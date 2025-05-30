@@ -6,6 +6,9 @@ import BudgetOverview from "@/components/budget-overview";
 import ExpenseChart from "@/components/expense-chart";
 import TrendsChart from "@/components/trends-chart";
 import UpgradeBanner from "@/components/upgrade-banner";
+import FinancialHealthScore from "@/components/financial-health-score";
+import QuickFinancialSnapshot from "@/components/quick-financial-snapshot";
+import ContextualFinancialTips from "@/components/contextual-financial-tips";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Calendar } from "lucide-react";
@@ -35,6 +38,11 @@ export default function Dashboard() {
 
   const { data: transactions, isLoading: transactionsLoading } = useQuery({
     queryKey: ['/api/transactions'],
+    enabled: !!user,
+  });
+
+  const { data: budgets } = useQuery({
+    queryKey: ['/api/budgets'],
     enabled: !!user,
   });
 
@@ -129,7 +137,24 @@ export default function Dashboard() {
         {/* Premium User Content */}
         {user.isPremium && (
           <div className="space-y-8">
-            {/* Advanced Analytics */}
+            {/* Advanced Analytics Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <FinancialHealthScore 
+                summary={financialSummary}
+                budgets={budgets}
+              />
+              <QuickFinancialSnapshot 
+                summary={financialSummary}
+                transactions={transactions}
+              />
+              <ContextualFinancialTips
+                summary={financialSummary}
+                transactions={transactions}
+                budgets={budgets}
+              />
+            </div>
+
+            {/* Interactive Charts */}
             <TrendsChart />
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

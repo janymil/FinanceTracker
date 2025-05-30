@@ -145,8 +145,8 @@ export default function FinancialCards({ summary, isLoading }: FinancialCardsPro
               <p className="text-sm font-medium text-red-700 dark:text-red-300 mb-1">
                 Total Expenses
               </p>
-              <p className="text-2xl font-bold text-red-800 dark:text-red-200">
-                {formatCurrency(Math.abs(summary?.totalExpenses || 0))}
+              <p className="text-2xl font-bold text-red-800 dark:text-red-200 transition-all duration-300 ease-out">
+                {formatCurrency(Math.abs(animatedValues.expenses))}
               </p>
               <p className="text-xs text-red-600 dark:text-red-400 mt-1">
                 Total spent in the period
@@ -167,8 +167,8 @@ export default function FinancialCards({ summary, isLoading }: FinancialCardsPro
               <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">
                 Net Balance
               </p>
-              <p className="text-2xl font-bold text-blue-800 dark:text-blue-200">
-                {formatCurrency(summary?.netBalance || 0)}
+              <p className="text-2xl font-bold text-blue-800 dark:text-blue-200 transition-all duration-300 ease-out">
+                {formatCurrency(animatedValues.balance)}
               </p>
               <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                 {(summary?.netBalance || 0) >= 0 ? 'Positive result' : 'Negative result'}
