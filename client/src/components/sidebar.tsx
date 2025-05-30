@@ -64,6 +64,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       icon: Target,
       href: "/budget",
       premium: true,
+      accessible: true, // Show pro badge but keep accessible
     },
     {
       title: "Categories",
