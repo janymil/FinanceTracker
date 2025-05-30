@@ -12,12 +12,11 @@ import { useLocation } from "wouter";
 import { Loader2, DollarSign, TrendingUp, Shield } from "lucide-react";
 
 const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
+  email: z.string().email("Please enter a valid email"),
   password: z.string().min(1, "Password is required"),
 });
 
 const registerSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   firstName: z.string().optional(),
@@ -32,7 +31,7 @@ export default function AuthPage() {
   const loginForm = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
@@ -40,7 +39,6 @@ export default function AuthPage() {
   const registerForm = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      username: "",
       email: "",
       password: "",
       firstName: "",
@@ -136,14 +134,15 @@ export default function AuthPage() {
                 <TabsContent value="login">
                   <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="login-username">Username</Label>
+                      <Label htmlFor="login-email">Email</Label>
                       <Input
-                        id="login-username"
-                        {...loginForm.register("username")}
-                        placeholder="Enter your username"
+                        id="login-email"
+                        type="email"
+                        {...loginForm.register("email")}
+                        placeholder="Enter your email"
                       />
-                      {loginForm.formState.errors.username && (
-                        <p className="text-sm text-red-600">{loginForm.formState.errors.username.message}</p>
+                      {loginForm.formState.errors.email && (
+                        <p className="text-sm text-red-600">{loginForm.formState.errors.email.message}</p>
                       )}
                     </div>
 
@@ -179,17 +178,6 @@ export default function AuthPage() {
 
                 <TabsContent value="register">
                   <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="register-username">Username</Label>
-                      <Input
-                        id="register-username"
-                        {...registerForm.register("username")}
-                        placeholder="Choose a username"
-                      />
-                      {registerForm.formState.errors.username && (
-                        <p className="text-sm text-red-600">{registerForm.formState.errors.username.message}</p>
-                      )}
-                    </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="register-email">Email</Label>

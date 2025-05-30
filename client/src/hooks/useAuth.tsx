@@ -23,12 +23,11 @@ type AuthContextType = {
 };
 
 type LoginData = {
-  username: string;
+  email: string;
   password: string;
 };
 
 type RegisterData = {
-  username: string;
   email: string;
   password: string;
   firstName?: string;
