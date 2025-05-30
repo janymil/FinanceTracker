@@ -1,8 +1,17 @@
-import { createContext, ReactNode, useContext } from "react";
+import React, { createContext, ReactNode, useContext } from "react";
 import { useQuery, useMutation, UseMutationResult } from "@tanstack/react-query";
-import { User } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+
+// Define User type directly since shared schema might not be accessible
+type User = {
+  id: number;
+  username: string;
+  email: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  isPremium?: boolean | null;
+};
 
 type AuthContextType = {
   user: User | null;
