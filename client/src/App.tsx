@@ -10,6 +10,7 @@ import Header from "@/components/header";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Subscribe from "@/pages/subscribe";
+import Reports from "@/pages/reports";
 import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
 
@@ -45,6 +46,7 @@ function Router() {
         <main className="flex-1 p-6">
           <Switch>
             <Route path="/" component={Dashboard} />
+            <Route path="/reports" component={Reports} />
             <Route path="/subscribe" component={Subscribe} />
             <Route component={NotFound} />
           </Switch>
