@@ -20,7 +20,16 @@ export default function Dashboard() {
   const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
 
   const { data: financialSummary, isLoading: summaryLoading } = useQuery({
-    queryKey: ['/api/financial-summary', { startDate: startDate.toISOString(), endDate: endDate.toISOString() }],
+    queryKey: ['/api/financial-summary', startDate.toISOString(), endDate.toISOString()],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString()
+      });
+      const response = await fetch(`/api/financial-summary?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch financial summary');
+      return response.json();
+    },
     enabled: !!user,
   });
 
