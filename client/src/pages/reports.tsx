@@ -4,9 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Download, TrendingUp, PieChart, BarChart3, FileText, Crown } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, Download, TrendingUp, PieChart, BarChart3, FileText, Crown, Brain, Zap } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
+import InteractiveChart from "@/components/interactive-chart";
+import AIInsights from "@/components/ai-insights";
+import ExportTools from "@/components/export-tools";
+import AutoCategorization from "@/components/auto-categorization";
 
 export default function Reports() {
   const { user } = useAuth();
@@ -19,6 +24,20 @@ export default function Reports() {
 
   const isPremium = user.isPremium;
 
+  // Sample data for charts - in real app this would come from API
+  const sampleChartData = [
+    { date: "2025-01", income: 4500, expenses: 3200, balance: 1300 },
+    { date: "2025-02", income: 4700, expenses: 3400, balance: 1600 },
+    { date: "2025-03", income: 4600, expenses: 3100, balance: 2100 },
+    { date: "2025-04", income: 4800, expenses: 3600, balance: 2300 },
+    { date: "2025-05", income: 5000, expenses: 3800, balance: 2500 },
+  ];
+
+  const { data: financialData, isLoading } = useQuery({
+    queryKey: ["/api/financial-data"],
+    enabled: !!user && isPremium,
+  });
+
   return (
     <div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -27,10 +46,10 @@ export default function Reports() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Financial Reports
+                Advanced Reports & Analytics
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
-                Generate comprehensive reports and insights
+                AI-powered insights, interactive charts, and comprehensive financial analysis
               </p>
             </div>
             <div className="flex items-center space-x-4">
@@ -47,40 +66,89 @@ export default function Reports() {
                   <SelectItem value="custom">Custom Range</SelectItem>
                 </SelectContent>
               </Select>
-              <Button className="bg-green-600 hover:bg-green-700">
-                <Download className="h-4 w-4 mr-2" />
-                Export Report
-              </Button>
             </div>
           </div>
         </div>
 
-        {/* Upgrade Banner for Free Users */}
-        {!isPremium && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mb-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                  <Crown className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Unlock Advanced Reports
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Get detailed analytics, custom date ranges, and exportable reports with Premium
-                  </p>
-                </div>
-              </div>
-              <Button 
-                onClick={() => setLocation("/subscribe")}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                Upgrade Now
-              </Button>
+        {/* Premium Features Tabs */}
+        <Tabs defaultValue="analytics" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="insights" className="flex items-center gap-2">
+              <Brain className="h-4 w-4" />
+              AI Insights
+            </TabsTrigger>
+            <TabsTrigger value="export" className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Export
+            </TabsTrigger>
+            <TabsTrigger value="categorization" className="flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              Auto-Tag
+            </TabsTrigger>
+            <TabsTrigger value="summary" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Summary
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Interactive Analytics */}
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <InteractiveChart
+                data={sampleChartData}
+                chartType="line"
+                title="Income vs Expenses Trend"
+                description="Track your cash flow over time with interactive zoom and insights"
+                isPremium={isPremium}
+                onExport={() => console.log("Exporting chart...")}
+              />
+              <InteractiveChart
+                data={sampleChartData}
+                chartType="bar"
+                title="Monthly Comparison"
+                description="Compare monthly performance with detailed tooltips"
+                isPremium={isPremium}
+              />
             </div>
-          </div>
-        )}
+            <InteractiveChart
+              data={sampleChartData}
+              chartType="area"
+              title="Financial Overview"
+              description="Comprehensive view of your financial health with trend analysis"
+              isPremium={isPremium}
+            />
+          </TabsContent>
+
+          {/* AI Insights */}
+          <TabsContent value="insights" className="space-y-6">
+            <AIInsights 
+              isPremium={isPremium}
+              data={financialData}
+            />
+          </TabsContent>
+
+          {/* Export Tools */}
+          <TabsContent value="export" className="space-y-6">
+            <ExportTools 
+              isPremium={isPremium}
+              data={financialData}
+            />
+          </TabsContent>
+
+          {/* Auto-Categorization */}
+          <TabsContent value="categorization" className="space-y-6">
+            <AutoCategorization 
+              isPremium={isPremium}
+              transactions={financialData?.transactions || []}
+            />
+          </TabsContent>
+
+          {/* Basic Summary for Free Users */}
+          <TabsContent value="summary" className="space-y-6">
 
         {/* Report Types */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
