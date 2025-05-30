@@ -13,7 +13,7 @@ import { useState } from "react";
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [selectedMonth, setSelectedMonth] = useState("2025-05");
+  const [selectedMonth, setSelectedMonth] = useState("2024-05");
 
   // Get start and end dates for the selected month
   const startDate = new Date(`${selectedMonth}-01`);
@@ -71,11 +71,11 @@ export default function Dashboard() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2025-05">May 2025</SelectItem>
-                  <SelectItem value="2025-04">April 2025</SelectItem>
-                  <SelectItem value="2025-03">March 2025</SelectItem>
-                  <SelectItem value="2025-02">February 2025</SelectItem>
-                  <SelectItem value="2025-01">January 2025</SelectItem>
+                  <SelectItem value="2024-05">May 2024</SelectItem>
+                  <SelectItem value="2024-04">April 2024</SelectItem>
+                  <SelectItem value="2024-03">March 2024</SelectItem>
+                  <SelectItem value="2024-02">February 2024</SelectItem>
+                  <SelectItem value="2024-01">January 2024</SelectItem>
                 </SelectContent>
               </Select>
               <Button className="bg-primary hover:bg-primary/90">

@@ -22,16 +22,33 @@ export default function FinancialCards({ summary, isLoading }: FinancialCardsPro
   };
 
   const getBudgetStatus = () => {
-    if (!summary) return { status: 'Loading...', percentage: 0, remaining: 0 };
+    if (!summary) return { status: 'Loading...', percentage: 0, remaining: 0, bgColor: 'bg-gray-50', textColor: 'text-gray-600' };
     
-    const budgetLimit = 900; // Mock budget limit
-    const percentage = (summary.totalExpenses / budgetLimit) * 100;
-    const remaining = budgetLimit - summary.totalExpenses;
+    const budgetLimit = 2450; // Total budget from demo data
+    const percentage = (Math.abs(summary.totalExpenses) / budgetLimit) * 100;
+    const remaining = budgetLimit - Math.abs(summary.totalExpenses);
     
-    if (percentage <= 50) return { status: 'Healthy', percentage, remaining };
-    if (percentage <= 75) return { status: 'Good', percentage, remaining };
-    if (percentage <= 90) return { status: 'Warning', percentage, remaining };
-    return { status: 'Over Budget', percentage, remaining };
+    if (percentage <= 50) return { 
+      status: 'Healthy', 
+      percentage, 
+      remaining, 
+      bgColor: 'bg-green-50 dark:bg-green-900/20', 
+      textColor: 'text-green-700 dark:text-green-300' 
+    };
+    if (percentage <= 90) return { 
+      status: 'Moderate', 
+      percentage, 
+      remaining, 
+      bgColor: 'bg-yellow-50 dark:bg-yellow-900/20', 
+      textColor: 'text-yellow-700 dark:text-yellow-300' 
+    };
+    return { 
+      status: 'Critical', 
+      percentage, 
+      remaining, 
+      bgColor: 'bg-red-50 dark:bg-red-900/20', 
+      textColor: 'text-red-700 dark:text-red-300' 
+    };
   };
 
   const budgetInfo = getBudgetStatus();
@@ -58,93 +75,96 @@ export default function FinancialCards({ summary, isLoading }: FinancialCardsPro
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       {/* Total Income Card */}
-      <Card className="bg-white dark:bg-gray-800 shadow-sm border">
+      <Card className="bg-green-50 dark:bg-green-900/20 shadow-sm border border-green-200 dark:border-green-800">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+              <p className="text-sm font-medium text-green-700 dark:text-green-300 mb-1">
                 Total Income
               </p>
-              <p className="text-2xl font-bold text-success">
+              <p className="text-2xl font-bold text-green-800 dark:text-green-200">
                 {formatCurrency(summary?.totalIncome || 0)}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-green-600 dark:text-green-400 mt-1">
                 Total income for the period
               </p>
             </div>
-            <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
-              <TrendingUp className="h-6 w-6 text-success" />
+            <div className="bg-green-100 dark:bg-green-800/40 p-3 rounded-lg">
+              <TrendingUp className="h-6 w-6 text-green-700 dark:text-green-300" />
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Total Expenses Card */}
-      <Card className="bg-white dark:bg-gray-800 shadow-sm border">
+      <Card className="bg-red-50 dark:bg-red-900/20 shadow-sm border border-red-200 dark:border-red-800">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+              <p className="text-sm font-medium text-red-700 dark:text-red-300 mb-1">
                 Total Expenses
               </p>
-              <p className="text-2xl font-bold text-destructive">
-                {formatCurrency(summary?.totalExpenses || 0)}
+              <p className="text-2xl font-bold text-red-800 dark:text-red-200">
+                {formatCurrency(Math.abs(summary?.totalExpenses || 0))}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-red-600 dark:text-red-400 mt-1">
                 Total spent in the period
               </p>
             </div>
-            <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
-              <TrendingDown className="h-6 w-6 text-destructive" />
+            <div className="bg-red-100 dark:bg-red-800/40 p-3 rounded-lg">
+              <TrendingDown className="h-6 w-6 text-red-700 dark:text-red-300" />
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Net Balance Card */}
-      <Card className="bg-white dark:bg-gray-800 shadow-sm border">
+      <Card className="bg-blue-50 dark:bg-blue-900/20 shadow-sm border border-blue-200 dark:border-blue-800">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+              <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">
                 Net Balance
               </p>
-              <p className="text-2xl font-bold text-primary">
+              <p className="text-2xl font-bold text-blue-800 dark:text-blue-200">
                 {formatCurrency(summary?.netBalance || 0)}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                 {(summary?.netBalance || 0) >= 0 ? 'Positive result' : 'Negative result'}
               </p>
             </div>
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-              <DollarSign className="h-6 w-6 text-primary" />
+            <div className="bg-blue-100 dark:bg-blue-800/40 p-3 rounded-lg">
+              <DollarSign className="h-6 w-6 text-blue-700 dark:text-blue-300" />
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Budget Status Card */}
-      <Card className="bg-white dark:bg-gray-800 shadow-sm border">
+      <Card className={`${budgetInfo.bgColor} shadow-sm border ${
+        budgetInfo.status === 'Healthy' ? 'border-green-200 dark:border-green-800' :
+        budgetInfo.status === 'Moderate' ? 'border-yellow-200 dark:border-yellow-800' :
+        'border-red-200 dark:border-red-800'
+      }`}>
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+              <p className={`text-sm font-medium mb-1 ${budgetInfo.textColor}`}>
                 Budget Status
               </p>
-              <p className={`text-2xl font-bold ${
-                budgetInfo.status === 'Healthy' ? 'text-success' :
-                budgetInfo.status === 'Good' ? 'text-success' :
-                budgetInfo.status === 'Warning' ? 'text-orange-500' :
-                'text-destructive'
-              }`}>
+              <p className={`text-2xl font-bold ${budgetInfo.textColor}`}>
                 {budgetInfo.status}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className={`text-xs mt-1 ${budgetInfo.textColor} opacity-80`}>
                 {Math.round(budgetInfo.percentage)}% utilized. Remaining: {formatCurrency(budgetInfo.remaining)}
               </p>
             </div>
-            <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
-              <Shield className="h-6 w-6 text-success" />
+            <div className={`p-3 rounded-lg ${
+              budgetInfo.status === 'Healthy' ? 'bg-green-100 dark:bg-green-800/40' :
+              budgetInfo.status === 'Moderate' ? 'bg-yellow-100 dark:bg-yellow-800/40' :
+              'bg-red-100 dark:bg-red-800/40'
+            }`}>
+              <Shield className={`h-6 w-6 ${budgetInfo.textColor}`} />
             </div>
           </div>
         </CardContent>
