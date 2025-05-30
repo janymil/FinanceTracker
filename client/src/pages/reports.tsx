@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Download, TrendingUp, PieChart, BarChart3, FileText } from "lucide-react";
+import { Calendar, Download, TrendingUp, PieChart, BarChart3, FileText, Crown } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 
@@ -17,29 +17,7 @@ export default function Reports() {
     return null;
   }
 
-  // Redirect free users to subscription page
-  if (!user.isPremium) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="max-w-md mx-auto">
-          <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Premium Feature
-          </h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Advanced reporting and analytics are available with a Premium subscription. 
-            Generate detailed financial reports and gain deeper insights into your spending patterns.
-          </p>
-          <Button 
-            onClick={() => setLocation("/subscribe")}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            Upgrade to Premium
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const isPremium = user.isPremium;
 
   return (
     <div>
@@ -77,8 +55,36 @@ export default function Reports() {
           </div>
         </div>
 
+        {/* Upgrade Banner for Free Users */}
+        {!isPremium && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mb-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                  <Crown className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Unlock Advanced Reports
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Get detailed analytics, custom date ranges, and exportable reports with Premium
+                  </p>
+                </div>
+              </div>
+              <Button 
+                onClick={() => setLocation("/subscribe")}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Upgrade Now
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Report Types */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {/* Basic Report - Available for Free */}
           <Card className="cursor-pointer hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -87,21 +93,22 @@ export default function Reports() {
                     <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Income vs Expenses</CardTitle>
-                    <CardDescription>Track your cash flow trends</CardDescription>
+                    <CardTitle className="text-lg">Basic Summary</CardTitle>
+                    <CardDescription>Simple income vs expenses</CardDescription>
                   </div>
                 </div>
-                <Badge variant="secondary">Available</Badge>
+                <Badge variant="outline">Free</Badge>
               </div>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                Detailed analysis of income and expense patterns over time with trend forecasting.
+                Basic overview of your income and expenses for the current month.
               </p>
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+          {/* Premium Report */}
+          <Card className={`${!isPremium ? 'opacity-60' : 'cursor-pointer hover:shadow-lg'} transition-shadow relative`}>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -109,21 +116,38 @@ export default function Reports() {
                     <PieChart className="h-5 w-5 text-green-600 dark:text-green-400" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Category Breakdown</CardTitle>
-                    <CardDescription>Spending by categories</CardDescription>
+                    <CardTitle className="text-lg">Category Analysis</CardTitle>
+                    <CardDescription>Detailed spending breakdown</CardDescription>
                   </div>
                 </div>
-                <Badge variant="secondary">Available</Badge>
+                {isPremium ? (
+                  <Badge className="bg-premium text-white">Pro</Badge>
+                ) : (
+                  <Badge variant="secondary">Pro</Badge>
+                )}
               </div>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                Visual breakdown of expenses across different categories with percentage analysis.
+                Interactive charts showing spending patterns across categories with percentage analysis.
               </p>
             </CardContent>
+            {!isPremium && (
+              <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 flex items-center justify-center rounded-lg">
+                <Button 
+                  onClick={() => setLocation("/subscribe")}
+                  size="sm"
+                  className="bg-premium hover:bg-premium/90"
+                >
+                  <Crown className="h-4 w-4 mr-1" />
+                  Upgrade
+                </Button>
+              </div>
+            )}
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+          {/* Premium Report */}
+          <Card className={`${!isPremium ? 'opacity-60' : 'cursor-pointer hover:shadow-lg'} transition-shadow relative`}>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -132,38 +156,156 @@ export default function Reports() {
                   </div>
                   <div>
                     <CardTitle className="text-lg">Budget Performance</CardTitle>
-                    <CardDescription>Budget vs actual spending</CardDescription>
+                    <CardDescription>Budget vs actual analysis</CardDescription>
                   </div>
                 </div>
-                <Badge variant="secondary">Available</Badge>
+                {isPremium ? (
+                  <Badge className="bg-premium text-white">Pro</Badge>
+                ) : (
+                  <Badge variant="secondary">Pro</Badge>
+                )}
               </div>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                Compare your budgeted amounts with actual spending across all categories.
+                Compare budgeted amounts with actual spending, track budget adherence over time.
               </p>
             </CardContent>
+            {!isPremium && (
+              <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 flex items-center justify-center rounded-lg">
+                <Button 
+                  onClick={() => setLocation("/subscribe")}
+                  size="sm"
+                  className="bg-premium hover:bg-premium/90"
+                >
+                  <Crown className="h-4 w-4 mr-1" />
+                  Upgrade
+                </Button>
+              </div>
+            )}
           </Card>
         </div>
 
-        {/* Sample Report Preview */}
+        {/* Basic Report for Free Users */}
         <Card>
           <CardHeader>
-            <CardTitle>Report Preview</CardTitle>
-            <CardDescription>
-              Sample financial report for the selected period
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Basic Financial Summary</CardTitle>
+                <CardDescription>
+                  {isPremium ? 'Current month overview' : 'Free tier - Basic report for current month'}
+                </CardDescription>
+              </div>
+              {!isPremium && (
+                <Badge variant="outline">Free Tier</Badge>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-12">
-              <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                Select a report type to view
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Choose from the report types above to generate detailed financial insights
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              {/* Total Income */}
+              <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <h4 className="text-sm font-medium text-green-600 dark:text-green-400 mb-1">Total Income</h4>
+                <p className="text-2xl font-bold text-green-700 dark:text-green-300">$0.00</p>
+                <p className="text-xs text-green-600 dark:text-green-400">This month</p>
+              </div>
+
+              {/* Total Expenses */}
+              <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <h4 className="text-sm font-medium text-red-600 dark:text-red-400 mb-1">Total Expenses</h4>
+                <p className="text-2xl font-bold text-red-700 dark:text-red-300">$0.00</p>
+                <p className="text-xs text-red-600 dark:text-red-400">This month</p>
+              </div>
+
+              {/* Net Balance */}
+              <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <h4 className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-1">Net Balance</h4>
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">$0.00</p>
+                <p className="text-xs text-blue-600 dark:text-blue-400">Difference</p>
+              </div>
             </div>
+
+            {/* Premium Features Locked */}
+            {!isPremium && (
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 text-center">
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="p-3 bg-gray-200 dark:bg-gray-700 rounded-full">
+                      <BarChart3 className="h-6 w-6 text-gray-400" />
+                    </div>
+                  </div>
+                  <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                    Advanced Analytics Locked
+                  </h4>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    Unlock detailed charts, custom date ranges, category breakdowns, and export functionality
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    <div className="flex items-center">
+                      <span className="w-2 h-2 bg-gray-300 rounded-full mr-2"></span>
+                      Interactive Charts
+                    </div>
+                    <div className="flex items-center">
+                      <span className="w-2 h-2 bg-gray-300 rounded-full mr-2"></span>
+                      Export to PDF/Excel
+                    </div>
+                    <div className="flex items-center">
+                      <span className="w-2 h-2 bg-gray-300 rounded-full mr-2"></span>
+                      Custom Date Ranges
+                    </div>
+                    <div className="flex items-center">
+                      <span className="w-2 h-2 bg-gray-300 rounded-full mr-2"></span>
+                      Trend Analysis
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => setLocation("/subscribe")}
+                    className="bg-premium hover:bg-premium/90"
+                  >
+                    <Crown className="h-4 w-4 mr-2" />
+                    Upgrade to Premium
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Premium Advanced Features */}
+            {isPremium && (
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                      Category Breakdown
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 dark:text-gray-300">Food & Dining</span>
+                        <span className="text-sm font-medium">$0.00</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 dark:text-gray-300">Transportation</span>
+                        <span className="text-sm font-medium">$0.00</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 dark:text-gray-300">Shopping</span>
+                        <span className="text-sm font-medium">$0.00</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                      Monthly Trends
+                    </h4>
+                    <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <TrendingUp className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Interactive chart would appear here
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
