@@ -9,10 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Crown, ArrowLeft, Check } from "lucide-react";
 import { Link } from "wouter";
 
-if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
-}
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+const stripePublicKey = import.meta.env.STRIPE_PUBLIC_KEY;
+const stripePromise = stripePublicKey ? loadStripe(stripePublicKey) : null;
 
 const SubscribeForm = () => {
   const stripe = useStripe();
@@ -82,6 +80,11 @@ export default function Subscribe() {
   const { toast } = useToast();
 
   useEffect(() => {
+    if (!stripePublicKey) {
+      setIsLoading(false);
+      return;
+    }
+
     const createSubscription = async () => {
       try {
         const res = await apiRequest("POST", "/api/get-or-create-subscription");
@@ -105,6 +108,31 @@ export default function Subscribe() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!stripePublicKey) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+        <div className="max-w-md mx-auto px-4">
+          <Card>
+            <CardHeader className="text-center">
+              <CardTitle className="text-orange-600">Payment Service Unavailable</CardTitle>
+              <CardDescription>
+                Payment processing is currently being configured. Please check back soon.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/">
+                <Button variant="outline" className="w-full">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Dashboard
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -214,9 +242,15 @@ export default function Subscribe() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Elements stripe={stripePromise} options={{ clientSecret }}>
-                <SubscribeForm />
-              </Elements>
+              {stripePromise ? (
+                <Elements stripe={stripePromise} options={{ clientSecret }}>
+                  <SubscribeForm />
+                </Elements>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500 dark:text-gray-400">Payment processing unavailable</p>
+                </div>
+              )}
               
               <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div className="flex justify-between items-center text-sm mb-2">
