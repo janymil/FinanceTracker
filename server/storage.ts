@@ -101,7 +101,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserTransactions(userId: string, limit?: number): Promise<Transaction[]> {
-    let query = db
+    const baseQuery = db
       .select({
         id: transactions.id,
         userId: transactions.userId,
@@ -121,10 +121,10 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(transactions.date));
 
     if (limit) {
-      query = query.limit(limit);
+      return baseQuery.limit(limit);
     }
 
-    return query;
+    return baseQuery;
   }
 
   async deleteTransaction(id: number, userId: string): Promise<void> {

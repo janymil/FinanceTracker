@@ -6,13 +6,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertTransactionSchema, insertBudgetSchema } from "@shared/schema";
 import { z } from "zod";
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
-}
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
-});
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -158,6 +152,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Stripe subscription management
   app.post('/api/get-or-create-subscription', isAuthenticated, async (req: any, res) => {
+    if (!stripe) {
+      return res.status(503).json({ message: "Payment processing unavailable. Please contact support." });
+    }
+
     try {
       const userId = req.user.claims.sub;
       let user = await storage.getUser(userId);
@@ -175,7 +173,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         return res.json({
           subscriptionId: subscription.id,
-          clientSecret: (invoice.payment_intent as any)?.client_secret,
+          clientSecret: (invoice as any).payment_intent?.client_secret,
         });
       }
 
@@ -207,7 +205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         subscriptionId: subscription.id,
-        clientSecret: invoice.payment_intent.client_secret,
+        clientSecret: invoice.payment_intent?.client_secret,
       });
     } catch (error: any) {
       console.error("Error creating subscription:", error);
