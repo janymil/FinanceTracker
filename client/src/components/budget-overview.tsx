@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Edit3 } from "lucide-react";
+import { useMemo } from "react";
 
 interface Budget {
   id: number;
@@ -16,15 +17,19 @@ interface Budget {
 }
 
 export default function BudgetOverview() {
-  const { data: budgets, isLoading } = useQuery({
+  const { data: budgets, isLoading: budgetsLoading } = useQuery({
     queryKey: ['/api/budgets'],
   });
 
-  const formatCurrency = (amount: string) => {
+  const { data: transactions, isLoading: transactionsLoading } = useQuery({
+    queryKey: ['/api/transactions'],
+  });
+
+  const formatCurrency = (amount: string | number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-    }).format(parseFloat(amount));
+    }).format(typeof amount === 'string' ? parseFloat(amount) : amount);
   };
 
   const getCategoryIcon = (icon: string) => {
@@ -39,41 +44,33 @@ export default function BudgetOverview() {
     return iconMap[icon] || '💰';
   };
 
-  // Mock data for demo - in real app this would come from API
-  const mockBudgets = [
-    {
-      id: 1,
-      categoryName: 'Food',
-      categoryIcon: 'utensils',
-      categoryColor: '#3B82F6',
-      amount: '100.00',
-      spent: '55.50',
-      startDate: '2025-05-01',
-      endDate: '2025-05-31',
-    },
-    {
-      id: 2,
-      categoryName: 'Housing',
-      categoryIcon: 'home',
-      categoryColor: '#10B981',
-      amount: '500.00',
-      spent: '245.00',
-      startDate: '2025-05-01',
-      endDate: '2025-05-31',
-    },
-    {
-      id: 3,
-      categoryName: 'Entertainment',
-      categoryIcon: 'film',
-      categoryColor: '#F59E0B',
-      amount: '300.00',
-      spent: '29.99',
-      startDate: '2025-05-01',
-      endDate: '2025-05-31',
-    },
-  ];
+  const budgetsWithSpending = useMemo(() => {
+    if (!budgets || !transactions) return [];
+    
+    return (budgets as any[])
+      .map((budget: any) => {
+        // Calculate total spending for this category in the current month
+        const categorySpending = (transactions as any[])
+          .filter((transaction: any) => 
+            transaction.categoryId === budget.categoryId && 
+            transaction.type === 'expense' &&
+            new Date(transaction.date) >= new Date(budget.startDate) &&
+            new Date(transaction.date) <= new Date(budget.endDate)
+          )
+          .reduce((total: number, transaction: any) => 
+            total + Math.abs(parseFloat(transaction.amount)), 0
+          );
 
-  if (isLoading) {
+        return {
+          ...budget,
+          spent: categorySpending
+        };
+      })
+      .filter((budget: any) => budget.spent > 0) // Only show budgets with spending
+      .sort((a: any, b: any) => b.spent - a.spent); // Sort by spending amount descending
+  }, [budgets, transactions]);
+
+  if (budgetsLoading || transactionsLoading) {
     return (
       <Card className="bg-white dark:bg-gray-800">
         <CardHeader>
@@ -103,8 +100,6 @@ export default function BudgetOverview() {
     );
   }
 
-  const displayBudgets = budgets || mockBudgets;
-
   return (
     <Card className="bg-white dark:bg-gray-800">
       <CardHeader>
@@ -123,41 +118,48 @@ export default function BudgetOverview() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
-          {displayBudgets.map((budget: any) => {
-            const spent = parseFloat(budget.spent || '0');
-            const budgetAmount = parseFloat(budget.amount);
-            const percentage = Math.round((spent / budgetAmount) * 100);
-            
-            return (
-              <div key={budget.id} className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-lg">{getCategoryIcon(budget.categoryIcon)}</span>
-                    <span className="font-medium text-gray-900 dark:text-white">
-                      {budget.categoryName}
-                    </span>
+        {budgetsWithSpending.length === 0 ? (
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <p>No spending on budgeted categories yet</p>
+            <p className="text-sm">Start spending and your budget progress will appear here</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {budgetsWithSpending.map((budget: any) => {
+              const spent = budget.spent;
+              const budgetAmount = parseFloat(budget.amount);
+              const percentage = Math.round((spent / budgetAmount) * 100);
+              
+              return (
+                <div key={budget.id} className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-lg">{getCategoryIcon(budget.categoryIcon)}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {budget.categoryName}
+                      </span>
+                    </div>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">{percentage}%</span>
                   </div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">{percentage}%</span>
+                  
+                  <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-2">
+                    <span>{formatCurrency(spent)} / {formatCurrency(budget.amount)}</span>
+                    <span>{new Date(budget.startDate).toLocaleDateString('en-US')} - {new Date(budget.endDate).toLocaleDateString('en-US')}</span>
+                  </div>
+                  
+                  <Progress 
+                    value={Math.min(percentage, 100)} 
+                    className="h-2"
+                    style={{
+                      '--progress-foreground': percentage > 90 ? '#EF4444' : 
+                                             percentage > 75 ? '#F59E0B' : '#10B981'
+                    } as React.CSSProperties}
+                  />
                 </div>
-                
-                <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-2">
-                  <span>{formatCurrency(spent.toString())} / {formatCurrency(budget.amount)}</span>
-                  <span>01/05/2025 - 31/05/2025</span>
-                </div>
-                
-                <Progress 
-                  value={percentage} 
-                  className="h-2"
-                  style={{
-                    '--progress-foreground': percentage > 90 ? '#EF4444' : 
-                                           percentage > 75 ? '#F59E0B' : '#10B981'
-                  } as React.CSSProperties}
-                />
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
