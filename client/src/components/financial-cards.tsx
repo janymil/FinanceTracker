@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, DollarSign, Shield } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
 
 interface FinancialSummary {
   totalIncome: number;
@@ -14,12 +15,52 @@ interface FinancialCardsProps {
 }
 
 export default function FinancialCards({ summary, isLoading }: FinancialCardsProps) {
+  const [animatedValues, setAnimatedValues] = useState({
+    income: 0,
+    expenses: 0,
+    balance: 0
+  });
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(amount);
   };
+
+  // Animate values when summary changes
+  useEffect(() => {
+    if (summary) {
+      const duration = 1000; // 1 second animation
+      const steps = 30;
+      const stepDuration = duration / steps;
+
+      let currentStep = 0;
+
+      const interval = setInterval(() => {
+        currentStep++;
+        const progress = currentStep / steps;
+        const easeOut = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
+
+        setAnimatedValues({
+          income: Math.round(summary.totalIncome * easeOut),
+          expenses: Math.round(summary.totalExpenses * easeOut),
+          balance: Math.round(summary.netBalance * easeOut)
+        });
+
+        if (currentStep >= steps) {
+          clearInterval(interval);
+          setAnimatedValues({
+            income: summary.totalIncome,
+            expenses: summary.totalExpenses,
+            balance: summary.netBalance
+          });
+        }
+      }, stepDuration);
+
+      return () => clearInterval(interval);
+    }
+  }, [summary]);
 
   const getBudgetStatus = () => {
     if (!summary) return { status: 'Loading...', percentage: 0, remaining: 0, bgColor: 'bg-gray-50', textColor: 'text-gray-600' };
@@ -82,8 +123,8 @@ export default function FinancialCards({ summary, isLoading }: FinancialCardsPro
               <p className="text-sm font-medium text-green-700 dark:text-green-300 mb-1">
                 Total Income
               </p>
-              <p className="text-2xl font-bold text-green-800 dark:text-green-200">
-                {formatCurrency(summary?.totalIncome || 0)}
+              <p className="text-2xl font-bold text-green-800 dark:text-green-200 transition-all duration-300 ease-out">
+                {formatCurrency(animatedValues.income)}
               </p>
               <p className="text-xs text-green-600 dark:text-green-400 mt-1">
                 Total income for the period
