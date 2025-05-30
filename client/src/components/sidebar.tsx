@@ -115,8 +115,13 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     return location.startsWith(href);
   };
 
-  const canAccess = (premium: boolean) => {
-    return !premium || user?.isPremium;
+  const canAccess = (item: any) => {
+    // If item has accessible property set to true, always allow access
+    if (item.accessible === true) {
+      return true;
+    }
+    // Otherwise, check premium status
+    return !item.premium || user?.isPremium;
   };
 
   return (
@@ -181,7 +186,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             {menuItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
-              const accessible = canAccess(item.premium);
+              const accessible = canAccess(item);
 
               return (
                 <div key={item.title} className="relative">
