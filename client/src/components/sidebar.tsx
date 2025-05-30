@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   TrendingUp,
+  TrendingDown,
   LayoutDashboard,
   CreditCard,
   PieChart,
