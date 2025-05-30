@@ -53,6 +53,12 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       premium: false,
     },
     {
+      title: "Categories",
+      icon: CreditCard,
+      href: "/categories",
+      premium: false,
+    },
+    {
       title: "Goals",
       icon: Crosshair,
       href: "/goals",
@@ -62,7 +68,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       title: "Reports",
       icon: FileText,
       href: "/reports",
-      premium: true,
+      premium: false,
     },
     {
       title: "Analytics",
