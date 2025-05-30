@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 210 11% 98%; /* #F5F7FA */
+  --foreground: 222 15% 15%; /* #262626 */
+  --muted: 210 11% 96%; /* #F0F4F8 */
+  --muted-foreground: 215 8% 47%; /* #718096 */
+  --popover: 0 0% 100%; /* #FFFFFF */
+  --popover-foreground: 222 15% 15%; /* #262626 */
+  --card: 0 0% 100%; /* #FFFFFF */
+  --card-foreground: 222 15% 15%; /* #262626 */
+  --border: 214 13% 88%; /* #E2E8F0 */
+  --input: 214 13% 88%; /* #E2E8F0 */
+  --primary: 213 94% 68%; /* #2563EB */
+  --primary-foreground: 0 0% 100%; /* #FFFFFF */
+  --secondary: 210 11% 96%; /* #F0F4F8 */
+  --secondary-foreground: 222 15% 15%; /* #262626 */
+  --accent: 210 11% 96%; /* #F0F4F8 */
+  --accent-foreground: 222 15% 15%; /* #262626 */
+  --destructive: 0 84% 60%; /* #EF4444 */
+  --destructive-foreground: 0 0% 100%; /* #FFFFFF */
+  --ring: 213 94% 68%; /* #2563EB */
+  --radius: 0.75rem;
+  
+  /* Custom colors for financial app */
+  --success: 142 71% 45%; /* #10B981 */
+  --success-foreground: 0 0% 100%; /* #FFFFFF */
+  --premium: 262 83% 58%; /* #7C3AED */
+  --premium-foreground: 0 0% 100%; /* #FFFFFF */
+  --premium-light: 262 90% 95%; /* #EDE9FE */
+  
+  /* Chart colors */
+  --chart-1: 213 94% 68%; /* #2563EB */
+  --chart-2: 142 71% 45%; /* #10B981 */
+  --chart-3: 0 84% 60%; /* #EF4444 */
+  --chart-4: 45 93% 58%; /* #F59E0B */
+  --chart-5: 262 83% 58%; /* #7C3AED */
+}
+
+.dark {
+  --background: 222 84% 5%; /* #0A0A0B */
+  --foreground: 210 40% 98%; /* #FAFAFA */
+  --muted: 217 33% 12%; /* #1A1B23 */
+  --muted-foreground: 215 20% 65%; /* #9CA3AF */
+  --popover: 222 84% 5%; /* #0A0A0B */
+  --popover-foreground: 210 40% 98%; /* #FAFAFA */
+  --card: 222 84% 5%; /* #0A0A0B */
+  --card-foreground: 210 40% 98%; /* #FAFAFA */
+  --border: 217 33% 17%; /* #252730 */
+  --input: 217 33% 17%; /* #252730 */
+  --primary: 213 94% 68%; /* #2563EB */
+  --primary-foreground: 0 0% 100%; /* #FFFFFF */
+  --secondary: 217 33% 17%; /* #252730 */
+  --secondary-foreground: 210 40% 98%; /* #FAFAFA */
+  --accent: 217 33% 17%; /* #252730 */
+  --accent-foreground: 210 40% 98%; /* #FAFAFA */
+  --destructive: 0 63% 31%; /* #7F1D1D */
+  --destructive-foreground: 0 0% 100%; /* #FFFFFF */
+  --ring: 213 94% 68%; /* #2563EB */
+  
+  /* Custom colors for dark mode */
+  --success: 142 71% 45%; /* #10B981 */
+  --success-foreground: 0 0% 100%; /* #FFFFFF */
+  --premium: 262 83% 58%; /* #7C3AED */
+  --premium-foreground: 0 0% 100%; /* #FFFFFF */
+  --premium-light: 262 50% 20%; /* #2D1B69 */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .text-success {
+    color: hsl(var(--success));
+  }
+  
+  .text-success-foreground {
+    color: hsl(var(--success-foreground));
+  }
+  
+  .bg-success {
+    background-color: hsl(var(--success));
+  }
+  
+  .bg-success-foreground {
+    background-color: hsl(var(--success-foreground));
+  }
+  
+  .border-success {
+    border-color: hsl(var(--success));
+  }
+  
+  .text-premium {
+    color: hsl(var(--premium));
+  }
+  
+  .text-premium-foreground {
+    color: hsl(var(--premium-foreground));
+  }
+  
+  .bg-premium {
+    background-color: hsl(var(--premium));
+  }
+  
+  .bg-premium-foreground {
+    background-color: hsl(var(--premium-foreground));
+  }
+  
+  .bg-premium-light {
+    background-color: hsl(var(--premium-light));
+  }
+  
+  .border-premium {
+    border-color: hsl(var(--premium));
+  }
+}
