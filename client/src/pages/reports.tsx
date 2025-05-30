@@ -70,28 +70,32 @@ export default function Reports() {
           </div>
         </div>
 
-        {/* Premium Features Tabs */}
-        <Tabs defaultValue="analytics" className="space-y-6">
+        {/* Reports Tabs - Basic available for all, Advanced for Premium */}
+        <Tabs defaultValue="summary" className="space-y-6">
           <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="summary" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Summary
+            </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Analytics
+              {!isPremium && <Badge variant="secondary" className="ml-1 text-xs">Pro</Badge>}
             </TabsTrigger>
             <TabsTrigger value="insights" className="flex items-center gap-2">
               <Brain className="h-4 w-4" />
               AI Insights
+              {!isPremium && <Badge variant="secondary" className="ml-1 text-xs">Pro</Badge>}
             </TabsTrigger>
             <TabsTrigger value="export" className="flex items-center gap-2">
               <Download className="h-4 w-4" />
               Export
+              {!isPremium && <Badge variant="secondary" className="ml-1 text-xs">Pro</Badge>}
             </TabsTrigger>
             <TabsTrigger value="categorization" className="flex items-center gap-2">
               <Zap className="h-4 w-4" />
               Auto-Tag
-            </TabsTrigger>
-            <TabsTrigger value="summary" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Summary
+              {!isPremium && <Badge variant="secondary" className="ml-1 text-xs">Pro</Badge>}
             </TabsTrigger>
           </TabsList>
 
@@ -147,60 +151,184 @@ export default function Reports() {
             />
           </TabsContent>
 
-          {/* Basic Summary for Free Users */}
+          {/* Financial Summary - Available for All Users */}
           <TabsContent value="summary" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Monthly Overview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Monthly Overview</CardTitle>
+                  <CardDescription>
+                    Basic financial summary for {selectedPeriod === "month" ? "this month" : selectedPeriod}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-green-100 dark:bg-green-800 rounded-full">
+                          <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-green-900 dark:text-green-100">Total Income</p>
+                          <p className="text-xs text-green-600 dark:text-green-400">Current month</p>
+                        </div>
+                      </div>
+                      <p className="text-xl font-bold text-green-700 dark:text-green-300">$0.00</p>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-red-100 dark:bg-red-800 rounded-full">
+                          <PieChart className="h-4 w-4 text-red-600 dark:text-red-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-red-900 dark:text-red-100">Total Expenses</p>
+                          <p className="text-xs text-red-600 dark:text-red-400">Current month</p>
+                        </div>
+                      </div>
+                      <p className="text-xl font-bold text-red-700 dark:text-red-300">$0.00</p>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-full">
+                          <BarChart3 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Net Balance</p>
+                          <p className="text-xs text-blue-600 dark:text-blue-400">Income - Expenses</p>
+                        </div>
+                      </div>
+                      <p className="text-xl font-bold text-blue-700 dark:text-blue-300">$0.00</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Recent Activity */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Activity</CardTitle>
+                  <CardDescription>
+                    Latest transactions and account activity
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8">
+                    <div className="mx-auto h-12 w-12 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+                      <FileText className="h-6 w-6 text-gray-400" />
+                    </div>
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                      No Recent Transactions
+                    </h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">
+                      Add transactions to see your recent activity here
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Category Breakdown - Basic for Free Users */}
             <Card>
               <CardHeader>
-                <CardTitle>Basic Financial Summary</CardTitle>
+                <CardTitle>Category Breakdown</CardTitle>
                 <CardDescription>
-                  {isPremium ? 'Current month overview' : 'Free tier - Basic report for current month'}
+                  {isPremium ? "Detailed spending analysis by category" : "Basic category overview (upgrade for detailed analysis)"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <h4 className="text-sm font-medium text-green-600 dark:text-green-400 mb-1">Total Income</h4>
-                    <p className="text-2xl font-bold text-green-700 dark:text-green-300">$0.00</p>
-                    <p className="text-xs text-green-600 dark:text-green-400">This month</p>
+                <div className="text-center py-12">
+                  <div className="mx-auto h-16 w-16 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+                    <PieChart className="h-8 w-8 text-gray-400" />
                   </div>
-                  <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                    <h4 className="text-sm font-medium text-red-600 dark:text-red-400 mb-1">Total Expenses</h4>
-                    <p className="text-2xl font-bold text-red-700 dark:text-red-300">$0.00</p>
-                    <p className="text-xs text-red-600 dark:text-red-400">This month</p>
-                  </div>
-                  <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <h4 className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-1">Net Balance</h4>
-                    <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">$0.00</p>
-                    <p className="text-xs text-blue-600 dark:text-blue-400">Difference</p>
-                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                    {isPremium ? "No Data to Display" : "Category Charts Available with Premium"}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto mb-6">
+                    {isPremium 
+                      ? "Add transactions to see detailed category breakdowns and spending patterns"
+                      : "Upgrade to Premium to unlock interactive category charts, spending trends, and detailed financial analysis"
+                    }
+                  </p>
+                  
+                  {!isPremium && (
+                    <Button 
+                      onClick={() => setLocation("/subscribe")}
+                      className="bg-premium hover:bg-premium/90"
+                    >
+                      <Crown className="h-4 w-4 mr-2" />
+                      Unlock Premium Charts
+                    </Button>
+                  )}
                 </div>
-                
-                {!isPremium && (
-                  <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Crown className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                        <div>
-                          <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                            Unlock Advanced Features
-                          </h4>
-                          <p className="text-xs text-blue-600 dark:text-blue-400">
-                            Get AI insights, interactive charts, and export capabilities
-                          </p>
-                        </div>
-                      </div>
-                      <Button 
-                        onClick={() => setLocation("/subscribe")}
-                        size="sm"
-                        className="bg-premium hover:bg-premium/90"
-                      >
-                        Upgrade
-                      </Button>
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
+
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+                <CardDescription>
+                  Common financial management tasks
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
+                    <Download className="h-5 w-5" />
+                    <span className="text-xs">Basic Export</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
+                    <Calendar className="h-5 w-5" />
+                    <span className="text-xs">Date Range</span>
+                  </Button>
+                  <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2" disabled>
+                    <Brain className="h-5 w-5" />
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs">AI Insights</span>
+                      <Badge variant="secondary" className="text-xs">Pro</Badge>
+                    </div>
+                  </Button>
+                  <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2" disabled>
+                    <Zap className="h-5 w-5" />
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs">Auto-Tag</span>
+                      <Badge variant="secondary" className="text-xs">Pro</Badge>
+                    </div>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Upgrade Banner for Free Users */}
+            {!isPremium && (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                      <Crown className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        Unlock Advanced Reports
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300">
+                        Get AI insights, interactive charts, export tools, and auto-categorization
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => setLocation("/subscribe")}
+                    className="bg-premium hover:bg-premium/90"
+                  >
+                    <Crown className="h-4 w-4 mr-2" />
+                    Upgrade Now
+                  </Button>
+                </div>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>
