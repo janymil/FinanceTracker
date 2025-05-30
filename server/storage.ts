@@ -4,7 +4,7 @@ import {
   budgets,
   categories,
   type User,
-  type UpsertUser,
+  type InsertUser,
   type Transaction,
   type InsertTransaction,
   type Budget,
@@ -15,27 +15,29 @@ import { db } from "./db";
 import { eq, and, gte, lte, desc, sum, sql } from "drizzle-orm";
 
 export interface IStorage {
-  // User operations (required for Replit Auth)
-  getUser(id: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
-  updateUserStripeInfo(userId: string, customerId: string, subscriptionId: string): Promise<User>;
-  updateUserPremiumStatus(userId: string, isPremium: boolean): Promise<User>;
+  // User operations
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: Omit<InsertUser, 'id' | 'createdAt' | 'updatedAt'>): Promise<User>;
+  updateUserStripeInfo(userId: number, customerId: string, subscriptionId: string): Promise<User>;
+  updateUserPremiumStatus(userId: number, isPremium: boolean): Promise<User>;
 
   // Transaction operations
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
-  getUserTransactions(userId: string, limit?: number): Promise<Transaction[]>;
-  deleteTransaction(id: number, userId: string): Promise<void>;
+  getUserTransactions(userId: number, limit?: number): Promise<Transaction[]>;
+  deleteTransaction(id: number, userId: number): Promise<void>;
 
   // Budget operations
   createBudget(budget: InsertBudget): Promise<Budget>;
-  getUserBudgets(userId: string): Promise<Budget[]>;
+  getUserBudgets(userId: number): Promise<Budget[]>;
   updateBudget(id: number, budget: Partial<InsertBudget>): Promise<Budget>;
 
   // Category operations
   getCategories(): Promise<Category[]>;
   
   // Analytics
-  getUserFinancialSummary(userId: string, startDate: Date, endDate: Date): Promise<{
+  getUserFinancialSummary(userId: number, startDate: Date, endDate: Date): Promise<{
     totalIncome: number;
     totalExpenses: number;
     netBalance: number;
@@ -45,27 +47,30 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   // User operations
-  async getUser(id: string): Promise<User | undefined> {
+  async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
 
-  async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
     return user;
   }
 
-  async updateUserStripeInfo(userId: string, customerId: string, subscriptionId: string): Promise<User> {
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async createUser(user: Omit<InsertUser, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
+    const [newUser] = await db
+      .insert(users)
+      .values(user)
+      .returning();
+    return newUser;
+  }
+
+  async updateUserStripeInfo(userId: number, customerId: string, subscriptionId: string): Promise<User> {
     const [user] = await db
       .update(users)
       .set({
@@ -79,7 +84,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUserPremiumStatus(userId: string, isPremium: boolean): Promise<User> {
+  async updateUserPremiumStatus(userId: number, isPremium: boolean): Promise<User> {
     const [user] = await db
       .update(users)
       .set({
@@ -100,34 +105,21 @@ export class DatabaseStorage implements IStorage {
     return newTransaction;
   }
 
-  async getUserTransactions(userId: string, limit?: number): Promise<Transaction[]> {
-    const baseQuery = db
-      .select({
-        id: transactions.id,
-        userId: transactions.userId,
-        categoryId: transactions.categoryId,
-        amount: transactions.amount,
-        description: transactions.description,
-        type: transactions.type,
-        date: transactions.date,
-        createdAt: transactions.createdAt,
-        categoryName: categories.name,
-        categoryIcon: categories.icon,
-        categoryColor: categories.color,
-      })
+  async getUserTransactions(userId: number, limit?: number): Promise<Transaction[]> {
+    let query = db
+      .select()
       .from(transactions)
-      .leftJoin(categories, eq(transactions.categoryId, categories.id))
       .where(eq(transactions.userId, userId))
       .orderBy(desc(transactions.date));
 
     if (limit) {
-      return baseQuery.limit(limit);
+      query = query.limit(limit);
     }
 
-    return baseQuery;
+    return await query;
   }
 
-  async deleteTransaction(id: number, userId: string): Promise<void> {
+  async deleteTransaction(id: number, userId: number): Promise<void> {
     await db
       .delete(transactions)
       .where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
@@ -142,24 +134,12 @@ export class DatabaseStorage implements IStorage {
     return newBudget;
   }
 
-  async getUserBudgets(userId: string): Promise<Budget[]> {
-    return db
-      .select({
-        id: budgets.id,
-        userId: budgets.userId,
-        categoryId: budgets.categoryId,
-        amount: budgets.amount,
-        period: budgets.period,
-        startDate: budgets.startDate,
-        endDate: budgets.endDate,
-        createdAt: budgets.createdAt,
-        categoryName: categories.name,
-        categoryIcon: categories.icon,
-        categoryColor: categories.color,
-      })
+  async getUserBudgets(userId: number): Promise<Budget[]> {
+    return await db
+      .select()
       .from(budgets)
-      .leftJoin(categories, eq(budgets.categoryId, categories.id))
-      .where(eq(budgets.userId, userId));
+      .where(eq(budgets.userId, userId))
+      .orderBy(desc(budgets.createdAt));
   }
 
   async updateBudget(id: number, budget: Partial<InsertBudget>): Promise<Budget> {
@@ -173,14 +153,16 @@ export class DatabaseStorage implements IStorage {
 
   // Category operations
   async getCategories(): Promise<Category[]> {
-    return db.select().from(categories);
+    return await db.select().from(categories);
   }
 
   // Analytics
-  async getUserFinancialSummary(userId: string, startDate: Date, endDate: Date) {
-    // Get total income and expenses
-    const [incomeResult] = await db
-      .select({ total: sql<string>`COALESCE(SUM(${transactions.amount}), 0)` })
+  async getUserFinancialSummary(userId: number, startDate: Date, endDate: Date) {
+    // Get income and expense totals
+    const incomeResult = await db
+      .select({
+        total: sum(transactions.amount),
+      })
       .from(transactions)
       .where(
         and(
@@ -191,8 +173,10 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    const [expenseResult] = await db
-      .select({ total: sql<string>`COALESCE(SUM(${transactions.amount}), 0)` })
+    const expenseResult = await db
+      .select({
+        total: sum(transactions.amount),
+      })
       .from(transactions)
       .where(
         and(
@@ -203,14 +187,11 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    const totalIncome = parseFloat(incomeResult?.total || '0');
-    const totalExpenses = parseFloat(expenseResult?.total || '0');
-
     // Get transactions by category
-    const transactionsByCategory = await db
+    const categoryResults = await db
       .select({
-        categoryName: sql<string>`COALESCE(${categories.name}, 'Uncategorized')`,
-        amount: sql<string>`SUM(${transactions.amount})`,
+        categoryName: categories.name,
+        amount: sum(transactions.amount),
         type: transactions.type,
       })
       .from(transactions)
@@ -224,15 +205,21 @@ export class DatabaseStorage implements IStorage {
       )
       .groupBy(categories.name, transactions.type);
 
+    const totalIncome = Number(incomeResult[0]?.total || 0);
+    const totalExpenses = Number(expenseResult[0]?.total || 0);
+    const netBalance = totalIncome - totalExpenses;
+
+    const transactionsByCategory = categoryResults.map(result => ({
+      categoryName: result.categoryName || 'Uncategorized',
+      amount: Number(result.amount || 0),
+      type: result.type,
+    }));
+
     return {
       totalIncome,
       totalExpenses,
-      netBalance: totalIncome - totalExpenses,
-      transactionsByCategory: transactionsByCategory.map(item => ({
-        categoryName: item.categoryName,
-        amount: parseFloat(item.amount),
-        type: item.type,
-      })),
+      netBalance,
+      transactionsByCategory,
     };
   }
 }

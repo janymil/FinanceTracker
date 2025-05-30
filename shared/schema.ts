@@ -24,13 +24,14 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table (required for Replit Auth)
+// User storage table with traditional authentication
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(),
-  email: varchar("email").unique(),
+  id: serial("id").primaryKey(),
+  username: varchar("username", { length: 50 }).unique().notNull(),
+  email: varchar("email").unique().notNull(),
+  password: varchar("password").notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
   isPremium: boolean("is_premium").default(false),
@@ -50,7 +51,7 @@ export const categories = pgTable("categories", {
 // Financial transactions
 export const transactions = pgTable("transactions", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: integer("user_id").notNull().references(() => users.id),
   categoryId: integer("category_id").references(() => categories.id),
   amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
   description: text("description").notNull(),
@@ -62,7 +63,7 @@ export const transactions = pgTable("transactions", {
 // Budget categories
 export const budgets = pgTable("budgets", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: integer("user_id").notNull().references(() => users.id),
   categoryId: integer("category_id").references(() => categories.id),
   amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
   period: varchar("period", { length: 20 }).notNull(), // 'monthly', 'yearly'
@@ -72,6 +73,7 @@ export const budgets = pgTable("budgets", {
 });
 
 // Schema exports
+export type InsertUser = typeof users.$inferInsert;
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
