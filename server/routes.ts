@@ -90,6 +90,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/budgets', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.isPremium) {
+        return res.status(403).json({ message: "Premium subscription required" });
+      }
+
       const budgets = await storage.getUserBudgets(userId);
       res.json(budgets);
     } catch (error) {
