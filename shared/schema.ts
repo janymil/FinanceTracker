@@ -72,6 +72,21 @@ export const budgets = pgTable("budgets", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Financial goals
+export const goals = pgTable("goals", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  targetAmount: decimal("target_amount", { precision: 12, scale: 2 }).notNull(),
+  currentAmount: decimal("current_amount", { precision: 12, scale: 2 }).default("0.00").notNull(),
+  targetDate: timestamp("target_date").notNull(),
+  category: varchar("category", { length: 100 }).notNull(),
+  status: varchar("status", { length: 50 }).default("active").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Schema exports
 export type InsertUser = typeof users.$inferInsert;
 export type UpsertUser = typeof users.$inferInsert;
@@ -82,6 +97,9 @@ export type Transaction = typeof transactions.$inferSelect;
 
 export type InsertBudget = typeof budgets.$inferInsert;
 export type Budget = typeof budgets.$inferSelect;
+
+export type InsertGoal = typeof goals.$inferInsert;
+export type Goal = typeof goals.$inferSelect;
 
 export type Category = typeof categories.$inferSelect;
 

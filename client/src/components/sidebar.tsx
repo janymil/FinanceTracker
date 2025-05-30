@@ -18,6 +18,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Crosshair,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
@@ -50,6 +51,12 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       icon: Target,
       href: "/budget",
       premium: false,
+    },
+    {
+      title: "Goals",
+      icon: Crosshair,
+      href: "/goals",
+      premium: true,
     },
     {
       title: "Reports",

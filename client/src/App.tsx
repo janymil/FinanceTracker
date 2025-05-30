@@ -11,6 +11,7 @@ import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Subscribe from "@/pages/subscribe";
 import Reports from "@/pages/reports";
+import Goals from "@/pages/goals";
 import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
 
