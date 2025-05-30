@@ -63,7 +63,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       title: "Budget",
       icon: Target,
       href: "/budget",
-      premium: false,
+      premium: true,
     },
     {
       title: "Categories",

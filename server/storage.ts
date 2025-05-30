@@ -32,6 +32,7 @@ export interface IStorage {
   createBudget(budget: InsertBudget): Promise<Budget>;
   getUserBudgets(userId: number): Promise<Budget[]>;
   updateBudget(id: number, budget: Partial<InsertBudget>): Promise<Budget>;
+  deleteBudget(id: number, userId: number): Promise<void>;
 
   // Category operations
   getCategories(): Promise<Category[]>;
@@ -149,6 +150,12 @@ export class DatabaseStorage implements IStorage {
       .where(eq(budgets.id, id))
       .returning();
     return updatedBudget;
+  }
+
+  async deleteBudget(id: number, userId: number): Promise<void> {
+    await db
+      .delete(budgets)
+      .where(and(eq(budgets.id, id), eq(budgets.userId, userId)));
   }
 
   // Category operations

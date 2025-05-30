@@ -16,6 +16,7 @@ import Categories from "@/pages/categories";
 import Transactions from "@/pages/transactions";
 import Income from "@/pages/income";
 import Expenses from "@/pages/expenses";
+import Budget from "@/pages/budget";
 import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
 
@@ -55,6 +56,7 @@ function Router() {
             <Route path="/categories" component={Categories} />
             <Route path="/income" component={Income} />
             <Route path="/expenses" component={Expenses} />
+            <Route path="/budget" component={Budget} />
             <Route path="/goals" component={Goals} />
             <Route path="/reports" component={Reports} />
             <Route path="/subscribe" component={Subscribe} />
