@@ -82,15 +82,10 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      const { username, email, password, firstName, lastName } = req.body;
+      const { email, password, firstName, lastName } = req.body;
       
-      if (!username || !email || !password) {
-        return res.status(400).json({ message: "Username, email, and password are required" });
-      }
-
-      const existingUser = await storage.getUserByUsername(username);
-      if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
       }
 
       const existingEmail = await storage.getUserByEmail(email);
@@ -99,7 +94,7 @@ export function setupAuth(app: Express) {
       }
 
       const user = await storage.createUser({
-        username,
+        username: email, // Use email as username for compatibility
         email,
         password: await hashPassword(password),
         firstName,
