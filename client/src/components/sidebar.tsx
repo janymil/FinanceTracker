@@ -40,72 +40,84 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       icon: LayoutDashboard,
       href: "/",
       premium: false,
+      showPremiumBadge: false,
     },
     {
       title: "Transactions",
       icon: CreditCard,
       href: "/transactions",
       premium: false,
+      showPremiumBadge: false,
     },
     {
       title: "Income",
       icon: TrendingUp,
       href: "/income",
       premium: false,
+      showPremiumBadge: false,
     },
     {
       title: "Expenses",
       icon: TrendingDown,
       href: "/expenses",
       premium: false,
+      showPremiumBadge: false,
     },
     {
       title: "Budget",
       icon: Target,
       href: "/budget",
-      premium: true,
+      premium: false,
+      showPremiumBadge: true,
     },
     {
       title: "Categories",
       icon: CreditCard,
       href: "/categories",
       premium: false,
+      showPremiumBadge: false,
     },
     {
       title: "Goals",
       icon: Crosshair,
       href: "/goals",
       premium: true,
+      showPremiumBadge: true,
     },
     {
       title: "Reports",
       icon: FileText,
       href: "/reports",
       premium: false,
+      showPremiumBadge: false,
     },
     {
       title: "Analytics",
       icon: BarChart3,
       href: "/analytics",
       premium: true,
+      showPremiumBadge: true,
     },
     {
       title: "Trends",
       icon: TrendingUp,
       href: "/trends",
       premium: true,
+      showPremiumBadge: true,
     },
     {
       title: "Calendar View",
       icon: Calendar,
       href: "/calendar",
       premium: true,
+      showPremiumBadge: true,
     },
     {
       title: "Export Data",
       icon: Download,
       href: "/export",
       premium: true,
+      showPremiumBadge: true,
     },
   ];
 
@@ -199,7 +211,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                         {!isCollapsed && (
                           <span className="flex items-center justify-between w-full">
                             {item.title}
-                            {item.premium && (
+                            {(item.premium || item.showPremiumBadge) && (
                               <Badge className="bg-premium text-white text-xs ml-2">
                                 <Crown className="h-3 w-3 mr-1" />
                                 Pro
