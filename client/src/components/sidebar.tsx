@@ -47,6 +47,18 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       premium: false,
     },
     {
+      title: "Income",
+      icon: TrendingUp,
+      href: "/income",
+      premium: false,
+    },
+    {
+      title: "Expenses",
+      icon: TrendingDown,
+      href: "/expenses",
+      premium: false,
+    },
+    {
       title: "Budget",
       icon: Target,
       href: "/budget",
