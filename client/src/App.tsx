@@ -58,7 +58,7 @@ function AppContent() {
           "flex-1 transition-all duration-300",
           sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
         )}>
-          <div className="p-6"></div>
+          <div className="p-6">
             <Switch>
               <Route path="/" component={Dashboard} />
               <Route path="/dashboard" component={Dashboard} />
