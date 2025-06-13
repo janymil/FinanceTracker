@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import FinancialCards from "@/components/financial-cards";
 import TransactionList from "@/components/transaction-list";
 import TrendsChart from "@/components/trends-chart";
@@ -17,13 +17,36 @@ import CloudBackup from "@/components/cloud-backup";
 import AutoCategorization from "@/components/auto-categorization";
 import AIFinancialTips from "@/components/ai-financial-tips";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Calendar } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Plus, Calendar, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { useState } from "react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+
+interface Category {
+  id: number;
+  name: string;
+  icon: string;
+  color: string;
+  type: "income" | "expense";
+}
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [selectedMonth, setSelectedMonth] = useState("2024-05");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  const [newTransaction, setNewTransaction] = useState({
+    amount: "",
+    description: "",
+    date: new Date().toISOString().split('T')[0],
+    type: "expense" as "income" | "expense",
+    categoryId: "",
+  });
 
   // Get start and end dates for the selected month
   const startDate = new Date(`${selectedMonth}-01`);
@@ -53,6 +76,44 @@ export default function Dashboard() {
     enabled: !!user,
   });
 
+  const { data: categories = [] } = useQuery({
+    queryKey: ["/api/categories"],
+    enabled: !!user,
+  });
+
+  const createTransactionMutation = useMutation({
+    mutationFn: async (transactionData: typeof newTransaction) => {
+      const res = await apiRequest("POST", "/api/transactions", {
+        ...transactionData,
+        amount: parseFloat(transactionData.amount),
+      });
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      setIsDialogOpen(false);
+      setNewTransaction({
+        amount: "",
+        description: "",
+        date: new Date().toISOString().split('T')[0],
+        type: "expense",
+        categoryId: "",
+      });
+      toast({
+        title: "Transaction Added",
+        description: "Transaction has been created successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   if (!user) {
     return null;
   }
@@ -63,6 +124,11 @@ export default function Dashboard() {
       month: 'long',
       year: 'numeric'
     });
+  };
+
+  const handleSubmit = () => {
+    if (!newTransaction.amount || !newTransaction.description) return;
+    createTransactionMutation.mutate(newTransaction);
   };
 
   return (
@@ -93,10 +159,120 @@ export default function Dashboard() {
                   <SelectItem value="2024-01">January 2024</SelectItem>
                 </SelectContent>
               </Select>
-              <Button className="bg-primary hover:bg-primary/90">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Transaction
-              </Button>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    className="bg-primary hover:bg-primary/90"
+                    onClick={() => {
+                      setNewTransaction({
+                        amount: "",
+                        description: "",
+                        date: new Date().toISOString().split('T')[0],
+                        type: "expense",
+                        categoryId: "",
+                      });
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Transaction
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Transaction</DialogTitle>
+                    <DialogDescription>
+                      Record a new income or expense transaction
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="amount">Amount</Label>
+                        <Input
+                          id="amount"
+                          type="number"
+                          step="0.01"
+                          value={newTransaction.amount}
+                          onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })}
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="date">Date</Label>
+                        <Input
+                          id="date"
+                          type="date"
+                          value={newTransaction.date}
+                          onChange={(e) => setNewTransaction({ ...newTransaction, date: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="description">Description</Label>
+                      <Input
+                        id="description"
+                        value={newTransaction.description}
+                        onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })}
+                        placeholder="Transaction description"
+                      />
+                    </div>
+
+                    <div>
+                      <Label>Type</Label>
+                      <div className="flex gap-2 mt-2">
+                        <Button
+                          variant={newTransaction.type === "income" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setNewTransaction({ ...newTransaction, type: "income" })}
+                        >
+                          <ArrowUpRight className="h-4 w-4 mr-2" />
+                          Income
+                        </Button>
+                        <Button
+                          variant={newTransaction.type === "expense" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setNewTransaction({ ...newTransaction, type: "expense" })}
+                        >
+                          <ArrowDownLeft className="h-4 w-4 mr-2" />
+                          Expense
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="category">Category</Label>
+                      <Select value={newTransaction.categoryId} onValueChange={(value) => setNewTransaction({ ...newTransaction, categoryId: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories
+                            .filter((cat: Category) => cat.type === newTransaction.type)
+                            .map((category: Category) => (
+                              <SelectItem key={category.id} value={category.id.toString()}>
+                                {category.name}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-4">
+                      <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button 
+                        onClick={handleSubmit}
+                        disabled={!newTransaction.amount || !newTransaction.description || createTransactionMutation.isPending}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>
