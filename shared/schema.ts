@@ -58,6 +58,11 @@ export const transactions = pgTable("transactions", {
   type: varchar("type", { length: 20 }).notNull(), // 'income' or 'expense'
   date: timestamp("date").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
+  // Recurring transaction fields
+  isRecurring: boolean("is_recurring").default(false),
+  recurringFrequency: varchar("recurring_frequency", { length: 20 }), // 'weekly', 'monthly', 'yearly'
+  recurringEndDate: timestamp("recurring_end_date"),
+  parentTransactionId: integer("parent_transaction_id").references(() => transactions.id),
 });
 
 // Budget categories

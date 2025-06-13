@@ -36,8 +36,11 @@ import {
   Menu,
   Plus,
   Bell,
-  Search
+  Search,
+  Repeat
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import RequirePlan from "@/components/require-plan";
 import { Link } from "wouter";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -82,6 +85,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
     date: new Date().toISOString().split('T')[0],
     type: "expense" as "income" | "expense",
     categoryId: "",
+    isRecurring: false,
+    recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
+    recurringEndDate: "",
   });
 
   const { data: categories = [] } = useQuery({
@@ -165,6 +171,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
                     date: new Date().toISOString().split('T')[0],
                     type: "expense",
                     categoryId: "",
+                    isRecurring: false,
+                    recurringFrequency: "monthly",
+                    recurringEndDate: "",
                   });
                 }}
               >
