@@ -43,6 +43,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
 import { Link } from "wouter";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
@@ -71,9 +72,10 @@ async function apiRequest(method: string, url: string, data?: any) {
 
 interface HeaderProps {
   onMenuClick: () => void;
+  sidebarCollapsed: boolean;
 }
 
-export default function Header({ onMenuClick }: HeaderProps) {
+export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -148,7 +150,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 h-16">
+    <header className={cn(
+      "bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 h-16 fixed top-0 right-0 z-40 transition-all duration-300",
+      sidebarCollapsed ? "left-16" : "left-64"
+    )}>
       <div className="flex items-center justify-between h-full px-4">
         {/* Left side - Mobile menu button and quick actions */}
         <div className="flex items-center space-x-4">
