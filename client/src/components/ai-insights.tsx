@@ -93,7 +93,7 @@ export default function AIInsights({ data }: AIInsightsProps) {
     const topCategory = Object.entries(categorySpending)
       .sort(([,a]: any, [,b]: any) => b - a)[0];
 
-    if (topCategory && topCategory[1] > totalExpenses * 0.3) {
+    if (topCategory && (topCategory[1] as number) > totalExpenses * 0.3) {
       insights.push({
         id: "category-dominance",
         type: "suggestion",

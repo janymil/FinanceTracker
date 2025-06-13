@@ -37,7 +37,10 @@ interface Category {
 export default function Dashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [selectedMonth, setSelectedMonth] = useState("2024-05");
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   const [newTransaction, setNewTransaction] = useState({
@@ -248,7 +251,7 @@ export default function Dashboard() {
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                         <SelectContent>
-                          {categories
+                          {Array.isArray(categories) && (categories as Category[])
                             .filter((cat: Category) => cat.type === newTransaction.type)
                             .map((category: Category) => (
                               <SelectItem key={category.id} value={category.id.toString()}>
