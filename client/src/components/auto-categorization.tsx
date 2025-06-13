@@ -119,6 +119,20 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
     },
   });
 
+  const aiCategorizeMutation = useMutation({
+    mutationFn: async ({ description, amount }: { description: string; amount: number }) => {
+      const res = await apiRequest("POST", "/api/ai/categorize", { description, amount });
+      return await res.json();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "AI Categorization Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
   const handleApplySuggestion = (suggestion: CategorySuggestion) => {
     // In a real implementation, you'd map category names to IDs
     applySuggestionMutation.mutate({

@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
 import { insertTransactionSchema, insertBudgetSchema } from "@shared/schema";
 import { z } from "zod";
+import { categorizeExpense, generateFinancialTips, generateSpendingInsights } from "./openai";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -353,6 +354,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error initializing categories:", error);
       res.status(500).json({ message: "Failed to initialize categories" });
+    }
+  });
+
+  // AI Categorization endpoint
+  app.post('/api/ai/categorize', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      
+      // Require standard+ plan for AI categorization
+      if (!user || !['standard', 'premium'].includes(user.plan || '')) {
+        return res.status(403).json({ message: "AI categorization requires standard or premium plan" });
+      }
+
+      const { description, amount } = req.body;
+      
+      if (!description) {
+        return res.status(400).json({ message: "Description is required" });
+      }
+
+      const result = await categorizeExpense(description, amount || 0);
+      res.json({ category: result.category });
+    } catch (error) {
+      console.error("Error categorizing expense:", error);
+      res.status(500).json({ message: "Failed to categorize expense" });
+    }
+  });
+
+  // AI Financial Tips endpoint
+  app.post('/api/ai/tip', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      
+      // Require premium plan for AI tips
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "AI financial tips require premium plan" });
+      }
+
+      const { month, total, categories } = req.body;
+      
+      if (!month || !total || !categories) {
+        return res.status(400).json({ message: "Month, total, and categories are required" });
+      }
+
+      // Get user's actual financial data for better tips
+      const startDate = new Date();
+      startDate.setDate(1); // First day of current month
+      const endDate = new Date();
+      
+      const financialSummary = await storage.getUserFinancialSummary(req.user.id, startDate, endDate);
+      const transactions = await storage.getUserTransactions(req.user.id, 50);
+      
+      const financialData = {
+        totalIncome: financialSummary.totalIncome,
+        totalExpenses: financialSummary.totalExpenses,
+        transactionsByCategory: financialSummary.transactionsByCategory,
+        recentTransactions: transactions.map(t => ({
+          description: t.description,
+          amount: parseFloat(t.amount),
+          date: t.date,
+          categoryName: t.categoryName
+        }))
+      };
+
+      const tips = await generateFinancialTips(financialData);
+      const tip = tips.length > 0 ? tips[0] : null;
+      
+      if (tip) {
+        res.json({ tip: `${tip.title}: ${tip.description}` });
+      } else {
+        res.json({ tip: "Continue tracking your expenses to get personalized financial insights." });
+      }
+    } catch (error) {
+      console.error("Error generating financial tip:", error);
+      res.status(500).json({ message: "Failed to generate financial tip" });
+    }
+  });
+
+  // AI Spending Insights endpoint
+  app.get('/api/ai/insights', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      
+      // Require premium plan for AI insights
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "AI spending insights require premium plan" });
+      }
+
+      const transactions = await storage.getUserTransactions(req.user.id, 100);
+      
+      const insights = await generateSpendingInsights(transactions.map(t => ({
+        description: t.description,
+        amount: parseFloat(t.amount),
+        date: t.date,
+        categoryName: t.categoryName,
+        type: t.type
+      })));
+
+      res.json(insights);
+    } catch (error) {
+      console.error("Error generating spending insights:", error);
+      res.status(500).json({ message: "Failed to generate spending insights" });
     }
   });
 
