@@ -358,7 +358,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           </Button>
 
           {/* Premium status */}
-          {user?.isPremium ? (
+          {user?.plan === 'premium' ? (
             <Badge className="bg-premium text-white hidden sm:flex">
               <Crown className="h-3 w-3 mr-1" />
               Premium
@@ -406,7 +406,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 <Settings className="h-4 w-4 mr-2" />
                 Account Settings
               </DropdownMenuItem>
-              {!user?.isPremium && (
+              {user?.plan !== 'premium' && (
                 <DropdownMenuItem asChild>
                   <Link href="/subscribe">
                     <Crown className="h-4 w-4 mr-2" />
