@@ -45,7 +45,7 @@ export default function AIInsights({ data }: AIInsightsProps) {
 
   // Generate AI insights based on user's financial data
   const generateInsights = (financialData: any): SpendingInsight[] => {
-    if (!financialData || !financialData.transactions) return [];
+    if (!financialData || !financialData.transactions || !Array.isArray(financialData.transactions) || financialData.transactions.length === 0) return [];
 
     const insights: SpendingInsight[] = [];
     const { transactions, budgets = [], goals = [] } = financialData || {};
@@ -180,7 +180,9 @@ export default function AIInsights({ data }: AIInsightsProps) {
     enabled: !!user && user.plan === 'premium',
   });
 
-  const insights = Array.isArray(insightsData) ? insightsData : generateInsights(data);
+  const insights = Array.isArray(insightsData) && insightsData.length > 0 
+    ? insightsData 
+    : generateInsights(data);
 
   const getInsightIcon = (type: string) => {
     switch (type) {

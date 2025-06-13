@@ -148,26 +148,29 @@ export default function Reports() {
 
         {/* Reports Tabs - Basic available for all, Advanced for Premium */}
         <Tabs defaultValue="summary" className="space-y-6">
-          <TabsList className={`grid w-full ${hasPremium ? 'grid-cols-5' : 'grid-cols-4'}`}>
+          <TabsList className={`grid w-full ${hasPremium ? 'grid-cols-5' : hasStandardOrBetter ? 'grid-cols-3' : 'grid-cols-2'}`}>
             <TabsTrigger value="summary" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Summary
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Analytics
-              {!hasStandardOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Standard+</Badge>}
-            </TabsTrigger>
-            <TabsTrigger value="insights" className="flex items-center gap-2">
-              <Brain className="h-4 w-4" />
-              AI Insights
-              {!hasPremium && <Badge variant="secondary" className="ml-1 text-xs">Premium</Badge>}
-            </TabsTrigger>
-            <TabsTrigger value="export" className="flex items-center gap-2">
-              <Download className="h-4 w-4" />
-              Export
-              {!hasStandardOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Standard+</Badge>}
-            </TabsTrigger>
+            {hasStandardOrBetter && (
+              <TabsTrigger value="analytics" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Analytics
+              </TabsTrigger>
+            )}
+            {hasStandardOrBetter && (
+              <TabsTrigger value="export" className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Export
+              </TabsTrigger>
+            )}
+            {hasPremium && (
+              <TabsTrigger value="insights" className="flex items-center gap-2">
+                <Brain className="h-4 w-4" />
+                AI Insights
+              </TabsTrigger>
+            )}
             {hasPremium && (
               <TabsTrigger value="categorization" className="flex items-center gap-2">
                 <Zap className="h-4 w-4" />
