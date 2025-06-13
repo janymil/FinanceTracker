@@ -45,7 +45,7 @@ interface ExportOptions {
 
 export default function ExportTools({ data }: ExportToolsProps) {
   const { user } = useAuth();
-  const { setLocation } = useLocation();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [exportOptions, setExportOptions] = useState<ExportOptions>({

@@ -185,7 +185,7 @@ export default function Dashboard() {
               </RequirePlan>
               
               <RequirePlan plan="standard">
-                <AutoCategorization transactions={transactions} />
+                <AutoCategorization transactions={transactions as any} />
               </RequirePlan>
             </div>
 

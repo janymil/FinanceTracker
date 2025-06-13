@@ -48,7 +48,7 @@ export default function AIInsights({ data }: AIInsightsProps) {
     if (!financialData || !financialData.transactions) return [];
 
     const insights: SpendingInsight[] = [];
-    const { transactions, budgets = [], goals = [] } = financialData;
+    const { transactions, budgets = [], goals = [] } = financialData || {};
 
     // Analyze spending patterns
     const currentMonth = new Date().getMonth();
