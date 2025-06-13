@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Lightbulb, Sparkles, RefreshCw, TrendingUp } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface AIFinancialTipsProps {
   summary?: {

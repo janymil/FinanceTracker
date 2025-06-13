@@ -15,6 +15,7 @@ import ExpensePrediction from "@/components/expense-prediction";
 import DailyRecommendations from "@/components/daily-recommendations";
 import CloudBackup from "@/components/cloud-backup";
 import AutoCategorization from "@/components/auto-categorization";
+import AIFinancialTips from "@/components/ai-financial-tips";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Calendar } from "lucide-react";

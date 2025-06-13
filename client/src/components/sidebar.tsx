@@ -198,7 +198,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             {menuItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
-              const accessible = hasAccess(item.requiredPlan);
+              const accessible = hasAccess(item.requiredPlan || "free");
 
               return (
                 <div key={item.title} className="relative">

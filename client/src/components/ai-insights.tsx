@@ -180,7 +180,7 @@ export default function AIInsights({ data }: AIInsightsProps) {
     enabled: !!user && user.plan === 'premium',
   });
 
-  const insights = insightsData || generateInsights(data);
+  const insights = Array.isArray(insightsData) ? insightsData : generateInsights(data);
 
   const getInsightIcon = (type: string) => {
     switch (type) {
