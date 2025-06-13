@@ -84,17 +84,17 @@ export default function Reports() {
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Analytics
-              {!hasBasicOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Basic+</Badge>}
+              {!hasStandardOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Standard+</Badge>}
             </TabsTrigger>
             <TabsTrigger value="insights" className="flex items-center gap-2">
               <Brain className="h-4 w-4" />
               AI Insights
-              {!hasBasicOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Premium</Badge>}
+              {!hasStandardOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Premium</Badge>}
             </TabsTrigger>
             <TabsTrigger value="export" className="flex items-center gap-2">
               <Download className="h-4 w-4" />
               Export
-              {!hasBasicOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Basic+</Badge>}
+              {!hasStandardOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Standard+</Badge>}
             </TabsTrigger>
             <TabsTrigger value="categorization" className="flex items-center gap-2">
               <Zap className="h-4 w-4" />
@@ -111,7 +111,7 @@ export default function Reports() {
                 chartType="line"
                 title="Income vs Expenses Trend"
                 description="Track your cash flow over time with interactive zoom and insights"
-                isPremium={hasBasicOrBetter}
+                isPremium={hasStandardOrBetter}
                 onExport={() => console.log("Exporting chart...")}
               />
               <InteractiveChart
@@ -119,7 +119,7 @@ export default function Reports() {
                 chartType="bar"
                 title="Monthly Comparison"
                 description="Compare monthly performance with detailed tooltips"
-                isPremium={hasBasicOrBetter}
+                isPremium={hasStandardOrBetter}
               />
             </div>
             <InteractiveChart
@@ -127,7 +127,7 @@ export default function Reports() {
               chartType="area"
               title="Financial Overview"
               description="Comprehensive view of your financial health with trend analysis"
-              isPremium={hasBasicOrBetter}
+              isPremium={hasStandardOrBetter}
             />
           </TabsContent>
 
@@ -238,7 +238,7 @@ export default function Reports() {
               <CardHeader>
                 <CardTitle>Category Breakdown</CardTitle>
                 <CardDescription>
-                  {hasBasicOrBetter ? "Detailed spending analysis by category" : "Basic category overview (upgrade for detailed analysis)"}
+                  {hasStandardOrBetter ? "Detailed spending analysis by category" : "Standard category overview (upgrade for detailed analysis)"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -247,16 +247,16 @@ export default function Reports() {
                     <PieChart className="h-8 w-8 text-gray-400" />
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    {hasBasicOrBetter ? "No Data to Display" : "Category Charts Available with Basic+"}
+                    {hasStandardOrBetter ? "No Data to Display" : "Category Charts Available with Standard+"}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto mb-6">
-                    {hasBasicOrBetter 
+                    {hasStandardOrBetter 
                       ? "Add transactions to see detailed category breakdowns and spending patterns"
                       : "Upgrade to Basic to unlock interactive category charts, spending trends, and detailed financial analysis"
                     }
                   </p>
 
-                  {!hasBasicOrBetter && (
+                  {!hasStandardOrBetter && (
                     <Button 
                       onClick={() => setLocation("/subscribe")}
                       className="bg-premium hover:bg-premium/90"
@@ -306,7 +306,7 @@ export default function Reports() {
             </Card>
 
             {/* Upgrade Banner for Free Users */}
-            {!hasBasicOrBetter && (
+            {!hasStandardOrBetter && (
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
