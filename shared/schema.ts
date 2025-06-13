@@ -65,6 +65,22 @@ export const transactions = pgTable("transactions", {
   parentTransactionId: integer("parent_transaction_id").references(() => transactions.id),
 });
 
+// Recurring transactions table (separate for cleaner implementation)
+export const recurringTransactions = pgTable("recurring_transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  categoryId: integer("category_id").references(() => categories.id),
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  description: text("description").notNull(),
+  type: varchar("type", { length: 20 }).notNull(), // 'income' or 'expense'
+  frequency: varchar("frequency", { length: 20 }).notNull(), // 'weekly', 'monthly', 'yearly'
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  isActive: boolean("is_active").default(true),
+  lastProcessed: timestamp("last_processed"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Budget categories
 export const budgets = pgTable("budgets", {
   id: serial("id").primaryKey(),
@@ -100,6 +116,9 @@ export type User = typeof users.$inferSelect;
 export type InsertTransaction = typeof transactions.$inferInsert;
 export type Transaction = typeof transactions.$inferSelect;
 
+export type InsertRecurringTransaction = typeof recurringTransactions.$inferInsert;
+export type RecurringTransaction = typeof recurringTransactions.$inferSelect;
+
 export type InsertBudget = typeof budgets.$inferInsert;
 export type Budget = typeof budgets.$inferSelect;
 
@@ -117,4 +136,10 @@ export const insertTransactionSchema = createInsertSchema(transactions).omit({
 export const insertBudgetSchema = createInsertSchema(budgets).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertRecurringTransactionSchema = createInsertSchema(recurringTransactions).omit({
+  id: true,
+  createdAt: true,
+  lastProcessed: true,
 });
