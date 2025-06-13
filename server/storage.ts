@@ -16,7 +16,7 @@ import {
   type InsertExpenseReminder,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gte, lte, desc, sum, sql } from "drizzle-orm";
+import { eq, and, gte, lte, desc, sum, sql, or, isNull } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -320,7 +320,7 @@ export class DatabaseStorage implements IStorage {
       });
     });
 
-    // Get active recurring transactions and calculate next occurrences
+    // Get active recurring transactions and calculate next occurrences  
     const activeRecurringTransactions = await db
       .select({
         id: recurringTransactions.id,
