@@ -45,78 +45,78 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       title: "Dashboard",
       icon: LayoutDashboard,
       href: "/",
-      premium: false,
-      showPremiumBadge: false,
+      requiredPlan: "free",
+      badge: null,
     },
     {
       title: "Transactions",
       icon: CreditCard,
       href: "/transactions",
-      premium: false,
-      showPremiumBadge: false,
+      requiredPlan: "free",
+      badge: null,
     },
     {
       title: "Income",
       icon: TrendingUp,
       href: "/income",
-      premium: false,
-      showPremiumBadge: false,
+      requiredPlan: "free",
+      badge: null,
     },
     {
       title: "Expenses",
       icon: TrendingDown,
       href: "/expenses",
-      premium: false,
-      showPremiumBadge: false,
+      requiredPlan: "free",
+      badge: null,
     },
     {
       title: "Budget",
       icon: Target,
       href: "/budget",
-      premium: false,
-      showPremiumBadge: true,
+      requiredPlan: "standard" as const,
+      badge: "Standard" as const,
     },
     {
       title: "Categories",
       icon: CreditCard,
       href: "/categories",
-      premium: false,
-      showPremiumBadge: false,
+      requiredPlan: "free",
+      badge: null,
     },
     {
       title: "Goals",
       icon: Crosshair,
       href: "/goals",
-      premium: true,
-      showPremiumBadge: true,
+      requiredPlan: "premium" as const,
+      badge: "Premium" as const,
     },
     {
       title: "Reports",
       icon: FileText,
       href: "/reports",
-      premium: false,
-      showPremiumBadge: false,
+      requiredPlan: "free",
+      badge: null,
     },
     {
       title: "Analytics",
       icon: BarChart3,
       href: "/analytics",
-      premium: true,
-      showPremiumBadge: true,
+      requiredPlan: "premium" as const,
+      badge: "Premium" as const,
     },
     {
       title: "Trends",
       icon: TrendingUp,
       href: "/trends",
-      premium: true,
-      showPremiumBadge: true,
+      requiredPlan: "premium" as const,
+      badge: "Premium" as const,
     },
     {
       title: "Calendar View",
       icon: Calendar,
       href: "/calendar",
-      premium: true,
-      showPremiumBadge: true,
+      requiredPlan: "premium" as const,
+      badge: "Premium" as const,
     },
     {
       title: "Export Data",
@@ -198,7 +198,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             {menuItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
-              const accessible = canAccess(item.premium);
+              const accessible = hasAccess(item.requiredPlan);
 
               return (
                 <div key={item.title} className="relative">
@@ -217,10 +217,13 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                       {!isCollapsed && (
                         <span className="flex items-center justify-between w-full">
                           {item.title}
-                          {item.showPremiumBadge && !hasAccess(item.premium ? 'premium' : 'basic') && (
-                            <Badge className="bg-premium text-white text-xs ml-2">
+                          {item.badge && !accessible && (
+                            <Badge className={cn(
+                              "text-white text-xs ml-2",
+                              item.badge === "Standard" ? "bg-blue-500" : "bg-purple-500"
+                            )}>
                               <Crown className="h-3 w-3 mr-1" />
-                              Pro
+                              {item.badge}
                             </Badge>
                           )}
                         </span>
