@@ -348,6 +348,61 @@ export default function Income() {
                     </Select>
                   </div>
 
+                  {/* Recurring transaction options - Standard/Premium only */}
+                  <RequirePlan plan="standard">
+                    <div className="space-y-4 border-t pt-4">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="recurring"
+                          checked={newIncome.isRecurring}
+                          onCheckedChange={(checked) => 
+                            setNewIncome({ ...newIncome, isRecurring: checked as boolean })
+                          }
+                        />
+                        <label htmlFor="recurring" className="flex items-center text-sm font-medium">
+                          <Repeat className="h-4 w-4 mr-2" />
+                          Make this a recurring income
+                        </label>
+                      </div>
+
+                      {newIncome.isRecurring && (
+                        <div className="grid grid-cols-2 gap-4 pl-6">
+                          <div>
+                            <Label htmlFor="frequency">Frequency</Label>
+                            <Select
+                              value={newIncome.recurringFrequency}
+                              onValueChange={(value) => setNewIncome({ 
+                                ...newIncome, 
+                                recurringFrequency: value as "weekly" | "monthly" | "yearly" 
+                              })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select frequency" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="weekly">Weekly</SelectItem>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                                <SelectItem value="yearly">Yearly</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label htmlFor="endDate">End Date (Optional)</Label>
+                            <Input
+                              id="endDate"
+                              type="date"
+                              value={newIncome.recurringEndDate}
+                              onChange={(e) => setNewIncome({ 
+                                ...newIncome, 
+                                recurringEndDate: e.target.value 
+                              })}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </RequirePlan>
+
                   <div className="flex justify-end gap-2 pt-4">
                     <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                       Cancel

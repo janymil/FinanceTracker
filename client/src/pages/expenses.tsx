@@ -18,8 +18,11 @@ import {
   ArrowDownLeft,
   DollarSign,
   TrendingDown,
-  BarChart3
+  BarChart3,
+  Repeat
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import RequirePlan from "@/components/require-plan";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -58,6 +61,9 @@ export default function Expenses() {
     description: "",
     date: new Date().toISOString().split('T')[0],
     categoryId: "",
+    isRecurring: false,
+    recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
+    recurringEndDate: "",
   });
 
   const { data: transactions = [], isLoading } = useQuery({
@@ -88,6 +94,9 @@ export default function Expenses() {
         description: "",
         date: new Date().toISOString().split('T')[0],
         categoryId: "",
+        isRecurring: false,
+        recurringFrequency: "monthly",
+        recurringEndDate: "",
       });
       toast({
         title: "Expense Added",
@@ -233,6 +242,9 @@ export default function Expenses() {
       description: transaction.description,
       date: transaction.date,
       categoryId: "",
+      isRecurring: false,
+      recurringFrequency: "monthly",
+      recurringEndDate: "",
     });
     setIsDialogOpen(true);
   };
@@ -266,6 +278,9 @@ export default function Expenses() {
                       description: "",
                       date: new Date().toISOString().split('T')[0],
                       categoryId: "",
+                      isRecurring: false,
+                      recurringFrequency: "monthly",
+                      recurringEndDate: "",
                     });
                   }}
                 >
@@ -332,6 +347,61 @@ export default function Expenses() {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  {/* Recurring transaction options - Standard/Premium only */}
+                  <RequirePlan plan="standard">
+                    <div className="space-y-4 border-t pt-4">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="recurring"
+                          checked={newExpense.isRecurring}
+                          onCheckedChange={(checked) => 
+                            setNewExpense({ ...newExpense, isRecurring: checked as boolean })
+                          }
+                        />
+                        <label htmlFor="recurring" className="flex items-center text-sm font-medium">
+                          <Repeat className="h-4 w-4 mr-2" />
+                          Make this a recurring expense
+                        </label>
+                      </div>
+
+                      {newExpense.isRecurring && (
+                        <div className="grid grid-cols-2 gap-4 pl-6">
+                          <div>
+                            <Label htmlFor="frequency">Frequency</Label>
+                            <Select
+                              value={newExpense.recurringFrequency}
+                              onValueChange={(value) => setNewExpense({ 
+                                ...newExpense, 
+                                recurringFrequency: value as "weekly" | "monthly" | "yearly" 
+                              })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select frequency" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="weekly">Weekly</SelectItem>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                                <SelectItem value="yearly">Yearly</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label htmlFor="endDate">End Date (Optional)</Label>
+                            <Input
+                              id="endDate"
+                              type="date"
+                              value={newExpense.recurringEndDate}
+                              onChange={(e) => setNewExpense({ 
+                                ...newExpense, 
+                                recurringEndDate: e.target.value 
+                              })}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </RequirePlan>
 
                   <div className="flex justify-end gap-2 pt-4">
                     <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
