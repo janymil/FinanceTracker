@@ -293,7 +293,7 @@ export default function Reports() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {!transactions || transactions.length === 0 ? (
+                  {!Array.isArray(transactions) || transactions.length === 0 ? (
                     <div className="text-center py-8">
                       <div className="mx-auto h-12 w-12 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
                         <FileText className="h-6 w-6 text-gray-400" />
@@ -307,7 +307,7 @@ export default function Reports() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {transactions.slice(0, 5).map((transaction: any) => (
+                      {(transactions as any[]).slice(0, 5).map((transaction: any) => (
                         <div key={transaction.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
                           <div className="flex items-center gap-3">
                             <div className={`p-2 rounded-full ${
@@ -342,10 +342,10 @@ export default function Reports() {
                           </div>
                         </div>
                       ))}
-                      {transactions.length > 5 && (
+                      {Array.isArray(transactions) && transactions.length > 5 && (
                         <div className="text-center pt-2">
                           <p className="text-xs text-gray-500">
-                            Showing 5 of {transactions.length} transactions
+                            Showing 5 of {Array.isArray(transactions) ? transactions.length : 0} transactions
                           </p>
                         </div>
                       )}
@@ -364,65 +364,127 @@ export default function Reports() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <div className="mx-auto h-16 w-16 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
-                    <PieChart className="h-8 w-8 text-gray-400" />
+                {!financialSummary?.transactionsByCategory || financialSummary.transactionsByCategory.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="mx-auto h-16 w-16 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+                      <PieChart className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                      No Category Data
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto mb-6">
+                      Add transactions to see detailed category breakdowns and spending patterns
+                    </p>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    {hasStandardOrBetter ? "No Data to Display" : "Category Charts Available with Standard+"}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto mb-6">
-                    {hasStandardOrBetter 
-                      ? "Add transactions to see detailed category breakdowns and spending patterns"
-                      : "Upgrade to Basic to unlock interactive category charts, spending trends, and detailed financial analysis"
-                    }
-                  </p>
-
-                  {!hasStandardOrBetter && (
-                    <Button 
-                      onClick={() => setLocation("/subscribe")}
-                      className="bg-premium hover:bg-premium/90"
-                    >
-                      <Crown className="h-4 w-4 mr-2" />
-                      Unlock Basic Charts
-                    </Button>
-                  )}
-                </div>
+                ) : (
+                  <div className="space-y-4">
+                    {financialSummary.transactionsByCategory
+                      .filter((cat: any) => cat.type === 'expense')
+                      .sort((a: any, b: any) => b.amount - a.amount)
+                      .slice(0, 6)
+                      .map((category: any, index: number) => {
+                        const percentage = financialSummary.totalExpenses > 0 
+                          ? (category.amount / financialSummary.totalExpenses) * 100 
+                          : 0;
+                        return (
+                          <div key={index} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+                                <PieChart className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                  {category.categoryName}
+                                </p>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
+                                  {percentage.toFixed(1)}% of expenses
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                ${category.amount.toFixed(2)}
+                              </p>
+                              <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-1">
+                                <div 
+                                  className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
+                                  style={{ width: `${Math.min(percentage, 100)}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    
+                    {financialSummary.transactionsByCategory.filter((cat: any) => cat.type === 'expense').length > 6 && (
+                      <div className="text-center pt-2">
+                        <p className="text-xs text-gray-500">
+                          Showing top 6 expense categories
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
             {/* Quick Actions */}
             <Card>
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+                <CardTitle>Financial Statistics</CardTitle>
                 <CardDescription>
-                  Common financial management tasks
+                  Key metrics from your financial data
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
-                    <Download className="h-5 w-5" />
-                    <span className="text-xs">Basic Export</span>
-                  </Button>
-                  <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    <span className="text-xs">Date Range</span>
-                  </Button>
-                  <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2" disabled>
-                    <Brain className="h-5 w-5" />
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs">AI Insights</span>
-                      <Badge variant="secondary" className="text-xs">Pro</Badge>
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
+                    <div className="p-2 bg-green-100 dark:bg-green-900 rounded-full w-fit mx-auto mb-2">
+                      <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
                     </div>
-                  </Button>
-                  <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2" disabled>
-                    <Zap className="h-5 w-5" />
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs">Auto-Tag</span>
-                      <Badge variant="secondary" className="text-xs">Pro</Badge>
+                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {Array.isArray(transactions) ? transactions.length : 0}
                     </div>
-                  </Button>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Total Transactions</span>
+                  </div>
+                  
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full w-fit mx-auto mb-2">
+                      <PieChart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {Array.isArray(financialSummary?.transactionsByCategory) 
+                        ? financialSummary.transactionsByCategory.filter((cat: any) => cat.type === 'expense').length 
+                        : 0}
+                    </div>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Categories Used</span>
+                  </div>
+                  
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-full w-fit mx-auto mb-2">
+                      <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                      ${((financialSummary?.totalIncome || 0) / Math.max(
+                        Array.isArray(transactions) ? transactions.filter((t: any) => t.type === 'income').length : 1, 
+                        1
+                      )).toFixed(0)}
+                    </div>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Avg Income</span>
+                  </div>
+                  
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
+                    <div className="p-2 bg-red-100 dark:bg-red-900 rounded-full w-fit mx-auto mb-2">
+                      <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                      ${((financialSummary?.totalExpenses || 0) / Math.max(
+                        Array.isArray(transactions) ? transactions.filter((t: any) => t.type === 'expense').length : 1, 
+                        1
+                      )).toFixed(0)}
+                    </div>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Avg Expense</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
