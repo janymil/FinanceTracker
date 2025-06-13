@@ -5,6 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 import Sidebar from "@/components/sidebar";
 import Header from "@/components/header";
 import Landing from "@/pages/landing";
@@ -23,6 +24,7 @@ import NotFound from "@/pages/not-found";
 function Router() {
   const { user, isLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   if (isLoading) {
     return (
@@ -44,9 +46,18 @@ function Router() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
-      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        setIsOpen={setSidebarOpen}
+        isCollapsed={sidebarCollapsed}
+        setIsCollapsed={setSidebarCollapsed}
+      />
       
-      <div className="flex-1 flex flex-col lg:ml-64">
+      <div className={cn(
+        "flex-1 flex flex-col transition-all duration-300",
+        // Responsive margin based on sidebar state
+        sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
+      )}>
         <Header onMenuClick={() => setSidebarOpen(true)} />
         
         <main className="flex-1 p-6">

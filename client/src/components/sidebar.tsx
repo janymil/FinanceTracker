@@ -27,9 +27,11 @@ import { cn } from "@/lib/utils";
 interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
+  isCollapsed: boolean;
+  setIsCollapsed: (collapsed: boolean) => void;
 }
 
-export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
+export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed }: SidebarProps) {
   const { user } = useAuth();
   const [location, navigate] = useLocation();
 
@@ -38,7 +40,6 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     const planHierarchy = { free: 0, standard: 1, premium: 2 };
     return planHierarchy[user.plan as keyof typeof planHierarchy] >= planHierarchy[requiredPlan as keyof typeof planHierarchy];
   };
-  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const menuItems = [
     {
