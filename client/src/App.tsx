@@ -12,6 +12,7 @@ import BudgetPage from "@/pages/budget";
 import CategoriesPage from "@/pages/categories";
 import GoalsPage from "@/pages/goals";
 import TrendsPage from "@/pages/trends";
+import CalendarPage from "@/pages/calendar";
 import ReportsPage from "@/pages/reports";
 import SubscribePage from "@/pages/subscribe";
 import LandingPage from "@/pages/landing";
@@ -71,6 +72,7 @@ function AppContent() {
               <Route path="/budget" component={BudgetPage} />
               <Route path="/categories" component={CategoriesPage} />
               <Route path="/goals" component={GoalsPage} />
+              <Route path="/calendar" component={CalendarPage} />
               <Route path="/trends" component={TrendsPage} />
               <Route path="/reports" component={ReportsPage} />
               <Route path="/subscribe" component={SubscribePage} />

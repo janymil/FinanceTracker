@@ -110,8 +110,8 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
       title: "Calendar View",
       icon: Calendar,
       href: "/calendar",
-      requiredPlan: "premium" as const,
-      badge: "Premium" as const,
+      requiredPlan: "standard" as const,
+      badge: "Standard" as const,
     },
     {
       title: "Export Data",
