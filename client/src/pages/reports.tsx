@@ -180,7 +180,7 @@ export default function Reports() {
             <RequirePlan plan="premium">
               <AIInsights 
                 data={{
-                  transactions: transactions || [],
+                  transactions: Array.isArray(transactions) ? transactions : [],
                   budgets: [],
                   goals: []
                 }}
@@ -193,7 +193,7 @@ export default function Reports() {
             <RequirePlan plan="standard">
               <ExportTools 
                 data={{
-                  transactions: transactions || [],
+                  transactions: Array.isArray(transactions) ? transactions : [],
                   budgets: [],
                   goals: [],
                   summary: financialSummary
@@ -206,7 +206,7 @@ export default function Reports() {
           <TabsContent value="categorization" className="space-y-6">
             <RequirePlan plan="standard">
               <AutoCategorization 
-                transactions={transactions || []}
+                transactions={Array.isArray(transactions) ? transactions : []}
               />
             </RequirePlan>
           </TabsContent>
@@ -364,7 +364,7 @@ export default function Reports() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {!financialSummary?.transactionsByCategory || financialSummary.transactionsByCategory.length === 0 ? (
+                {!Array.isArray(financialSummary?.transactionsByCategory) || financialSummary.transactionsByCategory.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="mx-auto h-16 w-16 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
                       <PieChart className="h-8 w-8 text-gray-400" />
@@ -378,7 +378,7 @@ export default function Reports() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {financialSummary.transactionsByCategory
+                    {(financialSummary.transactionsByCategory as any[])
                       .filter((cat: any) => cat.type === 'expense')
                       .sort((a: any, b: any) => b.amount - a.amount)
                       .slice(0, 6)
@@ -416,7 +416,7 @@ export default function Reports() {
                         );
                       })}
                     
-                    {financialSummary.transactionsByCategory.filter((cat: any) => cat.type === 'expense').length > 6 && (
+                    {Array.isArray(financialSummary.transactionsByCategory) && financialSummary.transactionsByCategory.filter((cat: any) => cat.type === 'expense').length > 6 && (
                       <div className="text-center pt-2">
                         <p className="text-xs text-gray-500">
                           Showing top 6 expense categories
