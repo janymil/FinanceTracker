@@ -46,17 +46,14 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Header 
-        onMenuClick={() => setSidebarOpen(true)} 
-        sidebarCollapsed={sidebarCollapsed}
-      />
+      <Header onMenuClick={() => setSidebarOpen(true)} />
       <div className="flex">
         <Sidebar 
-        isOpen={sidebarOpen} 
-        setIsOpen={setSidebarOpen}
-        isCollapsed={sidebarCollapsed}
-        setIsCollapsed={setSidebarCollapsed}
-      />
+          isOpen={sidebarOpen} 
+          setIsOpen={setSidebarOpen}
+          isCollapsed={sidebarCollapsed}
+          setIsCollapsed={setSidebarCollapsed}
+        />
         <main className={cn(
           "flex-1 transition-all duration-300 pt-16",
           sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
