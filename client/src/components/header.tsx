@@ -149,10 +149,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className={cn(
-      "bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 h-16 fixed top-0 right-0 z-40 transition-all duration-300",
-      sidebarCollapsed ? "left-16" : "left-64"
-    )}>
+    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 h-16 fixed top-0 left-64 right-0 z-40">
       <div className="flex items-center justify-between h-full px-4">
         {/* Left side - Mobile menu button and quick actions */}
         <div className="flex items-center space-x-4">
