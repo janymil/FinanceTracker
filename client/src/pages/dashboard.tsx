@@ -206,6 +206,12 @@ export default function Dashboard() {
             </RequirePlan>
 
             <RequirePlan plan="premium">
+              <AIFinancialTips 
+                summary={financialSummary}
+              />
+            </RequirePlan>
+
+            <RequirePlan plan="premium">
               <CloudBackup />
             </RequirePlan>
           </div>

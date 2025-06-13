@@ -412,8 +412,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         recentTransactions: transactions.map(t => ({
           description: t.description,
           amount: parseFloat(t.amount),
-          date: t.date,
-          categoryName: t.categoryName
+          date: t.date.toISOString(),
+          categoryName: t.categoryId?.toString() || 'Uncategorized'
         }))
       };
 
@@ -446,8 +446,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const insights = await generateSpendingInsights(transactions.map(t => ({
         description: t.description,
         amount: parseFloat(t.amount),
-        date: t.date,
-        categoryName: t.categoryName,
+        date: t.date.toISOString(),
+        categoryName: t.categoryId?.toString() || 'Uncategorized',
         type: t.type
       })));
 

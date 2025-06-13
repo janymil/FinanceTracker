@@ -134,13 +134,35 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
   });
 
   const handleApplySuggestion = (suggestion: CategorySuggestion) => {
-    // In a real implementation, you'd map category names to IDs
     applySuggestionMutation.mutate({
       transactionId: suggestion.id,
       categoryId: suggestion.suggestedCategory
     });
     
     setSuggestions(prev => prev.filter(s => s.id !== suggestion.id));
+  };
+
+  const handleAICategorize = async (transaction: any) => {
+    try {
+      const result = await aiCategorizeMutation.mutateAsync({
+        description: transaction.description,
+        amount: parseFloat(transaction.amount)
+      });
+      
+      const updatedSuggestions = suggestions.map(s => 
+        s.id === transaction.id.toString() 
+          ? { ...s, suggestedCategory: result.category, confidence: 0.85 }
+          : s
+      );
+      setSuggestions(updatedSuggestions);
+      
+      toast({
+        title: "AI Categorization Complete",
+        description: `Suggested category: ${result.category}`,
+      });
+    } catch (error) {
+      console.error('AI categorization failed:', error);
+    }
   };
 
   const handleRejectSuggestion = (suggestionId: string) => {
@@ -281,6 +303,24 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
                     </div>
 
                     <div className="flex items-center gap-2 ml-4">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          const transaction = transactions.find(t => t.id.toString() === suggestion.id);
+                          if (transaction) {
+                            await handleAICategorize(transaction);
+                          }
+                        }}
+                        disabled={aiCategorizeMutation.isPending}
+                        className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                      >
+                        {aiCategorizeMutation.isPending ? (
+                          <div className="h-3 w-3 animate-spin rounded-full border border-blue-600 border-t-transparent" />
+                        ) : (
+                          <Brain className="h-3 w-3" />
+                        )}
+                      </Button>
                       <Button
                         size="sm"
                         variant="outline"
