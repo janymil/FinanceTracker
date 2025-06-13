@@ -65,12 +65,12 @@ export default function FinancialRemindersWidget() {
     categoryId: "",
   });
 
-  const { data: reminders = [], isLoading } = useQuery({
+  const { data: reminders = [], isLoading } = useQuery<ExpenseReminder[]>({
     queryKey: ["/api/expense-reminders"],
     enabled: true,
   });
 
-  const { data: upcomingReminders = [] } = useQuery({
+  const { data: upcomingReminders = [] } = useQuery<ExpenseReminder[]>({
     queryKey: ["/api/expense-reminders/upcoming"],
     enabled: true,
   });
