@@ -46,7 +46,10 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Header onMenuClick={() => setSidebarOpen(true)} />
+      <Header 
+        onMenuClick={() => setSidebarOpen(true)} 
+        sidebarCollapsed={sidebarCollapsed}
+      />
       <div className="flex">
         <Sidebar 
           isOpen={sidebarOpen} 

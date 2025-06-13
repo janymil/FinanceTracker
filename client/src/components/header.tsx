@@ -61,25 +61,26 @@ async function apiRequest(method: string, url: string, data?: any) {
     headers: { "Content-Type": "application/json" },
     body: data ? JSON.stringify(data) : undefined,
   });
-  
+
   if (!response.ok) {
     const error = await response.text();
     throw new Error(error || "Network error");
   }
-  
+
   return response;
 }
 
 interface HeaderProps {
   onMenuClick: () => void;
+  sidebarCollapsed: boolean;
 }
 
-export default function Header({ onMenuClick }: HeaderProps) {
+export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
+
   const [newTransaction, setNewTransaction] = useState({
     amount: "",
     description: "",
@@ -149,7 +150,11 @@ export default function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 h-16 fixed top-0 left-64 right-0 z-40">
+    <header className={cn(
+      "bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 h-16 fixed top-0 right-0 z-40 transition-all duration-300",
+      sidebarCollapsed ? "lg:left-16" : "lg:left-64",
+      "left-0"
+    )}>
       <div className="flex items-center justify-between h-full px-4">
         {/* Left side - Mobile menu button and quick actions */}
         <div className="flex items-center space-x-4">
@@ -161,7 +166,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          
+
           {/* Quick add transaction button */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -192,7 +197,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                   Record a new income or expense transaction
                 </DialogDescription>
               </DialogHeader>
-              
+
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
