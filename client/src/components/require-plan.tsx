@@ -2,7 +2,7 @@
 import React, { ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
-type PlanType = 'free' | 'standard' | 'premium';
+type PlanType = 'free' | 'basic' | 'premium';
 
 interface RequirePlanProps {
   plan: PlanType;
@@ -11,7 +11,7 @@ interface RequirePlanProps {
 
 const planHierarchy: Record<PlanType, number> = {
   free: 0,
-  standard: 1,
+  basic: 1,
   premium: 2,
 };
 
