@@ -123,6 +123,7 @@ Changelog:
 - June 13, 2025. Fixed tier alignments - AI categorization moved to standard+
 - June 13, 2025. Added missing features: Reminders & Streaks, Expense Prediction, Daily Recommendations, Cloud Backup
 - June 13, 2025. Implemented RequirePlan component architecture for all tier-gated features
+- June 13, 2025. Integrated OpenAI GPT-4o for AI expense categorization (standard+) and financial tips (premium)
 ```
 
 ## User Preferences
