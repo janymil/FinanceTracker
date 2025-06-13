@@ -18,8 +18,11 @@ import {
   ArrowUpRight,
   DollarSign,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  Repeat
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import RequirePlan from "@/components/require-plan";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -58,6 +61,9 @@ export default function Income() {
     description: "",
     date: new Date().toISOString().split('T')[0],
     categoryId: "",
+    isRecurring: false,
+    recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
+    recurringEndDate: "",
   });
 
   const { data: transactions = [], isLoading } = useQuery({

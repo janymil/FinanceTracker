@@ -50,6 +50,9 @@ export default function Dashboard() {
     date: new Date().toISOString().split('T')[0],
     type: "expense" as "income" | "expense",
     categoryId: "",
+    isRecurring: false,
+    recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
+    recurringEndDate: "",
   });
 
   // Get start and end dates for the selected month
@@ -103,6 +106,9 @@ export default function Dashboard() {
         date: new Date().toISOString().split('T')[0],
         type: "expense",
         categoryId: "",
+        isRecurring: false,
+        recurringFrequency: "monthly",
+        recurringEndDate: "",
       });
       toast({
         title: "Transaction Added",
@@ -174,6 +180,9 @@ export default function Dashboard() {
                         date: new Date().toISOString().split('T')[0],
                         type: "expense",
                         categoryId: "",
+                        isRecurring: false,
+                        recurringFrequency: "monthly",
+                        recurringEndDate: "",
                       });
                     }}
                   >
@@ -262,6 +271,61 @@ export default function Dashboard() {
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Recurring transaction options - Standard/Premium only */}
+                    <RequirePlan plan="standard">
+                      <div className="space-y-4 border-t pt-4">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="recurring"
+                            checked={newTransaction.isRecurring}
+                            onCheckedChange={(checked) => 
+                              setNewTransaction({ ...newTransaction, isRecurring: checked as boolean })
+                            }
+                          />
+                          <label htmlFor="recurring" className="flex items-center text-sm font-medium">
+                            <Repeat className="h-4 w-4 mr-2" />
+                            Make this a recurring transaction
+                          </label>
+                        </div>
+
+                        {newTransaction.isRecurring && (
+                          <div className="grid grid-cols-2 gap-4 pl-6">
+                            <div>
+                              <Label htmlFor="frequency">Frequency</Label>
+                              <Select
+                                value={newTransaction.recurringFrequency}
+                                onValueChange={(value) => setNewTransaction({ 
+                                  ...newTransaction, 
+                                  recurringFrequency: value as "weekly" | "monthly" | "yearly" 
+                                })}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select frequency" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="weekly">Weekly</SelectItem>
+                                  <SelectItem value="monthly">Monthly</SelectItem>
+                                  <SelectItem value="yearly">Yearly</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label htmlFor="endDate">End Date (Optional)</Label>
+                              <Input
+                                id="endDate"
+                                type="date"
+                                value={newTransaction.recurringEndDate}
+                                onChange={(e) => setNewTransaction({ 
+                                  ...newTransaction, 
+                                  recurringEndDate: e.target.value 
+                                })}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </RequirePlan>
 
                     <div className="flex justify-end gap-2 pt-4">
                       <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
