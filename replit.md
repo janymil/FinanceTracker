@@ -119,6 +119,10 @@ FinanceFlow is a full-stack personal finance management application built with R
 ```
 Changelog:
 - June 13, 2025. Initial setup
+- June 13, 2025. Implemented complete three-tier subscription system (free, standard, premium)
+- June 13, 2025. Fixed tier alignments - AI categorization moved to standard+
+- June 13, 2025. Added missing features: Reminders & Streaks, Expense Prediction, Daily Recommendations, Cloud Backup
+- June 13, 2025. Implemented RequirePlan component architecture for all tier-gated features
 ```
 
 ## User Preferences

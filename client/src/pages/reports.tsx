@@ -148,10 +148,11 @@ export default function Reports() {
 
           {/* Auto-Categorization */}
           <TabsContent value="categorization" className="space-y-6">
-            <AutoCategorization 
-              isPremium={hasPremium}
-              transactions={(financialData as any)?.transactions || []}
-            />
+            <RequirePlan plan="standard">
+              <AutoCategorization 
+                transactions={(financialData as any)?.transactions || []}
+              />
+            </RequirePlan>
           </TabsContent>
 
           {/* Financial Summary - Available for All Users */}

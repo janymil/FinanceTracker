@@ -10,6 +10,11 @@ import UpgradeBanner from "@/components/upgrade-banner";
 import FinancialHealthScore from "@/components/financial-health-score";
 import QuickFinancialSnapshot from "@/components/quick-financial-snapshot";
 import ContextualFinancialTips from "@/components/contextual-financial-tips";
+import RemindersStreaks from "@/components/reminders-streaks";
+import ExpensePrediction from "@/components/expense-prediction";
+import DailyRecommendations from "@/components/daily-recommendations";
+import CloudBackup from "@/components/cloud-backup";
+import AutoCategorization from "@/components/auto-categorization";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Calendar } from "lucide-react";
@@ -171,6 +176,37 @@ export default function Dashboard() {
             {/* Budget Categories */}
             <RequirePlan plan="standard">
               <BudgetOverview />
+            </RequirePlan>
+
+            {/* Advanced Features */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <RequirePlan plan="standard">
+                <RemindersStreaks />
+              </RequirePlan>
+              
+              <RequirePlan plan="standard">
+                <AutoCategorization transactions={transactions} />
+              </RequirePlan>
+            </div>
+
+            {/* Premium Features */}
+            <RequirePlan plan="premium">
+              <ExpensePrediction 
+                transactions={transactions}
+                summary={financialSummary}
+              />
+            </RequirePlan>
+
+            <RequirePlan plan="premium">
+              <DailyRecommendations 
+                summary={financialSummary}
+                transactions={transactions}
+                budgets={budgets}
+              />
+            </RequirePlan>
+
+            <RequirePlan plan="premium">
+              <CloudBackup />
             </RequirePlan>
           </div>
         )}
