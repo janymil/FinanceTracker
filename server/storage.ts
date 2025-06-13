@@ -36,7 +36,7 @@ export interface IStorage {
 
   // Category operations
   getCategories(): Promise<Category[]>;
-  
+
   // Analytics
   getUserFinancialSummary(userId: number, startDate: Date, endDate: Date): Promise<{
     totalIncome: number;
@@ -78,6 +78,19 @@ export class DatabaseStorage implements IStorage {
         stripeCustomerId: customerId,
         stripeSubscriptionId: subscriptionId,
         isPremium: true,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async updateUserPlan(userId: number, plan: string) {
+    const [user] = await db
+      .update(users)
+      .set({
+        plan,
+        isPremium: plan !== 'free',
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId))

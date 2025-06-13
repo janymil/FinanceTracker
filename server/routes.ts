@@ -34,7 +34,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
-      const limit = user?.isPremium ? undefined : 3; // Free users limited to 3
+      
+      // Plan-based limits: free = 3, standard = 100, premium = unlimited
+      let limit;
+      if (user?.plan === 'free') {
+        limit = 3;
+      } else if (user?.plan === 'standard') {
+        limit = 100;
+      } else {
+        limit = undefined; // unlimited for premium
+      }
       
       const transactions = await storage.getUserTransactions(userId, limit);
       res.json(transactions);
@@ -49,8 +58,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
       
-      if (!user?.isPremium) {
-        return res.status(403).json({ message: "Premium subscription required" });
+      if (user?.plan === 'free') {
+        return res.status(403).json({ message: "Standard or Premium subscription required" });
       }
 
       const transactionId = parseInt(req.params.id);
@@ -68,8 +77,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
       
-      if (!user?.isPremium) {
-        return res.status(403).json({ message: "Premium subscription required" });
+      if (user?.plan === 'free') {
+        return res.status(403).json({ message: "Standard or Premium subscription required" });
       }
 
       const validatedData = insertBudgetSchema.parse({
@@ -92,8 +101,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
       
-      if (!user?.isPremium) {
-        return res.status(403).json({ message: "Premium subscription required" });
+      if (user?.plan === 'free') {
+        return res.status(403).json({ message: "Standard or Premium subscription required" });
       }
 
       const budgets = await storage.getUserBudgets(userId);
@@ -138,6 +147,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user plan
+  app.post('/api/update-plan', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { plan } = req.body;
+
+      if (!plan || !['free', 'standard', 'premium'].includes(plan)) {
+        return res.status(400).json({ message: "Invalid plan. Must be 'free', 'standard', or 'premium'" });
+      }
+
+      await storage.updateUserPlan(userId, plan);
+      
+      res.json({ success: true, message: `Plan updated to ${plan}` });
+    } catch (error) {
+      console.error("Error updating plan:", error);
+      res.status(500).json({ message: "Failed to update plan" });
+    }
+  });
+
   // Stripe subscription management
   app.post('/api/get-or-create-subscription', isAuthenticated, async (req: any, res) => {
     if (!stripe) {
@@ -146,6 +174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const userId = req.user.id;
+      const { plan = 'premium' } = req.body;
       let user = await storage.getUser(userId);
 
       if (!user) {
@@ -173,16 +202,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const customer = await stripe.customers.create({
         email: user.email,
         name: `${user.firstName} ${user.lastName}`,
+        metadata: {
+          userId: userId.toString(),
+          plan: plan
+        }
       });
+
+      // Determine price ID based on plan
+      const priceId = plan === 'standard' 
+        ? process.env.STRIPE_STANDARD_PRICE_ID || 'price_standard_demo'
+        : process.env.STRIPE_PREMIUM_PRICE_ID || 'price_premium_demo';
 
       // Create subscription
       const subscription = await stripe.subscriptions.create({
         customer: customer.id,
         items: [{
-          price: process.env.STRIPE_PRICE_ID || 'price_1234567890', // Default price for demo
+          price: priceId,
         }],
         payment_behavior: 'default_incomplete',
         payment_settings: { save_default_payment_method: 'on_subscription' },
+        metadata: {
+          userId: userId.toString(),
+          plan: plan
+        },
         expand: ['latest_invoice.payment_intent'],
       });
 
@@ -198,6 +240,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error creating subscription:", error);
       res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Stripe webhook handler
+  app.post('/api/stripe-webhook', async (req, res) => {
+    if (!stripe) {
+      return res.status(503).json({ message: "Stripe not configured" });
+    }
+
+    const sig = req.headers['stripe-signature'];
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!sig || !endpointSecret) {
+      return res.status(400).json({ message: "Missing signature or webhook secret" });
+    }
+
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    } catch (err: any) {
+      console.error('Webhook signature verification failed:', err.message);
+      return res.status(400).json({ message: `Webhook Error: ${err.message}` });
+    }
+
+    try {
+      switch (event.type) {
+        case 'invoice.payment_succeeded':
+          const invoice = event.data.object as any;
+          const subscriptionId = invoice.subscription;
+          
+          if (subscriptionId) {
+            const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+            const userId = subscription.metadata?.userId;
+            const plan = subscription.metadata?.plan || 'premium';
+            
+            if (userId) {
+              // Update user plan and premium status
+              await storage.updateUserPlan(parseInt(userId), plan);
+              await storage.updateUserPremiumStatus(parseInt(userId), true);
+              console.log(`Plan updated for user ${userId} to ${plan}`);
+            }
+          }
+          break;
+
+        case 'invoice.payment_failed':
+          const failedInvoice = event.data.object as any;
+          const failedSubscriptionId = failedInvoice.subscription;
+          
+          if (failedSubscriptionId) {
+            const subscription = await stripe.subscriptions.retrieve(failedSubscriptionId);
+            const userId = subscription.metadata?.userId;
+            
+            if (userId) {
+              // Optionally downgrade to free plan after payment failure
+              await storage.updateUserPlan(parseInt(userId), 'free');
+              await storage.updateUserPremiumStatus(parseInt(userId), false);
+              console.log(`Plan downgraded for user ${userId} due to payment failure`);
+            }
+          }
+          break;
+
+        case 'customer.subscription.deleted':
+          const deletedSubscription = event.data.object as any;
+          const deletedUserId = deletedSubscription.metadata?.userId;
+          
+          if (deletedUserId) {
+            // Downgrade to free plan when subscription is cancelled
+            await storage.updateUserPlan(parseInt(deletedUserId), 'free');
+            await storage.updateUserPremiumStatus(parseInt(deletedUserId), false);
+            console.log(`Plan downgraded for user ${deletedUserId} due to subscription cancellation`);
+          }
+          break;
+
+        default:
+          console.log(`Unhandled event type ${event.type}`);
+      }
+
+      res.json({ received: true });
+    } catch (error) {
+      console.error('Error processing webhook:', error);
+      res.status(500).json({ message: "Webhook processing failed" });
     }
   });
 

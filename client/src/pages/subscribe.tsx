@@ -1,3 +1,4 @@
+
 import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useEffect, useState } from 'react';
@@ -12,7 +13,49 @@ import { Link } from "wouter";
 const stripePublicKey = import.meta.env.STRIPE_PUBLIC_KEY;
 const stripePromise = stripePublicKey ? loadStripe(stripePublicKey) : null;
 
-const SubscribeForm = () => {
+type PlanType = 'standard' | 'premium';
+
+interface PlanDetails {
+  name: string;
+  price: number;
+  description: string;
+  features: string[];
+  recommended?: boolean;
+}
+
+const plans: Record<PlanType, PlanDetails> = {
+  standard: {
+    name: 'Standard Plan',
+    price: 4.99,
+    description: 'Enhanced financial tracking with more features',
+    features: [
+      'Everything in Free plan',
+      'Advanced budget tracking',
+      'Basic analytics & charts',
+      'Up to 100 transactions per month',
+      'Email support',
+      'Data export (CSV)',
+    ],
+  },
+  premium: {
+    name: 'Premium Plan',
+    price: 9.99,
+    description: 'Complete financial control with advanced features',
+    features: [
+      'Everything in Standard plan',
+      'AI-powered insights',
+      'Interactive charts & analytics',
+      'Unlimited transaction history',
+      'Advanced expense categorization',
+      'Data export (CSV, PDF)',
+      'Advanced filtering & search',
+      'Priority email support',
+    ],
+    recommended: true,
+  },
+};
+
+const SubscribeForm = ({ selectedPlan }: { selectedPlan: PlanType }) => {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -45,7 +88,7 @@ const SubscribeForm = () => {
     } else {
       toast({
         title: "Payment Successful",
-        description: "Welcome to Premium! You now have access to all advanced features.",
+        description: `Welcome to ${plans[selectedPlan].name}! You now have access to enhanced features.`,
       });
     }
   };
@@ -66,7 +109,7 @@ const SubscribeForm = () => {
         ) : (
           <>
             <Crown className="h-4 w-4 mr-2" />
-            Start Premium Subscription
+            Start {plans[selectedPlan].name}
           </>
         )}
       </Button>
@@ -75,6 +118,7 @@ const SubscribeForm = () => {
 };
 
 export default function Subscribe() {
+  const [selectedPlan, setSelectedPlan] = useState<PlanType>('premium');
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -87,7 +131,9 @@ export default function Subscribe() {
 
     const createSubscription = async () => {
       try {
-        const res = await apiRequest("POST", "/api/get-or-create-subscription");
+        const res = await apiRequest("POST", "/api/get-or-create-subscription", {
+          plan: selectedPlan
+        });
         const data = await res.json();
         setClientSecret(data.clientSecret);
       } catch (error) {
@@ -102,7 +148,7 @@ export default function Subscribe() {
     };
 
     createSubscription();
-  }, [toast]);
+  }, [toast, selectedPlan]);
 
   if (isLoading) {
     return (
@@ -164,87 +210,88 @@ export default function Subscribe() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
-      <div className="max-w-2xl mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="bg-premium-light p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
             <Crown className="h-10 w-10 text-premium" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Upgrade to Premium
+            Choose Your Plan
           </h1>
           <p className="text-gray-600 dark:text-gray-300">
             Unlock advanced financial analytics and take complete control of your money
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Plan Details */}
-          <Card className="border-2 border-premium">
-            <CardHeader className="bg-gradient-to-br from-premium-light to-white dark:from-premium/20 dark:to-transparent">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xl">Premium Plan</CardTitle>
-                <Badge className="bg-premium text-white">
-                  <Crown className="h-3 w-3 mr-1" />
-                  Popular
-                </Badge>
-              </div>
-              <div className="text-3xl font-bold text-premium">
-                $9.99<span className="text-lg font-normal text-gray-500">/month</span>
-              </div>
-              <CardDescription>Complete financial control with advanced features</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 pt-6">
-              <div className="flex items-center">
-                <Check className="h-4 w-4 text-success mr-3 flex-shrink-0" />
-                <span className="text-sm">Everything in Free plan</span>
-              </div>
-              <div className="flex items-center">
-                <Check className="h-4 w-4 text-success mr-3 flex-shrink-0" />
-                <span className="text-sm">Interactive charts & analytics</span>
-              </div>
-              <div className="flex items-center">
-                <Check className="h-4 w-4 text-success mr-3 flex-shrink-0" />
-                <span className="text-sm">Unlimited transaction history</span>
-              </div>
-              <div className="flex items-center">
-                <Check className="h-4 w-4 text-success mr-3 flex-shrink-0" />
-                <span className="text-sm">Advanced budget tracking</span>
-              </div>
-              <div className="flex items-center">
-                <Check className="h-4 w-4 text-success mr-3 flex-shrink-0" />
-                <span className="text-sm">Expense categorization</span>
-              </div>
-              <div className="flex items-center">
-                <Check className="h-4 w-4 text-success mr-3 flex-shrink-0" />
-                <span className="text-sm">Data export (CSV, PDF)</span>
-              </div>
-              <div className="flex items-center">
-                <Check className="h-4 w-4 text-success mr-3 flex-shrink-0" />
-                <span className="text-sm">Advanced filtering & search</span>
-              </div>
-              <div className="flex items-center">
-                <Check className="h-4 w-4 text-success mr-3 flex-shrink-0" />
-                <span className="text-sm">Priority email support</span>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Plan Selection */}
+          <div className="lg:col-span-2 space-y-6">
+            {Object.entries(plans).map(([planKey, plan]) => (
+              <Card 
+                key={planKey}
+                className={`cursor-pointer transition-all ${
+                  selectedPlan === planKey 
+                    ? 'border-2 border-premium ring-2 ring-premium/20' 
+                    : 'border hover:border-premium/50'
+                }`}
+                onClick={() => setSelectedPlan(planKey as PlanType)}
+              >
+                <CardHeader className={`${
+                  plan.recommended 
+                    ? 'bg-gradient-to-br from-premium-light to-white dark:from-premium/20 dark:to-transparent' 
+                    : ''
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-4 h-4 rounded-full border-2 ${
+                        selectedPlan === planKey 
+                          ? 'bg-premium border-premium' 
+                          : 'border-gray-300'
+                      }`} />
+                      <CardTitle className="text-xl">{plan.name}</CardTitle>
+                      {plan.recommended && (
+                        <Badge className="bg-premium text-white">
+                          <Crown className="h-3 w-3 mr-1" />
+                          Recommended
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-premium">
+                        ${plan.price}<span className="text-lg font-normal text-gray-500">/month</span>
+                      </div>
+                    </div>
+                  </div>
+                  <CardDescription>{plan.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3 pt-6">
+                  {plan.features.map((feature, index) => (
+                    <div key={index} className="flex items-center">
+                      <Check className="h-4 w-4 text-success mr-3 flex-shrink-0" />
+                      <span className="text-sm">{feature}</span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
           {/* Payment Form */}
-          <Card>
+          <Card className="lg:sticky lg:top-8 h-fit">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Crown className="h-5 w-5 text-premium mr-2" />
                 Complete Your Subscription
               </CardTitle>
               <CardDescription>
-                Start your 7-day free trial of Premium features
+                Start your 7-day free trial of {plans[selectedPlan].name}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {stripePromise ? (
                 <Elements stripe={stripePromise} options={{ clientSecret }}>
-                  <SubscribeForm />
+                  <SubscribeForm selectedPlan={selectedPlan} />
                 </Elements>
               ) : (
                 <div className="text-center py-8">
@@ -254,8 +301,8 @@ export default function Subscribe() {
               
               <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div className="flex justify-between items-center text-sm mb-2">
-                  <span>Premium Plan (Monthly)</span>
-                  <span className="font-medium">$9.99</span>
+                  <span>{plans[selectedPlan].name} (Monthly)</span>
+                  <span className="font-medium">${plans[selectedPlan].price}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
                   <span>7-day free trial</span>
