@@ -17,6 +17,7 @@ import {
   ArrowRight
 } from "lucide-react";
 import { useLocation } from "wouter";
+import RequirePlan from "@/components/require-plan";
 
 interface SpendingInsight {
   id: string;

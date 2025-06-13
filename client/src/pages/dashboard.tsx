@@ -2,9 +2,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import FinancialCards from "@/components/financial-cards";
 import TransactionList from "@/components/transaction-list";
+import { TrendsChart } from "@/components/trends-chart";
+import { ExpenseChart } from "@/components/expense-chart";
 import BudgetOverview from "@/components/budget-overview";
-import ExpenseChart from "@/components/expense-chart";
-import TrendsChart from "@/components/trends-chart";
+import RequirePlan from "@/components/require-plan";
 import UpgradeBanner from "@/components/upgrade-banner";
 import FinancialHealthScore from "@/components/financial-health-score";
 import QuickFinancialSnapshot from "@/components/quick-financial-snapshot";
@@ -104,14 +105,14 @@ export default function Dashboard() {
         {!user.isPremium && (
           <div className="space-y-8">
             <UpgradeBanner />
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <TransactionList
                 transactions={transactions}
                 isLoading={transactionsLoading}
                 isPremium={false}
               />
-              
+
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Budget Overview</h3>
@@ -119,7 +120,7 @@ export default function Dashboard() {
                     Premium Feature
                   </div>
                 </div>
-                
+
                 <div className="text-center py-8">
                   <div className="text-4xl text-gray-300 dark:text-gray-600 mb-4">📊</div>
                   <p className="text-gray-500 dark:text-gray-400 mb-4">
@@ -156,19 +157,21 @@ export default function Dashboard() {
 
             {/* Interactive Charts */}
             <TrendsChart />
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <TransactionList
                 transactions={transactions}
                 isLoading={transactionsLoading}
                 isPremium={true}
               />
-              
+
               <ExpenseChart summary={financialSummary} />
             </div>
 
             {/* Budget Categories */}
-            <BudgetOverview />
+            <RequirePlan plan="standard">
+              <BudgetOverview />
+            </RequirePlan>
           </div>
         )}
       </div>

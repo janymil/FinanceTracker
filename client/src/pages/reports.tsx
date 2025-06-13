@@ -2,16 +2,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Download, TrendingUp, PieChart, BarChart3, FileText, Crown, Brain, Zap } from "lucide-react";
-import { useState } from "react";
-import { useLocation } from "wouter";
-import InteractiveChart from "@/components/interactive-chart";
-import AIInsights from "@/components/ai-insights";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar, TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3 } from "lucide-react";
+import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from "date-fns";
+import { useState, useMemo } from "react";
+import RequirePlan from "@/components/require-plan";
 import ExportTools from "@/components/export-tools";
-import AutoCategorization from "@/components/auto-categorization";
 
 export default function Reports() {
   const { user } = useAuth();
@@ -176,7 +174,7 @@ export default function Reports() {
                       </div>
                       <p className="text-xl font-bold text-green-700 dark:text-green-300">$0.00</p>
                     </div>
-                    
+
                     <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-red-100 dark:bg-red-800 rounded-full">
@@ -189,7 +187,7 @@ export default function Reports() {
                       </div>
                       <p className="text-xl font-bold text-red-700 dark:text-red-300">$0.00</p>
                     </div>
-                    
+
                     <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-full">
@@ -252,7 +250,7 @@ export default function Reports() {
                       : "Upgrade to Premium to unlock interactive category charts, spending trends, and detailed financial analysis"
                     }
                   </p>
-                  
+
                   {!isPremium && (
                     <Button 
                       onClick={() => setLocation("/subscribe")}
