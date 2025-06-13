@@ -254,7 +254,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        {categories
+                        {(categories as Category[])
                           .filter((cat: Category) => cat.type === newTransaction.type)
                           .map((category: Category) => (
                             <SelectItem key={category.id} value={category.id.toString()}>

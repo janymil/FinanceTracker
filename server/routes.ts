@@ -17,12 +17,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/transactions', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      // Check if recurring transactions are being used and require appropriate plan
+      if (req.body.isRecurring && user?.plan === 'free') {
+        return res.status(403).json({ 
+          message: "Recurring transactions require Standard or Premium subscription" 
+        });
+      }
+
       const validatedData = insertTransactionSchema.parse({
         ...req.body,
         userId,
         categoryId: req.body.categoryId ? parseInt(req.body.categoryId) : null,
         amount: req.body.amount.toString(),
         date: new Date(req.body.date),
+        recurringEndDate: req.body.recurringEndDate ? new Date(req.body.recurringEndDate) : null,
       });
 
       const transaction = await storage.createTransaction(validatedData);

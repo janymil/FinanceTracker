@@ -62,7 +62,7 @@ export const transactions = pgTable("transactions", {
   isRecurring: boolean("is_recurring").default(false),
   recurringFrequency: varchar("recurring_frequency", { length: 20 }), // 'weekly', 'monthly', 'yearly'
   recurringEndDate: timestamp("recurring_end_date"),
-  parentTransactionId: integer("parent_transaction_id").references(() => transactions.id),
+  parentTransactionId: integer("parent_transaction_id"),
 });
 
 // Recurring transactions table (separate for cleaner implementation)
