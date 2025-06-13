@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import FinancialCards from "@/components/financial-cards";
 import TransactionList from "@/components/transaction-list";
-import { TrendsChart } from "@/components/trends-chart";
+import TrendsChart from "@/components/trends-chart";
 import { ExpenseChart } from "@/components/expense-chart";
 import BudgetOverview from "@/components/budget-overview";
 import RequirePlan from "@/components/require-plan";
@@ -102,13 +102,13 @@ export default function Dashboard() {
         />
 
         {/* Free User Content */}
-        {!user.isPremium && (
+        {!user?.isPremium && user?.plan !== 'premium' && (
           <div className="space-y-8">
             <UpgradeBanner />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <TransactionList
-                transactions={transactions}
+                transactions={transactions as any}
                 isLoading={transactionsLoading}
                 isPremium={false}
               />
@@ -136,22 +136,22 @@ export default function Dashboard() {
         )}
 
         {/* Premium User Content */}
-        {user.isPremium && (
+        {(user?.isPremium || user?.plan === 'premium') && (
           <div className="space-y-8">
             {/* Advanced Analytics Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <FinancialHealthScore 
                 summary={financialSummary}
-                budgets={budgets}
+                budgets={budgets as any}
               />
               <QuickFinancialSnapshot 
                 summary={financialSummary}
-                transactions={transactions}
+                transactions={transactions as any}
               />
               <ContextualFinancialTips
                 summary={financialSummary}
-                transactions={transactions}
-                budgets={budgets}
+                transactions={transactions as any}
+                budgets={budgets as any}
               />
             </div>
 
@@ -160,7 +160,7 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <TransactionList
-                transactions={transactions}
+                transactions={transactions as any}
                 isLoading={transactionsLoading}
                 isPremium={true}
               />

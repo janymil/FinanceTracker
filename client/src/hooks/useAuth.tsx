@@ -11,6 +11,7 @@ type User = {
   firstName?: string | null;
   lastName?: string | null;
   plan?: string | null;
+  isPremium?: boolean;
 };
 
 type AuthContextType = {
