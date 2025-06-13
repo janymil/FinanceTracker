@@ -23,10 +23,7 @@ import {
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 
-interface RemindersStreaksProps {
-  isStandard?: boolean;
-  isPremium?: boolean;
-}
+interface RemindersStreaksProps {}
 
 interface Reminder {
   id: string;
@@ -49,7 +46,7 @@ interface Streak {
   category: 'saving' | 'budgeting' | 'tracking' | 'goals';
 }
 
-export default function RemindersStreaks({ isStandard = false, isPremium = false }: RemindersStreaksProps) {
+export default function RemindersStreaks({}: RemindersStreaksProps) {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<'reminders' | 'streaks'>('reminders');
   const [isReminderDialogOpen, setIsReminderDialogOpen] = useState(false);
@@ -125,42 +122,7 @@ export default function RemindersStreaks({ isStandard = false, isPremium = false
     }
   ]);
 
-  if (!isStandard && !isPremium) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Bell className="h-5 w-5" />
-              Reminders & Streaks
-            </div>
-            <Badge variant="secondary">Standard+</Badge>
-          </CardTitle>
-          <CardDescription>
-            Set reminders and track financial habits with streak counters
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <Crown className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              Smart Reminders Available with Standard+
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Get automated reminders for financial tasks and track your consistency with achievement streaks.
-            </p>
-            <Button 
-              onClick={() => setLocation("/subscribe")}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Crown className="h-4 w-4 mr-2" />
-              Upgrade to Standard
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+
 
   const toggleReminder = (id: string) => {
     setReminders(prev => prev.map(reminder => 

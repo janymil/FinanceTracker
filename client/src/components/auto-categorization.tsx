@@ -34,8 +34,6 @@ interface CategorySuggestion {
 }
 
 interface AutoCategorizationProps {
-  isPremium?: boolean;
-  isStandard?: boolean;
   transactions?: any[];
 }
 
@@ -49,7 +47,7 @@ const CATEGORY_PATTERNS = {
   "Income": ["salary", "wage", "bonus", "freelance", "dividend", "refund"]
 };
 
-export default function AutoCategorization({ isPremium = false, isStandard = false, transactions = [] }: AutoCategorizationProps) {
+export default function AutoCategorization({ transactions = [] }: AutoCategorizationProps) {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -83,7 +81,7 @@ export default function AutoCategorization({ isPremium = false, isStandard = fal
 
   const { data: uncategorizedTransactions } = useQuery({
     queryKey: ["/api/transactions", "uncategorized"],
-    enabled: !!user && (isPremium || isStandard),
+    enabled: !!user,
   });
 
   const categorizeMutation = useMutation({
@@ -171,42 +169,7 @@ export default function AutoCategorization({ isPremium = false, isStandard = fal
     setSuggestions(mockTransactions);
   };
 
-  if (!isStandard && !isPremium) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              Auto-Categorization
-            </div>
-            <Badge variant="secondary">Standard+</Badge>
-          </CardTitle>
-          <CardDescription>
-            Automatically categorize transactions using machine learning
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <Crown className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              Smart Categorization Available with Standard+
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Let AI automatically categorize your transactions based on merchant names, amounts, and spending patterns.
-            </p>
-            <Button 
-              onClick={() => setLocation("/subscribe")}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Crown className="h-4 w-4 mr-2" />
-              Upgrade to Standard
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+
 
   return (
     <Card>

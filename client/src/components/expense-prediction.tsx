@@ -20,7 +20,6 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useLocation } from 'wouter';
 
 interface ExpensePredictionProps {
-  isPremium?: boolean;
   transactions?: any[];
   summary?: any;
 }
@@ -41,7 +40,7 @@ interface MonthlyPrediction {
   actual?: number;
 }
 
-export default function ExpensePrediction({ isPremium = false, transactions = [], summary }: ExpensePredictionProps) {
+export default function ExpensePrediction({ transactions = [], summary }: ExpensePredictionProps) {
   const [, setLocation] = useLocation();
   const [predictionPeriod, setPredictionPeriod] = useState<'1m' | '3m' | '6m'>('1m');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -144,42 +143,7 @@ export default function ExpensePrediction({ isPremium = false, transactions = []
     return months;
   };
 
-  if (!isPremium) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              Expense Prediction
-            </div>
-            <Badge variant="secondary">Premium</Badge>
-          </CardTitle>
-          <CardDescription>
-            AI-powered predictions for future spending patterns
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <Crown className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              Smart Predictions Available with Premium
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Get AI-powered forecasts of your future expenses based on spending patterns, seasonal trends, and category analysis.
-            </p>
-            <Button 
-              onClick={() => setLocation("/subscribe")}
-              className="bg-premium hover:bg-premium/90"
-            >
-              <Crown className="h-4 w-4 mr-2" />
-              Upgrade to Premium
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+
 
   const predictions = generatePredictions();
   const monthlyPredictions = generateMonthlyPredictions();
