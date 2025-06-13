@@ -205,25 +205,25 @@ export default function Budget() {
 
   return (
     <RequirePlan plan="standard">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <Card className="mb-8">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                {format(currentDate, "MMMM yyyy")}
-              </CardTitle>
-              <CardDescription>Total budget for {format(currentDate, "MMMM yyyy")}: ${totalBudget.toFixed(2)}</CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => navigateMonth("prev")}>
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigateMonth("next")}>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <Card className="mb-8">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5" />
+                    {format(currentDate, "MMMM yyyy")}
+                  </CardTitle>
+                  <CardDescription>Total budget for {format(currentDate, "MMMM yyyy")}: ${totalBudget.toFixed(2)}</CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => navigateMonth("prev")}>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => navigateMonth("next")}>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button 
@@ -465,9 +465,9 @@ export default function Budget() {
               })}
             </div>
           )}
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+          </Card>
+        </div>
     </RequirePlan>
   );
 }
