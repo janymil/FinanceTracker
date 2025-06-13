@@ -74,14 +74,45 @@ export default function Reports() {
     enabled: !!user,
   });
 
-  // Sample chart data for analytics
-  const sampleChartData = [
-    { date: "2025-01", income: 4500, expenses: 3200, balance: 1300 },
-    { date: "2025-02", income: 4700, expenses: 3400, balance: 1600 },
-    { date: "2025-03", income: 4600, expenses: 3100, balance: 2100 },
-    { date: "2025-04", income: 4800, expenses: 3600, balance: 2300 },
-    { date: "2025-05", income: 5000, expenses: 3800, balance: 2500 },
-  ];
+  // Generate dynamic chart data from actual transactions
+  const generateChartData = () => {
+    if (!Array.isArray(transactions) || transactions.length === 0) {
+      return [];
+    }
+
+    // Group transactions by month
+    const monthlyData: { [key: string]: { income: number; expenses: number } } = {};
+    
+    transactions.forEach((transaction: any) => {
+      const date = new Date(transaction.date);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = { income: 0, expenses: 0 };
+      }
+      
+      const amount = parseFloat(transaction.amount);
+      if (transaction.type === 'income') {
+        monthlyData[monthKey].income += amount;
+      } else {
+        monthlyData[monthKey].expenses += amount;
+      }
+    });
+
+    // Convert to chart format and sort by date
+    const chartData = Object.entries(monthlyData)
+      .map(([date, data]) => ({
+        date,
+        income: data.income,
+        expenses: data.expenses,
+        balance: data.income - data.expenses
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    return chartData;
+  };
+
+  const dynamicChartData = generateChartData();
 
   return (
     <div>
@@ -149,7 +180,7 @@ export default function Reports() {
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               <RequirePlan plan="standard">
                 <InteractiveChart
-                  data={sampleChartData}
+                  data={dynamicChartData}
                   chartType="line"
                   title="Income vs Expenses Trend"
                   description="Track your cash flow over time with interactive zoom and insights"
@@ -158,7 +189,7 @@ export default function Reports() {
               </RequirePlan>
               <RequirePlan plan="standard">
                 <InteractiveChart
-                  data={sampleChartData}
+                  data={dynamicChartData}
                   chartType="bar"
                   title="Monthly Comparison"
                   description="Compare monthly performance with detailed tooltips"
@@ -167,7 +198,7 @@ export default function Reports() {
             </div>
             <RequirePlan plan="standard">
               <InteractiveChart
-                data={sampleChartData}
+                data={dynamicChartData}
                 chartType="area"
                 title="Financial Overview"
                 description="Comprehensive view of your financial health with trend analysis"
