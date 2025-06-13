@@ -13,7 +13,7 @@ import ContextualFinancialTips from "@/components/contextual-financial-tips";
 import RemindersStreaks from "@/components/reminders-streaks";
 import ExpensePrediction from "@/components/expense-prediction";
 import DailyRecommendations from "@/components/daily-recommendations";
-import CloudBackup from "@/components/cloud-backup";
+
 import AutoCategorization from "@/components/auto-categorization";
 import AIFinancialTips from "@/components/ai-financial-tips";
 import TransactionRemindersWidget from "@/components/transaction-reminders-widget";
@@ -479,9 +479,7 @@ export default function Dashboard() {
               />
             </RequirePlan>
 
-            <RequirePlan plan="premium">
-              <CloudBackup />
-            </RequirePlan>
+
           </div>
         )}
       </div>

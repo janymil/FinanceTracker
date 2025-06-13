@@ -117,8 +117,8 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
       title: "Export Data",
       icon: Download,
       href: "/export",
-      premium: true,
-      showPremiumBadge: true,
+      requiredPlan: "premium" as const,
+      badge: "Premium" as const,
     },
   ];
 
