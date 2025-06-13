@@ -99,6 +99,7 @@ export function setupAuth(app: Express) {
         password: await hashPassword(password),
         firstName,
         lastName,
+        plan: 'free',
       });
 
       req.login(user, (err) => {
