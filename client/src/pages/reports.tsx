@@ -25,7 +25,7 @@ export default function Reports() {
     return null;
   }
 
-  const hasBasicOrBetter = user?.plan === 'basic' || user?.plan === 'premium';
+  const hasStandardOrBetter = user?.plan === 'standard' || user?.plan === 'premium';
   const hasPremium = user?.plan === 'premium';
 
   // Sample data for charts - in real app this would come from API

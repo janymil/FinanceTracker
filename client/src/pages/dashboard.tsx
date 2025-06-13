@@ -136,7 +136,7 @@ export default function Dashboard() {
         )}
 
         {/* Basic/Premium User Content */}
-        {(user?.plan === 'basic' || user?.plan === 'premium') && (
+        {(user?.plan === 'standard' || user?.plan === 'premium') && (
           <div className="space-y-8">
             {/* Advanced Analytics Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
