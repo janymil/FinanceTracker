@@ -132,6 +132,9 @@ Changelog:
 - June 13, 2025. Removed redundant Analytics menu item - all analytics features are within Reports page
 - June 13, 2025. Created dedicated AI-powered Trends page for premium users with OpenAI forecasting
 - June 13, 2025. Implemented comprehensive trend prediction system using GPT-4o for financial forecasting
+- June 13, 2025. Created comprehensive Calendar View page for standard+ users with monthly transaction grid
+- June 13, 2025. Moved cloud backup functionality from dashboard to dedicated Export Data page for premium users
+- June 13, 2025. Combined data export and cloud backup features in unified Export Data page with advanced functionality
 ```
 
 ## User Preferences

@@ -14,6 +14,7 @@ import GoalsPage from "@/pages/goals";
 import TrendsPage from "@/pages/trends";
 import CalendarPage from "@/pages/calendar";
 import ReportsPage from "@/pages/reports";
+import ExportPage from "@/pages/export";
 import SubscribePage from "@/pages/subscribe";
 import LandingPage from "@/pages/landing";
 import NotFoundPage from "@/pages/not-found";
@@ -75,6 +76,7 @@ function AppContent() {
               <Route path="/calendar" component={CalendarPage} />
               <Route path="/trends" component={TrendsPage} />
               <Route path="/reports" component={ReportsPage} />
+              <Route path="/export" component={ExportPage} />
               <Route path="/subscribe" component={SubscribePage} />
               <Route component={NotFoundPage} />
             </Switch>
