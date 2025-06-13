@@ -130,6 +130,8 @@ Changelog:
 - June 13, 2025. Moved Goals and Budget features from Premium to Standard tier
 - June 13, 2025. Updated RequirePlan component to show upgrade prompts instead of blank pages
 - June 13, 2025. Removed redundant Analytics menu item - all analytics features are within Reports page
+- June 13, 2025. Created dedicated AI-powered Trends page for premium users with OpenAI forecasting
+- June 13, 2025. Implemented comprehensive trend prediction system using GPT-4o for financial forecasting
 ```
 
 ## User Preferences

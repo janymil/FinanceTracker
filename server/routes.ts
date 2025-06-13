@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
 import { insertTransactionSchema, insertBudgetSchema, insertExpenseReminderSchema } from "@shared/schema";
 import { z } from "zod";
-import { categorizeExpense, generateFinancialTips, generateSpendingInsights } from "./openai";
+import { categorizeExpense, generateFinancialTips, generateSpendingInsights, generateTrendPredictions } from "./openai";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -542,7 +542,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: t.description,
           date: t.date.toISOString(),
           type: t.type,
-          categoryId: t.categoryId
+          categoryId: t.categoryId || 1 // Default to first category if null
         })),
         categoryMap,
         budgets.map(b => ({

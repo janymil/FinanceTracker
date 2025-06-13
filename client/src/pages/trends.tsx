@@ -33,6 +33,11 @@ export default function Trends() {
     enabled: !!user
   });
 
+  const { data: aiPredictions, isLoading: predictionsLoading } = useQuery({
+    queryKey: ["/api/trend-predictions"],
+    enabled: !!user && user?.plan === 'premium'
+  });
+
   // Generate trend data based on period selection
   const generateTrendData = useMemo(() => {
     if (!transactions || !Array.isArray(transactions)) return [];
@@ -415,35 +420,168 @@ export default function Trends() {
 
           {/* Forecasts */}
           <TabsContent value="forecasts" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Financial Forecasts</CardTitle>
-                <CardDescription>
-                  AI-powered predictions based on your historical data
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                      <h4 className="font-medium mb-2">Next Month Expenses</h4>
-                      <p className="text-2xl font-bold text-blue-600">$2,850</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">95% confidence</p>
-                    </div>
-                    <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                      <h4 className="font-medium mb-2">Expected Savings</h4>
-                      <p className="text-2xl font-bold text-green-600">$1,200</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Based on trends</p>
-                    </div>
-                    <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                      <h4 className="font-medium mb-2">Budget Variance</h4>
-                      <p className="text-2xl font-bold text-purple-600">-5%</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Under budget</p>
-                    </div>
-                  </div>
+            {predictionsLoading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-8 w-64" />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Skeleton className="h-32" />
+                  <Skeleton className="h-32" />
+                  <Skeleton className="h-32" />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            ) : aiPredictions ? (
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>AI Financial Forecasts</CardTitle>
+                    <CardDescription>
+                      AI-powered predictions based on your historical data patterns
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                          <h4 className="font-medium mb-2">Next Month Expenses</h4>
+                          <p className="text-2xl font-bold text-blue-600">
+                            ${aiPredictions.financialForecast?.nextMonthExpenses?.toLocaleString() || '0'}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {Math.round((aiPredictions.financialForecast?.confidence || 0) * 100)}% confidence
+                          </p>
+                        </div>
+                        <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <h4 className="font-medium mb-2">Expected Savings</h4>
+                          <p className="text-2xl font-bold text-green-600">
+                            ${aiPredictions.financialForecast?.expectedSavings?.toLocaleString() || '0'}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Based on AI analysis</p>
+                        </div>
+                        <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                          <h4 className="font-medium mb-2">Budget Variance</h4>
+                          <p className={`text-2xl font-bold ${
+                            (aiPredictions.financialForecast?.budgetVariance || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {(aiPredictions.financialForecast?.budgetVariance || 0) >= 0 ? '+' : ''}
+                            {aiPredictions.financialForecast?.budgetVariance?.toFixed(1) || '0'}%
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {(aiPredictions.financialForecast?.budgetVariance || 0) >= 0 ? 'Over budget' : 'Under budget'}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {/* AI Insights */}
+                      {aiPredictions.financialForecast?.keyInsights?.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-3">Key Insights</h4>
+                          <div className="space-y-2">
+                            {aiPredictions.financialForecast.keyInsights.map((insight, index) => (
+                              <div key={index} className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <p className="text-sm">{insight}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* AI Recommendations */}
+                      {aiPredictions.financialForecast?.recommendations?.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-3">AI Recommendations</h4>
+                          <div className="space-y-2">
+                            {aiPredictions.financialForecast.recommendations.map((rec, index) => (
+                              <div key={index} className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border-l-4 border-green-600">
+                                <p className="text-sm">{rec}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Risk Factors */}
+                      {aiPredictions.financialForecast?.riskFactors?.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-3">Risk Factors</h4>
+                          <div className="space-y-2">
+                            {aiPredictions.financialForecast.riskFactors.map((risk, index) => (
+                              <div key={index} className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border-l-4 border-red-600">
+                                <p className="text-sm">{risk}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Category Predictions */}
+                {aiPredictions.categoryPredictions?.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Category-Specific Predictions</CardTitle>
+                      <CardDescription>
+                        AI forecasts for individual spending categories
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {aiPredictions.categoryPredictions.slice(0, 6).map((prediction, index) => (
+                          <div key={index} className="p-4 border rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <h5 className="font-medium">{prediction.category}</h5>
+                              <Badge variant="outline" className={
+                                prediction.trend === 'increasing' ? 'text-red-600' : 
+                                prediction.trend === 'decreasing' ? 'text-green-600' : 
+                                'text-gray-600'
+                              }>
+                                {prediction.trend}
+                              </Badge>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-sm">
+                                <span>Predicted Amount:</span>
+                                <span className="font-medium">${prediction.predictedAmount?.toLocaleString()}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span>Confidence:</span>
+                                <span className="font-medium">{Math.round((prediction.confidence || 0) * 100)}%</span>
+                              </div>
+                              {prediction.reasoning && (
+                                <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                                  {prediction.reasoning}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>AI Financial Forecasts</CardTitle>
+                  <CardDescription>
+                    Generate AI-powered predictions based on your transaction history
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8">
+                    <RefreshCw className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                      No Predictions Available
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300">
+                      Add more transactions to generate AI-powered financial forecasts
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>
