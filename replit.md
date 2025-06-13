@@ -135,6 +135,7 @@ Changelog:
 - June 13, 2025. Created comprehensive Calendar View page for standard+ users with monthly transaction grid
 - June 13, 2025. Moved cloud backup functionality from dashboard to dedicated Export Data page for premium users
 - June 13, 2025. Combined data export and cloud backup features in unified Export Data page with advanced functionality
+- June 13, 2025. Removed duplicate export tab from reports page to eliminate redundant functionality
 ```
 
 ## User Preferences

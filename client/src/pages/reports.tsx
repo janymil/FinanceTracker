@@ -11,7 +11,7 @@ import { Calendar, TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, Fi
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from "date-fns";
 import { useState, useMemo } from "react";
 import RequirePlan from "@/components/require-plan";
-import ExportTools from "@/components/export-tools";
+
 import InteractiveChart from "@/components/interactive-chart";
 import AIInsights from "@/components/ai-insights";
 import AutoCategorization from "@/components/auto-categorization";
@@ -148,7 +148,7 @@ export default function Reports() {
 
         {/* Reports Tabs - Basic available for all, Advanced for Premium */}
         <Tabs defaultValue="summary" className="space-y-6">
-          <TabsList className={`grid w-full ${hasPremium ? 'grid-cols-5' : hasStandardOrBetter ? 'grid-cols-3' : 'grid-cols-2'}`}>
+          <TabsList className={`grid w-full ${hasPremium ? 'grid-cols-4' : hasStandardOrBetter ? 'grid-cols-2' : 'grid-cols-1'}`}>
             <TabsTrigger value="summary" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Summary
@@ -157,12 +157,6 @@ export default function Reports() {
               <TabsTrigger value="analytics" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
                 Analytics
-              </TabsTrigger>
-            )}
-            {hasStandardOrBetter && (
-              <TabsTrigger value="export" className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
-                Export
               </TabsTrigger>
             )}
             {hasPremium && (
@@ -223,19 +217,7 @@ export default function Reports() {
             </RequirePlan>
           </TabsContent>
 
-          {/* Export Tools */}
-          <TabsContent value="export" className="space-y-6">
-            <RequirePlan plan="standard">
-              <ExportTools 
-                data={{
-                  transactions: Array.isArray(transactions) ? transactions : [],
-                  budgets: [],
-                  goals: [],
-                  summary: financialSummary
-                }}
-              />
-            </RequirePlan>
-          </TabsContent>
+
 
           {/* Auto-Categorization */}
           <TabsContent value="categorization" className="space-y-6">
