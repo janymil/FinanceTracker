@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -28,10 +29,21 @@ interface SidebarProps {
   setIsOpen: (open: boolean) => void;
   isCollapsed: boolean;
   setIsCollapsed: (collapsed: boolean) => void;
+  userPlan?: string;
 }
 
 export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed }: SidebarProps) {
   const [location, navigate] = useLocation();
+  
+  // Safely get user data without breaking if auth context is unavailable
+  let user;
+  try {
+    const authData = useAuth();
+    user = authData.user;
+  } catch {
+    // Auth context not available, user will be undefined
+    user = undefined;
+  }
 
   const menuItems = [
     {
@@ -201,7 +213,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                       {!isCollapsed && (
                         <span className="flex items-center justify-between w-full">
                           {item.title}
-                          {item.badge && (
+                          {item.badge && user?.plan !== 'premium' && (
                             <Badge className={cn(
                               "text-white text-xs ml-2",
                               item.badge === "Standard" ? "bg-blue-500" : "bg-purple-500"
