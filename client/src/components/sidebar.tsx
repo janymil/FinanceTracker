@@ -133,7 +133,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   };
 
   const canAccess = (premium: boolean) => {
-    return !premium || user?.isPremium;
+    return !premium || user?.plan === 'premium';
   };
 
   return (
@@ -202,30 +202,31 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
               return (
                 <div key={item.title} className="relative">
-                 
-                      <Button
-                        variant={active ? "default" : "ghost"}
-                        className={cn(
-                          "w-full justify-start",
-                          isCollapsed ? "px-2" : "px-3",
-                          active && "bg-primary text-white",
-                          !active && "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                        )}
-                      >
-                        <Icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
-                        {!isCollapsed && (
-                          <span className="flex items-center justify-between w-full">
-                            {item.title}
-                            {item.showPremiumBadge && !hasAccess(item.premium ? 'premium' : 'standard') && (
-                              <Badge className="bg-premium text-white text-xs ml-2">
-                                <Crown className="h-3 w-3 mr-1" />
-                                Pro
-                              </Badge>
-                            )}
-                          </span>
-                        )}
-                      </Button>
-                   
+                  <Link href={item.href}>
+                    <Button
+                      variant={active ? "default" : "ghost"}
+                      className={cn(
+                        "w-full justify-start",
+                        isCollapsed ? "px-2" : "px-3",
+                        active && "bg-primary text-white",
+                        !active && "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                      )}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
+                      {!isCollapsed && (
+                        <span className="flex items-center justify-between w-full">
+                          {item.title}
+                          {item.showPremiumBadge && !hasAccess(item.premium ? 'premium' : 'basic') && (
+                            <Badge className="bg-premium text-white text-xs ml-2">
+                              <Crown className="h-3 w-3 mr-1" />
+                              Pro
+                            </Badge>
+                          )}
+                        </span>
+                      )}
+                    </Button>
+                  </Link>
                 </div>
               );
             })}
