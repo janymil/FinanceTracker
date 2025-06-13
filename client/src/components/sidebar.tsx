@@ -88,8 +88,8 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
       title: "Goals",
       icon: Crosshair,
       href: "/goals",
-      requiredPlan: "premium" as const,
-      badge: "Premium" as const,
+      requiredPlan: "standard" as const,
+      badge: "Standard" as const,
     },
     {
       title: "Reports",

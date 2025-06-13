@@ -29,6 +29,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import { Link } from "wouter";
+import RequirePlan from "@/components/require-plan";
 
 interface Budget {
   id: number;

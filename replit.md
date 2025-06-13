@@ -49,8 +49,8 @@ FinanceFlow is a full-stack personal finance management application built with R
 
 ### Subscription Tiers
 - **Free Plan**: Basic transaction tracking (limited to 3 transactions)
-- **Standard Plan**: Enhanced features with up to 100 transactions, basic analytics
-- **Premium Plan**: Unlimited transactions, advanced analytics, AI insights, data export
+- **Standard Plan**: Enhanced features with up to 100 transactions, budgeting, goals, transaction reminders, AI categorization
+- **Premium Plan**: Unlimited transactions, advanced analytics, AI insights, data export, predictions, recommendations
 
 ### UI Components
 - Responsive design with mobile-first approach
@@ -125,6 +125,9 @@ Changelog:
 - June 13, 2025. Implemented RequirePlan component architecture for all tier-gated features
 - June 13, 2025. Integrated OpenAI GPT-4o for AI expense categorization (standard+) and financial tips (premium)
 - June 13, 2025. Implemented comprehensive financial reminders system for both expenses and income (standard+)
+- June 13, 2025. Redesigned reminder system to automatically detect upcoming transactions from existing data
+- June 13, 2025. Created responsive sidebar layout with automatic content width adjustment
+- June 13, 2025. Moved Goals and Budget features from Premium to Standard tier
 ```
 
 ## User Preferences
