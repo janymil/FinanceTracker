@@ -49,10 +49,15 @@ export default function Navigation() {
           </div>
           
           <div className="flex items-center space-x-4">
-            {user?.isPremium ? (
+            {user?.plan === 'premium' ? (
               <Badge className="bg-premium text-white">
                 <Crown className="h-3 w-3 mr-1" />
                 Premium
+              </Badge>
+            ) : user?.plan === 'standard' ? (
+              <Badge className="bg-blue-600 text-white">
+                <Crown className="h-3 w-3 mr-1" />
+                Standard
               </Badge>
             ) : (
               <>

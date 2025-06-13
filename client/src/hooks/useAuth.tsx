@@ -10,7 +10,6 @@ type User = {
   email: string;
   firstName?: string | null;
   lastName?: string | null;
-  isPremium?: boolean | null;
   plan?: string | null;
 };
 
@@ -39,7 +38,7 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
-  
+
   const {
     data: user,
     error,

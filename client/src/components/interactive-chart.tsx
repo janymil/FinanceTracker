@@ -106,37 +106,37 @@ export default function InteractiveChart({
   useEffect(() => {
     if (data && data.length > 0) {
       const newInsights = [];
-      
+
       if (chartType === "line" || chartType === "area") {
         const totalIncome = data.reduce((sum, item) => sum + (item.income || 0), 0);
         const totalExpenses = data.reduce((sum, item) => sum + (item.expenses || 0), 0);
         const avgIncome = totalIncome / data.length;
         const avgExpenses = totalExpenses / data.length;
-        
+
         if (avgIncome > avgExpenses) {
           newInsights.push("You're maintaining positive cash flow");
         }
-        
+
         const trend = data.length > 1 ? 
           ((data[data.length - 1].balance || 0) - (data[0].balance || 0)) / data.length : 0;
-        
+
         if (trend > 0) {
           newInsights.push("Your balance is trending upward");
         } else if (trend < 0) {
           newInsights.push("Your balance is declining - consider reviewing expenses");
         }
       }
-      
+
       setInsights(newInsights);
     }
   }, [data, chartType]);
 
   const filteredData = React.useMemo(() => {
     if (chartRange === "all") return data;
-    
+
     const now = new Date();
     const cutoffDate = new Date(now);
-    
+
     switch (chartRange) {
       case "7d":
         cutoffDate.setDate(now.getDate() - 7);
@@ -150,7 +150,7 @@ export default function InteractiveChart({
       default:
         return data;
     }
-    
+
     return data.filter(item => new Date(item.date) >= cutoffDate);
   }, [data, chartRange]);
 
@@ -266,7 +266,9 @@ export default function InteractiveChart({
     }
   };
 
-  if (!isPremium) {
+  const { user } = useAuth();
+
+  if (user?.plan === 'free') {
     return (
       <Card className="relative">
         <CardHeader>
@@ -304,7 +306,7 @@ export default function InteractiveChart({
             </CardTitle>
             {description && <CardDescription>{description}</CardDescription>}
           </div>
-          
+
           {/* Chart Controls */}
           <div className="flex items-center space-x-2">
             <Select value={chartRange} onValueChange={setChartRange}>
@@ -318,7 +320,7 @@ export default function InteractiveChart({
                 <SelectItem value="90d">90D</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-md">
               <Button variant="ghost" size="sm" onClick={handleZoomOut}>
                 <ZoomOut className="h-4 w-4" />
@@ -330,7 +332,7 @@ export default function InteractiveChart({
                 <RotateCcw className="h-4 w-4" />
               </Button>
             </div>
-            
+
             {onExport && (
               <Button variant="outline" size="sm" onClick={onExport}>
                 <Download className="h-4 w-4" />
@@ -339,7 +341,7 @@ export default function InteractiveChart({
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         {/* Chart Container */}
         <div 

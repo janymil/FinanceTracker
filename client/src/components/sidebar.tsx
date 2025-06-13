@@ -32,6 +32,13 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const { user } = useAuth();
   const [location] = useLocation();
+  const { setLocation } = useLocation();
+
+  const hasAccess = (requiredPlan: string) => {
+    if (!user?.plan) return false;
+    const planHierarchy = { free: 0, standard: 1, premium: 2 };
+    return planHierarchy[user.plan as keyof typeof planHierarchy] >= planHierarchy[requiredPlan as keyof typeof planHierarchy];
+  };
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const menuItems = [
@@ -158,7 +165,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
               </span>
             </div>
           )}
-          
+
           <div className="flex items-center space-x-2">
             {/* Desktop collapse button */}
             <Button
@@ -173,7 +180,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 <ChevronLeft className="h-4 w-4" />
               )}
             </Button>
-            
+
             {/* Mobile close button */}
             <Button
               variant="ghost"
@@ -196,8 +203,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
               return (
                 <div key={item.title} className="relative">
-                  {accessible ? (
-                    <Link href={item.href}>
+                 
                       <Button
                         variant={active ? "default" : "ghost"}
                         className={cn(
@@ -211,7 +217,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                         {!isCollapsed && (
                           <span className="flex items-center justify-between w-full">
                             {item.title}
-                            {(item.premium || item.showPremiumBadge) && (
+                            {item.showPremiumBadge && !hasAccess(item.premium ? 'premium' : 'standard') && (
                               <Badge className="bg-premium text-white text-xs ml-2">
                                 <Crown className="h-3 w-3 mr-1" />
                                 Pro
@@ -220,36 +226,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                           </span>
                         )}
                       </Button>
-                    </Link>
-                  ) : (
-                    <div className="relative">
-                      <Button
-                        variant="ghost"
-                        className={cn(
-                          "w-full justify-start opacity-50 cursor-not-allowed",
-                          isCollapsed ? "px-2" : "px-3",
-                          "text-gray-400 dark:text-gray-600"
-                        )}
-                        disabled
-                      >
-                        <Icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
-                        {!isCollapsed && (
-                          <span className="flex items-center justify-between w-full">
-                            {item.title}
-                            <Badge className="bg-premium text-white text-xs ml-2">
-                              <Crown className="h-3 w-3 mr-1" />
-                              Pro
-                            </Badge>
-                          </span>
-                        )}
-                      </Button>
-                      {!user?.isPremium && (
-                        <Link href="/subscribe">
-                          <div className="absolute inset-0 cursor-pointer" />
-                        </Link>
-                      )}
-                    </div>
-                  )}
+                   
                 </div>
               );
             })}
@@ -258,9 +235,9 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           {!isCollapsed && (
             <>
               <Separator className="my-6" />
-              
+
               {/* Upgrade section for free users */}
-              {!user?.isPremium && (
+              {/* {!user?.isPremium && (
                 <div className="bg-gradient-to-br from-premium/10 to-blue-50 dark:from-premium/20 dark:to-gray-800 p-4 rounded-lg">
                   <div className="flex items-center mb-2">
                     <Crown className="h-5 w-5 text-premium mr-2" />
@@ -278,7 +255,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                     </Button>
                   </Link>
                 </div>
-              )}
+              )} */}
             </>
           )}
         </nav>
@@ -288,7 +265,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
               <span>v1.0.0</span>
-              {user?.isPremium ? (
+              {user?.plan === 'premium' ? (
                 <Badge className="bg-premium text-white">
                   <Crown className="h-3 w-3 mr-1" />
                   Premium

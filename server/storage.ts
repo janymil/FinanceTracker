@@ -98,16 +98,11 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUserPremiumStatus(userId: number, isPremium: boolean): Promise<User> {
-    const [user] = await db
-      .update(users)
-      .set({
-        isPremium,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, userId))
-      .returning();
-    return user;
+  // Legacy method - use updateUserPlan instead
+  async updateUserPremiumStatus(userId: number, isPremium: boolean): Promise<void> {
+    // Convert boolean to plan for backward compatibility
+    const plan = isPremium ? 'premium' : 'free';
+    await this.updateUserPlan(userId, plan);
   }
 
   // Transaction operations

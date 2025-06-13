@@ -23,7 +23,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface ExportToolsProps {
-  isPremium?: boolean;
   data?: {
     transactions: any[];
     budgets: any[];
@@ -44,9 +43,9 @@ interface ExportOptions {
   includeCharts: boolean;
 }
 
-export default function ExportTools({ isPremium = false, data }: ExportToolsProps) {
+export default function ExportTools({ data }: ExportToolsProps) {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const { setLocation } = useLocation();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
@@ -69,21 +68,21 @@ export default function ExportTools({ isPremium = false, data }: ExportToolsProp
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      
+
       const fileName = `financial-report-${new Date().toISOString().split('T')[0]}.${variables.format}`;
       link.setAttribute('download', fileName);
-      
+
       document.body.appendChild(link);
       link.click();
       link.remove();
-      
+
       window.URL.revokeObjectURL(url);
-      
+
       toast({
         title: "Export Successful",
         description: `Your financial report has been downloaded as ${fileName}`,
       });
-      
+
       setIsDialogOpen(false);
     },
     onError: (error: Error) => {
@@ -96,7 +95,7 @@ export default function ExportTools({ isPremium = false, data }: ExportToolsProp
   });
 
   const handleQuickExport = (format: "pdf" | "csv") => {
-    if (!isPremium) {
+    if (user?.plan === 'free') {
       setLocation("/subscribe");
       return;
     }
@@ -118,7 +117,7 @@ export default function ExportTools({ isPremium = false, data }: ExportToolsProp
     exportMutation.mutate(exportOptions);
   };
 
-  if (!isPremium) {
+  if (user?.plan === 'free') {
     return (
       <Card>
         <CardHeader>
@@ -179,7 +178,7 @@ export default function ExportTools({ isPremium = false, data }: ExportToolsProp
               <FileText className="h-4 w-4" />
               {exportMutation.isPending ? "Exporting..." : "Quick PDF"}
             </Button>
-            
+
             <Button 
               variant="outline"
               onClick={() => handleQuickExport("csv")}
@@ -206,7 +205,7 @@ export default function ExportTools({ isPremium = false, data }: ExportToolsProp
                   Customize your export settings for detailed financial reports
                 </DialogDescription>
               </DialogHeader>
-              
+
               <div className="grid gap-4 py-4">
                 {/* Format Selection */}
                 <div className="grid gap-2">
@@ -279,7 +278,7 @@ export default function ExportTools({ isPremium = false, data }: ExportToolsProp
                 {/* Data Inclusions */}
                 <div className="grid gap-3">
                   <Label>Include in Export</Label>
-                  
+
                   <div className="space-y-3">
                     <div className="flex items-center space-x-2">
                       <Checkbox 
