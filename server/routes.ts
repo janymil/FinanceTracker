@@ -359,6 +359,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Auto-categorization endpoint for bulk processing
+  app.post('/api/auto-categorize', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      
+      // Require premium plan for auto-categorization
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "Auto-categorization requires premium plan" });
+      }
+
+      // Get uncategorized transactions
+      const transactions = await storage.getUserTransactions(req.user.id);
+      const uncategorized = transactions.filter(t => !t.categoryId);
+
+      if (uncategorized.length === 0) {
+        return res.json({ suggestions: [] });
+      }
+
+      // Process up to 10 transactions at a time to avoid rate limits
+      const suggestions = [];
+      const limit = Math.min(uncategorized.length, 10);
+
+      for (let i = 0; i < limit; i++) {
+        const transaction = uncategorized[i];
+        try {
+          const result = await categorizeExpense(transaction.description, parseFloat(transaction.amount));
+          suggestions.push({
+            id: `suggestion-${transaction.id}`,
+            transactionDescription: transaction.description,
+            suggestedCategory: result.category,
+            confidence: result.confidence,
+            amount: parseFloat(transaction.amount),
+            date: transaction.date.toISOString(),
+            transactionId: transaction.id
+          });
+        } catch (error) {
+          console.error(`Failed to categorize transaction ${transaction.id}:`, error);
+        }
+      }
+
+      res.json({ suggestions });
+    } catch (error) {
+      console.error("Error in auto-categorization:", error);
+      res.status(500).json({ message: "Failed to auto-categorize transactions" });
+    }
+  });
+
   // AI Categorization endpoint
   app.post('/api/ai/categorize', isAuthenticated, async (req: any, res) => {
     try {

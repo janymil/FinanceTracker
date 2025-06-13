@@ -148,7 +148,7 @@ export default function Reports() {
 
         {/* Reports Tabs - Basic available for all, Advanced for Premium */}
         <Tabs defaultValue="summary" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className={`grid w-full ${hasPremium ? 'grid-cols-5' : 'grid-cols-4'}`}>
             <TabsTrigger value="summary" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Summary
@@ -161,18 +161,19 @@ export default function Reports() {
             <TabsTrigger value="insights" className="flex items-center gap-2">
               <Brain className="h-4 w-4" />
               AI Insights
-              {!hasStandardOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Premium</Badge>}
+              {!hasPremium && <Badge variant="secondary" className="ml-1 text-xs">Premium</Badge>}
             </TabsTrigger>
             <TabsTrigger value="export" className="flex items-center gap-2">
               <Download className="h-4 w-4" />
               Export
               {!hasStandardOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Standard+</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="categorization" className="flex items-center gap-2">
-              <Zap className="h-4 w-4" />
-              Auto-Tag
-              {!hasPremium && <Badge variant="secondary" className="ml-1 text-xs">Premium</Badge>}
-            </TabsTrigger>
+            {hasPremium && (
+              <TabsTrigger value="categorization" className="flex items-center gap-2">
+                <Zap className="h-4 w-4" />
+                Auto-Tag
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Interactive Analytics */}
