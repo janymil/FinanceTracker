@@ -46,7 +46,12 @@ function AppContent() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header onMenuClick={() => setSidebarOpen(true)} />
       <div className="flex">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <Sidebar 
+        isOpen={sidebarOpen} 
+        setIsOpen={setSidebarOpen}
+        isCollapsed={sidebarCollapsed}
+        setIsCollapsed={setSidebarCollapsed}
+      />
         <main className="flex-1 lg:ml-64">
           <div className="p-6">
             <Switch>
