@@ -93,6 +93,26 @@ export const budgets = pgTable("budgets", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Expense reminders for future and recurring payments
+export const expenseReminders = pgTable("expense_reminders", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  categoryId: integer("category_id").references(() => categories.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  amount: decimal("amount", { precision: 12, scale: 2 }),
+  dueDate: timestamp("due_date").notNull(),
+  isRecurring: boolean("is_recurring").default(false),
+  recurringFrequency: varchar("recurring_frequency", { length: 20 }), // 'weekly', 'monthly', 'yearly'
+  recurringEndDate: timestamp("recurring_end_date"),
+  reminderDaysBefore: integer("reminder_days_before").default(1), // Days before due date to remind
+  isActive: boolean("is_active").default(true),
+  isCompleted: boolean("is_completed").default(false),
+  lastReminded: timestamp("last_reminded"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Financial goals
 export const goals = pgTable("goals", {
   id: serial("id").primaryKey(),
@@ -125,6 +145,9 @@ export type Budget = typeof budgets.$inferSelect;
 export type InsertGoal = typeof goals.$inferInsert;
 export type Goal = typeof goals.$inferSelect;
 
+export type InsertExpenseReminder = typeof expenseReminders.$inferInsert;
+export type ExpenseReminder = typeof expenseReminders.$inferSelect;
+
 export type Category = typeof categories.$inferSelect;
 
 // Insert schemas
@@ -142,4 +165,11 @@ export const insertRecurringTransactionSchema = createInsertSchema(recurringTran
   id: true,
   createdAt: true,
   lastProcessed: true,
+});
+
+export const insertExpenseReminderSchema = createInsertSchema(expenseReminders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastReminded: true,
 });
