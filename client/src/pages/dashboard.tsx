@@ -102,7 +102,7 @@ export default function Dashboard() {
         />
 
         {/* Free User Content */}
-        {!user?.isPremium && user?.plan !== 'premium' && (
+        {user?.plan === 'free' && (
           <div className="space-y-8">
             <UpgradeBanner />
 
@@ -135,8 +135,8 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Premium User Content */}
-        {(user?.isPremium || user?.plan === 'premium') && (
+        {/* Basic/Premium User Content */}
+        {(user?.plan === 'basic' || user?.plan === 'premium') && (
           <div className="space-y-8">
             {/* Advanced Analytics Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

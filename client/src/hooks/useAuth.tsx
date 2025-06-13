@@ -10,8 +10,7 @@ type User = {
   email: string;
   firstName?: string | null;
   lastName?: string | null;
-  plan?: string | null;
-  isPremium?: boolean;
+  plan: 'free' | 'basic' | 'premium';
 };
 
 type AuthContextType = {

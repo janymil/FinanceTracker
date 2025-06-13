@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, FileText, Brain, Download, Zap, Crown } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from "date-fns";
 import { useState, useMemo } from "react";
 import RequirePlan from "@/components/require-plan";
@@ -21,7 +22,7 @@ export default function Reports() {
     return null;
   }
 
-  const hasStandardOrBetter = user?.plan === 'standard' || user?.plan === 'premium';
+  const hasBasicOrBetter = user?.plan === 'basic' || user?.plan === 'premium';
   const hasPremium = user?.plan === 'premium';
 
   // Sample data for charts - in real app this would come from API
@@ -72,30 +73,20 @@ export default function Reports() {
 
         {/* Reports Tabs - Basic available for all, Advanced for Premium */}
         <Tabs defaultValue="summary" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="summary" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Summary
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <TabsTrigger value="analytics" className="flex items-center gap-2" disabled={!hasBasicOrBetter}>
               <BarChart3 className="h-4 w-4" />
               Analytics
-              {!hasStandardOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Pro</Badge>}
+              {!hasBasicOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Basic+</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="insights" className="flex items-center gap-2">
-              <Brain className="h-4 w-4" />
-              AI Insights
-              {!hasStandardOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Pro</Badge>}
-            </TabsTrigger>
-            <TabsTrigger value="export" className="flex items-center gap-2">
+            <TabsTrigger value="export" className="flex items-center gap-2" disabled={!hasBasicOrBetter}>
               <Download className="h-4 w-4" />
               Export
-              {!hasStandardOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Pro</Badge>}
-            </TabsTrigger>
-            <TabsTrigger value="categorization" className="flex items-center gap-2">
-              <Zap className="h-4 w-4" />
-              Auto-Tag
-              {!hasStandardOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Pro</Badge>}
+              {!hasBasicOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Basic+</Badge>}
             </TabsTrigger>
           </TabsList>
 
