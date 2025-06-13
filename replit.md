@@ -128,6 +128,8 @@ Changelog:
 - June 13, 2025. Redesigned reminder system to automatically detect upcoming transactions from existing data
 - June 13, 2025. Created responsive sidebar layout with automatic content width adjustment
 - June 13, 2025. Moved Goals and Budget features from Premium to Standard tier
+- June 13, 2025. Updated RequirePlan component to show upgrade prompts instead of blank pages
+- June 13, 2025. Removed redundant Analytics menu item - all analytics features are within Reports page
 ```
 
 ## User Preferences

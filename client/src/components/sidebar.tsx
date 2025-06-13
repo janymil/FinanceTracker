@@ -98,13 +98,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
       requiredPlan: "free",
       badge: null,
     },
-    {
-      title: "Analytics",
-      icon: BarChart3,
-      href: "/analytics",
-      requiredPlan: "premium" as const,
-      badge: "Premium" as const,
-    },
+
     {
       title: "Trends",
       icon: TrendingUp,
