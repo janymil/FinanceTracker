@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Lightbulb, Sparkles, RefreshCw, TrendingUp } from "lucide-react";
-
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -21,6 +21,7 @@ interface AIFinancialTipsProps {
 }
 
 export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [currentTip, setCurrentTip] = useState<string | null>(null);
 
