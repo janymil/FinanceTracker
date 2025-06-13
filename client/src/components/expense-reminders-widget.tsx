@@ -81,11 +81,14 @@ export default function FinancialRemindersWidget() {
 
   const createReminderMutation = useMutation({
     mutationFn: async (reminderData: any) => {
-      return await apiRequest('/api/expense-reminders', {
+      const response = await fetch('/api/expense-reminders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reminderData),
+        credentials: 'include'
       });
+      if (!response.ok) throw new Error('Failed to create reminder');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
@@ -108,10 +111,12 @@ export default function FinancialRemindersWidget() {
 
   const completeReminderMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await apiRequest(`/api/expense-reminders/${id}/complete`, {
+      const response = await fetch(`/api/expense-reminders/${id}/complete`, {
         method: 'POST',
+        credentials: 'include'
       });
-      return await res.json();
+      if (!response.ok) throw new Error('Failed to complete reminder');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
@@ -132,10 +137,12 @@ export default function FinancialRemindersWidget() {
 
   const deleteReminderMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await apiRequest(`/api/expense-reminders/${id}`, {
+      const response = await fetch(`/api/expense-reminders/${id}`, {
         method: 'DELETE',
+        credentials: 'include'
       });
-      return await res.json();
+      if (!response.ok) throw new Error('Failed to delete reminder');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
@@ -193,8 +200,7 @@ export default function FinancialRemindersWidget() {
     }
   };
 
-  const expenseCategories = Array.isArray(categories) ? 
-    (categories as Category[]).filter((cat: Category) => cat.type === "expense") : [];
+  const allCategories = Array.isArray(categories) ? (categories as Category[]) : [];
 
   return (
     <RequirePlan plan="standard">
@@ -224,10 +230,10 @@ export default function FinancialRemindersWidget() {
               <DialogContent className="max-w-md">
                 <DialogHeader>
                   <DialogTitle>
-                    {editingReminder ? "Edit Reminder" : "Create Expense Reminder"}
+                    {editingReminder ? "Edit Reminder" : "Create Financial Reminder"}
                   </DialogTitle>
                   <DialogDescription>
-                    Set up a reminder for an upcoming expense or payment
+                    Set up a reminder for an upcoming expense, payment, or income
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
@@ -286,9 +292,9 @@ export default function FinancialRemindersWidget() {
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
-                          {expenseCategories.map((category: Category) => (
+                          {allCategories.map((category: Category) => (
                             <SelectItem key={category.id} value={category.id.toString()}>
-                              {category.name}
+                              {category.name} ({category.type})
                             </SelectItem>
                           ))}
                         </SelectContent>
