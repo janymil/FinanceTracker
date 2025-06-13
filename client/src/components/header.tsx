@@ -72,10 +72,9 @@ async function apiRequest(method: string, url: string, data?: any) {
 
 interface HeaderProps {
   onMenuClick: () => void;
-  sidebarCollapsed: boolean;
 }
 
-export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
+export default function Header({ onMenuClick }: HeaderProps) {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
