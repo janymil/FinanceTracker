@@ -293,17 +293,64 @@ export default function Reports() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8">
-                    <div className="mx-auto h-12 w-12 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
-                      <FileText className="h-6 w-6 text-gray-400" />
+                  {!transactions || transactions.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="mx-auto h-12 w-12 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+                        <FileText className="h-6 w-6 text-gray-400" />
+                      </div>
+                      <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                        No Recent Transactions
+                      </h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-300">
+                        Add transactions to see your recent activity here
+                      </p>
                     </div>
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-                      No Recent Transactions
-                    </h3>
-                    <p className="text-xs text-gray-600 dark:text-gray-300">
-                      Add transactions to see your recent activity here
-                    </p>
-                  </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {transactions.slice(0, 5).map((transaction: any) => (
+                        <div key={transaction.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-full ${
+                              transaction.type === 'income' 
+                                ? 'bg-green-100 dark:bg-green-900' 
+                                : 'bg-red-100 dark:bg-red-900'
+                            }`}>
+                              {transaction.type === 'income' ? (
+                                <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+                              ) : (
+                                <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                {transaction.description}
+                              </p>
+                              <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {new Date(transaction.date).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className={`text-sm font-semibold ${
+                              transaction.type === 'income' 
+                                ? 'text-green-600 dark:text-green-400' 
+                                : 'text-red-600 dark:text-red-400'
+                            }`}>
+                              {transaction.type === 'income' ? '+' : '-'}$
+                              {parseFloat(transaction.amount).toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                      {transactions.length > 5 && (
+                        <div className="text-center pt-2">
+                          <p className="text-xs text-gray-500">
+                            Showing 5 of {transactions.length} transactions
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
