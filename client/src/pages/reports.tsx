@@ -12,6 +12,9 @@ import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, su
 import { useState, useMemo } from "react";
 import RequirePlan from "@/components/require-plan";
 import ExportTools from "@/components/export-tools";
+import InteractiveChart from "@/components/interactive-chart";
+import AIInsights from "@/components/ai-insights";
+import AutoCategorization from "@/components/auto-categorization";
 
 export default function Reports() {
   const { user } = useAuth();
@@ -73,20 +76,30 @@ export default function Reports() {
 
         {/* Reports Tabs - Basic available for all, Advanced for Premium */}
         <Tabs defaultValue="summary" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="summary" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Summary
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2" disabled={!hasBasicOrBetter}>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Analytics
               {!hasBasicOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Basic+</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="export" className="flex items-center gap-2" disabled={!hasBasicOrBetter}>
+            <TabsTrigger value="insights" className="flex items-center gap-2">
+              <Brain className="h-4 w-4" />
+              AI Insights
+              {!hasBasicOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Premium</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="export" className="flex items-center gap-2">
               <Download className="h-4 w-4" />
               Export
               {!hasBasicOrBetter && <Badge variant="secondary" className="ml-1 text-xs">Basic+</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="categorization" className="flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              Auto-Tag
+              {!hasPremium && <Badge variant="secondary" className="ml-1 text-xs">Premium</Badge>}
             </TabsTrigger>
           </TabsList>
 
@@ -98,7 +111,7 @@ export default function Reports() {
                 chartType="line"
                 title="Income vs Expenses Trend"
                 description="Track your cash flow over time with interactive zoom and insights"
-                isPremium={hasStandardOrBetter}
+                isPremium={hasBasicOrBetter}
                 onExport={() => console.log("Exporting chart...")}
               />
               <InteractiveChart
@@ -106,7 +119,7 @@ export default function Reports() {
                 chartType="bar"
                 title="Monthly Comparison"
                 description="Compare monthly performance with detailed tooltips"
-                isPremium={hasStandardOrBetter}
+                isPremium={hasBasicOrBetter}
               />
             </div>
             <InteractiveChart
@@ -114,14 +127,14 @@ export default function Reports() {
               chartType="area"
               title="Financial Overview"
               description="Comprehensive view of your financial health with trend analysis"
-              isPremium={hasStandardOrBetter}
+              isPremium={hasBasicOrBetter}
             />
           </TabsContent>
 
           {/* AI Insights */}
           <TabsContent value="insights" className="space-y-6">
             <AIInsights 
-              isPremium={hasStandardOrBetter}
+              isPremium={hasPremium}
               data={financialData as any}
             />
           </TabsContent>
@@ -129,7 +142,6 @@ export default function Reports() {
           {/* Export Tools */}
           <TabsContent value="export" className="space-y-6">
             <ExportTools 
-              isPremium={hasStandardOrBetter}
               data={financialData as any}
             />
           </TabsContent>
@@ -137,7 +149,7 @@ export default function Reports() {
           {/* Auto-Categorization */}
           <TabsContent value="categorization" className="space-y-6">
             <AutoCategorization 
-              isPremium={hasStandardOrBetter}
+              isPremium={hasPremium}
               transactions={(financialData as any)?.transactions || []}
             />
           </TabsContent>
@@ -226,7 +238,7 @@ export default function Reports() {
               <CardHeader>
                 <CardTitle>Category Breakdown</CardTitle>
                 <CardDescription>
-                  {hasStandardOrBetter ? "Detailed spending analysis by category" : "Basic category overview (upgrade for detailed analysis)"}
+                  {hasBasicOrBetter ? "Detailed spending analysis by category" : "Basic category overview (upgrade for detailed analysis)"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -235,22 +247,22 @@ export default function Reports() {
                     <PieChart className="h-8 w-8 text-gray-400" />
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    {hasStandardOrBetter ? "No Data to Display" : "Category Charts Available with Premium"}
+                    {hasBasicOrBetter ? "No Data to Display" : "Category Charts Available with Basic+"}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto mb-6">
-                    {hasStandardOrBetter 
+                    {hasBasicOrBetter 
                       ? "Add transactions to see detailed category breakdowns and spending patterns"
-                      : "Upgrade to Premium to unlock interactive category charts, spending trends, and detailed financial analysis"
+                      : "Upgrade to Basic to unlock interactive category charts, spending trends, and detailed financial analysis"
                     }
                   </p>
 
-                  {!hasStandardOrBetter && (
+                  {!hasBasicOrBetter && (
                     <Button 
                       onClick={() => setLocation("/subscribe")}
                       className="bg-premium hover:bg-premium/90"
                     >
                       <Crown className="h-4 w-4 mr-2" />
-                      Unlock Premium Charts
+                      Unlock Basic Charts
                     </Button>
                   )}
                 </div>
@@ -294,7 +306,7 @@ export default function Reports() {
             </Card>
 
             {/* Upgrade Banner for Free Users */}
-            {!hasStandardOrBetter && (
+            {!hasBasicOrBetter && (
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
