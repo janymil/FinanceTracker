@@ -130,22 +130,26 @@ export default function Reports() {
                 chartType="area"
                 title="Financial Overview"
                 description="Comprehensive view of your financial health with trend analysis"
-            />
+              />
+            </RequirePlan>
           </TabsContent>
 
           {/* AI Insights */}
           <TabsContent value="insights" className="space-y-6">
-            <AIInsights 
-              isPremium={hasPremium}
-              data={financialData as any}
-            />
+            <RequirePlan plan="premium">
+              <AIInsights 
+                data={financialData as any}
+              />
+            </RequirePlan>
           </TabsContent>
 
           {/* Export Tools */}
           <TabsContent value="export" className="space-y-6">
-            <ExportTools 
-              data={financialData as any}
-            />
+            <RequirePlan plan="standard">
+              <ExportTools 
+                data={financialData as any}
+              />
+            </RequirePlan>
           </TabsContent>
 
           {/* Auto-Categorization */}

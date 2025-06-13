@@ -91,8 +91,7 @@ export default function InteractiveChart({
   data, 
   chartType, 
   title, 
-  description, 
-  isPremium = false,
+  description,
   onExport 
 }: InteractiveChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);

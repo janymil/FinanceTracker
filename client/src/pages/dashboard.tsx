@@ -192,7 +192,7 @@ export default function Dashboard() {
             {/* Premium Features */}
             <RequirePlan plan="premium">
               <ExpensePrediction 
-                transactions={transactions}
+                transactions={transactions as any}
                 summary={financialSummary}
               />
             </RequirePlan>
@@ -200,8 +200,8 @@ export default function Dashboard() {
             <RequirePlan plan="premium">
               <DailyRecommendations 
                 summary={financialSummary}
-                transactions={transactions}
-                budgets={budgets}
+                transactions={transactions as any}
+                budgets={budgets as any}
               />
             </RequirePlan>
 

@@ -177,10 +177,10 @@ export default function AIInsights({ data }: AIInsightsProps) {
 
   const { data: insightsData } = useQuery({
     queryKey: ["/api/ai-insights"],
-    enabled: !!user && isPremium,
+    enabled: !!user,
   });
 
-  const insights = isPremium ? generateInsights(data) : [];
+  const insights = generateInsights(data);
 
   const getInsightIcon = (type: string) => {
     switch (type) {
