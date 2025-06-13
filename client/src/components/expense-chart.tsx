@@ -1,124 +1,119 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
-import { useState } from "react";
 
-interface FinancialSummary {
-  transactionsByCategory: Array<{
-    categoryName: string;
-    amount: number;
-    type: string;
-  }>;
-}
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { DollarSign } from "lucide-react";
 
 interface ExpenseChartProps {
-  summary?: FinancialSummary;
+  summary?: {
+    totalExpenses: number;
+    expensesByCategory: { category: string; amount: number; color?: string }[];
+  };
 }
 
-export default function ExpenseChart({ summary }: ExpenseChartProps) {
-  const [timePeriod, setTimePeriod] = useState("month");
+const COLORS = [
+  '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088fe',
+  '#00c49f', '#ffbb28', '#ff8042', '#8dd1e1', '#d084d0'
+];
 
-  // Process data for the chart
-  const expenseData = summary?.transactionsByCategory
-    ?.filter(item => item.type === 'expense')
-    ?.map((item, index) => ({
-      name: item.categoryName,
-      value: item.amount,
-      color: `hsl(${(index * 137.5) % 360}, 70%, 50%)`, // Generate distinct colors
-    })) || [];
+export function ExpenseChart({ summary }: ExpenseChartProps) {
+  const { data: expenseData } = useQuery({
+    queryKey: ['/api/expense-breakdown'],
+    enabled: !summary,
+  });
 
-  // Mock data if no real data available
-  const mockData = [
-    { name: 'Food', value: 55.50, color: '#3B82F6' },
-    { name: 'Entertainment', value: 29.99, color: '#F59E0B' },
-    { name: 'Housing', value: 245.00, color: '#10B981' },
-  ];
+  const data = summary?.expensesByCategory || expenseData?.expensesByCategory || [];
+  const totalExpenses = summary?.totalExpenses || expenseData?.totalExpenses || 0;
 
-  const chartData = expenseData.length > 0 ? expenseData : mockData;
+  const chartData = data.map((item, index) => ({
+    ...item,
+    color: item.color || COLORS[index % COLORS.length],
+    percentage: totalExpenses > 0 ? ((item.amount / totalExpenses) * 100).toFixed(1) : '0.0'
+  }));
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(value);
-  };
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0];
-      return (
-        <div className="bg-white dark:bg-gray-800 p-3 border rounded-lg shadow-lg">
-          <p className="font-medium">{data.name}</p>
-          <p className="text-primary">{formatCurrency(data.value)}</p>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const calculatePercentage = (value: number) => {
-    const total = chartData.reduce((sum, item) => sum + item.value, 0);
-    return Math.round((value / total) * 100);
-  };
+  if (data.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <DollarSign className="h-5 w-5" />
+            Expense Breakdown
+          </CardTitle>
+          <CardDescription>
+            Your spending by category
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <div className="mx-auto h-12 w-12 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+              <DollarSign className="h-6 w-6 text-gray-400" />
+            </div>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+              No Expenses to Display
+            </h3>
+            <p className="text-xs text-gray-600 dark:text-gray-300">
+              Add some expense transactions to see your spending breakdown
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="bg-white dark:bg-gray-800">
+    <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">Expense Distribution</CardTitle>
-          <Select value={timePeriod} onValueChange={setTimePeriod}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="month">This Month</SelectItem>
-              <SelectItem value="lastMonth">Last Month</SelectItem>
-              <SelectItem value="quarter">Last 3 Months</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <CardTitle className="flex items-center gap-2">
+          <DollarSign className="h-5 w-5" />
+          Expense Breakdown
+        </CardTitle>
+        <CardDescription>
+          Your spending by category this month
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col items-center">
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          
-          <div className="w-full space-y-3 mt-4">
-            {chartData.map((entry, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <div 
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: entry.color }}
-                  />
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    {entry.name}
-                  </span>
-                </div>
-                <span className="text-sm font-medium">
-                  {calculatePercentage(entry.value)}%
-                </span>
+        <div className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percentage }) => `${name} (${percentage}%)`}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="amount"
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip 
+                formatter={(value: number) => [`$${value.toLocaleString()}`, 'Amount']}
+                labelFormatter={(label) => `Category: ${label}`}
+              />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        
+        <div className="mt-4 space-y-2">
+          {chartData.map((item, index) => (
+            <div key={index} className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                <div 
+                  className="w-3 h-3 rounded-full" 
+                  style={{ backgroundColor: item.color }}
+                />
+                <span>{item.category}</span>
               </div>
-            ))}
-          </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">${item.amount.toLocaleString()}</span>
+                <span className="text-gray-500">({item.percentage}%)</span>
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>
