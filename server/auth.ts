@@ -104,7 +104,7 @@ export function setupAuth(app: Express) {
 
       req.login(user, (err) => {
         if (err) return next(err);
-        res.status(201).json({ id: user.id, username: user.username, email: user.email, firstName: user.firstName, lastName: user.lastName, isPremium: user.isPremium });
+        res.status(201).json({ id: user.id, username: user.username, email: user.email, firstName: user.firstName, lastName: user.lastName, isPremium: user.isPremium, plan: user.plan });
       });
     } catch (error) {
       console.error("Registration error:", error);
@@ -120,7 +120,8 @@ export function setupAuth(app: Express) {
       email: user.email, 
       firstName: user.firstName, 
       lastName: user.lastName, 
-      isPremium: user.isPremium 
+      isPremium: user.isPremium,
+      plan: user.plan
     });
   });
 
@@ -140,7 +141,8 @@ export function setupAuth(app: Express) {
       email: user.email, 
       firstName: user.firstName, 
       lastName: user.lastName, 
-      isPremium: user.isPremium 
+      isPremium: user.isPremium,
+      plan: user.plan
     });
   });
 }
