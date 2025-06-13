@@ -35,11 +35,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
       
-      // Plan-based limits: free = 3, standard = 100, premium = unlimited
+      // Plan-based limits: free = 3, basic = 100, premium = unlimited
       let limit;
       if (user?.plan === 'free') {
         limit = 3;
-      } else if (user?.plan === 'standard') {
+      } else if (user?.plan === 'basic') {
         limit = 100;
       } else {
         limit = undefined; // unlimited for premium
@@ -78,7 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(userId);
       
       if (user?.plan === 'free') {
-        return res.status(403).json({ message: "Standard or Premium subscription required" });
+        return res.status(403).json({ message: "Basic or Premium subscription required" });
       }
 
       const validatedData = insertBudgetSchema.parse({
@@ -102,7 +102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(userId);
       
       if (user?.plan === 'free') {
-        return res.status(403).json({ message: "Standard or Premium subscription required" });
+        return res.status(403).json({ message: "Basic or Premium subscription required" });
       }
 
       const budgets = await storage.getUserBudgets(userId);

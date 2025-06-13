@@ -31,12 +31,11 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const { user } = useAuth();
-  const [location] = useLocation();
-  const { setLocation } = useLocation();
+  const [location, navigate] = useLocation();
 
   const hasAccess = (requiredPlan: string) => {
     if (!user?.plan) return false;
-    const planHierarchy = { free: 0, standard: 1, premium: 2 };
+    const planHierarchy = { free: 0, basic: 1, premium: 2 };
     return planHierarchy[user.plan as keyof typeof planHierarchy] >= planHierarchy[requiredPlan as keyof typeof planHierarchy];
   };
   const [isCollapsed, setIsCollapsed] = useState(false);
