@@ -517,6 +517,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Trend Predictions (Premium only)
+  app.get('/api/trend-predictions', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "AI trend predictions require Premium subscription" });
+      }
+
+      const transactions = await storage.getUserTransactions(req.user.id, 200);
+      const categories = await storage.getCategories();
+      const budgets = await storage.getUserBudgets(req.user.id);
+      
+      const categoryMap = new Map();
+      categories.forEach(cat => {
+        categoryMap.set(cat.id, cat.name);
+      });
+
+      const predictions = await generateTrendPredictions(
+        transactions.map(t => ({
+          id: t.id,
+          amount: t.amount,
+          description: t.description,
+          date: t.date.toISOString(),
+          type: t.type,
+          categoryId: t.categoryId
+        })),
+        categoryMap,
+        budgets.map(b => ({
+          categoryId: b.categoryId,
+          amount: b.amount
+        }))
+      );
+
+      res.json(predictions);
+    } catch (error) {
+      console.error("Error generating trend predictions:", error);
+      res.status(500).json({ message: "Failed to generate trend predictions" });
+    }
+  });
+
   // Automatic transaction reminders (Standard/Premium only)
   app.get('/api/transaction-reminders', isAuthenticated, async (req: any, res) => {
     try {

@@ -12,6 +12,7 @@ import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Subscribe from "@/pages/subscribe";
 import Reports from "@/pages/reports";
+import Trends from "@/pages/trends";
 import Goals from "@/pages/goals";
 import Categories from "@/pages/categories";
 import Transactions from "@/pages/transactions";
@@ -70,6 +71,7 @@ function Router() {
             <Route path="/budget" component={Budget} />
             <Route path="/goals" component={Goals} />
             <Route path="/reports" component={Reports} />
+            <Route path="/trends" component={Trends} />
             <Route path="/subscribe" component={Subscribe} />
             <Route component={NotFound} />
           </Switch>

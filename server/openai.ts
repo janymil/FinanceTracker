@@ -18,6 +18,29 @@ export interface FinancialTip {
   estimatedSaving?: number;
 }
 
+export interface TrendPrediction {
+  category: string;
+  predictedAmount: number;
+  confidence: number;
+  trend: 'increasing' | 'decreasing' | 'stable';
+  reasoning: string;
+  monthlyForecast: Array<{
+    month: string;
+    predicted: number;
+    confidence: number;
+  }>;
+}
+
+export interface FinancialForecast {
+  nextMonthExpenses: number;
+  expectedSavings: number;
+  budgetVariance: number;
+  confidence: number;
+  keyInsights: string[];
+  recommendations: string[];
+  riskFactors: string[];
+}
+
 export async function categorizeExpense(description: string, amount: number): Promise<ExpenseCategorizationResult> {
   try {
     const response = await openai.chat.completions.create({
@@ -276,5 +299,150 @@ Generate financial insights based on this spending data.`
   } catch (error) {
     console.error('Error generating spending insights:', error);
     return [];
+  }
+}
+
+export async function generateTrendPredictions(
+  transactions: Array<{
+    id: number;
+    amount: string;
+    description: string;
+    date: string;
+    type: string;
+    categoryId: number;
+  }>,
+  categoryMap: Map<number, string>,
+  budgets: Array<{ categoryId: number; amount: string; }> = []
+): Promise<{
+  categoryPredictions: TrendPrediction[];
+  financialForecast: FinancialForecast;
+}> {
+  try {
+    // Prepare comprehensive financial data for AI analysis
+    const monthlyData = new Map();
+    const categoryTotals = new Map();
+    
+    transactions.forEach(t => {
+      const month = t.date.slice(0, 7);
+      const category = categoryMap.get(t.categoryId) || 'Other';
+      const amount = parseFloat(t.amount);
+      
+      if (!monthlyData.has(month)) {
+        monthlyData.set(month, { income: 0, expenses: 0, categories: new Map() });
+      }
+      
+      const monthData = monthlyData.get(month);
+      if (t.type === 'income') {
+        monthData.income += amount;
+      } else {
+        monthData.expenses += amount;
+        const catAmount = monthData.categories.get(category) || 0;
+        monthData.categories.set(category, catAmount + amount);
+      }
+      
+      const totalAmount = categoryTotals.get(category) || 0;
+      categoryTotals.set(category, totalAmount + amount);
+    });
+
+    const financialSummary = {
+      monthlyTrends: Array.from(monthlyData.entries()).map(([month, data]) => ({
+        month,
+        income: data.income,
+        expenses: data.expenses,
+        netBalance: data.income - data.expenses,
+        topCategories: Array.from(data.categories.entries())
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([cat, amount]) => ({ category: cat, amount }))
+      })).sort((a, b) => a.month.localeCompare(b.month)),
+      categoryTotals: Array.from(categoryTotals.entries()).map(([cat, amount]) => ({ category: cat, amount })),
+      budgets: budgets.map(b => ({ category: categoryMap.get(b.categoryId) || 'Other', budgetAmount: parseFloat(b.amount) }))
+    };
+
+    const prompt = `Analyze this comprehensive financial data and provide AI-powered trend predictions and forecasting.
+
+Financial Data Analysis:
+${JSON.stringify(financialSummary, null, 2)}
+
+Please provide detailed predictions in this JSON format:
+{
+  "categoryPredictions": [
+    {
+      "category": "category name",
+      "predictedAmount": 0,
+      "confidence": 0.95,
+      "trend": "increasing|decreasing|stable",
+      "reasoning": "explanation of prediction logic",
+      "monthlyForecast": [
+        {"month": "2025-01", "predicted": 0, "confidence": 0.9}
+      ]
+    }
+  ],
+  "financialForecast": {
+    "nextMonthExpenses": 0,
+    "expectedSavings": 0,
+    "budgetVariance": 0,
+    "confidence": 0.85,
+    "keyInsights": ["insight 1", "insight 2"],
+    "recommendations": ["recommendation 1", "recommendation 2"],
+    "riskFactors": ["risk 1", "risk 2"]
+  }
+}
+
+Analysis Requirements:
+- Use historical patterns to predict future spending
+- Identify seasonal trends and cyclical behaviors
+- Calculate confidence based on data consistency
+- Consider economic factors and spending volatility
+- Provide actionable financial recommendations
+- Include next 3 months forecast for each category
+- Analyze budget adherence and variance predictions`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are an advanced financial forecasting AI that analyzes spending patterns and predicts future financial trends with high accuracy. Use sophisticated pattern recognition and statistical analysis to provide reliable predictions."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 2000,
+      temperature: 0.3 // Lower temperature for more consistent predictions
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{"categoryPredictions": [], "financialForecast": {}}');
+    
+    return {
+      categoryPredictions: result.categoryPredictions || [],
+      financialForecast: result.financialForecast || {
+        nextMonthExpenses: 0,
+        expectedSavings: 0,
+        budgetVariance: 0,
+        confidence: 0,
+        keyInsights: [],
+        recommendations: [],
+        riskFactors: []
+      }
+    };
+
+  } catch (error) {
+    console.error('Error generating trend predictions:', error);
+    return {
+      categoryPredictions: [],
+      financialForecast: {
+        nextMonthExpenses: 0,
+        expectedSavings: 0,
+        budgetVariance: 0,
+        confidence: 0,
+        keyInsights: [],
+        recommendations: [],
+        riskFactors: []
+      }
+    };
   }
 }
