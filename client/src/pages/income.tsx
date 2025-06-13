@@ -94,6 +94,9 @@ export default function Income() {
         description: "",
         date: new Date().toISOString().split('T')[0],
         categoryId: "",
+        isRecurring: false,
+        recurringFrequency: "monthly",
+        recurringEndDate: "",
       });
       toast({
         title: "Income Added",
@@ -239,6 +242,9 @@ export default function Income() {
       description: transaction.description,
       date: transaction.date,
       categoryId: "",
+      isRecurring: false,
+      recurringFrequency: "monthly",
+      recurringEndDate: "",
     });
     setIsDialogOpen(true);
   };
@@ -272,6 +278,9 @@ export default function Income() {
                       description: "",
                       date: new Date().toISOString().split('T')[0],
                       categoryId: "",
+                      isRecurring: false,
+                      recurringFrequency: "monthly",
+                      recurringEndDate: "",
                     });
                   }}
                 >
