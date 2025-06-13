@@ -48,7 +48,7 @@ interface Category {
   type: "income" | "expense";
 }
 
-export default function ExpenseRemindersWidget() {
+export default function FinancialRemindersWidget() {
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReminder, setEditingReminder] = useState<ExpenseReminder | null>(null);
@@ -211,7 +211,7 @@ export default function ExpenseRemindersWidget() {
                 </Badge>
               </CardTitle>
               <CardDescription>
-                Never miss important payments and expenses
+                Never miss important payments, expenses, or upcoming income
               </CardDescription>
             </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
