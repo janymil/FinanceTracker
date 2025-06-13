@@ -1,6 +1,7 @@
 import {
   users,
   transactions,
+  recurringTransactions,
   budgets,
   categories,
   expenseReminders,
@@ -255,31 +256,144 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async getUserExpenseReminders(userId: number): Promise<ExpenseReminder[]> {
-    return await db
-      .select()
-      .from(expenseReminders)
-      .where(and(eq(expenseReminders.userId, userId), eq(expenseReminders.isActive, true)))
-      .orderBy(expenseReminders.dueDate);
-  }
-
-  async getUpcomingExpenseReminders(userId: number, daysBefore: number = 1): Promise<ExpenseReminder[]> {
+  async getUpcomingTransactionReminders(userId: number, daysAhead: number = 7): Promise<Array<{
+    id: string;
+    title: string;
+    description: string;
+    amount: string;
+    dueDate: Date;
+    type: 'income' | 'expense';
+    categoryName: string;
+    isRecurring: boolean;
+    source: 'future_transaction' | 'recurring_transaction';
+  }>> {
     const now = new Date();
-    const reminderDate = new Date();
-    reminderDate.setDate(now.getDate() + daysBefore);
+    const futureDate = new Date();
+    futureDate.setDate(now.getDate() + daysAhead);
 
-    return await db
-      .select()
-      .from(expenseReminders)
+    const reminders: Array<{
+      id: string;
+      title: string;
+      description: string;
+      amount: string;
+      dueDate: Date;
+      type: 'income' | 'expense';
+      categoryName: string;
+      isRecurring: boolean;
+      source: 'future_transaction' | 'recurring_transaction';
+    }> = [];
+
+    // Get future-dated transactions
+    const futureTransactions = await db
+      .select({
+        id: transactions.id,
+        description: transactions.description,
+        amount: transactions.amount,
+        date: transactions.date,
+        type: transactions.type,
+        categoryName: categories.name,
+        isRecurring: transactions.isRecurring,
+      })
+      .from(transactions)
+      .leftJoin(categories, eq(transactions.categoryId, categories.id))
       .where(
         and(
-          eq(expenseReminders.userId, userId),
-          eq(expenseReminders.isActive, true),
-          eq(expenseReminders.isCompleted, false),
-          lte(expenseReminders.dueDate, reminderDate)
+          eq(transactions.userId, userId),
+          gte(transactions.date, now),
+          lte(transactions.date, futureDate)
         )
       )
-      .orderBy(expenseReminders.dueDate);
+      .orderBy(transactions.date);
+
+    // Add future transactions as reminders
+    futureTransactions.forEach(transaction => {
+      reminders.push({
+        id: `future_${transaction.id}`,
+        title: transaction.description,
+        description: `${transaction.type === 'expense' ? 'Payment' : 'Income'} scheduled`,
+        amount: transaction.amount,
+        dueDate: transaction.date,
+        type: transaction.type as 'income' | 'expense',
+        categoryName: transaction.categoryName || 'Uncategorized',
+        isRecurring: transaction.isRecurring || false,
+        source: 'future_transaction'
+      });
+    });
+
+    // Get active recurring transactions and calculate next occurrences
+    const activeRecurringTransactions = await db
+      .select({
+        id: recurringTransactions.id,
+        description: recurringTransactions.description,
+        amount: recurringTransactions.amount,
+        type: recurringTransactions.type,
+        frequency: recurringTransactions.frequency,
+        startDate: recurringTransactions.startDate,
+        endDate: recurringTransactions.endDate,
+        lastProcessed: recurringTransactions.lastProcessed,
+        categoryName: categories.name,
+      })
+      .from(recurringTransactions)
+      .leftJoin(categories, eq(recurringTransactions.categoryId, categories.id))
+      .where(
+        and(
+          eq(recurringTransactions.userId, userId),
+          eq(recurringTransactions.isActive, true),
+          or(
+            isNull(recurringTransactions.endDate),
+            gte(recurringTransactions.endDate, now)
+          )
+        )
+      );
+
+    // Calculate next occurrences for recurring transactions
+    activeRecurringTransactions.forEach(recurring => {
+      const nextOccurrence = this.calculateNextOccurrence(
+        recurring.lastProcessed || recurring.startDate,
+        recurring.frequency,
+        recurring.endDate
+      );
+
+      if (nextOccurrence && nextOccurrence <= futureDate && nextOccurrence >= now) {
+        reminders.push({
+          id: `recurring_${recurring.id}`,
+          title: recurring.description,
+          description: `Recurring ${recurring.type} (${recurring.frequency})`,
+          amount: recurring.amount,
+          dueDate: nextOccurrence,
+          type: recurring.type as 'income' | 'expense',
+          categoryName: recurring.categoryName || 'Uncategorized',
+          isRecurring: true,
+          source: 'recurring_transaction'
+        });
+      }
+    });
+
+    return reminders.sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+  }
+
+  private calculateNextOccurrence(lastDate: Date, frequency: string, endDate: Date | null): Date | null {
+    const next = new Date(lastDate);
+    
+    switch (frequency) {
+      case 'weekly':
+        next.setDate(next.getDate() + 7);
+        break;
+      case 'monthly':
+        next.setMonth(next.getMonth() + 1);
+        break;
+      case 'yearly':
+        next.setFullYear(next.getFullYear() + 1);
+        break;
+      default:
+        return null;
+    }
+
+    if (endDate && next > endDate) {
+      return null;
+    }
+
+    return next;
   }
 
   async updateExpenseReminder(id: number, reminder: Partial<InsertExpenseReminder>): Promise<ExpenseReminder> {
