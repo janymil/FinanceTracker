@@ -106,28 +106,30 @@ export default function Reports() {
           {/* Interactive Analytics */}
           <TabsContent value="analytics" className="space-y-6">
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <InteractiveChart
-                data={sampleChartData}
-                chartType="line"
-                title="Income vs Expenses Trend"
-                description="Track your cash flow over time with interactive zoom and insights"
-                isPremium={hasStandardOrBetter}
-                onExport={() => console.log("Exporting chart...")}
-              />
-              <InteractiveChart
-                data={sampleChartData}
-                chartType="bar"
-                title="Monthly Comparison"
-                description="Compare monthly performance with detailed tooltips"
-                isPremium={hasStandardOrBetter}
-              />
+              <RequirePlan plan="standard">
+                <InteractiveChart
+                  data={sampleChartData}
+                  chartType="line"
+                  title="Income vs Expenses Trend"
+                  description="Track your cash flow over time with interactive zoom and insights"
+                  onExport={() => console.log("Exporting chart...")}
+                />
+              </RequirePlan>
+              <RequirePlan plan="standard">
+                <InteractiveChart
+                  data={sampleChartData}
+                  chartType="bar"
+                  title="Monthly Comparison"
+                  description="Compare monthly performance with detailed tooltips"
+                />
+              </RequirePlan>
             </div>
-            <InteractiveChart
-              data={sampleChartData}
-              chartType="area"
-              title="Financial Overview"
-              description="Comprehensive view of your financial health with trend analysis"
-              isPremium={hasStandardOrBetter}
+            <RequirePlan plan="standard">
+              <InteractiveChart
+                data={sampleChartData}
+                chartType="area"
+                title="Financial Overview"
+                description="Comprehensive view of your financial health with trend analysis"
             />
           </TabsContent>
 

@@ -32,7 +32,6 @@ interface SpendingInsight {
 }
 
 interface AIInsightsProps {
-  isPremium?: boolean;
   data?: {
     transactions: any[];
     budgets: any[];
@@ -40,7 +39,7 @@ interface AIInsightsProps {
   };
 }
 
-export default function AIInsights({ isPremium = false, data }: AIInsightsProps) {
+export default function AIInsights({ data }: AIInsightsProps) {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -205,42 +204,7 @@ export default function AIInsights({ isPremium = false, data }: AIInsightsProps)
     return "text-blue-600 bg-blue-50 border-blue-200";
   };
 
-  if (!isPremium) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              AI-Powered Insights
-            </div>
-            <Badge variant="secondary">Pro</Badge>
-          </CardTitle>
-          <CardDescription>
-            Get personalized spending insights and recommendations
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <Crown className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              AI Insights Available with Premium
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Unlock intelligent analysis of your spending patterns, personalized recommendations, and financial health insights powered by machine learning.
-            </p>
-            <Button 
-              onClick={() => setLocation("/subscribe")}
-              className="bg-premium hover:bg-premium/90"
-            >
-              <Crown className="h-4 w-4 mr-2" />
-              Upgrade to Premium
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+
 
   return (
     <Card>

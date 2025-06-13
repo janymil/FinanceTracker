@@ -167,7 +167,7 @@ export default function Dashboard() {
               <TransactionList
                 transactions={transactions as any}
                 isLoading={transactionsLoading}
-                isPremium={true}
+                isPremium={user?.plan === 'premium'}
               />
 
               <ExpenseChart summary={financialSummary} />

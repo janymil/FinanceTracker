@@ -43,7 +43,6 @@ interface InteractiveChartProps {
   chartType: "line" | "bar" | "area" | "pie";
   title: string;
   description?: string;
-  isPremium?: boolean;
   onExport?: () => void;
 }
 
@@ -266,34 +265,9 @@ export default function InteractiveChart({
     }
   };
 
-  const { user } = useAuth();
 
-  if (user?.plan === 'free') {
-    return (
-      <Card className="relative">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            {title}
-            <Badge variant="secondary">Pro</Badge>
-          </CardTitle>
-          {description && <CardDescription>{description}</CardDescription>}
-        </CardHeader>
-        <CardContent>
-          <div className="h-64 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <Crown className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                Interactive Charts Available with Premium
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Unlock advanced data visualization with zoom, hover insights, and real-time analytics
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+
+
 
   return (
     <Card>

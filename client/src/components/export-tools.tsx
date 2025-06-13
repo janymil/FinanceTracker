@@ -117,42 +117,7 @@ export default function ExportTools({ data }: ExportToolsProps) {
     exportMutation.mutate(exportOptions);
   };
 
-  if (user?.plan === 'free') {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Download className="h-5 w-5" />
-              Export Data
-            </div>
-            <Badge variant="secondary">Pro</Badge>
-          </CardTitle>
-          <CardDescription>
-            Export your financial data in multiple formats
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <Crown className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              Export Features Available with Premium
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Export your financial reports as PDF or CSV files with customizable date ranges and data selections.
-            </p>
-            <Button 
-              onClick={() => setLocation("/subscribe")}
-              className="bg-premium hover:bg-premium/90"
-            >
-              <Crown className="h-4 w-4 mr-2" />
-              Upgrade to Premium
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+
 
   return (
     <Card>
