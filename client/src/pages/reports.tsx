@@ -28,7 +28,53 @@ export default function Reports() {
   const hasStandardOrBetter = user?.plan === 'standard' || user?.plan === 'premium';
   const hasPremium = user?.plan === 'premium';
 
-  // Sample data for charts - in real app this would come from API
+  // Calculate date ranges based on selected period
+  const getDateRange = () => {
+    const now = new Date();
+    switch (selectedPeriod) {
+      case "week":
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - 7);
+        return { startDate: weekStart, endDate: now };
+      case "month":
+        return { startDate: startOfMonth(now), endDate: endOfMonth(now) };
+      case "quarter":
+        const quarterStart = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
+        const quarterEnd = new Date(quarterStart);
+        quarterEnd.setMonth(quarterStart.getMonth() + 3);
+        quarterEnd.setDate(0);
+        return { startDate: quarterStart, endDate: quarterEnd };
+      case "year":
+        return { startDate: startOfYear(now), endDate: endOfYear(now) };
+      default:
+        return { startDate: startOfMonth(now), endDate: endOfMonth(now) };
+    }
+  };
+
+  const { startDate, endDate } = getDateRange();
+
+  // Fetch financial summary data
+  const { data: financialSummary, isLoading: summaryLoading } = useQuery({
+    queryKey: ['/api/financial-summary', startDate.toISOString(), endDate.toISOString()],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString()
+      });
+      const response = await fetch(`/api/financial-summary?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch financial summary');
+      return response.json();
+    },
+    enabled: !!user,
+  });
+
+  // Fetch transactions for recent activity
+  const { data: transactions } = useQuery({
+    queryKey: ['/api/transactions'],
+    enabled: !!user,
+  });
+
+  // Sample chart data for analytics
   const sampleChartData = [
     { date: "2025-01", income: 4500, expenses: 3200, balance: 1300 },
     { date: "2025-02", income: 4700, expenses: 3400, balance: 1600 },
@@ -36,11 +82,6 @@ export default function Reports() {
     { date: "2025-04", income: 4800, expenses: 3600, balance: 2300 },
     { date: "2025-05", income: 5000, expenses: 3800, balance: 2500 },
   ];
-
-  const { data: financialData } = useQuery({
-    queryKey: ["/api/financial-data"],
-    enabled: !!user && hasPremium,
-  });
 
   return (
     <div>
@@ -138,7 +179,11 @@ export default function Reports() {
           <TabsContent value="insights" className="space-y-6">
             <RequirePlan plan="premium">
               <AIInsights 
-                data={financialData as any}
+                data={{
+                  transactions: transactions || [],
+                  budgets: [],
+                  goals: []
+                }}
               />
             </RequirePlan>
           </TabsContent>
@@ -147,7 +192,12 @@ export default function Reports() {
           <TabsContent value="export" className="space-y-6">
             <RequirePlan plan="standard">
               <ExportTools 
-                data={financialData as any}
+                data={{
+                  transactions: transactions || [],
+                  budgets: [],
+                  goals: [],
+                  summary: financialSummary
+                }}
               />
             </RequirePlan>
           </TabsContent>
@@ -156,7 +206,7 @@ export default function Reports() {
           <TabsContent value="categorization" className="space-y-6">
             <RequirePlan plan="standard">
               <AutoCategorization 
-                transactions={(financialData as any)?.transactions || []}
+                transactions={transactions || []}
               />
             </RequirePlan>
           </TabsContent>
@@ -184,7 +234,13 @@ export default function Reports() {
                           <p className="text-xs text-green-600 dark:text-green-400">Current month</p>
                         </div>
                       </div>
-                      <p className="text-xl font-bold text-green-700 dark:text-green-300">$0.00</p>
+                      <p className="text-xl font-bold text-green-700 dark:text-green-300">
+                        {summaryLoading ? (
+                          <Skeleton className="h-6 w-16" />
+                        ) : (
+                          `$${financialSummary?.totalIncome?.toFixed(2) || '0.00'}`
+                        )}
+                      </p>
                     </div>
 
                     <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
@@ -197,7 +253,13 @@ export default function Reports() {
                           <p className="text-xs text-red-600 dark:text-red-400">Current month</p>
                         </div>
                       </div>
-                      <p className="text-xl font-bold text-red-700 dark:text-red-300">$0.00</p>
+                      <p className="text-xl font-bold text-red-700 dark:text-red-300">
+                        {summaryLoading ? (
+                          <Skeleton className="h-6 w-16" />
+                        ) : (
+                          `$${financialSummary?.totalExpenses?.toFixed(2) || '0.00'}`
+                        )}
+                      </p>
                     </div>
 
                     <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
@@ -210,7 +272,13 @@ export default function Reports() {
                           <p className="text-xs text-blue-600 dark:text-blue-400">Income - Expenses</p>
                         </div>
                       </div>
-                      <p className="text-xl font-bold text-blue-700 dark:text-blue-300">$0.00</p>
+                      <p className="text-xl font-bold text-blue-700 dark:text-blue-300">
+                        {summaryLoading ? (
+                          <Skeleton className="h-6 w-16" />
+                        ) : (
+                          `$${((financialSummary?.totalIncome || 0) - (financialSummary?.totalExpenses || 0)).toFixed(2)}`
+                        )}
+                      </p>
                     </div>
                   </div>
                 </CardContent>
