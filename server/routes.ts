@@ -20,6 +20,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertTransactionSchema.parse({
         ...req.body,
         userId,
+        categoryId: req.body.categoryId ? parseInt(req.body.categoryId) : null,
+        amount: req.body.amount.toString(),
         date: new Date(req.body.date),
       });
 
