@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/use-auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -32,14 +31,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed }: SidebarProps) {
-  const { user } = useAuth();
   const [location, navigate] = useLocation();
-
-  const hasAccess = (requiredPlan: string) => {
-    if (!user?.plan) return false;
-    const planHierarchy = { free: 0, standard: 1, premium: 2 };
-    return planHierarchy[user.plan as keyof typeof planHierarchy] >= planHierarchy[requiredPlan as keyof typeof planHierarchy];
-  };
 
   const menuItems = [
     {
@@ -127,9 +119,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
     return location.startsWith(href);
   };
 
-  const canAccess = (premium: boolean) => {
-    return !premium || user?.plan === 'premium';
-  };
+
 
   return (
     <>
@@ -193,7 +183,6 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
             {menuItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
-              const accessible = hasAccess(item.requiredPlan || "free");
 
               return (
                 <div key={item.title} className="relative">
@@ -212,7 +201,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                       {!isCollapsed && (
                         <span className="flex items-center justify-between w-full">
                           {item.title}
-                          {item.badge && !accessible && (
+                          {item.badge && (
                             <Badge className={cn(
                               "text-white text-xs ml-2",
                               item.badge === "Standard" ? "bg-blue-500" : "bg-purple-500"
@@ -261,16 +250,8 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
         {/* Footer */}
         {!isCollapsed && (
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-              <span>v1.0.0</span>
-              {user?.plan === 'premium' ? (
-                <Badge className="bg-premium text-white">
-                  <Crown className="h-3 w-3 mr-1" />
-                  Premium
-                </Badge>
-              ) : (
-                <Badge variant="secondary">Free</Badge>
-              )}
+            <div className="flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
+              <span>FinanceFlow v1.0.0</span>
             </div>
           </div>
         )}
