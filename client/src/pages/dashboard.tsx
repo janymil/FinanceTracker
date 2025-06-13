@@ -136,6 +136,26 @@ export default function Dashboard() {
     });
   };
 
+  // Generate dynamic month options (current month + last 11 months)
+  const generateMonthOptions = () => {
+    const options = [];
+    const now = new Date();
+    
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const value = `${year}-${month}`;
+      const label = date.toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric'
+      });
+      options.push({ value, label });
+    }
+    
+    return options;
+  };
+
   const handleSubmit = () => {
     if (!newTransaction.amount || !newTransaction.description) return;
     createTransactionMutation.mutate(newTransaction);
@@ -162,11 +182,11 @@ export default function Dashboard() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2024-05">May 2024</SelectItem>
-                  <SelectItem value="2024-04">April 2024</SelectItem>
-                  <SelectItem value="2024-03">March 2024</SelectItem>
-                  <SelectItem value="2024-02">February 2024</SelectItem>
-                  <SelectItem value="2024-01">January 2024</SelectItem>
+                  {generateMonthOptions().map(({ value, label }) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

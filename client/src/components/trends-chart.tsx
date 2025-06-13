@@ -4,15 +4,32 @@ import { Crown } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 export default function TrendsChart() {
-  // Mock data for financial trends
-  const trendData = [
-    { month: 'Dec 2024', income: 0, expenses: 0, netBalance: 0 },
-    { month: 'Jan 2025', income: 0, expenses: 0, netBalance: 0 },
-    { month: 'Feb 2025', income: 0, expenses: 0, netBalance: 0 },
-    { month: 'Mar 2025', income: 0, expenses: 0, netBalance: 0 },
-    { month: 'Apr 2025', income: 2000, expenses: 150, netBalance: 1850 },
-    { month: 'May 2025', income: 14000, expenses: 330, netBalance: 13670 },
-  ];
+  // Generate dynamic months based on current date
+  const generateTrendData = () => {
+    const data = [];
+    const now = new Date();
+    
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthLabel = date.toLocaleDateString('en-US', {
+        month: 'short',
+        year: 'numeric'
+      });
+      
+      // Only show actual data for current and previous month, others show 0
+      const isRecentMonth = i <= 1;
+      data.push({
+        month: monthLabel,
+        income: isRecentMonth ? (i === 0 ? 14000 : 2000) : 0,
+        expenses: isRecentMonth ? (i === 0 ? 330 : 150) : 0,
+        netBalance: isRecentMonth ? (i === 0 ? 13670 : 1850) : 0,
+      });
+    }
+    
+    return data;
+  };
+
+  const trendData = generateTrendData();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
