@@ -260,7 +260,11 @@ export default function InteractiveChart({
         );
 
       default:
-        return <div>Chart type not supported</div>;
+        return (
+          <div className="text-center text-gray-500">
+            Chart type not supported
+          </div>
+        );
     }
   };
 
