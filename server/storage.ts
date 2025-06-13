@@ -3,6 +3,7 @@ import {
   transactions,
   budgets,
   categories,
+  expenseReminders,
   type User,
   type InsertUser,
   type Transaction,
@@ -10,6 +11,8 @@ import {
   type Budget,
   type InsertBudget,
   type Category,
+  type ExpenseReminder,
+  type InsertExpenseReminder,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, desc, sum, sql } from "drizzle-orm";
@@ -36,6 +39,14 @@ export interface IStorage {
 
   // Category operations
   getCategories(): Promise<Category[]>;
+
+  // Expense reminder operations (Standard/Premium only)
+  createExpenseReminder(reminder: InsertExpenseReminder): Promise<ExpenseReminder>;
+  getUserExpenseReminders(userId: number): Promise<ExpenseReminder[]>;
+  getUpcomingExpenseReminders(userId: number, daysBefore?: number): Promise<ExpenseReminder[]>;
+  updateExpenseReminder(id: number, reminder: Partial<InsertExpenseReminder>): Promise<ExpenseReminder>;
+  deleteExpenseReminder(id: number, userId: number): Promise<void>;
+  markExpenseReminderCompleted(id: number, userId: number): Promise<void>;
 
   // Analytics
   getUserFinancialSummary(userId: number, startDate: Date, endDate: Date): Promise<{
@@ -236,6 +247,61 @@ export class DatabaseStorage implements IStorage {
       netBalance,
       transactionsByCategory,
     };
+  }
+
+  // Expense reminder operations
+  async createExpenseReminder(reminder: InsertExpenseReminder): Promise<ExpenseReminder> {
+    const [result] = await db.insert(expenseReminders).values(reminder).returning();
+    return result;
+  }
+
+  async getUserExpenseReminders(userId: number): Promise<ExpenseReminder[]> {
+    return await db
+      .select()
+      .from(expenseReminders)
+      .where(and(eq(expenseReminders.userId, userId), eq(expenseReminders.isActive, true)))
+      .orderBy(expenseReminders.dueDate);
+  }
+
+  async getUpcomingExpenseReminders(userId: number, daysBefore: number = 1): Promise<ExpenseReminder[]> {
+    const now = new Date();
+    const reminderDate = new Date();
+    reminderDate.setDate(now.getDate() + daysBefore);
+
+    return await db
+      .select()
+      .from(expenseReminders)
+      .where(
+        and(
+          eq(expenseReminders.userId, userId),
+          eq(expenseReminders.isActive, true),
+          eq(expenseReminders.isCompleted, false),
+          lte(expenseReminders.dueDate, reminderDate)
+        )
+      )
+      .orderBy(expenseReminders.dueDate);
+  }
+
+  async updateExpenseReminder(id: number, reminder: Partial<InsertExpenseReminder>): Promise<ExpenseReminder> {
+    const [result] = await db
+      .update(expenseReminders)
+      .set({ ...reminder, updatedAt: new Date() })
+      .where(eq(expenseReminders.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteExpenseReminder(id: number, userId: number): Promise<void> {
+    await db
+      .delete(expenseReminders)
+      .where(and(eq(expenseReminders.id, id), eq(expenseReminders.userId, userId)));
+  }
+
+  async markExpenseReminderCompleted(id: number, userId: number): Promise<void> {
+    await db
+      .update(expenseReminders)
+      .set({ isCompleted: true, updatedAt: new Date() })
+      .where(and(eq(expenseReminders.id, id), eq(expenseReminders.userId, userId)));
   }
 }
 

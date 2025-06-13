@@ -1,0 +1,464 @@
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { 
+  Bell, 
+  Clock, 
+  Calendar,
+  Plus,
+  CheckCircle,
+  AlertTriangle,
+  Trash2,
+  Edit,
+  Crown
+} from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { format, isToday, isTomorrow, isWithinInterval, addDays } from "date-fns";
+import RequirePlan from "@/components/require-plan";
+
+interface ExpenseReminder {
+  id: number;
+  title: string;
+  description?: string;
+  amount?: string;
+  dueDate: string;
+  isRecurring: boolean;
+  recurringFrequency?: string;
+  recurringEndDate?: string;
+  reminderDaysBefore: number;
+  isActive: boolean;
+  isCompleted: boolean;
+  categoryId?: number;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  icon: string;
+  color: string;
+  type: "income" | "expense";
+}
+
+export default function ExpenseRemindersWidget() {
+  const { toast } = useToast();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingReminder, setEditingReminder] = useState<ExpenseReminder | null>(null);
+  
+  const [newReminder, setNewReminder] = useState({
+    title: "",
+    description: "",
+    amount: "",
+    dueDate: new Date().toISOString().split('T')[0],
+    isRecurring: false,
+    recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
+    recurringEndDate: "",
+    reminderDaysBefore: 1,
+    categoryId: "",
+  });
+
+  const { data: reminders = [], isLoading } = useQuery({
+    queryKey: ["/api/expense-reminders"],
+    enabled: true,
+  });
+
+  const { data: upcomingReminders = [] } = useQuery({
+    queryKey: ["/api/expense-reminders/upcoming"],
+    enabled: true,
+  });
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["/api/categories"],
+  });
+
+  const createReminderMutation = useMutation({
+    mutationFn: async (reminderData: any) => {
+      const res = await apiRequest('/api/expense-reminders', {
+        method: 'POST',
+        body: JSON.stringify(reminderData),
+      });
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
+      setIsDialogOpen(false);
+      resetForm();
+      toast({
+        title: "Reminder Created",
+        description: "Expense reminder has been set successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const completeReminderMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiRequest(`/api/expense-reminders/${id}/complete`, {
+        method: 'POST',
+      });
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
+      toast({
+        title: "Reminder Completed",
+        description: "Expense reminder marked as completed",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteReminderMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiRequest(`/api/expense-reminders/${id}`, {
+        method: 'DELETE',
+      });
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
+      toast({
+        title: "Reminder Deleted",
+        description: "Expense reminder has been deleted",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resetForm = () => {
+    setNewReminder({
+      title: "",
+      description: "",
+      amount: "",
+      dueDate: new Date().toISOString().split('T')[0],
+      isRecurring: false,
+      recurringFrequency: "monthly",
+      recurringEndDate: "",
+      reminderDaysBefore: 1,
+      categoryId: "",
+    });
+    setEditingReminder(null);
+  };
+
+  const handleSubmit = () => {
+    if (!newReminder.title || !newReminder.dueDate) return;
+    createReminderMutation.mutate(newReminder);
+  };
+
+  const getReminderPriority = (reminder: ExpenseReminder) => {
+    const dueDate = new Date(reminder.dueDate);
+    const today = new Date();
+    
+    if (isToday(dueDate)) return "high";
+    if (isTomorrow(dueDate)) return "medium";
+    if (isWithinInterval(dueDate, { start: today, end: addDays(today, 7) })) return "low";
+    return "normal";
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "high": return "text-red-600 bg-red-100 dark:bg-red-900/20";
+      case "medium": return "text-orange-600 bg-orange-100 dark:bg-orange-900/20";
+      case "low": return "text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20";
+      default: return "text-blue-600 bg-blue-100 dark:bg-blue-900/20";
+    }
+  };
+
+  const expenseCategories = Array.isArray(categories) ? 
+    (categories as Category[]).filter((cat: Category) => cat.type === "expense") : [];
+
+  return (
+    <RequirePlan plan="standard">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Expense Reminders
+                <Badge className="bg-blue-600 text-white">
+                  <Crown className="h-3 w-3 mr-1" />
+                  Standard+
+                </Badge>
+              </CardTitle>
+              <CardDescription>
+                Never miss important payments and expenses
+              </CardDescription>
+            </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" onClick={resetForm}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Reminder
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingReminder ? "Edit Reminder" : "Create Expense Reminder"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    Set up a reminder for an upcoming expense or payment
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="title">Title *</Label>
+                    <Input
+                      id="title"
+                      value={newReminder.title}
+                      onChange={(e) => setNewReminder({ ...newReminder, title: e.target.value })}
+                      placeholder="e.g., Rent payment, Insurance bill"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={newReminder.description}
+                      onChange={(e) => setNewReminder({ ...newReminder, description: e.target.value })}
+                      placeholder="Additional notes about this expense"
+                      rows={2}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="amount">Amount</Label>
+                      <Input
+                        id="amount"
+                        type="number"
+                        step="0.01"
+                        value={newReminder.amount}
+                        onChange={(e) => setNewReminder({ ...newReminder, amount: e.target.value })}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="dueDate">Due Date *</Label>
+                      <Input
+                        id="dueDate"
+                        type="date"
+                        value={newReminder.dueDate}
+                        onChange={(e) => setNewReminder({ ...newReminder, dueDate: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="category">Category</Label>
+                      <Select 
+                        value={newReminder.categoryId} 
+                        onValueChange={(value) => setNewReminder({ ...newReminder, categoryId: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {expenseCategories.map((category: Category) => (
+                            <SelectItem key={category.id} value={category.id.toString()}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="reminderDays">Remind me</Label>
+                      <Select 
+                        value={newReminder.reminderDaysBefore.toString()} 
+                        onValueChange={(value) => setNewReminder({ ...newReminder, reminderDaysBefore: parseInt(value) })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">On due date</SelectItem>
+                          <SelectItem value="1">1 day before</SelectItem>
+                          <SelectItem value="3">3 days before</SelectItem>
+                          <SelectItem value="7">1 week before</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 border-t pt-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="recurring"
+                        checked={newReminder.isRecurring}
+                        onCheckedChange={(checked) => 
+                          setNewReminder({ ...newReminder, isRecurring: checked as boolean })
+                        }
+                      />
+                      <label htmlFor="recurring" className="text-sm font-medium">
+                        Recurring reminder
+                      </label>
+                    </div>
+
+                    {newReminder.isRecurring && (
+                      <div className="grid grid-cols-2 gap-4 pl-6">
+                        <div>
+                          <Label htmlFor="frequency">Frequency</Label>
+                          <Select
+                            value={newReminder.recurringFrequency}
+                            onValueChange={(value) => setNewReminder({ 
+                              ...newReminder, 
+                              recurringFrequency: value as "weekly" | "monthly" | "yearly" 
+                            })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="weekly">Weekly</SelectItem>
+                              <SelectItem value="monthly">Monthly</SelectItem>
+                              <SelectItem value="yearly">Yearly</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="endDate">End Date</Label>
+                          <Input
+                            id="endDate"
+                            type="date"
+                            value={newReminder.recurringEndDate}
+                            onChange={(e) => setNewReminder({ 
+                              ...newReminder, 
+                              recurringEndDate: e.target.value 
+                            })}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 pt-4">
+                    <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="flex-1">
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleSubmit}
+                      disabled={!newReminder.title || !newReminder.dueDate || createReminderMutation.isPending}
+                      className="flex-1"
+                    >
+                      {editingReminder ? "Update" : "Create"} Reminder
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-3">
+              <div className="h-16 bg-gray-100 dark:bg-gray-800 rounded animate-pulse" />
+              <div className="h-16 bg-gray-100 dark:bg-gray-800 rounded animate-pulse" />
+            </div>
+          ) : upcomingReminders.length > 0 ? (
+            <div className="space-y-3">
+              {upcomingReminders.slice(0, 5).map((reminder: ExpenseReminder) => {
+                const priority = getReminderPriority(reminder);
+                const priorityColor = getPriorityColor(priority);
+                
+                return (
+                  <div key={reminder.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${priorityColor}`}>
+                        {priority === "high" ? (
+                          <AlertTriangle className="h-4 w-4" />
+                        ) : (
+                          <Clock className="h-4 w-4" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h5 className="font-medium text-sm">{reminder.title}</h5>
+                          {reminder.amount && (
+                            <Badge variant="outline" className="text-xs">
+                              ${reminder.amount}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-600 dark:text-gray-300">
+                          Due: {format(new Date(reminder.dueDate), "MMM dd, yyyy")}
+                        </p>
+                        {reminder.description && (
+                          <p className="text-xs text-gray-500 mt-1">{reminder.description}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => completeReminderMutation.mutate(reminder.id)}
+                        disabled={completeReminderMutation.isPending}
+                      >
+                        <CheckCircle className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => deleteReminderMutation.mutate(reminder.id)}
+                        disabled={deleteReminderMutation.isPending}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+              
+              {upcomingReminders.length > 5 && (
+                <p className="text-xs text-gray-500 text-center">
+                  +{upcomingReminders.length - 5} more reminders
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Bell className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+              <p className="text-gray-600 dark:text-gray-300">No upcoming expense reminders</p>
+              <p className="text-sm text-gray-500 mt-1">
+                Create reminders for important payments and expenses
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </RequirePlan>
+  );
+}
