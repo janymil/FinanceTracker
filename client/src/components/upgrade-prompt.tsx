@@ -5,7 +5,7 @@ import { Crown, Lock, Target, TrendingUp, BarChart3, Calendar, Check } from "luc
 import { Link } from "wouter";
 
 interface UpgradePromptProps {
-  requiredPlan: 'standard' | 'premium';
+  requiredPlan: 'free' | 'standard' | 'premium';
   feature: string;
   description: string;
   benefits: string[];
@@ -20,6 +20,11 @@ export default function UpgradePrompt({
   icon: Icon = Lock 
 }: UpgradePromptProps) {
   const planColors = {
+    free: {
+      gradient: "from-gray-100 to-slate-100 dark:from-gray-900 dark:to-slate-900",
+      accent: "bg-gray-600",
+      badge: "bg-gray-500"
+    },
     standard: {
       gradient: "from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900",
       accent: "bg-blue-600",
@@ -38,7 +43,7 @@ export default function UpgradePrompt({
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="text-center mb-8">
         <div className={`mx-auto w-24 h-24 bg-gradient-to-br ${colors.gradient} rounded-full flex items-center justify-center mb-6`}>
-          <Icon className={`h-12 w-12 text-${requiredPlan === 'standard' ? 'blue' : 'purple'}-600`} />
+          <Icon className={`h-12 w-12 ${requiredPlan === 'standard' ? 'text-blue-600' : requiredPlan === 'premium' ? 'text-purple-600' : 'text-gray-600'}`} />
         </div>
         
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
