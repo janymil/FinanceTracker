@@ -81,11 +81,11 @@ export default function ExpenseRemindersWidget() {
 
   const createReminderMutation = useMutation({
     mutationFn: async (reminderData: any) => {
-      const res = await apiRequest('/api/expense-reminders', {
+      return await apiRequest('/api/expense-reminders', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reminderData),
       });
-      return await res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
