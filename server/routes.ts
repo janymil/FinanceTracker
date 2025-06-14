@@ -1031,6 +1031,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Cloud backup requires Premium subscription" });
       }
 
+      // Ensure backup settings exist before backup
+      let settings = await storage.getUserBackupSettings(userId);
+      if (!settings) {
+        settings = await storage.createBackupSettings({
+          userId,
+          autoBackup: true,
+          frequency: 'daily',
+          retentionDays: 7,
+          includeAttachments: true,
+          encryptBackups: true,
+          status: 'active',
+          totalBackups: 0,
+          totalSize: '0 B',
+          lastBackupDate: null,
+          nextBackupDate: null
+        });
+      }
+
       const { backupScheduler } = await import('./backupScheduler');
       
       // Trigger manual backup
@@ -1168,10 +1186,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Backup status requires Premium subscription" });
       }
 
-      const settings = await storage.getUserBackupSettings(userId);
+      let settings = await storage.getUserBackupSettings(userId);
+      
+      // Create default settings if none exist
+      if (!settings) {
+        settings = await storage.createBackupSettings({
+          userId,
+          autoBackup: true,
+          frequency: 'daily',
+          retentionDays: 7,
+          includeAttachments: true,
+          encryptBackups: true,
+          status: 'active',
+          totalBackups: 0,
+          totalSize: '0 B',
+          lastBackupDate: null,
+          nextBackupDate: null
+        });
+      }
+
       const { bunnyStorage } = await import('./bunnyStorage');
-      const backups = await bunnyStorage.getUserBackups(userId);
-      const backupInfo = await bunnyStorage.getBackupInfo(userId);
+      let backups = [];
+      let backupInfo = { totalBackups: 0, totalSize: 0 };
+      
+      try {
+        backups = await bunnyStorage.getUserBackups(userId);
+        backupInfo = await bunnyStorage.getBackupInfo(userId);
+      } catch (error) {
+        // If no backups exist yet, that's ok - user hasn't backed up yet
+        console.log(`No backups found for user ${userId}, this is normal for new users`);
+      }
 
       res.json({
         settings,

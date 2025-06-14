@@ -406,7 +406,7 @@ export default function ExportPage() {
   // Manual backup mutation
   const backupMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch("/api/manual-backup", {
+      const response = await fetch("/api/backup", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -414,7 +414,8 @@ export default function ExportPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Backup failed');
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        throw new Error(errorData.message || 'Backup failed');
       }
 
       return await response.json();
