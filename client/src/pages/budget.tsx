@@ -33,6 +33,7 @@ import RequirePlan from "@/components/require-plan";
 
 interface Budget {
   id: number;
+  categoryId: number;
   amount: string;
   categoryName: string;
   categoryIcon: string;
@@ -175,7 +176,7 @@ export default function Budget() {
     setEditingBudget(budget);
     setNewBudget({
       amount: budget.amount,
-      categoryId: "",
+      categoryId: budget.categoryId.toString(),
       startDate: budget.startDate,
       endDate: budget.endDate,
     });

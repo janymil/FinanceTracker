@@ -206,8 +206,21 @@ export class DatabaseStorage implements IStorage {
 
   async getUserBudgets(userId: number): Promise<Budget[]> {
     return await db
-      .select()
+      .select({
+        id: budgets.id,
+        userId: budgets.userId,
+        categoryId: budgets.categoryId,
+        amount: budgets.amount,
+        startDate: budgets.startDate,
+        endDate: budgets.endDate,
+        period: budgets.period,
+        createdAt: budgets.createdAt,
+        categoryName: categories.name,
+        categoryIcon: categories.icon,
+        categoryColor: categories.color,
+      })
       .from(budgets)
+      .leftJoin(categories, eq(budgets.categoryId, categories.id))
       .where(eq(budgets.userId, userId))
       .orderBy(desc(budgets.createdAt));
   }
