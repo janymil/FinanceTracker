@@ -271,32 +271,44 @@ export default function ExportPage() {
       // Convert preview data to transactions
       const transactionsToImport = importResult.preview.map(item => ({
         description: item.description,
-        amount: item.amount.toString(),
+        amount: item.amount,
         type: item.type,
-        date: new Date(item.date),
+        date: item.date,
         categoryId: (categories as any[]).find((cat: any) => cat.name.toLowerCase() === item.category.toLowerCase())?.id || 1,
       }));
 
-      // Import transactions in batches
-      for (let i = 0; i < transactionsToImport.length; i++) {
-        await apiRequest('/api/transactions', {
-          method: 'POST',
-          body: JSON.stringify(transactionsToImport[i]),
-        });
-        setImportProgress((i + 1) / transactionsToImport.length * 100);
+      // Send all transactions to the bulk import endpoint
+      const response = await fetch('/api/import/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          transactions: transactionsToImport,
+          mergeStrategy: importOptions.mergeStrategy
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Import failed');
       }
 
-      return transactionsToImport.length;
+      return await response.json();
     },
-    onSuccess: (importedCount) => {
-      setImportResult(prev => prev ? { ...prev, imported: importedCount || 0 } : null);
+    onSuccess: (response) => {
+      setImportResult(prev => prev ? { 
+        ...prev, 
+        imported: response.imported || 0,
+        skipped: response.skipped || 0,
+        errors: response.errors || []
+      } : null);
       setImportStep('complete');
       queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial-summary'] });
       
       toast({
         title: "Import completed",
-        description: `Successfully imported ${importedCount} transactions.`,
+        description: response.message || `Successfully imported ${response.imported} transactions.`,
       });
     },
     onError: (error) => {
@@ -334,10 +346,27 @@ export default function ExportPage() {
         summary: exportOptions.includeSummary ? summary : null,
       };
 
-      return apiRequest("/api/export", {
+      const response = await fetch("/api/export", {
         method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(data),
       });
+
+      if (!response.ok) {
+        throw new Error('Export failed');
+      }
+
+      // For file downloads, we need to handle blob response
+      if (options.format === 'csv' || options.format === 'excel') {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const filename = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || 'export.csv';
+        return { downloadUrl: url, filename };
+      }
+
+      return await response.json();
     },
     onSuccess: (data: any) => {
       toast({
@@ -371,10 +400,19 @@ export default function ExportPage() {
   // Backup mutation
   const backupMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("/api/backup", {
+      const response = await fetch("/api/backup", {
         method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(backupSettings),
       });
+
+      if (!response.ok) {
+        throw new Error('Backup failed');
+      }
+
+      return await response.json();
     },
     onSuccess: () => {
       toast({
