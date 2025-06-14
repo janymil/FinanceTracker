@@ -610,6 +610,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Financial Health Score
+  app.post('/api/ai/financial-health-score', isAuthenticated, async (req: any, res) => {
+    try {
+      const { summary, budgets, useAdvancedFactors } = req.body;
+      
+      const transactions = await storage.getUserTransactions(req.user.id, 100);
+      
+      const aiScore = await generateAIFinancialHealthScore({
+        summary,
+        budgets,
+        transactions: transactions.map(t => ({
+          description: t.description,
+          amount: parseFloat(t.amount),
+          date: t.date.toISOString(),
+          categoryName: t.categoryId?.toString() || 'Uncategorized',
+          type: t.type
+        })),
+        useAdvancedFactors
+      });
+
+      res.json(aiScore);
+    } catch (error) {
+      console.error("Error generating AI financial health score:", error);
+      res.status(500).json({ message: "Failed to generate AI financial health score" });
+    }
+  });
+
   // AI Trend Predictions (Premium only)
   app.get('/api/trend-predictions', isAuthenticated, async (req: any, res) => {
     try {

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { TrendingUp, Shield, AlertTriangle, CheckCircle, HelpCircle } from "lucide-react";
@@ -13,8 +14,35 @@ interface FinancialHealthProps {
 }
 
 export default function FinancialHealthScore({ summary, budgets }: FinancialHealthProps) {
+  const [useAIScore, setUseAIScore] = useState(false);
+  const [aiScore, setAIScore] = useState<any>(null);
+
+  // Fetch AI-powered financial health score
+  const fetchAIScore = async () => {
+    try {
+      const response = await fetch('/api/ai/financial-health-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          summary,
+          budgets,
+          useAdvancedFactors: true
+        })
+      });
+      const data = await response.json();
+      setAIScore(data);
+    } catch (error) {
+      console.error('Failed to fetch AI score:', error);
+    }
+  };
+
   const calculateHealthScore = () => {
     if (!summary) return { score: 0, status: 'Loading...', color: 'gray' };
+
+    // Return AI score if available and enabled
+    if (useAIScore && aiScore) {
+      return aiScore;
+    }
 
     let score = 0;
     const factors = [];
@@ -116,18 +144,30 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
               <TooltipContent className="max-w-sm p-4 text-sm">
                 <div className="space-y-2">
                   <div className="font-semibold">How Your Financial Health Score is Calculated:</div>
-                  <div>
-                    <strong>Spending Control (30%):</strong> Compares your expenses to income. Lower expense ratio = higher score.
-                  </div>
-                  <div>
-                    <strong>Savings Rate (25%):</strong> Measures how much you save. Aim for 10-20% of income.
-                  </div>
-                  <div>
-                    <strong>Budget Adherence (25%):</strong> How well you stick to your budgets. Under budget = excellent.
-                  </div>
-                  <div>
-                    <strong>Financial Stability (20%):</strong> Overall balance between income and expenses.
-                  </div>
+                  {useAIScore ? (
+                    <div>
+                      <div className="text-blue-600 font-medium mb-2">🤖 AI-Powered Calculation</div>
+                      <div>AI analyzes your spending patterns, seasonal trends, and financial behavior to provide a personalized score that adapts to your unique situation.</div>
+                      <div className="mt-2">
+                        <strong>AI considers:</strong> Transaction patterns, spending volatility, category preferences, seasonal adjustments, goal progress, and predictive factors.
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div>
+                        <strong>Spending Control (30%):</strong> Compares your expenses to income. Lower expense ratio = higher score.
+                      </div>
+                      <div>
+                        <strong>Savings Rate (25%):</strong> Measures how much you save. Aim for 10-20% of income.
+                      </div>
+                      <div>
+                        <strong>Budget Adherence (25%):</strong> How well you stick to your budgets. Under budget = excellent.
+                      </div>
+                      <div>
+                        <strong>Financial Stability (20%):</strong> Overall balance between income and expenses.
+                      </div>
+                    </>
+                  )}
                   <div className="mt-3 pt-2 border-t border-gray-200">
                     <strong>Score Ranges:</strong><br />
                     80-100: Excellent | 65-79: Good | 50-64: Fair | Below 50: Needs Improvement
@@ -136,6 +176,22 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
+          <button
+            onClick={() => {
+              if (!useAIScore && !aiScore) {
+                fetchAIScore();
+              }
+              setUseAIScore(!useAIScore);
+            }}
+            className={`ml-2 px-2 py-1 text-xs rounded-full transition-colors ${
+              useAIScore 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+            }`}
+            title={useAIScore ? 'Switch to Standard Calculation' : 'Use AI-Powered Score'}
+          >
+            {useAIScore ? '🤖 AI' : 'AI'}
+          </button>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

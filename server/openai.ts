@@ -338,6 +338,153 @@ Generate financial insights based on this spending data.`
   }
 }
 
+export async function generateAIFinancialHealthScore(financialData: {
+  summary: {
+    totalIncome: number;
+    totalExpenses: number;
+    netBalance: number;
+  };
+  budgets: any[];
+  transactions: Array<{
+    description: string;
+    amount: number;
+    date: string;
+    categoryName: string;
+    type: string;
+  }>;
+  useAdvancedFactors?: boolean;
+}): Promise<{
+  score: number;
+  status: string;
+  color: string;
+  factors: Array<{
+    name: string;
+    score: number;
+    max: number;
+    status: string;
+    aiInsight?: string;
+  }>;
+  icon: string;
+  aiAnalysis: {
+    personalizedFactors: string[];
+    riskAssessment: string;
+    recommendations: string[];
+    confidence: number;
+  };
+}> {
+  try {
+    const { summary, budgets, transactions, useAdvancedFactors } = financialData;
+    
+    // Create hash for caching
+    const dataHash = aiCache.createDataHash(financialData);
+    const cached = aiCache.get(`ai_health_score_${dataHash}`);
+    if (cached) {
+      console.log('Using cached AI financial health score');
+      return cached;
+    }
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
+
+Your analysis should consider:
+- Spending patterns and volatility
+- Seasonal trends in expenses
+- Category distribution and priorities
+- Financial behavior consistency
+- Risk factors and resilience
+- Personalized weight adjustments based on user's situation
+
+Provide a comprehensive financial health score from 0-100 with detailed factor breakdown.
+
+Respond with JSON in this format:
+{
+  "score": 85,
+  "status": "Good",
+  "color": "blue",
+  "factors": [
+    {
+      "name": "Adaptive Spending Control",
+      "score": 25,
+      "max": 30,
+      "status": "good",
+      "aiInsight": "Your spending shows good consistency with minor seasonal variations"
+    }
+  ],
+  "icon": "TrendingUp",
+  "aiAnalysis": {
+    "personalizedFactors": ["Custom factor explanations"],
+    "riskAssessment": "Overall risk level and factors",
+    "recommendations": ["Personalized recommendations"],
+    "confidence": 0.87
+  }
+}`
+        },
+        {
+          role: "user",
+          content: `Analyze this financial data for a personalized health score:
+
+Financial Summary:
+- Income: $${summary.totalIncome}
+- Expenses: $${summary.totalExpenses}
+- Net Balance: $${summary.netBalance}
+
+Transaction History (${transactions.length} transactions):
+${transactions.slice(0, 20).map(t => 
+  `- ${t.description}: $${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`
+).join('\n')}
+
+Budgets: ${budgets.length} active budgets
+Advanced Analysis: ${useAdvancedFactors ? 'Enabled' : 'Standard'}
+
+Provide an AI-powered financial health score that adapts to this user's specific situation and spending patterns.`
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.3
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    
+    const processedResult = {
+      score: Math.max(0, Math.min(100, result.score || 50)),
+      status: result.status || 'Fair',
+      color: result.color || 'yellow',
+      factors: result.factors || [],
+      icon: result.icon || 'Shield',
+      aiAnalysis: {
+        personalizedFactors: result.aiAnalysis?.personalizedFactors || [],
+        riskAssessment: result.aiAnalysis?.riskAssessment || 'Standard risk assessment',
+        recommendations: result.aiAnalysis?.recommendations || [],
+        confidence: Math.max(0, Math.min(1, result.aiAnalysis?.confidence || 0.7))
+      }
+    };
+
+    // Cache the result
+    aiCache.set(`ai_health_score_${dataHash}`, processedResult, 3600); // Cache for 1 hour
+    
+    return processedResult;
+  } catch (error) {
+    console.error('Error generating AI financial health score:', error);
+    return {
+      score: 50,
+      status: 'Analysis Unavailable',
+      color: 'gray',
+      factors: [],
+      icon: 'AlertTriangle',
+      aiAnalysis: {
+        personalizedFactors: [],
+        riskAssessment: 'Unable to assess risk',
+        recommendations: ['Please try again later'],
+        confidence: 0
+      }
+    };
+  }
+}
+
 export async function generateTrendPredictions(
   transactions: Array<{
     id: number;
