@@ -14,12 +14,14 @@ export default function Landing() {
   };
 
   const handleGetStarted = (plan: string) => {
-    // For free plan, go directly to signup
+    // All users start with Replit Auth (they get free plan by default)
+    // After login, they can upgrade if they chose a paid plan
     if (plan === 'free') {
-      setLocation('/auth?plan=free');
+      window.location.href = '/api/login';
     } else {
-      // For paid plans, go to dedicated subscribe page
-      setLocation(`/subscribe?plan=${plan}`);
+      // Store the desired plan and redirect to Replit login
+      localStorage.setItem('selectedPlan', plan);
+      window.location.href = '/api/login';
     }
   };
 

@@ -36,10 +36,10 @@ FinanzerPro is a full-stack personal finance management application built with R
 ## Key Components
 
 ### Authentication System
-- Traditional username/password authentication with bcrypt hashing
+- Replit Auth (OpenID Connect) for secure user authentication
 - Session-based authentication using PostgreSQL session store
 - Plan-based access control (free, standard, premium)
-- Stripe customer integration for subscription management
+- Stripe integration for subscription management after account creation
 
 ### Financial Data Models
 - **Transactions**: Core financial records with amount, description, date, type, and category
@@ -185,6 +185,11 @@ Changelog:
 - June 14, 2025. Updated demo to use authentic FinanzerPro dashboard screenshots showing real financial data
 - June 14, 2025. Removed promotional video demo and "View Demo" button from landing page per user request
 - June 14, 2025. Deleted demo.tsx page and removed demo routing from application completely
+- June 14, 2025. Successfully implemented Replit Auth to replace complex Stripe-first authentication system
+- June 14, 2025. Updated database schema to support Replit Auth with string-based user IDs and profile image URLs
+- June 14, 2025. Implemented standard industry authentication flow: users sign up with Replit Auth first, then upgrade to paid plans after account creation
+- June 14, 2025. Fixed weird username issues from Stripe checkout by using clean Replit Auth user data
+- June 14, 2025. Created UpgradePrompt component for seamless post-authentication subscription flow
 ```
 
 ## User Preferences
