@@ -44,7 +44,7 @@ export interface FinancialForecast {
 export async function categorizeExpense(description: string, amount: number): Promise<ExpenseCategorizationResult> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
@@ -84,7 +84,7 @@ Please categorize this expense.`
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
-    
+
     return {
       category: result.category || 'Other',
       confidence: Math.max(0, Math.min(1, result.confidence || 0.5)),
@@ -117,7 +117,7 @@ export async function generateFinancialTips(financialData: {
 }): Promise<FinancialTip[]> {
   try {
     const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
-    
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -176,10 +176,10 @@ Please provide personalized financial tips based on this data.`
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{"tips": []}');
-    
+
     // Handle both array response and object with tips array
     const tips = Array.isArray(result) ? result : (result.tips || []);
-    
+
     return tips.map((tip: any) => ({
       title: tip.title || 'Financial Tip',
       description: tip.description || 'No description available',
@@ -221,7 +221,7 @@ export async function generateSpendingInsights(transactions: Array<{
 }>> {
   try {
     const expenseTransactions = transactions.filter(t => t.type === 'expense');
-    
+
     if (expenseTransactions.length === 0) {
       return [];
     }
@@ -284,7 +284,7 @@ Generate financial insights based on this spending data.`
 
     const result = JSON.parse(response.choices[0].message.content || '{"insights": []}');
     const insights = Array.isArray(result) ? result : (result.insights || []);
-    
+
     return insights.map((insight: any, index: number) => ({
       id: insight.id || `ai_insight_${index}`,
       type: ['warning', 'suggestion', 'achievement', 'trend'].includes(insight.type) ? insight.type : 'suggestion',
@@ -321,16 +321,16 @@ export async function generateTrendPredictions(
     // Prepare comprehensive financial data for AI analysis
     const monthlyData = new Map();
     const categoryTotals = new Map();
-    
+
     transactions.forEach(t => {
       const month = t.date.slice(0, 7);
       const category = categoryMap.get(t.categoryId) || 'Other';
       const amount = parseFloat(t.amount);
-      
+
       if (!monthlyData.has(month)) {
         monthlyData.set(month, { income: 0, expenses: 0, categories: new Map() });
       }
-      
+
       const monthData = monthlyData.get(month);
       if (t.type === 'income') {
         monthData.income += amount;
@@ -339,7 +339,7 @@ export async function generateTrendPredictions(
         const catAmount = monthData.categories.get(category) || 0;
         monthData.categories.set(category, catAmount + amount);
       }
-      
+
       const totalAmount = categoryTotals.get(category) || 0;
       categoryTotals.set(category, totalAmount + amount);
     });
@@ -416,7 +416,7 @@ Analysis Requirements:
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{"categoryPredictions": [], "financialForecast": {}}');
-    
+
     return {
       categoryPredictions: result.categoryPredictions || [],
       financialForecast: result.financialForecast || {
