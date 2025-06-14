@@ -11,6 +11,7 @@ import { Calendar, TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, Fi
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from "date-fns";
 import { useState, useMemo } from "react";
 import RequirePlan from "@/components/require-plan";
+import MonthFilter from "@/components/month-filter";
 
 import InteractiveChart from "@/components/interactive-chart";
 import AIInsights from "@/components/ai-insights";

@@ -585,6 +585,13 @@ export default function Income() {
           </Card>
         </div>
 
+        {/* Month Navigation Filter */}
+        <MonthFilter 
+          selectedMonth={selectedMonth}
+          onMonthSelect={setSelectedMonth}
+          onDateRangeReset={() => setDateRange("all")}
+        />
+
         {/* Filters and Search */}
         <Card className="mb-6">
           <CardContent className="p-6">
