@@ -58,6 +58,13 @@ export interface IStorage {
     netBalance: number;
     transactionsByCategory: Array<{ categoryName: string; amount: number; type: string }>;
   }>;
+
+  // Backup settings operations
+  getUserBackupSettings(userId: number): Promise<BackupSettings | undefined>;
+  createBackupSettings(settings: InsertBackupSettings): Promise<BackupSettings>;
+  updateBackupSettings(userId: number, settings: Partial<InsertBackupSettings>): Promise<BackupSettings>;
+  getUsersWithActiveBackups(): Promise<Array<{ userId: number }>>;
+  getUsersWithOverdueBackups(): Promise<Array<{ userId: number }>>;
 }
 
 export class DatabaseStorage implements IStorage {

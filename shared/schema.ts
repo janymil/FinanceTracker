@@ -134,6 +134,24 @@ export const goals = pgTable("goals", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Backup settings for cloud storage
+export const backupSettings = pgTable("backup_settings", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  autoBackup: boolean("auto_backup").default(true),
+  frequency: varchar("frequency", { length: 20 }).default("daily"), // daily, weekly, monthly
+  retentionDays: integer("retention_days").default(7), // 7, 14, 30
+  includeAttachments: boolean("include_attachments").default(true),
+  encryptBackups: boolean("encrypt_backups").default(true),
+  lastBackupDate: timestamp("last_backup_date"),
+  nextBackupDate: timestamp("next_backup_date"),
+  totalBackups: integer("total_backups").default(0),
+  totalSize: varchar("total_size", { length: 50 }).default("0 MB"),
+  status: varchar("status", { length: 20 }).default("active"), // active, paused, error
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Schema exports
 export type InsertUser = typeof users.$inferInsert;
 export type UpsertUser = typeof users.$inferInsert;
@@ -153,6 +171,9 @@ export type Goal = typeof goals.$inferSelect;
 
 export type InsertExpenseReminder = typeof expenseReminders.$inferInsert;
 export type ExpenseReminder = typeof expenseReminders.$inferSelect;
+
+export type InsertBackupSettings = typeof backupSettings.$inferInsert;
+export type BackupSettings = typeof backupSettings.$inferSelect;
 
 export type Category = typeof categories.$inferSelect;
 
