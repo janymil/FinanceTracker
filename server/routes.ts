@@ -1628,8 +1628,8 @@ FEATURES:
 
 SUBSCRIPTION PLANS:
 - Free: Up to 3 transactions, basic tracking
-- Standard ($9.99/month): Up to 100 transactions, AI categorization, budgets, goals, reminders
-- Premium ($19.99/month): Unlimited transactions, advanced analytics, cloud backup, data import/export
+- Standard ($4.99/month or $49.90/year): Up to 100 transactions, AI categorization, budgets, goals, reminders
+- Premium ($9.99/month or $99.90/year): Unlimited transactions, advanced analytics, cloud backup, data import/export, AI insights
 
 GETTING STARTED:
 1. Create account
