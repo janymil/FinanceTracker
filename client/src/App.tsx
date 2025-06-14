@@ -27,6 +27,7 @@ import { Footer } from "@/components/footer";
 import { CookieBanner } from "@/components/cookie-banner";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import NotFoundPage from "./pages/not-found";
 
 function AppContent() {
   const { user, isLoading } = useAuth();
