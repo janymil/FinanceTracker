@@ -1518,6 +1518,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // AI Help Chat endpoint
+  app.post("/api/help-chat", async (req: Request, res: Response) => {
+    try {
+      const { message } = req.body;
+      
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ error: "Message is required" });
+      }
+
+      const systemPrompt = `You are a helpful assistant for FinanzerPro, a personal finance management application. You should answer questions about:
+
+FEATURES:
+- Transaction tracking (income/expenses)
+- AI-powered expense categorization (Standard+ plans)
+- Budget management (Standard+ plans)
+- Financial goals (Standard+ plans)  
+- Reports and analytics
+- Calendar view (Standard+ plans)
+- Data export/import (Premium plan)
+- Cloud backup (Premium plan)
+- AI insights and predictions (Premium plan)
+
+SUBSCRIPTION PLANS:
+- Free: Up to 3 transactions, basic tracking
+- Standard ($9.99/month): Up to 100 transactions, AI categorization, budgets, goals, reminders
+- Premium ($19.99/month): Unlimited transactions, advanced analytics, cloud backup, data import/export
+
+GETTING STARTED:
+1. Create account
+2. Add first transaction
+3. Set up categories (or use AI categorization)
+4. Create budgets and goals (Standard+)
+5. Monitor progress with dashboard
+
+Keep responses helpful, concise, and focused on FinanzerPro features. If asked about technical issues, suggest contacting support.`;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: message }
+          ],
+          max_tokens: 300,
+          temperature: 0.7,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const aiResponse = data.choices[0]?.message?.content || "I'm sorry, I couldn't process your question. Please try again or contact support.";
+
+      res.json({ response: aiResponse });
+    } catch (error) {
+      console.error('Help chat error:', error);
+      res.status(500).json({ 
+        response: "I'm experiencing technical difficulties. Please try again later or contact support for assistance." 
+      });
+    }
+  });
+
   // Error handler
   app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error(err.stack);

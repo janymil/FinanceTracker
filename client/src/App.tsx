@@ -21,6 +21,7 @@ import TermsOfService from "@/pages/terms-of-service";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import CookiePolicy from "@/pages/cookie-policy";
 import Contact from "@/pages/contact";
+import Help from "@/pages/help";
 import Header from "@/components/header";
 import Sidebar from "@/components/sidebar";
 import { Footer } from "@/components/footer";
@@ -99,6 +100,7 @@ function AppContent() {
               <Route path="/privacy-policy" component={PrivacyPolicy} />
               <Route path="/cookie-policy" component={CookiePolicy} />
               <Route path="/contact" component={Contact} />
+              <Route path="/help" component={Help} />
               <Route component={NotFoundPage} />
             </Switch>
           </div>

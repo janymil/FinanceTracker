@@ -20,6 +20,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Crosshair,
+  HelpCircle,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
