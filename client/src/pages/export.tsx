@@ -171,6 +171,158 @@ export default function ExportPage() {
     status: 'synced',
   };
 
+  // Import handlers
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/json'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a CSV, Excel, or JSON file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setImportOptions(prev => ({ ...prev, file }));
+    setImportStep('mapping');
+    
+    toast({
+      title: "File uploaded",
+      description: `${file.name} is ready for processing.`,
+    });
+  };
+
+  const handleImportPreview = async () => {
+    if (!importOptions.file) return;
+
+    setIsImporting(true);
+    setImportProgress(25);
+
+    try {
+      // Parse the uploaded file
+      const text = await importOptions.file.text();
+      setImportProgress(50);
+
+      let parsedData: any[] = [];
+      
+      if (importOptions.source === 'csv' || importOptions.file.type === 'text/csv') {
+        // Parse CSV
+        const lines = text.split('\n').filter(line => line.trim());
+        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+        
+        for (let i = importOptions.skipFirstRow ? 1 : 0; i < Math.min(lines.length, 6); i++) {
+          const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+          const row: any = {};
+          headers.forEach((header, index) => {
+            row[header] = values[index] || '';
+          });
+          parsedData.push(row);
+        }
+      } else if (importOptions.source === 'json' || importOptions.file.type === 'application/json') {
+        // Parse JSON
+        const jsonData = JSON.parse(text);
+        parsedData = Array.isArray(jsonData) ? jsonData.slice(0, 5) : [jsonData];
+      }
+
+      setImportProgress(75);
+
+      // Map parsed data to our format
+      const mappedData = parsedData.map((row, index) => {
+        const amount = parseFloat(row[columnMapping.amount] || '0');
+        return {
+          date: row[columnMapping.date] || new Date().toISOString().split('T')[0],
+          description: row[columnMapping.description] || `Imported transaction ${index + 1}`,
+          amount: Math.abs(amount),
+          category: row[columnMapping.category || ''] || 'Food',
+          type: amount < 0 ? 'expense' : 'income',
+        };
+      });
+
+      setImportResult({
+        success: true,
+        imported: 0,
+        skipped: 0,
+        errors: [],
+        preview: mappedData,
+      });
+
+      setImportProgress(100);
+      setImportStep('preview');
+    } catch (error) {
+      toast({
+        title: "Preview failed",
+        description: "Failed to process the file. Please check the format.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsImporting(false);
+      setImportProgress(0);
+    }
+  };
+
+  const importMutation = useMutation({
+    mutationFn: async () => {
+      if (!importOptions.file || !importResult?.preview) return;
+
+      // Convert preview data to transactions
+      const transactionsToImport = importResult.preview.map(item => ({
+        description: item.description,
+        amount: item.amount.toString(),
+        type: item.type,
+        date: new Date(item.date),
+        categoryId: (categories as any[]).find((cat: any) => cat.name.toLowerCase() === item.category.toLowerCase())?.id || 1,
+      }));
+
+      // Import transactions in batches
+      for (let i = 0; i < transactionsToImport.length; i++) {
+        await apiRequest('/api/transactions', {
+          method: 'POST',
+          body: JSON.stringify(transactionsToImport[i]),
+        });
+        setImportProgress((i + 1) / transactionsToImport.length * 100);
+      }
+
+      return transactionsToImport.length;
+    },
+    onSuccess: (importedCount) => {
+      setImportResult(prev => prev ? { ...prev, imported: importedCount || 0 } : null);
+      setImportStep('complete');
+      queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial-summary'] });
+      
+      toast({
+        title: "Import completed",
+        description: `Successfully imported ${importedCount} transactions.`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Import failed",
+        description: "Failed to import transactions. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleImportConfirm = () => {
+    setIsImporting(true);
+    importMutation.mutate();
+  };
+
+  const resetImport = () => {
+    setImportStep('upload');
+    setImportResult(null);
+    setImportProgress(0);
+    setImportOptions(prev => ({ ...prev, file: undefined }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   // Export mutation
   const exportMutation = useMutation({
     mutationFn: async (options: ExportOptions) => {
@@ -187,7 +339,7 @@ export default function ExportPage() {
         body: JSON.stringify(data),
       });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast({
         title: "Export Successful",
         description: "Your data has been exported successfully.",
@@ -197,20 +349,24 @@ export default function ExportPage() {
       if (data.downloadUrl) {
         const link = document.createElement('a');
         link.href = data.downloadUrl;
-        link.download = data.filename;
+        link.download = data.filename || 'financial-data.csv';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       }
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast({
         title: "Export Failed",
-        description: error.message || "Failed to export data. Please try again.",
+        description: "Failed to export data. Please try again.",
         variant: "destructive",
       });
     },
   });
+
+  const handleExport = () => {
+    exportMutation.mutate(exportOptions);
+  };
 
   // Backup mutation
   const backupMutation = useMutation({
@@ -222,30 +378,25 @@ export default function ExportPage() {
     },
     onSuccess: () => {
       toast({
-        title: "Backup Initiated",
-        description: "Your data backup has been started.",
+        title: "Backup Successful",
+        description: "Your data has been backed up to the cloud.",
       });
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast({
         title: "Backup Failed",
-        description: error.message || "Failed to start backup. Please try again.",
+        description: "Failed to backup data. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  const handleExport = () => {
-    exportMutation.mutate(exportOptions);
-  };
-
-  const handleBackupNow = async () => {
+  const handleBackupNow = () => {
     setIsBackingUp(true);
     setBackupProgress(0);
     
-    // Simulate backup progress
     const interval = setInterval(() => {
-      setBackupProgress(prev => {
+      setBackupProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval);
           setIsBackingUp(false);
@@ -253,40 +404,39 @@ export default function ExportPage() {
         }
         return prev + 10;
       });
-    }, 200);
-
-    // Also trigger the actual backup
+    }, 300);
+    
     backupMutation.mutate();
   };
 
   const handleRestoreData = () => {
     toast({
-      title: "Restore Initiated",
-      description: "Your data restore has been started from the latest backup.",
+      title: "Restore initiated",
+      description: "Data restore has been started. This may take a few minutes.",
     });
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'synced':
-        return <Check className="h-4 w-4 text-green-600" />;
+        return <Check className="h-5 w-5 text-green-500" />;
       case 'syncing':
-        return <Upload className="h-4 w-4 text-blue-600 animate-pulse" />;
+        return <Upload className="h-5 w-5 text-blue-500 animate-spin" />;
       case 'error':
-        return <AlertCircle className="h-4 w-4 text-red-600" />;
+        return <AlertCircle className="h-5 w-5 text-red-500" />;
       default:
-        return <Cloud className="h-4 w-4 text-gray-400" />;
+        return <AlertCircle className="h-5 w-5 text-gray-500" />;
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
       case 'synced':
-        return 'Up to date';
+        return 'All data synced';
       case 'syncing':
-        return 'Syncing...';
+        return 'Syncing data...';
       case 'error':
-        return 'Sync error';
+        return 'Sync error occurred';
       default:
         return 'Pending';
     }
@@ -297,9 +447,9 @@ export default function ExportPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Export & Backup</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Data Management</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Export your financial data and manage cloud backups
+              Import, export, and backup your financial data
             </p>
           </div>
           
@@ -309,462 +459,810 @@ export default function ExportPage() {
           </Badge>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Data Export Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Download className="h-5 w-5" />
-                <span>Data Export</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Export Format */}
-              <div className="space-y-2">
-                <Label htmlFor="format">Export Format</Label>
-                <Select
-                  value={exportOptions.format}
-                  onValueChange={(value: any) => 
-                    setExportOptions({ ...exportOptions, format: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select format" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pdf">PDF Report</SelectItem>
-                    <SelectItem value="csv">CSV Spreadsheet</SelectItem>
-                    <SelectItem value="excel">Excel Workbook</SelectItem>
-                    <SelectItem value="json">JSON Data</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+        <Tabs defaultValue="import" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="import" className="flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              Import Data
+            </TabsTrigger>
+            <TabsTrigger value="export" className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Export Data
+            </TabsTrigger>
+            <TabsTrigger value="backup" className="flex items-center gap-2">
+              <Cloud className="h-4 w-4" />
+              Cloud Backup
+            </TabsTrigger>
+          </TabsList>
 
-              {/* Date Range */}
-              <div className="space-y-2">
-                <Label htmlFor="dateRange">Date Range</Label>
-                <Select
-                  value={exportOptions.dateRange}
-                  onValueChange={(value: any) => 
-                    setExportOptions({ ...exportOptions, dateRange: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select date range" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Time</SelectItem>
-                    <SelectItem value="month">This Month</SelectItem>
-                    <SelectItem value="quarter">This Quarter</SelectItem>
-                    <SelectItem value="year">This Year</SelectItem>
-                    <SelectItem value="custom">Custom Range</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+          {/* Import Tab */}
+          <TabsContent value="import" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Upload className="h-5 w-5" />
+                  Import Financial Data
+                </CardTitle>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Import transactions from various formats and financial apps
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {importStep === 'upload' && (
+                  <div className="space-y-4">
+                    {/* Import Source Selection */}
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">Import Source</Label>
+                      <Select
+                        value={importOptions.source}
+                        onValueChange={(value) =>
+                          setImportOptions(prev => ({ ...prev, source: value as any }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="csv">CSV File</SelectItem>
+                          <SelectItem value="excel">Excel File</SelectItem>
+                          <SelectItem value="json">JSON File</SelectItem>
+                          <SelectItem value="mint">Mint Export</SelectItem>
+                          <SelectItem value="quickbooks">QuickBooks</SelectItem>
+                          <SelectItem value="ynab">YNAB (You Need A Budget)</SelectItem>
+                          <SelectItem value="personal-capital">Personal Capital</SelectItem>
+                          <SelectItem value="bank-export">Bank Export</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-              {/* Custom Date Range */}
-              {exportOptions.dateRange === "custom" && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="startDate">Start Date</Label>
-                    <Input
-                      id="startDate"
-                      type="date"
-                      value={exportOptions.startDate || ""}
-                      onChange={(e) =>
-                        setExportOptions({ ...exportOptions, startDate: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="endDate">End Date</Label>
-                    <Input
-                      id="endDate"
-                      type="date"
-                      value={exportOptions.endDate || ""}
-                      onChange={(e) =>
-                        setExportOptions({ ...exportOptions, endDate: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-              )}
+                    {/* File Upload Area */}
+                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".csv,.xlsx,.xls,.json"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                      <div className="space-y-4">
+                        <div className="mx-auto w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                          <File className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                            Upload your file
+                          </h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            CSV, Excel, or JSON files up to 10MB
+                          </p>
+                        </div>
+                        <Button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Choose File
+                        </Button>
+                      </div>
+                    </div>
 
-              {/* Data Inclusions */}
-              <div className="space-y-3">
-                <Label>Include in Export</Label>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="includeTransactions"
-                      checked={exportOptions.includeTransactions}
-                      onCheckedChange={(checked) =>
-                        setExportOptions({ ...exportOptions, includeTransactions: checked as boolean })
-                      }
-                    />
-                    <Label htmlFor="includeTransactions" className="flex items-center text-sm">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Transactions
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="includeBudgets"
-                      checked={exportOptions.includeBudgets}
-                      onCheckedChange={(checked) =>
-                        setExportOptions({ ...exportOptions, includeBudgets: checked as boolean })
-                      }
-                    />
-                    <Label htmlFor="includeBudgets" className="flex items-center text-sm">
-                      <Database className="h-4 w-4 mr-2" />
-                      Budgets
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="includeGoals"
-                      checked={exportOptions.includeGoals}
-                      onCheckedChange={(checked) =>
-                        setExportOptions({ ...exportOptions, includeGoals: checked as boolean })
-                      }
-                    />
-                    <Label htmlFor="includeGoals" className="flex items-center text-sm">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Goals
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="includeSummary"
-                      checked={exportOptions.includeSummary}
-                      onCheckedChange={(checked) =>
-                        setExportOptions({ ...exportOptions, includeSummary: checked as boolean })
-                      }
-                    />
-                    <Label htmlFor="includeSummary" className="flex items-center text-sm">
-                      <Settings className="h-4 w-4 mr-2" />
-                      Financial Summary
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="includeCharts"
-                      checked={exportOptions.includeCharts}
-                      onCheckedChange={(checked) =>
-                        setExportOptions({ ...exportOptions, includeCharts: checked as boolean })
-                      }
-                    />
-                    <Label htmlFor="includeCharts" className="flex items-center text-sm">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Charts & Graphs
-                    </Label>
-                  </div>
-                </div>
-              </div>
+                    {/* Import Options */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        <Label className="text-sm font-medium">Date Format</Label>
+                        <Select
+                          value={importOptions.dateFormat}
+                          onValueChange={(value) =>
+                            setImportOptions(prev => ({ ...prev, dateFormat: value }))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="MM/dd/yyyy">MM/DD/YYYY</SelectItem>
+                            <SelectItem value="dd/MM/yyyy">DD/MM/YYYY</SelectItem>
+                            <SelectItem value="yyyy-MM-dd">YYYY-MM-DD</SelectItem>
+                            <SelectItem value="MM-dd-yyyy">MM-DD-YYYY</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-              <Button 
-                onClick={handleExport} 
-                disabled={exportMutation.isPending}
-                className="w-full"
-              >
-                {exportMutation.isPending ? (
-                  <>
-                    <Upload className="h-4 w-4 mr-2 animate-spin" />
-                    Exporting...
-                  </>
-                ) : (
-                  <>
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Data
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
+                      <div className="space-y-3">
+                        <Label className="text-sm font-medium">Merge Strategy</Label>
+                        <Select
+                          value={importOptions.mergeStrategy}
+                          onValueChange={(value) =>
+                            setImportOptions(prev => ({ ...prev, mergeStrategy: value as any }))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="append">Add to existing data</SelectItem>
+                            <SelectItem value="merge">Merge and update duplicates</SelectItem>
+                            <SelectItem value="replace">Replace all data</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
 
-          {/* Cloud Backup Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Cloud className="h-5 w-5" />
-                <span>Cloud Backup</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Backup Status */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    {getStatusIcon(backupStatus.status)}
-                    <div>
-                      <p className="font-medium text-sm">
-                        {getStatusText(backupStatus.status)}
-                      </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        Last backup: {format(new Date(backupStatus.lastBackup), 'MMM d, h:mm a')}
-                      </p>
+                    <div className="flex items-center space-x-6">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="skipFirstRow"
+                          checked={importOptions.skipFirstRow}
+                          onCheckedChange={(checked) =>
+                            setImportOptions(prev => ({ ...prev, skipFirstRow: !!checked }))
+                          }
+                        />
+                        <Label htmlFor="skipFirstRow" className="text-sm">
+                          Skip first row (headers)
+                        </Label>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="autoCategory"
+                          checked={importOptions.categoryMapping === 'auto'}
+                          onCheckedChange={(checked) =>
+                            setImportOptions(prev => ({ 
+                              ...prev, 
+                              categoryMapping: checked ? 'auto' : 'manual' 
+                            }))
+                          }
+                        />
+                        <Label htmlFor="autoCategory" className="text-sm">
+                          Auto-categorize transactions
+                        </Label>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium">{backupStatus.totalSize}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">Total size</p>
-                  </div>
-                </div>
+                )}
 
-                {(backupStatus.status === 'syncing' || isBackingUp) && (
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>{isBackingUp ? 'Backing up data...' : 'Syncing data...'}</span>
-                      <span>{isBackingUp ? `${backupProgress}%` : '67%'}</span>
+                {importStep === 'mapping' && importOptions.file && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-medium">Map Columns</h3>
+                      <Badge variant="outline">
+                        File: {importOptions.file.name}
+                      </Badge>
                     </div>
-                    <Progress value={isBackingUp ? backupProgress : 67} className="h-2" />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        <Label>Date Column</Label>
+                        <Input
+                          value={columnMapping.date}
+                          onChange={(e) =>
+                            setColumnMapping(prev => ({ ...prev, date: e.target.value }))
+                          }
+                          placeholder="Date"
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label>Description Column</Label>
+                        <Input
+                          value={columnMapping.description}
+                          onChange={(e) =>
+                            setColumnMapping(prev => ({ ...prev, description: e.target.value }))
+                          }
+                          placeholder="Description"
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label>Amount Column</Label>
+                        <Input
+                          value={columnMapping.amount}
+                          onChange={(e) =>
+                            setColumnMapping(prev => ({ ...prev, amount: e.target.value }))
+                          }
+                          placeholder="Amount"
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label>Category Column (Optional)</Label>
+                        <Input
+                          value={columnMapping.category || ''}
+                          onChange={(e) =>
+                            setColumnMapping(prev => ({ ...prev, category: e.target.value }))
+                          }
+                          placeholder="Category"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button
+                        variant="outline"
+                        onClick={() => setImportStep('upload')}
+                      >
+                        Back
+                      </Button>
+                      <Button
+                        onClick={handleImportPreview}
+                        disabled={isImporting}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        {isImporting ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Preview Data
+                          </>
+                        )}
+                      </Button>
+                    </div>
+
+                    {isImporting && (
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Processing file...</span>
+                          <span>{importProgress}%</span>
+                        </div>
+                        <Progress value={importProgress} className="h-2" />
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
 
-              <Separator />
+                {importStep === 'preview' && importResult?.preview && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-medium">Preview Import</h3>
+                      <Badge variant="outline">
+                        {importResult.preview.length} transactions ready
+                      </Badge>
+                    </div>
 
-              {/* Backup Settings */}
-              <div className="space-y-4">
-                <h4 className="font-medium">Backup Settings</h4>
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm font-medium">Automatic Backup</Label>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Automatically backup your data
-                    </p>
+                    <div className="border rounded-lg overflow-hidden">
+                      <div className="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b">
+                        <div className="grid grid-cols-5 gap-4 text-sm font-medium">
+                          <span>Date</span>
+                          <span>Description</span>
+                          <span>Amount</span>
+                          <span>Category</span>
+                          <span>Type</span>
+                        </div>
+                      </div>
+                      <div className="divide-y">
+                        {importResult.preview.map((transaction, index) => (
+                          <div key={index} className="px-4 py-3">
+                            <div className="grid grid-cols-5 gap-4 text-sm">
+                              <span>{transaction.date}</span>
+                              <span>{transaction.description}</span>
+                              <span className={transaction.type === 'expense' ? 'text-red-600' : 'text-green-600'}>
+                                {transaction.type === 'expense' ? '-' : '+'}${transaction.amount.toFixed(2)}
+                              </span>
+                              <span>{transaction.category}</span>
+                              <span className="capitalize">{transaction.type}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button
+                        variant="outline"
+                        onClick={() => setImportStep('mapping')}
+                      >
+                        Back to Mapping
+                      </Button>
+                      <Button
+                        onClick={handleImportConfirm}
+                        disabled={isImporting}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        {isImporting ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Importing...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Confirm Import
+                          </>
+                        )}
+                      </Button>
+                    </div>
+
+                    {isImporting && (
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Importing transactions...</span>
+                          <span>{importProgress.toFixed(0)}%</span>
+                        </div>
+                        <Progress value={importProgress} className="h-2" />
+                      </div>
+                    )}
                   </div>
-                  <Switch
-                    checked={backupSettings.autoBackup}
-                    onCheckedChange={(checked) =>
-                      setBackupSettings({ ...backupSettings, autoBackup: checked })
-                    }
-                  />
-                </div>
+                )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="frequency">Backup Frequency</Label>
-                  <Select
-                    value={backupSettings.frequency}
-                    onValueChange={(value: any) =>
-                      setBackupSettings({ ...backupSettings, frequency: value })
-                    }
-                    disabled={!backupSettings.autoBackup}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="daily">Daily</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {importStep === 'complete' && importResult && (
+                  <div className="space-y-4">
+                    <div className="text-center py-6">
+                      <div className="mx-auto w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-4">
+                        <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        Import Completed!
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        Successfully imported {importResult.imported} transactions
+                      </p>
+                    </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm font-medium flex items-center">
-                      <Shield className="h-4 w-4 mr-2" />
-                      Encrypt Backups
-                    </Label>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      End-to-end encryption for your data
-                    </p>
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                          {importResult.imported}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          Imported
+                        </div>
+                      </div>
+                      <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
+                          {importResult.skipped}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          Skipped
+                        </div>
+                      </div>
+                      <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                          {importResult.errors.length}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          Errors
+                        </div>
+                      </div>
+                    </div>
+
+                    <Button onClick={resetImport} className="w-full">
+                      Import Another File
+                    </Button>
                   </div>
-                  <Switch
-                    checked={backupSettings.encryptBackups}
-                    onCheckedChange={(checked) =>
-                      setBackupSettings({ ...backupSettings, encryptBackups: checked })
-                    }
-                  />
-                </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm font-medium">Include Attachments</Label>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Backup transaction receipts and documents
-                    </p>
+          {/* Export Tab */}
+          <TabsContent value="export" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Data Export Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Download className="h-5 w-5" />
+                    <span>Data Export</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Export Format */}
+                  <div className="space-y-2">
+                    <Label htmlFor="format">Export Format</Label>
+                    <Select
+                      value={exportOptions.format}
+                      onValueChange={(value: any) => 
+                        setExportOptions({ ...exportOptions, format: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select format" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pdf">PDF Report</SelectItem>
+                        <SelectItem value="csv">CSV Spreadsheet</SelectItem>
+                        <SelectItem value="excel">Excel Workbook</SelectItem>
+                        <SelectItem value="json">JSON Data</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <Switch
-                    checked={backupSettings.includeAttachments}
-                    onCheckedChange={(checked) =>
-                      setBackupSettings({ ...backupSettings, includeAttachments: checked })
-                    }
-                  />
-                </div>
-              </div>
 
-              <Separator />
+                  {/* Date Range */}
+                  <div className="space-y-2">
+                    <Label htmlFor="dateRange">Date Range</Label>
+                    <Select
+                      value={exportOptions.dateRange}
+                      onValueChange={(value: any) => 
+                        setExportOptions({ ...exportOptions, dateRange: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select date range" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Time</SelectItem>
+                        <SelectItem value="month">This Month</SelectItem>
+                        <SelectItem value="quarter">This Quarter</SelectItem>
+                        <SelectItem value="year">This Year</SelectItem>
+                        <SelectItem value="custom">Custom Range</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              {/* Backup Actions */}
-              <div className="space-y-3">
-                <Button 
-                  onClick={handleBackupNow} 
-                  disabled={backupMutation.isPending || backupStatus.status === 'syncing' || isBackingUp}
-                  variant="outline"
-                  className="w-full"
-                >
-                  {(backupMutation.isPending || isBackingUp) ? (
-                    <>
-                      <Upload className="h-4 w-4 mr-2 animate-spin" />
-                      {isBackingUp ? 'Backing up...' : 'Starting Backup...'}
-                    </>
-                  ) : (
-                    <>
-                      <Cloud className="h-4 w-4 mr-2" />
-                      Backup Now
-                    </>
+                  {/* Custom Date Range */}
+                  {exportOptions.dateRange === "custom" && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="startDate">Start Date</Label>
+                        <Input
+                          id="startDate"
+                          type="date"
+                          value={exportOptions.startDate || ""}
+                          onChange={(e) =>
+                            setExportOptions({ ...exportOptions, startDate: e.target.value })
+                          }
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="endDate">End Date</Label>
+                        <Input
+                          id="endDate"
+                          type="date"
+                          value={exportOptions.endDate || ""}
+                          onChange={(e) =>
+                            setExportOptions({ ...exportOptions, endDate: e.target.value })
+                          }
+                        />
+                      </div>
+                    </div>
                   )}
-                </Button>
 
-                <div className="text-center">
-                  <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Advanced Settings
-                    <ChevronRight className="h-4 w-4 ml-2" />
+                  {/* Data Inclusions */}
+                  <div className="space-y-3">
+                    <Label>Include in Export</Label>
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="includeTransactions"
+                          checked={exportOptions.includeTransactions}
+                          onCheckedChange={(checked) =>
+                            setExportOptions({ ...exportOptions, includeTransactions: checked as boolean })
+                          }
+                        />
+                        <Label htmlFor="includeTransactions" className="flex items-center text-sm">
+                          <FileText className="h-4 w-4 mr-2" />
+                          Transactions
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="includeBudgets"
+                          checked={exportOptions.includeBudgets}
+                          onCheckedChange={(checked) =>
+                            setExportOptions({ ...exportOptions, includeBudgets: checked as boolean })
+                          }
+                        />
+                        <Label htmlFor="includeBudgets" className="flex items-center text-sm">
+                          <Database className="h-4 w-4 mr-2" />
+                          Budgets
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="includeGoals"
+                          checked={exportOptions.includeGoals}
+                          onCheckedChange={(checked) =>
+                            setExportOptions({ ...exportOptions, includeGoals: checked as boolean })
+                          }
+                        />
+                        <Label htmlFor="includeGoals" className="flex items-center text-sm">
+                          <Calendar className="h-4 w-4 mr-2" />
+                          Goals
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="includeSummary"
+                          checked={exportOptions.includeSummary}
+                          onCheckedChange={(checked) =>
+                            setExportOptions({ ...exportOptions, includeSummary: checked as boolean })
+                          }
+                        />
+                        <Label htmlFor="includeSummary" className="flex items-center text-sm">
+                          <Settings className="h-4 w-4 mr-2" />
+                          Financial Summary
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="includeCharts"
+                          checked={exportOptions.includeCharts}
+                          onCheckedChange={(checked) =>
+                            setExportOptions({ ...exportOptions, includeCharts: checked as boolean })
+                          }
+                        />
+                        <Label htmlFor="includeCharts" className="flex items-center text-sm">
+                          <FileText className="h-4 w-4 mr-2" />
+                          Charts & Graphs
+                        </Label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button 
+                    onClick={handleExport} 
+                    disabled={exportMutation.isPending}
+                    className="w-full"
+                  >
+                    {exportMutation.isPending ? (
+                      <>
+                        <Upload className="h-4 w-4 mr-2 animate-spin" />
+                        Exporting...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4 mr-2" />
+                        Export Data
+                      </>
+                    )}
                   </Button>
+                </CardContent>
+              </Card>
+
+              {/* Quick Export Templates */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Export Templates</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-4">
+                    <Button
+                      variant="outline"
+                      className="h-auto p-4 flex flex-col items-start space-y-2"
+                      onClick={() => {
+                        const quickOptions: ExportOptions = {
+                          format: "pdf",
+                          dateRange: "month",
+                          includeTransactions: true,
+                          includeBudgets: false,
+                          includeGoals: false,
+                          includeSummary: true,
+                          includeCharts: true,
+                        };
+                        setExportOptions(quickOptions);
+                        exportMutation.mutate(quickOptions);
+                      }}
+                    >
+                      <FileText className="h-8 w-8 text-blue-600" />
+                      <div className="text-left">
+                        <p className="font-medium">Monthly Report</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          PDF with transactions and summary
+                        </p>
+                      </div>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="h-auto p-4 flex flex-col items-start space-y-2"
+                      onClick={() => {
+                        const quickOptions: ExportOptions = {
+                          format: "csv",
+                          dateRange: "all",
+                          includeTransactions: true,
+                          includeBudgets: true,
+                          includeGoals: true,
+                          includeSummary: false,
+                          includeCharts: false,
+                        };
+                        setExportOptions(quickOptions);
+                        exportMutation.mutate(quickOptions);
+                      }}
+                    >
+                      <Database className="h-8 w-8 text-green-600" />
+                      <div className="text-left">
+                        <p className="font-medium">Complete Data</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          CSV with all transactions and budgets
+                        </p>
+                      </div>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="h-auto p-4 flex flex-col items-start space-y-2"
+                      onClick={() => {
+                        const quickOptions: ExportOptions = {
+                          format: "excel",
+                          dateRange: "year",
+                          includeTransactions: true,
+                          includeBudgets: true,
+                          includeGoals: true,
+                          includeSummary: true,
+                          includeCharts: false,
+                        };
+                        setExportOptions(quickOptions);
+                        exportMutation.mutate(quickOptions);
+                      }}
+                    >
+                      <Calendar className="h-8 w-8 text-purple-600" />
+                      <div className="text-left">
+                        <p className="font-medium">Annual Summary</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          Excel workbook with yearly data
+                        </p>
+                      </div>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Backup Tab */}
+          <TabsContent value="backup" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Cloud className="h-5 w-5" />
+                  <span>Cloud Backup & Restore</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Backup Status */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      {getStatusIcon(backupStatus.status)}
+                      <div>
+                        <p className="font-medium text-sm">
+                          {getStatusText(backupStatus.status)}
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          Last backup: {format(new Date(backupStatus.lastBackup), 'MMM d, h:mm a')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">{backupStatus.totalSize}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">Total size</p>
+                    </div>
+                  </div>
+
+                  {(backupStatus.status === 'syncing' || isBackingUp) && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>{isBackingUp ? 'Backing up data...' : 'Syncing data...'}</span>
+                        <span>{isBackingUp ? `${backupProgress}%` : '67%'}</span>
+                      </div>
+                      <Progress value={isBackingUp ? backupProgress : 67} className="h-2" />
+                    </div>
+                  )}
                 </div>
 
-                {backupStatus.status === 'synced' && !isBackingUp && (
-                  <div className="text-center text-xs text-gray-600 dark:text-gray-400">
-                    Next backup scheduled for {format(new Date(backupStatus.nextBackup), 'MMM d, h:mm a')}
-                  </div>
-                )}
-              </div>
+                <Separator />
 
-              <Separator />
-
-              {/* Data Restore Options */}
-              <div className="space-y-4">
-                <h4 className="font-medium">Data Restore</h4>
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium">Restore from Backup</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Restore your data from the latest cloud backup
-                    </p>
+                {/* Backup Settings */}
+                <div className="space-y-4">
+                  <h4 className="font-medium">Backup Settings</h4>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-sm font-medium">Automatic Backup</Label>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        Automatically backup your data
+                      </p>
+                    </div>
+                    <Switch
+                      checked={backupSettings.autoBackup}
+                      onCheckedChange={(checked) =>
+                        setBackupSettings({ ...backupSettings, autoBackup: checked })
+                      }
+                    />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="frequency">Backup Frequency</Label>
+                    <Select
+                      value={backupSettings.frequency}
+                      onValueChange={(value: any) =>
+                        setBackupSettings({ ...backupSettings, frequency: value })
+                      }
+                      disabled={!backupSettings.autoBackup}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-sm font-medium flex items-center">
+                        <Shield className="h-4 w-4 mr-2" />
+                        Encrypt Backups
+                      </Label>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        End-to-end encryption for your data
+                      </p>
+                    </div>
+                    <Switch
+                      checked={backupSettings.encryptBackups}
+                      onCheckedChange={(checked) =>
+                        setBackupSettings({ ...backupSettings, encryptBackups: checked })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Backup Actions */}
+                <div className="space-y-3">
+                  <Button 
+                    onClick={handleBackupNow} 
+                    disabled={backupMutation.isPending || backupStatus.status === 'syncing' || isBackingUp}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {(backupMutation.isPending || isBackingUp) ? (
+                      <>
+                        <Upload className="h-4 w-4 mr-2 animate-spin" />
+                        {isBackingUp ? 'Backing up...' : 'Starting Backup...'}
+                      </>
+                    ) : (
+                      <>
+                        <Cloud className="h-4 w-4 mr-2" />
+                        Backup Now
+                      </>
+                    )}
+                  </Button>
+
                   <Button 
                     variant="outline"
                     onClick={handleRestoreData}
-                    className="flex items-center gap-2"
+                    className="w-full flex items-center gap-2"
                   >
                     <Download className="h-4 w-4" />
-                    Restore
+                    Restore from Backup
                   </Button>
+
+                  {backupStatus.status === 'synced' && !isBackingUp && (
+                    <div className="text-center text-xs text-gray-600 dark:text-gray-400">
+                      Next backup scheduled for {format(new Date(backupStatus.nextBackup), 'MMM d, h:mm a')}
+                    </div>
+                  )}
                 </div>
-              </div>
 
-              <Separator />
+                <Separator />
 
-              {/* Storage Usage */}
-              <div className="space-y-4">
-                <h4 className="font-medium">Storage Usage</h4>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span>Used Storage</span>
-                    <span>12.4 MB of 1 GB</span>
+                {/* Storage Usage */}
+                <div className="space-y-4">
+                  <h4 className="font-medium">Storage Usage</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Used Storage</span>
+                      <span>12.4 MB of 1 GB</span>
+                    </div>
+                    <Progress value={1.24} className="h-2" />
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      Plenty of space remaining for your financial data
+                    </p>
                   </div>
-                  <Progress value={1.24} className="h-2" />
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Plenty of space remaining for your financial data
-                  </p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Export Options */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Export Templates</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button
-                variant="outline"
-                className="h-auto p-4 flex flex-col items-start space-y-2"
-                onClick={() => {
-                  const quickOptions: ExportOptions = {
-                    format: "pdf",
-                    dateRange: "month",
-                    includeTransactions: true,
-                    includeBudgets: false,
-                    includeGoals: false,
-                    includeSummary: true,
-                    includeCharts: true,
-                  };
-                  setExportOptions(quickOptions);
-                  exportMutation.mutate(quickOptions);
-                }}
-              >
-                <FileText className="h-8 w-8 text-blue-600" />
-                <div className="text-left">
-                  <p className="font-medium">Monthly Report</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    PDF with transactions and summary
-                  </p>
-                </div>
-              </Button>
-
-              <Button
-                variant="outline"
-                className="h-auto p-4 flex flex-col items-start space-y-2"
-                onClick={() => {
-                  const quickOptions: ExportOptions = {
-                    format: "csv",
-                    dateRange: "all",
-                    includeTransactions: true,
-                    includeBudgets: true,
-                    includeGoals: true,
-                    includeSummary: false,
-                    includeCharts: false,
-                  };
-                  setExportOptions(quickOptions);
-                  exportMutation.mutate(quickOptions);
-                }}
-              >
-                <Database className="h-8 w-8 text-green-600" />
-                <div className="text-left">
-                  <p className="font-medium">Complete Data</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    CSV with all transactions and budgets
-                  </p>
-                </div>
-              </Button>
-
-              <Button
-                variant="outline"
-                className="h-auto p-4 flex flex-col items-start space-y-2"
-                onClick={() => {
-                  const quickOptions: ExportOptions = {
-                    format: "excel",
-                    dateRange: "year",
-                    includeTransactions: true,
-                    includeBudgets: true,
-                    includeGoals: true,
-                    includeSummary: true,
-                    includeCharts: false,
-                  };
-                  setExportOptions(quickOptions);
-                  exportMutation.mutate(quickOptions);
-                }}
-              >
-                <Calendar className="h-8 w-8 text-purple-600" />
-                <div className="text-left">
-                  <p className="font-medium">Annual Summary</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Excel workbook with yearly data
-                  </p>
-                </div>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </RequirePlan>
   );
