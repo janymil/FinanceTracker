@@ -4,9 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, Filter, Lock, Crown, TrendingDown, TrendingUp } from "lucide-react";
-import { Link } from "wouter";
-import { useState } from "react";
+import { Link, useLocation } from "wouter";
+import { useState, useMemo } from "react";
 
 interface Transaction {
   id: number;
@@ -27,6 +29,9 @@ interface TransactionListProps {
 
 export default function TransactionList({ transactions, isLoading, isPremium }: TransactionListProps) {
   const [activeTab, setActiveTab] = useState("expenses");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("all");
+  const [, setLocation] = useLocation();
   
   const formatCurrency = (amount: string) => {
     return new Intl.NumberFormat('en-US', {
@@ -82,7 +87,24 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
     );
   }
 
-  const displayTransactions = transactions || [];
+  // Filter and search transactions
+  const filteredTransactions = useMemo(() => {
+    if (!transactions) return [];
+    
+    return transactions.filter(transaction => {
+      // Search filter
+      const matchesSearch = searchTerm === "" || 
+        transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (transaction.categoryName && transaction.categoryName.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      // Type filter
+      const matchesType = filterType === "all" || transaction.type === filterType;
+      
+      return matchesSearch && matchesType;
+    });
+  }, [transactions, searchTerm, filterType]);
+
+  const displayTransactions = filteredTransactions || [];
   const expenseTransactions = displayTransactions
     .filter(t => t.type === 'expense')
     .slice(0, 5);
@@ -148,10 +170,31 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
               <Input 
                 placeholder="Search transactions..." 
                 className="w-48 h-8 text-sm"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <Button size="sm" variant="outline">
-                <Filter className="h-4 w-4" />
-              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button size="sm" variant="outline">
+                    <Filter className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-48" align="end">
+                  <div className="space-y-2">
+                    <h4 className="font-medium leading-none">Filter by type</h4>
+                    <Select value={filterType} onValueChange={setFilterType}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="All transactions" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All transactions</SelectItem>
+                        <SelectItem value="expense">Expenses only</SelectItem>
+                        <SelectItem value="income">Income only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           ) : (
             <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -194,12 +237,13 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
         )}
         
         {isPremium && (
-          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between">
-            <Button variant="ghost" className="text-primary hover:text-primary/80">
+          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+            <Button 
+              variant="ghost" 
+              className="w-full text-primary hover:text-primary/80"
+              onClick={() => setLocation('/transactions')}
+            >
               View All Transactions
-            </Button>
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
-              Export
             </Button>
           </div>
         )}
