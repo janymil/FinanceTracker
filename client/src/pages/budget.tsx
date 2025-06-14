@@ -177,8 +177,8 @@ export default function Budget() {
     setNewBudget({
       amount: budget.amount,
       categoryId: budget.categoryId.toString(),
-      startDate: budget.startDate,
-      endDate: budget.endDate,
+      startDate: new Date(budget.startDate).toISOString().split('T')[0],
+      endDate: new Date(budget.endDate).toISOString().split('T')[0],
     });
     setIsDialogOpen(true);
   };

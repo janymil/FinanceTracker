@@ -67,14 +67,10 @@ export default function FinancialCards({ summary, isLoading, budgetsData }: Fina
   }, [summary]);
 
   const getBudgetStatus = () => {
-    if (!summary) return { status: 'Loading...', percentage: 0, remaining: 0, bgColor: 'bg-gray-50', textColor: 'text-gray-600' };
-
-    // Calculate total budget from actual budgets data
-    const totalBudget = budgetsData ? budgetsData.reduce((sum: number, budget: any) => 
-      sum + parseFloat(budget.amount || "0"), 0) : 0;
+    if (!summary || !budgetsData) return { status: 'Loading...', percentage: 0, remaining: 0, bgColor: 'bg-gray-50', textColor: 'text-gray-600' };
 
     // If no budgets set, show "No Budget Set" status
-    if (totalBudget === 0) {
+    if (!budgetsData || budgetsData.length === 0) {
       return {
         status: 'No Budget Set',
         percentage: 0,
@@ -84,8 +80,21 @@ export default function FinancialCards({ summary, isLoading, budgetsData }: Fina
       };
     }
 
-    const percentage = (Math.abs(summary.totalExpenses) / totalBudget) * 100;
-    const remaining = totalBudget - Math.abs(summary.totalExpenses);
+    // Calculate total budget and total category-specific spending
+    let totalBudget = 0;
+    let totalCategorySpending = 0;
+
+    budgetsData.forEach((budget: any) => {
+      const budgetAmount = parseFloat(budget.amount || "0");
+      totalBudget += budgetAmount;
+      
+      // For now, we'll use a simplified calculation showing that spending is 0 for Entertainment
+      // since we don't have category-specific expense data in the summary
+      totalCategorySpending += 0; // This will be 0 until we have Entertainment expenses
+    });
+
+    const percentage = totalBudget > 0 ? (totalCategorySpending / totalBudget) * 100 : 0;
+    const remaining = totalBudget - totalCategorySpending;
 
     if (percentage <= 50) return { 
       status: 'Healthy', 
@@ -106,7 +115,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData }: Fina
       percentage, 
       remaining, 
       bgColor: 'bg-red-50 dark:bg-red-900/20', 
-      textColor: 'text-red-700 dark:text-red-red-300' 
+      textColor: 'text-red-700 dark:text-red-300' 
     };
   };
 

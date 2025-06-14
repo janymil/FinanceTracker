@@ -66,7 +66,6 @@ export default function BudgetOverview() {
           spent: categorySpending
         };
       })
-      .filter((budget: any) => budget.spent > 0) // Only show budgets with spending
       .sort((a: any, b: any) => b.spent - a.spent); // Sort by spending amount descending
   }, [budgets, transactions]);
 
