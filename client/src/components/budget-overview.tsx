@@ -112,7 +112,7 @@ export default function BudgetOverview() {
               <Edit3 className="h-4 w-4 mr-1" />
               Edit Budgets
             </Button>
-            <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => setLocation('/expenses')}>
+            <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => setLocation('/categories')}>
               <Plus className="h-4 w-4 mr-1" />
               Add Category
             </Button>
