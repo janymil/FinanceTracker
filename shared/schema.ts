@@ -63,6 +63,9 @@ export const transactions = pgTable("transactions", {
   recurringFrequency: varchar("recurring_frequency", { length: 20 }), // 'weekly', 'monthly', 'yearly'
   recurringEndDate: timestamp("recurring_end_date"),
   parentTransactionId: integer("parent_transaction_id"),
+  // Smart Bill Assistant fields
+  paymentUrl: text("payment_url"),
+  referenceNote: text("reference_note"),
 });
 
 // Recurring transactions table (separate for cleaner implementation)

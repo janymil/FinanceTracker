@@ -237,11 +237,13 @@ export default function Income() {
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
+    // Find the category ID for this transaction
+    const category = categories.find((cat: Category) => cat.name === transaction.categoryName);
     setNewIncome({
       amount: transaction.amount,
       description: transaction.description,
       date: transaction.date,
-      categoryId: "",
+      categoryId: category ? category.id.toString() : "",
       isRecurring: false,
       recurringFrequency: "monthly",
       recurringEndDate: "",

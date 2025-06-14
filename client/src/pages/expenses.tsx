@@ -37,6 +37,8 @@ interface Transaction {
   categoryName?: string;
   categoryIcon?: string;
   categoryColor?: string;
+  paymentUrl?: string;
+  referenceNote?: string;
 }
 
 interface Category {
@@ -241,16 +243,18 @@ export default function Expenses() {
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
+    // Find the category ID for this transaction
+    const category = categories.find((cat: Category) => cat.name === transaction.categoryName);
     setNewExpense({
       amount: transaction.amount,
       description: transaction.description,
       date: transaction.date,
-      categoryId: "",
+      categoryId: category ? category.id.toString() : "",
       isRecurring: false,
       recurringFrequency: "monthly",
       recurringEndDate: "",
-      paymentUrl: "",
-      referenceNote: "",
+      paymentUrl: transaction.paymentUrl || "",
+      referenceNote: transaction.referenceNote || "",
     });
     setIsDialogOpen(true);
   };
