@@ -32,6 +32,23 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [, setLocation] = useLocation();
+
+  // Filter and search transactions
+  const filteredTransactions = useMemo(() => {
+    if (!transactions) return [];
+    
+    return transactions.filter(transaction => {
+      // Search filter
+      const matchesSearch = searchTerm === "" || 
+        transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (transaction.categoryName && transaction.categoryName.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      // Type filter
+      const matchesType = filterType === "all" || transaction.type === filterType;
+      
+      return matchesSearch && matchesType;
+    });
+  }, [transactions, searchTerm, filterType]);
   
   const formatCurrency = (amount: string) => {
     return new Intl.NumberFormat('en-US', {
@@ -86,23 +103,6 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
       </Card>
     );
   }
-
-  // Filter and search transactions
-  const filteredTransactions = useMemo(() => {
-    if (!transactions) return [];
-    
-    return transactions.filter(transaction => {
-      // Search filter
-      const matchesSearch = searchTerm === "" || 
-        transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (transaction.categoryName && transaction.categoryName.toLowerCase().includes(searchTerm.toLowerCase()));
-      
-      // Type filter
-      const matchesType = filterType === "all" || transaction.type === filterType;
-      
-      return matchesSearch && matchesType;
-    });
-  }, [transactions, searchTerm, filterType]);
 
   const displayTransactions = filteredTransactions || [];
   const expenseTransactions = displayTransactions
