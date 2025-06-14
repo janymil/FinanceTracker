@@ -48,6 +48,12 @@ export default function Pricing() {
       premium: true
     },
     {
+      name: "Personalized Financial Tips",
+      free: true,
+      standard: true,
+      premium: true
+    },
+    {
       name: "Goals and Budget Management",
       free: false,
       standard: true,
@@ -207,6 +213,10 @@ export default function Pricing() {
                     <Check className="h-5 w-5 text-success mr-3" />
                     <span>Simple financial overview</span>
                   </div>
+                  <div className="flex items-center">
+                    <Check className="h-5 w-5 text-success mr-3" />
+                    <span>Personalized financial tips</span>
+                  </div>
                 </div>
                 <Button 
                   onClick={() => handleGetStarted('free')} 
@@ -262,6 +272,10 @@ export default function Pricing() {
                     <Check className="h-5 w-5 text-success mr-3" />
                     <span>Unlimited transaction history</span>
                   </div>
+                  <div className="flex items-center">
+                    <Check className="h-5 w-5 text-success mr-3" />
+                    <span>Personalized financial tips</span>
+                  </div>
                 </div>
                 <Button 
                   onClick={() => handleGetStarted('standard')} 
@@ -296,6 +310,10 @@ export default function Pricing() {
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
                     <span>Everything in Standard plan</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="h-5 w-5 text-success mr-3" />
+                    <span>Personalized financial tips</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
