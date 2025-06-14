@@ -1613,32 +1613,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Message is required" });
       }
 
-      const systemPrompt = `You are a helpful assistant for FinanzerPro, a personal finance management application. You should answer questions about:
+      // Get current app configuration dynamically
+      const { getCurrentAppConfig, formatConfigForAI } = await import('./helpConfig');
+      const currentConfig = getCurrentAppConfig();
+      const formattedConfig = formatConfigForAI(currentConfig);
 
-FEATURES:
-- Transaction tracking (income/expenses)
-- AI-powered expense categorization (Standard+ plans)
-- Budget management (Standard+ plans)
-- Financial goals (Standard+ plans)  
-- Reports and analytics
-- Calendar view (Standard+ plans)
-- Data export/import (Premium plan)
-- Cloud backup (Premium plan)
-- AI insights and predictions (Premium plan)
+      const systemPrompt = `You are a helpful assistant for FinanzerPro, a personal finance management application. You should answer questions about the app's features, pricing, and how to use it.
 
-SUBSCRIPTION PLANS:
-- Free: Up to 3 transactions, basic tracking
-- Standard ($4.99/month or $49.90/year): Up to 100 transactions, AI categorization, budgets, goals, reminders
-- Premium ($9.99/month or $99.90/year): Unlimited transactions, advanced analytics, cloud backup, data import/export, AI insights
+${formattedConfig}
 
-GETTING STARTED:
-1. Create account
-2. Add first transaction
-3. Set up categories (or use AI categorization)
-4. Create budgets and goals (Standard+)
-5. Monitor progress with dashboard
-
-Keep responses helpful, concise, and focused on FinanzerPro features. If asked about technical issues, suggest contacting support.`;
+Keep responses helpful, concise, and focused on FinanzerPro features. If asked about technical issues, suggest contacting support. Always use the most current information provided above.`;
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',

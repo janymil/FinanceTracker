@@ -173,6 +173,10 @@ Changelog:
 - June 14, 2025. Removed all unauthorized 7-day free trial references and ensured yearly subscription functionality works properly
 - June 14, 2025. Fixed subscription system to handle both monthly and yearly billing cycles through Stripe integration
 - June 14, 2025. Updated landing page to display all three pricing tiers (Free, Standard $4.99/month, Premium $9.99/month) with consistent pricing across all pages
+- June 14, 2025. Implemented dynamic AI assistant configuration system to ensure help chat always has current pricing and feature information
+- June 14, 2025. Created comprehensive helpConfig.ts module that automatically provides accurate app information to AI assistant
+- June 14, 2025. Added anonymous user headers to all legal pages (Privacy Policy, Terms of Service, Cookie Policy) with proper navigation
+- June 14, 2025. Fixed help page routing for anonymous users - help link now works correctly from landing page
 ```
 
 ## User Preferences
