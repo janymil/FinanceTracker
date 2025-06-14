@@ -121,10 +121,16 @@ export class DatabaseStorage implements IStorage {
 
   // Transaction operations
   async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
+    const startTime = Date.now();
+    console.log('Creating transaction:', { description: transaction.description, amount: transaction.amount });
+    
     const [newTransaction] = await db
       .insert(transactions)
       .values(transaction)
       .returning();
+    
+    const endTime = Date.now();
+    console.log(`Transaction created in ${endTime - startTime}ms`);
     return newTransaction;
   }
 
