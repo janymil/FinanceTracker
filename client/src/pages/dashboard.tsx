@@ -479,7 +479,15 @@ export default function Dashboard() {
                 isPremium={user?.plan === 'premium'}
               />
 
-              <ExpenseChart summary={financialSummary} />
+              <ExpenseChart summary={{
+                totalExpenses: Math.abs(financialSummary?.totalExpenses || 0),
+                expensesByCategory: financialSummary?.transactionsByCategory
+                  ?.filter((cat: any) => cat.type === 'expense')
+                  ?.map((cat: any, index: number) => ({
+                    category: cat.categoryName,
+                    amount: Math.abs(cat.amount)
+                  })) || []
+              }} />
             </div>
 
             {/* Budget Categories */}

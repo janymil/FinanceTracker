@@ -22,8 +22,19 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
     enabled: !summary,
   });
 
-  const data = summary?.expensesByCategory || expenseData?.expensesByCategory || [];
-  const totalExpenses = summary?.totalExpenses || expenseData?.totalExpenses || 0;
+  // Handle both summary data and API data
+  let data = [];
+  let totalExpenses = 0;
+
+  if (summary?.expensesByCategory) {
+    // Use summary data if provided
+    data = summary.expensesByCategory;
+    totalExpenses = summary.totalExpenses;
+  } else if (expenseData) {
+    // Use API data if no summary provided
+    data = expenseData.expensesByCategory || [];
+    totalExpenses = expenseData.totalExpenses || 0;
+  }
 
   const chartData = data.map((item, index) => ({
     ...item,

@@ -19,6 +19,11 @@ import { batchProcessor } from "./batch-processor";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
+const COLORS = [
+  '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088fe',
+  '#00c49f', '#ffbb28', '#ff8042', '#8dd1e1', '#d084d0'
+];
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   setupAuth(app);
@@ -396,6 +401,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching financial summary:", error);
       res.status(500).json({ message: "Failed to fetch financial summary" });
+    }
+  });
+
+  // Expense breakdown for current month
+  app.get('/api/expense-breakdown', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Get current month date range
+      const now = new Date();
+      const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+      const summary = await storage.getUserFinancialSummary(userId, startDate, endDate);
+      
+      // Filter for expense categories only and format for chart
+      const expensesByCategory = summary.transactionsByCategory
+        .filter((cat: any) => cat.type === 'expense')
+        .map((cat: any, index: number) => ({
+          category: cat.categoryName,
+          amount: Math.abs(cat.amount),
+          color: COLORS[index % COLORS.length]
+        }));
+
+      res.json({
+        expensesByCategory,
+        totalExpenses: Math.abs(summary.totalExpenses)
+      });
+    } catch (error) {
+      console.error("Error fetching expense breakdown:", error);
+      res.status(500).json({ message: "Failed to fetch expense breakdown" });
     }
   });
 
