@@ -12,10 +12,10 @@ class APICache {
   
   // Default TTL (Time To Live) in milliseconds
   private readonly DEFAULT_TTL = {
-    categorization: 24 * 60 * 60 * 1000, // 24 hours - categories don't change much
-    insights: 6 * 60 * 60 * 1000,        // 6 hours - insights can be refreshed more often
-    trends: 12 * 60 * 60 * 1000,         // 12 hours - trends need regular updates
-    tips: 24 * 60 * 60 * 1000            // 24 hours - tips are fairly stable
+    categorization: Number.MAX_SAFE_INTEGER, // No expiration - categories are stable
+    insights: 24 * 60 * 60 * 1000,          // 24 hours - daily insights refresh
+    trends: Number.MAX_SAFE_INTEGER,         // No expiration - only invalidate on data change
+    tips: 48 * 60 * 60 * 1000               // 48 hours - tips change less frequently
   };
 
   private generateKey(prefix: string, data: any): string {
