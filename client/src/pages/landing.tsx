@@ -13,8 +13,28 @@ export default function Landing() {
     setLocation("/auth");
   };
 
-  const handleGetStarted = (plan: string) => {
-    setLocation('/auth');
+  const handleGetStarted = async (plan: string) => {
+    // Create Stripe checkout session for all plans including free
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ plan }),
+      });
+
+      if (response.ok) {
+        const { url } = await response.json();
+        window.location.href = url;
+      } else {
+        // Fallback to auth page if Stripe fails
+        setLocation('/auth');
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      setLocation('/auth');
+    }
   };
 
   return (

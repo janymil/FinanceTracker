@@ -1662,19 +1662,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stripe payment endpoints
   app.post("/api/create-checkout-session", async (req: Request, res: Response) => {
     try {
-      if (!req.session.userId) {
-        return res.status(401).json({ error: "Authentication required" });
-      }
-
       const { plan } = req.body;
-      const user = await db.select().from(users).where(eq(users.id, req.session.userId)).limit(1);
       
-      if (!user.length) {
-        return res.status(404).json({ error: "User not found" });
-      }
+      // Allow anonymous users to go through checkout for all plans
+      const baseUrl = `${req.headers.origin || 'http://localhost:5000'}`;
+      const successUrl = `${baseUrl}/api/subscription-success?plan=${plan}&session_id={CHECKOUT_SESSION_ID}`;
+      const cancelUrl = `${baseUrl}/auth`;
 
       // Plan pricing in cents (Stripe uses cents)
       const planPrices = {
+        'free': { 
+          priceData: {
+            currency: 'usd',
+            product_data: { name: 'FinanzerPro Free Plan' },
+            unit_amount: 0, // $0.00
+            recurring: { interval: 'month' as const }
+          }
+        },
         'standard': { 
           priceData: {
             currency: 'usd',
@@ -1714,24 +1718,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid plan selected" });
       }
 
-      const successUrl = `${req.headers.origin}/api/subscription-success?plan=${plan}&session_id={CHECKOUT_SESSION_ID}`;
-      const cancelUrl = `${req.headers.origin}/pricing`;
-
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
+      // For free plan, create a simplified checkout
+      const sessionConfig: any = {
         line_items: [{
           price_data: selectedPlan.priceData,
           quantity: 1,
         }],
-        mode: 'subscription',
         success_url: successUrl,
         cancel_url: cancelUrl,
-        customer_email: user[0].email,
         metadata: {
-          userId: req.session.userId.toString(),
-          plan: plan
+          plan: plan,
+          userId: req.session?.userId?.toString() || 'anonymous'
         }
-      });
+      };
+
+      // Configure checkout based on plan type
+      if (plan === 'free') {
+        sessionConfig.mode = 'setup';
+        sessionConfig.payment_method_types = ['card'];
+        sessionConfig.setup_intent_data = {
+          metadata: { plan: 'free' }
+        };
+      } else {
+        sessionConfig.mode = 'subscription';
+        sessionConfig.payment_method_types = ['card'];
+      }
+
+      const session = await stripe!.checkout.sessions.create(sessionConfig);
 
       res.json({ url: session.url });
 
