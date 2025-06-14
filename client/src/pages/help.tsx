@@ -65,11 +65,11 @@ export default function Help() {
         },
         body: JSON.stringify({ message }),
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to get help response");
       }
-      
+
       return response.json();
     },
     onSuccess: (data) => {
@@ -180,8 +180,13 @@ export default function Help() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
-                <TrendingUp className="h-8 w-8 text-primary mr-3" />
-                <span className="text-xl font-bold text-gray-900 dark:text-white">FinanzerPro</span>
+                <button 
+                  onClick={() => setLocation('/')} 
+                  className="flex items-center hover:opacity-80 transition-opacity"
+                >
+                  <TrendingUp className="h-8 w-8 text-primary mr-3" />
+                  <span className="text-xl font-bold text-gray-900 dark:text-white">FinanzerPro</span>
+                </button>
               </div>
               <div className="flex items-center space-x-4">
                 <button 
@@ -204,7 +209,7 @@ export default function Help() {
           </div>
         </header>
       )}
-      
+
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Documentation */}
@@ -244,7 +249,7 @@ export default function Help() {
                     take control of your financial future. With AI-powered insights, comprehensive tracking, 
                     and flexible subscription plans, managing your money has never been easier.
                   </p>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                     <div className="flex items-start gap-3 p-4 border rounded-lg">
                       <BarChart3 className="h-8 w-8 text-blue-500 mt-1" />
@@ -255,7 +260,7 @@ export default function Help() {
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-start gap-3 p-4 border rounded-lg">
                       <Shield className="h-8 w-8 text-green-500 mt-1" />
                       <div>
@@ -265,7 +270,7 @@ export default function Help() {
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-start gap-3 p-4 border rounded-lg">
                       <Cloud className="h-8 w-8 text-purple-500 mt-1" />
                       <div>
@@ -275,7 +280,7 @@ export default function Help() {
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-start gap-3 p-4 border rounded-lg">
                       <Zap className="h-8 w-8 text-yellow-500 mt-1" />
                       <div>
@@ -519,7 +524,7 @@ export default function Help() {
                           Fill in the amount, description, date, and category. AI will suggest categories for Standard+ users.
                         </p>
                       </div>
-                      
+
                       <div>
                         <h4 className="font-medium flex items-center gap-2">
                           <Target className="h-4 w-4" />
@@ -530,7 +535,7 @@ export default function Help() {
                           The app will track your spending against the budget automatically.
                         </p>
                       </div>
-                      
+
                       <div>
                         <h4 className="font-medium flex items-center gap-2">
                           <BarChart3 className="h-4 w-4" />
@@ -596,7 +601,7 @@ export default function Help() {
                 Ask me anything about FinanzerPro
               </CardDescription>
             </CardHeader>
-            
+
             <CardContent className="flex-1 flex flex-col">
               <ScrollArea className="flex-1 mb-4">
                 <div className="space-y-4 pr-4">
@@ -628,7 +633,7 @@ export default function Help() {
                   )}
                 </div>
               </ScrollArea>
-              
+
               <div className="flex gap-2">
                 <Input
                   value={chatInput}
