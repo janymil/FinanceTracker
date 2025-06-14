@@ -514,37 +514,91 @@ export default function Landing() {
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">Manual categorization</td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-gray-100 dark:border-gray-700">
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">Simple financial overview</td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-gray-100 dark:border-gray-700">
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">Personalized financial tips</td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-gray-100 dark:border-gray-700">
                   <td className="p-6 font-medium text-gray-900 dark:text-white">Transaction history</td>
                   <td className="p-6 text-center text-gray-500">Last 3</td>
-                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
-                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                  <td className="p-6 text-center text-gray-500">Unlimited</td>
+                  <td className="p-6 text-center text-gray-500">Unlimited</td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Budget management</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">Goals and budget management</td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">AI categorization</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">Interactive charts and reports</td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Financial insights</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">AI expense categorization</td>
+                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-gray-100 dark:border-gray-700">
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">Calendar view and reminders</td>
+                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-gray-100 dark:border-gray-700">
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">AI financial tips and insights</td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Cloud backup</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">Advanced trends analysis</td>
+                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
+                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-gray-100 dark:border-gray-700">
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">Expense prediction</td>
+                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
+                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-gray-100 dark:border-gray-700">
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">Daily personalized recommendations</td>
+                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
+                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-gray-100 dark:border-gray-700">
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">Cloud data backup</td>
+                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
+                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-gray-100 dark:border-gray-700">
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">Data management (CSV, PDF)</td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr>
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Priority support</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">Priority email support</td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
