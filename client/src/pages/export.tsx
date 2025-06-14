@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import RequirePlan from "@/components/require-plan";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
   Download,
   Upload,
@@ -26,6 +28,10 @@ import {
   AlertCircle,
   Crown,
   ChevronRight,
+  CheckCircle,
+  Loader2,
+  File,
+  AlertTriangle,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -51,8 +57,47 @@ interface BackupStatus {
   status: 'synced' | 'syncing' | 'error' | 'pending';
 }
 
+interface ImportOptions {
+  source: 'csv' | 'excel' | 'json' | 'mint' | 'quickbooks' | 'ynab' | 'personal-capital' | 'bank-export';
+  file?: File;
+  mapColumns: boolean;
+  skipFirstRow: boolean;
+  dateFormat: string;
+  mergeStrategy: 'replace' | 'merge' | 'append';
+  categoryMapping: 'auto' | 'manual';
+}
+
+interface ImportResult {
+  success: boolean;
+  imported: number;
+  skipped: number;
+  errors: Array<{
+    row: number;
+    field: string;
+    message: string;
+  }>;
+  preview?: Array<{
+    date: string;
+    description: string;
+    amount: number;
+    category: string;
+    type: string;
+  }>;
+}
+
+interface ColumnMapping {
+  date: string;
+  description: string;
+  amount: string;
+  category?: string;
+  type?: string;
+  account?: string;
+}
+
 export default function ExportPage() {
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
     format: "pdf",
     dateRange: "month",
@@ -70,6 +115,27 @@ export default function ExportPage() {
     encryptBackups: true,
   });
 
+  const [importOptions, setImportOptions] = useState<ImportOptions>({
+    source: 'csv',
+    mapColumns: true,
+    skipFirstRow: true,
+    dateFormat: 'MM/dd/yyyy',
+    mergeStrategy: 'append',
+    categoryMapping: 'auto',
+  });
+
+  const [columnMapping, setColumnMapping] = useState<ColumnMapping>({
+    date: 'Date',
+    description: 'Description',
+    amount: 'Amount',
+    category: 'Category',
+    type: 'Type',
+  });
+
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [importStep, setImportStep] = useState<'upload' | 'mapping' | 'preview' | 'complete'>('upload');
+  const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [backupProgress, setBackupProgress] = useState(0);
 
@@ -88,6 +154,10 @@ export default function ExportPage() {
 
   const { data: summary } = useQuery({
     queryKey: ["/api/financial-summary"],
+  });
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["/api/categories"],
   });
 
   // Mock backup status - in real app this would come from API

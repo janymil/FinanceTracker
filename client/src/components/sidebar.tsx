@@ -114,7 +114,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
       badge: "Standard" as const,
     },
     {
-      title: "Export Data",
+      title: "Data Management",
       icon: Download,
       href: "/export",
       requiredPlan: "premium" as const,
