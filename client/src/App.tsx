@@ -18,8 +18,14 @@ import ExportPage from "@/pages/export";
 import SubscribePage from "@/pages/subscribe";
 import LandingPage from "@/pages/landing";
 import NotFoundPage from "@/pages/not-found";
+import PrivacyPolicy from "@/pages/privacy-policy";
+import TermsOfService from "@/pages/terms-of-service";
+import CookiePolicy from "@/pages/cookie-policy";
+import Contact from "@/pages/contact";
 import Header from "@/components/header";
 import Sidebar from "@/components/sidebar";
+import { Footer } from "@/components/footer";
+import { CookieBanner } from "@/components/cookie-banner";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
