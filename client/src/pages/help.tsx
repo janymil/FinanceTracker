@@ -104,7 +104,7 @@ export default function Help() {
     {
       id: "subscription-plans",
       question: "What are the differences between subscription plans?",
-      answer: "Free plan allows 3 transactions, Standard plan ($9.99/month) includes up to 100 transactions with AI features, budgeting, and goals. Premium plan ($19.99/month) offers unlimited transactions, advanced analytics, cloud backup, and data import/export."
+      answer: "Free plan allows 3 transactions, Standard plan ($4.99/month) includes up to 100 transactions with AI features, budgeting, and goals. Premium plan ($9.99/month) offers unlimited transactions, advanced analytics, cloud backup, and data import/export."
     },
     {
       id: "data-security",
@@ -164,6 +164,12 @@ export default function Help() {
       "Priority support",
       "Multiple data formats"
     ]
+  };
+
+  const planPricing = {
+    free: "$0",
+    standard: "$4.99",
+    premium: "$9.99"
   };
 
   return (
@@ -389,7 +395,7 @@ export default function Help() {
                   <CardHeader>
                     <CardTitle className="text-center">Standard</CardTitle>
                     <CardDescription className="text-center">
-                      <span className="text-3xl font-bold">$9.99</span>
+                      <span className="text-3xl font-bold">$4.99</span>
                       <span className="text-sm">/month</span>
                     </CardDescription>
                   </CardHeader>
@@ -409,7 +415,7 @@ export default function Help() {
                   <CardHeader>
                     <CardTitle className="text-center">Premium</CardTitle>
                     <CardDescription className="text-center">
-                      <span className="text-3xl font-bold">$19.99</span>
+                      <span className="text-3xl font-bold">$9.99</span>
                       <span className="text-sm">/month</span>
                     </CardDescription>
                   </CardHeader>
