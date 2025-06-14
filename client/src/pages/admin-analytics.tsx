@@ -67,10 +67,7 @@ export default function AdminAnalytics() {
     setIsLoggingIn(true);
     
     try {
-      await apiRequest('/api/admin/login', {
-        method: 'POST',
-        body: JSON.stringify({ password }),
-      });
+      await apiRequest('POST', '/api/admin/login', { password });
       
       setIsAuthenticated(true);
       setPassword("");
