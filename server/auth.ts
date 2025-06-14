@@ -5,6 +5,7 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
+import { DataEncryption } from "./encryption";
 import { User as SelectUser } from "@shared/schema";
 import connectPg from "connect-pg-simple";
 
@@ -97,8 +98,8 @@ export function setupAuth(app: Express) {
         username: email, // Use email as username for compatibility
         email,
         password: await hashPassword(password),
-        firstName,
-        lastName,
+        firstName: firstName ? DataEncryption.encrypt(firstName) : null,
+        lastName: lastName ? DataEncryption.encrypt(lastName) : null,
         plan: 'free',
       });
 

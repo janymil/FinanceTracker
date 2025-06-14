@@ -22,6 +22,7 @@ import {
   type InsertBackupSettings,
 } from "@shared/schema";
 import { db } from "./db";
+import { DataEncryption } from "./encryption";
 import { eq, and, gte, lte, desc, sum, count, sql, or, isNull } from "drizzle-orm";
 
 export interface IStorage {
@@ -141,11 +142,23 @@ export class DatabaseStorage implements IStorage {
 
   // Transaction operations
   async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
-    const [newTransaction] = await db
-      .insert(transactions)
-      .values(transaction)
-      .returning();
-    return newTransaction;
+    // Encrypt sensitive fields
+    const encryptedTransaction = {
+      ...transaction,
+      amount: DataEncryption.encryptAmount(transaction.amount),
+      description: DataEncryption.encryptDescription(transaction.description),
+      referenceNote: transaction.referenceNote ? DataEncryption.encrypt(transaction.referenceNote) : null
+    };
+
+    const [newTransaction] = await db.insert(transactions).values(encryptedTransaction).returning();
+
+    // Decrypt for return
+    return {
+      ...newTransaction,
+      amount: DataEncryption.decryptAmount(newTransaction.amount),
+      description: DataEncryption.decryptDescription(newTransaction.description),
+      referenceNote: newTransaction.referenceNote ? DataEncryption.decrypt(newTransaction.referenceNote) : null
+    };
   }
 
   async getUserTransactions(userId: number, limit?: number): Promise<Transaction[]> {
@@ -178,7 +191,15 @@ export class DatabaseStorage implements IStorage {
       query = query.limit(limit);
     }
 
-    return await query;
+    const userTransactions = await query;
+
+    // Decrypt sensitive fields
+    return userTransactions.map(transaction => ({
+      ...transaction,
+      amount: DataEncryption.decryptAmount(transaction.amount),
+      description: DataEncryption.decryptDescription(transaction.description),
+      referenceNote: transaction.referenceNote ? DataEncryption.decrypt(transaction.referenceNote) : null
+    }));
   }
 
   async updateTransaction(id: number, transaction: InsertTransaction): Promise<Transaction> {
@@ -323,7 +344,7 @@ export class DatabaseStorage implements IStorage {
         type: category.type as "income" | "expense",
       })
       .returning();
-    
+
     return newCategory;
   }
 
@@ -434,7 +455,7 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(expenseReminders.dueDate);
-    
+
     return results;
   }
 
@@ -556,7 +577,7 @@ export class DatabaseStorage implements IStorage {
 
   private calculateNextOccurrence(lastDate: Date, frequency: string, endDate: Date | null): Date | null {
     const next = new Date(lastDate);
-    
+
     switch (frequency) {
       case 'weekly':
         next.setDate(next.getDate() + 7);
@@ -607,7 +628,7 @@ export class DatabaseStorage implements IStorage {
       .from(backupSettings)
       .where(eq(backupSettings.userId, userId))
       .limit(1);
-    
+
     return settings[0];
   }
 
@@ -616,7 +637,7 @@ export class DatabaseStorage implements IStorage {
       .insert(backupSettings)
       .values(settings)
       .returning();
-    
+
     return result[0];
   }
 
@@ -626,7 +647,7 @@ export class DatabaseStorage implements IStorage {
       .set({ ...settings, updatedAt: new Date() })
       .where(eq(backupSettings.userId, userId))
       .returning();
-    
+
     return result[0];
   }
 
@@ -642,13 +663,13 @@ export class DatabaseStorage implements IStorage {
           eq(users.plan, 'premium')
         )
       );
-    
+
     return result;
   }
 
   async getUsersWithOverdueBackups(): Promise<Array<{ userId: number }>> {
     const now = new Date();
-    
+
     const result = await db
       .select({ userId: backupSettings.userId })
       .from(backupSettings)
@@ -664,7 +685,7 @@ export class DatabaseStorage implements IStorage {
           )
         )
       );
-    
+
     return result;
   }
 }
