@@ -97,7 +97,7 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   // User operations
-  async getUser(id: number): Promise<User | undefined> {
+  async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
@@ -118,6 +118,21 @@ export class DatabaseStorage implements IStorage {
       .values(user)
       .returning();
     return newUser;
+  }
+
+  async upsertUser(user: any): Promise<User> {
+    const [upsertedUser] = await db
+      .insert(users)
+      .values(user)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...user,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return upsertedUser;
   }
 
   async updateUserStripeInfo(userId: number, customerId: string, subscriptionId: string): Promise<User> {
@@ -754,7 +769,7 @@ export class DatabaseStorage implements IStorage {
 
   // Admin methods for user management with encryption support
   async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users).orderBy(desc(users.createdAt));
+    return await db.select().from(users).orderBy(users.createdAt);
   }
 
   async updateUser(userId: string, userData: Partial<User>): Promise<User> {
