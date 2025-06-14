@@ -16,51 +16,51 @@ interface DemoStep {
 const demoSteps: DemoStep[] = [
   {
     id: 1,
-    title: "Welcome to FinanzerPro",
-    description: "Your comprehensive personal finance management solution with AI-powered insights and secure data encryption.",
-    screenshot: "/attached_assets/image_1749938217408.png",
+    title: "Dashboard Overview",
+    description: "Complete financial overview showing $4,000 income, $577.15 expenses, and $3,422.85 net balance with real transaction data.",
+    screenshot: "/attached_assets/image_1749915936622.png",
     duration: 4000,
-    features: ["Secure encrypted data", "AI-powered categorization", "Real-time analytics"]
+    features: ["Real-time financial summary", "Income and expense tracking", "Transaction counters"]
   },
   {
     id: 2,
-    title: "Smart Dashboard Overview",
-    description: "Get instant insights into your financial health with our intelligent dashboard showing real transaction data and spending patterns.",
-    screenshot: "/attached_assets/image_1749911383114.png",
+    title: "Budget Status Alert",
+    description: "Critical budget monitoring showing 577% utilization and $477.15 overspending with clear visual indicators.",
+    screenshot: "/attached_assets/image_1749916144876.png",
     duration: 4500,
-    features: ["Income vs expenses", "Category breakdowns", "Budget progress tracking"]
+    features: ["Budget status alerts", "Overspending warnings", "Financial health monitoring"]
   },
   {
     id: 3,
-    title: "Easy Transaction Management",
-    description: "Add and categorize transactions effortlessly with AI assistance. See how transactions are automatically organized by category.",
-    screenshot: "/attached_assets/image_1749911403594.png",
+    title: "Budget Creation",
+    description: "Create new budgets with intuitive category selection, amount specification, and flexible date ranges.",
+    screenshot: "/attached_assets/image_1749915441662.png",
     duration: 4000,
-    features: ["Quick transaction entry", "AI categorization", "Recurring transaction detection"]
+    features: ["Category-based budgets", "Amount specification", "Date range selection"]
   },
   {
     id: 4,
-    title: "Intelligent Budget Planning",
-    description: "Set and track budgets with smart recommendations and real-time progress monitoring for each spending category.",
-    screenshot: "/attached_assets/image_1749911440342.png",
+    title: "Budget Management",
+    description: "Edit existing budgets for Entertainment category with $100 amount and custom date ranges for precise control.",
+    screenshot: "/attached_assets/image_1749916014048.png",
     duration: 4000,
-    features: ["Category-based budgets", "Progress monitoring", "Overspending alerts"]
+    features: ["Budget editing", "Category selection", "Amount adjustments"]
   },
   {
     id: 5,
-    title: "Advanced Analytics & Reports",
-    description: "Gain deep insights with comprehensive reports showing spending trends, category analysis, and detailed financial summaries.",
-    screenshot: "/attached_assets/image_1749915441662.png",
+    title: "Budget Editing Interface",
+    description: "Streamlined budget editing with dropdown category selection and date picker controls for easy modifications.",
+    screenshot: "/attached_assets/image_1749915848462.png",
     duration: 4500,
-    features: ["Spending trends", "Category analysis", "Custom date ranges"]
+    features: ["Category dropdown", "Date pickers", "Update controls"]
   },
   {
     id: 6,
-    title: "AI-Powered Financial Insights",
-    description: "Get personalized recommendations and predictions powered by GPT-4 for better financial decisions and future planning.",
-    screenshot: "/attached_assets/image_1749915636089.png",
+    title: "Premium Features",
+    description: "Upgrade to unlock AI-powered insights, advanced analytics, trend predictions, and comprehensive financial management tools.",
+    screenshot: "/attached_assets/image_1749915441662.png",
     duration: 4500,
-    features: ["Spending predictions", "Saving recommendations", "Financial health score"]
+    features: ["AI insights", "Advanced analytics", "Trend predictions"]
   }
 ];
 
