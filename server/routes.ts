@@ -1075,7 +1075,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           retentionDays: 7,
           includeAttachments: true,
           encryptBackups: true,
-          status: 'active'
+          status: 'active',
+          totalBackups: 0,
+          totalSize: '0 B',
+          lastBackupDate: null,
+          nextBackupDate: null
         });
       }
 
@@ -1126,7 +1130,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           retentionDays: retentionDays ?? 7,
           includeAttachments: includeAttachments ?? true,
           encryptBackups: encryptBackups ?? true,
-          status: 'active'
+          status: 'active',
+          totalBackups: 0,
+          totalSize: '0 B',
+          lastBackupDate: null,
+          nextBackupDate: null
         });
       } else {
         // Update existing settings

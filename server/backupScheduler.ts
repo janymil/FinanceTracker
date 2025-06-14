@@ -172,8 +172,11 @@ class BackupScheduler {
       
       // Clean up old backups based on retention policy
       const settings = await storage.getUserBackupSettings(userId);
-      if (settings) {
+      if (settings && settings.retentionDays) {
         await bunnyStorage.cleanupOldBackups(userId, settings.retentionDays);
+      } else {
+        // Use default retention period if settings not found
+        await bunnyStorage.cleanupOldBackups(userId, 7);
       }
       
       // Update backup status in database
