@@ -177,6 +177,10 @@ Changelog:
 - June 14, 2025. Created comprehensive helpConfig.ts module that automatically provides accurate app information to AI assistant
 - June 14, 2025. Added anonymous user headers to all legal pages (Privacy Policy, Terms of Service, Cookie Policy) with proper navigation
 - June 14, 2025. Fixed help page routing for anonymous users - help link now works correctly from landing page
+- June 14, 2025. Created comprehensive promotional video demo using real FinanzerPro screenshots
+- June 14, 2025. Built interactive demo tour with 6 steps showcasing dashboard, transactions, budgets, reports, and AI features
+- June 14, 2025. Connected "View Demo" button on landing page to professional demo experience with real app screenshots
+- June 14, 2025. Added static file serving for attached assets to display actual app screenshots in demo
 ```
 
 ## User Preferences

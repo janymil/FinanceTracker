@@ -1659,7 +1659,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
   });
 
   // Serve attached assets for demo screenshots
-  app.use('/attached_assets', Express.static('attached_assets'));
+  app.use('/attached_assets', express.static('attached_assets'));
 
   // Error handler
   app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
