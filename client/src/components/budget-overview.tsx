@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Edit3 } from "lucide-react";
 import { useMemo } from "react";
+import { useLocation } from "wouter";
 
 interface Budget {
   id: number;
@@ -17,6 +18,8 @@ interface Budget {
 }
 
 export default function BudgetOverview() {
+  const [, setLocation] = useLocation();
+  
   const { data: budgets, isLoading: budgetsLoading } = useQuery({
     queryKey: ['/api/budgets'],
   });
@@ -105,11 +108,11 @@ export default function BudgetOverview() {
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold">Budget by Category</CardTitle>
           <div className="flex items-center space-x-2">
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" onClick={() => setLocation('/budget')}>
               <Edit3 className="h-4 w-4 mr-1" />
               Edit Budgets
             </Button>
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
+            <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => setLocation('/expenses')}>
               <Plus className="h-4 w-4 mr-1" />
               Add Category
             </Button>
