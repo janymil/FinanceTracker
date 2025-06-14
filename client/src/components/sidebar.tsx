@@ -9,6 +9,7 @@ import {
   Crown,
   Download,
   HelpCircle,
+  LayoutDashboard,
   Menu,
   Target,
   TrendingUp,

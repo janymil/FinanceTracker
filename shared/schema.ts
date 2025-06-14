@@ -32,10 +32,9 @@ export const users = pgTable("users", {
   password: varchar("password").notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
+  plan: varchar("plan", { length: 20 }).default("free").notNull(),
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
-  phone: text("phone"),
-  website: text("website"),
   settings: text("settings"),
 });
 
