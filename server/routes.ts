@@ -2,10 +2,18 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
+import { users, transactions, budgets, categories, type Transaction, type Budget } from "@shared/schema";
 import { setupAuth, isAuthenticated } from "./auth";
 import { insertTransactionSchema, insertBudgetSchema, insertExpenseReminderSchema } from "@shared/schema";
 import { z } from "zod";
-import { categorizeExpense, generateFinancialTips, generateSpendingInsights, generateTrendPredictions } from "./openai";
+import { 
+  generateFinancialTips, 
+  categorizeExpense, 
+  generateSpendingInsights, 
+  generateTrendPredictions,
+  type ExpenseCategorizationResult 
+} from "./openai";
+import { aiCache } from "./cache";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -18,7 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
-      
+
       // Check if recurring transactions are being used and require appropriate plan
       if (req.body.isRecurring && user?.plan === 'free') {
         return res.status(403).json({ 
@@ -37,10 +45,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Save transaction to database immediately
       const transaction = await storage.createTransaction(validatedData);
-      
+
       // Return response immediately to user
       res.json(transaction);
-      
+
       // Handle any background processing asynchronously (no await)
       setImmediate(async () => {
         try {
@@ -52,7 +60,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Don't affect the user experience even if background processing fails
         }
       });
-      
+
     } catch (error) {
       console.error("Error creating transaction:", error);
       res.status(400).json({ message: "Failed to create transaction" });
@@ -63,7 +71,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
-      
+
       // Plan-based limits: free = 3, standard = 100, premium = unlimited
       let limit;
       if (user?.plan === 'free') {
@@ -73,7 +81,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         limit = undefined; // unlimited for premium
       }
-      
+
       const transactions = await storage.getUserTransactions(userId, limit);
       res.json(transactions);
     } catch (error) {
@@ -86,7 +94,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
-      
+
       if (user?.plan === 'free') {
         return res.status(403).json({ message: "Standard or Premium subscription required" });
       }
@@ -113,7 +121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
-      
+
       if (user?.plan === 'free') {
         return res.status(403).json({ message: "Standard or Premium subscription required" });
       }
@@ -132,7 +140,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
-      
+
       if (user?.plan === 'free') {
         return res.status(403).json({ message: "Standard or Premium subscription required" });
       }
@@ -156,7 +164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
-      
+
       if (user?.plan === 'free') {
         return res.status(403).json({ message: "Standard or Premium subscription required" });
       }
@@ -183,7 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/categories', isAuthenticated, async (req: any, res) => {
     try {
       const { name, icon, color, type } = req.body;
-      
+
       if (!name || !icon || !color || !type) {
         return res.status(400).json({ message: "Name, icon, color, and type are required" });
       }
@@ -205,7 +213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const { startDate, endDate } = req.query;
-      
+
       if (!startDate || !endDate) {
         return res.status(400).json({ message: "Start date and end date are required" });
       }
@@ -215,7 +223,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         new Date(startDate as string),
         new Date(endDate as string)
       );
-      
+
       res.json(summary);
     } catch (error) {
       console.error("Error fetching financial summary:", error);
@@ -234,7 +242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       await storage.updateUserPlan(userId, plan);
-      
+
       res.json({ success: true, message: `Plan updated to ${plan}` });
     } catch (error) {
       console.error("Error updating plan:", error);
@@ -308,7 +316,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateUserStripeInfo(userId, customer.id, subscription.id);
 
       const invoice = subscription.latest_invoice as any;
-      
+
       res.json({
         subscriptionId: subscription.id,
         clientSecret: invoice.payment_intent?.client_secret,
@@ -346,12 +354,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         case 'invoice.payment_succeeded':
           const invoice = event.data.object as any;
           const subscriptionId = invoice.subscription;
-          
+
           if (subscriptionId) {
             const subscription = await stripe.subscriptions.retrieve(subscriptionId);
             const userId = subscription.metadata?.userId;
             const plan = subscription.metadata?.plan || 'premium';
-            
+
             if (userId) {
               // Update user plan and premium status
               await storage.updateUserPlan(parseInt(userId), plan);
@@ -364,11 +372,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         case 'invoice.payment_failed':
           const failedInvoice = event.data.object as any;
           const failedSubscriptionId = failedInvoice.subscription;
-          
+
           if (failedSubscriptionId) {
             const subscription = await stripe.subscriptions.retrieve(failedSubscriptionId);
             const userId = subscription.metadata?.userId;
-            
+
             if (userId) {
               // Optionally downgrade to free plan after payment failure
               await storage.updateUserPlan(parseInt(userId), 'free');
@@ -381,7 +389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         case 'customer.subscription.deleted':
           const deletedSubscription = event.data.object as any;
           const deletedUserId = deletedSubscription.metadata?.userId;
-          
+
           if (deletedUserId) {
             // Downgrade to free plan when subscription is cancelled
             await storage.updateUserPlan(parseInt(deletedUserId), 'free');
@@ -405,7 +413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/init-categories', isAuthenticated, async (req, res) => {
     try {
       const existingCategories = await storage.getCategories();
-      
+
       if (existingCategories.length === 0) {
         // Initialize default categories
         const defaultCategories = [
@@ -436,7 +444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auto-categorize', isAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.id);
-      
+
       // Require premium plan for auto-categorization
       if (!user || user.plan !== 'premium') {
         return res.status(403).json({ message: "Auto-categorization requires premium plan" });
@@ -483,14 +491,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/ai/categorize', isAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.id);
-      
+
       // Require standard+ plan for AI categorization
       if (!user || !['standard', 'premium'].includes(user.plan || '')) {
         return res.status(403).json({ message: "AI categorization requires standard or premium plan" });
       }
 
       const { description, amount } = req.body;
-      
+
       if (!description) {
         return res.status(400).json({ message: "Description is required" });
       }
@@ -507,14 +515,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/ai/tip', isAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.id);
-      
+
       // Require premium plan for AI tips
       if (!user || user.plan !== 'premium') {
         return res.status(403).json({ message: "AI financial tips require premium plan" });
       }
 
       const { month, total, categories } = req.body;
-      
+
       if (!month || !total || !categories) {
         return res.status(400).json({ message: "Month, total, and categories are required" });
       }
@@ -523,10 +531,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const startDate = new Date();
       startDate.setDate(1); // First day of current month
       const endDate = new Date();
-      
+
       const financialSummary = await storage.getUserFinancialSummary(req.user.id, startDate, endDate);
       const transactions = await storage.getUserTransactions(req.user.id, 50);
-      
+
       const financialData = {
         totalIncome: financialSummary.totalIncome,
         totalExpenses: financialSummary.totalExpenses,
@@ -541,7 +549,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const tips = await generateFinancialTips(financialData);
       const tip = tips.length > 0 ? tips[0] : null;
-      
+
       if (tip) {
         res.json({ tip: `${tip.title}: ${tip.description}` });
       } else {
@@ -557,14 +565,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/ai/insights', isAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.id);
-      
+
       // Require premium plan for AI insights
       if (!user || user.plan !== 'premium') {
         return res.status(403).json({ message: "AI spending insights require premium plan" });
       }
 
       const transactions = await storage.getUserTransactions(req.user.id, 100);
-      
+
       const insights = await generateSpendingInsights(transactions.map(t => ({
         description: t.description,
         amount: parseFloat(t.amount),
@@ -584,7 +592,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/trend-predictions', isAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.id);
-      
+
       if (!user || user.plan !== 'premium') {
         return res.status(403).json({ message: "AI trend predictions require Premium subscription" });
       }
@@ -592,7 +600,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const transactions = await storage.getUserTransactions(req.user.id, 200);
       const categories = await storage.getCategories();
       const budgets = await storage.getUserBudgets(req.user.id);
-      
+
       const categoryMap = new Map();
       categories.forEach(cat => {
         categoryMap.set(cat.id, cat.name);
@@ -625,7 +633,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/transaction-reminders', isAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.id);
-      
+
       if (!user || user.plan === 'free') {
         return res.status(403).json({ message: "Transaction reminders require Standard or Premium subscription" });
       }
@@ -644,7 +652,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
-      
+
       if (!user || user.plan === 'free') {
         return res.status(403).json({ message: "Expense reminders require Standard or Premium subscription" });
       }
@@ -670,7 +678,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
-      
+
       if (!user || user.plan === 'free') {
         return res.status(403).json({ message: "Expense reminders require Standard or Premium subscription" });
       }
@@ -687,7 +695,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
-      
+
       if (!user || user.plan === 'free') {
         return res.status(403).json({ message: "Expense reminders require Standard or Premium subscription" });
       }
@@ -705,7 +713,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
-      
+
       if (!user || user.plan === 'free') {
         return res.status(403).json({ message: "Expense reminders require Standard or Premium subscription" });
       }
@@ -736,7 +744,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
-      
+
       if (!user || user.plan === 'free') {
         return res.status(403).json({ message: "Expense reminders require Standard or Premium subscription" });
       }
@@ -754,7 +762,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
-      
+
       if (!user || user.plan === 'free') {
         return res.status(403).json({ message: "Expense reminders require Standard or Premium subscription" });
       }
@@ -766,6 +774,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error completing expense reminder:", error);
       res.status(500).json({ message: "Failed to complete expense reminder" });
     }
+  });
+
+  // Cache management endpoints (admin/debugging)
+  app.get('/api/admin/cache/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+
+      // Only allow premium users to view cache stats for now
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "Cache stats require premium plan" });
+      }
+
+      const stats = aiCache.getStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error getting cache stats:", error);
+      res.status(500).json({ message: "Failed to get cache stats" });
+    }
+  });
+
+  app.post('/api/admin/cache/clear', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+
+      // Only allow premium users to clear cache for now
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "Cache clearing requires premium plan" });
+      }
+
+      aiCache.clear();
+      res.json({ message: "Cache cleared successfully" });
+    } catch (error) {
+      console.error("Error clearing cache:", error);
+      res.status(500).json({ message: "Failed to clear cache" });
+    }
+  });
+
+  // Error handler
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error(err.stack);
+    res.status(500).json({ message: "Something went wrong!" });
   });
 
   const httpServer = createServer(app);

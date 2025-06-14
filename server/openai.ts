@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { aiCache } from "./cache";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -43,6 +44,12 @@ export interface FinancialForecast {
 
 export async function categorizeExpense(description: string, amount: number): Promise<ExpenseCategorizationResult> {
   try {
+    // Check cache first
+    const cached = aiCache.getCategorization(description, amount);
+    if (cached) {
+      console.log('Using cached categorization result');
+      return cached;
+    }
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -85,11 +92,16 @@ Please categorize this expense.`
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
 
-    return {
+    const categorization = {
       category: result.category || 'Other',
       confidence: Math.max(0, Math.min(1, result.confidence || 0.5)),
       reasoning: result.reasoning || 'Unable to determine category'
     };
+
+    // Cache the result
+    aiCache.setCategorization(description, amount, categorization);
+    
+    return categorization;
   } catch (error) {
     console.error('Error categorizing expense:', error);
     return {
@@ -116,6 +128,13 @@ export async function generateFinancialTips(financialData: {
   }>;
 }): Promise<FinancialTip[]> {
   try {
+    // Create hash for financial data to use as cache key
+    const dataHash = aiCache.createDataHash(financialData);
+    const cached = aiCache.getTips(dataHash);
+    if (cached) {
+      console.log('Using cached financial tips result');
+      return cached;
+    }
     const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
 
     const response = await openai.chat.completions.create({
@@ -180,7 +199,7 @@ Please provide personalized financial tips based on this data.`
     // Handle both array response and object with tips array
     const tips = Array.isArray(result) ? result : (result.tips || []);
 
-    return tips.map((tip: any) => ({
+    const processedTips = tips.map((tip: any) => ({
       title: tip.title || 'Financial Tip',
       description: tip.description || 'No description available',
       category: ['spending', 'saving', 'budgeting', 'income'].includes(tip.category) ? tip.category : 'spending',
@@ -188,6 +207,11 @@ Please provide personalized financial tips based on this data.`
       actionable: Boolean(tip.actionable),
       estimatedSaving: tip.estimatedSaving || undefined
     }));
+
+    // Cache the result
+    aiCache.setTips(dataHash, processedTips);
+    
+    return processedTips;
   } catch (error) {
     console.error('Error generating financial tips:', error);
     return [
@@ -220,6 +244,13 @@ export async function generateSpendingInsights(transactions: Array<{
   actionable: boolean;
 }>> {
   try {
+    // Create hash for transactions to use as cache key
+    const transactionsHash = aiCache.createDataHash(transactions);
+    const cached = aiCache.getInsights(transactionsHash);
+    if (cached) {
+      console.log('Using cached insights result');
+      return cached;
+    }
     const expenseTransactions = transactions.filter(t => t.type === 'expense');
 
     if (expenseTransactions.length === 0) {
@@ -285,7 +316,7 @@ Generate financial insights based on this spending data.`
     const result = JSON.parse(response.choices[0].message.content || '{"insights": []}');
     const insights = Array.isArray(result) ? result : (result.insights || []);
 
-    return insights.map((insight: any, index: number) => ({
+    const processedInsights = insights.map((insight: any, index: number) => ({
       id: insight.id || `ai_insight_${index}`,
       type: ['warning', 'suggestion', 'achievement', 'trend'].includes(insight.type) ? insight.type : 'suggestion',
       title: insight.title || 'Financial Insight',
@@ -296,6 +327,11 @@ Generate financial insights based on this spending data.`
       recommendation: insight.recommendation || undefined,
       actionable: Boolean(insight.actionable)
     }));
+
+    // Cache the result
+    aiCache.setInsights(transactionsHash, processedInsights);
+    
+    return processedInsights;
   } catch (error) {
     console.error('Error generating spending insights:', error);
     return [];
@@ -318,6 +354,16 @@ export async function generateTrendPredictions(
   financialForecast: FinancialForecast;
 }> {
   try {
+    // Create cache keys for the input data
+    const transactionsHash = aiCache.createDataHash(transactions);
+    const budgetsHash = aiCache.createDataHash(budgets);
+    const cached = aiCache.getTrends(transactionsHash, budgetsHash);
+    
+    if (cached) {
+      console.log('Using cached trend predictions result');
+      return cached;
+    }
+
     // Prepare comprehensive financial data for AI analysis
     const monthlyData = new Map();
     const categoryTotals = new Map();
@@ -417,7 +463,7 @@ Analysis Requirements:
 
     const result = JSON.parse(response.choices[0].message.content || '{"categoryPredictions": [], "financialForecast": {}}');
 
-    return {
+    const predictions = {
       categoryPredictions: result.categoryPredictions || [],
       financialForecast: result.financialForecast || {
         nextMonthExpenses: 0,
@@ -429,6 +475,11 @@ Analysis Requirements:
         riskFactors: []
       }
     };
+
+    // Cache the result
+    aiCache.setTrends(transactionsHash, budgetsHash, predictions);
+    
+    return predictions;
 
   } catch (error) {
     console.error('Error generating trend predictions:', error);
