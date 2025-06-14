@@ -58,12 +58,9 @@ export default function Landing() {
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
             Track expenses, manage budgets, and gain insights into your spending patterns with our comprehensive financial management platform.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Button onClick={handleLogin} size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8 py-3">
               Get Started Free
-            </Button>
-            <Button onClick={() => setLocation('/demo')} variant="outline" size="lg" className="text-lg px-8 py-3">
-              View Demo
             </Button>
           </div>
         </div>

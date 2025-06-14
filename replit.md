@@ -183,6 +183,8 @@ Changelog:
 - June 14, 2025. Added static file serving for attached assets to display actual app screenshots in demo
 - June 14, 2025. Cleaned up all screenshot capture development files and endpoints per user request
 - June 14, 2025. Updated demo to use authentic FinanzerPro dashboard screenshots showing real financial data
+- June 14, 2025. Removed promotional video demo and "View Demo" button from landing page per user request
+- June 14, 2025. Deleted demo.tsx page and removed demo routing from application completely
 ```
 
 ## User Preferences

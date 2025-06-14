@@ -30,7 +30,6 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import NotFoundPage from "./pages/not-found";
 import Landing from "@/pages/landing";
-import Demo from "@/pages/demo";
 
 function AppContent() {
   const { user, isLoading } = useAuth();
@@ -57,7 +56,7 @@ function AppContent() {
           <Route path="/cookie-policy" component={CookiePolicy} />
           <Route path="/contact" component={Contact} />
           <Route path="/help" component={Help} />
-          <Route path="/demo" component={Demo} />
+
           <Route component={Landing} />
         </Switch>
         <Footer />
