@@ -1718,30 +1718,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid plan selected" });
       }
 
-      // For free plan, create a simplified checkout
-      const sessionConfig: any = {
-        line_items: [{
-          price_data: selectedPlan.priceData,
-          quantity: 1,
-        }],
-        success_url: successUrl,
-        cancel_url: cancelUrl,
-        metadata: {
-          plan: plan,
-          userId: req.session?.userId?.toString() || 'anonymous'
-        }
-      };
+      let sessionConfig: any;
 
       // Configure checkout based on plan type
       if (plan === 'free') {
-        sessionConfig.mode = 'setup';
-        sessionConfig.payment_method_types = ['card'];
-        sessionConfig.setup_intent_data = {
-          metadata: { plan: 'free' }
+        // For free plan, just collect customer info and redirect
+        sessionConfig = {
+          mode: 'setup',
+          payment_method_types: ['card'],
+          success_url: successUrl,
+          cancel_url: cancelUrl,
+          setup_intent_data: {
+            metadata: { plan: 'free' }
+          },
+          metadata: {
+            plan: plan,
+            userId: req.session?.userId?.toString() || 'anonymous'
+          }
         };
       } else {
-        sessionConfig.mode = 'subscription';
-        sessionConfig.payment_method_types = ['card'];
+        // For paid plans, create subscription
+        sessionConfig = {
+          mode: 'subscription',
+          payment_method_types: ['card'],
+          line_items: [{
+            price_data: selectedPlan.priceData,
+            quantity: 1,
+          }],
+          success_url: successUrl,
+          cancel_url: cancelUrl,
+          metadata: {
+            plan: plan,
+            userId: req.session?.userId?.toString() || 'anonymous'
+          }
+        };
       }
 
       const session = await stripe!.checkout.sessions.create(sessionConfig);
@@ -1769,6 +1779,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const planRequiresPayment = plan !== 'free';
       if (planRequiresPayment && session.payment_status !== 'paid') {
         return res.redirect('/auth?error=payment_not_completed');
+      }
+      
+      // For free plans, check setup completion
+      if (plan === 'free' && session.mode === 'setup' && session.status !== 'complete') {
+        return res.redirect('/auth?error=setup_not_completed');
       }
 
       // Map plan names to database values  
