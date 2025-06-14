@@ -28,6 +28,7 @@ import { CookieBanner } from "@/components/cookie-banner";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import NotFoundPage from "./pages/not-found";
+import Landing from "@/pages/landing";
 
 function AppContent() {
   const { user, isLoading } = useAuth();
@@ -46,13 +47,13 @@ function AppContent() {
     return (
       <>
         <Switch>
-          <Route path="/" component={LandingPage} />
+          <Route path="/" component={Landing} />
           <Route path="/auth" component={AuthPage} />
           <Route path="/privacy-policy" component={PrivacyPolicy} />
           <Route path="/terms-of-service" component={TermsOfService} />
           <Route path="/cookie-policy" component={CookiePolicy} />
           <Route path="/contact" component={Contact} />
-          <Route component={LandingPage} />
+          <Route component={Landing} />
         </Switch>
         <Footer />
         <CookieBanner />
