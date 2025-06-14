@@ -247,6 +247,11 @@ export default function Expenses() {
     const category = categories.find((cat: Category) => cat.name === transaction.categoryName);
     // Convert date to proper format for date input (YYYY-MM-DD)
     const formattedDate = new Date(transaction.date).toISOString().split('T')[0];
+    
+    console.log("Transaction categoryName:", transaction.categoryName);
+    console.log("Found category:", category);
+    console.log("Categories:", categories);
+    
     setNewExpense({
       amount: transaction.amount,
       description: transaction.description,
