@@ -5,6 +5,7 @@ import {
   budgets,
   categories,
   expenseReminders,
+  backupSettings,
   type User,
   type InsertUser,
   type Transaction,
@@ -14,6 +15,8 @@ import {
   type Category,
   type ExpenseReminder,
   type InsertExpenseReminder,
+  type BackupSettings,
+  type InsertBackupSettings,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, desc, sum, sql, or, isNull } from "drizzle-orm";
@@ -498,6 +501,74 @@ export class DatabaseStorage implements IStorage {
       .update(expenseReminders)
       .set({ isCompleted: true, updatedAt: new Date() })
       .where(and(eq(expenseReminders.id, id), eq(expenseReminders.userId, userId)));
+  }
+
+  // Backup settings operations
+  async getUserBackupSettings(userId: number): Promise<BackupSettings | undefined> {
+    const settings = await db
+      .select()
+      .from(backupSettings)
+      .where(eq(backupSettings.userId, userId))
+      .limit(1);
+    
+    return settings[0];
+  }
+
+  async createBackupSettings(settings: InsertBackupSettings): Promise<BackupSettings> {
+    const result = await db
+      .insert(backupSettings)
+      .values(settings)
+      .returning();
+    
+    return result[0];
+  }
+
+  async updateBackupSettings(userId: number, settings: Partial<InsertBackupSettings>): Promise<BackupSettings> {
+    const result = await db
+      .update(backupSettings)
+      .set({ ...settings, updatedAt: new Date() })
+      .where(eq(backupSettings.userId, userId))
+      .returning();
+    
+    return result[0];
+  }
+
+  async getUsersWithActiveBackups(): Promise<Array<{ userId: number }>> {
+    const result = await db
+      .select({ userId: backupSettings.userId })
+      .from(backupSettings)
+      .innerJoin(users, eq(backupSettings.userId, users.id))
+      .where(
+        and(
+          eq(backupSettings.autoBackup, true),
+          eq(backupSettings.status, 'active'),
+          eq(users.plan, 'premium')
+        )
+      );
+    
+    return result;
+  }
+
+  async getUsersWithOverdueBackups(): Promise<Array<{ userId: number }>> {
+    const now = new Date();
+    
+    const result = await db
+      .select({ userId: backupSettings.userId })
+      .from(backupSettings)
+      .innerJoin(users, eq(backupSettings.userId, users.id))
+      .where(
+        and(
+          eq(backupSettings.autoBackup, true),
+          eq(backupSettings.status, 'active'),
+          eq(users.plan, 'premium'),
+          or(
+            isNull(backupSettings.nextBackupDate),
+            lte(backupSettings.nextBackupDate, now)
+          )
+        )
+      );
+    
+    return result;
   }
 }
 

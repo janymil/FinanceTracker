@@ -1030,29 +1030,151 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Cloud backup requires Premium subscription" });
       }
 
-      // In a real implementation, this would backup to cloud storage
-      // For now, we'll simulate the backup process
-      const backupData = {
-        user: { id: userId, email: user.email },
-        transactions: await storage.getUserTransactions(userId),
-        budgets: await storage.getUserBudgets(userId),
-        backupDate: new Date().toISOString()
-      };
-
-      // Simulate backup process with some delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
+      const { backupScheduler } = await import('./backupScheduler');
+      
+      // Trigger manual backup
+      await backupScheduler.triggerManualBackup(userId);
+      
+      // Get updated backup info
+      const { bunnyStorage } = await import('./bunnyStorage');
+      const backupInfo = await bunnyStorage.getBackupInfo(userId);
+      
       res.json({
         success: true,
-        message: "Data backed up successfully",
-        backupId: `backup_${userId}_${Date.now()}`,
-        size: JSON.stringify(backupData).length,
+        message: "Data backed up successfully to Bunny.net cloud storage",
+        totalBackups: backupInfo.totalBackups,
+        totalSize: backupInfo.totalSize,
         timestamp: new Date().toISOString()
       });
 
     } catch (error) {
       console.error("Error creating backup:", error);
-      res.status(500).json({ message: "Failed to create backup" });
+      res.status(500).json({ message: "Failed to create backup: " + (error instanceof Error ? error.message : 'Unknown error') });
+    }
+  });
+
+  // Backup settings endpoints
+  app.get('/api/backup-settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "Backup settings require Premium subscription" });
+      }
+
+      let settings = await storage.getUserBackupSettings(userId);
+      
+      // Create default settings if none exist
+      if (!settings) {
+        settings = await storage.createBackupSettings({
+          userId,
+          autoBackup: true,
+          frequency: 'daily',
+          retentionDays: 7,
+          includeAttachments: true,
+          encryptBackups: true,
+          status: 'active'
+        });
+      }
+
+      // Get backup info from Bunny.net
+      const { bunnyStorage } = await import('./bunnyStorage');
+      const backupInfo = await bunnyStorage.getBackupInfo(userId);
+      
+      res.json({
+        ...settings,
+        ...backupInfo
+      });
+
+    } catch (error) {
+      console.error("Error getting backup settings:", error);
+      res.status(500).json({ message: "Failed to get backup settings" });
+    }
+  });
+
+  app.put('/api/backup-settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "Backup settings require Premium subscription" });
+      }
+
+      const { autoBackup, frequency, retentionDays, includeAttachments, encryptBackups } = req.body;
+      
+      // Validate frequency
+      if (frequency && !['daily', 'weekly', 'monthly'].includes(frequency)) {
+        return res.status(400).json({ message: "Invalid frequency. Must be daily, weekly, or monthly" });
+      }
+      
+      // Validate retention days
+      if (retentionDays && ![7, 14, 30].includes(retentionDays)) {
+        return res.status(400).json({ message: "Invalid retention period. Must be 7, 14, or 30 days" });
+      }
+
+      let settings = await storage.getUserBackupSettings(userId);
+      
+      if (!settings) {
+        // Create new settings
+        settings = await storage.createBackupSettings({
+          userId,
+          autoBackup: autoBackup ?? true,
+          frequency: frequency ?? 'daily',
+          retentionDays: retentionDays ?? 7,
+          includeAttachments: includeAttachments ?? true,
+          encryptBackups: encryptBackups ?? true,
+          status: 'active'
+        });
+      } else {
+        // Update existing settings
+        settings = await storage.updateBackupSettings(userId, {
+          autoBackup,
+          frequency,
+          retentionDays,
+          includeAttachments,
+          encryptBackups
+        });
+      }
+
+      // Update backup schedule
+      const { backupScheduler } = await import('./backupScheduler');
+      await backupScheduler.updateUserSchedule(userId);
+
+      res.json(settings);
+
+    } catch (error) {
+      console.error("Error updating backup settings:", error);
+      res.status(500).json({ message: "Failed to update backup settings" });
+    }
+  });
+
+  app.get('/api/backup-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "Backup status requires Premium subscription" });
+      }
+
+      const settings = await storage.getUserBackupSettings(userId);
+      const { bunnyStorage } = await import('./bunnyStorage');
+      const backups = await bunnyStorage.getUserBackups(userId);
+      const backupInfo = await bunnyStorage.getBackupInfo(userId);
+
+      res.json({
+        settings,
+        backups: backups.slice(0, 10), // Latest 10 backups
+        info: backupInfo,
+        lastBackup: backups.length > 0 ? backups[0].DateCreated : null,
+        nextBackup: settings?.nextBackupDate || null
+      });
+
+    } catch (error) {
+      console.error("Error getting backup status:", error);
+      res.status(500).json({ message: "Failed to get backup status" });
     }
   });
 
