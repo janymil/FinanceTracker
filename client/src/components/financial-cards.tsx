@@ -65,9 +65,22 @@ export default function FinancialCards({ summary, isLoading }: FinancialCardsPro
   const getBudgetStatus = () => {
     if (!summary) return { status: 'Loading...', percentage: 0, remaining: 0, bgColor: 'bg-gray-50', textColor: 'text-gray-600' };
     
-    const budgetLimit = 2450; // Total budget from demo data
-    const percentage = (Math.abs(summary.totalExpenses) / budgetLimit) * 100;
-    const remaining = budgetLimit - Math.abs(summary.totalExpenses);
+    // Calculate total budget from actual budgets data
+    const totalBudget = budgets ? budgets.reduce((sum: number, budget: any) => sum + parseFloat(budget.amount || 0), 0) : 0;
+    
+    // If no budgets set, show "No Budget Set" status
+    if (totalBudget === 0) {
+      return {
+        status: 'No Budget Set',
+        percentage: 0,
+        remaining: 0,
+        bgColor: 'bg-gray-50 dark:bg-gray-900/20',
+        textColor: 'text-gray-600 dark:text-gray-400'
+      };
+    }
+    
+    const percentage = (Math.abs(summary.totalExpenses) / totalBudget) * 100;
+    const remaining = totalBudget - Math.abs(summary.totalExpenses);
     
     if (percentage <= 50) return { 
       status: 'Healthy', 
@@ -88,7 +101,7 @@ export default function FinancialCards({ summary, isLoading }: FinancialCardsPro
       percentage, 
       remaining, 
       bgColor: 'bg-red-50 dark:bg-red-900/20', 
-      textColor: 'text-red-700 dark:text-red-300' 
+      textColor: 'text-red-700 dark:text-red-red-300' 
     };
   };
 

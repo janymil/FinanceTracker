@@ -14,6 +14,7 @@ import {
   type ExpenseCategorizationResult 
 } from "./openai";
 import { aiCache } from "./cache";
+import { batchProcessor } from "./batch-processor";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -53,7 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       setImmediate(async () => {
         try {
           const user = await storage.getUser(userId);
-          
+
           // Auto-categorization for premium users (immediate processing)
           if (user?.plan === 'premium' && !transaction.categoryId && transaction.type === 'expense') {
             try {
@@ -71,10 +72,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.error('Auto-categorization error:', error);
             }
           }
-          
-          // Schedule batch processing check
-          scheduleBatchProcessing(userId);
-          
+
+          // Schedule this user for batch processing
+          batchProcessor.scheduleUser(userId);
+
           console.log('Background processing completed for transaction:', transaction.id);
         } catch (error) {
           console.error('Background processing error:', error);
