@@ -16,7 +16,7 @@ export function Footer({ sidebarCollapsed = false }: FooterProps) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">FinanceFlow</h3>
+            <h3 className="text-lg font-semibold">FinanzerPro</h3>
             <p className="text-sm text-muted-foreground">
               Take control of your finances with intelligent expense tracking, 
               budgeting, and AI-powered insights.
@@ -24,7 +24,7 @@ export function Footer({ sidebarCollapsed = false }: FooterProps) {
             <div className="text-sm text-muted-foreground">
               <p>123 Finance Street</p>
               <p>San Francisco, CA 94105</p>
-              <p>support@financeflow.app</p>
+              <p>support@finanzerpro.app</p>
             </div>
           </div>
 
@@ -70,7 +70,7 @@ export function Footer({ sidebarCollapsed = false }: FooterProps) {
                 </Link>
               </li>
               <li>
-                <Link href="/documentation" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/help" className="text-muted-foreground hover:text-foreground transition-colors">
                   Documentation
                 </Link>
               </li>

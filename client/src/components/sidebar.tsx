@@ -163,7 +163,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
             <div className="flex items-center">
               <TrendingUp className="h-8 w-8 text-primary mr-3" />
               <span className="text-xl font-bold text-gray-900 dark:text-white">
-                FinanceFlow
+                FinanzerPro
               </span>
             </div>
           )}
