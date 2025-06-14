@@ -49,7 +49,7 @@ export class BunnyStorage {
       throw new Error('Bunny.net credentials not properly configured');
     }
 
-    this.baseUrl = `https://${this.config.region || 'de'}.storage.bunnycdn.com/${this.config.storageZone}`;
+    this.baseUrl = `https://storage.bunnycdn.com/${this.config.storageZone}`;
   }
 
   private makeRequest(
