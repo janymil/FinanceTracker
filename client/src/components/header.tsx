@@ -149,9 +149,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
     createTransactionMutation.mutate(newTransaction);
   };
 
-  const handleLogout = () => {
-    logoutMutation.mutate();
-  };
+
 
   return (
     <header className={cn(
@@ -468,9 +466,9 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} disabled={logoutMutation.isPending}>
+              <DropdownMenuItem onClick={() => window.location.href = '/api/logout'}>
                 <LogOut className="h-4 w-4 mr-2" />
-                {logoutMutation.isPending ? "Signing out..." : "Sign Out"}
+                Sign Out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
