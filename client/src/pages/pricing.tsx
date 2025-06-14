@@ -78,9 +78,9 @@ export default function Pricing() {
       premium: true
     },
     {
-      name: "Data Export (CSV, PDF)",
+      name: "Data Management (CSV, PDF)",
       free: false,
-      standard: true,
+      standard: false,
       premium: true
     },
     {
@@ -233,7 +233,7 @@ export default function Pricing() {
                 <div className="text-4xl font-bold text-blue-600">
                   $7.99<span className="text-lg font-normal text-gray-500">/month</span>
                 </div>
-                <CardDescription>For users serious about saving money</CardDescription>
+                <CardDescription>For users serious about financial management</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
@@ -257,10 +257,7 @@ export default function Pricing() {
                     <Check className="h-5 w-5 text-success mr-3" />
                     <span>Calendar view and reminders</span>
                   </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Data export (CSV, PDF)</span>
-                  </div>
+                  
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
                     <span>Unlimited transaction history</span>
@@ -319,6 +316,10 @@ export default function Pricing() {
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
                     <span>Cloud data backup</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="h-5 w-5 text-success mr-3" />
+                    <span>Data management (CSV, PDF)</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />

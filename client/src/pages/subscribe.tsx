@@ -31,10 +31,9 @@ const plans: Record<PlanType, PlanDetails> = {
     features: [
       'Everything in Free plan',
       'Advanced budget tracking',
-      'Basic analytics & charts',
+      'Standard analytics & charts',
       'Up to 100 transactions per month',
       'Email support',
-      'Data export (CSV)',
     ],
   },
   premium: {
@@ -47,7 +46,7 @@ const plans: Record<PlanType, PlanDetails> = {
       'Interactive charts & analytics',
       'Unlimited transaction history',
       'Advanced expense categorization',
-      'Data export (CSV, PDF)',
+      'Data management (CSV, PDF)',
       'Advanced filtering & search',
       'Priority email support',
     ],

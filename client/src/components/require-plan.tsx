@@ -1,4 +1,3 @@
-
 import React, { ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import UpgradePrompt from './upgrade-prompt';
@@ -71,6 +70,18 @@ const featureConfigs = {
       "Visual spending patterns by date"
     ],
     icon: Calendar
+  },
+  export: {
+    feature: "Data Management",
+    description: "Export and manage your financial data with CSV or PDF format for external analysis or record keeping.",
+    benefits: [
+      "Export transactions to CSV format",
+      "Generate PDF reports",
+      "Backup your financial data",
+      "Share data with accountants"
+    ],
+    requiredPlan: "premium" as PlanType,
+    icon: BarChart3
   }
 };
 
