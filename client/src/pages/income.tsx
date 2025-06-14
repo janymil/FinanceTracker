@@ -579,6 +579,19 @@ export default function Income() {
                     <SelectItem value="today">Today</SelectItem>
                     <SelectItem value="week">Last Week</SelectItem>
                     <SelectItem value="month">Last Month</SelectItem>
+                    <SelectItem value="current-month">This Month</SelectItem>
+                    <SelectItem value="jan">January</SelectItem>
+                    <SelectItem value="feb">February</SelectItem>
+                    <SelectItem value="mar">March</SelectItem>
+                    <SelectItem value="apr">April</SelectItem>
+                    <SelectItem value="may">May</SelectItem>
+                    <SelectItem value="jun">June</SelectItem>
+                    <SelectItem value="jul">July</SelectItem>
+                    <SelectItem value="aug">August</SelectItem>
+                    <SelectItem value="sep">September</SelectItem>
+                    <SelectItem value="oct">October</SelectItem>
+                    <SelectItem value="nov">November</SelectItem>
+                    <SelectItem value="dec">December</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

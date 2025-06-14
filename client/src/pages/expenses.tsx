@@ -182,6 +182,7 @@ export default function Expenses() {
     if (dateRange !== "all") {
       const transactionDate = new Date(transaction.date);
       const today = new Date();
+      const currentYear = today.getFullYear();
       
       switch (dateRange) {
         case "today":
@@ -194,6 +195,46 @@ export default function Expenses() {
         case "month":
           const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
           matchesDate = transactionDate >= monthAgo;
+          break;
+        case "current-month":
+          const currentMonth = today.getMonth();
+          matchesDate = transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear;
+          break;
+        case "jan":
+          matchesDate = transactionDate.getMonth() === 0 && transactionDate.getFullYear() === currentYear;
+          break;
+        case "feb":
+          matchesDate = transactionDate.getMonth() === 1 && transactionDate.getFullYear() === currentYear;
+          break;
+        case "mar":
+          matchesDate = transactionDate.getMonth() === 2 && transactionDate.getFullYear() === currentYear;
+          break;
+        case "apr":
+          matchesDate = transactionDate.getMonth() === 3 && transactionDate.getFullYear() === currentYear;
+          break;
+        case "may":
+          matchesDate = transactionDate.getMonth() === 4 && transactionDate.getFullYear() === currentYear;
+          break;
+        case "jun":
+          matchesDate = transactionDate.getMonth() === 5 && transactionDate.getFullYear() === currentYear;
+          break;
+        case "jul":
+          matchesDate = transactionDate.getMonth() === 6 && transactionDate.getFullYear() === currentYear;
+          break;
+        case "aug":
+          matchesDate = transactionDate.getMonth() === 7 && transactionDate.getFullYear() === currentYear;
+          break;
+        case "sep":
+          matchesDate = transactionDate.getMonth() === 8 && transactionDate.getFullYear() === currentYear;
+          break;
+        case "oct":
+          matchesDate = transactionDate.getMonth() === 9 && transactionDate.getFullYear() === currentYear;
+          break;
+        case "nov":
+          matchesDate = transactionDate.getMonth() === 10 && transactionDate.getFullYear() === currentYear;
+          break;
+        case "dec":
+          matchesDate = transactionDate.getMonth() === 11 && transactionDate.getFullYear() === currentYear;
           break;
       }
     }
@@ -624,6 +665,19 @@ export default function Expenses() {
                     <SelectItem value="today">Today</SelectItem>
                     <SelectItem value="week">Last Week</SelectItem>
                     <SelectItem value="month">Last Month</SelectItem>
+                    <SelectItem value="current-month">This Month</SelectItem>
+                    <SelectItem value="jan">January</SelectItem>
+                    <SelectItem value="feb">February</SelectItem>
+                    <SelectItem value="mar">March</SelectItem>
+                    <SelectItem value="apr">April</SelectItem>
+                    <SelectItem value="may">May</SelectItem>
+                    <SelectItem value="jun">June</SelectItem>
+                    <SelectItem value="jul">July</SelectItem>
+                    <SelectItem value="aug">August</SelectItem>
+                    <SelectItem value="sep">September</SelectItem>
+                    <SelectItem value="oct">October</SelectItem>
+                    <SelectItem value="nov">November</SelectItem>
+                    <SelectItem value="dec">December</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
