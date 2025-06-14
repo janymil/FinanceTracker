@@ -1996,8 +1996,8 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
     }
   });
 
-  // Delete user and all their encrypted data (no auth required for development)
-  app.delete('/api/admin/users/:id', async (req: any, res) => {
+  // Delete user and all their encrypted data (requires admin authentication)
+  app.delete('/api/admin/users/:id', adminAuth, async (req: any, res) => {
     try {
       const userId = req.params.id;
 
@@ -2011,8 +2011,8 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
     }
   });
 
-  // Get user's encrypted data summary (no auth required for development)
-  app.get('/api/admin/users/:id/data', async (req: any, res) => {
+  // Get user's encrypted data summary (requires admin authentication)
+  app.get('/api/admin/users/:id/data', adminAuth, async (req: any, res) => {
     try {
       const userId = req.params.id;
       

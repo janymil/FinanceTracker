@@ -38,6 +38,9 @@ interface UserStats {
 }
 
 export default function AdminAnalytics() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [planFilter, setPlanFilter] = useState("all");
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -51,11 +54,40 @@ export default function AdminAnalytics() {
 
   const { data: users = [], isLoading: usersLoading } = useQuery({
     queryKey: ['/api/admin/users'],
+    enabled: isAuthenticated,
   });
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['/api/admin/stats'],
+    enabled: isAuthenticated,
   });
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoggingIn(true);
+    
+    try {
+      await apiRequest('/api/admin/login', {
+        method: 'POST',
+        body: JSON.stringify({ password }),
+      });
+      
+      setIsAuthenticated(true);
+      setPassword("");
+      toast({
+        title: "Success",
+        description: "Admin login successful",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Invalid admin password",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
 
   const createUserMutation = useMutation({
     mutationFn: async (userData: any) => {
@@ -163,6 +195,48 @@ export default function AdminAnalytics() {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString();
   };
+
+  // Show login form if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <Shield className="h-12 w-12 text-blue-600" />
+            </div>
+            <CardTitle className="text-2xl">Admin Access</CardTitle>
+            <CardDescription>
+              Enter your admin password to access the system analytics
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <Label htmlFor="password">Admin Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter admin password"
+                  required
+                  className="mt-1"
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoggingIn || !password}
+              >
+                {isLoggingIn ? "Authenticating..." : "Access Admin Panel"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (usersLoading || statsLoading) {
     return (
