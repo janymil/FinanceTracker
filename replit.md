@@ -1,8 +1,8 @@
-# FinanceFlow - Personal Finance Management Application
+# FinanzerPro - Personal Finance Management Application
 
 ## Overview
 
-FinanceFlow is a full-stack personal finance management application built with React (frontend) and Express.js (backend). The application provides comprehensive financial tracking capabilities with tiered subscription plans offering different feature sets. Users can track transactions, manage budgets, set financial goals, and gain insights into their spending patterns.
+FinanzerPro is a full-stack personal finance management application built with React (frontend) and Express.js (backend). The application provides comprehensive financial tracking capabilities with tiered subscription plans offering different feature sets. Users can track transactions, manage budgets, set financial goals, and gain insights into their spending patterns.
 
 ## System Architecture
 
@@ -157,6 +157,8 @@ Changelog:
 - June 14, 2025. Added cookie-parser integration and proper cookie consent storage/retrieval from backend
 - June 14, 2025. Fixed Budget Status card to filter budgets by selected month period instead of showing all budgets
 - June 14, 2025. Budget Status now correctly shows "No Budget Set" when no budgets are active for the selected time period
+- June 14, 2025. Completed comprehensive rebranding from "FinanceFlow" to "FinanzerPro" across all frontend components
+- June 14, 2025. Updated application name in landing page, terms of service, navigation component, and all user-facing elements
 ```
 
 ## User Preferences

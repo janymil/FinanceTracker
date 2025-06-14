@@ -19,7 +19,7 @@ export default function Landing() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <TrendingUp className="h-8 w-8 text-primary mr-2" />
-              <span className="text-xl font-bold text-gray-900 dark:text-white">FinanceFlow</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">FinanzerPro</span>
             </div>
             <div className="flex items-center space-x-4">
               <Button variant="ghost" onClick={() => setLocation("/pricing")}>
@@ -228,14 +228,14 @@ export default function Landing() {
           <div className="text-center">
             <div className="flex items-center justify-center mb-4">
               <TrendingUp className="h-8 w-8 text-primary mr-2" />
-              <span className="text-xl font-bold">FinanceFlow</span>
+              <span className="text-xl font-bold">FinanzerPro</span>
             </div>
             <p className="text-gray-400 mb-8">
               Take control of your financial future with intelligent expense tracking and budgeting.
             </p>
             <div className="border-t border-gray-800 pt-8">
               <p className="text-gray-400">
-                © 2025 FinanceFlow. All rights reserved.
+                © 2025 FinanzerPro. All rights reserved.
               </p>
             </div>
           </div>

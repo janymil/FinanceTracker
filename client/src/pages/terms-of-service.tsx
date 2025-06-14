@@ -23,7 +23,7 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">2. Description of Service</h2>
             <p className="mb-4">
-              FinanceFlow is a personal finance management application that helps users track expenses, 
+              FinanzerPro is a personal finance management application that helps users track expenses, 
               manage budgets, set financial goals, and gain insights into their spending patterns.
             </p>
             <h3 className="text-lg font-semibold mb-2">2.1 Service Plans</h3>
@@ -50,7 +50,7 @@ export default function TermsOfService() {
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">4. Acceptable Use</h2>
-            <p className="mb-4">You agree not to use FinanceFlow to:</p>
+            <p className="mb-4">You agree not to use FinanzerPro to:</p>
             <ul className="list-disc list-inside mb-4 space-y-2">
               <li>Violate any applicable laws or regulations</li>
               <li>Transmit any harmful, threatening, or offensive content</li>
@@ -103,7 +103,7 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">8. Limitation of Liability</h2>
             <p className="mb-4">
-              FinanceFlow is provided "as is" without warranties of any kind. We are not liable for 
+              FinanzerPro is provided "as is" without warranties of any kind. We are not liable for 
               any indirect, incidental, or consequential damages arising from your use of the service.
             </p>
           </section>
