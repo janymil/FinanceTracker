@@ -155,6 +155,8 @@ Changelog:
 - June 14, 2025. Implemented real backend cookie consent functionality with server-side cookie middleware
 - June 14, 2025. Created cookie consent system that actually respects user preferences and blocks non-consented cookies
 - June 14, 2025. Added cookie-parser integration and proper cookie consent storage/retrieval from backend
+- June 14, 2025. Fixed Budget Status card to filter budgets by selected month period instead of showing all budgets
+- June 14, 2025. Budget Status now correctly shows "No Budget Set" when no budgets are active for the selected time period
 ```
 
 ## User Preferences
