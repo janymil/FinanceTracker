@@ -20,7 +20,9 @@ import {
   DollarSign,
   TrendingUp,
   TrendingDown,
-  Repeat
+  Repeat,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
@@ -56,6 +58,8 @@ export default function Transactions() {
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [monthOffset, setMonthOffset] = useState(0);
   
   const [newTransaction, setNewTransaction] = useState({
     amount: "",
@@ -77,6 +81,43 @@ export default function Transactions() {
     queryKey: ["/api/categories"],
     enabled: !!user,
   });
+
+  // Generate month navigation data
+  const generateMonthData = () => {
+    const months = [];
+    const today = new Date();
+    
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      months.push({
+        key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
+        label: format(date, "MMM yyyy"),
+        month: date.getMonth(),
+        year: date.getFullYear(),
+      });
+    }
+    return months;
+  };
+
+  const monthData = generateMonthData();
+  const visibleMonths = monthData.slice(monthOffset, monthOffset + 4);
+
+  const handleMonthSelect = (monthKey: string) => {
+    setSelectedMonth(monthKey === selectedMonth ? null : monthKey);
+    setDateRange("all"); // Reset date range when using month filter
+  };
+
+  const handlePrevMonths = () => {
+    if (monthOffset > 0) {
+      setMonthOffset(monthOffset - 1);
+    }
+  };
+
+  const handleNextMonths = () => {
+    if (monthOffset < monthData.length - 4) {
+      setMonthOffset(monthOffset + 1);
+    }
+  };
 
   const createTransactionMutation = useMutation({
     mutationFn: async (transactionData: typeof newTransaction) => {
@@ -172,8 +213,17 @@ export default function Transactions() {
     
     const matchesCategory = filterCategory === "all" || transaction.categoryName === filterCategory;
     
+    // Check month filter first (horizontal filter takes priority)
+    let matchesMonth = true;
+    if (selectedMonth) {
+      const transactionDate = new Date(transaction.date);
+      const [year, month] = selectedMonth.split('-');
+      matchesMonth = transactionDate.getFullYear() === parseInt(year) && 
+                     transactionDate.getMonth() === parseInt(month) - 1;
+    }
+    
     let matchesDate = true;
-    if (dateRange !== "all") {
+    if (dateRange !== "all" && !selectedMonth) {
       const transactionDate = new Date(transaction.date);
       const today = new Date();
       const currentYear = today.getFullYear();
@@ -233,7 +283,7 @@ export default function Transactions() {
       }
     }
     
-    return matchesSearch && matchesType && matchesCategory && matchesDate;
+    return matchesSearch && matchesType && matchesCategory && matchesMonth && matchesDate;
   });
 
   const availableCategories = Array.from(new Set(transactions.map((t: Transaction) => t.categoryName).filter(Boolean)));
@@ -516,6 +566,68 @@ export default function Transactions() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Month Navigation Filter */}
+        <Card className="mb-4">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by Month</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handlePrevMonths}
+                  disabled={monthOffset === 0}
+                  className="h-8 w-8 p-0"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                
+                <div className="flex gap-1">
+                  {visibleMonths.map((month) => (
+                    <Button
+                      key={month.key}
+                      variant={selectedMonth === month.key ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleMonthSelect(month.key)}
+                      className="h-8 px-3 text-xs"
+                    >
+                      {month.label}
+                    </Button>
+                  ))}
+                </div>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleNextMonths}
+                  disabled={monthOffset >= monthData.length - 4}
+                  className="h-8 w-8 p-0"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            {selectedMonth && (
+              <div className="mt-2 flex items-center gap-2">
+                <Badge variant="secondary" className="text-xs">
+                  Filtering by: {visibleMonths.find(m => m.key === selectedMonth)?.label || selectedMonth}
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedMonth(null)}
+                  className="h-6 px-2 text-xs"
+                >
+                  Clear
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Filters and Search */}
         <Card className="mb-6">
