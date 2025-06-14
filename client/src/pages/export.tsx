@@ -160,15 +160,20 @@ export default function ExportPage() {
     queryKey: ["/api/categories"],
   });
 
-  // Mock backup status - in real app this would come from API
+  // Fetch real backup status from API
+  const { data: backupStatusData } = useQuery({
+    queryKey: ["/api/backup-status"],
+  });
+
+  // Create backup status object from API data
   const backupStatus: BackupStatus = {
-    lastBackup: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-    nextBackup: new Date(Date.now() + 86400000 * 6).toISOString(), // 6 days from now
-    totalSize: "12.4 MB",
-    frequency: backupSettings.frequency,
-    autoBackup: backupSettings.autoBackup,
-    encrypted: backupSettings.encryptBackups,
-    status: 'synced',
+    lastBackup: backupStatusData?.lastBackup || new Date(Date.now() - 86400000).toISOString(),
+    nextBackup: backupStatusData?.nextBackup || new Date(Date.now() + 86400000).toISOString(),
+    totalSize: backupStatusData?.info?.totalSize ? `${(backupStatusData.info.totalSize / 1024 / 1024).toFixed(1)} MB` : "0 MB",
+    frequency: backupStatusData?.settings?.frequency || backupSettings.frequency,
+    autoBackup: backupStatusData?.settings?.autoBackup ?? backupSettings.autoBackup,
+    encrypted: backupStatusData?.settings?.encryptBackups ?? backupSettings.encryptBackups,
+    status: backupStatusData?.settings?.status === 'active' ? 'synced' : 'pending',
   };
 
   // Import handlers
