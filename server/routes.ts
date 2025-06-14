@@ -49,11 +49,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Return response immediately to user
       res.json(transaction);
 
-      // Handle any background processing asynchronously (no await)
+      // Handle background processing asynchronously (no await)
       setImmediate(async () => {
         try {
-          // Any future AI categorization or other async processing can go here
-          // This runs after the response is sent, so it doesn't slow down the user
+          const user = await storage.getUser(userId);
+          
+          // Auto-categorization for premium users (immediate processing)
+          if (user?.plan === 'premium' && !transaction.categoryId && transaction.type === 'expense') {
+            try {
+              const categorization = await categorizeExpense(transaction.description, parseFloat(transaction.amount));
+              if (categorization.confidence > 0.7) { // Only auto-apply if confidence is high
+                // Update transaction with suggested category
+                const categories = await storage.getCategories();
+                const matchingCategory = categories.find(cat => cat.name === categorization.category);
+                if (matchingCategory) {
+                  await storage.updateTransaction(transaction.id, { categoryId: matchingCategory.id });
+                  console.log(`Auto-categorized transaction ${transaction.id} as ${categorization.category}`);
+                }
+              }
+            } catch (error) {
+              console.error('Auto-categorization error:', error);
+            }
+          }
+          
+          // Schedule batch processing check
+          scheduleBatchProcessing(userId);
+          
           console.log('Background processing completed for transaction:', transaction.id);
         } catch (error) {
           console.error('Background processing error:', error);
