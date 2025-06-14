@@ -31,9 +31,19 @@ export default function Goals() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [newGoal, setNewGoal] = useState({
     name: "",
     targetAmount: "",
+    targetDate: "",
+    category: "",
+    description: ""
+  });
+  const [editGoal, setEditGoal] = useState({
+    name: "",
+    targetAmount: "",
+    currentAmount: "",
     targetDate: "",
     category: "",
     description: ""
@@ -97,6 +107,78 @@ export default function Goals() {
     },
   });
 
+  const updateGoalMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      const res = await apiRequest("PUT", `/api/goals/${id}`, data);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
+      setIsEditDialogOpen(false);
+      setEditingGoal(null);
+      toast({
+        title: "Goal Updated",
+        description: "Your financial goal has been updated successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteGoalMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiRequest("DELETE", `/api/goals/${id}`);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
+      toast({
+        title: "Goal Deleted",
+        description: "Your financial goal has been deleted successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const duplicateGoalMutation = useMutation({
+    mutationFn: async (goal: Goal) => {
+      const duplicateData = {
+        name: `${goal.name} (Copy)`,
+        targetAmount: goal.targetAmount,
+        targetDate: goal.targetDate,
+        category: goal.category,
+        description: goal.description,
+      };
+      const res = await apiRequest("POST", "/api/goals", duplicateData);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
+      toast({
+        title: "Goal Duplicated",
+        description: "Your financial goal has been duplicated successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCreateGoal = () => {
     createGoalMutation.mutate({
       name: newGoal.name,
@@ -105,6 +187,43 @@ export default function Goals() {
       category: newGoal.category,
       description: newGoal.description,
     });
+  };
+
+  const handleEditGoal = (goal: Goal) => {
+    setEditingGoal(goal);
+    setEditGoal({
+      name: goal.name,
+      targetAmount: goal.targetAmount.toString(),
+      currentAmount: goal.currentAmount.toString(),
+      targetDate: goal.targetDate.split('T')[0], // Format date for input
+      category: goal.category,
+      description: goal.description || ""
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateGoal = () => {
+    if (!editingGoal) return;
+    
+    updateGoalMutation.mutate({
+      id: editingGoal.id,
+      data: {
+        name: editGoal.name,
+        targetAmount: parseFloat(editGoal.targetAmount),
+        currentAmount: parseFloat(editGoal.currentAmount),
+        targetDate: editGoal.targetDate,
+        category: editGoal.category,
+        description: editGoal.description,
+      }
+    });
+  };
+
+  const handleDeleteGoal = (id: number) => {
+    deleteGoalMutation.mutate(id);
+  };
+
+  const handleDuplicateGoal = (goal: Goal) => {
+    duplicateGoalMutation.mutate(goal);
   };
 
   const getProgressPercentage = (current: number, target: number) => {
@@ -216,6 +335,92 @@ export default function Goals() {
                 </div>
               </DialogContent>
             </Dialog>
+
+            {/* Edit Goal Dialog */}
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>Edit Goal</DialogTitle>
+                  <DialogDescription>
+                    Update your financial goal details and track your progress.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-name">Goal Name</Label>
+                    <Input
+                      id="edit-name"
+                      placeholder="Emergency Fund"
+                      value={editGoal.name}
+                      onChange={(e) => setEditGoal({ ...editGoal, name: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-amount">Target Amount ($)</Label>
+                    <Input
+                      id="edit-amount"
+                      type="number"
+                      placeholder="10000"
+                      value={editGoal.targetAmount}
+                      onChange={(e) => setEditGoal({ ...editGoal, targetAmount: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-current">Current Amount ($)</Label>
+                    <Input
+                      id="edit-current"
+                      type="number"
+                      placeholder="5000"
+                      value={editGoal.currentAmount}
+                      onChange={(e) => setEditGoal({ ...editGoal, currentAmount: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-date">Target Date</Label>
+                    <Input
+                      id="edit-date"
+                      type="date"
+                      value={editGoal.targetDate}
+                      onChange={(e) => setEditGoal({ ...editGoal, targetDate: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-category">Category</Label>
+                    <Select value={editGoal.category} onValueChange={(value) => setEditGoal({ ...editGoal, category: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="emergency">Emergency Fund</SelectItem>
+                        <SelectItem value="vacation">Vacation</SelectItem>
+                        <SelectItem value="house">House Down Payment</SelectItem>
+                        <SelectItem value="car">Car Purchase</SelectItem>
+                        <SelectItem value="debt">Debt Payoff</SelectItem>
+                        <SelectItem value="retirement">Retirement</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-description">Description (Optional)</Label>
+                    <Input
+                      id="edit-description"
+                      placeholder="Save for 6 months of expenses"
+                      value={editGoal.description}
+                      onChange={(e) => setEditGoal({ ...editGoal, description: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleUpdateGoal} disabled={updateGoalMutation.isPending}>
+                    {updateGoalMutation.isPending ? "Updating..." : "Update Goal"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
@@ -309,12 +514,46 @@ export default function Goals() {
 
                       {/* Action Buttons */}
                       <div className="flex space-x-2 pt-2">
-                        <Button size="sm" variant="outline" className="flex-1">
-                          Update Progress
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => handleEditGoal(goal)}
+                        >
+                          <Edit2 className="h-4 w-4 mr-1" />
+                          Edit
                         </Button>
-                        <Button size="sm" variant="outline">
-                          <TrendingUp className="h-4 w-4" />
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleDuplicateGoal(goal)}
+                        >
+                          <Copy className="h-4 w-4" />
                         </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="outline">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Goal</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete "{goal.name}"? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => handleDeleteGoal(goal.id)}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
                   </CardContent>
