@@ -156,29 +156,32 @@ export class BunnyStorage {
   }
 
   async getUserBackups(userId: number): Promise<StorageFileInfo[]> {
-    console.log(`Getting backups for user ${userId} from 'backups' folder`);
+    console.log(`Getting backups for user ${userId} from 'backups/user-${userId}' folder`);
     
-    // List all files in the backups folder
-    const files = await this.listFiles('backups');
-    console.log(`Found ${files.length} files in backups folder`);
+    // Look directly in the user's backup folder
+    const userFolder = `backups/user-${userId}`;
+    const files = await this.listFiles(userFolder);
+    console.log(`Found ${files.length} files in ${userFolder}`);
     
     if (files.length > 0) {
-      console.log(`All files in backups:`, files.map(f => ({ name: f.ObjectName, size: f.Length })));
+      console.log(`Backup files for user ${userId}:`, files.map(f => ({ 
+        name: f.ObjectName, 
+        size: f.Length, 
+        date: f.DateCreated,
+        isDirectory: f.IsDirectory 
+      })));
       
-      // Filter files that belong to this user (look for user-1, user-2, etc. or backup files)
-      const userBackups = files.filter(file => 
-        file.ObjectName.includes(`user-${userId}`) || 
-        file.ObjectName.includes('backup') ||
-        (file.ObjectName.includes('.json') && userId === 1) // For user 1, include all JSON backup files
+      // Filter out directories and only return actual backup files
+      const backupFiles = files.filter(file => 
+        !file.IsDirectory && 
+        (file.ObjectName.includes('backup') || file.ObjectName.includes('.json'))
       );
       
-      console.log(`Found ${userBackups.length} backup files for user ${userId}:`, 
-        userBackups.map(f => ({ name: f.ObjectName, size: f.Size, date: f.DateCreated })));
-      
-      return userBackups;
+      console.log(`Found ${backupFiles.length} actual backup files for user ${userId}`);
+      return backupFiles;
     }
     
-    console.log(`No files found in backups folder`);
+    console.log(`No backup files found in ${userFolder}`);
     return [];
   }
 

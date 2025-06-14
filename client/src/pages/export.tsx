@@ -181,8 +181,10 @@ export default function ExportPage() {
   });
 
   // Fetch real backup status from API
-  const { data: backupStatusData } = useQuery({
+  const { data: backupStatusData, refetch: refetchBackupStatus } = useQuery({
     queryKey: ["/api/backup-status"],
+    staleTime: 0, // Always fetch fresh data
+    cacheTime: 0,  // Don't cache the results
   });
 
   // Create backup status object from API data
