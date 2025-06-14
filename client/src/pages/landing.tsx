@@ -28,6 +28,12 @@ export default function Landing() {
               <span className="text-xl font-bold text-gray-900 dark:text-white">FinanzerPro</span>
             </div>
             <div className="flex items-center space-x-4">
+              <a href="/help" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                Help
+              </a>
+              <a href="/contact" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                Contact
+              </a>
               <Button onClick={handleLogin} className="bg-primary hover:bg-primary/90">
                 Sign In
               </Button>
