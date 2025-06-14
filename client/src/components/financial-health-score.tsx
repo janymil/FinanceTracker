@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { TrendingUp, Shield, AlertTriangle, CheckCircle } from "lucide-react";
+import { TrendingUp, Shield, AlertTriangle, CheckCircle, HelpCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface FinancialHealthProps {
   summary?: {
@@ -107,6 +108,34 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
         <CardTitle className="text-lg flex items-center gap-2">
           <StatusIcon className={`h-5 w-5 text-${healthData.color}-600`} />
           Financial Health Score
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-sm p-4 text-sm">
+                <div className="space-y-2">
+                  <div className="font-semibold">How Your Financial Health Score is Calculated:</div>
+                  <div>
+                    <strong>Spending Control (30%):</strong> Compares your expenses to income. Lower expense ratio = higher score.
+                  </div>
+                  <div>
+                    <strong>Savings Rate (25%):</strong> Measures how much you save. Aim for 10-20% of income.
+                  </div>
+                  <div>
+                    <strong>Budget Adherence (25%):</strong> How well you stick to your budgets. Under budget = excellent.
+                  </div>
+                  <div>
+                    <strong>Financial Stability (20%):</strong> Overall balance between income and expenses.
+                  </div>
+                  <div className="mt-3 pt-2 border-t border-gray-200">
+                    <strong>Score Ranges:</strong><br />
+                    80-100: Excellent | 65-79: Good | 50-64: Fair | Below 50: Needs Improvement
+                  </div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
