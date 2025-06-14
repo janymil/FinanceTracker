@@ -256,6 +256,37 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
+  async getUserExpenseReminders(userId: number): Promise<ExpenseReminder[]> {
+    const results = await db
+      .select()
+      .from(expenseReminders)
+      .where(eq(expenseReminders.userId, userId))
+      .orderBy(expenseReminders.dueDate);
+    return results;
+  }
+
+  async getUpcomingExpenseReminders(userId: number, daysBefore: number = 7): Promise<ExpenseReminder[]> {
+    const now = new Date();
+    const futureDate = new Date();
+    futureDate.setDate(now.getDate() + daysBefore);
+
+    const results = await db
+      .select()
+      .from(expenseReminders)
+      .where(
+        and(
+          eq(expenseReminders.userId, userId),
+          eq(expenseReminders.isActive, true),
+          eq(expenseReminders.isCompleted, false),
+          gte(expenseReminders.dueDate, now),
+          lte(expenseReminders.dueDate, futureDate)
+        )
+      )
+      .orderBy(expenseReminders.dueDate);
+    
+    return results;
+  }
+
   async getUpcomingTransactionReminders(userId: number, daysAhead: number = 7): Promise<Array<{
     id: string;
     title: string;

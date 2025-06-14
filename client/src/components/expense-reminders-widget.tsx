@@ -18,7 +18,9 @@ import {
   AlertTriangle,
   Trash2,
   Edit,
-  Crown
+  Crown,
+  ExternalLink,
+  Copy
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -462,6 +464,35 @@ export default function FinancialRemindersWidget() {
                         {reminder.description && (
                           <p className="text-xs text-gray-500 mt-1">{reminder.description}</p>
                         )}
+                        {/* Smart Bill Assistant Display */}
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {reminder.paymentUrl && (
+                            <a 
+                              href={reminder.paymentUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded-md transition-colors"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              Pay Now
+                            </a>
+                          )}
+                          {reminder.referenceNote && (
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(reminder.referenceNote || '');
+                                toast({
+                                  title: "Copied!",
+                                  description: "Reference note copied to clipboard",
+                                });
+                              }}
+                              className="inline-flex items-center gap-1 text-xs bg-gray-500 hover:bg-gray-600 text-white px-2 py-1 rounded-md transition-colors"
+                            >
+                              <Copy className="h-3 w-3" />
+                              Copy: {reminder.referenceNote}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">

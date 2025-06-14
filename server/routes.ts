@@ -576,6 +576,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Expense Reminders API (Standard/Premium only) - Smart Bill Assistant feature
+  app.post('/api/expense-reminders', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.plan === 'free') {
+        return res.status(403).json({ message: "Expense reminders require Standard or Premium subscription" });
+      }
+
+      const validatedData = insertExpenseReminderSchema.parse({
+        ...req.body,
+        userId,
+        categoryId: req.body.categoryId ? parseInt(req.body.categoryId) : null,
+        amount: req.body.amount ? req.body.amount.toString() : null,
+        dueDate: new Date(req.body.dueDate),
+        recurringEndDate: req.body.recurringEndDate ? new Date(req.body.recurringEndDate) : null,
+      });
+
+      const reminder = await storage.createExpenseReminder(validatedData);
+      res.json(reminder);
+    } catch (error) {
+      console.error("Error creating expense reminder:", error);
+      res.status(400).json({ message: "Failed to create expense reminder" });
+    }
+  });
+
+  app.get('/api/expense-reminders', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.plan === 'free') {
+        return res.status(403).json({ message: "Expense reminders require Standard or Premium subscription" });
+      }
+
+      const reminders = await storage.getUserExpenseReminders(userId);
+      res.json(reminders);
+    } catch (error) {
+      console.error("Error fetching expense reminders:", error);
+      res.status(500).json({ message: "Failed to fetch expense reminders" });
+    }
+  });
+
+  app.get('/api/expense-reminders/upcoming', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.plan === 'free') {
+        return res.status(403).json({ message: "Expense reminders require Standard or Premium subscription" });
+      }
+
+      const daysBefore = req.query.days ? parseInt(req.query.days as string) : 7;
+      const reminders = await storage.getUpcomingExpenseReminders(userId, daysBefore);
+      res.json(reminders);
+    } catch (error) {
+      console.error("Error fetching upcoming expense reminders:", error);
+      res.status(500).json({ message: "Failed to fetch upcoming expense reminders" });
+    }
+  });
+
+  app.put('/api/expense-reminders/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.plan === 'free') {
+        return res.status(403).json({ message: "Expense reminders require Standard or Premium subscription" });
+      }
+
+      const id = parseInt(req.params.id);
+      const updateData = {
+        ...req.body,
+        categoryId: req.body.categoryId ? parseInt(req.body.categoryId) : null,
+        amount: req.body.amount ? req.body.amount.toString() : null,
+        dueDate: req.body.dueDate ? new Date(req.body.dueDate) : undefined,
+        recurringEndDate: req.body.recurringEndDate ? new Date(req.body.recurringEndDate) : undefined,
+      };
+
+      // Remove undefined values
+      Object.keys(updateData).forEach(key => 
+        updateData[key] === undefined && delete updateData[key]
+      );
+
+      const reminder = await storage.updateExpenseReminder(id, updateData);
+      res.json(reminder);
+    } catch (error) {
+      console.error("Error updating expense reminder:", error);
+      res.status(400).json({ message: "Failed to update expense reminder" });
+    }
+  });
+
+  app.delete('/api/expense-reminders/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.plan === 'free') {
+        return res.status(403).json({ message: "Expense reminders require Standard or Premium subscription" });
+      }
+
+      const id = parseInt(req.params.id);
+      await storage.deleteExpenseReminder(id, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting expense reminder:", error);
+      res.status(500).json({ message: "Failed to delete expense reminder" });
+    }
+  });
+
+  app.post('/api/expense-reminders/:id/complete', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.plan === 'free') {
+        return res.status(403).json({ message: "Expense reminders require Standard or Premium subscription" });
+      }
+
+      const id = parseInt(req.params.id);
+      await storage.markExpenseReminderCompleted(id, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error completing expense reminder:", error);
+      res.status(500).json({ message: "Failed to complete expense reminder" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
