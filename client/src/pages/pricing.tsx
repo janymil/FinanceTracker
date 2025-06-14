@@ -272,10 +272,6 @@ export default function Pricing() {
                     <Check className="h-5 w-5 text-success mr-3" />
                     <span>Unlimited transaction history</span>
                   </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Personalized financial tips</span>
-                  </div>
                 </div>
                 <Button 
                   onClick={() => handleGetStarted('standard')} 
@@ -310,10 +306,6 @@ export default function Pricing() {
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
                     <span>Everything in Standard plan</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Personalized financial tips</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
