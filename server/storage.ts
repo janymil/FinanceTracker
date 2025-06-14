@@ -79,6 +79,12 @@ export interface IStorage {
   updateBackupSettings(userId: number, settings: Partial<InsertBackupSettings>): Promise<BackupSettings>;
   getUsersWithActiveBackups(): Promise<Array<{ userId: number }>>;
   getUsersWithOverdueBackups(): Promise<Array<{ userId: number }>>;
+
+  // Profile Management
+  updateUserProfile(userId: number, profileData: { firstName: string; lastName: string; email: string; phone?: string; website?: string }): Promise<void>;
+  updateUserPassword(userId: number, hashedPassword: string): Promise<void>;
+  getUserSettings(userId: number): Promise<any>;
+  updateUserSettings(userId: number, settings: any): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -706,6 +712,36 @@ export class DatabaseStorage implements IStorage {
       );
 
     return result;
+  }
+
+  async updateUserProfile(userId: number, profileData: { firstName: string; lastName: string; email: string; phone?: string; website?: string }): Promise<void> {
+    const updateData: any = {
+      firstName: profileData.firstName ? DataEncryption.encrypt(profileData.firstName) : null,
+      lastName: profileData.lastName ? DataEncryption.encrypt(profileData.lastName) : null,
+      email: profileData.email,
+    };
+
+    if (profileData.phone) {
+      updateData.phone = DataEncryption.encrypt(profileData.phone);
+    }
+    if (profileData.website) {
+      updateData.website = profileData.website;
+    }
+
+    await db.update(users).set(updateData).where(eq(users.id, userId));
+  }
+
+  async updateUserPassword(userId: number, hashedPassword: string): Promise<void> {
+    await db.update(users).set({ password: hashedPassword }).where(eq(users.id, userId));
+  }
+
+  async getUserSettings(userId: number): Promise<any> {
+    const user = await this.getUser(userId);
+    return user?.settings ? JSON.parse(user.settings) : null;
+  }
+
+  async updateUserSettings(userId: number, settings: any): Promise<void> {
+    await db.update(users).set({ settings: JSON.stringify(settings) }).where(eq(users.id, userId));
   }
 }
 

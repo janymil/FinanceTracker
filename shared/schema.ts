@@ -34,9 +34,9 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
-  plan: text("plan").default("free").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  phone: text("phone"),
+  website: text("website"),
+  settings: text("settings"),
 });
 
 // Categories for transactions and budgets

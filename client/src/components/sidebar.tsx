@@ -4,23 +4,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
-  TrendingUp,
-  TrendingDown,
-  LayoutDashboard,
-  CreditCard,
-  PieChart,
-  FileText,
-  Target,
-  Calendar,
-  Download,
   BarChart3,
+  Calendar,
   Crown,
+  Download,
+  HelpCircle,
   Menu,
+  Target,
+  TrendingUp,
+  User,
   X,
   ChevronLeft,
   ChevronRight,
   Crosshair,
-  HelpCircle,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
@@ -99,7 +95,6 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
       requiredPlan: "free",
       badge: null,
     },
-
     {
       title: "Trends",
       icon: TrendingUp,
@@ -125,6 +120,13 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
       title: "Help & Documentation",
       icon: HelpCircle,
       href: "/help",
+      requiredPlan: "free",
+      badge: null,
+    },
+    {
+      title: "Profile",
+      icon: User,
+      href: "/profile",
       requiredPlan: "free",
       badge: null,
     },
@@ -241,27 +243,6 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
           {!isCollapsed && (
             <>
               <Separator className="my-6" />
-
-              {/* Upgrade section for free users */}
-              {/* {!user?.isPremium && (
-                <div className="bg-gradient-to-br from-premium/10 to-blue-50 dark:from-premium/20 dark:to-gray-800 p-4 rounded-lg">
-                  <div className="flex items-center mb-2">
-                    <Crown className="h-5 w-5 text-premium mr-2" />
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      Upgrade to Premium
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    Unlock advanced analytics, unlimited history, and export features.
-                  </p>
-                  <Link href="/subscribe">
-                    <Button className="w-full bg-premium hover:bg-premium/90 text-white">
-                      <Crown className="h-4 w-4 mr-2" />
-                      Upgrade Now
-                    </Button>
-                  </Link>
-                </div>
-              )} */}
             </>
           )}
         </nav>

@@ -1480,6 +1480,145 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true, message: "Cookie preferences updated successfully" });
   });
 
+  // Profile management endpoints
+  app.get('/api/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Return profile data (excluding sensitive info)
+      res.json({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone || '',
+        website: user.website || ''
+      });
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+
+  app.put('/api/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { firstName, lastName, email, phone, website } = req.body;
+
+      // Basic validation
+      if (!firstName || !lastName || !email) {
+        return res.status(400).json({ message: "First name, last name, and email are required" });
+      }
+
+      // Check if email is already taken by another user
+      if (email !== req.user.email) {
+        const existingUser = await storage.getUserByEmail(email);
+        if (existingUser && existingUser.id !== userId) {
+          return res.status(400).json({ message: "Email already in use" });
+        }
+      }
+
+      // Update user profile
+      await storage.updateUserProfile(userId, {
+        firstName,
+        lastName,
+        email,
+        phone,
+        website
+      });
+
+      res.json({ message: "Profile updated successfully" });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  app.post('/api/change-password', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { currentPassword, newPassword } = req.body;
+
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current password and new password are required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Verify current password
+      const { comparePasswords } = await import('./auth');
+      const isCurrentPasswordValid = await comparePasswords(currentPassword, user.password);
+      
+      if (!isCurrentPasswordValid) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+
+      // Hash new password
+      const { hashPassword } = await import('./auth');
+      const hashedNewPassword = await hashPassword(newPassword);
+
+      // Update password
+      await storage.updateUserPassword(userId, hashedNewPassword);
+
+      res.json({ message: "Password changed successfully" });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+
+  app.get('/api/user-settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const settings = await storage.getUserSettings(userId);
+      
+      res.json(settings || {
+        notifications: {
+          email: true,
+          push: true,
+          transactionReminders: true,
+          budgetAlerts: true,
+          weeklyReports: false
+        },
+        privacy: {
+          profileVisibility: 'private',
+          dataCollection: true,
+          analytics: true
+        },
+        preferences: {
+          theme: 'system',
+          currency: 'USD',
+          language: 'en',
+          dateFormat: 'MM/DD/YYYY',
+          dashboardLayout: 'comfortable'
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching user settings:", error);
+      res.status(500).json({ message: "Failed to fetch user settings" });
+    }
+  });
+
+  app.put('/api/user-settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const settings = req.body;
+
+      await storage.updateUserSettings(userId, settings);
+      res.json({ message: "Settings updated successfully" });
+    } catch (error) {
+      console.error("Error updating user settings:", error);
+      res.status(500).json({ message: "Failed to update user settings" });
+    }
+  });
+
   // Test endpoint to demonstrate cookie functionality
   app.get('/api/test-cookies', (req: any, res) => {
     const consent = req.cookieConsent;

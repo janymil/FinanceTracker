@@ -30,6 +30,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import NotFoundPage from "./pages/not-found";
 import Landing from "@/pages/landing";
+import ProfilePage from "./pages/profile";
 
 function AppContent() {
   const { user, isLoading } = useAuth();
@@ -103,6 +104,7 @@ function AppContent() {
               <Route path="/cookie-policy" component={CookiePolicy} />
               <Route path="/contact" component={Contact} />
               <Route path="/help" component={Help} />
+              <Route path="/profile" component={ProfilePage} />
               <Route component={NotFoundPage} />
             </Switch>
           </div>
