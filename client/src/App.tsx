@@ -55,6 +55,7 @@ function AppContent() {
           <Route path="/terms-of-service" component={TermsOfService} />
           <Route path="/cookie-policy" component={CookiePolicy} />
           <Route path="/contact" component={Contact} />
+          <Route path="/help" component={Help} />
           <Route component={Landing} />
         </Switch>
         <Footer />

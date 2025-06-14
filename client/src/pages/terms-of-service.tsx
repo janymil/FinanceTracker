@@ -1,12 +1,50 @@
 import { useEffect } from "react";
+import { TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 
 export default function TermsOfService() {
+  const [, setLocation] = useLocation();
+  
   useEffect(() => {
-    document.title = "Terms of Service - FinanceFlow";
+    document.title = "Terms of Service - FinanzerPro";
   }, []);
+
+  const handleLogin = () => {
+    setLocation("/auth");
+  };
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header for anonymous users */}
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <TrendingUp className="h-8 w-8 text-primary mr-3" />
+              <span className="text-xl font-bold text-gray-900 dark:text-white">FinanzerPro</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <button 
+                onClick={() => setLocation('/help')} 
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Help
+              </button>
+              <button 
+                onClick={() => setLocation('/contact')} 
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Contact
+              </button>
+              <Button onClick={handleLogin} className="bg-primary hover:bg-primary/90">
+                Sign In
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+      
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-4xl font-bold mb-8">Terms of Service</h1>
         <p className="text-muted-foreground mb-8">Last updated: June 14, 2025</p>
