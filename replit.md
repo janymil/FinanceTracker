@@ -181,6 +181,8 @@ Changelog:
 - June 14, 2025. Built interactive demo tour with 6 steps showcasing dashboard, transactions, budgets, reports, and AI features
 - June 14, 2025. Connected "View Demo" button on landing page to professional demo experience with real app screenshots
 - June 14, 2025. Added static file serving for attached assets to display actual app screenshots in demo
+- June 14, 2025. Cleaned up all screenshot capture development files and endpoints per user request
+- June 14, 2025. Updated demo to use authentic FinanzerPro dashboard screenshots showing real financial data
 ```
 
 ## User Preferences
