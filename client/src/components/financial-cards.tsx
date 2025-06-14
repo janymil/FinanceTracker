@@ -12,9 +12,10 @@ interface FinancialSummary {
 interface FinancialCardsProps {
   summary?: FinancialSummary;
   isLoading: boolean;
+  budgetsData?: any[];
 }
 
-export default function FinancialCards({ summary, isLoading }: FinancialCardsProps) {
+export default function FinancialCards({ summary, isLoading, budgetsData }: FinancialCardsProps) {
   const [animatedValues, setAnimatedValues] = useState({
     income: 0,
     expenses: 0,
@@ -64,10 +65,11 @@ export default function FinancialCards({ summary, isLoading }: FinancialCardsPro
 
   const getBudgetStatus = () => {
     if (!summary) return { status: 'Loading...', percentage: 0, remaining: 0, bgColor: 'bg-gray-50', textColor: 'text-gray-600' };
-    
+
     // Calculate total budget from actual budgets data
-    const totalBudget = budgets ? budgets.reduce((sum: number, budget: any) => sum + parseFloat(budget.amount || 0), 0) : 0;
-    
+    const totalBudget = budgetsData ? budgetsData.reduce((sum: number, budget: any) => 
+      sum + parseFloat(budget.amount || "0"), 0) : 0;
+
     // If no budgets set, show "No Budget Set" status
     if (totalBudget === 0) {
       return {
@@ -78,10 +80,10 @@ export default function FinancialCards({ summary, isLoading }: FinancialCardsPro
         textColor: 'text-gray-600 dark:text-gray-400'
       };
     }
-    
+
     const percentage = (Math.abs(summary.totalExpenses) / totalBudget) * 100;
     const remaining = totalBudget - Math.abs(summary.totalExpenses);
-    
+
     if (percentage <= 50) return { 
       status: 'Healthy', 
       percentage, 
