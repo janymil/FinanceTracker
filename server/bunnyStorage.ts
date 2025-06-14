@@ -106,9 +106,25 @@ export class BunnyStorage {
 
   async listFiles(path = ''): Promise<StorageFileInfo[]> {
     try {
-      const result = await this.makeRequest('GET', `/${path}`);
+      console.log(`Attempting to list files at path: ${path}`);
+      const result = await this.makeRequest('GET', `/${path}/`);
+      console.log(`Bunny.net response for ${path}:`, result);
       return Array.isArray(result) ? result : [];
     } catch (error: any) {
+      console.log(`Bunny.net request failed for GET /${path}: ${error}`);
+      
+      // Try without trailing slash if it failed
+      if (path && !error.message.includes('404')) {
+        try {
+          console.log(`Retrying without trailing slash: ${path}`);
+          const result = await this.makeRequest('GET', `/${path}`);
+          console.log(`Bunny.net response for ${path} (no slash):`, result);
+          return Array.isArray(result) ? result : [];
+        } catch (retryError: any) {
+          console.log(`Retry also failed: ${retryError}`);
+        }
+      }
+      
       // 404 errors are expected when directory doesn't exist yet
       if (error.message && (error.message.includes('404') || error.message.includes('Object Not Found'))) {
         console.log(`Directory ${path} doesn't exist yet - this is normal for new users`);
@@ -138,7 +154,40 @@ export class BunnyStorage {
   }
 
   async getUserBackups(userId: number): Promise<StorageFileInfo[]> {
-    return await this.listFiles(`backups/user-${userId}`);
+    console.log(`Getting backups for user ${userId}`);
+    
+    // Try multiple possible paths since your backups might be in a different structure
+    const possiblePaths = [
+      `backups/user-${userId}`,
+      `user-${userId}`,
+      `backups`,
+      '' // Root directory
+    ];
+    
+    for (const path of possiblePaths) {
+      console.log(`Trying path: ${path}`);
+      const files = await this.listFiles(path);
+      
+      if (files.length > 0) {
+        console.log(`Found ${files.length} files in path: ${path}`);
+        console.log(`Files:`, files.map(f => f.ObjectName));
+        
+        // Filter files that belong to this user or are backups
+        const userBackups = files.filter(file => 
+          file.ObjectName.includes(`user-${userId}`) || 
+          file.ObjectName.includes('backup') ||
+          file.ObjectName.includes('.json')
+        );
+        
+        if (userBackups.length > 0) {
+          console.log(`Found ${userBackups.length} backup files for user ${userId}:`, userBackups.map(f => f.ObjectName));
+          return userBackups;
+        }
+      }
+    }
+    
+    console.log(`No backups found for user ${userId} in any path`);
+    return [];
   }
 
   async cleanupOldBackups(userId: number, retentionDays: number): Promise<number> {
