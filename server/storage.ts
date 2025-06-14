@@ -31,6 +31,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: Omit<InsertUser, 'id' | 'createdAt' | 'updatedAt'>): Promise<User>;
   updateUserStripeInfo(userId: number, customerId: string, subscriptionId: string): Promise<User>;
+  updateUserPlan(userId: number, plan: string): Promise<User>;
   updateUserPremiumStatus(userId: number, isPremium: boolean): Promise<User>;
 
   // Transaction operations
