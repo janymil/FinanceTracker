@@ -125,15 +125,21 @@ export async function generateFinancialTips(financialData: {
     amount: number;
     date: string;
     categoryName?: string;
+    type?: string;
   }>;
+  timestamp?: number; // For bypassing cache
 }): Promise<FinancialTip[]> {
   try {
-    // Create hash for financial data to use as cache key
-    const dataHash = aiCache.createDataHash(financialData);
-    const cached = aiCache.getTips(dataHash);
-    if (cached) {
-      console.log('Using cached financial tips result');
-      return cached;
+    // Skip cache if timestamp is provided (for fresh responses)
+    if (!financialData.timestamp) {
+      const dataHash = aiCache.createDataHash(financialData);
+      const cached = aiCache.getTips(dataHash);
+      if (cached) {
+        console.log('Using cached financial tips result');
+        return cached;
+      }
+    } else {
+      console.log('Bypassing cache for fresh AI financial tips');
     }
     const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
 
@@ -208,8 +214,11 @@ Please provide personalized financial tips based on this data.`
       estimatedSaving: tip.estimatedSaving || undefined
     }));
 
-    // Cache the result
-    aiCache.setTips(dataHash, processedTips);
+    // Only cache if not bypassing cache
+    if (!financialData.timestamp) {
+      const dataHash = aiCache.createDataHash(financialData);
+      aiCache.setTips(dataHash, processedTips);
+    }
     
     return processedTips;
   } catch (error) {

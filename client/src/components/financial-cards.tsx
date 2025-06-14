@@ -7,6 +7,9 @@ interface FinancialSummary {
   totalIncome: number;
   totalExpenses: number;
   netBalance: number;
+  incomeTransactionCount?: number;
+  expenseTransactionCount?: number;
+  totalTransactionCount?: number;
 }
 
 interface FinancialCardsProps {
@@ -142,7 +145,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData }: Fina
                 {formatCurrency(animatedValues.income)}
               </p>
               <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                Total income for the period
+                {summary?.incomeTransactionCount || 0} transaction{(summary?.incomeTransactionCount || 0) !== 1 ? 's' : ''}
               </p>
             </div>
             <div className="bg-green-100 dark:bg-green-800/40 p-3 rounded-lg">
@@ -164,7 +167,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData }: Fina
                 {formatCurrency(Math.abs(animatedValues.expenses))}
               </p>
               <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                Total spent in the period
+                {summary?.expenseTransactionCount || 0} transaction{(summary?.expenseTransactionCount || 0) !== 1 ? 's' : ''}
               </p>
             </div>
             <div className="bg-red-100 dark:bg-red-800/40 p-3 rounded-lg">
@@ -186,7 +189,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData }: Fina
                 {formatCurrency(animatedValues.balance)}
               </p>
               <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                {(summary?.netBalance || 0) >= 0 ? 'Positive result' : 'Negative result'}
+                {summary?.totalTransactionCount || 0} total transaction{(summary?.totalTransactionCount || 0) !== 1 ? 's' : ''}
               </p>
             </div>
             <div className="bg-blue-100 dark:bg-blue-800/40 p-3 rounded-lg">
