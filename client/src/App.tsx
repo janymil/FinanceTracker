@@ -16,10 +16,9 @@ import CalendarPage from "@/pages/calendar";
 import ReportsPage from "@/pages/reports";
 import ExportPage from "@/pages/export";
 import SubscribePage from "@/pages/subscribe";
-import LandingPage from "@/pages/landing";
-import NotFoundPage from "@/pages/not-found";
-import PrivacyPolicy from "@/pages/privacy-policy";
+import Pricing from "@/pages/pricing";
 import TermsOfService from "@/pages/terms-of-service";
+import PrivacyPolicy from "@/pages/privacy-policy";
 import CookiePolicy from "@/pages/cookie-policy";
 import Contact from "@/pages/contact";
 import Header from "@/components/header";
@@ -92,8 +91,9 @@ function AppContent() {
               <Route path="/reports" component={ReportsPage} />
               <Route path="/export" component={ExportPage} />
               <Route path="/subscribe" component={SubscribePage} />
-              <Route path="/privacy-policy" component={PrivacyPolicy} />
+              <Route path="/pricing" component={Pricing} />
               <Route path="/terms-of-service" component={TermsOfService} />
+              <Route path="/privacy-policy" component={PrivacyPolicy} />
               <Route path="/cookie-policy" component={CookiePolicy} />
               <Route path="/contact" component={Contact} />
               <Route component={NotFoundPage} />

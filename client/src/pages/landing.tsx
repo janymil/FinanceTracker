@@ -21,9 +21,14 @@ export default function Landing() {
               <TrendingUp className="h-8 w-8 text-primary mr-2" />
               <span className="text-xl font-bold text-gray-900 dark:text-white">FinanceFlow</span>
             </div>
-            <Button onClick={handleLogin} className="bg-primary hover:bg-primary/90">
-              Sign In
-            </Button>
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" onClick={() => setLocation("/pricing")}>
+                Pricing
+              </Button>
+              <Button onClick={handleLogin} className="bg-primary hover:bg-primary/90">
+                Sign In
+              </Button>
+            </div>
           </div>
         </div>
       </nav>
