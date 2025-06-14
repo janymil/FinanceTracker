@@ -1930,6 +1930,12 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
     }
   });
 
+  // Admin login route
+  app.post('/api/admin/login', adminLogin);
+
+  // Admin logout route
+  app.post('/api/admin/logout', adminLogout);
+
   // Get admin statistics (requires admin authentication)
   app.get('/api/admin/stats', adminAuth, async (req: any, res) => {
     try {
