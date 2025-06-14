@@ -1,5 +1,5 @@
 // Test encryption system
-const crypto = require('crypto');
+import crypto from 'crypto';
 
 // Simulate the encryption system
 const getEncryptionKey = () => {
@@ -18,7 +18,7 @@ class TestDataEncryption {
     if (!text) return text;
     
     const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipherGCM(ALGORITHM, ENCRYPTION_KEY, iv);
+    const cipher = crypto.createCipher('aes-256-gcm', ENCRYPTION_KEY);
     
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
