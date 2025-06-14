@@ -19,7 +19,7 @@ import {
   type InsertBackupSettings,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gte, lte, desc, sum, sql, or, isNull } from "drizzle-orm";
+import { eq, and, gte, lte, desc, sum, count, sql, or, isNull } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -239,10 +239,11 @@ export class DatabaseStorage implements IStorage {
 
   // Analytics
   async getUserFinancialSummary(userId: number, startDate: Date, endDate: Date) {
-    // Get income and expense totals
+    // Get income and expense totals with counts
     const incomeResult = await db
       .select({
         total: sum(transactions.amount),
+        count: count(transactions.id),
       })
       .from(transactions)
       .where(
@@ -257,6 +258,7 @@ export class DatabaseStorage implements IStorage {
     const expenseResult = await db
       .select({
         total: sum(transactions.amount),
+        count: count(transactions.id),
       })
       .from(transactions)
       .where(
@@ -288,6 +290,8 @@ export class DatabaseStorage implements IStorage {
 
     const totalIncome = Number(incomeResult[0]?.total || 0);
     const totalExpenses = Number(expenseResult[0]?.total || 0);
+    const incomeTransactionCount = Number(incomeResult[0]?.count || 0);
+    const expenseTransactionCount = Number(expenseResult[0]?.count || 0);
     const netBalance = totalIncome - totalExpenses;
 
     const transactionsByCategory = categoryResults.map(result => ({
@@ -300,6 +304,9 @@ export class DatabaseStorage implements IStorage {
       totalIncome,
       totalExpenses,
       netBalance,
+      incomeTransactionCount,
+      expenseTransactionCount,
+      totalTransactionCount: incomeTransactionCount + expenseTransactionCount,
       transactionsByCategory,
     };
   }

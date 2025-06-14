@@ -534,7 +534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Financial Tips endpoint
+  // AI Financial Tips endpoint - bypasses cache for fresh responses
   app.post('/api/ai/tip', isAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.id);
@@ -544,20 +544,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "AI financial tips require premium plan" });
       }
 
-      const { month, total, categories } = req.body;
+      // Get user's complete financial data for analysis
+      const currentDate = new Date();
+      const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
+      
+      const financialSummary = await storage.getUserFinancialSummary(req.user.id, startOfYear, currentDate);
+      const transactions = await storage.getUserTransactions(req.user.id, 100);
+      const categories = await storage.getCategories();
 
-      if (!month || !total || !categories) {
-        return res.status(400).json({ message: "Month, total, and categories are required" });
-      }
+      // Create category name mapping
+      const categoryMap = new Map();
+      categories.forEach(cat => categoryMap.set(cat.id, cat.name));
 
-      // Get user's actual financial data for better tips
-      const startDate = new Date();
-      startDate.setDate(1); // First day of current month
-      const endDate = new Date();
-
-      const financialSummary = await storage.getUserFinancialSummary(req.user.id, startDate, endDate);
-      const transactions = await storage.getUserTransactions(req.user.id, 50);
-
+      // Prepare comprehensive financial data
       const financialData = {
         totalIncome: financialSummary.totalIncome,
         totalExpenses: financialSummary.totalExpenses,
@@ -566,17 +565,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: t.description,
           amount: parseFloat(t.amount),
           date: t.date.toISOString(),
-          categoryName: t.categoryId?.toString() || 'Uncategorized'
-        }))
+          categoryName: categoryMap.get(t.categoryId) || 'Uncategorized',
+          type: t.type
+        })),
+        // Add timestamp to force fresh AI response
+        timestamp: Date.now()
       };
 
+      console.log(`Generating fresh AI tip for user ${req.user.id} with ${transactions.length} transactions`);
+      
       const tips = await generateFinancialTips(financialData);
       const tip = tips.length > 0 ? tips[0] : null;
 
       if (tip) {
         res.json({ tip: `${tip.title}: ${tip.description}` });
       } else {
-        res.json({ tip: "Continue tracking your expenses to get personalized financial insights." });
+        // Provide specific fallback based on actual data
+        if (transactions.length === 0) {
+          res.json({ tip: "Start by adding some transactions to get personalized financial insights." });
+        } else {
+          const expenseCount = transactions.filter(t => t.type === 'expense').length;
+          const incomeCount = transactions.filter(t => t.type === 'income').length;
+          res.json({ 
+            tip: `Based on your ${expenseCount} expense transactions ($${financialSummary.totalExpenses.toFixed(2)}) and ${incomeCount} income transactions ($${financialSummary.totalIncome.toFixed(2)}), consider setting up budgets for your top spending categories to better manage your finances.` 
+          });
+        }
       }
     } catch (error) {
       console.error("Error generating financial tip:", error);
