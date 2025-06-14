@@ -17,10 +17,11 @@ interface StorageFileInfo {
   Guid: string;
   StorageZoneName: string;
   Path: string;
-  ObjectId: string;
-  ServerUrl: string;
+  ObjectId?: string;
+  ServerUrl?: string;
   ArrayNumber: number;
-  Size: number;
+  Size?: number; // Legacy field
+  Length: number; // Actual field from Bunny.net
   UserId: string;
   ContentType: string;
   DateCreated: string;
@@ -29,6 +30,7 @@ interface StorageFileInfo {
   IsDirectory: boolean;
   Checksum: string;
   ReplicatedZones: string;
+  StorageZoneId: number;
 }
 
 export class BunnyStorage {
@@ -154,39 +156,29 @@ export class BunnyStorage {
   }
 
   async getUserBackups(userId: number): Promise<StorageFileInfo[]> {
-    console.log(`Getting backups for user ${userId}`);
+    console.log(`Getting backups for user ${userId} from 'backups' folder`);
     
-    // Try multiple possible paths since your backups might be in a different structure
-    const possiblePaths = [
-      `backups/user-${userId}`,
-      `user-${userId}`,
-      `backups`,
-      '' // Root directory
-    ];
+    // List all files in the backups folder
+    const files = await this.listFiles('backups');
+    console.log(`Found ${files.length} files in backups folder`);
     
-    for (const path of possiblePaths) {
-      console.log(`Trying path: ${path}`);
-      const files = await this.listFiles(path);
+    if (files.length > 0) {
+      console.log(`All files in backups:`, files.map(f => ({ name: f.ObjectName, size: f.Length })));
       
-      if (files.length > 0) {
-        console.log(`Found ${files.length} files in path: ${path}`);
-        console.log(`Files:`, files.map(f => f.ObjectName));
-        
-        // Filter files that belong to this user or are backups
-        const userBackups = files.filter(file => 
-          file.ObjectName.includes(`user-${userId}`) || 
-          file.ObjectName.includes('backup') ||
-          file.ObjectName.includes('.json')
-        );
-        
-        if (userBackups.length > 0) {
-          console.log(`Found ${userBackups.length} backup files for user ${userId}:`, userBackups.map(f => f.ObjectName));
-          return userBackups;
-        }
-      }
+      // Filter files that belong to this user (look for user-1, user-2, etc. or backup files)
+      const userBackups = files.filter(file => 
+        file.ObjectName.includes(`user-${userId}`) || 
+        file.ObjectName.includes('backup') ||
+        (file.ObjectName.includes('.json') && userId === 1) // For user 1, include all JSON backup files
+      );
+      
+      console.log(`Found ${userBackups.length} backup files for user ${userId}:`, 
+        userBackups.map(f => ({ name: f.ObjectName, size: f.Size, date: f.DateCreated })));
+      
+      return userBackups;
     }
     
-    console.log(`No backups found for user ${userId} in any path`);
+    console.log(`No files found in backups folder`);
     return [];
   }
 
@@ -225,6 +217,7 @@ export class BunnyStorage {
     newestBackup: string | null;
   }> {
     const backups = await this.getUserBackups(userId);
+    console.log(`Calculating backup info for ${backups.length} backups`);
     
     if (backups.length === 0) {
       return {
@@ -235,7 +228,15 @@ export class BunnyStorage {
       };
     }
     
-    const totalSize = backups.reduce((sum, backup) => sum + backup.Size, 0);
+    // Use Length field from Bunny.net instead of Size
+    const totalSize = backups.reduce((sum, backup) => {
+      const size = backup.Length || backup.Size || 0;
+      console.log(`Backup ${backup.ObjectName}: ${size} bytes`);
+      return sum + size;
+    }, 0);
+    
+    console.log(`Total size calculated: ${totalSize} bytes`);
+    
     const sortedBackups = backups.sort((a, b) => 
       new Date(a.DateCreated).getTime() - new Date(b.DateCreated).getTime()
     );
