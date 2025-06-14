@@ -65,14 +65,22 @@ export async function captureScreenshots() {
   console.log('Starting screenshot capture...');
   
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: 'new',
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
       '--disable-web-security',
-      '--disable-features=VizDisplayCompositor'
-    ]
+      '--disable-features=VizDisplayCompositor',
+      '--disable-gpu',
+      '--disable-extensions',
+      '--no-first-run',
+      '--disable-default-apps',
+      '--disable-background-timer-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-renderer-backgrounding'
+    ],
+    executablePath: '/usr/bin/chromium-browser'
   });
 
   const page = await browser.newPage();

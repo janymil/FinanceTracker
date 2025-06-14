@@ -1661,6 +1661,59 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
   // Serve attached assets for demo screenshots
   app.use('/attached_assets', express.static('attached_assets'));
 
+  // Save screenshot endpoint
+  app.post('/api/save-screenshot', async (req, res) => {
+    try {
+      const { name, title, description, dataUrl, timestamp } = req.body;
+      
+      // Convert base64 to buffer
+      const base64Data = dataUrl.replace(/^data:image\/png;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      
+      // Save to demo_screenshots directory
+      const fs = require('fs');
+      const path = require('path');
+      
+      const dir = path.join(process.cwd(), 'demo_screenshots');
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      
+      const filename = `${name}-${Date.now()}.png`;
+      const filepath = path.join(dir, filename);
+      
+      fs.writeFileSync(filepath, buffer);
+      
+      // Update metadata
+      const metadataPath = path.join(dir, 'metadata.json');
+      let metadata = [];
+      
+      if (fs.existsSync(metadataPath)) {
+        metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+      }
+      
+      metadata.push({
+        name,
+        title,
+        description,
+        filename,
+        filepath: `/demo_screenshots/${filename}`,
+        timestamp,
+        success: true
+      });
+      
+      fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
+      
+      res.json({ success: true, filename, filepath: `/demo_screenshots/${filename}` });
+    } catch (error) {
+      console.error('Save screenshot error:', error);
+      res.status(500).json({ error: 'Failed to save screenshot' });
+    }
+  });
+
+  // Serve demo screenshots
+  app.use('/demo_screenshots', express.static('demo_screenshots'));
+
   // Error handler
   app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error(err.stack);
