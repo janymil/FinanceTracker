@@ -55,8 +55,6 @@ export default function AuthPage() {
       firstName: "",
       lastName: "",
       plan: selectedPlan,
-      stripeCustomerId: stripeCustomer || "",
-      stripeSubscriptionId: stripeSubscription || "",
     },
   });
 

@@ -1,94 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Crown, TrendingUp, ArrowLeft, CreditCard } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TrendingUp, Crown, Check, ArrowLeft, CreditCard } from "lucide-react";
 
 export default function Subscribe() {
   const [, setLocation] = useLocation();
-  const { user } = useAuth();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<string>("");
+  
+  // Get plan from URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const selectedPlan = urlParams.get('plan') || 'standard';
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const plan = urlParams.get('plan') || 'standard';
-    setSelectedPlan(plan);
-  }, []);
-
-  const planConfig = {
-    'standard': {
-      name: 'Standard',
-      price: '$4.99',
-      yearlyPrice: '$49.90',
-      description: 'For users serious about financial management',
-      features: [
-        'Everything in Free plan',
-        'Goals and budget management',
-        'Interactive charts and reports',
-        'AI expense categorization',
-        'Calendar view and reminders',
-        'Unlimited transaction history'
-      ]
-    },
-    'standard-yearly': {
-      name: 'Standard (Yearly)',
-      price: '$49.90',
-      yearlyPrice: '$49.90',
-      description: 'For users serious about financial management - Save 20 months',
-      features: [
-        'Everything in Free plan',
-        'Goals and budget management',
-        'Interactive charts and reports',
-        'AI expense categorization',
-        'Calendar view and reminders',
-        'Unlimited transaction history'
-      ]
-    },
-    'premium': {
-      name: 'Premium',
-      price: '$9.99',
-      yearlyPrice: '$99.90',
-      description: 'Complete AI-powered financial automation',
-      features: [
-        'Everything in Standard plan',
-        'AI financial tips and insights',
-        'Advanced trends analysis',
-        'Expense prediction',
-        'Daily personalized recommendations',
-        'Cloud data backup',
-        'Data management (CSV, PDF)',
-        'Priority email support'
-      ]
-    },
-    'premium-yearly': {
-      name: 'Premium (Yearly)',
-      price: '$99.90',
-      yearlyPrice: '$99.90',
-      description: 'Complete AI-powered financial automation - Save 20 months',
-      features: [
-        'Everything in Standard plan',
-        'AI financial tips and insights',
-        'Advanced trends analysis',
-        'Expense prediction',
-        'Daily personalized recommendations',
-        'Cloud data backup',
-        'Data management (CSV, PDF)',
-        'Priority email support'
-      ]
-    }
-  };
-
-  const handleSubscribe = async () => {
-    if (!user) {
-      setLocation('/login');
-      return;
-    }
-
+  const handleSubscribe = async (plan: string, interval: 'month' | 'year' = 'month') => {
     setLoading(true);
     try {
       const response = await fetch('/api/create-checkout-session', {
@@ -96,45 +22,67 @@ export default function Subscribe() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          plan: selectedPlan,
-          userId: user.id
-        }),
+        body: JSON.stringify({ plan, interval }),
       });
 
-      const data = await response.json();
-      
-      if (data.url) {
-        window.location.href = data.url;
+      if (response.ok) {
+        const { url } = await response.json();
+        window.location.href = url;
       } else {
-        throw new Error('Failed to create checkout session');
+        console.error('Failed to create checkout session');
+        setLoading(false);
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to start subscription process. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
+      console.error('Error creating checkout session:', error);
       setLoading(false);
     }
   };
 
-  const currentPlan = planConfig[selectedPlan as keyof typeof planConfig];
-  const isYearly = selectedPlan.includes('-yearly');
+  const plans = {
+    standard: {
+      name: 'Standard',
+      monthly: 4.99,
+      yearly: 49.90,
+      features: [
+        'Everything in Free plan',
+        'Goals and budget management',
+        'Interactive charts and reports',
+        'AI expense categorization',
+        'Calendar view and reminders',
+        'Unlimited transaction history'
+      ]
+    },
+    premium: {
+      name: 'Premium',
+      monthly: 9.99,
+      yearly: 99.90,
+      features: [
+        'Everything in Standard plan',
+        'AI financial tips and insights',
+        'Advanced trends analysis',
+        'Expense prediction',
+        'Daily personalized recommendations',
+        'Cloud data backup',
+        'Data management (CSV, PDF)',
+        'Priority email support'
+      ]
+    }
+  };
+
+  const currentPlan = plans[selectedPlan as keyof typeof plans];
 
   if (!currentPlan) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Invalid Plan</CardTitle>
             <CardDescription>The selected plan is not available.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => setLocation('/pricing')} className="w-full">
+            <Button onClick={() => setLocation('/')} className="w-full">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Pricing
+              Back to Home
             </Button>
           </CardContent>
         </Card>
@@ -143,121 +91,161 @@ export default function Subscribe() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <Button 
-          variant="ghost" 
-          onClick={() => setLocation('/pricing')}
-          className="mb-8"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Pricing
-        </Button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <Button 
+              variant="outline" 
+              onClick={() => setLocation('/')}
+              className="mb-4"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Home
+            </Button>
+            <h1 className="text-4xl font-bold mb-4">Subscribe to {currentPlan.name}</h1>
+            <p className="text-gray-600 dark:text-gray-300">
+              Unlock powerful financial management features with your subscription
+            </p>
+          </div>
 
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            Subscribe to {currentPlan.name}
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300">
-            {currentPlan.description}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Plan Details */}
-          <Card className="border-2 border-blue-500">
-            <CardHeader className="text-center pb-8">
-              <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                {selectedPlan.includes('premium') ? (
-                  <Crown className="h-8 w-8 text-premium" />
-                ) : (
-                  <TrendingUp className="h-8 w-8 text-blue-600" />
-                )}
-              </div>
-              <CardTitle className="text-2xl">{currentPlan.name}</CardTitle>
-              <div className="text-4xl font-bold text-blue-600">
-                {currentPlan.price}
-                <span className="text-lg font-normal text-gray-500">
-                  {isYearly ? '/year' : '/month'}
-                </span>
-              </div>
-              {isYearly && (
-                <Badge className="bg-green-500 text-white mt-2">
-                  Save {selectedPlan.includes('premium') ? '$19.98' : '$9.98'}
+          {/* Billing Toggle */}
+          <Tabs defaultValue="monthly" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
+              <TabsTrigger value="monthly">Monthly</TabsTrigger>
+              <TabsTrigger value="yearly">
+                Yearly 
+                <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800">
+                  Save 17%
                 </Badge>
-              )}
-              <CardDescription>{currentPlan.description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {currentPlan.features.map((feature, index) => (
-                  <div key={index} className="flex items-center">
-                    <Check className="h-5 w-5 text-success mr-3 flex-shrink-0" />
-                    <span>{feature}</span>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="monthly">
+              <Card className="max-w-2xl mx-auto">
+                <CardHeader className="text-center pb-8 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-transparent">
+                  <div className={`p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center ${
+                    selectedPlan === 'premium' 
+                      ? 'bg-purple-100 dark:bg-purple-900' 
+                      : 'bg-blue-100 dark:bg-blue-900'
+                  }`}>
+                    {selectedPlan === 'premium' ? (
+                      <Crown className="h-8 w-8 text-purple-600" />
+                    ) : (
+                      <TrendingUp className="h-8 w-8 text-blue-600" />
+                    )}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <CardTitle className="text-3xl">{currentPlan.name} Plan</CardTitle>
+                  <div className={`text-5xl font-bold mb-2 ${
+                    selectedPlan === 'premium' ? 'text-purple-600' : 'text-blue-600'
+                  }`}>
+                    ${currentPlan.monthly}
+                    <span className="text-lg font-normal text-gray-500">/month</span>
+                  </div>
+                  <CardDescription>Billed monthly, cancel anytime</CardDescription>
+                </CardHeader>
+                <CardContent className="p-8">
+                  <div className="space-y-4 mb-8">
+                    {currentPlan.features.map((feature, index) => (
+                      <div key={index} className="flex items-center">
+                        <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <Button 
+                    onClick={() => handleSubscribe(selectedPlan, 'month')}
+                    disabled={loading}
+                    className={`w-full py-6 text-lg ${
+                      selectedPlan === 'premium'
+                        ? 'bg-purple-600 hover:bg-purple-700'
+                        : 'bg-blue-600 hover:bg-blue-700'
+                    }`}
+                  >
+                    <CreditCard className="h-5 w-5 mr-2" />
+                    {loading ? 'Processing...' : `Subscribe for $${currentPlan.monthly}/month`}
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-          {/* Payment */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <CreditCard className="h-5 w-5 mr-2" />
-                Complete Your Subscription
-              </CardTitle>
-              <CardDescription>
-                You'll be redirected to our secure payment processor to complete your subscription.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                  What happens next?
-                </h3>
-                <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                  <li>• Secure payment processing via Stripe</li>
-                  <li>• 7-day free trial (no charge today)</li>
-                  <li>• Cancel anytime with one click</li>
-                  <li>• Instant access to all features</li>
-                </ul>
-              </div>
+            <TabsContent value="yearly">
+              <Card className="max-w-2xl mx-auto">
+                <CardHeader className="text-center pb-8 bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-transparent">
+                  <div className={`p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center ${
+                    selectedPlan === 'premium' 
+                      ? 'bg-purple-100 dark:bg-purple-900' 
+                      : 'bg-blue-100 dark:bg-blue-900'
+                  }`}>
+                    {selectedPlan === 'premium' ? (
+                      <Crown className="h-8 w-8 text-purple-600" />
+                    ) : (
+                      <TrendingUp className="h-8 w-8 text-blue-600" />
+                    )}
+                  </div>
+                  <CardTitle className="text-3xl">{currentPlan.name} Plan</CardTitle>
+                  <div className={`text-5xl font-bold mb-2 ${
+                    selectedPlan === 'premium' ? 'text-purple-600' : 'text-blue-600'
+                  }`}>
+                    ${currentPlan.yearly}
+                    <span className="text-lg font-normal text-gray-500">/year</span>
+                  </div>
+                  <CardDescription>
+                    Save ${((currentPlan.monthly * 12) - currentPlan.yearly).toFixed(2)} per year
+                  </CardDescription>
+                  <Badge className="mt-2 bg-green-100 text-green-800">
+                    Best Value - 17% Off
+                  </Badge>
+                </CardHeader>
+                <CardContent className="p-8">
+                  <div className="space-y-4 mb-8">
+                    {currentPlan.features.map((feature, index) => (
+                      <div key={index} className="flex items-center">
+                        <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <Button 
+                    onClick={() => handleSubscribe(selectedPlan, 'year')}
+                    disabled={loading}
+                    className={`w-full py-6 text-lg ${
+                      selectedPlan === 'premium'
+                        ? 'bg-purple-600 hover:bg-purple-700'
+                        : 'bg-blue-600 hover:bg-blue-700'
+                    }`}
+                  >
+                    <CreditCard className="h-5 w-5 mr-2" />
+                    {loading ? 'Processing...' : `Subscribe for $${currentPlan.yearly}/year`}
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
 
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded">
-                  <span>Plan</span>
-                  <span className="font-semibold">{currentPlan.name}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded">
-                  <span>Billing</span>
-                  <span className="font-semibold">{isYearly ? 'Yearly' : 'Monthly'}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded">
-                  <span>Price</span>
-                  <span className="font-semibold">{currentPlan.price}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-green-50 dark:bg-green-900/20 rounded">
-                  <span>Today's charge</span>
-                  <span className="font-semibold text-green-600">$0.00 (Free trial)</span>
-                </div>
-              </div>
-
-              <Button 
-                onClick={handleSubscribe}
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                size="lg"
+          {/* Already have an account */}
+          <div className="text-center mt-8">
+            <p className="text-gray-600 dark:text-gray-300">
+              Already have an account?{' '}
+              <button 
+                onClick={() => setLocation('/auth')}
+                className="text-blue-600 hover:text-blue-700 font-medium"
               >
-                {loading ? 'Processing...' : 'Start Free Trial'}
-              </Button>
+                Sign in here
+              </button>
+            </p>
+          </div>
 
-              <p className="text-xs text-gray-500 text-center">
-                By subscribing, you agree to our Terms of Service and Privacy Policy. 
-                Your subscription will automatically renew unless cancelled.
-              </p>
-            </CardContent>
-          </Card>
+          {/* Security & Terms */}
+          <div className="text-center mt-8 space-y-2">
+            <p className="text-sm text-gray-500">
+              Secure payment processing by Stripe
+            </p>
+            <p className="text-xs text-gray-400">
+              By subscribing, you agree to our Terms of Service and Privacy Policy
+            </p>
+          </div>
         </div>
       </div>
     </div>
