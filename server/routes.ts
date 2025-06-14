@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { users, transactions, budgets, categories, type Transaction, type Budget } from "@shared/schema";
 import { setupAuth, isAuthenticated } from "./auth";
+import { setCookieConsent } from "./cookieMiddleware";
 import { insertTransactionSchema, insertBudgetSchema, insertExpenseReminderSchema } from "@shared/schema";
 import { z } from "zod";
 import { 
@@ -1211,6 +1212,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error clearing cache:", error);
       res.status(500).json({ message: "Failed to clear cache" });
     }
+  });
+
+  // Cookie consent endpoint
+  app.post('/api/cookie-consent', setCookieConsent, (req, res) => {
+    res.json({ success: true, message: "Cookie preferences updated successfully" });
+  });
+
+  // Test endpoint to demonstrate cookie functionality
+  app.get('/api/test-cookies', (req: any, res) => {
+    const consent = req.cookieConsent;
+    
+    // Try to set different types of cookies based on consent
+    res.cookie('test-essential', 'always-works', { maxAge: 3600000 }); // Always works
+    res.cookie('test-functional', 'user-preferences', { maxAge: 3600000 }); // Only if functional enabled
+    res.cookie('test-analytics', 'tracking-data', { maxAge: 3600000 }); // Only if analytics enabled
+    
+    // Return current consent status
+    res.json({
+      consent,
+      message: "Cookies set based on your preferences",
+      cookiesAttempted: {
+        essential: "test-essential (always set)",
+        functional: consent.functional ? "test-functional (set)" : "test-functional (blocked)",
+        analytics: consent.analytics ? "test-analytics (set)" : "test-analytics (blocked)"
+      }
+    });
   });
 
   // Error handler

@@ -27,7 +27,22 @@ export function CookieBanner() {
     }
   }, []);
 
-  const acceptAll = () => {
+  const sendConsentToServer = async (consent: CookiePreferences & { timestamp: string }) => {
+    try {
+      await fetch('/api/cookie-consent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ consent }),
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.warn('Failed to send cookie consent to server:', error);
+    }
+  };
+
+  const acceptAll = async () => {
     const consent = {
       essential: true,
       functional: true,
@@ -35,19 +50,21 @@ export function CookieBanner() {
       timestamp: new Date().toISOString(),
     };
     localStorage.setItem('cookie-consent', JSON.stringify(consent));
+    await sendConsentToServer(consent);
     setIsVisible(false);
   };
 
-  const acceptSelected = () => {
+  const acceptSelected = async () => {
     const consent = {
       ...preferences,
       timestamp: new Date().toISOString(),
     };
     localStorage.setItem('cookie-consent', JSON.stringify(consent));
+    await sendConsentToServer(consent);
     setIsVisible(false);
   };
 
-  const rejectAll = () => {
+  const rejectAll = async () => {
     const consent = {
       essential: true, // Essential cookies cannot be rejected
       functional: false,
@@ -55,6 +72,7 @@ export function CookieBanner() {
       timestamp: new Date().toISOString(),
     };
     localStorage.setItem('cookie-consent', JSON.stringify(consent));
+    await sendConsentToServer(consent);
     setIsVisible(false);
   };
 
