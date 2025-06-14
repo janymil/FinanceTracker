@@ -118,7 +118,7 @@ export default function Landing() {
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Bank-level security to keep your financial data safe and private.
+                  Industry-standard encryption to keep your financial data safe and private.
                 </CardDescription>
               </CardContent>
             </Card>

@@ -193,7 +193,7 @@ export default function Contact() {
                 <div>
                   <p className="font-medium mb-2">Is my financial data secure?</p>
                   <p className="text-sm text-muted-foreground">
-                    Yes, we use bank-level encryption and security measures to protect your data. Read our Privacy Policy for details.
+                    Yes, we use industry-standard encryption and security measures to protect your data. Read our Privacy Policy for details.
                   </p>
                 </div>
                 

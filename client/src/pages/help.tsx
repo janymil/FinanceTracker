@@ -101,7 +101,7 @@ export default function Help() {
     {
       id: "data-security",
       question: "Is my financial data secure?",
-      answer: "Yes, we use bank-level encryption and security measures. Your data is stored securely with PostgreSQL, and we offer cloud backup for Premium users. We never share your personal financial information."
+      answer: "Yes, we use industry-standard encryption and security measures. Your data is stored securely with PostgreSQL, and we offer cloud backup for Premium users. We never share your personal financial information."
     },
     {
       id: "ai-categorization",
@@ -213,9 +213,9 @@ export default function Help() {
                     <div className="flex items-start gap-3 p-4 border rounded-lg">
                       <Shield className="h-8 w-8 text-green-500 mt-1" />
                       <div>
-                        <h3 className="font-semibold">Bank-Level Security</h3>
+                        <h3 className="font-semibold">Secure Data Protection</h3>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                          Your financial data is protected with enterprise-grade encryption
+                          Your financial data is protected with industry-standard encryption
                         </p>
                       </div>
                     </div>

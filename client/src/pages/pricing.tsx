@@ -173,7 +173,7 @@ export default function Pricing() {
             <span className="text-primary block">Financial Plan</span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-            Start free and upgrade as your financial management needs grow. Every plan includes bank-level security and privacy protection.
+            Start free and upgrade as your financial management needs grow. Every plan includes industry-standard security and privacy protection.
           </p>
         </div>
       </section>
@@ -412,7 +412,7 @@ export default function Pricing() {
                 Is my financial data secure?
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Absolutely. We use bank-level encryption and security measures to protect your data. 
+                Absolutely. We use industry-standard encryption and security measures to protect your data. 
                 We never store your bank login credentials and all data is encrypted both in transit and at rest.
               </p>
             </div>

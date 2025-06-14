@@ -163,6 +163,8 @@ Changelog:
 - June 14, 2025. Implemented multi-tab documentation covering overview, features, subscription plans, user guide, and FAQ
 - June 14, 2025. Added GPT-3.5 powered help chat with detailed knowledge base about FinanzerPro features and functionality
 - June 14, 2025. Integrated help system into sidebar navigation and routing system for easy user access
+- June 14, 2025. Updated security communications to use accurate language - replaced exaggerated "bank-level" claims with honest "industry-standard" descriptions
+- June 14, 2025. Corrected misleading security marketing across landing, help, contact, pricing, and cloud-backup components for transparency
 ```
 
 ## User Preferences

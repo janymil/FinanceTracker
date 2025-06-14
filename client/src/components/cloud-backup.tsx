@@ -274,7 +274,7 @@ export default function CloudBackup({}: CloudBackupProps) {
               <div>
                 <p className="text-sm font-medium">Secure Cloud Storage</p>
                 <p className="text-xs text-gray-600 dark:text-gray-300">
-                  Data stored in enterprise-grade secure cloud infrastructure
+                  Data stored in secure cloud infrastructure with standard encryption
                 </p>
               </div>
             </div>
