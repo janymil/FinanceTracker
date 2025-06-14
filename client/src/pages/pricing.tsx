@@ -183,7 +183,7 @@ export default function Pricing() {
                 <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Star className="h-8 w-8 text-gray-600 dark:text-gray-300" />
                 </div>
-                <CardTitle className="text-2xl">Básico</CardTitle>
+                <CardTitle className="text-2xl">Free</CardTitle>
                 <div className="text-4xl font-bold text-gray-900 dark:text-white">
                   $0<span className="text-lg font-normal text-gray-500">/month</span>
                 </div>
@@ -229,7 +229,7 @@ export default function Pricing() {
                 <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <TrendingUp className="h-8 w-8 text-blue-600" />
                 </div>
-                <CardTitle className="text-2xl">Enfoque</CardTitle>
+                <CardTitle className="text-2xl">Basic</CardTitle>
                 <div className="text-4xl font-bold text-blue-600">
                   $7.99<span className="text-lg font-normal text-gray-500">/month</span>
                 </div>
@@ -239,7 +239,7 @@ export default function Pricing() {
                 <div className="space-y-3">
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Everything in Básico plan</span>
+                    <span>Everything in Free plan</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
@@ -288,7 +288,7 @@ export default function Pricing() {
                 <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Crown className="h-8 w-8 text-premium" />
                 </div>
-                <CardTitle className="text-2xl">Avanzado</CardTitle>
+                <CardTitle className="text-2xl">Premium</CardTitle>
                 <div className="text-4xl font-bold text-premium">
                   $14.99<span className="text-lg font-normal text-gray-500">/month</span>
                 </div>
@@ -298,7 +298,7 @@ export default function Pricing() {
                 <div className="space-y-3">
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Everything in Enfoque plan</span>
+                    <span>Everything in Basic plan</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
@@ -356,9 +356,9 @@ export default function Pricing() {
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700">
                   <th className="text-left p-6 font-semibold text-gray-900 dark:text-white">Features</th>
-                  <th className="text-center p-6 font-semibold text-gray-900 dark:text-white">Básico</th>
-                  <th className="text-center p-6 font-semibold text-blue-600">Enfoque</th>
-                  <th className="text-center p-6 font-semibold text-premium">Avanzado</th>
+                  <th className="text-center p-6 font-semibold text-gray-900 dark:text-white">Free</th>
+                  <th className="text-center p-6 font-semibold text-blue-600">Basic</th>
+                  <th className="text-center p-6 font-semibold text-premium">Premium</th>
                 </tr>
               </thead>
               <tbody>
