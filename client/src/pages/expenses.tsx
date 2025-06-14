@@ -99,6 +99,8 @@ export default function Expenses() {
         isRecurring: false,
         recurringFrequency: "monthly",
         recurringEndDate: "",
+        paymentUrl: "",
+        referenceNote: "",
       });
       toast({
         title: "Expense Added",
@@ -247,6 +249,8 @@ export default function Expenses() {
       isRecurring: false,
       recurringFrequency: "monthly",
       recurringEndDate: "",
+      paymentUrl: "",
+      referenceNote: "",
     });
     setIsDialogOpen(true);
   };
@@ -283,6 +287,8 @@ export default function Expenses() {
                       isRecurring: false,
                       recurringFrequency: "monthly",
                       recurringEndDate: "",
+                      paymentUrl: "",
+                      referenceNote: "",
                     });
                   }}
                 >
@@ -290,7 +296,7 @@ export default function Expenses() {
                   Add Expense
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingTransaction ? "Edit Expense" : "Add New Expense"}
