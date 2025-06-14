@@ -33,7 +33,7 @@ import RequirePlan from "@/components/require-plan";
 
 interface Budget {
   id: number;
-  amount: number;
+  amount: string;
   categoryName: string;
   categoryIcon: string;
   categoryColor: string;
@@ -174,7 +174,7 @@ export default function Budget() {
   const handleEdit = (budget: Budget) => {
     setEditingBudget(budget);
     setNewBudget({
-      amount: budget.amount.toString(),
+      amount: budget.amount,
       categoryId: "",
       startDate: budget.startDate,
       endDate: budget.endDate,
@@ -441,7 +441,7 @@ export default function Budget() {
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>Spent: ${(budget.spent || 0).toFixed(2)}</span>
-                          <span>Budget: ${budget.amount.toFixed(2)}</span>
+                          <span>Budget: ${parseFloat(budget.amount.toString()).toFixed(2)}</span>
                         </div>
                         <Progress value={budget.percentage || 0} className="h-2" />
                         <div className="flex justify-between items-center">
