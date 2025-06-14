@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import NotFoundPage from "./pages/not-found";
 import Landing from "@/pages/landing";
 import ProfilePage from "./pages/profile";
+import AdminAnalytics from "@/pages/admin-analytics";
 
 function AppContent() {
   const { user, isLoading } = useAuth();
@@ -105,6 +106,7 @@ function AppContent() {
               <Route path="/contact" component={Contact} />
               <Route path="/help" component={Help} />
               <Route path="/profile" component={ProfilePage} />
+              <Route path="/admin-analytics" component={AdminAnalytics} />
               <Route component={NotFoundPage} />
             </Switch>
           </div>
