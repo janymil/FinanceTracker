@@ -15,9 +15,10 @@ export function cookieConsentMiddleware(req: Request, res: Response, next: NextF
   const consentCookie = req.cookies?.['cookie-consent'];
   if (consentCookie) {
     try {
-      consent = JSON.parse(consentCookie);
+      // Handle both string and already parsed object
+      consent = typeof consentCookie === 'string' ? JSON.parse(consentCookie) : consentCookie;
     } catch (error) {
-      console.warn('Invalid cookie consent format');
+      console.warn('Invalid cookie consent format:', error);
     }
   }
   
@@ -26,7 +27,7 @@ export function cookieConsentMiddleware(req: Request, res: Response, next: NextF
     try {
       consent = JSON.parse(req.headers['x-cookie-consent'] as string);
     } catch (error) {
-      console.warn('Invalid header consent format');
+      console.warn('Invalid header consent format:', error);
     }
   }
   
@@ -102,9 +103,12 @@ export function setCookieConsent(req: Request, res: Response, next: NextFunction
     res.cookie('cookie-consent', JSON.stringify(consent), {
       maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
       httpOnly: false, // Allow frontend access
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
+      secure: false, // Set to false for development
+      sameSite: 'lax' // More permissive for development
     });
+    
+    // Update the request object with new consent for immediate use
+    (req as any).cookieConsent = consent;
     
     // If user disabled functional cookies, clear existing functional cookies
     if (!consent.functional) {
