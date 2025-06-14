@@ -28,7 +28,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import MonthFilter from "@/components/month-filter";
 
 interface Transaction {
   id: number;
@@ -59,7 +59,6 @@ export default function Transactions() {
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  const [monthOffset, setMonthOffset] = useState(0);
   
   const [newTransaction, setNewTransaction] = useState({
     amount: "",
@@ -82,12 +81,13 @@ export default function Transactions() {
     enabled: !!user,
   });
 
-  // Generate month navigation data
+  // Generate month navigation data (last 12 months including current)
   const generateMonthData = () => {
     const months = [];
     const today = new Date();
     
-    for (let i = 11; i >= 0; i--) {
+    // Start from current month and go back 11 months (total 12 months)
+    for (let i = 0; i < 12; i++) {
       const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
       months.push({
         key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
@@ -96,7 +96,7 @@ export default function Transactions() {
         year: date.getFullYear(),
       });
     }
-    return months;
+    return months.reverse(); // Reverse to show oldest to newest
   };
 
   const monthData = generateMonthData();
