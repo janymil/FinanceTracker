@@ -17,7 +17,6 @@ import DailyRecommendations from "@/components/daily-recommendations";
 import AutoCategorization from "@/components/auto-categorization";
 import AIFinancialTips from "@/components/ai-financial-tips";
 import TransactionRemindersWidget from "@/components/transaction-reminders-widget";
-import FinancialRemindersWidget from "@/components/expense-reminders-widget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -447,7 +446,7 @@ export default function Dashboard() {
 
             {/* Advanced Features */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <FinancialRemindersWidget />
+              <TransactionRemindersWidget />
               
               <RequirePlan plan="standard">
                 <RemindersStreaks />
