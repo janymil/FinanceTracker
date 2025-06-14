@@ -1,9 +1,17 @@
 import { Link } from "wouter";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
-export function Footer() {
+interface FooterProps {
+  sidebarCollapsed?: boolean;
+}
+
+export function Footer({ sidebarCollapsed = false }: FooterProps) {
   return (
-    <footer className="bg-background border-t">
+    <footer className={cn(
+      "bg-background border-t transition-all duration-300",
+      sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
+    )}>
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}

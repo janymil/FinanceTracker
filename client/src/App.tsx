@@ -101,7 +101,7 @@ function AppContent() {
           </div>
         </main>
       </div>
-      <Footer />
+      <Footer sidebarCollapsed={sidebarCollapsed} />
       <CookieBanner />
     </div>
   );
