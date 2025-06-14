@@ -88,10 +88,7 @@ export default function AdminAnalytics() {
 
   const createUserMutation = useMutation({
     mutationFn: async (userData: any) => {
-      return await apiRequest('/api/admin/users', {
-        method: 'POST',
-        body: JSON.stringify(userData),
-      });
+      return await apiRequest('POST', '/api/admin/users', userData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
@@ -113,10 +110,7 @@ export default function AdminAnalytics() {
 
   const updateUserMutation = useMutation({
     mutationFn: async ({ id, userData }: { id: string; userData: any }) => {
-      return await apiRequest(`/api/admin/users/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(userData),
-      });
+      return await apiRequest('PUT', `/api/admin/users/${id}`, userData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
@@ -138,9 +132,7 @@ export default function AdminAnalytics() {
 
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: string) => {
-      return await apiRequest(`/api/admin/users/${userId}`, {
-        method: 'DELETE',
-      });
+      return await apiRequest('DELETE', `/api/admin/users/${userId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
