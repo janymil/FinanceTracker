@@ -1,332 +1,263 @@
-
-import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
-import { useEffect, useState } from 'react';
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Crown, ArrowLeft, Check } from "lucide-react";
-import { Link } from "wouter";
+import { Check, Crown, TrendingUp, ArrowLeft, CreditCard } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-const stripePublicKey = import.meta.env.STRIPE_PUBLIC_KEY;
-const stripePromise = stripePublicKey ? loadStripe(stripePublicKey) : null;
-
-type PlanType = 'standard' | 'premium';
-
-interface PlanDetails {
-  name: string;
-  price: number;
-  description: string;
-  features: string[];
-  recommended?: boolean;
-}
-
-const plans: Record<PlanType, PlanDetails> = {
-  standard: {
-    name: 'Standard Plan',
-    price: 4.99,
-    description: 'Enhanced financial tracking with more features',
-    features: [
-      'Everything in Free plan',
-      'Advanced budget tracking',
-      'Standard analytics & charts',
-      'Up to 100 transactions per month',
-      'Email support',
-    ],
-  },
-  premium: {
-    name: 'Premium Plan',
-    price: 9.99,
-    description: 'Complete financial control with advanced features',
-    features: [
-      'Everything in Standard plan',
-      'AI-powered insights',
-      'Interactive charts & analytics',
-      'Unlimited transaction history',
-      'Advanced expense categorization',
-      'Data management (CSV, PDF)',
-      'Advanced filtering & search',
-      'Priority email support',
-    ],
-    recommended: true,
-  },
-};
-
-const SubscribeForm = ({ selectedPlan }: { selectedPlan: PlanType }) => {
-  const stripe = useStripe();
-  const elements = useElements();
+export default function Subscribe() {
+  const [, setLocation] = useLocation();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string>("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const plan = urlParams.get('plan') || 'standard';
+    setSelectedPlan(plan);
+  }, []);
 
-    if (!stripe || !elements) {
-      return;
-    }
-
-    setIsProcessing(true);
-
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: window.location.origin,
-      },
-    });
-
-    setIsProcessing(false);
-
-    if (error) {
-      toast({
-        title: "Payment Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Payment Successful",
-        description: `Welcome to ${plans[selectedPlan].name}! You now have access to enhanced features.`,
-      });
+  const planConfig = {
+    'standard': {
+      name: 'Standard',
+      price: '$4.99',
+      yearlyPrice: '$49.90',
+      description: 'For users serious about financial management',
+      features: [
+        'Everything in Free plan',
+        'Goals and budget management',
+        'Interactive charts and reports',
+        'AI expense categorization',
+        'Calendar view and reminders',
+        'Unlimited transaction history'
+      ]
+    },
+    'standard-yearly': {
+      name: 'Standard (Yearly)',
+      price: '$49.90',
+      yearlyPrice: '$49.90',
+      description: 'For users serious about financial management - Save 20 months',
+      features: [
+        'Everything in Free plan',
+        'Goals and budget management',
+        'Interactive charts and reports',
+        'AI expense categorization',
+        'Calendar view and reminders',
+        'Unlimited transaction history'
+      ]
+    },
+    'premium': {
+      name: 'Premium',
+      price: '$9.99',
+      yearlyPrice: '$99.90',
+      description: 'Complete AI-powered financial automation',
+      features: [
+        'Everything in Standard plan',
+        'AI financial tips and insights',
+        'Advanced trends analysis',
+        'Expense prediction',
+        'Daily personalized recommendations',
+        'Cloud data backup',
+        'Data management (CSV, PDF)',
+        'Priority email support'
+      ]
+    },
+    'premium-yearly': {
+      name: 'Premium (Yearly)',
+      price: '$99.90',
+      yearlyPrice: '$99.90',
+      description: 'Complete AI-powered financial automation - Save 20 months',
+      features: [
+        'Everything in Standard plan',
+        'AI financial tips and insights',
+        'Advanced trends analysis',
+        'Expense prediction',
+        'Daily personalized recommendations',
+        'Cloud data backup',
+        'Data management (CSV, PDF)',
+        'Priority email support'
+      ]
     }
   };
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement />
-      <Button 
-        type="submit" 
-        disabled={!stripe || isProcessing} 
-        className="w-full bg-premium hover:bg-premium/90"
-      >
-        {isProcessing ? (
-          <div className="flex items-center">
-            <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
-            Processing...
-          </div>
-        ) : (
-          <>
-            <Crown className="h-4 w-4 mr-2" />
-            Start {plans[selectedPlan].name}
-          </>
-        )}
-      </Button>
-    </form>
-  );
-};
-
-export default function Subscribe() {
-  const [selectedPlan, setSelectedPlan] = useState<PlanType>('premium');
-  const [clientSecret, setClientSecret] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    if (!stripePublicKey) {
-      setIsLoading(false);
+  const handleSubscribe = async () => {
+    if (!user) {
+      setLocation('/login');
       return;
     }
 
-    const createSubscription = async () => {
-      try {
-        const res = await apiRequest("POST", "/api/get-or-create-subscription", {
-          plan: selectedPlan
-        });
-        const data = await res.json();
-        setClientSecret(data.clientSecret);
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to initialize payment. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
+    setLoading(true);
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          plan: selectedPlan,
+          userId: user.id
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('Failed to create checkout session');
       }
-    };
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to start subscription process. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    createSubscription();
-  }, [toast, selectedPlan]);
+  const currentPlan = planConfig[selectedPlan as keyof typeof planConfig];
+  const isYearly = selectedPlan.includes('-yearly');
 
-  if (isLoading) {
+  if (!currentPlan) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-      </div>
-    );
-  }
-
-  if (!stripePublicKey) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
-        <div className="max-w-md mx-auto px-4">
-          <Card>
-            <CardHeader className="text-center">
-              <CardTitle className="text-orange-600">Payment Service Unavailable</CardTitle>
-              <CardDescription>
-                Payment processing is currently being configured. Please check back soon.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link href="/">
-                <Button variant="outline" className="w-full">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Dashboard
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  if (!clientSecret) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
-        <div className="max-w-md mx-auto px-4">
-          <Card>
-            <CardHeader className="text-center">
-              <CardTitle className="text-red-600">Payment Error</CardTitle>
-              <CardDescription>
-                Unable to initialize payment. Please try again later.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link href="/">
-                <Button variant="outline" className="w-full">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Dashboard
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Invalid Plan</CardTitle>
+            <CardDescription>The selected plan is not available.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => setLocation('/pricing')} className="w-full">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Pricing
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
-      <div className="max-w-6xl mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="bg-premium-light p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-            <Crown className="h-10 w-10 text-premium" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Choose Your Plan
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <Button 
+          variant="ghost" 
+          onClick={() => setLocation('/pricing')}
+          className="mb-8"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Pricing
+        </Button>
+
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            Subscribe to {currentPlan.name}
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">
-            Unlock advanced financial analytics and take complete control of your money
+          <p className="text-xl text-gray-600 dark:text-gray-300">
+            {currentPlan.description}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Plan Selection */}
-          <div className="lg:col-span-2 space-y-6">
-            {Object.entries(plans).map(([planKey, plan]) => (
-              <Card 
-                key={planKey}
-                className={`cursor-pointer transition-all ${
-                  selectedPlan === planKey 
-                    ? 'border-2 border-premium ring-2 ring-premium/20' 
-                    : 'border hover:border-premium/50'
-                }`}
-                onClick={() => setSelectedPlan(planKey as PlanType)}
-              >
-                <CardHeader className={`${
-                  plan.recommended 
-                    ? 'bg-gradient-to-br from-premium-light to-white dark:from-premium/20 dark:to-transparent' 
-                    : ''
-                }`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-4 h-4 rounded-full border-2 ${
-                        selectedPlan === planKey 
-                          ? 'bg-premium border-premium' 
-                          : 'border-gray-300'
-                      }`} />
-                      <CardTitle className="text-xl">{plan.name}</CardTitle>
-                      {plan.recommended && (
-                        <Badge className="bg-premium text-white">
-                          <Crown className="h-3 w-3 mr-1" />
-                          Recommended
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-premium">
-                        ${plan.price}<span className="text-lg font-normal text-gray-500">/month</span>
-                      </div>
-                    </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Plan Details */}
+          <Card className="border-2 border-blue-500">
+            <CardHeader className="text-center pb-8">
+              <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                {selectedPlan.includes('premium') ? (
+                  <Crown className="h-8 w-8 text-premium" />
+                ) : (
+                  <TrendingUp className="h-8 w-8 text-blue-600" />
+                )}
+              </div>
+              <CardTitle className="text-2xl">{currentPlan.name}</CardTitle>
+              <div className="text-4xl font-bold text-blue-600">
+                {currentPlan.price}
+                <span className="text-lg font-normal text-gray-500">
+                  {isYearly ? '/year' : '/month'}
+                </span>
+              </div>
+              {isYearly && (
+                <Badge className="bg-green-500 text-white mt-2">
+                  Save {selectedPlan.includes('premium') ? '$19.98' : '$9.98'}
+                </Badge>
+              )}
+              <CardDescription>{currentPlan.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {currentPlan.features.map((feature, index) => (
+                  <div key={index} className="flex items-center">
+                    <Check className="h-5 w-5 text-success mr-3 flex-shrink-0" />
+                    <span>{feature}</span>
                   </div>
-                  <CardDescription>{plan.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3 pt-6">
-                  {plan.features.map((feature, index) => (
-                    <div key={index} className="flex items-center">
-                      <Check className="h-4 w-4 text-success mr-3 flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Payment Form */}
-          <Card className="lg:sticky lg:top-8 h-fit">
+          {/* Payment */}
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Crown className="h-5 w-5 text-premium mr-2" />
+                <CreditCard className="h-5 w-5 mr-2" />
                 Complete Your Subscription
               </CardTitle>
               <CardDescription>
-                Start your 7-day free trial of {plans[selectedPlan].name}
+                You'll be redirected to our secure payment processor to complete your subscription.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              {stripePromise ? (
-                <Elements stripe={stripePromise} options={{ clientSecret }}>
-                  <SubscribeForm selectedPlan={selectedPlan} />
-                </Elements>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-gray-500 dark:text-gray-400">Payment processing unavailable</p>
+            <CardContent className="space-y-6">
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                  What happens next?
+                </h3>
+                <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                  <li>• Secure payment processing via Stripe</li>
+                  <li>• 7-day free trial (no charge today)</li>
+                  <li>• Cancel anytime with one click</li>
+                  <li>• Instant access to all features</li>
+                </ul>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                  <span>Plan</span>
+                  <span className="font-semibold">{currentPlan.name}</span>
                 </div>
-              )}
-              
-              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div className="flex justify-between items-center text-sm mb-2">
-                  <span>{plans[selectedPlan].name} (Monthly)</span>
-                  <span className="font-medium">${plans[selectedPlan].price}</span>
+                <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                  <span>Billing</span>
+                  <span className="font-semibold">{isYearly ? 'Yearly' : 'Monthly'}</span>
                 </div>
-                <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
-                  <span>7-day free trial</span>
-                  <span>$0.00</span>
+                <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                  <span>Price</span>
+                  <span className="font-semibold">{currentPlan.price}</span>
                 </div>
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-2 flex justify-between items-center font-medium">
-                  <span>Total due today</span>
-                  <span>$0.00</span>
+                <div className="flex justify-between items-center p-3 bg-green-50 dark:bg-green-900/20 rounded">
+                  <span>Today's charge</span>
+                  <span className="font-semibold text-green-600">$0.00 (Free trial)</span>
                 </div>
               </div>
-              
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-4">
-                By subscribing, you agree to our Terms of Service and Privacy Policy. Cancel anytime.
+
+              <Button 
+                onClick={handleSubscribe}
+                disabled={loading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                size="lg"
+              >
+                {loading ? 'Processing...' : 'Start Free Trial'}
+              </Button>
+
+              <p className="text-xs text-gray-500 text-center">
+                By subscribing, you agree to our Terms of Service and Privacy Policy. 
+                Your subscription will automatically renew unless cancelled.
               </p>
             </CardContent>
           </Card>
-        </div>
-
-        <div className="text-center mt-8">
-          <Link href="/">
-            <Button variant="ghost">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Button>
-          </Link>
         </div>
       </div>
     </div>

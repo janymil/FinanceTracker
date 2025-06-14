@@ -1519,6 +1519,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Help Chat endpoint
+  // Stripe payment endpoints
+  app.post("/api/create-checkout-session", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const { plan } = req.body;
+      
+      // Simple plan mapping for Stripe
+      const planPrices = {
+        'standard': { priceId: 'price_standard_monthly', amount: 499 },
+        'standard-yearly': { priceId: 'price_standard_yearly', amount: 4990 },
+        'premium': { priceId: 'price_premium_monthly', amount: 999 },
+        'premium-yearly': { priceId: 'price_premium_yearly', amount: 9990 }
+      };
+
+      const selectedPlan = planPrices[plan as keyof typeof planPrices];
+      if (!selectedPlan) {
+        return res.status(400).json({ error: "Invalid plan selected" });
+      }
+
+      // For demo purposes, return a success URL that updates the user's plan
+      const successUrl = `${req.headers.origin}/api/subscription-success?plan=${plan}&userId=${req.session.userId}`;
+      const cancelUrl = `${req.headers.origin}/pricing`;
+
+      // In a real implementation, you would create a Stripe checkout session here
+      // For now, we'll redirect directly to success to simulate payment
+      res.json({ url: successUrl });
+
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      res.status(500).json({ error: "Failed to create checkout session" });
+    }
+  });
+
+  app.get("/api/subscription-success", async (req: Request, res: Response) => {
+    try {
+      const { plan, userId } = req.query;
+      
+      if (!userId || !plan) {
+        return res.redirect('/pricing?error=invalid_params');
+      }
+
+      // Map plan names to database values
+      const planMapping = {
+        'standard': 'standard',
+        'standard-yearly': 'standard',
+        'premium': 'premium',
+        'premium-yearly': 'premium'
+      };
+
+      const dbPlan = planMapping[plan as keyof typeof planMapping];
+      if (!dbPlan) {
+        return res.redirect('/pricing?error=invalid_plan');
+      }
+
+      // Update user's plan in database
+      await storage.updateUserPlan(Number(userId), dbPlan);
+
+      // Redirect to dashboard with success message
+      res.redirect('/dashboard?subscription=success');
+
+    } catch (error) {
+      console.error('Error processing subscription success:', error);
+      res.redirect('/pricing?error=processing_failed');
+    }
+  });
+
+  app.post("/api/cancel-subscription", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Reset user to free plan
+      await storage.updateUserPlan(req.session.userId, 'free');
+
+      res.json({ success: true, message: "Subscription cancelled successfully" });
+
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      res.status(500).json({ error: "Failed to cancel subscription" });
+    }
+  });
+
   app.post("/api/help-chat", async (req: Request, res: Response) => {
     try {
       const { message } = req.body;
