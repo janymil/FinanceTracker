@@ -62,7 +62,7 @@ export default function Landing() {
             <Button onClick={handleLogin} size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8 py-3">
               Get Started Free
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-3">
+            <Button onClick={() => setLocation('/demo')} variant="outline" size="lg" className="text-lg px-8 py-3">
               View Demo
             </Button>
           </div>

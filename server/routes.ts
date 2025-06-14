@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
@@ -1656,6 +1657,9 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
       });
     }
   });
+
+  // Serve attached assets for demo screenshots
+  app.use('/attached_assets', Express.static('attached_assets'));
 
   // Error handler
   app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
