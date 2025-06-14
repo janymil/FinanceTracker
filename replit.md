@@ -172,6 +172,7 @@ Changelog:
 - June 14, 2025. Added subscription success notifications and plan update functionality that works with current user authentication system
 - June 14, 2025. Removed all unauthorized 7-day free trial references and ensured yearly subscription functionality works properly
 - June 14, 2025. Fixed subscription system to handle both monthly and yearly billing cycles through Stripe integration
+- June 14, 2025. Updated landing page to display all three pricing tiers (Free, Standard $4.99/month, Premium $9.99/month) with consistent pricing across all pages
 ```
 
 ## User Preferences

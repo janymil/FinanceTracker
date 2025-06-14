@@ -138,7 +138,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Free Plan */}
             <Card className="border-2">
               <CardHeader className="text-center pb-8">
@@ -167,6 +167,47 @@ export default function Landing() {
                 </div>
                 <Button onClick={handleLogin} className="w-full mt-6" variant="outline">
                   Get Started Free
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Standard Plan */}
+            <Card className="border-2 border-blue-500 relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-blue-500 text-white px-4 py-1">
+                  Most Popular
+                </Badge>
+              </div>
+              <CardHeader className="text-center pb-8">
+                <CardTitle className="text-2xl">Standard Plan</CardTitle>
+                <div className="text-4xl font-bold text-blue-600">
+                  $4.99<span className="text-lg font-normal text-gray-500">/month</span>
+                </div>
+                <CardDescription>For serious budgeters</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center">
+                  <Check className="h-5 w-5 text-success mr-3" />
+                  <span>Everything in Free plan</span>
+                </div>
+                <div className="flex items-center">
+                  <Check className="h-5 w-5 text-success mr-3" />
+                  <span>Goals and budget management</span>
+                </div>
+                <div className="flex items-center">
+                  <Check className="h-5 w-5 text-success mr-3" />
+                  <span>AI expense categorization</span>
+                </div>
+                <div className="flex items-center">
+                  <Check className="h-5 w-5 text-success mr-3" />
+                  <span>Calendar view and reminders</span>
+                </div>
+                <div className="flex items-center">
+                  <Check className="h-5 w-5 text-success mr-3" />
+                  <span>Unlimited transaction history</span>
+                </div>
+                <Button onClick={handleLogin} className="w-full mt-6 bg-blue-600 hover:bg-blue-700">
+                  Subscribe Now
                 </Button>
               </CardContent>
             </Card>
@@ -213,9 +254,8 @@ export default function Landing() {
                 </div>
                 <Button onClick={handleLogin} className="w-full mt-6 bg-premium hover:bg-premium/90">
                   <Crown className="h-4 w-4 mr-2" />
-                  Start Premium Trial
+                  Subscribe Now
                 </Button>
-                <p className="text-xs text-gray-500 text-center">7-day free trial</p>
               </CardContent>
             </Card>
           </div>
