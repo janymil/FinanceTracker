@@ -55,6 +55,14 @@ interface BackupStatus {
   autoBackup: boolean;
   encrypted: boolean;
   status: 'synced' | 'syncing' | 'error' | 'pending';
+  info?: {
+    totalSize?: number;
+    totalBackups?: number;
+  };
+  realUsage?: {
+    size: number;
+    formattedSize: string;
+  };
 }
 
 interface ImportOptions {
@@ -94,10 +102,21 @@ interface ColumnMapping {
   account?: string;
 }
 
+// Helper function to format file sizes
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 B';
+
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
 export default function ExportPage() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
     format: "pdf",
     dateRange: "month",
@@ -175,6 +194,8 @@ export default function ExportPage() {
     autoBackup: backupStatusData?.settings?.autoBackup ?? backupSettings.autoBackup,
     encrypted: backupStatusData?.settings?.encryptBackups ?? backupSettings.encryptBackups,
     status: backupStatusData?.settings?.status === 'active' ? 'synced' : 'pending',
+    info: backupStatusData?.info,
+    realUsage: backupStatusData?.realUsage,
   };
 
   // Import handlers
@@ -195,7 +216,7 @@ export default function ExportPage() {
 
     setImportOptions(prev => ({ ...prev, file }));
     setImportStep('mapping');
-    
+
     toast({
       title: "File uploaded",
       description: `${file.name} is ready for processing.`,
@@ -214,12 +235,12 @@ export default function ExportPage() {
       setImportProgress(50);
 
       let parsedData: any[] = [];
-      
+
       if (importOptions.source === 'csv' || importOptions.file.type === 'text/csv') {
         // Parse CSV
         const lines = text.split('\n').filter(line => line.trim());
         const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-        
+
         for (let i = importOptions.skipFirstRow ? 1 : 0; i < Math.min(lines.length, 6); i++) {
           const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
           const row: any = {};
@@ -311,7 +332,7 @@ export default function ExportPage() {
       setImportStep('complete');
       queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial-summary'] });
-      
+
       toast({
         title: "Import completed",
         description: response.message || `Successfully imported ${response.imported} transactions.`,
@@ -379,7 +400,7 @@ export default function ExportPage() {
         title: "Export Successful",
         description: "Your data has been exported successfully.",
       });
-      
+
       // Trigger download
       if (data.downloadUrl) {
         const link = document.createElement('a');
@@ -472,7 +493,7 @@ export default function ExportPage() {
   const handleBackupNow = () => {
     setIsBackingUp(true);
     setBackupProgress(0);
-    
+
     const interval = setInterval(() => {
       setBackupProgress((prev) => {
         if (prev >= 100) {
@@ -483,7 +504,7 @@ export default function ExportPage() {
         return prev + 10;
       });
     }, 300);
-    
+
     backupMutation.mutate();
   };
 
@@ -530,7 +551,7 @@ export default function ExportPage() {
               Import, export, and backup your financial data
             </p>
           </div>
-          
+
           <Badge variant="outline" className="text-purple-600 border-purple-600">
             <Crown className="h-3 w-3 mr-1" />
             Premium Feature
@@ -1206,10 +1227,14 @@ export default function ExportPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium">{backupStatus.totalSize}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">Total size</p>
+                    <div className="text-lg font-semibold">
+                      {backupStatus.realUsage?.formattedSize || formatFileSize(backupStatus.info?.totalSize || 0)}
+                    </div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                      {backupStatus.info?.totalBackups || 0} backup{(backupStatus.info?.totalBackups || 0) !== 1 ? 's' : ''}
                     </div>
                   </div>
+                </div>
 
                   {(backupStatus.status === 'syncing' || isBackingUp) && (
                     <div className="space-y-2">
@@ -1227,7 +1252,7 @@ export default function ExportPage() {
                 {/* Backup Settings */}
                 <div className="space-y-4">
                   <h4 className="font-medium">Backup Settings</h4>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label className="text-sm font-medium">Automatic Backup</Label>
@@ -1290,7 +1315,7 @@ export default function ExportPage() {
                       }
                     />
                   </div>
-                  
+
                   <Button 
                     onClick={() => backupSettingsMutation.mutate(backupSettings)}
                     disabled={backupSettingsMutation.isPending}

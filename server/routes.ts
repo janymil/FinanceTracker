@@ -615,9 +615,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/ai/financial-health-score', isAuthenticated, async (req: any, res) => {
     try {
       const { summary, budgets, useAdvancedFactors } = req.body;
-      
+
       const transactions = await storage.getUserTransactions(req.user.id, 100);
-      
+
       const aiScore = await generateAIFinancialHealthScore({
         summary,
         budgets,
@@ -844,12 +844,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let importedCount = 0;
       let skippedCount = 0;
-      const errors: Array<{ row: number; field: string; message: string }> = [];
+      const errors: Array<{ row: number; field: string; message: string }> =[];
 
       // Process each transaction
       for (let i = 0; i < importTransactions.length; i++) {
         const transaction = importTransactions[i];
-        
+
         try {
           // Validate required fields
           if (!transaction.description || !transaction.amount || !transaction.type || !transaction.date) {
@@ -932,7 +932,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get date range
       let start: Date, end: Date;
       const now = new Date();
-      
+
       switch (dateRange) {
         case 'month':
           start = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -1050,14 +1050,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { backupScheduler } = await import('./backupScheduler');
-      
+
       // Trigger manual backup
       await backupScheduler.triggerManualBackup(userId);
-      
+
       // Get updated backup info
       const { bunnyStorage } = await import('./bunnyStorage');
       const backupInfo = await bunnyStorage.getBackupInfo(userId);
-      
+
       res.json({
         success: true,
         message: "Data backed up successfully to Bunny.net cloud storage",
@@ -1083,7 +1083,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       let settings = await storage.getUserBackupSettings(userId);
-      
+
       // Create default settings if none exist
       if (!settings) {
         settings = await storage.createBackupSettings({
@@ -1104,7 +1104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get backup info from Bunny.net
       const { bunnyStorage } = await import('./bunnyStorage');
       const backupInfo = await bunnyStorage.getBackupInfo(userId);
-      
+
       res.json({
         ...settings,
         ...backupInfo
@@ -1126,19 +1126,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { autoBackup, frequency, retentionDays, includeAttachments, encryptBackups } = req.body;
-      
+
       // Validate frequency
       if (frequency && !['daily', 'weekly', 'monthly'].includes(frequency)) {
         return res.status(400).json({ message: "Invalid frequency. Must be daily, weekly, or monthly" });
       }
-      
+
       // Validate retention days
       if (retentionDays && ![7, 14, 30].includes(retentionDays)) {
         return res.status(400).json({ message: "Invalid retention period. Must be 7, 14, or 30 days" });
       }
 
       let settings = await storage.getUserBackupSettings(userId);
-      
+
       if (!settings) {
         // Create new settings
         settings = await storage.createBackupSettings({
@@ -1187,7 +1187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       let settings = await storage.getUserBackupSettings(userId);
-      
+
       // Create default settings if none exist
       if (!settings) {
         settings = await storage.createBackupSettings({
@@ -1205,10 +1205,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Get backup info from Bunny.net
       const { bunnyStorage } = await import('./bunnyStorage');
       let backups = [];
-      let backupInfo = { totalBackups: 0, totalSize: 0 };
-      
+      let backupInfo = { totalBackups: 0, totalSize: 0, oldestBackup: null, newestBackup: null };
+
       try {
         backups = await bunnyStorage.getUserBackups(userId);
         backupInfo = await bunnyStorage.getBackupInfo(userId);
@@ -1222,7 +1223,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         backups: backups.slice(0, 10), // Latest 10 backups
         info: backupInfo,
         lastBackup: backups.length > 0 ? backups[0].DateCreated : null,
-        nextBackup: settings?.nextBackupDate || null
+        nextBackup: settings?.nextBackupDate || null,
+        realUsage: {
+          totalBackupSize: backupInfo.totalSize,
+          totalBackups: backupInfo.totalBackups,
+          formattedSize: this.formatFileSize(backupInfo.totalSize)
+        }
       });
 
     } catch (error) {
@@ -1274,29 +1280,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Test endpoint to demonstrate cookie functionality
   app.get('/api/test-cookies', (req: any, res) => {
     const consent = req.cookieConsent;
-    
+
     // Show what cookies will be set based on consent
     const cookieResults = {
       essential: "always set (required for site function)",
       functional: consent.functional ? "will be set (user preferences enabled)" : "blocked (user disabled functional cookies)",
       analytics: consent.analytics ? "will be set (analytics enabled)" : "blocked (user disabled analytics cookies)"
     };
-    
+
     // Demonstrate real functionality by setting theme cookie (functional)
     if (consent.functional) {
       res.cookie('user-theme', 'dark-mode', { maxAge: 86400000 }); // 24 hours
       res.cookie('dashboard-layout', 'compact', { maxAge: 86400000 });
     }
-    
+
     // Demonstrate analytics cookies
     if (consent.analytics) {
       res.cookie('analytics-session', 'track_123', { maxAge: 1800000 }); // 30 minutes  
       res.cookie('user-behavior', 'navigation_pattern', { maxAge: 3600000 }); // 1 hour
     }
-    
+
     // Always set essential cookies (for login, security, etc)
     res.cookie('site-essential', 'csrf_token_abc', { maxAge: 86400000, httpOnly: true });
-    
+
     res.json({
       consent,
       message: "Cookie behavior demonstration",
