@@ -227,16 +227,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Standard or Premium subscription required" });
       }
 
-      const goalData = insertGoalSchema.parse({
-        ...req.body,
+      // Transform and validate the data
+      const { name, targetAmount, targetDate, category, description } = req.body;
+
+      const goalData = {
         userId,
-      });
+        name: String(name),
+        targetAmount: String(targetAmount), // Convert number to string for decimal storage
+        targetDate: new Date(targetDate), // Convert string to Date
+        category: String(category),
+        description: description ? String(description) : null,
+        currentAmount: "0.00",
+        status: "active"
+      };
 
       const goal = await storage.createGoal(goalData);
       res.json(goal);
     } catch (error) {
       console.error("Error creating goal:", error);
       res.status(400).json({ message: "Failed to create goal" });
+    }
+  });
+
+  app.put('/api/goals/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+
+      if (user?.plan === 'free') {
+        return res.status(403).json({ message: "Standard or Premium subscription required" });
+      }
+
+      const id = parseInt(req.params.id);
+      const { name, targetAmount, targetDate, category, description, currentAmount } = req.body;
+
+      const updateData: any = {};
+      if (name !== undefined) updateData.name = String(name);
+      if (targetAmount !== undefined) updateData.targetAmount = String(targetAmount);
+      if (targetDate !== undefined) updateData.targetDate = new Date(targetDate);
+      if (category !== undefined) updateData.category = String(category);
+      if (description !== undefined) updateData.description = description ? String(description) : null;
+      if (currentAmount !== undefined) updateData.currentAmount = String(currentAmount);
+
+      const goal = await storage.updateGoal(id, updateData);
+      res.json(goal);
+    } catch (error) {
+      console.error("Error updating goal:", error);
+      res.status(400).json({ message: "Failed to update goal" });
+    }
+  });
+
+  app.delete('/api/goals/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+
+      if (user?.plan === 'free') {
+        return res.status(403).json({ message: "Standard or Premium subscription required" });
+      }
+
+      const id = parseInt(req.params.id);
+      await storage.deleteGoal(id, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting goal:", error);
+      res.status(500).json({ message: "Failed to delete goal" });
     }
   });
 
