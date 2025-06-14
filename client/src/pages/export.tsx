@@ -187,13 +187,13 @@ export default function ExportPage() {
 
   // Create backup status object from API data
   const backupStatus: BackupStatus = {
-    lastBackup: backupStatusData?.lastBackup || new Date(Date.now() - 86400000).toISOString(),
+    lastBackup: backupStatusData?.lastBackup || (backupStatusData?.info?.newestBackup) || new Date(Date.now() - 86400000).toISOString(),
     nextBackup: backupStatusData?.nextBackup || new Date(Date.now() + 86400000).toISOString(),
-    totalSize: backupStatusData?.info?.totalSize ? `${(backupStatusData.info.totalSize / 1024 / 1024).toFixed(1)} MB` : "0 MB",
+    totalSize: backupStatusData?.realUsage?.formattedSize || "0 B",
     frequency: backupStatusData?.settings?.frequency || backupSettings.frequency,
     autoBackup: backupStatusData?.settings?.autoBackup ?? backupSettings.autoBackup,
     encrypted: backupStatusData?.settings?.encryptBackups ?? backupSettings.encryptBackups,
-    status: backupStatusData?.settings?.status === 'active' ? 'synced' : 'pending',
+    status: backupStatusData?.info?.totalBackups > 0 ? 'synced' : 'pending',
     info: backupStatusData?.info,
     realUsage: backupStatusData?.realUsage,
   };
@@ -1383,11 +1383,19 @@ export default function ExportPage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span>Used Storage</span>
-                      <span>12.4 MB of 1 GB</span>
+                      <span>
+                        {backupStatus.realUsage?.formattedSize || '0 B'} of 1 GB
+                      </span>
                     </div>
-                    <Progress value={1.24} className="h-2" />
+                    <Progress 
+                      value={backupStatus.realUsage?.size ? Math.min((backupStatus.realUsage.size / (1024 * 1024 * 1024)) * 100, 100) : 0} 
+                      className="h-2" 
+                    />
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Plenty of space remaining for your financial data
+                      {backupStatus.realUsage?.size && backupStatus.realUsage.size > 0 
+                        ? `${backupStatus.info?.totalBackups || 0} backup${(backupStatus.info?.totalBackups || 0) !== 1 ? 's' : ''} stored`
+                        : 'No backups created yet'
+                      }
                     </p>
                   </div>
                 </div>

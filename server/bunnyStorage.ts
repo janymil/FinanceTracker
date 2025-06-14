@@ -110,7 +110,8 @@ export class BunnyStorage {
       return Array.isArray(result) ? result : [];
     } catch (error: any) {
       // 404 errors are expected when directory doesn't exist yet
-      if (error.message && error.message.includes('404')) {
+      if (error.message && (error.message.includes('404') || error.message.includes('Object Not Found'))) {
+        console.log(`Directory ${path} doesn't exist yet - this is normal for new users`);
         return [];
       }
       console.error(`Failed to list files in ${path}:`, error);
@@ -125,7 +126,13 @@ export class BunnyStorage {
     
     const backupContent = JSON.stringify(backupData, null, 2);
     
-    await this.uploadFile(filePath, backupContent, 'application/json');
+    try {
+      await this.uploadFile(filePath, backupContent, 'application/json');
+      console.log(`Backup created successfully: ${filePath}`);
+    } catch (error) {
+      console.error(`Failed to create backup ${filePath}:`, error);
+      throw error;
+    }
     
     return filename;
   }

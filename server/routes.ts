@@ -1218,6 +1218,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`No backups found for user ${userId}, this is normal for new users`);
       }
 
+      // Helper function to format file sizes
+      function formatFileSize(bytes: number): string {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+      }
+
       res.json({
         settings,
         backups: backups.slice(0, 10), // Latest 10 backups
@@ -1225,9 +1234,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastBackup: backups.length > 0 ? backups[0].DateCreated : null,
         nextBackup: settings?.nextBackupDate || null,
         realUsage: {
-          totalBackupSize: backupInfo.totalSize,
-          totalBackups: backupInfo.totalBackups,
-          formattedSize: this.formatFileSize(backupInfo.totalSize)
+          size: backupInfo.totalSize,
+          formattedSize: formatFileSize(backupInfo.totalSize)
         }
       });
 
