@@ -229,7 +229,7 @@ export default function Pricing() {
                 <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <TrendingUp className="h-8 w-8 text-blue-600" />
                 </div>
-                <CardTitle className="text-2xl">Basic</CardTitle>
+                <CardTitle className="text-2xl">Standard</CardTitle>
                 <div className="text-4xl font-bold text-blue-600">
                   $7.99<span className="text-lg font-normal text-gray-500">/month</span>
                 </div>
@@ -295,7 +295,7 @@ export default function Pricing() {
                 <div className="space-y-3">
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Everything in Basic plan</span>
+                    <span>Everything in Standard plan</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
@@ -358,7 +358,7 @@ export default function Pricing() {
                 <tr className="border-b border-gray-200 dark:border-gray-700">
                   <th className="text-left p-6 font-semibold text-gray-900 dark:text-white">Features</th>
                   <th className="text-center p-6 font-semibold text-gray-900 dark:text-white">Free</th>
-                  <th className="text-center p-6 font-semibold text-blue-600">Basic</th>
+                  <th className="text-center p-6 font-semibold text-blue-600">Standard</th>
                   <th className="text-center p-6 font-semibold text-premium">Premium</th>
                 </tr>
               </thead>
