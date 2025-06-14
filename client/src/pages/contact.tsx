@@ -32,7 +32,7 @@ export default function Contact() {
 
     // Simulate form submission
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     toast({
       title: "Message sent successfully",
       description: "Thank you for contacting us. We'll get back to you within 24 hours.",
@@ -78,10 +78,8 @@ export default function Contact() {
           </div>
         </header>
       )}
-      
-      <div className="container mx-auto px-4 py-8 max-w-6xl"></div>
-    </div>
-  );
+
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -129,7 +127,7 @@ export default function Contact() {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label htmlFor="subject" className="block text-sm font-medium mb-2">
                     Subject
@@ -143,7 +141,7 @@ export default function Contact() {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label htmlFor="message" className="block text-sm font-medium mb-2">
                     Message
@@ -157,7 +155,7 @@ export default function Contact() {
                     required
                   />
                 </div>
-                
+
                 <Button 
                   type="submit" 
                   className="w-full" 
@@ -186,7 +184,7 @@ export default function Contact() {
                     <p className="text-sm text-muted-foreground">support@financeflow.app</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <Phone className="h-5 w-5 text-primary" />
                   <div>
@@ -194,7 +192,7 @@ export default function Contact() {
                     <p className="text-sm text-muted-foreground">+1 (555) 123-4567</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <MapPin className="h-5 w-5 text-primary" />
                   <div>
@@ -205,7 +203,7 @@ export default function Contact() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <Clock className="h-5 w-5 text-primary" />
                   <div>
@@ -230,14 +228,14 @@ export default function Contact() {
                     Visit your account settings and click on "Upgrade Plan" to choose between Standard and Premium plans.
                   </p>
                 </div>
-                
+
                 <div>
                   <p className="font-medium mb-2">Is my financial data secure?</p>
                   <p className="text-sm text-muted-foreground">
                     Yes, we use industry-standard encryption and security measures to protect your data. Read our Privacy Policy for details.
                   </p>
                 </div>
-                
+
                 <div>
                   <p className="font-medium mb-2">Can I export my data?</p>
                   <p className="text-sm text-muted-foreground">
