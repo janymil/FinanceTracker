@@ -188,6 +188,12 @@ export const insertBudgetSchema = createInsertSchema(budgets).omit({
   createdAt: true,
 });
 
+export const insertGoalSchema = createInsertSchema(goals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertRecurringTransactionSchema = createInsertSchema(recurringTransactions).omit({
   id: true,
   createdAt: true,

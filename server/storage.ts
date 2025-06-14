@@ -4,6 +4,7 @@ import {
   recurringTransactions,
   budgets,
   categories,
+  goals,
   expenseReminders,
   backupSettings,
   type User,
@@ -12,6 +13,8 @@ import {
   type InsertTransaction,
   type Budget,
   type InsertBudget,
+  type Goal,
+  type InsertGoal,
   type Category,
   type ExpenseReminder,
   type InsertExpenseReminder,
@@ -41,6 +44,12 @@ export interface IStorage {
   getUserBudgets(userId: number): Promise<Budget[]>;
   updateBudget(id: number, budget: Partial<InsertBudget>): Promise<Budget>;
   deleteBudget(id: number, userId: number): Promise<void>;
+
+  // Goal operations
+  createGoal(goal: InsertGoal): Promise<Goal>;
+  getUserGoals(userId: number): Promise<Goal[]>;
+  updateGoal(id: number, goal: Partial<InsertGoal>): Promise<Goal>;
+  deleteGoal(id: number, userId: number): Promise<void>;
 
   // Category operations
   getCategories(): Promise<Category[]>;

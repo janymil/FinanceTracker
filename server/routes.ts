@@ -2,10 +2,10 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
-import { users, transactions, budgets, categories, type Transaction, type Budget } from "@shared/schema";
+import { users, transactions, budgets, categories, goals, type Transaction, type Budget, type Goal } from "@shared/schema";
 import { setupAuth, isAuthenticated } from "./auth";
 import { setCookieConsent } from "./cookieMiddleware";
-import { insertTransactionSchema, insertBudgetSchema, insertExpenseReminderSchema } from "@shared/schema";
+import { insertTransactionSchema, insertBudgetSchema, insertGoalSchema, insertExpenseReminderSchema } from "@shared/schema";
 import { z } from "zod";
 import { 
   generateFinancialTips, 
@@ -197,6 +197,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching budgets:", error);
       res.status(500).json({ message: "Failed to fetch budgets" });
+    }
+  });
+
+  // Goals routes
+  app.get('/api/goals', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+
+      if (user?.plan === 'free') {
+        return res.status(403).json({ message: "Standard or Premium subscription required" });
+      }
+
+      const goals = await storage.getUserGoals(userId);
+      res.json(goals);
+    } catch (error) {
+      console.error("Error fetching goals:", error);
+      res.status(500).json({ message: "Failed to fetch goals" });
+    }
+  });
+
+  app.post('/api/goals', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+
+      if (user?.plan === 'free') {
+        return res.status(403).json({ message: "Standard or Premium subscription required" });
+      }
+
+      const goalData = insertGoalSchema.parse({
+        ...req.body,
+        userId,
+      });
+
+      const goal = await storage.createGoal(goalData);
+      res.json(goal);
+    } catch (error) {
+      console.error("Error creating goal:", error);
+      res.status(400).json({ message: "Failed to create goal" });
     }
   });
 
