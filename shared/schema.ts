@@ -152,6 +152,90 @@ export const backupSettings = pgTable("backup_settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Friend connections for collaborative features
+export const friendships = pgTable("friendships", {
+  id: serial("id").primaryKey(),
+  requesterId: varchar("requester_id").notNull().references(() => users.id),
+  recipientId: varchar("recipient_id").notNull().references(() => users.id),
+  status: varchar("status", { length: 20 }).default("pending").notNull(), // pending, accepted, blocked
+  createdAt: timestamp("created_at").defaultNow(),
+  acceptedAt: timestamp("accepted_at"),
+});
+
+// Collaborative savings goal challenges
+export const collaborativeGoals = pgTable("collaborative_goals", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  targetAmount: decimal("target_amount", { precision: 12, scale: 2 }).notNull(),
+  currentAmount: decimal("current_amount", { precision: 12, scale: 2 }).default("0.00").notNull(),
+  targetDate: timestamp("target_date").notNull(),
+  category: varchar("category", { length: 100 }).notNull(),
+  challengeType: varchar("challenge_type", { length: 50 }).notNull(), // 'collaborative', 'competitive', 'milestone'
+  status: varchar("status", { length: 50 }).default("active").notNull(), // active, completed, cancelled
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  isPublic: boolean("is_public").default(false), // Whether non-participants can view
+  joinCode: varchar("join_code", { length: 20 }), // Optional join code for easy sharing
+  milestoneRewards: jsonb("milestone_rewards"), // JSON array of milestone rewards
+  competitionRules: jsonb("competition_rules"), // Rules for competitive challenges
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Participants in collaborative goals
+export const collaborativeGoalParticipants = pgTable("collaborative_goal_participants", {
+  id: serial("id").primaryKey(),
+  goalId: integer("goal_id").notNull().references(() => collaborativeGoals.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  personalTarget: decimal("personal_target", { precision: 12, scale: 2 }), // Individual target within group goal
+  currentContribution: decimal("current_contribution", { precision: 12, scale: 2 }).default("0.00").notNull(),
+  role: varchar("role", { length: 20 }).default("participant").notNull(), // creator, participant, viewer
+  status: varchar("status", { length: 20 }).default("active").notNull(), // active, left, removed
+  joinedAt: timestamp("joined_at").defaultNow(),
+  lastContribution: timestamp("last_contribution"),
+});
+
+// Contributions to collaborative goals
+export const goalContributions = pgTable("goal_contributions", {
+  id: serial("id").primaryKey(),
+  goalId: integer("goal_id").notNull().references(() => collaborativeGoals.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  description: text("description"),
+  contributionType: varchar("contribution_type", { length: 50 }).default("manual").notNull(), // manual, automatic, milestone
+  transactionId: integer("transaction_id").references(() => transactions.id), // Link to actual transaction
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Challenge activities and updates
+export const challengeActivities = pgTable("challenge_activities", {
+  id: serial("id").primaryKey(),
+  goalId: integer("goal_id").notNull().references(() => collaborativeGoals.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  activityType: varchar("activity_type", { length: 50 }).notNull(), // contribution, milestone, comment, achievement
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  amount: decimal("amount", { precision: 12, scale: 2 }), // For contribution activities
+  metadata: jsonb("metadata"), // Additional activity data
+  isPublic: boolean("is_public").default(true), // Whether other participants can see
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Milestone achievements
+export const milestoneAchievements = pgTable("milestone_achievements", {
+  id: serial("id").primaryKey(),
+  goalId: integer("goal_id").notNull().references(() => collaborativeGoals.id),
+  userId: varchar("user_id").references(() => users.id), // NULL for group milestones
+  milestoneType: varchar("milestone_type", { length: 50 }).notNull(), // personal, group, percentage
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  targetAmount: decimal("target_amount", { precision: 12, scale: 2 }).notNull(),
+  achievedAmount: decimal("achieved_amount", { precision: 12, scale: 2 }).notNull(),
+  rewardType: varchar("reward_type", { length: 50 }), // badge, points, custom
+  rewardData: jsonb("reward_data"), // Reward details
+  achievedAt: timestamp("achieved_at").defaultNow(),
+});
+
 // Schema exports
 export type InsertUser = typeof users.$inferInsert;
 export type UpsertUser = typeof users.$inferInsert;
@@ -176,6 +260,25 @@ export type InsertBackupSettings = typeof backupSettings.$inferInsert;
 export type BackupSettings = typeof backupSettings.$inferSelect;
 
 export type Category = typeof categories.$inferSelect;
+
+// Collaborative features types
+export type InsertFriendship = typeof friendships.$inferInsert;
+export type Friendship = typeof friendships.$inferSelect;
+
+export type InsertCollaborativeGoal = typeof collaborativeGoals.$inferInsert;
+export type CollaborativeGoal = typeof collaborativeGoals.$inferSelect;
+
+export type InsertCollaborativeGoalParticipant = typeof collaborativeGoalParticipants.$inferInsert;
+export type CollaborativeGoalParticipant = typeof collaborativeGoalParticipants.$inferSelect;
+
+export type InsertGoalContribution = typeof goalContributions.$inferInsert;
+export type GoalContribution = typeof goalContributions.$inferSelect;
+
+export type InsertChallengeActivity = typeof challengeActivities.$inferInsert;
+export type ChallengeActivity = typeof challengeActivities.$inferSelect;
+
+export type InsertMilestoneAchievement = typeof milestoneAchievements.$inferInsert;
+export type MilestoneAchievement = typeof milestoneAchievements.$inferSelect;
 
 // Insert schemas
 export const insertTransactionSchema = createInsertSchema(transactions).omit({
@@ -205,4 +308,38 @@ export const insertExpenseReminderSchema = createInsertSchema(expenseReminders).
   createdAt: true,
   updatedAt: true,
   lastReminded: true,
+});
+
+// Collaborative features insert schemas
+export const insertFriendshipSchema = createInsertSchema(friendships).omit({
+  id: true,
+  createdAt: true,
+  acceptedAt: true,
+});
+
+export const insertCollaborativeGoalSchema = createInsertSchema(collaborativeGoals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCollaborativeGoalParticipantSchema = createInsertSchema(collaborativeGoalParticipants).omit({
+  id: true,
+  joinedAt: true,
+  lastContribution: true,
+});
+
+export const insertGoalContributionSchema = createInsertSchema(goalContributions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertChallengeActivitySchema = createInsertSchema(challengeActivities).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertMilestoneAchievementSchema = createInsertSchema(milestoneAchievements).omit({
+  id: true,
+  achievedAt: true,
 });
