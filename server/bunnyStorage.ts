@@ -108,7 +108,11 @@ export class BunnyStorage {
     try {
       const result = await this.makeRequest('GET', `/${path}`);
       return Array.isArray(result) ? result : [];
-    } catch (error) {
+    } catch (error: any) {
+      // 404 errors are expected when directory doesn't exist yet
+      if (error.message && error.message.includes('404')) {
+        return [];
+      }
       console.error(`Failed to list files in ${path}:`, error);
       return [];
     }
