@@ -44,11 +44,19 @@ function AppContent() {
 
   if (!user) {
     return (
-      <Switch>
-        <Route path="/" component={LandingPage} />
-        <Route path="/auth" component={AuthPage} />
-        <Route component={LandingPage} />
-      </Switch>
+      <>
+        <Switch>
+          <Route path="/" component={LandingPage} />
+          <Route path="/auth" component={AuthPage} />
+          <Route path="/privacy-policy" component={PrivacyPolicy} />
+          <Route path="/terms-of-service" component={TermsOfService} />
+          <Route path="/cookie-policy" component={CookiePolicy} />
+          <Route path="/contact" component={Contact} />
+          <Route component={LandingPage} />
+        </Switch>
+        <Footer />
+        <CookieBanner />
+      </>
     );
   }
 
@@ -84,11 +92,17 @@ function AppContent() {
               <Route path="/reports" component={ReportsPage} />
               <Route path="/export" component={ExportPage} />
               <Route path="/subscribe" component={SubscribePage} />
+              <Route path="/privacy-policy" component={PrivacyPolicy} />
+              <Route path="/terms-of-service" component={TermsOfService} />
+              <Route path="/cookie-policy" component={CookiePolicy} />
+              <Route path="/contact" component={Contact} />
               <Route component={NotFoundPage} />
             </Switch>
           </div>
         </main>
       </div>
+      <Footer />
+      <CookieBanner />
     </div>
   );
 }
