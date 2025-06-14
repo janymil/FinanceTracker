@@ -21,6 +21,7 @@ export default function Reports() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [selectedPeriod, setSelectedPeriod] = useState("month");
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
 
   if (!user) {
     return null;
@@ -75,16 +76,34 @@ export default function Reports() {
     enabled: !!user,
   });
 
-  // Generate dynamic chart data from actual transactions
-  const generateChartData = () => {
+  // Filter transactions based on selected month
+  const filteredTransactions = useMemo(() => {
     if (!Array.isArray(transactions) || transactions.length === 0) {
+      return [];
+    }
+    
+    if (selectedMonth) {
+      const [year, month] = selectedMonth.split('-');
+      return transactions.filter((transaction: any) => {
+        const transactionDate = new Date(transaction.date);
+        return transactionDate.getFullYear() === parseInt(year) && 
+               transactionDate.getMonth() === parseInt(month) - 1;
+      });
+    }
+    
+    return transactions;
+  }, [transactions, selectedMonth]);
+
+  // Generate dynamic chart data from filtered transactions
+  const generateChartData = () => {
+    if (!Array.isArray(filteredTransactions) || filteredTransactions.length === 0) {
       return [];
     }
 
     // Group transactions by month
     const monthlyData: { [key: string]: { income: number; expenses: number } } = {};
     
-    transactions.forEach((transaction: any) => {
+    filteredTransactions.forEach((transaction: any) => {
       const date = new Date(transaction.date);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       
@@ -146,6 +165,13 @@ export default function Reports() {
             </div>
           </div>
         </div>
+
+        {/* Month Navigation Filter */}
+        <MonthFilter 
+          selectedMonth={selectedMonth}
+          onMonthSelect={setSelectedMonth}
+          onDateRangeReset={() => setSelectedPeriod("month")}
+        />
 
         {/* Reports Tabs - Basic available for all, Advanced for Premium */}
         <Tabs defaultValue="summary" className="space-y-6">
