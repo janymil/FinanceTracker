@@ -1223,19 +1223,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/test-cookies', (req: any, res) => {
     const consent = req.cookieConsent;
     
-    // Try to set different types of cookies based on consent
-    res.cookie('test-essential', 'always-works', { maxAge: 3600000 }); // Always works
-    res.cookie('test-functional', 'user-preferences', { maxAge: 3600000 }); // Only if functional enabled
-    res.cookie('test-analytics', 'tracking-data', { maxAge: 3600000 }); // Only if analytics enabled
+    // Show what cookies will be set based on consent
+    const cookieResults = {
+      essential: "always set (required for site function)",
+      functional: consent.functional ? "will be set (user preferences enabled)" : "blocked (user disabled functional cookies)",
+      analytics: consent.analytics ? "will be set (analytics enabled)" : "blocked (user disabled analytics cookies)"
+    };
     
-    // Return current consent status
+    // Demonstrate real functionality by setting theme cookie (functional)
+    if (consent.functional) {
+      res.cookie('user-theme', 'dark-mode', { maxAge: 86400000 }); // 24 hours
+      res.cookie('dashboard-layout', 'compact', { maxAge: 86400000 });
+    }
+    
+    // Demonstrate analytics cookies
+    if (consent.analytics) {
+      res.cookie('analytics-session', 'track_123', { maxAge: 1800000 }); // 30 minutes  
+      res.cookie('user-behavior', 'navigation_pattern', { maxAge: 3600000 }); // 1 hour
+    }
+    
+    // Always set essential cookies (for login, security, etc)
+    res.cookie('site-essential', 'csrf_token_abc', { maxAge: 86400000, httpOnly: true });
+    
     res.json({
       consent,
-      message: "Cookies set based on your preferences",
-      cookiesAttempted: {
-        essential: "test-essential (always set)",
-        functional: consent.functional ? "test-functional (set)" : "test-functional (blocked)",
-        analytics: consent.analytics ? "test-analytics (set)" : "test-analytics (blocked)"
+      message: "Cookie behavior demonstration",
+      cookieResults,
+      demonstration: {
+        functionalCookiesSet: consent.functional ? ["user-theme", "dashboard-layout"] : [],
+        analyticsCookiesSet: consent.analytics ? ["analytics-session", "user-behavior"] : [],
+        essentialCookiesSet: ["site-essential"],
+        note: "Check your browser's developer tools to see which cookies were actually set"
       }
     });
   });
