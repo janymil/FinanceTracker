@@ -49,6 +49,7 @@ function AppContent() {
         <Switch>
           <Route path="/" component={Landing} />
           <Route path="/auth" component={AuthPage} />
+          <Route path="/pricing" component={Pricing} />
           <Route path="/privacy-policy" component={PrivacyPolicy} />
           <Route path="/terms-of-service" component={TermsOfService} />
           <Route path="/cookie-policy" component={CookiePolicy} />
