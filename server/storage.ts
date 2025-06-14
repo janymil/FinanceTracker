@@ -203,12 +203,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateTransaction(id: number, transaction: InsertTransaction): Promise<Transaction> {
-    const [updatedTransaction] = await db
-      .update(transactions)
-      .set(transaction)
-      .where(and(eq(transactions.id, id), eq(transactions.userId, transaction.userId)))
-      .returning();
-    return updatedTransaction;
+        // Encrypt sensitive fields if they're being updated
+        const encryptedTransaction = { ...transaction };
+        if (transaction.amount) {
+            encryptedTransaction.amount = DataEncryption.encryptAmount(transaction.amount);
+        }
+        if (transaction.description) {
+            encryptedTransaction.description = DataEncryption.encryptDescription(transaction.description);
+        }
+        if (transaction.referenceNote) {
+            encryptedTransaction.referenceNote = DataEncryption.encrypt(transaction.referenceNote);
+        }
+
+        const [updatedTransaction] = await db
+            .update(transactions)
+            .set(encryptedTransaction)
+            .where(and(eq(transactions.id, id), eq(transactions.userId, transaction.userId)))
+            .returning();
+
+        // Decrypt for return value
+        return {
+            ...updatedTransaction,
+            amount: DataEncryption.decryptAmount(updatedTransaction.amount),
+            description: DataEncryption.decryptDescription(updatedTransaction.description),
+            referenceNote: updatedTransaction.referenceNote ? DataEncryption.decrypt(updatedTransaction.referenceNote) : null
+        };
   }
 
   async deleteTransaction(id: number, userId: number): Promise<void> {
