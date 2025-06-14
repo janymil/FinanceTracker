@@ -30,6 +30,7 @@ export interface IStorage {
   // Transaction operations
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
   getUserTransactions(userId: number, limit?: number): Promise<Transaction[]>;
+  updateTransaction(id: number, transaction: InsertTransaction): Promise<Transaction>;
   deleteTransaction(id: number, userId: number): Promise<void>;
 
   // Budget operations
@@ -139,6 +140,15 @@ export class DatabaseStorage implements IStorage {
     }
 
     return await query;
+  }
+
+  async updateTransaction(id: number, transaction: InsertTransaction): Promise<Transaction> {
+    const [updatedTransaction] = await db
+      .update(transactions)
+      .set(transaction)
+      .where(and(eq(transactions.id, id), eq(transactions.userId, transaction.userId)))
+      .returning();
+    return updatedTransaction;
   }
 
   async deleteTransaction(id: number, userId: number): Promise<void> {

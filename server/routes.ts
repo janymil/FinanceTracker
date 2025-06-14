@@ -66,6 +66,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put('/api/transactions/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (user?.plan === 'free') {
+        return res.status(403).json({ message: "Standard or Premium subscription required" });
+      }
+
+      const transactionId = parseInt(req.params.id);
+      const validatedData = insertTransactionSchema.parse({
+        ...req.body,
+        userId,
+        categoryId: req.body.categoryId ? parseInt(req.body.categoryId) : null,
+        amount: req.body.amount.toString(),
+        date: new Date(req.body.date),
+        recurringEndDate: req.body.recurringEndDate ? new Date(req.body.recurringEndDate) : null,
+      });
+
+      const transaction = await storage.updateTransaction(transactionId, validatedData);
+      res.json(transaction);
+    } catch (error) {
+      console.error("Error updating transaction:", error);
+      res.status(400).json({ message: "Failed to update transaction" });
+    }
+  });
+
   app.delete('/api/transactions/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
