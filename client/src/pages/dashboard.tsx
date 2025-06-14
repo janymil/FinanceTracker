@@ -412,6 +412,7 @@ export default function Dashboard() {
         <FinancialCards
           summary={financialSummary}
           isLoading={summaryLoading}
+          budgetsData={budgets as any}
         />
 
         {/* Free User Content */}
