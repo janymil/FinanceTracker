@@ -17,6 +17,7 @@ import {
 } from "./openai";
 import { aiCache } from "./cache";
 import { batchProcessor } from "./batch-processor";
+import { adminAuth, adminLogin, adminLogout } from "./adminAuth";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -1914,8 +1915,12 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
     }
   };
 
-  // Get all users for admin panel (no auth required for development)
-  app.get('/api/admin/users', async (req: any, res) => {
+  // Admin authentication routes
+  app.post('/api/admin/login', adminLogin);
+  app.post('/api/admin/logout', adminLogout);
+
+  // Get all users for admin panel (requires admin authentication)
+  app.get('/api/admin/users', adminAuth, async (req: any, res) => {
     try {
       const users = await storage.getAllUsers();
       res.json(users);
@@ -1925,8 +1930,8 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
     }
   });
 
-  // Get admin statistics (no auth required for development)
-  app.get('/api/admin/stats', async (req: any, res) => {
+  // Get admin statistics (requires admin authentication)
+  app.get('/api/admin/stats', adminAuth, async (req: any, res) => {
     try {
       const stats = await storage.getAdminStats();
       res.json(stats);
@@ -1936,8 +1941,8 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
     }
   });
 
-  // Create new user (no auth required for development)
-  app.post('/api/admin/users', async (req: any, res) => {
+  // Create new user (requires admin authentication)
+  app.post('/api/admin/users', adminAuth, async (req: any, res) => {
     try {
       const { email, firstName, lastName, plan } = req.body;
       
@@ -1968,8 +1973,8 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
     }
   });
 
-  // Update user (no auth required for development)
-  app.put('/api/admin/users/:id', async (req: any, res) => {
+  // Update user (requires admin authentication)
+  app.put('/api/admin/users/:id', adminAuth, async (req: any, res) => {
     try {
       const userId = req.params.id;
       const { email, firstName, lastName, plan } = req.body;
