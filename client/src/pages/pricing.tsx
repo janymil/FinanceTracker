@@ -274,7 +274,7 @@ export default function Pricing() {
                   $49.90<span className="text-lg font-normal text-gray-500">/year</span>
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-300">
-                  $4.16/month • Save 20 months
+                  $4.16/month • Save 2 months
                 </div>
                 <CardDescription>For users serious about financial management</CardDescription>
               </CardHeader>
@@ -330,7 +330,7 @@ export default function Pricing() {
                   $99.90<span className="text-lg font-normal text-gray-500">/year</span>
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-300">
-                  $8.33/month • Save 20 months
+                  $8.33/month • Save 2 months
                 </div>
                 <CardDescription>Complete AI-powered financial automation</CardDescription>
               </CardHeader>
