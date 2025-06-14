@@ -1759,23 +1759,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { plan, session_id } = req.query;
       
       if (!session_id || !plan) {
-        return res.redirect('/pricing?error=invalid_params');
+        return res.redirect('/auth?error=invalid_params');
       }
 
       // Verify the session with Stripe
-      const session = await stripe.checkout.sessions.retrieve(session_id as string);
+      const session = await stripe!.checkout.sessions.retrieve(session_id as string);
       
-      if (session.payment_status !== 'paid') {
-        return res.redirect('/pricing?error=payment_not_completed');
+      // For free plans, we don't require payment completion
+      const planRequiresPayment = plan !== 'free';
+      if (planRequiresPayment && session.payment_status !== 'paid') {
+        return res.redirect('/auth?error=payment_not_completed');
       }
 
-      const userId = session.metadata?.userId;
-      if (!userId) {
-        return res.redirect('/pricing?error=user_not_found');
-      }
-
-      // Map plan names to database values
+      // Map plan names to database values  
       const planMapping = {
+        'free': 'free',
         'standard': 'standard',
         'standard-yearly': 'standard',
         'premium': 'premium',
@@ -1784,25 +1782,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const dbPlan = planMapping[plan as keyof typeof planMapping];
       if (!dbPlan) {
-        return res.redirect('/pricing?error=invalid_plan');
+        return res.redirect('/auth?error=invalid_plan');
       }
 
-      // Update user's plan in database
-      await storage.updateUserPlan(Number(userId), dbPlan);
-
-      // Also store Stripe customer ID for future subscription management
-      if (session.customer) {
-        await db.update(users)
-          .set({ stripeCustomerId: session.customer as string })
-          .where(eq(users.id, Number(userId)));
-      }
-
-      // Redirect to dashboard with success message
-      res.redirect('/dashboard?subscription=success');
+      // Store plan selection and redirect to signup/login page
+      // This creates a unified flow where users complete Stripe first, then create account
+      const planParam = encodeURIComponent(dbPlan);
+      const customerParam = session.customer ? `&customer=${session.customer}` : '';
+      const subscriptionParam = session.subscription ? `&subscription=${session.subscription}` : '';
+      
+      return res.redirect(`/auth?plan=${planParam}&success=true${customerParam}${subscriptionParam}`);
 
     } catch (error) {
       console.error('Error processing subscription success:', error);
-      res.redirect('/pricing?error=processing_failed');
+      return res.redirect('/auth?error=subscription_processing_failed');
     }
   });
 

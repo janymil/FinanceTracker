@@ -21,12 +21,23 @@ const registerSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
+  plan: z.string().optional(),
+  stripeCustomerId: z.string().optional(),
+  stripeSubscriptionId: z.string().optional(),
 });
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
   const { user, loginMutation, registerMutation } = useAuth();
-  const [activeTab, setActiveTab] = useState("login");
+  const [activeTab, setActiveTab] = useState("register");
+
+  // Extract URL parameters from Stripe redirect
+  const urlParams = new URLSearchParams(window.location.search);
+  const selectedPlan = urlParams.get('plan') || 'free';
+  const stripeSuccess = urlParams.get('success') === 'true';
+  const stripeCustomer = urlParams.get('customer');
+  const stripeSubscription = urlParams.get('subscription');
+  const error = urlParams.get('error');
 
   const loginForm = useForm({
     resolver: zodResolver(loginSchema),
@@ -43,6 +54,9 @@ export default function AuthPage() {
       password: "",
       firstName: "",
       lastName: "",
+      plan: selectedPlan,
+      stripeCustomerId: stripeCustomer || "",
+      stripeSubscriptionId: stripeSubscription || "",
     },
   });
 
@@ -61,7 +75,14 @@ export default function AuthPage() {
   };
 
   const onRegister = (data: z.infer<typeof registerSchema>) => {
-    registerMutation.mutate(data, {
+    const registrationData = {
+      ...data,
+      plan: selectedPlan,
+      stripeCustomerId: stripeCustomer,
+      stripeSubscriptionId: stripeSubscription,
+    };
+
+    registerMutation.mutate(registrationData, {
       onSuccess: () => {
         setLocation("/");
       },
@@ -119,10 +140,28 @@ export default function AuthPage() {
         <div className="w-full max-w-md mx-auto">
           <Card>
             <CardHeader className="text-center">
-              <CardTitle>Welcome to Financial Manager</CardTitle>
+              <CardTitle>Welcome to FinanzerPro</CardTitle>
               <CardDescription>
-                Create an account or sign in to get started
+                {stripeSuccess && selectedPlan ? (
+                  <>Complete your {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} plan setup</>
+                ) : error ? (
+                  <span className="text-red-600">
+                    {error === 'payment_not_completed' ? 'Payment was not completed' :
+                     error === 'invalid_plan' ? 'Invalid plan selected' :
+                     error === 'subscription_processing_failed' ? 'Subscription processing failed' :
+                     'There was an error processing your request'}
+                  </span>
+                ) : (
+                  'Create an account or sign in to get started'
+                )}
               </CardDescription>
+              {stripeSuccess && selectedPlan && (
+                <div className="mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                  <p className="text-sm text-green-700 dark:text-green-300">
+                    ✓ Subscription confirmed for {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} plan
+                  </p>
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               <Tabs value={activeTab} onValueChange={setActiveTab}>
