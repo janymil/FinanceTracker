@@ -40,6 +40,7 @@ export interface IStorage {
 
   // Category operations
   getCategories(): Promise<Category[]>;
+  createCategory(category: { name: string; icon: string; color: string; type: string }): Promise<Category>;
 
   // Expense reminder operations (Standard/Premium only)
   createExpenseReminder(reminder: InsertExpenseReminder): Promise<ExpenseReminder>;
@@ -181,6 +182,20 @@ export class DatabaseStorage implements IStorage {
   // Category operations
   async getCategories(): Promise<Category[]> {
     return await db.select().from(categories);
+  }
+
+  async createCategory(category: { name: string; icon: string; color: string; type: string }): Promise<Category> {
+    const [newCategory] = await db
+      .insert(categories)
+      .values({
+        name: category.name,
+        icon: category.icon,
+        color: category.color,
+        type: category.type as "income" | "expense",
+      })
+      .returning();
+    
+    return newCategory;
   }
 
   // Analytics

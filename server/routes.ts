@@ -137,6 +137,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/categories', isAuthenticated, async (req: any, res) => {
+    try {
+      const { name, icon, color, type } = req.body;
+      
+      if (!name || !icon || !color || !type) {
+        return res.status(400).json({ message: "Name, icon, color, and type are required" });
+      }
+
+      if (!['income', 'expense'].includes(type)) {
+        return res.status(400).json({ message: "Type must be 'income' or 'expense'" });
+      }
+
+      const category = await storage.createCategory({ name, icon, color, type });
+      res.json(category);
+    } catch (error) {
+      console.error("Error creating category:", error);
+      res.status(400).json({ message: "Failed to create category" });
+    }
+  });
+
   // Financial summary
   app.get('/api/financial-summary', isAuthenticated, async (req: any, res) => {
     try {
