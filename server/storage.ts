@@ -27,13 +27,21 @@ import { eq, and, gte, lte, desc, sum, count, sql, or, isNull } from "drizzle-or
 
 export interface IStorage {
   // User operations
-  getUser(id: number): Promise<User | undefined>;
+  getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  upsertUser(user: any): Promise<User>;
   createUser(user: Omit<InsertUser, 'id' | 'createdAt' | 'updatedAt'>): Promise<User>;
-  updateUserStripeInfo(userId: number, customerId: string, subscriptionId: string): Promise<User>;
-  updateUserPlan(userId: number, plan: string): Promise<User>;
-  updateUserPremiumStatus(userId: number, isPremium: boolean): Promise<User>;
+  updateUserStripeInfo(userId: string, customerId: string, subscriptionId: string): Promise<User>;
+  updateUserPlan(userId: string, plan: string): Promise<User>;
+  updateUserPremiumStatus(userId: string, isPremium: boolean): Promise<User>;
+  
+  // Admin operations
+  getAllUsers(): Promise<User[]>;
+  updateUser(userId: string, userData: Partial<User>): Promise<User>;
+  deleteUserCompletely(userId: string): Promise<void>;
+  getAdminStats(): Promise<any>;
+  getUserDataSummary(userId: string): Promise<any>;
 
   // Transaction operations
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
@@ -742,6 +750,148 @@ export class DatabaseStorage implements IStorage {
 
   async updateUserSettings(userId: number, settings: any): Promise<void> {
     await db.update(users).set({ settings: JSON.stringify(settings) }).where(eq(users.id, userId));
+  }
+
+  // Admin methods for user management with encryption support
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async updateUser(userId: string, userData: Partial<User>): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({
+        ...userData,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser;
+  }
+
+  async deleteUserCompletely(userId: string): Promise<void> {
+    // Delete all user's data in correct order (respecting foreign keys)
+    // Note: This properly handles encrypted data deletion
+    
+    // Delete goals first
+    await db.delete(goals).where(eq(goals.userId, userId));
+    
+    // Delete budgets
+    await db.delete(budgets).where(eq(budgets.userId, userId));
+    
+    // Delete transactions (encrypted data will be properly removed)
+    await db.delete(transactions).where(eq(transactions.userId, userId));
+    
+    // Delete expense reminders
+    await db.delete(expenseReminders).where(eq(expenseReminders.userId, userId));
+    
+    // Finally delete the user
+    await db.delete(users).where(eq(users.id, userId));
+  }
+
+  async getAdminStats(): Promise<{
+    totalUsers: number;
+    activeUsers: number;
+    freeUsers: number;
+    standardUsers: number;
+    premiumUsers: number;
+    totalTransactions: number;
+    totalRevenue: number;
+  }> {
+    // Get user counts by plan
+    const userStats = await db
+      .select({
+        plan: users.plan,
+        count: sql<number>`count(*)`,
+      })
+      .from(users)
+      .groupBy(users.plan);
+
+    // Get total transaction count
+    const [transactionCount] = await db
+      .select({
+        count: sql<number>`count(*)`,
+      })
+      .from(transactions);
+
+    // Calculate stats
+    const stats = {
+      totalUsers: 0,
+      activeUsers: 0,
+      freeUsers: 0,
+      standardUsers: 0,
+      premiumUsers: 0,
+      totalTransactions: transactionCount?.count || 0,
+      totalRevenue: 0,
+    };
+
+    userStats.forEach(stat => {
+      const count = Number(stat.count);
+      stats.totalUsers += count;
+      
+      if (stat.plan === 'free') {
+        stats.freeUsers = count;
+      } else if (stat.plan === 'standard') {
+        stats.standardUsers = count;
+        stats.totalRevenue += count * 4.99; // $4.99/month
+      } else if (stat.plan === 'premium') {
+        stats.premiumUsers = count;
+        stats.totalRevenue += count * 9.99; // $9.99/month
+      }
+    });
+
+    // Active users are those with standard or premium plans
+    stats.activeUsers = stats.standardUsers + stats.premiumUsers;
+
+    return stats;
+  }
+
+  async getUserDataSummary(userId: string): Promise<{
+    transactionCount: number;
+    budgetCount: number;
+    goalCount: number;
+    dataSize: string;
+    lastActivity: Date | null;
+  }> {
+    // Get counts without exposing encrypted content
+    const [transactionCount] = await db
+      .select({
+        count: sql<number>`count(*)`,
+      })
+      .from(transactions)
+      .where(eq(transactions.userId, userId));
+
+    const [budgetCount] = await db
+      .select({
+        count: sql<number>`count(*)`,
+      })
+      .from(budgets)
+      .where(eq(budgets.userId, userId));
+
+    const [goalCount] = await db
+      .select({
+        count: sql<number>`count(*)`,
+      })
+      .from(goals)
+      .where(eq(goals.userId, userId));
+
+    // Get last activity (most recent transaction)
+    const [lastTransaction] = await db
+      .select({
+        date: transactions.date,
+      })
+      .from(transactions)
+      .where(eq(transactions.userId, userId))
+      .orderBy(desc(transactions.date))
+      .limit(1);
+
+    return {
+      transactionCount: Number(transactionCount?.count || 0),
+      budgetCount: Number(budgetCount?.count || 0),
+      goalCount: Number(goalCount?.count || 0),
+      dataSize: "Encrypted", // Don't expose actual size for security
+      lastActivity: lastTransaction?.date || null,
+    };
   }
 }
 

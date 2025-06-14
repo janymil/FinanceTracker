@@ -1892,6 +1892,135 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
     res.status(500).json({ message: "Something went wrong!" });
   });
 
+  // Admin routes - secure admin panel for user management
+  const isAdmin = async (req: any, res: any, next: any) => {
+    try {
+      if (!req.user?.claims?.sub) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      // Check if user is admin (you can customize this logic)
+      const adminEmails = ['jan.milata@gmail.com', 'admin@finanzerpro.com']; // Add your admin emails
+      if (!user?.email || !adminEmails.includes(user.email)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      next();
+    } catch (error) {
+      res.status(500).json({ message: "Admin authorization failed" });
+    }
+  };
+
+  // Get all users for admin panel
+  app.get('/api/admin/users', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Get admin statistics
+  app.get('/api/admin/stats', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const stats = await storage.getAdminStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      res.status(500).json({ message: "Failed to fetch stats" });
+    }
+  });
+
+  // Create new user (admin only)
+  app.post('/api/admin/users', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { email, firstName, lastName, plan } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      // Generate a unique ID for the new user
+      const userId = `admin_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const userData = {
+        id: userId,
+        email,
+        firstName: firstName || null,
+        lastName: lastName || null,
+        plan: plan || 'free',
+        profileImageUrl: null,
+        stripeCustomerId: null,
+        stripeSubscriptionId: null,
+        settings: null
+      };
+
+      const newUser = await storage.upsertUser(userData);
+      res.json(newUser);
+    } catch (error) {
+      console.error("Error creating user:", error);
+      res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
+  // Update user (admin only)
+  app.put('/api/admin/users/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const userId = req.params.id;
+      const { email, firstName, lastName, plan } = req.body;
+
+      const userData = {
+        id: userId,
+        email,
+        firstName,
+        lastName,
+        plan,
+        updatedAt: new Date()
+      };
+
+      const updatedUser = await storage.updateUser(userId, userData);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  // Delete user and all their encrypted data (admin only)
+  app.delete('/api/admin/users/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const userId = req.params.id;
+
+      // Delete all user data (this will handle encrypted data properly)
+      await storage.deleteUserCompletely(userId);
+
+      res.json({ success: true, message: "User and all data deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
+  // Get user's encrypted data summary (admin only - for audit purposes)
+  app.get('/api/admin/users/:id/data', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const userId = req.params.id;
+      
+      // Get data counts without exposing actual encrypted content
+      const dataSummary = await storage.getUserDataSummary(userId);
+      
+      res.json(dataSummary);
+    } catch (error) {
+      console.error("Error fetching user data summary:", error);
+      res.status(500).json({ message: "Failed to fetch user data summary" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
