@@ -121,6 +121,13 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
       requiredPlan: "premium" as const,
       badge: "Premium" as const,
     },
+    {
+      title: "Help & Documentation",
+      icon: HelpCircle,
+      href: "/help",
+      requiredPlan: "free",
+      badge: null,
+    },
   ];
 
   const isActive = (href: string) => {
