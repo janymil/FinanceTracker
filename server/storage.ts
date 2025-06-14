@@ -205,7 +205,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserBudgets(userId: number): Promise<Budget[]> {
-    return await db
+    const budgetData = await db
       .select({
         id: budgets.id,
         userId: budgets.userId,
@@ -223,6 +223,41 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(categories, eq(budgets.categoryId, categories.id))
       .where(eq(budgets.userId, userId))
       .orderBy(desc(budgets.createdAt));
+
+    // Calculate actual spending for each budget
+    const budgetsWithSpending = await Promise.all(
+      budgetData.map(async (budget) => {
+        // Calculate total spending for this category within the budget period
+        const spendingResult = await db
+          .select({
+            totalSpent: sql`COALESCE(SUM(ABS(CAST(${transactions.amount} AS DECIMAL))), 0)`
+          })
+          .from(transactions)
+          .where(
+            and(
+              eq(transactions.userId, userId),
+              eq(transactions.categoryId, budget.categoryId),
+              eq(transactions.type, 'expense'),
+              gte(transactions.date, budget.startDate),
+              lte(transactions.date, budget.endDate)
+            )
+          );
+
+        const totalSpent = Number(spendingResult[0]?.totalSpent || 0);
+        const budgetAmount = parseFloat(budget.amount);
+        const remaining = budgetAmount - totalSpent;
+        const percentage = budgetAmount > 0 ? (totalSpent / budgetAmount) * 100 : 0;
+
+        return {
+          ...budget,
+          spent: totalSpent,
+          remaining: remaining,
+          percentage: percentage
+        };
+      })
+    );
+
+    return budgetsWithSpending;
   }
 
   async updateBudget(id: number, budget: Partial<InsertBudget>): Promise<Budget> {

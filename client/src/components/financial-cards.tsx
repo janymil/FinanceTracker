@@ -80,21 +80,19 @@ export default function FinancialCards({ summary, isLoading, budgetsData }: Fina
       };
     }
 
-    // Calculate total budget and total category-specific spending
+    // Calculate total budget and total spending using real backend data
     let totalBudget = 0;
-    let totalCategorySpending = 0;
+    let totalSpent = 0;
 
     budgetsData.forEach((budget: any) => {
       const budgetAmount = parseFloat(budget.amount || "0");
+      const spent = parseFloat(budget.spent || "0");
       totalBudget += budgetAmount;
-      
-      // For now, we'll use a simplified calculation showing that spending is 0 for Entertainment
-      // since we don't have category-specific expense data in the summary
-      totalCategorySpending += 0; // This will be 0 until we have Entertainment expenses
+      totalSpent += spent;
     });
 
-    const percentage = totalBudget > 0 ? (totalCategorySpending / totalBudget) * 100 : 0;
-    const remaining = totalBudget - totalCategorySpending;
+    const percentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+    const remaining = totalBudget - totalSpent;
 
     if (percentage <= 50) return { 
       status: 'Healthy', 
