@@ -170,6 +170,8 @@ Changelog:
 - June 14, 2025. Created comprehensive subscription flow with pricing page, subscribe page, and payment processing endpoints
 - June 14, 2025. Integrated payment system with existing RequirePlan component architecture for seamless tier access control
 - June 14, 2025. Added subscription success notifications and plan update functionality that works with current user authentication system
+- June 14, 2025. Removed all unauthorized 7-day free trial references and ensured yearly subscription functionality works properly
+- June 14, 2025. Fixed subscription system to handle both monthly and yearly billing cycles through Stripe integration
 ```
 
 ## User Preferences

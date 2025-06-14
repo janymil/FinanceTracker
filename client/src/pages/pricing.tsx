@@ -146,9 +146,8 @@ export default function Pricing() {
                   onClick={() => handleGetStarted('standard')} 
                   className="w-full mt-6 bg-blue-600 hover:bg-blue-700"
                 >
-                  Start 7-Day Free Trial
+                  Subscribe Now
                 </Button>
-                <p className="text-xs text-gray-500 text-center">No credit card required</p>
               </CardContent>
             </Card>
 
@@ -204,9 +203,8 @@ export default function Pricing() {
                   className="w-full mt-6 bg-premium hover:bg-premium/90"
                 >
                   <Crown className="h-4 w-4 mr-2" />
-                  Start Premium Trial
+                  Subscribe Now
                 </Button>
-                <p className="text-xs text-gray-500 text-center">7-day free trial included</p>
               </CardContent>
             </Card>
               </div>
@@ -311,9 +309,8 @@ export default function Pricing() {
                   onClick={() => handleGetStarted('standard-yearly')} 
                   className="w-full mt-6 bg-blue-600 hover:bg-blue-700"
                 >
-                  Start 7-Day Free Trial
+                  Subscribe Now
                 </Button>
-                <p className="text-xs text-gray-500 text-center">No credit card required</p>
               </CardContent>
             </Card>
 
@@ -377,9 +374,8 @@ export default function Pricing() {
                   className="w-full mt-6 bg-premium hover:bg-premium/90"
                 >
                   <Crown className="h-4 w-4 mr-2" />
-                  Start Premium Trial
+                  Subscribe Now
                 </Button>
-                <p className="text-xs text-gray-500 text-center">7-day free trial included</p>
               </CardContent>
             </Card>
               </div>
