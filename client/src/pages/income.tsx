@@ -26,6 +26,7 @@ import RequirePlan from "@/components/require-plan";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import MonthFilter from "@/components/month-filter";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 interface Transaction {
@@ -55,6 +56,7 @@ export default function Income() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   
   const [newIncome, setNewIncome] = useState({
     amount: "",
@@ -171,6 +173,15 @@ export default function Income() {
                          transaction.categoryName?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCategory = filterCategory === "all" || transaction.categoryName === filterCategory;
+    
+    // Month filter takes precedence over date range
+    if (selectedMonth) {
+      const transactionDate = new Date(transaction.date);
+      const [year, month] = selectedMonth.split('-');
+      const monthMatches = transactionDate.getFullYear() === parseInt(year) && 
+                          transactionDate.getMonth() === parseInt(month) - 1;
+      return matchesSearch && matchesCategory && monthMatches;
+    }
     
     let matchesDate = true;
     if (dateRange !== "all") {

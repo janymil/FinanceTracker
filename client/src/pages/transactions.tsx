@@ -29,6 +29,7 @@ import RequirePlan from "@/components/require-plan";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import MonthFilter from "@/components/month-filter";
+import { format } from "date-fns";
 
 interface Transaction {
   id: number;
@@ -81,43 +82,7 @@ export default function Transactions() {
     enabled: !!user,
   });
 
-  // Generate month navigation data (last 12 months including current)
-  const generateMonthData = () => {
-    const months = [];
-    const today = new Date();
-    
-    // Start from current month and go back 11 months (total 12 months)
-    for (let i = 0; i < 12; i++) {
-      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      months.push({
-        key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
-        label: format(date, "MMM yyyy"),
-        month: date.getMonth(),
-        year: date.getFullYear(),
-      });
-    }
-    return months.reverse(); // Reverse to show oldest to newest
-  };
 
-  const monthData = generateMonthData();
-  const visibleMonths = monthData.slice(monthOffset, monthOffset + 4);
-
-  const handleMonthSelect = (monthKey: string) => {
-    setSelectedMonth(monthKey === selectedMonth ? null : monthKey);
-    setDateRange("all"); // Reset date range when using month filter
-  };
-
-  const handlePrevMonths = () => {
-    if (monthOffset > 0) {
-      setMonthOffset(monthOffset - 1);
-    }
-  };
-
-  const handleNextMonths = () => {
-    if (monthOffset < monthData.length - 4) {
-      setMonthOffset(monthOffset + 1);
-    }
-  };
 
   const createTransactionMutation = useMutation({
     mutationFn: async (transactionData: typeof newTransaction) => {
@@ -568,66 +533,11 @@ export default function Transactions() {
         </div>
 
         {/* Month Navigation Filter */}
-        <Card className="mb-4">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by Month</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handlePrevMonths}
-                  disabled={monthOffset === 0}
-                  className="h-8 w-8 p-0"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                
-                <div className="flex gap-1">
-                  {visibleMonths.map((month) => (
-                    <Button
-                      key={month.key}
-                      variant={selectedMonth === month.key ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handleMonthSelect(month.key)}
-                      className="h-8 px-3 text-xs"
-                    >
-                      {month.label}
-                    </Button>
-                  ))}
-                </div>
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleNextMonths}
-                  disabled={monthOffset >= monthData.length - 4}
-                  className="h-8 w-8 p-0"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            {selectedMonth && (
-              <div className="mt-2 flex items-center gap-2">
-                <Badge variant="secondary" className="text-xs">
-                  Filtering by: {visibleMonths.find(m => m.key === selectedMonth)?.label || selectedMonth}
-                </Badge>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedMonth(null)}
-                  className="h-6 px-2 text-xs"
-                >
-                  Clear
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <MonthFilter 
+          selectedMonth={selectedMonth}
+          onMonthSelect={setSelectedMonth}
+          onDateRangeReset={() => setDateRange("all")}
+        />
 
         {/* Filters and Search */}
         <Card className="mb-6">
