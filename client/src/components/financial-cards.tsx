@@ -16,9 +16,10 @@ interface FinancialCardsProps {
   summary?: FinancialSummary;
   isLoading: boolean;
   budgetsData?: any[];
+  selectedMonth?: string;
 }
 
-export default function FinancialCards({ summary, isLoading, budgetsData }: FinancialCardsProps) {
+export default function FinancialCards({ summary, isLoading, budgetsData, selectedMonth }: FinancialCardsProps) {
   const [animatedValues, setAnimatedValues] = useState({
     income: 0,
     expenses: 0,
@@ -69,8 +70,24 @@ export default function FinancialCards({ summary, isLoading, budgetsData }: Fina
   const getBudgetStatus = () => {
     if (!summary || !budgetsData) return { status: 'Loading...', percentage: 0, remaining: 0, bgColor: 'bg-gray-50', textColor: 'text-gray-600' };
 
-    // If no budgets set, show "No Budget Set" status
-    if (!budgetsData || budgetsData.length === 0) {
+    // Filter budgets for the current selected month period
+    const currentMonthBudgets = budgetsData.filter((budget: any) => {
+      if (!selectedMonth) return true; // If no month selected, show all budgets
+      
+      const [year, month] = selectedMonth.split('-');
+      const selectedDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const budgetStart = new Date(budget.startDate);
+      const budgetEnd = new Date(budget.endDate);
+      
+      // Check if the selected month falls within the budget period
+      const monthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      const monthEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
+      
+      return budgetStart <= monthEnd && budgetEnd >= monthStart;
+    });
+
+    // If no budgets active for this period, show "No Budget Set" status
+    if (!currentMonthBudgets || currentMonthBudgets.length === 0) {
       return {
         status: 'No Budget Set',
         percentage: 0,
@@ -80,11 +97,11 @@ export default function FinancialCards({ summary, isLoading, budgetsData }: Fina
       };
     }
 
-    // Calculate total budget and total spending using real backend data
+    // Calculate total budget and total spending using real backend data for active budgets
     let totalBudget = 0;
     let totalSpent = 0;
 
-    budgetsData.forEach((budget: any) => {
+    currentMonthBudgets.forEach((budget: any) => {
       const budgetAmount = parseFloat(budget.amount || "0");
       const spent = parseFloat(budget.spent || "0");
       totalBudget += budgetAmount;

@@ -413,6 +413,7 @@ export default function Dashboard() {
           summary={financialSummary}
           isLoading={summaryLoading}
           budgetsData={budgets as any}
+          selectedMonth={selectedMonth}
         />
 
         {/* Free User Content */}
