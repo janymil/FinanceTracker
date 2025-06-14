@@ -110,7 +110,8 @@ export default function ExportPage() {
 
   const [backupSettings, setBackupSettings] = useState({
     autoBackup: true,
-    frequency: 'weekly' as const,
+    frequency: 'daily' as const,
+    retentionDays: 7,
     includeAttachments: true,
     encryptBackups: true,
   });
@@ -402,15 +403,14 @@ export default function ExportPage() {
     exportMutation.mutate(exportOptions);
   };
 
-  // Backup mutation
+  // Manual backup mutation
   const backupMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch("/api/backup", {
+      const response = await fetch("/api/manual-backup", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(backupSettings),
       });
 
       if (!response.ok) {
@@ -424,11 +424,45 @@ export default function ExportPage() {
         title: "Backup Successful",
         description: "Your data has been backed up to the cloud.",
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/backup-status"] });
     },
     onError: (error) => {
       toast({
         title: "Backup Failed",
         description: "Failed to backup data. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Backup settings mutation
+  const backupSettingsMutation = useMutation({
+    mutationFn: async (settings: typeof backupSettings) => {
+      const response = await fetch("/api/backup-settings", {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settings),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save backup settings');
+      }
+
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Settings Saved",
+        description: "Backup settings have been updated successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/backup-status"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Save Failed",
+        description: "Failed to save backup settings. Please try again.",
         variant: "destructive",
       });
     },
@@ -1209,11 +1243,18 @@ export default function ExportPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="frequency">Backup Frequency</Label>
+                    <Label htmlFor="frequency">Backup Schedule</Label>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      Automatic daily backups at 2:00 AM
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="retention">Data Retention Period</Label>
                     <Select
-                      value={backupSettings.frequency}
-                      onValueChange={(value: any) =>
-                        setBackupSettings({ ...backupSettings, frequency: value })
+                      value={backupSettings.retentionDays?.toString() || "7"}
+                      onValueChange={(value: string) =>
+                        setBackupSettings({ ...backupSettings, retentionDays: parseInt(value) })
                       }
                       disabled={!backupSettings.autoBackup}
                     >
@@ -1221,11 +1262,14 @@ export default function ExportPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="7">7 days</SelectItem>
+                        <SelectItem value="14">14 days</SelectItem>
+                        <SelectItem value="30">30 days</SelectItem>
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      Older backups will be automatically deleted
+                    </p>
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -1245,6 +1289,25 @@ export default function ExportPage() {
                       }
                     />
                   </div>
+                  
+                  <Button 
+                    onClick={() => backupSettingsMutation.mutate(backupSettings)}
+                    disabled={backupSettingsMutation.isPending}
+                    variant="default"
+                    className="w-full"
+                  >
+                    {backupSettingsMutation.isPending ? (
+                      <>
+                        <Upload className="h-4 w-4 mr-2 animate-spin" />
+                        Saving Settings...
+                      </>
+                    ) : (
+                      <>
+                        <Settings className="h-4 w-4 mr-2" />
+                        Save Settings
+                      </>
+                    )}
+                  </Button>
                 </div>
 
                 <Separator />
