@@ -64,6 +64,8 @@ export default function Expenses() {
     isRecurring: false,
     recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
     recurringEndDate: "",
+    paymentUrl: "",
+    referenceNote: "",
   });
 
   const { data: transactions = [], isLoading } = useQuery({
