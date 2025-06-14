@@ -130,8 +130,27 @@ export class DatabaseStorage implements IStorage {
 
   async getUserTransactions(userId: number, limit?: number): Promise<Transaction[]> {
     let query = db
-      .select()
+      .select({
+        id: transactions.id,
+        userId: transactions.userId,
+        categoryId: transactions.categoryId,
+        amount: transactions.amount,
+        description: transactions.description,
+        date: transactions.date,
+        type: transactions.type,
+        createdAt: transactions.createdAt,
+        isRecurring: transactions.isRecurring,
+        recurringFrequency: transactions.recurringFrequency,
+        recurringEndDate: transactions.recurringEndDate,
+        parentTransactionId: transactions.parentTransactionId,
+        paymentUrl: transactions.paymentUrl,
+        referenceNote: transactions.referenceNote,
+        categoryName: categories.name,
+        categoryIcon: categories.icon,
+        categoryColor: categories.color,
+      })
       .from(transactions)
+      .leftJoin(categories, eq(transactions.categoryId, categories.id))
       .where(eq(transactions.userId, userId))
       .orderBy(desc(transactions.date));
 
