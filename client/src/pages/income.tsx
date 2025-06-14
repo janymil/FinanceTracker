@@ -239,10 +239,12 @@ export default function Income() {
     setEditingTransaction(transaction);
     // Find the category ID for this transaction
     const category = categories.find((cat: Category) => cat.name === transaction.categoryName);
+    // Convert date to proper format for date input (YYYY-MM-DD)
+    const formattedDate = new Date(transaction.date).toISOString().split('T')[0];
     setNewIncome({
       amount: transaction.amount,
       description: transaction.description,
-      date: transaction.date,
+      date: formattedDate,
       categoryId: category ? category.id.toString() : "",
       isRecurring: false,
       recurringFrequency: "monthly",
