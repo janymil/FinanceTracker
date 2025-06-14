@@ -136,6 +136,11 @@ Changelog:
 - June 13, 2025. Moved cloud backup functionality from dashboard to dedicated Export Data page for premium users
 - June 13, 2025. Combined data export and cloud backup features in unified Export Data page with advanced functionality
 - June 13, 2025. Removed duplicate export tab from reports page to eliminate redundant functionality
+- June 14, 2025. Implemented comprehensive data import functionality for premium users with support for CSV, Excel, JSON formats
+- June 14, 2025. Added support for importing from popular financial apps (Mint, QuickBooks, YNAB, Personal Capital, Bank exports)
+- June 14, 2025. Renamed sidebar menu item from "Export Data" to "Data Management" to reflect import/export/backup capabilities
+- June 14, 2025. Created multi-step import wizard with file upload, column mapping, preview, and batch processing
+- June 14, 2025. Added comprehensive data validation, error handling, and progress tracking for import operations
 ```
 
 ## User Preferences
