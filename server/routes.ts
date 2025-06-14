@@ -1528,13 +1528,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { plan } = req.body;
+      const user = await db.select().from(users).where(eq(users.id, req.session.userId)).limit(1);
       
-      // Simple plan mapping for Stripe
+      if (!user.length) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Plan pricing in cents (Stripe uses cents)
       const planPrices = {
-        'standard': { priceId: 'price_standard_monthly', amount: 499 },
-        'standard-yearly': { priceId: 'price_standard_yearly', amount: 4990 },
-        'premium': { priceId: 'price_premium_monthly', amount: 999 },
-        'premium-yearly': { priceId: 'price_premium_yearly', amount: 9990 }
+        'standard': { 
+          priceData: {
+            currency: 'usd',
+            product_data: { name: 'FinanzerPro Standard' },
+            unit_amount: 499, // $4.99
+            recurring: { interval: 'month' as const }
+          }
+        },
+        'standard-yearly': { 
+          priceData: {
+            currency: 'usd',
+            product_data: { name: 'FinanzerPro Standard (Yearly)' },
+            unit_amount: 4990, // $49.90
+            recurring: { interval: 'year' as const }
+          }
+        },
+        'premium': { 
+          priceData: {
+            currency: 'usd',
+            product_data: { name: 'FinanzerPro Premium' },
+            unit_amount: 999, // $9.99
+            recurring: { interval: 'month' as const }
+          }
+        },
+        'premium-yearly': { 
+          priceData: {
+            currency: 'usd',
+            product_data: { name: 'FinanzerPro Premium (Yearly)' },
+            unit_amount: 9990, // $99.90
+            recurring: { interval: 'year' as const }
+          }
+        }
       };
 
       const selectedPlan = planPrices[plan as keyof typeof planPrices];
@@ -1542,13 +1575,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid plan selected" });
       }
 
-      // For demo purposes, return a success URL that updates the user's plan
-      const successUrl = `${req.headers.origin}/api/subscription-success?plan=${plan}&userId=${req.session.userId}`;
+      const successUrl = `${req.headers.origin}/api/subscription-success?plan=${plan}&session_id={CHECKOUT_SESSION_ID}`;
       const cancelUrl = `${req.headers.origin}/pricing`;
 
-      // In a real implementation, you would create a Stripe checkout session here
-      // For now, we'll redirect directly to success to simulate payment
-      res.json({ url: successUrl });
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [{
+          price_data: selectedPlan.priceData,
+          quantity: 1,
+        }],
+        mode: 'subscription',
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        customer_email: user[0].email,
+        metadata: {
+          userId: req.session.userId.toString(),
+          plan: plan
+        }
+      });
+
+      res.json({ url: session.url });
 
     } catch (error) {
       console.error('Error creating checkout session:', error);
@@ -1558,10 +1604,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/subscription-success", async (req: Request, res: Response) => {
     try {
-      const { plan, userId } = req.query;
+      const { plan, session_id } = req.query;
       
-      if (!userId || !plan) {
+      if (!session_id || !plan) {
         return res.redirect('/pricing?error=invalid_params');
+      }
+
+      // Verify the session with Stripe
+      const session = await stripe.checkout.sessions.retrieve(session_id as string);
+      
+      if (session.payment_status !== 'paid') {
+        return res.redirect('/pricing?error=payment_not_completed');
+      }
+
+      const userId = session.metadata?.userId;
+      if (!userId) {
+        return res.redirect('/pricing?error=user_not_found');
       }
 
       // Map plan names to database values
@@ -1579,6 +1637,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Update user's plan in database
       await storage.updateUserPlan(Number(userId), dbPlan);
+
+      // Also store Stripe customer ID for future subscription management
+      if (session.customer) {
+        await db.update(users)
+          .set({ stripeCustomerId: session.customer as string })
+          .where(eq(users.id, Number(userId)));
+      }
 
       // Redirect to dashboard with success message
       res.redirect('/dashboard?subscription=success');
