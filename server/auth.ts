@@ -123,7 +123,6 @@ export function setupAuth(app: Express) {
       email: user.email, 
       firstName: user.firstName, 
       lastName: user.lastName, 
-      isPremium: user.isPremium,
       plan: user.plan
     });
   });
@@ -144,7 +143,6 @@ export function setupAuth(app: Express) {
       email: user.email, 
       firstName: user.firstName, 
       lastName: user.lastName, 
-      isPremium: user.isPremium,
       plan: user.plan
     });
   });
