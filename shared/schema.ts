@@ -109,6 +109,9 @@ export const expenseReminders = pgTable("expense_reminders", {
   isActive: boolean("is_active").default(true),
   isCompleted: boolean("is_completed").default(false),
   lastReminded: timestamp("last_reminded"),
+  // Smart Bill Assistant fields
+  paymentUrl: text("payment_url"), // URL where user can pay the bill
+  referenceNote: text("reference_note"), // Account number or other reference info
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
