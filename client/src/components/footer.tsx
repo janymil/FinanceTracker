@@ -7,13 +7,17 @@ interface FooterProps {
 }
 
 export function Footer({ sidebarCollapsed = false }: FooterProps) {
+  const handleLinkClick = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <footer className={cn(
       "bg-background border-t transition-all duration-300",
       sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
     )}>
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">FinanzerPro</h3>
@@ -33,23 +37,8 @@ export function Footer({ sidebarCollapsed = false }: FooterProps) {
             <h4 className="font-semibold">Product</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/pricing" onClick={handleLinkClick} className="text-muted-foreground hover:text-foreground transition-colors">
                   Pricing
-                </Link>
-              </li>
-              <li>
-                <Link href="/features" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Features
-                </Link>
-              </li>
-              <li>
-                <Link href="/security" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Security
-                </Link>
-              </li>
-              <li>
-                <Link href="/integrations" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Integrations
                 </Link>
               </li>
             </ul>
@@ -60,50 +49,13 @@ export function Footer({ sidebarCollapsed = false }: FooterProps) {
             <h4 className="font-semibold">Support</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/contact" onClick={handleLinkClick} className="text-muted-foreground hover:text-foreground transition-colors">
                   Contact Us
                 </Link>
               </li>
               <li>
-                <Link href="/help" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/help" onClick={handleLinkClick} className="text-muted-foreground hover:text-foreground transition-colors">
                   Help Center
-                </Link>
-              </li>
-              <li>
-                <Link href="/help" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Documentation
-                </Link>
-              </li>
-              <li>
-                <Link href="/status" className="text-muted-foreground hover:text-foreground transition-colors">
-                  System Status
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div className="space-y-4">
-            <h4 className="font-semibold">Legal</h4>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/privacy-policy" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms-of-service" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link href="/cookie-policy" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Cookie Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/data-processing" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Data Processing
                 </Link>
               </li>
             </ul>
@@ -114,19 +66,19 @@ export function Footer({ sidebarCollapsed = false }: FooterProps) {
         
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="text-sm text-muted-foreground">
-            © 2025 FinanceFlow. All rights reserved.
+            © 2025 FinanzerPro. All rights reserved.
           </div>
           <div className="flex items-center space-x-6 text-sm">
-            <Link href="/privacy-policy" className="text-muted-foreground hover:text-foreground transition-colors">
-              Privacy
+            <Link href="/privacy-policy" onClick={handleLinkClick} className="text-muted-foreground hover:text-foreground transition-colors">
+              Privacy Policy
             </Link>
-            <Link href="/terms-of-service" className="text-muted-foreground hover:text-foreground transition-colors">
-              Terms
+            <Link href="/terms-of-service" onClick={handleLinkClick} className="text-muted-foreground hover:text-foreground transition-colors">
+              Terms of Service
             </Link>
-            <Link href="/cookie-policy" className="text-muted-foreground hover:text-foreground transition-colors">
-              Cookies
+            <Link href="/cookie-policy" onClick={handleLinkClick} className="text-muted-foreground hover:text-foreground transition-colors">
+              Cookie Policy
             </Link>
-            <Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/contact" onClick={handleLinkClick} className="text-muted-foreground hover:text-foreground transition-colors">
               Contact
             </Link>
           </div>
