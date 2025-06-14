@@ -76,7 +76,7 @@ interface HeaderProps {
 }
 
 export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
-  const { user, logoutMutation } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
