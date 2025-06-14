@@ -12,6 +12,11 @@ export function scheduleBatchProcessing(userId: number) {
   batchQueue.add(userId);
 }
 
+// Export batch processor interface
+export const batchProcessor = {
+  scheduleUser: scheduleBatchProcessing
+};
+
 // Process batched AI operations for users with new data
 async function processBatchedOperations() {
   if (batchQueue.size === 0) return;
