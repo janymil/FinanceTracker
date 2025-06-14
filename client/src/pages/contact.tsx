@@ -3,10 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, MapPin, Phone, Clock } from "lucide-react";
+import { Mail, MapPin, Phone, Clock, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
 
 export default function Contact() {
+  const { user } = useAuth();
+  const [, setLocation] = useLocation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
@@ -17,6 +21,10 @@ export default function Contact() {
   useEffect(() => {
     document.title = "Contact Us - FinanceFlow";
   }, []);
+
+  const handleLogin = () => {
+    setLocation('/auth');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +48,40 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      {/* Header for anonymous users */}
+      {!user && (
+        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center">
+                <TrendingUp className="h-8 w-8 text-primary mr-3" />
+                <span className="text-xl font-bold text-gray-900 dark:text-white">FinanzerPro</span>
+              </div>
+              <div className="flex items-center space-x-4">
+                <button 
+                  onClick={() => setLocation('/help')} 
+                  className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Help
+                </button>
+                <button 
+                  onClick={() => setLocation('/contact')} 
+                  className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Contact
+                </button>
+                <Button onClick={handleLogin} className="bg-primary hover:bg-primary/90">
+                  Sign In
+                </Button>
+              </div>
+            </div>
+          </div>
+        </header>
+      )}
+      
+      <div className="container mx-auto px-4 py-8 max-w-6xl"></div>
+    </div>
+  );
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
