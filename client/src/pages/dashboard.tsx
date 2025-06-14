@@ -54,6 +54,8 @@ export default function Dashboard() {
     isRecurring: false,
     recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
     recurringEndDate: "",
+    paymentUrl: "",
+    referenceNote: "",
   });
 
   // Get start and end dates for the selected month
@@ -110,6 +112,8 @@ export default function Dashboard() {
         isRecurring: false,
         recurringFrequency: "monthly",
         recurringEndDate: "",
+        paymentUrl: "",
+        referenceNote: "",
       });
       toast({
         title: "Transaction Added",
