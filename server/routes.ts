@@ -35,8 +35,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         recurringEndDate: req.body.recurringEndDate ? new Date(req.body.recurringEndDate) : null,
       });
 
+      // Save transaction to database immediately
       const transaction = await storage.createTransaction(validatedData);
+      
+      // Return response immediately to user
       res.json(transaction);
+      
+      // Handle any background processing asynchronously (no await)
+      setImmediate(async () => {
+        try {
+          // Any future AI categorization or other async processing can go here
+          // This runs after the response is sent, so it doesn't slow down the user
+          console.log('Background processing completed for transaction:', transaction.id);
+        } catch (error) {
+          console.error('Background processing error:', error);
+          // Don't affect the user experience even if background processing fails
+        }
+      });
+      
     } catch (error) {
       console.error("Error creating transaction:", error);
       res.status(400).json({ message: "Failed to create transaction" });
