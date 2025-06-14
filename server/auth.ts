@@ -83,7 +83,7 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      const { email, password, firstName, lastName } = req.body;
+      const { email, password, firstName, lastName, plan, stripeCustomerId, stripeSubscriptionId } = req.body;
       
       if (!email || !password) {
         return res.status(400).json({ message: "Email and password are required" });
@@ -100,12 +100,14 @@ export function setupAuth(app: Express) {
         password: await hashPassword(password),
         firstName: firstName ? DataEncryption.encrypt(firstName) : null,
         lastName: lastName ? DataEncryption.encrypt(lastName) : null,
-        plan: 'free',
+        plan: plan || 'free',
+        stripeCustomerId: stripeCustomerId || null,
+        stripeSubscriptionId: stripeSubscriptionId || null,
       });
 
       req.login(user, (err) => {
         if (err) return next(err);
-        res.status(201).json({ id: user.id, username: user.username, email: user.email, firstName: user.firstName, lastName: user.lastName, isPremium: user.isPremium, plan: user.plan });
+        res.status(201).json({ id: user.id, username: user.username, email: user.email, firstName: user.firstName, lastName: user.lastName, plan: user.plan });
       });
     } catch (error) {
       console.error("Registration error:", error);

@@ -21,15 +21,13 @@ export class DataEncryption {
     
     try {
       const iv = crypto.randomBytes(16);
-      const cipher = crypto.createCipherGCM(ALGORITHM, ENCRYPTION_KEY, iv);
+      const cipher = crypto.createCipher('aes-256-cbc', ENCRYPTION_KEY);
       
       let encrypted = cipher.update(text, 'utf8', 'hex');
       encrypted += cipher.final('hex');
       
-      const authTag = cipher.getAuthTag();
-      
-      // Combine iv, authTag, and encrypted data
-      return iv.toString('hex') + ':' + authTag.toString('hex') + ':' + encrypted;
+      // For simplicity, just return encrypted data with iv
+      return iv.toString('hex') + ':' + encrypted;
     } catch (error) {
       console.error('Encryption error:', error);
       return text; // Return original text if encryption fails
@@ -48,17 +46,15 @@ export class DataEncryption {
     
     try {
       const parts = encryptedData.split(':');
-      if (parts.length !== 3) {
+      if (parts.length !== 2) {
         // If format is incorrect, return as-is (legacy data)
         return encryptedData;
       }
       
       const iv = Buffer.from(parts[0], 'hex');
-      const authTag = Buffer.from(parts[1], 'hex');
-      const encrypted = parts[2];
+      const encrypted = parts[1];
       
-      const decipher = crypto.createDecipherGCM(ALGORITHM, ENCRYPTION_KEY, iv);
-      decipher.setAuthTag(authTag);
+      const decipher = crypto.createDecipher('aes-256-cbc', ENCRYPTION_KEY);
       
       let decrypted = decipher.update(encrypted, 'hex', 'utf8');
       decrypted += decipher.final('utf8');
