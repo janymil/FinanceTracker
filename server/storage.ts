@@ -112,7 +112,7 @@ export interface IStorage {
 
   // Profile Management
   updateUserProfile(userId: string, profileData: { firstName: string; lastName: string; email: string; phone?: string; website?: string }): Promise<void>;
-  updateUserPassword(userId: number, hashedPassword: string): Promise<void>;
+  updateUserPassword(userId: string, hashedPassword: string): Promise<void>;
   getUserSettings(userId: number): Promise<any>;
   updateUserSettings(userId: number, settings: any): Promise<void>;
 
