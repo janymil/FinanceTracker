@@ -197,6 +197,8 @@ Changelog:
 - June 15, 2025. Successfully migrated from Replit Auth to Clerk authentication as primary system
 - June 15, 2025. Completed backend integration with @clerk/express package and updated all user ID extraction methods
 - June 15, 2025. Removed all Replit Auth dependencies and endpoints, fixed constant /api/login request loops
+- June 15, 2025. Created modern, attractive sign-up and sign-in pages with two-column layouts, gradient themes, and professional branding
+- June 15, 2025. Enhanced user onboarding experience with feature highlights, benefit messaging, and responsive design for all devices
 - June 15, 2025. Fixed critical transaction editing bug where all fields were being overwritten instead of preserving existing data
 - June 15, 2025. Modified updateTransaction storage method to only update specific fields provided, preventing data loss during edits
 - June 15, 2025. Completely disabled encryption system to resolve database type mismatch issues with encrypted amount fields
