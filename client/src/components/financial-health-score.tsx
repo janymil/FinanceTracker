@@ -17,7 +17,7 @@ interface FinancialHealthProps {
 export default function FinancialHealthScore({ summary, budgets }: FinancialHealthProps) {
   const [useAIScore, setUseAIScore] = useState(false);
   const [aiScore, setAIScore] = useState<any>(null);
-  const { isLoading } = useAuth();
+  const { user, isLoading, error } = useAuth();
 
   // Fetch AI-powered financial health score
   const fetchAIScore = async () => {
