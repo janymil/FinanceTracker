@@ -1,0 +1,80 @@
+[vite] connecting...
+[vite] connected.
+Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+Warning: validateDOMNesting(...): <div> cannot appear as a descendant of &lt;p&gt;.
+    at div
+    at Skeleton (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/src/components/ui/skeleton.tsx:19:3)
+    at p
+    at div
+    at div
+    at div
+    at _c9 (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/src/components/ui/card.tsx:114:12)
+    at div
+    at _c (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/src/components/ui/card.tsx:20:11)
+    at div
+    at div
+    at https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=f00d9b60:42:13
+    at Presence (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-E4UC4BFD.js?v=f00d9b60:24:11)
+    at https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=f00d9b60:176:13
+    at _c5 (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/src/components/ui/tabs.tsx:72:12)
+    at div
+    at https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=f00d9b60:42:13
+    at Provider (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=f00d9b60:38:15)
+    at https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=f00d9b60:54:7
+    at div
+    at div
+    at Reports (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/src/pages/reports.tsx:36:20)
+    at Route (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=f00d9b60:191:16)
+    at Switch (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=f00d9b60:247:17)
+    at div
+    at main
+    at div
+    at div
+    at AppContent (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/src/App.tsx?v=SVDtf5_ui7B-fRjBIKpcs:78:50)
+    at QueryClientProvider (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=f00d9b60:2805:3)
+    at App
+    at SWRConfig (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@clerk_clerk-react.js?v=f00d9b60:1129:11)
+    at OrganizationProvider (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@clerk_clerk-react.js?v=f00d9b60:2107:3)
+    at ClerkContextProvider (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@clerk_clerk-react.js?v=f00d9b60:5678:11)
+    at ClerkProviderBase (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@clerk_clerk-react.js?v=f00d9b60:5762:11)
+    at Hoc (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@clerk_clerk-react.js?v=f00d9b60:3587:5)
+at div
+at Skeleton (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/src/components/ui/skeleton.tsx:19:3)
+at p
+at div
+at div
+at div
+at _c9 (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/src/components/ui/card.tsx:114:12)
+at div
+at _c (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/src/components/ui/card.tsx:20:11)
+at div
+at div
+at https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=f00d9b60:42:13
+at Presence (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-E4UC4BFD.js?v=f00d9b60:24:11)
+at https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=f00d9b60:176:13
+at _c5 (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/src/components/ui/tabs.tsx:72:12)
+at div
+at https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=f00d9b60:42:13
+at Provider (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=f00d9b60:38:15)
+at https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=f00d9b60:54:7
+at div
+at div
+at Reports (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/src/pages/reports.tsx:36:20)
+at Route (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=f00d9b60:191:16)
+at Switch (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=f00d9b60:247:17)
+at div
+at main
+at div
+at div
+at AppContent (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/src/App.tsx?v=SVDtf5_ui7B-fRjBIKpcs:78:50)
+at QueryClientProvider (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=f00d9b60:2805:3)
+at App
+at SWRConfig (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@clerk_clerk-react.js?v=f00d9b60:1129:11)
+at OrganizationProvider (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@clerk_clerk-react.js?v=f00d9b60:2107:3)
+at ClerkContextProvider (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@clerk_clerk-react.js?v=f00d9b60:5678:11)
+at ClerkProviderBase (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@clerk_clerk-react.js?v=f00d9b60:5762:11)
+at Hoc (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@clerk_clerk-react.js?v=f00d9b60:3587:5)
+at t.value (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400

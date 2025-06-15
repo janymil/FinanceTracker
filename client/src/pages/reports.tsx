@@ -300,13 +300,13 @@ export default function Reports() {
                           </p>
                         </div>
                       </div>
-                      <p className="text-xl font-bold text-green-700 dark:text-green-300">
+                      <div className="text-xl font-bold text-green-700 dark:text-green-300">
                         {summaryLoading ? (
                           <Skeleton className="h-6 w-16" />
                         ) : (
                           `$${financialSummary?.totalIncome?.toFixed(2) || '0.00'}`
                         )}
-                      </p>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
@@ -324,13 +324,13 @@ export default function Reports() {
                           </p>
                         </div>
                       </div>
-                      <p className="text-xl font-bold text-red-700 dark:text-red-300">
+                      <div className="text-xl font-bold text-red-700 dark:text-red-300">
                         {summaryLoading ? (
                           <Skeleton className="h-6 w-16" />
                         ) : (
                           `$${financialSummary?.totalExpenses?.toFixed(2) || '0.00'}`
                         )}
-                      </p>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
@@ -348,13 +348,13 @@ export default function Reports() {
                           </p>
                         </div>
                       </div>
-                      <p className="text-xl font-bold text-blue-700 dark:text-blue-300">
+                      <div className="text-xl font-bold text-blue-700 dark:text-blue-300">
                         {summaryLoading ? (
                           <Skeleton className="h-6 w-16" />
                         ) : (
                           `$${((financialSummary?.totalIncome || 0) - (financialSummary?.totalExpenses || 0)).toFixed(2)}`
                         )}
-                      </p>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
