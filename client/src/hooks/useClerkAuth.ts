@@ -1,4 +1,4 @@
-import { useUser, useAuth as useClerkAuth } from '@clerk/nextjs';
+import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-react';
 import { useQuery } from '@tanstack/react-query';
 
 export function useAuth() {

@@ -1,4 +1,4 @@
-import { ClerkProvider } from '@clerk/nextjs'
+import { ClerkProvider } from '@clerk/clerk-react'
 
 export const clerkConfig = {
   publishableKey: 'pk_test_dXNlZnVsLXJlZGZpc2gtMTUuY2xlcmsuYWNjb3VudHMuZGV2JA',
