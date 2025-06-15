@@ -166,6 +166,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const transactionId = parseInt(req.params.id);
       
+      console.log('=== TRANSACTION UPDATE DEBUG ===');
+      console.log('Request body received:', JSON.stringify(req.body, null, 2));
+      
       // Only update fields that are actually provided in the request
       const updateData: any = { userId }; // Always include userId for security
       
@@ -200,9 +203,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updateData.referenceNote = req.body.referenceNote;
       }
 
-
+      console.log('Final updateData being sent to storage:', JSON.stringify(updateData, null, 2));
 
       const transaction = await storage.updateTransaction(transactionId, updateData);
+      
+      console.log('Transaction returned from storage:', JSON.stringify(transaction, null, 2));
+      console.log('=== END TRANSACTION UPDATE DEBUG ===');
+      
       res.json(transaction);
     } catch (error) {
       console.error("Error updating transaction:", error);

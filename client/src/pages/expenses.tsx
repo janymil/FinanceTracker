@@ -122,11 +122,62 @@ export default function Expenses() {
 
   const updateExpenseMutation = useMutation({
     mutationFn: async ({ id, ...data }: { id: number } & typeof newExpense) => {
-      const res = await apiRequest("PUT", `/api/transactions/${id}`, {
-        ...data,
-        amount: parseFloat(data.amount),
-        type: "expense",
-      });
+      // Only send fields that have actually changed from the original transaction
+      const updateData: any = {};
+      
+      if (editingTransaction) {
+        // Convert the original amount to string for comparison
+        const originalAmount = editingTransaction.amount.toString();
+        if (data.amount !== originalAmount) {
+          updateData.amount = parseFloat(data.amount);
+        }
+        
+        if (data.description !== editingTransaction.description) {
+          updateData.description = data.description;
+        }
+        
+        // Format original date for comparison
+        const originalDate = new Date(editingTransaction.date).toISOString().split('T')[0];
+        if (data.date !== originalDate) {
+          updateData.date = data.date;
+        }
+        
+        // Find original category ID
+        const originalCategory = categories.find((cat: Category) => cat.name === editingTransaction.categoryName);
+        const originalCategoryId = originalCategory ? originalCategory.id.toString() : "";
+        if (data.categoryId !== originalCategoryId) {
+          updateData.categoryId = data.categoryId ? parseInt(data.categoryId) : null;
+        }
+        
+        if (data.isRecurring !== Boolean(editingTransaction.isRecurring)) {
+          updateData.isRecurring = data.isRecurring;
+        }
+        
+        if (data.recurringFrequency !== (editingTransaction.recurringFrequency || "monthly")) {
+          updateData.recurringFrequency = data.recurringFrequency;
+        }
+        
+        // Format original recurring end date for comparison
+        const originalRecurringEndDate = editingTransaction.recurringEndDate 
+          ? new Date(editingTransaction.recurringEndDate).toISOString().split('T')[0]
+          : "";
+        if (data.recurringEndDate !== originalRecurringEndDate) {
+          updateData.recurringEndDate = data.recurringEndDate || null;
+        }
+        
+        if (data.paymentUrl !== (editingTransaction.paymentUrl || "")) {
+          updateData.paymentUrl = data.paymentUrl;
+        }
+        
+        if (data.referenceNote !== (editingTransaction.referenceNote || "")) {
+          updateData.referenceNote = data.referenceNote;
+        }
+        
+        // Always ensure type is expense for this page
+        updateData.type = "expense";
+      }
+      
+      const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
       return await res.json();
     },
     onSuccess: () => {
