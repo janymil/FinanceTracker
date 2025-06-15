@@ -71,8 +71,8 @@ function AppContent() {
     return <AppLoader />;
   }
 
-  // Show guest routes if no user and on public route OR while authentication is uncertain
-  if (!user && (isOnPublicRoute || !isUnauthenticated)) {
+  // Show guest routes only if definitely unauthenticated and on public route
+  if (isUnauthenticated && isOnPublicRoute) {
     return (
       <>
         <Switch>
@@ -90,6 +90,11 @@ function AppContent() {
         <CookieBanner />
       </>
     );
+  }
+
+  // If we have Clerk user but no database user yet, wait for sync
+  if (!user && !isUnauthenticated) {
+    return <AppLoader />;
   }
 
   // Authenticated user layout
