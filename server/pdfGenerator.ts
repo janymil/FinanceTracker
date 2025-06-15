@@ -488,7 +488,7 @@ export class PDFGeneratorService {
         }
       });
       
-      return pdfBuffer;
+      return Buffer.from(pdfBuffer);
       
     } catch (error) {
       console.error('Error generating PDF:', error);
