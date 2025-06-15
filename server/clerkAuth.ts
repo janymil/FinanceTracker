@@ -1,36 +1,31 @@
+import { clerkMiddleware, requireAuth } from '@clerk/express';
+import type { Request, Response, NextFunction } from 'express';
 
-import { clerkMiddleware, createClerkClient } from '@clerk/clerk-sdk-node';
-import type { RequestHandler } from 'express';
+export const setupClerkAuth = (app: any) => {
+  // Add Clerk middleware to handle authentication
+  app.use(clerkMiddleware({
+    secretKey: process.env.CLERK_SECRET_KEY,
+    publishableKey: process.env.VITE_CLERK_PUBLISHABLE_KEY
+  }));
+};
 
-const clerk = createClerkClient({
-  secretKey: process.env.CLERK_SECRET_KEY,
-});
-
-export const clerkAuth = clerkMiddleware();
-
-export const isClerkAuthenticated: RequestHandler = async (req, res, next) => {
+// Middleware to require authentication
+export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { userId } = req.auth || {};
-    
-    if (!userId) {
-      return res.status(401).json({ message: "Unauthorized - Clerk auth required" });
-    }
-
-    // Get user from Clerk
-    const user = await clerk.users.getUser(userId);
-    
-    // Attach Clerk user to request
-    (req as any).clerkUser = user;
-    
-    return next();
+    // Use Clerk's requireAuth middleware
+    requireAuth()(req, res, (err) => {
+      if (err) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+      next();
+    });
   } catch (error) {
-    console.error('Clerk authentication error:', error);
-    return res.status(401).json({ message: "Unauthorized - Clerk auth failed" });
+    console.error('Authentication error:', error);
+    res.status(401).json({ message: 'Authentication failed' });
   }
 };
 
-export async function upsertClerkUser(clerkUserId: string, clerkUser: any) {
-  // This will be used to sync Clerk users with your database
-  // Implementation depends on your storage layer
-  console.log('Upserting Clerk user:', clerkUserId, clerkUser);
-}
+// Helper to get user ID from Clerk
+export const getUserId = (req: any): string | null => {
+  return req.auth?.userId || null;
+};

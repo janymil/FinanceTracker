@@ -4,7 +4,7 @@ import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { users, transactions, budgets, categories, goals, type Transaction, type Budget, type Goal } from "@shared/schema";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupClerkAuth, isAuthenticated, getUserId } from "./clerkAuth";
 import { setCookieConsent } from "./cookieMiddleware";
 import { insertTransactionSchema, insertBudgetSchema, insertGoalSchema, insertExpenseReminderSchema } from "@shared/schema";
 import { z } from "zod";
@@ -29,12 +29,12 @@ const COLORS = [
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  await setupAuth(app);
+  setupClerkAuth(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = getUserId(req);
       
       if (!userId) {
         return res.status(401).json({ message: "No user ID found" });
@@ -42,15 +42,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let user = await storage.getUser(userId);
       
-      // If user doesn't exist, create them using the claims data
+      // If user doesn't exist, create them using Clerk user data
       if (!user) {
-        const claims = req.user.claims;
+        const clerkUser = req.auth.user;
         const userData = {
-          id: claims.sub,
-          email: claims.email,
-          firstName: claims.first_name,
-          lastName: claims.last_name,
-          profileImageUrl: claims.profile_image_url || null,
+          id: userId,
+          email: clerkUser?.emailAddresses?.[0]?.emailAddress || null,
+          firstName: clerkUser?.firstName || null,
+          lastName: clerkUser?.lastName || null,
+          profileImageUrl: clerkUser?.imageUrl || null,
           plan: 'free',
           stripeCustomerId: null,
           stripeSubscriptionId: null,
@@ -69,7 +69,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Transaction routes
   app.post('/api/transactions', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
 
       // Check if recurring transactions are being used and require appropriate plan
@@ -135,7 +135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/transactions', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
 
       // Plan-based limits: free = 3, standard = 100, premium = unlimited
