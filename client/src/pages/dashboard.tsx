@@ -1,10 +1,10 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useState, useEffect, useMemo, lazy, Suspense, startTransition, useDeferredValue, useTransition } from "react";
+import { useState, useEffect, useMemo, startTransition, useDeferredValue, useTransition } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardSkeleton } from "@/components/dashboard-skeleton";
-import { LazyWrapper } from "@/components/lazy-wrapper";
+
 
 // Core components for immediate display
 import FinancialCards from "@/components/financial-cards";
@@ -483,31 +483,23 @@ export default function Dashboard() {
           <div className="space-y-8">
             {/* Advanced Analytics Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <LazyWrapper fallback={<div className="h-48 bg-white dark:bg-gray-800 rounded-xl animate-pulse border"></div>}>
-                <FinancialHealthScore 
-                  summary={financialSummary}
-                  budgets={budgets as any}
-                />
-              </LazyWrapper>
-              <LazyWrapper fallback={<div className="h-48 bg-white dark:bg-gray-800 rounded-xl animate-pulse border"></div>}>
-                <QuickFinancialSnapshot 
-                  summary={financialSummary}
-                  transactions={transactions as any}
-                />
-              </LazyWrapper>
-              <LazyWrapper fallback={<div className="h-48 bg-white dark:bg-gray-800 rounded-xl animate-pulse border"></div>}>
-                <ContextualFinancialTips
-                  summary={financialSummary}
-                  transactions={transactions as any}
-                  budgets={budgets as any}
-                />
-              </LazyWrapper>
+              <LazyFinancialHealthScore 
+                summary={financialSummary}
+                budgets={budgets as any}
+              />
+              <LazyQuickFinancialSnapshot 
+                summary={financialSummary}
+                transactions={transactions as any}
+              />
+              <LazyContextualFinancialTips
+                summary={financialSummary}
+                transactions={transactions as any}
+                budgets={budgets as any}
+              />
             </div>
 
             {/* Interactive Charts */}
-            <LazyWrapper fallback={<div className="h-64 bg-white dark:bg-gray-800 rounded-xl animate-pulse border"></div>}>
-              <TrendsChart />
-            </LazyWrapper>
+            <LazyTrendsChart />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <TransactionList
@@ -516,17 +508,15 @@ export default function Dashboard() {
                 isPremium={user?.plan === 'premium'}
               />
 
-              <Suspense fallback={<div className="h-96 bg-white dark:bg-gray-800 rounded-xl animate-pulse border"></div>}>
-                <ExpenseChart summary={{
-                  totalExpenses: Math.abs(financialSummary?.totalExpenses || 0),
-                  expensesByCategory: financialSummary?.transactionsByCategory
-                    ?.filter((cat: any) => cat.type === 'expense')
-                    ?.map((cat: any, index: number) => ({
-                      category: cat.categoryName,
-                      amount: Math.abs(cat.amount)
-                    })) || []
-                }} />
-              </Suspense>
+              <LazyExpenseChart summary={{
+                totalExpenses: Math.abs(financialSummary?.totalExpenses || 0),
+                expensesByCategory: financialSummary?.transactionsByCategory
+                  ?.filter((cat: any) => cat.type === 'expense')
+                  ?.map((cat: any, index: number) => ({
+                    category: cat.categoryName,
+                    amount: Math.abs(cat.amount)
+                  })) || []
+              }} />
             </div>
 
             {/* Budget Categories */}
@@ -536,27 +526,27 @@ export default function Dashboard() {
 
             {/* Advanced Features */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <TransactionRemindersWidget />
+              <LazyTransactionRemindersWidget />
               
               <RequirePlan plan="standard">
-                <RemindersStreaks />
+                <LazyRemindersStreaks />
               </RequirePlan>
               
               <RequirePlan plan="standard">
-                <AutoCategorization transactions={transactions as any} />
+                <LazyAutoCategorization transactions={transactions as any} />
               </RequirePlan>
             </div>
 
             {/* Premium Features */}
             <RequirePlan plan="premium">
-              <ExpensePrediction 
+              <LazyExpensePrediction 
                 transactions={transactions as any}
                 summary={financialSummary}
               />
             </RequirePlan>
 
             <RequirePlan plan="premium">
-              <DailyRecommendations 
+              <LazyDailyRecommendations 
                 summary={financialSummary}
                 transactions={transactions as any}
                 budgets={budgets as any}
@@ -564,7 +554,7 @@ export default function Dashboard() {
             </RequirePlan>
 
             <RequirePlan plan="premium">
-              <AIFinancialTips 
+              <LazyAIFinancialTips 
                 summary={financialSummary}
               />
             </RequirePlan>
