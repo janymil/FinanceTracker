@@ -119,10 +119,8 @@ export default function CollaborativeGoalsPage() {
   // Create goal mutation
   const createGoalMutation = useMutation({
     mutationFn: async (goalData: any) => {
-      return apiRequest("/api/collaborative-goals", {
-        method: "POST",
-        body: JSON.stringify(goalData),
-      });
+      const response = await apiRequest("POST", "/api/collaborative-goals", goalData);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/collaborative-goals"] });
@@ -152,10 +150,8 @@ export default function CollaborativeGoalsPage() {
   // Send friend request mutation
   const sendFriendRequestMutation = useMutation({
     mutationFn: async (email: string) => {
-      return apiRequest("/api/friends/request", {
-        method: "POST",
-        body: JSON.stringify({ recipientEmail: email }),
-      });
+      const response = await apiRequest("POST", "/api/friends/request", { recipientEmail: email });
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
@@ -178,9 +174,8 @@ export default function CollaborativeGoalsPage() {
   // Accept friend request mutation
   const acceptFriendMutation = useMutation({
     mutationFn: async (requestId: number) => {
-      return apiRequest(`/api/friends/accept/${requestId}`, {
-        method: "POST",
-      });
+      const response = await apiRequest("POST", `/api/friends/accept/${requestId}`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
@@ -195,9 +190,8 @@ export default function CollaborativeGoalsPage() {
   // Reject friend request mutation
   const rejectFriendMutation = useMutation({
     mutationFn: async (requestId: number) => {
-      return apiRequest(`/api/friends/reject/${requestId}`, {
-        method: "DELETE",
-      });
+      const response = await apiRequest("DELETE", `/api/friends/reject/${requestId}`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/friends/requests"] });
