@@ -13,11 +13,13 @@ export function useAuth() {
     queryFn: getQueryFn({ on401: "returnNull" }),
     enabled: !!clerkUser && isSignedIn,
     retry: (failureCount, error: any) => {
-      return failureCount < 2 && error?.status !== 401;
+      return failureCount < 3 && error?.status !== 401;
     },
-    staleTime: 2 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // Increase stale time to 5 minutes
+    refetchOnWindowFocus: true, // Re-enable refetch on focus to handle reconnections
     refetchInterval: false,
+    // Add retry delay to handle temporary server issues
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   const isLoading = !userLoaded || !authLoaded || (isSignedIn && dbUserLoading);

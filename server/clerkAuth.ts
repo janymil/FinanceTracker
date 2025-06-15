@@ -12,7 +12,19 @@ export const setupClerkAuth = (app: any) => {
     afterSignInUrl: '/',
     afterSignUpUrl: '/',
     // Configure for API usage
-    apiRoutes: ['/api/*']
+    apiRoutes: ['/api/*'],
+    // Improve session handling
+    jwtKey: process.env.CLERK_JWT_KEY,
+    // Allow longer session duration
+    sessionTokenTemplate: {
+      standard: {
+        nbf: '{{session.created_at}}',
+        exp: '{{session.expire_at}}',
+        iat: '{{session.created_at}}',
+        iss: process.env.CLERK_SECRET_KEY?.split('_')[1],
+        sub: '{{user.id}}'
+      }
+    }
   }));
 };
 
