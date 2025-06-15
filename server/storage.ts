@@ -241,15 +241,7 @@ export class DatabaseStorage implements IStorage {
 
   // Transaction operations
   async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
-    // Encrypt sensitive fields
-    const encryptedTransaction = {
-      ...transaction,
-      amount: DataEncryption.encryptAmount(transaction.amount),
-      description: DataEncryption.encryptDescription(transaction.description),
-      referenceNote: transaction.referenceNote ? DataEncryption.encrypt(transaction.referenceNote) : null
-    };
-
-    const [newTransaction] = await db.insert(transactions).values(encryptedTransaction).returning();
+    const [newTransaction] = await db.insert(transactions).values(transaction).returning();
 
     // If this is a recurring transaction, create a recurring transaction record
     if (transaction.isRecurring && transaction.recurringFrequency) {
@@ -271,13 +263,7 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    // Decrypt for return
-    return {
-      ...newTransaction,
-      amount: DataEncryption.decryptAmount(newTransaction.amount),
-      description: DataEncryption.decryptDescription(newTransaction.description),
-      referenceNote: newTransaction.referenceNote ? DataEncryption.decrypt(newTransaction.referenceNote) : null
-    };
+    return newTransaction;
   }
 
   async getUserTransactions(userId: number, limit?: number): Promise<Transaction[]> {
@@ -322,31 +308,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateTransaction(id: number, transaction: InsertTransaction): Promise<Transaction> {
-        // Encrypt sensitive fields if they're being updated
-        const encryptedTransaction = { ...transaction };
-        if (transaction.amount) {
-            encryptedTransaction.amount = DataEncryption.encryptAmount(transaction.amount);
-        }
-        if (transaction.description) {
-            encryptedTransaction.description = DataEncryption.encryptDescription(transaction.description);
-        }
-        if (transaction.referenceNote) {
-            encryptedTransaction.referenceNote = DataEncryption.encrypt(transaction.referenceNote);
-        }
-
         const [updatedTransaction] = await db
             .update(transactions)
-            .set(encryptedTransaction)
+            .set(transaction)
             .where(and(eq(transactions.id, id), eq(transactions.userId, transaction.userId)))
             .returning();
 
-        // Decrypt for return value
-        return {
-            ...updatedTransaction,
-            amount: DataEncryption.decryptAmount(updatedTransaction.amount),
-            description: DataEncryption.decryptDescription(updatedTransaction.description),
-            referenceNote: updatedTransaction.referenceNote ? DataEncryption.decrypt(updatedTransaction.referenceNote) : null
-        };
+        return updatedTransaction;
   }
 
   async deleteTransaction(id: number, userId: number): Promise<void> {
