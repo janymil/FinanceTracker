@@ -147,9 +147,7 @@ export default function RequirePlan({ plan, children, feature, description, bene
   const isFormContext = typeof window !== 'undefined' && 
     (window.location.pathname.includes('/income') || 
      window.location.pathname.includes('/expenses') || 
-     window.location.pathname.includes('/transactions') ||
-     // Check if we're inside a dialog by looking for dialog-specific elements
-     document.querySelector('[role="dialog"]') !== null);
+     window.location.pathname.includes('/transactions'));
 
   if (isFormContext) {
     return (
