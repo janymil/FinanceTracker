@@ -501,13 +501,14 @@ export default function CollaborativeGoalsPage() {
                             )}
                           </div>
 
-                          <Button 
-                            variant="outline" 
-                            className="w-full"
-                            onClick={() => window.location.href = `/collaborative-goals/${goal.id}`}
-                          >
-                            View Challenge
-                          </Button>
+                          <Link href={`/collaborative-goals/${goal.id}`}>
+                            <Button 
+                              variant="outline" 
+                              className="w-full"
+                            >
+                              View Challenge
+                            </Button>
+                          </Link>
                         </CardContent>
                       </Card>
                     );
