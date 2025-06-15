@@ -135,7 +135,17 @@ function AppContent() {
 }
 
 export default function App() {
-  const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_dXNlZnVsLXJlZGZpc2gtMTUuY2xlcmsuYWNjb3VudHMuZGV2JA';
+  const publishableKey = 'pk_test_dXNlZnVsLXJlZGZpc2gtMTUuY2xlcmsuYWNjb3VudHMuZGV2JA';
+  
+  if (!publishableKey) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600">Clerk publishable key is missing</p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <ClerkProvider publishableKey={publishableKey}>
