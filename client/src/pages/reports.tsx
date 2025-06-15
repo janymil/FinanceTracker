@@ -239,7 +239,7 @@ export default function Reports() {
           <TabsContent value="categorization" className="space-y-6">
             <RequirePlan plan="standard">
               <AutoCategorization 
-                transactions={Array.isArray(transactions) ? transactions : []}
+                transactions={filteredTransactions}
               />
             </RequirePlan>
           </TabsContent>
@@ -249,7 +249,7 @@ export default function Reports() {
             <RequirePlan plan="premium">
               <AIInsights 
                 data={{
-                  transactions: Array.isArray(transactions) ? transactions : [],
+                  transactions: filteredTransactions,
                   budgets: [],
                   goals: []
                 }}
