@@ -1568,60 +1568,247 @@ export async function registerRoutes(app: Express): Promise<Server> {
           contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
           break;
         case 'pdf':
-          const { jsPDF } = await import('jspdf');
-          const doc = new jsPDF();
+          const puppeteer = await import('puppeteer');
           
-          // Title
-          doc.setFontSize(20);
-          doc.text('Financial Report', 20, 20);
-          
-          // Date range
-          doc.setFontSize(12);
-          doc.text(`Report Period: ${start.toLocaleDateString()} - ${end.toLocaleDateString()}`, 20, 30);
-          
-          let yPosition = 50;
-          
-          // Summary section
-          if (exportData.transactions) {
-            const totalIncome = exportData.transactions
-              .filter((t: any) => t.type === 'income')
-              .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
-            const totalExpenses = exportData.transactions
-              .filter((t: any) => t.type === 'expense')
-              .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
-            const netAmount = totalIncome - totalExpenses;
-            
-            doc.setFontSize(14);
-            doc.text('Summary', 20, yPosition);
-            yPosition += 10;
-            
-            doc.setFontSize(12);
-            doc.text(`Total Income: $${totalIncome.toFixed(2)}`, 20, yPosition);
-            yPosition += 8;
-            doc.text(`Total Expenses: $${totalExpenses.toFixed(2)}`, 20, yPosition);
-            yPosition += 8;
-            doc.text(`Net Amount: $${netAmount.toFixed(2)}`, 20, yPosition);
-            yPosition += 15;
-          }
-          
-          // Transactions section
-          if (exportData.transactions && exportData.transactions.length > 0) {
-            doc.setFontSize(14);
-            doc.text('Recent Transactions', 20, yPosition);
-            yPosition += 10;
-            
-            doc.setFontSize(10);
-            exportData.transactions.slice(0, 20).forEach((t: any) => {
-              if (yPosition > 280) {
-                doc.addPage();
-                yPosition = 20;
+          // Create HTML template for the financial report
+          const htmlTemplate = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Financial Report</title>
+            <style>
+              body { 
+                font-family: Arial, sans-serif; 
+                margin: 40px; 
+                color: #333;
+                line-height: 1.6;
               }
-              doc.text(`${t.date} - ${t.description} - $${t.amount} (${t.type})`, 20, yPosition);
-              yPosition += 6;
-            });
-          }
+              .header { 
+                text-align: center; 
+                margin-bottom: 30px; 
+                border-bottom: 2px solid #4f46e5;
+                padding-bottom: 20px;
+              }
+              .header h1 { 
+                color: #4f46e5; 
+                margin: 0;
+                font-size: 28px;
+              }
+              .header p { 
+                color: #666; 
+                margin: 5px 0;
+                font-size: 14px;
+              }
+              .summary { 
+                background: #f8fafc; 
+                padding: 20px; 
+                border-radius: 8px; 
+                margin: 20px 0;
+                border-left: 4px solid #4f46e5;
+              }
+              .summary h2 { 
+                color: #4f46e5; 
+                margin-top: 0;
+                font-size: 20px;
+              }
+              .metric { 
+                display: flex; 
+                justify-content: space-between; 
+                margin: 10px 0;
+                padding: 8px 0;
+                border-bottom: 1px solid #e2e8f0;
+              }
+              .metric:last-child { border-bottom: none; }
+              .metric-label { font-weight: bold; }
+              .metric-value { color: #059669; font-weight: bold; }
+              .metric-value.negative { color: #dc2626; }
+              .section { 
+                margin: 30px 0; 
+              }
+              .section h2 { 
+                color: #4f46e5; 
+                border-bottom: 1px solid #e2e8f0;
+                padding-bottom: 10px;
+                font-size: 18px;
+              }
+              table { 
+                width: 100%; 
+                border-collapse: collapse; 
+                margin: 15px 0;
+              }
+              th, td { 
+                padding: 12px; 
+                text-align: left; 
+                border-bottom: 1px solid #e2e8f0;
+              }
+              th { 
+                background: #f1f5f9; 
+                font-weight: bold;
+                color: #4f46e5;
+              }
+              .transaction-income { color: #059669; }
+              .transaction-expense { color: #dc2626; }
+              .footer { 
+                margin-top: 40px; 
+                text-align: center; 
+                color: #666; 
+                font-size: 12px;
+                border-top: 1px solid #e2e8f0;
+                padding-top: 20px;
+              }
+              @media print {
+                body { margin: 20px; }
+                .header { page-break-after: avoid; }
+                table { page-break-inside: avoid; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>FinanzerPro - Financial Report</h1>
+              <p>Report Period: ${start.toLocaleDateString()} - ${end.toLocaleDateString()}</p>
+              <p>Generated on: ${new Date().toLocaleDateString()}</p>
+            </div>
+
+            ${exportData.summary ? `
+            <div class="summary">
+              <h2>Financial Summary</h2>
+              <div class="metric">
+                <span class="metric-label">Total Income:</span>
+                <span class="metric-value">$${exportData.summary.totalIncome.toFixed(2)}</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Total Expenses:</span>
+                <span class="metric-value negative">$${exportData.summary.totalExpenses.toFixed(2)}</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Net Amount:</span>
+                <span class="metric-value ${exportData.summary.netAmount < 0 ? 'negative' : ''}">$${exportData.summary.netAmount.toFixed(2)}</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Total Transactions:</span>
+                <span class="metric-value">${exportData.summary.transactionCount}</span>
+              </div>
+            </div>
+            ` : ''}
+
+            ${exportData.transactions && exportData.transactions.length > 0 ? `
+            <div class="section">
+              <h2>Transactions</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Type</th>
+                    <th>Category</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${exportData.transactions.map((t: any) => `
+                    <tr>
+                      <td>${new Date(t.date).toLocaleDateString()}</td>
+                      <td>${t.description}</td>
+                      <td class="transaction-${t.type}">$${parseFloat(t.amount).toFixed(2)}</td>
+                      <td>${t.type.charAt(0).toUpperCase() + t.type.slice(1)}</td>
+                      <td>${t.categoryId || 'Uncategorized'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+            ` : ''}
+
+            ${exportData.budgets && exportData.budgets.length > 0 ? `
+            <div class="section">
+              <h2>Budgets</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Budget Amount</th>
+                    <th>Period</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${exportData.budgets.map((b: any) => `
+                    <tr>
+                      <td>${b.categoryId}</td>
+                      <td>$${parseFloat(b.amount).toFixed(2)}</td>
+                      <td>${b.period}</td>
+                      <td>${new Date(b.startDate).toLocaleDateString()}</td>
+                      <td>${new Date(b.endDate).toLocaleDateString()}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+            ` : ''}
+
+            ${exportData.goals && exportData.goals.length > 0 ? `
+            <div class="section">
+              <h2>Financial Goals</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Goal</th>
+                    <th>Target Amount</th>
+                    <th>Current Amount</th>
+                    <th>Progress</th>
+                    <th>Target Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${exportData.goals.map((g: any) => {
+                    const progress = ((parseFloat(g.currentAmount) / parseFloat(g.targetAmount)) * 100).toFixed(1);
+                    return `
+                    <tr>
+                      <td>${g.title}</td>
+                      <td>$${parseFloat(g.targetAmount).toFixed(2)}</td>
+                      <td>$${parseFloat(g.currentAmount).toFixed(2)}</td>
+                      <td>${progress}%</td>
+                      <td>${new Date(g.targetDate).toLocaleDateString()}</td>
+                    </tr>
+                  `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+            ` : ''}
+
+            <div class="footer">
+              <p>This report was generated by FinanzerPro on ${new Date().toLocaleDateString()}</p>
+              <p>For questions or support, please contact us through our help system.</p>
+            </div>
+          </body>
+          </html>
+          `;
+
+          const browser = await puppeteer.launch({
+            headless: 'new',
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+          });
+          const page = await browser.newPage();
+          await page.setContent(htmlTemplate);
           
-          responseData = Buffer.from(doc.output('arraybuffer'));
+          const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: {
+              top: '20mm',
+              right: '15mm',
+              bottom: '20mm',
+              left: '15mm'
+            }
+          });
+          
+          await browser.close();
+          
+          responseData = pdfBuffer;
           filename = `financial-report-${new Date().toISOString().split('T')[0]}.pdf`;
           contentType = 'application/pdf';
           break;
