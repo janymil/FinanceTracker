@@ -37,7 +37,8 @@ import {
   Plus,
   Bell,
   Search,
-  Repeat
+  Repeat,
+  HelpCircle
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
@@ -451,6 +452,12 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                 <Link href="/profile">
                   <User className="h-4 w-4 mr-2" />
                   Profile & Account Configuration
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/help">
+                  <HelpCircle className="h-4 w-4 mr-2" />
+                  Help & Documentation
                 </Link>
               </DropdownMenuItem>
               {user?.plan !== 'premium' && (
