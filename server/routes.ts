@@ -912,7 +912,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Categorization endpoint
   app.post('/api/ai/categorize', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(requireUserId(req));
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const user = await storage.getUser(userId);
 
       // Require standard+ plan for AI categorization
       if (!user || !['standard', 'premium'].includes(user.plan || '')) {
@@ -936,7 +940,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Financial Tips endpoint - bypasses cache for fresh responses
   app.post('/api/ai/tip', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(requireUserId(req));
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const user = await storage.getUser(userId);
 
       // Require premium plan for AI tips
       if (!user || user.plan !== 'premium') {
@@ -947,8 +955,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentDate = new Date();
       const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
       
-      const financialSummary = await storage.getUserFinancialSummary(requireUserId(req), startOfYear, currentDate);
-      const transactions = await storage.getUserTransactions(requireUserId(req), 100);
+      const financialSummary = await storage.getUserFinancialSummary(userId, startOfYear, currentDate);
+      const transactions = await storage.getUserTransactions(userId, 100);
       const categories = await storage.getCategories();
 
       // Create category name mapping
