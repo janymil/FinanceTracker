@@ -55,7 +55,7 @@ function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Show loading state only for a brief moment
+  // Show loading state
   if (isLoading) {
     return <AppLoader />;
   }
@@ -65,14 +65,14 @@ function AppContent() {
   const currentPath = window.location.pathname;
   const isOnPublicRoute = publicRoutes.includes(currentPath);
 
-  // If clearly unauthenticated and on a protected route, redirect to landing
+  // If clearly unauthenticated and on a protected route, redirect to auth
   if (isUnauthenticated && !isOnPublicRoute) {
-    window.location.href = '/';
+    window.location.href = '/auth';
     return <AppLoader />;
   }
 
-  // Show guest routes for unauthenticated users OR when on public routes
-  if (isUnauthenticated || isOnPublicRoute) {
+  // Show guest routes only if definitely unauthenticated and on public route
+  if (isUnauthenticated && isOnPublicRoute) {
     return (
       <>
         <Switch>
