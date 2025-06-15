@@ -330,6 +330,8 @@ export default function Transactions() {
                       isRecurring: false,
                       recurringFrequency: "monthly",
                       recurringEndDate: "",
+                      paymentUrl: "",
+                      referenceNote: "",
                     });
                   }}
                 >
