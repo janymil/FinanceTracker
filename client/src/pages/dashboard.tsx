@@ -48,6 +48,43 @@ interface Category {
 export default function Dashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Check for subscription success/error messages
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const upgrade = urlParams.get('upgrade');
+    const plan = urlParams.get('plan');
+    const error = urlParams.get('error');
+    
+    if (upgrade === 'success' && plan) {
+      toast({
+        title: "Subscription Successful!",
+        description: `You've been upgraded to the ${plan} plan. Enjoy your new features!`,
+      });
+      // Clean up URL parameters
+      window.history.replaceState({}, '', '/');
+    } else if (error) {
+      let message = "An error occurred during payment processing.";
+      switch (error) {
+        case 'payment_not_completed':
+          message = "Payment was not completed. Please try again.";
+          break;
+        case 'user_not_found':
+          message = "User account not found. Please contact support.";
+          break;
+        case 'plan_update_failed':
+          message = "Payment successful but plan update failed. Please contact support.";
+          break;
+      }
+      toast({
+        title: "Payment Error",
+        description: message,
+        variant: "destructive",
+      });
+      // Clean up URL parameters
+      window.history.replaceState({}, '', '/');
+    }
+  }, [toast]);
   const [isPending, startTransition] = useTransition();
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();

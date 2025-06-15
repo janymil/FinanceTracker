@@ -13,21 +13,33 @@ export default function Subscribe() {
   const { user } = useAuth();
   
   const handleSubscribe = async (plan: string, interval: 'month' | 'year' = 'month') => {
+    if (!user) {
+      setLocation('/auth');
+      return;
+    }
+    
     setLoading(true);
     try {
+      // Get the Clerk session token for authentication
+      const token = await window.Clerk?.session?.getToken();
+      
+      const planName = interval === 'year' ? `${plan}-yearly` : plan;
+      
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ plan, interval }),
+        body: JSON.stringify({ plan: planName }),
       });
 
       if (response.ok) {
         const { url } = await response.json();
         window.location.href = url;
       } else {
-        console.error('Failed to create checkout session');
+        const error = await response.json();
+        console.error('Failed to create checkout session:', error);
         setLoading(false);
       }
     } catch (error) {
