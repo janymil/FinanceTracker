@@ -135,13 +135,6 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
       requiredPlan: "free",
       badge: null,
     },
-    {
-      title: "Profile",
-      icon: User,
-      href: "/profile",
-      requiredPlan: "free",
-      badge: null,
-    },
   ];
 
   const isActive = (href: string) => {

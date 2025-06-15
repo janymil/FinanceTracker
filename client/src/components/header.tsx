@@ -447,13 +447,11 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                 </p>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <User className="h-4 w-4 mr-2" />
-                Profile Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="h-4 w-4 mr-2" />
-                Account Settings
+              <DropdownMenuItem asChild>
+                <Link href="/profile">
+                  <User className="h-4 w-4 mr-2" />
+                  Profile & Account Configuration
+                </Link>
               </DropdownMenuItem>
               {user?.plan !== 'premium' && (
                 <DropdownMenuItem asChild>
