@@ -1,7 +1,7 @@
 import { ClerkProvider } from '@clerk/nextjs'
 
 export const clerkConfig = {
-  publishableKey: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+  publishableKey: 'pk_test_dXNlZnVsLXJlZGZpc2gtMTUuY2xlcmsuYWNjb3VudHMuZGV2JA',
   signInUrl: '/sign-in',
   signUpUrl: '/sign-up',
   afterSignInUrl: '/',

@@ -6,9 +6,7 @@ if (!process.env.CLERK_SECRET_KEY) {
 }
 
 // Initialize Clerk middleware
-export const clerkMiddleware = ClerkExpressWithAuth({
-  secretKey: process.env.CLERK_SECRET_KEY,
-});
+export const clerkMiddleware = ClerkExpressWithAuth();
 
 // Enhanced request interface with Clerk auth
 export interface AuthenticatedRequest extends Request {
