@@ -136,43 +136,43 @@ export default function Reports() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Advanced Reports & Analytics
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
-                AI-powered insights, interactive charts, and comprehensive financial analysis
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                <SelectTrigger className="w-40">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="week">This Week</SelectItem>
-                  <SelectItem value="month">This Month</SelectItem>
-                  <SelectItem value="quarter">This Quarter</SelectItem>
-                  <SelectItem value="year">This Year</SelectItem>
-                  <SelectItem value="custom">Custom Range</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Advanced Reports & Analytics
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300 mt-1">
+              AI-powered insights, interactive charts, and comprehensive financial analysis
+            </p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+              <SelectTrigger className="w-40">
+                <Calendar className="h-4 w-4 mr-2" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="week">This Week</SelectItem>
+                <SelectItem value="month">This Month</SelectItem>
+                <SelectItem value="quarter">This Quarter</SelectItem>
+                <SelectItem value="year">This Year</SelectItem>
+                <SelectItem value="custom">Custom Range</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
+      </div>
 
-        {/* Month Navigation Filter */}
-        <MonthFilter 
-          selectedMonth={selectedMonth}
-          onMonthSelect={setSelectedMonth}
-          onDateRangeReset={() => setSelectedPeriod("month")}
-        />
+      {/* Month Navigation Filter */}
+      <MonthFilter 
+        selectedMonth={selectedMonth}
+        onMonthSelect={setSelectedMonth}
+        onDateRangeReset={() => setSelectedPeriod("month")}
+      />
 
-        {/* Reports Tabs - Basic available for all, Advanced for Premium */}
+      {/* Reports Tabs - Basic available for all, Advanced for Premium */}
         <Tabs defaultValue="summary" className="space-y-6">
           <TabsList className={`grid w-full ${hasPremium ? 'grid-cols-4' : hasStandardOrBetter ? 'grid-cols-2' : 'grid-cols-1'}`}>
             <TabsTrigger value="summary" className="flex items-center gap-2">
@@ -313,8 +313,6 @@ export default function Reports() {
               />
             </RequirePlan>
           </TabsContent>
-
-
 
           {/* Auto-Categorization */}
           <TabsContent value="categorization" className="space-y-6">
