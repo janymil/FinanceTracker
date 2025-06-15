@@ -43,7 +43,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If user doesn't exist, create them using the claims data
       if (!user) {
-        console.log("User not found in database, creating from claims");
         const claims = req.user.claims;
         const userData = {
           id: claims.sub,
@@ -56,9 +55,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           stripeSubscriptionId: null,
           settings: null
         };
-        console.log("Creating user with data:", userData);
         user = await storage.upsertUser(userData);
-        console.log("User created:", user);
       }
 
       res.json(user);
