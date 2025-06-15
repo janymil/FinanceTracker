@@ -59,10 +59,10 @@ export default function UpgradePrompt({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Crown className="h-5 w-5 text-yellow-500" />
-            {requiredPlan.charAt(0).toUpperCase() + requiredPlan.slice(1)} Feature
+            {requiredPlan ? requiredPlan.charAt(0).toUpperCase() + requiredPlan.slice(1) : 'Premium'} Feature
           </CardTitle>
           <CardDescription>
-            This feature is available for {requiredPlan} subscribers
+            This feature is available for {requiredPlan || 'premium'} subscribers
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -81,7 +81,7 @@ export default function UpgradePrompt({
             <Link href="/subscribe">
               <Button size="lg" className={`${colors.accent} hover:opacity-90 text-white`}>
                 <Crown className="h-4 w-4 mr-2" />
-                Upgrade to {requiredPlan.charAt(0).toUpperCase() + requiredPlan.slice(1)}
+                Upgrade to {requiredPlan ? requiredPlan.charAt(0).toUpperCase() + requiredPlan.slice(1) : 'Premium'}
               </Button>
             </Link>
           </div>

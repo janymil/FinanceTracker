@@ -67,11 +67,9 @@ export default function Budget() {
     endDate: format(endOfMonth(currentDate), "yyyy-MM-dd"),
   });
 
-  const hasStandardAccess = user?.plan === 'standard' || user?.plan === 'premium';
-
   const { data: budgets = [], isLoading } = useQuery({
     queryKey: ["/api/budgets"],
-    enabled: !!user && hasStandardAccess,
+    enabled: !!user,
   });
 
   const { data: categories = [] } = useQuery({

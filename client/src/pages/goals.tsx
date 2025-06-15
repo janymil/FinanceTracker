@@ -53,35 +53,9 @@ export default function Goals() {
     return null;
   }
 
-  // Redirect users without Standard+ plan to subscription page
-  const hasStandardAccess = user.plan === 'standard' || user.plan === 'premium';
-  if (!hasStandardAccess) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="max-w-md mx-auto">
-          <Target className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Standard Feature
-          </h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Goal setting and tracking with progress monitoring are available with Standard or Premium subscription. 
-            Set savings goals, track progress, and get personalized recommendations.
-          </p>
-          <Button 
-            onClick={() => setLocation("/subscribe")}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <Crown className="h-4 w-4 mr-2" />
-            Upgrade to Standard
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   const { data: goals = [], isLoading } = useQuery({
     queryKey: ["/api/goals"],
-    enabled: !!user && hasStandardAccess,
+    enabled: !!user,
   });
 
   const createGoalMutation = useMutation({
