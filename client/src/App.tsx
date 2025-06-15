@@ -135,8 +135,27 @@ function AppContent() {
 }
 
 export default function App() {
+  if (!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY) {
+    console.error('Missing VITE_CLERK_PUBLISHABLE_KEY');
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600">Authentication configuration error. Please check environment variables.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
+    <ClerkProvider 
+      publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}
+      appearance={{
+        elements: {
+          formButtonPrimary: 'bg-blue-600 hover:bg-blue-700',
+          card: 'shadow-lg'
+        }
+      }}
+    >
       <QueryClientProvider client={queryClient}>
         <AppContent />
         <Toaster />
