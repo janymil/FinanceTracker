@@ -135,10 +135,9 @@ function AppContent() {
 }
 
 export default function App() {
-  const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_dXNlZnVsLXJlZGZpc2gtMTUuY2xlcmsuYWNjb3VudHMuZGV2JA';
+  const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-  console.log('Environment variable VITE_CLERK_PUBLISHABLE_KEY:', import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
-  console.log('Using publishable key:', publishableKey);
+  console.log('Environment variable VITE_CLERK_PUBLISHABLE_KEY:', publishableKey ? 'Found' : 'Missing');
 
   if (!publishableKey) {
     return (
@@ -146,6 +145,7 @@ export default function App() {
         <div className="text-center">
           <p className="text-red-600">Clerk publishable key is missing</p>
           <p className="text-sm text-gray-500 mt-2">Check your VITE_CLERK_PUBLISHABLE_KEY in Secrets</p>
+          <p className="text-xs text-gray-400 mt-1">Restart the development server after adding the key</p>
         </div>
       </div>
     );
