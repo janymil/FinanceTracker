@@ -36,8 +36,8 @@ FinanzerPro is a full-stack personal finance management application built with R
 ## Key Components
 
 ### Authentication System
-- Clerk.com authentication with comprehensive user management
-- JWT-based authentication with automatic token refresh
+- Replit Auth (OpenID Connect) for secure user authentication
+- Session-based authentication using PostgreSQL session store
 - Plan-based access control (free, standard, premium)
 - Stripe integration for subscription management after account creation
 
@@ -194,11 +194,6 @@ Changelog:
 - June 14, 2025. Implemented comprehensive admin panel security with password authentication using ADMIN_PASSWORD environment variable
 - June 14, 2025. Secured all 8 admin API routes with authentication middleware requiring password login before access
 - June 14, 2025. Created secure admin login form that appears before showing any sensitive admin data or functionality
-- June 15, 2025. Successfully migrated from Replit Auth to Clerk.com authentication system
-- June 15, 2025. Updated frontend to use ClerkProvider, useAuth hook with Clerk patterns, and signOut functionality
-- June 15, 2025. Migrated backend from isAuthenticated to requireAuth middleware with proper Clerk user access patterns
-- June 15, 2025. Updated user data handling to use Clerk's sessionClaims for firstName, lastName, email, and profileImageUrl
-- June 15, 2025. Fixed Clerk authentication loading states and screen blinking issues with proper ClerkProvider configuration
 ```
 
 ## User Preferences

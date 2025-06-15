@@ -1,6 +1,5 @@
 import OpenAI from "openai";
 import { aiCache } from "./cache";
-import { DataAnonymizer } from "./dataAnonymizer";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -51,10 +50,6 @@ export async function categorizeExpense(description: string, amount: number): Pr
       console.log('Using cached categorization result');
       return cached;
     }
-
-    // Anonymize data before sending to AI
-    const { anonymizedText, mapping } = DataAnonymizer.anonymizeForAI(description, amount);
-    console.log('Anonymized data for AI:', { original: description, anonymized: anonymizedText });
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -85,10 +80,10 @@ Respond with JSON in this exact format:
         },
         {
           role: "user",
-          content: `Description: "${anonymizedText}"
-Amount: $${Math.round(amount / 5) * 5}
+          content: `Description: "${description}"
+Amount: $${amount}
 
-Please categorize this expense. Note: Some merchant names have been anonymized for privacy.`
+Please categorize this expense.`
         }
       ],
       response_format: { type: "json_object" },
@@ -146,11 +141,6 @@ export async function generateFinancialTips(financialData: {
     } else {
       console.log('Bypassing cache for fresh AI financial tips');
     }
-    
-    // Anonymize financial data before sending to AI
-    const anonymizedData = DataAnonymizer.anonymizeFinancialSummary(financialData);
-    console.log('Using anonymized financial data for AI tips');
-    
     const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
 
     const response = await openai.chat.completions.create({
@@ -188,23 +178,22 @@ Respond with JSON array in this format:
         },
         {
           role: "user",
-          content: `Financial Summary (anonymized for privacy):
-- Income Range: ${anonymizedData.incomeRange}
-- Expense Range: ${anonymizedData.expenseRange}
-- Transaction Count: ${anonymizedData.transactionCount}
+          content: `Financial Summary:
+- Monthly Income: $${totalIncome}
+- Monthly Expenses: $${totalExpenses}
+- Net Balance: $${totalIncome - totalExpenses}
 
-Top Spending Categories:
-${anonymizedData.topCategories.map((cat: any) => 
-  `- ${cat.category}: ${cat.amountRange}`
+Spending by Category:
+${transactionsByCategory.filter(cat => cat.type === 'expense').map(cat => 
+  `- ${cat.categoryName}: $${cat.amount}`
 ).join('\n')}
 
-Recent Transaction Types (anonymized):
-${recentTransactions.slice(0, 10).map(t => {
-  const { anonymizedText } = DataAnonymizer.anonymizeForAI(t.description, t.amount);
-  return `- ${anonymizedText}: amount_range (${t.categoryName || 'Uncategorized'})`;
-}).join('\n')}
+Recent Transactions (last 10):
+${recentTransactions.slice(0, 10).map(t => 
+  `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'})`
+).join('\n')}
 
-Please provide personalized financial tips based on this anonymized data. Focus on spending patterns and categories rather than specific amounts or merchants.`
+Please provide personalized financial tips based on this data.`
         }
       ],
       response_format: { type: "json_object" },

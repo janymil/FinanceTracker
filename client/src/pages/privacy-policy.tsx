@@ -94,21 +94,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">4. AI Services and Data Privacy</h2>
-            <p className="mb-4">
-              Our Premium AI features use anonymized data to provide insights:
-            </p>
-            <ul className="list-disc list-inside mb-4 space-y-2">
-              <li>All personal identifiers are removed before AI processing</li>
-              <li>Merchant names and locations are anonymized or generalized</li>
-              <li>Exact amounts are rounded to protect financial privacy</li>
-              <li>AI providers process only anonymized, non-personally identifiable data</li>
-              <li>Original encrypted data never leaves our secure servers</li>
-            </ul>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">5. Data Security</h2>
+            <h2 className="text-2xl font-semibold mb-4">4. Data Security</h2>
             <p className="mb-4">
               We implement appropriate security measures to protect your personal information:
             </p>

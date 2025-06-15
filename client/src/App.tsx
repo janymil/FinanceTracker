@@ -1,6 +1,5 @@
 import { Switch, Route } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { ClerkProvider } from "@clerk/clerk-react";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,9 +14,8 @@ import { CookieBanner } from "@/components/cookie-banner";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 
-// Authentication components
-import SignInPage from "@/components/auth/sign-in";
-import SignUpPage from "@/components/auth/sign-up";
+// Other components loaded on demand
+import AuthPage from "@/pages/auth-page";
 import TransactionsPage from "@/pages/transactions";
 import IncomePage from "@/pages/income";
 import ExpensesPage from "@/pages/expenses";
@@ -66,8 +64,6 @@ function AppContent() {
       <>
         <Switch>
           <Route path="/" component={Landing} />
-          <Route path="/sign-in" component={SignInPage} />
-          <Route path="/sign-up" component={SignUpPage} />
           <Route path="/pricing" component={Pricing} />
           <Route path="/privacy-policy" component={PrivacyPolicy} />
           <Route path="/terms-of-service" component={TermsOfService} />
@@ -135,15 +131,10 @@ function AppContent() {
 }
 
 export default function App() {
-  // Use the working development key directly
-  const publishableKey = 'pk_test_dXNlZnVsLXJlZGZpc2gtMTUuY2xlcmsuYWNjb3VudHMuZGV2JA';
-
   return (
-    <ClerkProvider publishableKey={publishableKey}>
-      <QueryClientProvider client={queryClient}>
-        <AppContent />
-        <Toaster />
-      </QueryClientProvider>
-    </ClerkProvider>
+    <QueryClientProvider client={queryClient}>
+      <AppContent />
+      <Toaster />
+    </QueryClientProvider>
   );
 }
