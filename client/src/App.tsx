@@ -136,7 +136,7 @@ function AppContent() {
 
 export default function App() {
   return (
-    <ClerkProvider publishableKey="pk_test_dXNlZnVsLXJlZGZpc2gtMTUuY2xlcmsuYWNjb3VudHMuZGV2JA">
+    <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
       <QueryClientProvider client={queryClient}>
         <AppContent />
         <Toaster />
