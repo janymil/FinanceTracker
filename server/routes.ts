@@ -31,6 +31,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   setupClerkAuth(app);
 
+  // Explicitly block old auth endpoints that no longer exist
+  app.get('/api/login', (req, res) => {
+    res.status(404).json({ error: 'Login endpoint no longer exists. Please use /sign-in-clerk' });
+  });
+  
+  app.get('/api/logout', (req, res) => {
+    res.status(404).json({ error: 'Logout endpoint no longer exists. Please use Clerk sign out' });
+  });
+  
+  app.get('/api/callback', (req, res) => {
+    res.status(404).json({ error: 'Callback endpoint no longer exists. Authentication handled by Clerk' });
+  });
+
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {

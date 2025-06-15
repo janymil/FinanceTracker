@@ -28,7 +28,7 @@ const registerSchema = z.object({
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
-  const { user, loginMutation, registerMutation } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState("register");
 
   // Extract URL parameters from Stripe redirect
@@ -65,26 +65,13 @@ export default function AuthPage() {
   }
 
   const onLogin = (data: z.infer<typeof loginSchema>) => {
-    loginMutation.mutate(data, {
-      onSuccess: () => {
-        setLocation("/");
-      },
-    });
+    // Redirect to Clerk sign-in page
+    setLocation("/sign-in-clerk");
   };
 
   const onRegister = (data: z.infer<typeof registerSchema>) => {
-    const registrationData = {
-      ...data,
-      plan: selectedPlan,
-      stripeCustomerId: stripeCustomer,
-      stripeSubscriptionId: stripeSubscription,
-    };
-
-    registerMutation.mutate(registrationData, {
-      onSuccess: () => {
-        setLocation("/");
-      },
-    });
+    // Redirect to Clerk sign-up page
+    setLocation("/sign-up-clerk");
   };
 
   return (
