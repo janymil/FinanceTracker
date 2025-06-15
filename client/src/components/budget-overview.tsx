@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Edit3 } from "lucide-react";
 import { useMemo } from "react";
 import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Budget {
   id: number;
@@ -24,6 +25,7 @@ interface BudgetOverviewProps {
 
 export default function BudgetOverview({ className, isLimited = false }: BudgetOverviewProps) {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
 
   const { data: budgets, isLoading: budgetsLoading } = useQuery({
     queryKey: ['/api/budgets'],
