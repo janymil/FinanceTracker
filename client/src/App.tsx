@@ -135,22 +135,8 @@ function AppContent() {
 }
 
 export default function App() {
-  // Try multiple ways to get the publishable key
-  const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY 
-    || 'pk_test_dXNlZnVsLXJlZGZpc2gtMTUuY2xlcmsuYWNjb3VudHMuZGV2JA';
-
-  console.log('Using Clerk publishable key:', publishableKey ? 'Found' : 'Missing');
-
-  if (!publishableKey) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600">Clerk publishable key is missing</p>
-          <p className="text-sm text-gray-500 mt-2">Please add VITE_CLERK_PUBLISHABLE_KEY to Secrets</p>
-        </div>
-      </div>
-    );
-  }
+  // Use the working development key directly
+  const publishableKey = 'pk_test_dXNlZnVsLXJlZGZpc2gtMTUuY2xlcmsuYWNjb3VudHMuZGV2JA';
 
   return (
     <ClerkProvider publishableKey={publishableKey}>
