@@ -27,6 +27,9 @@ export default function CollaborativeGoalDetailPage() {
     enabled: !!id,
   });
 
+  // Debug log to see the actual data structure
+  console.log('Goal data received:', goal);
+
   const addContributionMutation = useMutation({
     mutationFn: async (data: { amount: string; note: string }) => {
       return apiRequest('POST', `/api/collaborative-goals/${id}/contributions`, data);
