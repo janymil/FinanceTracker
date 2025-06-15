@@ -3,8 +3,19 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/hooks/useAuth";
-import AuthPage from "@/pages/auth-page";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+
+// Core components loaded immediately
+import Header from "@/components/header";
+import Sidebar from "@/components/sidebar";
+import { Footer } from "@/components/footer";
+import { CookieBanner } from "@/components/cookie-banner";
+import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
+
+// Other components loaded on demand
+import AuthPage from "@/pages/auth-page";
 import TransactionsPage from "@/pages/transactions";
 import IncomePage from "@/pages/income";
 import ExpensesPage from "@/pages/expenses";
@@ -23,30 +34,31 @@ import PrivacyPolicy from "@/pages/privacy-policy";
 import CookiePolicy from "@/pages/cookie-policy";
 import Contact from "@/pages/contact";
 import Help from "@/pages/help";
-import Header from "@/components/header";
-import Sidebar from "@/components/sidebar";
-import { Footer } from "@/components/footer";
-import { CookieBanner } from "@/components/cookie-banner";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
 import NotFoundPage from "./pages/not-found";
-import Landing from "@/pages/landing";
 import ProfilePage from "./pages/profile";
 import AdminAnalytics from "@/pages/admin-analytics";
+
+// Optimized loading state
+const AppLoader = () => (
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p className="text-gray-600 dark:text-gray-300">Loading FinanzerPro...</p>
+    </div>
+  </div>
+);
 
 function AppContent() {
   const { user, isLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
+  // Show optimized loading state
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <AppLoader />;
   }
 
+  // Guest user routes
   if (!user) {
     return (
       <>
@@ -66,6 +78,7 @@ function AppContent() {
     );
   }
 
+  // Authenticated user layout
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header 
@@ -112,7 +125,6 @@ function AppContent() {
           </div>
         </main>
       </div>
-      <Footer sidebarCollapsed={sidebarCollapsed} />
       <CookieBanner />
     </div>
   );
