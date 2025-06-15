@@ -69,7 +69,14 @@ export default function Pricing() {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             {/* Free Plan */}
-            <Card className="border-2 relative">
+            <Card className={`border-2 relative ${isCurrentPlan('free') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}`}>
+              {isCurrentPlan('free') && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-green-500 text-white px-4 py-1">
+                    Current Plan
+                  </Badge>
+                </div>
+              )}
               <CardHeader className="text-center pb-8">
                 <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Star className="h-8 w-8 text-gray-600 dark:text-gray-300" />
@@ -106,20 +113,29 @@ export default function Pricing() {
                 <Button 
                   onClick={() => handleGetStarted('free')} 
                   className="w-full mt-6" 
-                  variant="outline"
+                  variant={isCurrentPlan('free') ? "default" : "outline"}
+                  disabled={isCurrentPlan('free')}
                 >
-                  Get Started Free
+                  {getButtonText('free')}
                 </Button>
               </CardContent>
             </Card>
 
             {/* Standard Plan */}
-            <Card className="border-2 border-blue-500 relative">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-blue-500 text-white px-4 py-1">
-                  Most Popular
-                </Badge>
-              </div>
+            <Card className={`border-2 relative ${isCurrentPlan('standard') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-blue-500'}`}>
+              {isCurrentPlan('standard') ? (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-green-500 text-white px-4 py-1">
+                    Current Plan
+                  </Badge>
+                </div>
+              ) : (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-blue-500 text-white px-4 py-1">
+                    Most Popular
+                  </Badge>
+                </div>
+              )}
               <CardHeader className="text-center pb-8 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-transparent">
                 <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <TrendingUp className="h-8 w-8 text-blue-600" />
@@ -160,23 +176,31 @@ export default function Pricing() {
                 <Button 
                   onClick={() => handleGetStarted('standard')} 
                   className="w-full mt-6 bg-blue-600 hover:bg-blue-700"
+                  disabled={isCurrentPlan('standard')}
                 >
-                  Subscribe Now
+                  {getButtonText('standard')}
                 </Button>
               </CardContent>
             </Card>
 
             {/* Premium Plan */}
-            <Card className="border-2 border-premium relative">
-              <CardHeader className="text-center pb-8 bg-gradient-to-br from-premium-light to-white dark:from-premium/20 dark:to-transparent">
+            <Card className={`border-2 relative ${isCurrentPlan('premium') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-purple-500'}`}>
+              {isCurrentPlan('premium') && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-green-500 text-white px-4 py-1">
+                    Current Plan
+                  </Badge>
+                </div>
+              )}
+              <CardHeader className="text-center pb-8 bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-transparent">
                 <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <Crown className="h-8 w-8 text-premium" />
+                  <Crown className="h-8 w-8 text-purple-600" />
                 </div>
                 <CardTitle className="text-2xl">Premium</CardTitle>
-                <div className="text-4xl font-bold text-premium">
+                <div className="text-4xl font-bold text-purple-600">
                   $9.99<span className="text-lg font-normal text-gray-500">/month</span>
                 </div>
-                <CardDescription>Complete AI-powered financial automation</CardDescription>
+                <CardDescription>The ultimate financial management experience</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
@@ -215,21 +239,28 @@ export default function Pricing() {
                 </div>
                 <Button 
                   onClick={() => handleGetStarted('premium')} 
-                  className="w-full mt-6 bg-premium hover:bg-premium/90"
+                  className="w-full mt-6 bg-purple-600 hover:bg-purple-700"
+                  disabled={isCurrentPlan('premium')}
                 >
-                  <Crown className="h-4 w-4 mr-2" />
-                  Subscribe Now
+                  {getButtonText('premium')}
                 </Button>
               </CardContent>
             </Card>
-              </div>
+            </div>
             </TabsContent>
-            
+
             <TabsContent value="yearly">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            {/* Free Plan */}
-            <Card className="border-2 relative">
+            {/* Free Plan - Yearly */}
+            <Card className={`border-2 relative ${isCurrentPlan('free') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}`}>
+              {isCurrentPlan('free') && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-green-500 text-white px-4 py-1">
+                    Current Plan
+                  </Badge>
+                </div>
+              )}
               <CardHeader className="text-center pb-8">
                 <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Star className="h-8 w-8 text-gray-600 dark:text-gray-300" />
@@ -266,20 +297,29 @@ export default function Pricing() {
                 <Button 
                   onClick={() => handleGetStarted('free')} 
                   className="w-full mt-6" 
-                  variant="outline"
+                  variant={isCurrentPlan('free') ? "default" : "outline"}
+                  disabled={isCurrentPlan('free')}
                 >
-                  Get Started Free
+                  {getButtonText('free')}
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Standard Plan */}
-            <Card className="border-2 border-blue-500 relative">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-green-500 text-white px-4 py-1">
-                  Save $9.98
-                </Badge>
-              </div>
+            {/* Standard Plan - Yearly */}
+            <Card className={`border-2 relative ${isCurrentPlan('standard') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-blue-500'}`}>
+              {isCurrentPlan('standard') ? (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-green-500 text-white px-4 py-1">
+                    Current Plan
+                  </Badge>
+                </div>
+              ) : (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-blue-500 text-white px-4 py-1">
+                    Most Popular
+                  </Badge>
+                </div>
+              )}
               <CardHeader className="text-center pb-8 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-transparent">
                 <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <TrendingUp className="h-8 w-8 text-blue-600" />
@@ -288,9 +328,7 @@ export default function Pricing() {
                 <div className="text-4xl font-bold text-blue-600">
                   $49.90<span className="text-lg font-normal text-gray-500">/year</span>
                 </div>
-                <div className="text-sm text-gray-600 dark:text-gray-300">
-                  $4.16/month • Save 2 months
-                </div>
+                <div className="text-sm text-green-600 font-medium mt-1">Save $9.98 annually</div>
                 <CardDescription>For users serious about financial management</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -323,31 +361,32 @@ export default function Pricing() {
                 <Button 
                   onClick={() => handleGetStarted('standard-yearly')} 
                   className="w-full mt-6 bg-blue-600 hover:bg-blue-700"
+                  disabled={isCurrentPlan('standard')}
                 >
-                  Subscribe Now
+                  {getButtonText('standard')}
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Premium Plan */}
-            <Card className="border-2 border-premium relative">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-green-500 text-white px-4 py-1">
-                  Save $19.98
-                </Badge>
-              </div>
-              <CardHeader className="text-center pb-8 bg-gradient-to-br from-premium-light to-white dark:from-premium/20 dark:to-transparent">
+            {/* Premium Plan - Yearly */}
+            <Card className={`border-2 relative ${isCurrentPlan('premium') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-purple-500'}`}>
+              {isCurrentPlan('premium') && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-green-500 text-white px-4 py-1">
+                    Current Plan
+                  </Badge>
+                </div>
+              )}
+              <CardHeader className="text-center pb-8 bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-transparent">
                 <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <Crown className="h-8 w-8 text-premium" />
+                  <Crown className="h-8 w-8 text-purple-600" />
                 </div>
                 <CardTitle className="text-2xl">Premium</CardTitle>
-                <div className="text-4xl font-bold text-premium">
+                <div className="text-4xl font-bold text-purple-600">
                   $99.90<span className="text-lg font-normal text-gray-500">/year</span>
                 </div>
-                <div className="text-sm text-gray-600 dark:text-gray-300">
-                  $8.33/month • Save 2 months
-                </div>
-                <CardDescription>Complete AI-powered financial automation</CardDescription>
+                <div className="text-sm text-green-600 font-medium mt-1">Save $19.98 annually</div>
+                <CardDescription>The ultimate financial management experience</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
@@ -386,127 +425,16 @@ export default function Pricing() {
                 </div>
                 <Button 
                   onClick={() => handleGetStarted('premium-yearly')} 
-                  className="w-full mt-6 bg-premium hover:bg-premium/90"
+                  className="w-full mt-6 bg-purple-600 hover:bg-purple-700"
+                  disabled={isCurrentPlan('premium')}
                 >
-                  <Crown className="h-4 w-4 mr-2" />
-                  Subscribe Now
+                  {getButtonText('premium')}
                 </Button>
               </CardContent>
             </Card>
-              </div>
+            </div>
             </TabsContent>
           </Tabs>
-        </div>
-      </section>
-
-      {/* Feature Comparison Table */}
-      <section className="py-16 bg-white/50 dark:bg-gray-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Compare All Features
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300">
-              See exactly what's included in each plan
-            </p>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-              <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-700">
-                  <th className="text-left p-6 font-semibold text-gray-900 dark:text-white">Features</th>
-                  <th className="text-center p-6 font-semibold text-gray-900 dark:text-white">Free</th>
-                  <th className="text-center p-6 font-semibold text-blue-600">Standard</th>
-                  <th className="text-center p-6 font-semibold text-premium">Premium</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Basic expense tracking</td>
-                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
-                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
-                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
-                </tr>
-                <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Transaction history</td>
-                  <td className="p-6 text-center text-gray-500">Last 3</td>
-                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
-                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
-                </tr>
-                <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Budget management</td>
-                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
-                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
-                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
-                </tr>
-                <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">AI categorization</td>
-                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
-                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
-                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
-                </tr>
-                <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Financial insights</td>
-                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
-                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
-                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
-                </tr>
-                <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Cloud backup</td>
-                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
-                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
-                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
-                </tr>
-                <tr>
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Priority support</td>
-                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
-                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
-                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Frequently Asked Questions
-            </h2>
-          </div>
-          
-          <div className="space-y-8">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Can I cancel my subscription anytime?
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Yes, you can cancel your subscription at any time. Your access will continue until the end of your current billing period.
-              </p>
-            </div>
-            
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Is there a free trial for paid plans?
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Yes, both Standard and Premium plans come with a 7-day free trial. No credit card required to start.
-              </p>
-            </div>
-            
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                How secure is my financial data?
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                We use industry-standard encryption to protect your data. Your information is encrypted both in transit and at rest.
-              </p>
-            </div>
-          </div>
         </div>
       </section>
     </div>
