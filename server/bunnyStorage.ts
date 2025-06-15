@@ -109,23 +109,45 @@ export class BunnyStorage {
   async listFiles(path = ''): Promise<StorageFileInfo[]> {
     try {
       console.log(`Attempting to list files at path: ${path}`);
-      const result = await this.makeRequest('GET', `/${path}/`);
-      console.log(`Bunny.net response for ${path}:`, result);
-      return Array.isArray(result) ? result : [];
-    } catch (error: any) {
-      console.log(`Bunny.net request failed for GET /${path}: ${error}`);
       
-      // Try without trailing slash if it failed
-      if (path && !error.message.includes('404')) {
+      // Try multiple path variations to handle different Bunny.net behaviors
+      const pathVariations = [
+        `/${path}/`,
+        `/${path}`,
+        path.endsWith('/') ? `/${path}` : `/${path}/`,
+        path
+      ];
+      
+      for (const tryPath of pathVariations) {
         try {
-          console.log(`Retrying without trailing slash: ${path}`);
-          const result = await this.makeRequest('GET', `/${path}`);
-          console.log(`Bunny.net response for ${path} (no slash):`, result);
-          return Array.isArray(result) ? result : [];
-        } catch (retryError: any) {
-          console.log(`Retry also failed: ${retryError}`);
+          const result = await this.makeRequest('GET', tryPath);
+          console.log(`Bunny.net response for ${tryPath}:`, result);
+          
+          if (Array.isArray(result)) {
+            return result;
+          }
+          
+          // Sometimes Bunny.net returns an object with array inside
+          if (result && typeof result === 'object') {
+            if (result.data && Array.isArray(result.data)) {
+              return result.data;
+            }
+            if (result.files && Array.isArray(result.files)) {
+              return result.files;
+            }
+            if (result.objects && Array.isArray(result.objects)) {
+              return result.objects;
+            }
+          }
+        } catch (pathError: any) {
+          console.log(`Path ${tryPath} failed: ${pathError.message}`);
+          continue;
         }
       }
+      
+      return [];
+    } catch (error: any) {
+      console.log(`Bunny.net request failed for all path variations of ${path}: ${error}`);
       
       // 404 errors are expected when directory doesn't exist yet
       if (error.message && (error.message.includes('404') || error.message.includes('Object Not Found'))) {
@@ -158,30 +180,51 @@ export class BunnyStorage {
   async getUserBackups(userId: string | number): Promise<StorageFileInfo[]> {
     console.log(`Getting backups for user ${userId} from 'backups/user-${userId}' folder`);
     
-    // Look directly in the user's backup folder
-    const userFolder = `backups/user-${userId}`;
-    const files = await this.listFiles(userFolder);
-    console.log(`Found ${files.length} files in ${userFolder}`);
+    // Try multiple folder path formats
+    const folderVariations = [
+      `backups/user-${userId}`,
+      `backups/user-${userId}/`,
+      `user-${userId}`,
+      `${userId}`,
+      `backups/${userId}`
+    ];
     
-    if (files.length > 0) {
-      console.log(`Backup files for user ${userId}:`, files.map(f => ({ 
-        name: f.ObjectName, 
-        size: f.Length, 
-        date: f.DateCreated,
-        isDirectory: f.IsDirectory 
-      })));
+    for (const userFolder of folderVariations) {
+      console.log(`Trying folder path: ${userFolder}`);
+      const files = await this.listFiles(userFolder);
+      console.log(`Found ${files.length} files in ${userFolder}`);
       
-      // Filter out directories and only return actual backup files
-      const backupFiles = files.filter(file => 
-        !file.IsDirectory && 
-        (file.ObjectName.includes('backup') || file.ObjectName.includes('.json'))
-      );
-      
-      console.log(`Found ${backupFiles.length} actual backup files for user ${userId}`);
-      return backupFiles;
+      if (files.length > 0) {
+        console.log(`Backup files for user ${userId} in ${userFolder}:`, files.map(f => ({ 
+          name: f.ObjectName, 
+          size: f.Length || f.Size || 0, 
+          date: f.DateCreated,
+          isDirectory: f.IsDirectory 
+        })));
+        
+        // Filter out directories and only return actual backup files
+        const backupFiles = files.filter(file => 
+          !file.IsDirectory && 
+          (file.ObjectName.includes('backup') || file.ObjectName.includes('.json') || file.ObjectName.endsWith('.json'))
+        );
+        
+        console.log(`Found ${backupFiles.length} actual backup files for user ${userId} in ${userFolder}`);
+        
+        if (backupFiles.length > 0) {
+          return backupFiles.sort((a, b) => new Date(b.DateCreated).getTime() - new Date(a.DateCreated).getTime());
+        }
+      }
     }
     
-    console.log(`No backup files found in ${userFolder}`);
+    // Also try listing root directory to see what's there
+    console.log(`Listing root directory to debug structure`);
+    const rootFiles = await this.listFiles('');
+    console.log(`Root directory contains:`, rootFiles.map(f => ({ 
+      name: f.ObjectName, 
+      isDirectory: f.IsDirectory 
+    })));
+    
+    console.log(`No backup files found for user ${userId} in any folder variation`);
     return [];
   }
 
@@ -220,9 +263,10 @@ export class BunnyStorage {
     newestBackup: string | null;
   }> {
     const backups = await this.getUserBackups(userId);
-    console.log(`Calculating backup info for ${backups.length} backups`);
+    console.log(`Calculating backup info for ${backups.length} backups for user ${userId}`);
     
     if (backups.length === 0) {
+      console.log(`No backups found for user ${userId}, returning zero values`);
       return {
         totalBackups: 0,
         totalSize: 0,
@@ -231,25 +275,28 @@ export class BunnyStorage {
       };
     }
     
-    // Use Length field from Bunny.net instead of Size
+    // Use Length field from Bunny.net instead of Size, with better fallback
     const totalSize = backups.reduce((sum, backup) => {
       const size = backup.Length || backup.Size || 0;
-      console.log(`Backup ${backup.ObjectName}: ${size} bytes`);
+      console.log(`Backup ${backup.ObjectName}: ${size} bytes (Length: ${backup.Length}, Size: ${backup.Size})`);
       return sum + size;
     }, 0);
     
-    console.log(`Total size calculated: ${totalSize} bytes`);
+    console.log(`Total size calculated: ${totalSize} bytes for ${backups.length} backups`);
     
     const sortedBackups = backups.sort((a, b) => 
       new Date(a.DateCreated).getTime() - new Date(b.DateCreated).getTime()
     );
     
-    return {
+    const result = {
       totalBackups: backups.length,
       totalSize,
-      oldestBackup: sortedBackups[0].DateCreated,
-      newestBackup: sortedBackups[sortedBackups.length - 1].DateCreated,
+      oldestBackup: sortedBackups[0]?.DateCreated || null,
+      newestBackup: sortedBackups[sortedBackups.length - 1]?.DateCreated || null,
     };
+    
+    console.log(`Final backup info for user ${userId}:`, result);
+    return result;
   }
 }
 

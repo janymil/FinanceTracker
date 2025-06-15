@@ -1652,6 +1652,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug Bunny.net storage endpoint (premium users only)
+  app.get('/api/debug/storage', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const user = await storage.getUser(userId);
+
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "Storage debug requires premium plan" });
+      }
+
+      const { bunnyStorage } = await import('./bunnyStorage');
+      
+      // Get root directory listing
+      const rootFiles = await bunnyStorage.listFiles('');
+      
+      // Get user-specific backups
+      const userBackups = await bunnyStorage.getUserBackups(userId);
+      
+      // Get backup info
+      const backupInfo = await bunnyStorage.getBackupInfo(userId);
+
+      res.json({
+        userId,
+        rootDirectory: rootFiles.map(f => ({
+          name: f.ObjectName,
+          isDirectory: f.IsDirectory,
+          size: f.Length || f.Size || 0,
+          created: f.DateCreated
+        })),
+        userBackups: userBackups.map(f => ({
+          name: f.ObjectName,
+          size: f.Length || f.Size || 0,
+          created: f.DateCreated
+        })),
+        backupInfo,
+        debugInfo: {
+          rootFileCount: rootFiles.length,
+          userBackupCount: userBackups.length,
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error("Error debugging storage:", error);
+      res.status(500).json({ message: "Failed to debug storage: " + (error instanceof Error ? error.message : 'Unknown error') });
+    }
+  });
+
   // Cache management endpoints (admin/debugging)
   app.get('/api/admin/cache/stats', isAuthenticated, async (req: any, res) => {
     try {
