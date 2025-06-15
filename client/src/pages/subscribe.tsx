@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,11 +10,8 @@ import { TrendingUp, Crown, Check, ArrowLeft, CreditCard } from "lucide-react";
 export default function Subscribe() {
   const [, setLocation] = useLocation();
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
   
-  // Get plan from URL params
-  const urlParams = new URLSearchParams(window.location.search);
-  const selectedPlan = urlParams.get('plan') || 'standard';
-
   const handleSubscribe = async (plan: string, interval: 'month' | 'year' = 'month') => {
     setLoading(true);
     try {
@@ -69,31 +67,10 @@ export default function Subscribe() {
     }
   };
 
-  const currentPlan = plans[selectedPlan as keyof typeof plans];
-
-  if (!currentPlan) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Invalid Plan</CardTitle>
-            <CardDescription>The selected plan is not available.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => setLocation('/')} className="w-full">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
             <Button 
@@ -104,7 +81,7 @@ export default function Subscribe() {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Home
             </Button>
-            <h1 className="text-4xl font-bold mb-4">Subscribe to {currentPlan.name}</h1>
+            <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
             <p className="text-gray-600 dark:text-gray-300">
               Unlock powerful financial management features with your subscription
             </p>
@@ -123,119 +100,182 @@ export default function Subscribe() {
             </TabsList>
 
             <TabsContent value="monthly">
-              <Card className="max-w-2xl mx-auto">
-                <CardHeader className="text-center pb-8 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-transparent">
-                  <div className={`p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center ${
-                    selectedPlan === 'premium' 
-                      ? 'bg-purple-100 dark:bg-purple-900' 
-                      : 'bg-blue-100 dark:bg-blue-900'
-                  }`}>
-                    {selectedPlan === 'premium' ? (
-                      <Crown className="h-8 w-8 text-purple-600" />
-                    ) : (
+              <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+                {/* Standard Plan */}
+                <Card className="relative">
+                  <CardHeader className="text-center pb-8 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-transparent">
+                    <div className="p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-blue-100 dark:bg-blue-900">
                       <TrendingUp className="h-8 w-8 text-blue-600" />
-                    )}
+                    </div>
+                    <CardTitle className="text-3xl">{plans.standard.name} Plan</CardTitle>
+                    <div className="text-5xl font-bold mb-2 text-blue-600">
+                      ${plans.standard.monthly}
+                      <span className="text-lg font-normal text-gray-500">/month</span>
+                    </div>
+                    <CardDescription>Billed monthly, cancel anytime</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-8">
+                    <div className="space-y-4 mb-8">
+                      {plans.standard.features.map((feature, index) => (
+                        <div key={index} className="flex items-center">
+                          <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Button 
+                      onClick={() => handleSubscribe('standard', 'month')}
+                      disabled={loading}
+                      className="w-full py-6 text-lg bg-blue-600 hover:bg-blue-700"
+                    >
+                      <CreditCard className="h-5 w-5 mr-2" />
+                      {loading ? 'Processing...' : `Subscribe for $${plans.standard.monthly}/month`}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Premium Plan */}
+                <Card className="relative border-purple-200 dark:border-purple-800">
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-purple-600 text-white px-4 py-1">
+                      <Crown className="h-3 w-3 mr-1" />
+                      Most Popular
+                    </Badge>
                   </div>
-                  <CardTitle className="text-3xl">{currentPlan.name} Plan</CardTitle>
-                  <div className={`text-5xl font-bold mb-2 ${
-                    selectedPlan === 'premium' ? 'text-purple-600' : 'text-blue-600'
-                  }`}>
-                    ${currentPlan.monthly}
-                    <span className="text-lg font-normal text-gray-500">/month</span>
-                  </div>
-                  <CardDescription>Billed monthly, cancel anytime</CardDescription>
-                </CardHeader>
-                <CardContent className="p-8">
-                  <div className="space-y-4 mb-8">
-                    {currentPlan.features.map((feature, index) => (
-                      <div key={index} className="flex items-center">
-                        <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                        <span>{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Button 
-                    onClick={() => handleSubscribe(selectedPlan, 'month')}
-                    disabled={loading}
-                    className={`w-full py-6 text-lg ${
-                      selectedPlan === 'premium'
-                        ? 'bg-purple-600 hover:bg-purple-700'
-                        : 'bg-blue-600 hover:bg-blue-700'
-                    }`}
-                  >
-                    <CreditCard className="h-5 w-5 mr-2" />
-                    {loading ? 'Processing...' : `Subscribe for $${currentPlan.monthly}/month`}
-                  </Button>
-                </CardContent>
-              </Card>
+                  <CardHeader className="text-center pb-8 bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-transparent">
+                    <div className="p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-purple-100 dark:bg-purple-900">
+                      <Crown className="h-8 w-8 text-purple-600" />
+                    </div>
+                    <CardTitle className="text-3xl">{plans.premium.name} Plan</CardTitle>
+                    <div className="text-5xl font-bold mb-2 text-purple-600">
+                      ${plans.premium.monthly}
+                      <span className="text-lg font-normal text-gray-500">/month</span>
+                    </div>
+                    <CardDescription>Billed monthly, cancel anytime</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-8">
+                    <div className="space-y-4 mb-8">
+                      {plans.premium.features.map((feature, index) => (
+                        <div key={index} className="flex items-center">
+                          <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Button 
+                      onClick={() => handleSubscribe('premium', 'month')}
+                      disabled={loading}
+                      className="w-full py-6 text-lg bg-purple-600 hover:bg-purple-700"
+                    >
+                      <CreditCard className="h-5 w-5 mr-2" />
+                      {loading ? 'Processing...' : `Subscribe for $${plans.premium.monthly}/month`}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             <TabsContent value="yearly">
-              <Card className="max-w-2xl mx-auto">
-                <CardHeader className="text-center pb-8 bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-transparent">
-                  <div className={`p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center ${
-                    selectedPlan === 'premium' 
-                      ? 'bg-purple-100 dark:bg-purple-900' 
-                      : 'bg-blue-100 dark:bg-blue-900'
-                  }`}>
-                    {selectedPlan === 'premium' ? (
-                      <Crown className="h-8 w-8 text-purple-600" />
-                    ) : (
+              <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+                {/* Standard Plan - Yearly */}
+                <Card className="relative">
+                  <CardHeader className="text-center pb-8 bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-transparent">
+                    <div className="p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-blue-100 dark:bg-blue-900">
                       <TrendingUp className="h-8 w-8 text-blue-600" />
-                    )}
+                    </div>
+                    <CardTitle className="text-3xl">{plans.standard.name} Plan</CardTitle>
+                    <div className="text-5xl font-bold mb-2 text-blue-600">
+                      ${plans.standard.yearly}
+                      <span className="text-lg font-normal text-gray-500">/year</span>
+                    </div>
+                    <CardDescription>
+                      Save ${((plans.standard.monthly * 12) - plans.standard.yearly).toFixed(2)} per year
+                    </CardDescription>
+                    <Badge className="mt-2 bg-green-100 text-green-800">
+                      17% Off
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="p-8">
+                    <div className="space-y-4 mb-8">
+                      {plans.standard.features.map((feature, index) => (
+                        <div key={index} className="flex items-center">
+                          <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Button 
+                      onClick={() => handleSubscribe('standard', 'year')}
+                      disabled={loading}
+                      className="w-full py-6 text-lg bg-blue-600 hover:bg-blue-700"
+                    >
+                      <CreditCard className="h-5 w-5 mr-2" />
+                      {loading ? 'Processing...' : `Subscribe for $${plans.standard.yearly}/year`}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Premium Plan - Yearly */}
+                <Card className="relative border-purple-200 dark:border-purple-800">
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-purple-600 text-white px-4 py-1">
+                      <Crown className="h-3 w-3 mr-1" />
+                      Best Value
+                    </Badge>
                   </div>
-                  <CardTitle className="text-3xl">{currentPlan.name} Plan</CardTitle>
-                  <div className={`text-5xl font-bold mb-2 ${
-                    selectedPlan === 'premium' ? 'text-purple-600' : 'text-blue-600'
-                  }`}>
-                    ${currentPlan.yearly}
-                    <span className="text-lg font-normal text-gray-500">/year</span>
-                  </div>
-                  <CardDescription>
-                    Save ${((currentPlan.monthly * 12) - currentPlan.yearly).toFixed(2)} per year
-                  </CardDescription>
-                  <Badge className="mt-2 bg-green-100 text-green-800">
-                    Best Value - 17% Off
-                  </Badge>
-                </CardHeader>
-                <CardContent className="p-8">
-                  <div className="space-y-4 mb-8">
-                    {currentPlan.features.map((feature, index) => (
-                      <div key={index} className="flex items-center">
-                        <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                        <span>{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Button 
-                    onClick={() => handleSubscribe(selectedPlan, 'year')}
-                    disabled={loading}
-                    className={`w-full py-6 text-lg ${
-                      selectedPlan === 'premium'
-                        ? 'bg-purple-600 hover:bg-purple-700'
-                        : 'bg-blue-600 hover:bg-blue-700'
-                    }`}
-                  >
-                    <CreditCard className="h-5 w-5 mr-2" />
-                    {loading ? 'Processing...' : `Subscribe for $${currentPlan.yearly}/year`}
-                  </Button>
-                </CardContent>
-              </Card>
+                  <CardHeader className="text-center pb-8 bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-transparent">
+                    <div className="p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-purple-100 dark:bg-purple-900">
+                      <Crown className="h-8 w-8 text-purple-600" />
+                    </div>
+                    <CardTitle className="text-3xl">{plans.premium.name} Plan</CardTitle>
+                    <div className="text-5xl font-bold mb-2 text-purple-600">
+                      ${plans.premium.yearly}
+                      <span className="text-lg font-normal text-gray-500">/year</span>
+                    </div>
+                    <CardDescription>
+                      Save ${((plans.premium.monthly * 12) - plans.premium.yearly).toFixed(2)} per year
+                    </CardDescription>
+                    <Badge className="mt-2 bg-green-100 text-green-800">
+                      Best Value - 17% Off
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="p-8">
+                    <div className="space-y-4 mb-8">
+                      {plans.premium.features.map((feature, index) => (
+                        <div key={index} className="flex items-center">
+                          <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Button 
+                      onClick={() => handleSubscribe('premium', 'year')}
+                      disabled={loading}
+                      className="w-full py-6 text-lg bg-purple-600 hover:bg-purple-700"
+                    >
+                      <CreditCard className="h-5 w-5 mr-2" />
+                      {loading ? 'Processing...' : `Subscribe for $${plans.premium.yearly}/year`}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
 
-          {/* Already have an account */}
-          <div className="text-center mt-8">
-            <p className="text-gray-600 dark:text-gray-300">
-              Already have an account?{' '}
-              <button 
-                onClick={() => setLocation('/auth')}
-                className="text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Sign in here
-              </button>
-            </p>
-          </div>
+          {/* Only show sign-in text for non-logged-in users */}
+          {!user && (
+            <div className="text-center mt-8">
+              <p className="text-gray-600 dark:text-gray-300">
+                Already have an account?{' '}
+                <a 
+                  href="/api/login"
+                  className="text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  Sign in here
+                </a>
+              </p>
+            </div>
+          )}
 
           {/* Security & Terms */}
           <div className="text-center mt-8 space-y-2">
