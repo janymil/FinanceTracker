@@ -10,6 +10,9 @@ export default function Pricing() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   
+  // Get user's current plan
+  const userPlan = user && 'plan' in user && user.plan ? user.plan : 'free';
+  
   const handleGetStarted = (plan: string) => {
     if (user) {
       if (plan === 'free') {
@@ -21,6 +24,18 @@ export default function Pricing() {
       setLocation('/sign-in-clerk');
     }
   };
+
+  const getButtonText = (plan: string) => {
+    if (userPlan === plan) {
+      return 'This is your plan';
+    }
+    if (plan === 'free') {
+      return 'Get Started Free';
+    }
+    return 'Subscribe Now';
+  };
+
+  const isCurrentPlan = (plan: string) => userPlan === plan;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
