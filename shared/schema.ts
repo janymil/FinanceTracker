@@ -13,7 +13,7 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Session storage table (required for Replit Auth)
+// Session storage table (for session management)
 export const sessions = pgTable(
   "sessions",
   {
@@ -24,16 +24,16 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table (required for Replit Auth)
+// User storage table (uses Clerk user IDs as primary key)
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(),
+  id: varchar("id").primaryKey().notNull(), // Clerk user ID (user_xxxxxxxxxxxxxxxxxxxxxxxx)
   email: varchar("email").unique(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   phone: varchar("phone"),
   website: varchar("website"),
-  password: varchar("password"), // Hashed password for additional security
+  password: varchar("password"), // Not used with Clerk auth, kept for compatibility
   plan: varchar("plan", { length: 20 }).default("free").notNull(),
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),

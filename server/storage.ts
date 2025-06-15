@@ -49,7 +49,6 @@ import { eq, and, gte, lte, desc, sum, count, sql, or, isNull } from "drizzle-or
 export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: any): Promise<User>;
   createUser(user: Omit<InsertUser, 'id' | 'createdAt' | 'updatedAt'>): Promise<User>;
@@ -66,23 +65,23 @@ export interface IStorage {
 
   // Transaction operations
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
-  getUserTransactions(userId: number, limit?: number): Promise<Transaction[]>;
+  getUserTransactions(userId: string, limit?: number): Promise<Transaction[]>;
   updateTransaction(id: number, transaction: Partial<InsertTransaction>): Promise<Transaction>;
-  deleteTransaction(id: number, userId: number): Promise<void>;
+  deleteTransaction(id: number, userId: string): Promise<void>;
   clearUserTransactions(userId: string): Promise<void>;
 
   // Budget operations
   createBudget(budget: InsertBudget): Promise<Budget>;
-  getUserBudgets(userId: number): Promise<Budget[]>;
+  getUserBudgets(userId: string): Promise<Budget[]>;
   updateBudget(id: number, budget: Partial<InsertBudget>): Promise<Budget>;
-  deleteBudget(id: number, userId: number): Promise<void>;
+  deleteBudget(id: number, userId: string): Promise<void>;
   clearUserBudgets(userId: string): Promise<void>;
 
   // Goal operations
   createGoal(goal: InsertGoal): Promise<Goal>;
-  getUserGoals(userId: number): Promise<Goal[]>;
+  getUserGoals(userId: string): Promise<Goal[]>;
   updateGoal(id: number, goal: Partial<InsertGoal>): Promise<Goal>;
-  deleteGoal(id: number, userId: number): Promise<void>;
+  deleteGoal(id: number, userId: string): Promise<void>;
 
   // Category operations
   getCategories(): Promise<Category[]>;
@@ -161,11 +160,6 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
-  }
-
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
     return user;
@@ -216,13 +210,12 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateUserStripeInfo(userId: number, customerId: string, subscriptionId: string): Promise<User> {
+  async updateUserStripeInfo(userId: string, customerId: string, subscriptionId: string): Promise<User> {
     const [user] = await db
       .update(users)
       .set({
         stripeCustomerId: customerId,
         stripeSubscriptionId: subscriptionId,
-        isPremium: true,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId))
@@ -230,12 +223,11 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUserPlan(userId: number, plan: string) {
+  async updateUserPlan(userId: string, plan: string): Promise<User> {
     const [user] = await db
       .update(users)
       .set({
         plan,
-        isPremium: plan !== 'free',
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId))
@@ -243,11 +235,10 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  // Legacy method - use updateUserPlan instead
-  async updateUserPremiumStatus(userId: number, isPremium: boolean): Promise<void> {
+  async updateUserPremiumStatus(userId: string, isPremium: boolean): Promise<User> {
     // Convert boolean to plan for backward compatibility
     const plan = isPremium ? 'premium' : 'free';
-    await this.updateUserPlan(userId, plan);
+    return await this.updateUserPlan(userId, plan);
   }
 
   // Transaction operations
