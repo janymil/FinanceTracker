@@ -280,15 +280,27 @@ export default function Transactions() {
       cat => cat.name === transaction.categoryName
     );
 
+    // Format the date properly - ensure it's in YYYY-MM-DD format
+    const formattedDate = transaction.date instanceof Date 
+      ? transaction.date.toISOString().split('T')[0]
+      : new Date(transaction.date).toISOString().split('T')[0];
+
+    // Format recurring end date if it exists
+    const formattedRecurringEndDate = transaction.recurringEndDate 
+      ? (transaction.recurringEndDate instanceof Date 
+          ? transaction.recurringEndDate.toISOString().split('T')[0]
+          : new Date(transaction.recurringEndDate).toISOString().split('T')[0])
+      : "";
+
     setNewTransaction({
-      amount: transaction.amount,
+      amount: transaction.amount.toString(),
       description: transaction.description,
-      date: transaction.date,
+      date: formattedDate,
       type: transaction.type,
       categoryId: matchingCategory ? matchingCategory.id.toString() : "",
-      isRecurring: transaction.isRecurring || false,
+      isRecurring: Boolean(transaction.isRecurring),
       recurringFrequency: (transaction.recurringFrequency as "weekly" | "monthly" | "yearly") || "monthly",
-      recurringEndDate: transaction.recurringEndDate ? new Date(transaction.recurringEndDate).toISOString().split('T')[0] : "",
+      recurringEndDate: formattedRecurringEndDate,
       paymentUrl: transaction.paymentUrl || "",
       referenceNote: transaction.referenceNote || "",
     });
