@@ -94,8 +94,8 @@ export interface IStorage {
   getUserExpenseReminders(userId: string): Promise<ExpenseReminder[]>;
   getUpcomingExpenseReminders(userId: string, daysBefore?: number): Promise<ExpenseReminder[]>;
   updateExpenseReminder(id: number, reminder: Partial<InsertExpenseReminder>): Promise<ExpenseReminder>;
-  deleteExpenseReminder(id: number, userId: number): Promise<void>;
-  markExpenseReminderCompleted(id: number, userId: number): Promise<void>;
+  deleteExpenseReminder(id: number, userId: string): Promise<void>;
+  markExpenseReminderCompleted(id: number, userId: string): Promise<void>;
 
   // Analytics
   getUserFinancialSummary(userId: string, startDate: Date, endDate: Date): Promise<{
@@ -106,17 +106,17 @@ export interface IStorage {
   }>;
 
   // Backup settings operations
-  getUserBackupSettings(userId: number): Promise<BackupSettings | undefined>;
+  getUserBackupSettings(userId: string): Promise<BackupSettings | undefined>;
   createBackupSettings(settings: InsertBackupSettings): Promise<BackupSettings>;
-  updateBackupSettings(userId: number, settings: Partial<InsertBackupSettings>): Promise<BackupSettings>;
-  getUsersWithActiveBackups(): Promise<Array<{ userId: number }>>;
-  getUsersWithOverdueBackups(): Promise<Array<{ userId: number }>>;
+  updateBackupSettings(userId: string, settings: Partial<InsertBackupSettings>): Promise<BackupSettings>;
+  getUsersWithActiveBackups(): Promise<Array<{ userId: string }>>;
+  getUsersWithOverdueBackups(): Promise<Array<{ userId: string }>>;
 
   // Profile Management
   updateUserProfile(userId: string, profileData: { firstName: string; lastName: string; email: string; phone?: string; website?: string }): Promise<void>;
   updateUserPassword(userId: string, hashedPassword: string): Promise<void>;
-  getUserSettings(userId: number): Promise<any>;
-  updateUserSettings(userId: number, settings: any): Promise<void>;
+  getUserSettings(userId: string): Promise<any>;
+  updateUserSettings(userId: string, settings: any): Promise<void>;
 
   // Collaborative Savings Goals
   // Friend management
@@ -657,7 +657,7 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async getUserExpenseReminders(userId: number): Promise<ExpenseReminder[]> {
+  async getUserExpenseReminders(userId: string): Promise<ExpenseReminder[]> {
     const results = await db
       .select()
       .from(expenseReminders)
@@ -666,7 +666,7 @@ export class DatabaseStorage implements IStorage {
     return results;
   }
 
-  async getUpcomingExpenseReminders(userId: number, daysBefore: number = 7): Promise<ExpenseReminder[]> {
+  async getUpcomingExpenseReminders(userId: string, daysBefore: number = 7): Promise<ExpenseReminder[]> {
     const now = new Date();
     const futureDate = new Date();
     futureDate.setDate(now.getDate() + daysBefore);
@@ -872,7 +872,7 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async deleteExpenseReminder(id: number, userId: number): Promise<void> {
+  async deleteExpenseReminder(id: number, userId: string): Promise<void> {
     await db
       .delete(expenseReminders)
       .where(and(eq(expenseReminders.id, id), eq(expenseReminders.userId, userId)));
