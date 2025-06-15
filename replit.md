@@ -208,6 +208,7 @@ Changelog:
 - June 15, 2025. Enhanced backup system to include ALL user data types: transactions, budgets, goals, expense reminders, collaborative goals, and categories
 - June 15, 2025. Implemented comprehensive date field conversion helper to properly handle JSON serialization/deserialization of Date objects in backup/restore operations
 - June 15, 2025. Completed fully functional cloud backup and restore system with real Bunny.net CDN integration for premium users
+- June 15, 2025. PDF export system remains with existing Puppeteer infrastructure - left as-is per user preference
 ```
 
 ## User Preferences
