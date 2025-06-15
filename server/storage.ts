@@ -91,14 +91,14 @@ export interface IStorage {
 
   // Expense reminder operations (Standard/Premium only)
   createExpenseReminder(reminder: InsertExpenseReminder): Promise<ExpenseReminder>;
-  getUserExpenseReminders(userId: number): Promise<ExpenseReminder[]>;
-  getUpcomingExpenseReminders(userId: number, daysBefore?: number): Promise<ExpenseReminder[]>;
+  getUserExpenseReminders(userId: string): Promise<ExpenseReminder[]>;
+  getUpcomingExpenseReminders(userId: string, daysBefore?: number): Promise<ExpenseReminder[]>;
   updateExpenseReminder(id: number, reminder: Partial<InsertExpenseReminder>): Promise<ExpenseReminder>;
   deleteExpenseReminder(id: number, userId: number): Promise<void>;
   markExpenseReminderCompleted(id: number, userId: number): Promise<void>;
 
   // Analytics
-  getUserFinancialSummary(userId: number, startDate: Date, endDate: Date): Promise<{
+  getUserFinancialSummary(userId: string, startDate: Date, endDate: Date): Promise<{
     totalIncome: number;
     totalExpenses: number;
     netBalance: number;
@@ -578,7 +578,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Analytics
-  async getUserFinancialSummary(userId: number, startDate: Date, endDate: Date) {
+  async getUserFinancialSummary(userId: string, startDate: Date, endDate: Date) {
     // Get income and expense totals with counts
     const incomeResult = await db
       .select({
