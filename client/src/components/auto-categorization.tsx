@@ -209,7 +209,7 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
 
 
   return (
-    <RequirePlan requiredPlan="standard" feature="Auto-Categorization">
+    <RequirePlan plan="standard" feature="Auto-Categorization">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
