@@ -111,7 +111,18 @@ export default function RequirePlan({ plan, children, feature, description, bene
     return null;
   }
 
-  const userPlan = (user.plan as PlanType) || 'free';
+  // Support both Clerk and Replit auth systems
+  let userPlan: PlanType = 'free';
+  
+  // Check for Clerk user with publicMetadata.plan
+  if (user.publicMetadata && typeof user.publicMetadata === 'object' && 'plan' in user.publicMetadata) {
+    userPlan = (user.publicMetadata.plan as PlanType) || 'free';
+  }
+  // Check for Replit user with direct plan property
+  else if (user.plan) {
+    userPlan = (user.plan as PlanType) || 'free';
+  }
+
   const requiredPlanLevel = planHierarchy[plan];
   const userPlanLevel = planHierarchy[userPlan];
 
