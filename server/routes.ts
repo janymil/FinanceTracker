@@ -1568,301 +1568,428 @@ export async function registerRoutes(app: Express): Promise<Server> {
           contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
           break;
         case 'pdf':
-          try {
-            const puppeteer = await import('puppeteer');
+          const ReactPDF = await import('@react-pdf/renderer');
+          const { ChartJSNodeCanvas } = await import('chartjs-node-canvas');
+          
+          // Create charts using Chart.js
+          const chartJSNodeCanvas = new ChartJSNodeCanvas({ 
+            width: 400, 
+            height: 300,
+            backgroundColour: '#ffffff'
+          });
+          
+          // Generate income vs expenses chart
+          let incomeExpenseChart = null;
+          if (exportData.summary) {
+            const chartConfig = {
+              type: 'doughnut' as const,
+              data: {
+                labels: ['Income', 'Expenses'],
+                datasets: [{
+                  data: [exportData.summary.totalIncome, exportData.summary.totalExpenses],
+                  backgroundColor: ['#10b981', '#ef4444'],
+                  borderWidth: 0
+                }]
+              },
+              options: {
+                responsive: false,
+                plugins: {
+                  legend: {
+                    position: 'bottom' as const,
+                    labels: {
+                      padding: 20,
+                      font: { size: 14 }
+                    }
+                  }
+                }
+              }
+            };
+            incomeExpenseChart = await chartJSNodeCanvas.renderToBuffer(chartConfig);
+          }
+          
+          // Generate monthly trend chart if we have transactions
+          let monthlyTrendChart = null;
+          if (exportData.transactions && exportData.transactions.length > 0) {
+            // Process transactions by month
+            const monthlyData: { [key: string]: { income: number; expenses: number } } = {};
             
-            // Create HTML template for the financial report
-            const htmlTemplate = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <title>Financial Report</title>
-            <style>
-              body { 
-                font-family: Arial, sans-serif; 
-                margin: 40px; 
-                color: #333;
-                line-height: 1.6;
+            exportData.transactions.forEach((t: any) => {
+              const month = new Date(t.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+              if (!monthlyData[month]) {
+                monthlyData[month] = { income: 0, expenses: 0 };
               }
-              .header { 
-                text-align: center; 
-                margin-bottom: 30px; 
-                border-bottom: 2px solid #4f46e5;
-                padding-bottom: 20px;
+              if (t.type === 'income') {
+                monthlyData[month].income += parseFloat(t.amount);
+              } else {
+                monthlyData[month].expenses += parseFloat(t.amount);
               }
-              .header h1 { 
-                color: #4f46e5; 
-                margin: 0;
-                font-size: 28px;
+            });
+            
+            const months = Object.keys(monthlyData).sort();
+            const incomeData = months.map(month => monthlyData[month].income);
+            const expenseData = months.map(month => monthlyData[month].expenses);
+            
+            const trendConfig = {
+              type: 'line' as const,
+              data: {
+                labels: months,
+                datasets: [
+                  {
+                    label: 'Income',
+                    data: incomeData,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.3
+                  },
+                  {
+                    label: 'Expenses',
+                    data: expenseData,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.3
+                  }
+                ]
+              },
+              options: {
+                responsive: false,
+                plugins: {
+                  legend: {
+                    position: 'top' as const
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      callback: function(value: any) {
+                        return '$' + value;
+                      }
+                    }
+                  }
+                }
               }
-              .header p { 
-                color: #666; 
-                margin: 5px 0;
-                font-size: 14px;
-              }
-              .summary { 
-                background: #f8fafc; 
-                padding: 20px; 
-                border-radius: 8px; 
-                margin: 20px 0;
-                border-left: 4px solid #4f46e5;
-              }
-              .summary h2 { 
-                color: #4f46e5; 
-                margin-top: 0;
-                font-size: 20px;
-              }
-              .metric { 
-                display: flex; 
-                justify-content: space-between; 
-                margin: 10px 0;
-                padding: 8px 0;
-                border-bottom: 1px solid #e2e8f0;
-              }
-              .metric:last-child { border-bottom: none; }
-              .metric-label { font-weight: bold; }
-              .metric-value { color: #059669; font-weight: bold; }
-              .metric-value.negative { color: #dc2626; }
-              .section { 
-                margin: 30px 0; 
-              }
-              .section h2 { 
-                color: #4f46e5; 
-                border-bottom: 1px solid #e2e8f0;
-                padding-bottom: 10px;
-                font-size: 18px;
-              }
-              table { 
-                width: 100%; 
-                border-collapse: collapse; 
-                margin: 15px 0;
-              }
-              th, td { 
-                padding: 12px; 
-                text-align: left; 
-                border-bottom: 1px solid #e2e8f0;
-              }
-              th { 
-                background: #f1f5f9; 
-                font-weight: bold;
-                color: #4f46e5;
-              }
-              .transaction-income { color: #059669; }
-              .transaction-expense { color: #dc2626; }
-              .footer { 
-                margin-top: 40px; 
-                text-align: center; 
-                color: #666; 
-                font-size: 12px;
-                border-top: 1px solid #e2e8f0;
-                padding-top: 20px;
-              }
-              @media print {
-                body { margin: 20px; }
-                .header { page-break-after: avoid; }
-                table { page-break-inside: avoid; }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <h1>FinanzerPro - Financial Report</h1>
-              <p>Report Period: ${start.toLocaleDateString()} - ${end.toLocaleDateString()}</p>
-              <p>Generated on: ${new Date().toLocaleDateString()}</p>
-            </div>
-
-            ${exportData.summary ? `
-            <div class="summary">
-              <h2>Financial Summary</h2>
-              <div class="metric">
-                <span class="metric-label">Total Income:</span>
-                <span class="metric-value">$${exportData.summary.totalIncome.toFixed(2)}</span>
-              </div>
-              <div class="metric">
-                <span class="metric-label">Total Expenses:</span>
-                <span class="metric-value negative">$${exportData.summary.totalExpenses.toFixed(2)}</span>
-              </div>
-              <div class="metric">
-                <span class="metric-label">Net Amount:</span>
-                <span class="metric-value ${exportData.summary.netAmount < 0 ? 'negative' : ''}">$${exportData.summary.netAmount.toFixed(2)}</span>
-              </div>
-              <div class="metric">
-                <span class="metric-label">Total Transactions:</span>
-                <span class="metric-value">${exportData.summary.transactionCount}</span>
-              </div>
-            </div>
-            ` : ''}
-
-            ${exportData.transactions && exportData.transactions.length > 0 ? `
-            <div class="section">
-              <h2>Transactions</h2>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Description</th>
-                    <th>Amount</th>
-                    <th>Type</th>
-                    <th>Category</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${exportData.transactions.map((t: any) => `
-                    <tr>
-                      <td>${new Date(t.date).toLocaleDateString()}</td>
-                      <td>${t.description}</td>
-                      <td class="transaction-${t.type}">$${parseFloat(t.amount).toFixed(2)}</td>
-                      <td>${t.type.charAt(0).toUpperCase() + t.type.slice(1)}</td>
-                      <td>${t.categoryId || 'Uncategorized'}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-            ` : ''}
-
-            ${exportData.budgets && exportData.budgets.length > 0 ? `
-            <div class="section">
-              <h2>Budgets</h2>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Category</th>
-                    <th>Budget Amount</th>
-                    <th>Period</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${exportData.budgets.map((b: any) => `
-                    <tr>
-                      <td>${b.categoryId}</td>
-                      <td>$${parseFloat(b.amount).toFixed(2)}</td>
-                      <td>${b.period}</td>
-                      <td>${new Date(b.startDate).toLocaleDateString()}</td>
-                      <td>${new Date(b.endDate).toLocaleDateString()}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-            ` : ''}
-
-            ${exportData.goals && exportData.goals.length > 0 ? `
-            <div class="section">
-              <h2>Financial Goals</h2>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Goal</th>
-                    <th>Target Amount</th>
-                    <th>Current Amount</th>
-                    <th>Progress</th>
-                    <th>Target Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${exportData.goals.map((g: any) => {
-                    const progress = ((parseFloat(g.currentAmount) / parseFloat(g.targetAmount)) * 100).toFixed(1);
-                    return `
-                    <tr>
-                      <td>${g.title}</td>
-                      <td>$${parseFloat(g.targetAmount).toFixed(2)}</td>
-                      <td>$${parseFloat(g.currentAmount).toFixed(2)}</td>
-                      <td>${progress}%</td>
-                      <td>${new Date(g.targetDate).toLocaleDateString()}</td>
-                    </tr>
-                  `;
-                  }).join('')}
-                </tbody>
-              </table>
-            </div>
-            ` : ''}
-
-            <div class="footer">
-              <p>This report was generated by FinanzerPro on ${new Date().toLocaleDateString()}</p>
-              <p>For questions or support, please contact us through our help system.</p>
-            </div>
-          </body>
-          </html>
-          `;
-
-          const browser = await puppeteer.launch({
-            headless: true,
-            args: [
-              '--no-sandbox', 
-              '--disable-setuid-sandbox',
-              '--disable-dev-shm-usage',
-              '--disable-accelerated-2d-canvas',
-              '--no-first-run',
-              '--no-zygote',
-              '--disable-gpu',
-              '--single-process',
-              '--disable-background-timer-throttling',
-              '--disable-backgrounding-occluded-windows',
-              '--disable-renderer-backgrounding'
-            ]
-          });
-          const page = await browser.newPage();
-          await page.setContent(htmlTemplate);
+            };
+            monthlyTrendChart = await chartJSNodeCanvas.renderToBuffer(trendConfig);
+          }
           
-          const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            margin: {
-              top: '20mm',
-              right: '15mm',
-              bottom: '20mm',
-              left: '15mm'
-            }
-          });
+          // Create React PDF Document
+          const PDFDocument = () => ReactPDF.createElement(ReactPDF.Document, null,
+            // Page 1 - Summary and Overview
+            ReactPDF.createElement(ReactPDF.Page, { 
+              size: 'A4', 
+              style: { 
+                fontFamily: 'Helvetica',
+                padding: 30,
+                backgroundColor: '#ffffff'
+              }
+            },
+              // Header
+              ReactPDF.createElement(ReactPDF.View, {
+                style: {
+                  backgroundColor: '#4f46e5',
+                  padding: 20,
+                  marginBottom: 20,
+                  borderRadius: 8
+                }
+              },
+                ReactPDF.createElement(ReactPDF.Text, {
+                  style: {
+                    fontSize: 24,
+                    color: '#ffffff',
+                    textAlign: 'center',
+                    fontWeight: 'bold'
+                  }
+                }, 'FinanzerPro - Financial Report'),
+                ReactPDF.createElement(ReactPDF.Text, {
+                  style: {
+                    fontSize: 12,
+                    color: '#e0e7ff',
+                    textAlign: 'center',
+                    marginTop: 5
+                  }
+                }, `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`)
+              ),
+              
+              // Financial Summary Section
+              exportData.summary ? ReactPDF.createElement(ReactPDF.View, {
+                style: {
+                  backgroundColor: '#f8fafc',
+                  padding: 20,
+                  marginBottom: 20,
+                  borderRadius: 8,
+                  borderLeft: '4px solid #4f46e5'
+                }
+              },
+                ReactPDF.createElement(ReactPDF.Text, {
+                  style: {
+                    fontSize: 18,
+                    color: '#4f46e5',
+                    fontWeight: 'bold',
+                    marginBottom: 15
+                  }
+                }, 'Financial Summary'),
+                
+                ReactPDF.createElement(ReactPDF.View, {
+                  style: {
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    marginBottom: 8
+                  }
+                },
+                  ReactPDF.createElement(ReactPDF.Text, {
+                    style: { fontSize: 12, fontWeight: 'bold' }
+                  }, 'Total Income:'),
+                  ReactPDF.createElement(ReactPDF.Text, {
+                    style: { fontSize: 12, color: '#10b981', fontWeight: 'bold' }
+                  }, `$${exportData.summary.totalIncome.toFixed(2)}`)
+                ),
+                
+                ReactPDF.createElement(ReactPDF.View, {
+                  style: {
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    marginBottom: 8
+                  }
+                },
+                  ReactPDF.createElement(ReactPDF.Text, {
+                    style: { fontSize: 12, fontWeight: 'bold' }
+                  }, 'Total Expenses:'),
+                  ReactPDF.createElement(ReactPDF.Text, {
+                    style: { fontSize: 12, color: '#ef4444', fontWeight: 'bold' }
+                  }, `$${exportData.summary.totalExpenses.toFixed(2)}`)
+                ),
+                
+                ReactPDF.createElement(ReactPDF.View, {
+                  style: {
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    marginBottom: 8,
+                    paddingTop: 8,
+                    borderTop: '1px solid #e2e8f0'
+                  }
+                },
+                  ReactPDF.createElement(ReactPDF.Text, {
+                    style: { fontSize: 14, fontWeight: 'bold' }
+                  }, 'Net Amount:'),
+                  ReactPDF.createElement(ReactPDF.Text, {
+                    style: { 
+                      fontSize: 14, 
+                      color: exportData.summary.netAmount >= 0 ? '#10b981' : '#ef4444',
+                      fontWeight: 'bold' 
+                    }
+                  }, `$${exportData.summary.netAmount.toFixed(2)}`)
+                ),
+                
+                ReactPDF.createElement(ReactPDF.View, {
+                  style: {
+                    flexDirection: 'row',
+                    justifyContent: 'space-between'
+                  }
+                },
+                  ReactPDF.createElement(ReactPDF.Text, {
+                    style: { fontSize: 12 }
+                  }, 'Total Transactions:'),
+                  ReactPDF.createElement(ReactPDF.Text, {
+                    style: { fontSize: 12, fontWeight: 'bold' }
+                  }, exportData.summary.transactionCount.toString())
+                )
+              ) : null,
+              
+              // Income vs Expenses Chart
+              incomeExpenseChart ? ReactPDF.createElement(ReactPDF.View, {
+                style: {
+                  marginBottom: 20,
+                  alignItems: 'center'
+                }
+              },
+                ReactPDF.createElement(ReactPDF.Text, {
+                  style: {
+                    fontSize: 16,
+                    color: '#4f46e5',
+                    fontWeight: 'bold',
+                    marginBottom: 10,
+                    textAlign: 'center'
+                  }
+                }, 'Income vs Expenses'),
+                ReactPDF.createElement(ReactPDF.Image, {
+                  src: incomeExpenseChart,
+                  style: {
+                    width: 300,
+                    height: 225
+                  }
+                })
+              ) : null,
+              
+              // Footer
+              ReactPDF.createElement(ReactPDF.Text, {
+                style: {
+                  position: 'absolute',
+                  bottom: 30,
+                  left: 0,
+                  right: 0,
+                  textAlign: 'center',
+                  fontSize: 10,
+                  color: '#6b7280'
+                }
+              }, `Generated by FinanzerPro on ${new Date().toLocaleDateString()}`)
+            ),
+            
+            // Page 2 - Charts and Trends
+            monthlyTrendChart ? ReactPDF.createElement(ReactPDF.Page, {
+              size: 'A4',
+              style: {
+                fontFamily: 'Helvetica',
+                padding: 30,
+                backgroundColor: '#ffffff'
+              }
+            },
+              ReactPDF.createElement(ReactPDF.Text, {
+                style: {
+                  fontSize: 20,
+                  color: '#4f46e5',
+                  fontWeight: 'bold',
+                  marginBottom: 20,
+                  textAlign: 'center'
+                }
+              }, 'Monthly Trends'),
+              
+              ReactPDF.createElement(ReactPDF.View, {
+                style: {
+                  alignItems: 'center',
+                  marginBottom: 30
+                }
+              },
+                ReactPDF.createElement(ReactPDF.Image, {
+                  src: monthlyTrendChart,
+                  style: {
+                    width: 500,
+                    height: 375
+                  }
+                })
+              )
+            ) : null,
+            
+            // Page 3 - Transaction Details
+            exportData.transactions && exportData.transactions.length > 0 ? ReactPDF.createElement(ReactPDF.Page, {
+              size: 'A4',
+              style: {
+                fontFamily: 'Helvetica',
+                padding: 30,
+                backgroundColor: '#ffffff'
+              }
+            },
+              ReactPDF.createElement(ReactPDF.Text, {
+                style: {
+                  fontSize: 18,
+                  color: '#4f46e5',
+                  fontWeight: 'bold',
+                  marginBottom: 15
+                }
+              }, 'Recent Transactions'),
+              
+              // Transaction table header
+              ReactPDF.createElement(ReactPDF.View, {
+                style: {
+                  flexDirection: 'row',
+                  backgroundColor: '#4f46e5',
+                  padding: 8,
+                  marginBottom: 5
+                }
+              },
+                ReactPDF.createElement(ReactPDF.Text, {
+                  style: {
+                    color: '#ffffff',
+                    fontSize: 10,
+                    fontWeight: 'bold',
+                    width: '15%'
+                  }
+                }, 'Date'),
+                ReactPDF.createElement(ReactPDF.Text, {
+                  style: {
+                    color: '#ffffff',
+                    fontSize: 10,
+                    fontWeight: 'bold',
+                    width: '35%'
+                  }
+                }, 'Description'),
+                ReactPDF.createElement(ReactPDF.Text, {
+                  style: {
+                    color: '#ffffff',
+                    fontSize: 10,
+                    fontWeight: 'bold',
+                    width: '20%'
+                  }
+                }, 'Amount'),
+                ReactPDF.createElement(ReactPDF.Text, {
+                  style: {
+                    color: '#ffffff',
+                    fontSize: 10,
+                    fontWeight: 'bold',
+                    width: '15%'
+                  }
+                }, 'Type'),
+                ReactPDF.createElement(ReactPDF.Text, {
+                  style: {
+                    color: '#ffffff',
+                    fontSize: 10,
+                    fontWeight: 'bold',
+                    width: '15%'
+                  }
+                }, 'Category')
+              ),
+              
+              // Transaction rows
+              ...exportData.transactions.slice(0, 30).map((t: any, index: number) =>
+                ReactPDF.createElement(ReactPDF.View, {
+                  key: index,
+                  style: {
+                    flexDirection: 'row',
+                    backgroundColor: index % 2 === 0 ? '#f9fafb' : '#ffffff',
+                    padding: 6,
+                    borderBottom: '1px solid #e5e7eb'
+                  }
+                },
+                  ReactPDF.createElement(ReactPDF.Text, {
+                    style: {
+                      fontSize: 9,
+                      width: '15%'
+                    }
+                  }, new Date(t.date).toLocaleDateString()),
+                  ReactPDF.createElement(ReactPDF.Text, {
+                    style: {
+                      fontSize: 9,
+                      width: '35%'
+                    }
+                  }, t.description.length > 30 ? t.description.substring(0, 30) + '...' : t.description),
+                  ReactPDF.createElement(ReactPDF.Text, {
+                    style: {
+                      fontSize: 9,
+                      width: '20%',
+                      color: t.type === 'income' ? '#10b981' : '#ef4444',
+                      fontWeight: 'bold'
+                    }
+                  }, `$${parseFloat(t.amount).toFixed(2)}`),
+                  ReactPDF.createElement(ReactPDF.Text, {
+                    style: {
+                      fontSize: 9,
+                      width: '15%'
+                    }
+                  }, t.type.charAt(0).toUpperCase() + t.type.slice(1)),
+                  ReactPDF.createElement(ReactPDF.Text, {
+                    style: {
+                      fontSize: 9,
+                      width: '15%'
+                    }
+                  }, t.categoryId || 'Other')
+                )
+              )
+            ) : null
+          );
           
-          await browser.close();
-          
+          const pdfBuffer = await ReactPDF.pdf(PDFDocument()).toBuffer();
           responseData = pdfBuffer;
           filename = `financial-report-${new Date().toISOString().split('T')[0]}.pdf`;
           contentType = 'application/pdf';
-          
-          } catch (puppeteerError) {
-            console.log('Puppeteer not available in development environment, generating fallback message');
-            
-            // Fallback message for development environment
-            const fallbackMessage = `
-PDF Export Notice
-
-The PDF export feature requires Chrome/Chromium to be installed and is not available in the current development environment.
-
-However, this feature will work perfectly when you deploy the application to production.
-
-For now, please use one of the other export formats:
-- Excel (.xlsx) - Full featured spreadsheet with multiple tabs
-- CSV (.csv) - Simple spreadsheet format
-- JSON (.json) - Complete data download
-
-Your financial data from ${start.toLocaleDateString()} to ${end.toLocaleDateString()}:
-
-Summary:
-- Total Income: $${exportData.summary?.totalIncome?.toFixed(2) || '0.00'}
-- Total Expenses: $${exportData.summary?.totalExpenses?.toFixed(2) || '0.00'}
-- Net Amount: $${exportData.summary?.netAmount?.toFixed(2) || '0.00'}
-- Total Transactions: ${exportData.summary?.transactionCount || 0}
-
-The PDF feature will generate a beautifully formatted report with:
-✓ Professional FinanzerPro branding
-✓ Complete financial summary
-✓ Detailed transaction tables
-✓ Budget and goals information
-✓ Print-ready formatting
-
-This will be available once deployed to production.
-            `;
-            
-            responseData = Buffer.from(fallbackMessage);
-            filename = `pdf-export-notice-${new Date().toISOString().split('T')[0]}.txt`;
-            contentType = 'text/plain';
-          }
           break;
         default:
           responseData = JSON.stringify(exportData, null, 2);
