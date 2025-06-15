@@ -1,22 +1,29 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useEffect, useMemo } from "react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+
+// Core components for immediate display
 import FinancialCards from "@/components/financial-cards";
 import TransactionList from "@/components/transaction-list";
-import TrendsChart from "@/components/trends-chart";
-import { ExpenseChart } from "@/components/expense-chart";
 import BudgetOverview from "@/components/budget-overview";
 import RequirePlan from "@/components/require-plan";
 import UpgradeBanner from "@/components/upgrade-banner";
-import FinancialHealthScore from "@/components/financial-health-score";
-import QuickFinancialSnapshot from "@/components/quick-financial-snapshot";
-import ContextualFinancialTips from "@/components/contextual-financial-tips";
-import RemindersStreaks from "@/components/reminders-streaks";
-import ExpensePrediction from "@/components/expense-prediction";
-import DailyRecommendations from "@/components/daily-recommendations";
 
-import AutoCategorization from "@/components/auto-categorization";
-import AIFinancialTips from "@/components/ai-financial-tips";
-import TransactionRemindersWidget from "@/components/transaction-reminders-widget";
+// Progressive loading components (loaded after core content)
+import { lazy, Suspense } from "react";
+const TrendsChart = lazy(() => import("@/components/trends-chart"));
+const ExpenseChart = lazy(() => import("@/components/expense-chart").then(module => ({ default: module.ExpenseChart })));
+const FinancialHealthScore = lazy(() => import("@/components/financial-health-score"));
+const QuickFinancialSnapshot = lazy(() => import("@/components/quick-financial-snapshot"));
+const ContextualFinancialTips = lazy(() => import("@/components/contextual-financial-tips"));
+const RemindersStreaks = lazy(() => import("@/components/reminders-streaks"));
+const ExpensePrediction = lazy(() => import("@/components/expense-prediction"));
+const DailyRecommendations = lazy(() => import("@/components/daily-recommendations"));
+const AutoCategorization = lazy(() => import("@/components/auto-categorization"));
+const AIFinancialTips = lazy(() => import("@/components/ai-financial-tips"));
+const TransactionRemindersWidget = lazy(() => import("@/components/transaction-reminders-widget"));
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,9 +31,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Calendar, ArrowUpRight, ArrowDownLeft, Repeat } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState, useEffect } from "react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
 
 interface Category {
   id: number;
