@@ -202,3 +202,5 @@ export function CookieBanner() {
     </div>
   );
 }
+
+export default CookieBanner;
