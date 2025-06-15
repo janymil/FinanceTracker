@@ -40,6 +40,9 @@ interface Transaction {
   categoryName?: string;
   categoryIcon?: string;
   categoryColor?: string;
+  isRecurring?: boolean;
+  recurringFrequency?: "weekly" | "monthly" | "yearly";
+  recurringEndDate?: string;
 }
 
 interface Category {
@@ -265,15 +268,21 @@ export default function Transactions() {
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
+    
+    // Find the category ID from the transaction's category name
+    const matchingCategory = (categories as Category[]).find(
+      cat => cat.name === transaction.categoryName
+    );
+    
     setNewTransaction({
       amount: transaction.amount,
       description: transaction.description,
       date: transaction.date,
       type: transaction.type,
-      categoryId: "", // You'd need to map category name to ID
-      isRecurring: false,
-      recurringFrequency: "monthly",
-      recurringEndDate: "",
+      categoryId: matchingCategory ? matchingCategory.id.toString() : "",
+      isRecurring: transaction.isRecurring || false,
+      recurringFrequency: (transaction.recurringFrequency as "weekly" | "monthly" | "yearly") || "monthly",
+      recurringEndDate: transaction.recurringEndDate ? new Date(transaction.recurringEndDate).toISOString().split('T')[0] : "",
     });
     setIsDialogOpen(true);
   };
