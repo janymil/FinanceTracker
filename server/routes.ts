@@ -165,16 +165,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const transactionId = parseInt(req.params.id);
-      const validatedData = insertTransactionSchema.parse({
-        ...req.body,
-        userId,
-        categoryId: req.body.categoryId ? parseInt(req.body.categoryId) : null,
-        amount: req.body.amount.toString(),
-        date: new Date(req.body.date),
-        recurringEndDate: req.body.recurringEndDate ? new Date(req.body.recurringEndDate) : null,
-      });
+      
+      // Only update fields that are actually provided in the request
+      const updateData: any = { userId }; // Always include userId for security
+      
+      if (req.body.amount !== undefined) {
+        updateData.amount = req.body.amount.toString();
+      }
+      if (req.body.description !== undefined) {
+        updateData.description = req.body.description;
+      }
+      if (req.body.categoryId !== undefined) {
+        updateData.categoryId = req.body.categoryId ? parseInt(req.body.categoryId) : null;
+      }
+      if (req.body.date !== undefined) {
+        updateData.date = new Date(req.body.date);
+      }
+      if (req.body.type !== undefined) {
+        updateData.type = req.body.type;
+      }
+      if (req.body.isRecurring !== undefined) {
+        updateData.isRecurring = req.body.isRecurring;
+      }
+      if (req.body.recurringFrequency !== undefined) {
+        updateData.recurringFrequency = req.body.recurringFrequency;
+      }
+      if (req.body.recurringEndDate !== undefined) {
+        updateData.recurringEndDate = req.body.recurringEndDate ? new Date(req.body.recurringEndDate) : null;
+      }
+      if (req.body.paymentUrl !== undefined) {
+        updateData.paymentUrl = req.body.paymentUrl;
+      }
+      if (req.body.referenceNote !== undefined) {
+        updateData.referenceNote = req.body.referenceNote;
+      }
 
-      const transaction = await storage.updateTransaction(transactionId, validatedData);
+      const transaction = await storage.updateTransaction(transactionId, updateData);
       res.json(transaction);
     } catch (error) {
       console.error("Error updating transaction:", error);
