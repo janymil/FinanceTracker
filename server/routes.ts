@@ -4,7 +4,7 @@ import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { users, transactions, budgets, categories, goals, type Transaction, type Budget, type Goal } from "@shared/schema";
-import { setupAuth, isAuthenticated } from "./auth";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setCookieConsent } from "./cookieMiddleware";
 import { insertTransactionSchema, insertBudgetSchema, insertGoalSchema, insertExpenseReminderSchema } from "@shared/schema";
 import { z } from "zod";
@@ -28,7 +28,7 @@ const COLORS = [
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  setupAuth(app);
+  await setupAuth(app);
 
   // Transaction routes
   app.post('/api/transactions', isAuthenticated, async (req: any, res) => {
