@@ -878,7 +878,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(expenseReminders.id, id), eq(expenseReminders.userId, userId)));
   }
 
-  async markExpenseReminderCompleted(id: number, userId: number): Promise<void> {
+  async markExpenseReminderCompleted(id: number, userId: string): Promise<void> {
     await db
       .update(expenseReminders)
       .set({ isCompleted: true, updatedAt: new Date() })
@@ -892,7 +892,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Backup settings operations
-  async getUserBackupSettings(userId: number): Promise<BackupSettings | undefined> {
+  async getUserBackupSettings(userId: string): Promise<BackupSettings | undefined> {
     const settings = await db
       .select()
       .from(backupSettings)
@@ -911,7 +911,7 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async updateBackupSettings(userId: number, settings: Partial<InsertBackupSettings>): Promise<BackupSettings> {
+  async updateBackupSettings(userId: string, settings: Partial<InsertBackupSettings>): Promise<BackupSettings> {
     const result = await db
       .update(backupSettings)
       .set({ ...settings, updatedAt: new Date() })
@@ -921,7 +921,7 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async getUsersWithActiveBackups(): Promise<Array<{ userId: number }>> {
+  async getUsersWithActiveBackups(): Promise<Array<{ userId: string }>> {
     const result = await db
       .select({ userId: backupSettings.userId })
       .from(backupSettings)
@@ -937,7 +937,7 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async getUsersWithOverdueBackups(): Promise<Array<{ userId: number }>> {
+  async getUsersWithOverdueBackups(): Promise<Array<{ userId: string }>> {
     const now = new Date();
 
     const result = await db
@@ -984,12 +984,12 @@ export class DatabaseStorage implements IStorage {
     }).where(eq(users.id, userId));
   }
 
-  async getUserSettings(userId: number): Promise<any> {
+  async getUserSettings(userId: string): Promise<any> {
     const user = await this.getUser(userId);
     return user?.settings ? JSON.parse(user.settings) : null;
   }
 
-  async updateUserSettings(userId: number, settings: any): Promise<void> {
+  async updateUserSettings(userId: string, settings: any): Promise<void> {
     await db.update(users).set({ settings: JSON.stringify(settings) }).where(eq(users.id, userId));
   }
 
