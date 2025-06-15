@@ -140,6 +140,7 @@ function AppContent() {
           </div>
         </main>
       </div>
+      <Footer sidebarCollapsed={sidebarCollapsed} />
       <FinancialMascot />
       <CookieBanner />
     </div>
