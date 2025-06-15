@@ -140,7 +140,7 @@ export const goals = pgTable("goals", {
 // Backup settings for cloud storage
 export const backupSettings = pgTable("backup_settings", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
   autoBackup: boolean("auto_backup").default(true),
   frequency: varchar("frequency", { length: 20 }).default("daily"), // daily, weekly, monthly
   retentionDays: integer("retention_days").default(7), // 7, 14, 30

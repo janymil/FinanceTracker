@@ -4,11 +4,11 @@ import { generateSpendingInsights, generateFinancialTips } from "./openai";
 import { aiCache } from "./cache";
 
 // Track users who need batch processing
-const batchQueue = new Set<number>();
-const processingInProgress = new Set<number>();
+const batchQueue = new Set<string>();
+const processingInProgress = new Set<string>();
 
 // Schedule a user for batch processing
-export function scheduleBatchProcessing(userId: number) {
+export function scheduleBatchProcessing(userId: string) {
   batchQueue.add(userId);
 }
 
@@ -99,7 +99,7 @@ async function processBatchedOperations() {
 }
 
 // Check if insights need updating based on transaction changes
-async function shouldProcessInsights(userId: number, transactions: any[]): Promise<boolean> {
+async function shouldProcessInsights(userId: string, transactions: any[]): Promise<boolean> {
   // Check if user has significant new transactions since last processing
   const recentTransactions = transactions.filter(t => {
     const transactionDate = new Date(t.date);
