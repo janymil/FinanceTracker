@@ -217,12 +217,13 @@ class BackupScheduler {
   }
 
   private async collectUserData(userId: string) {
-    const [transactions, budgets, expenseReminders, goals] = await Promise.all([
+    const [transactions, budgets, expenseReminders, goals, collaborativeGoals, categories] = await Promise.all([
       storage.getUserTransactions(userId),
       storage.getUserBudgets(userId),
       storage.getUserExpenseReminders(userId),
-      // Goals would need to be implemented in storage
-      []
+      storage.getUserGoals(userId),
+      storage.getUserCollaborativeGoals(userId),
+      storage.getCategories()
     ]);
 
     return {
@@ -230,10 +231,13 @@ class BackupScheduler {
       budgets,
       expenseReminders,
       goals,
+      collaborativeGoals,
+      categories,
       metadata: {
         exportDate: new Date().toISOString(),
-        version: '1.0',
-        userId
+        version: '2.0',
+        userId,
+        dataTypes: ['transactions', 'budgets', 'expenseReminders', 'goals', 'collaborativeGoals', 'categories']
       }
     };
   }

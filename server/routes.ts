@@ -1698,12 +1698,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Begin restore transaction
       console.log('RESTORE: Starting database restoration process...');
       
-      // Clear existing user data
+      // Clear existing user data completely
       console.log('RESTORE: Clearing existing user transactions...');
       await storage.clearUserTransactions(userId);
       
       console.log('RESTORE: Clearing existing user budgets...');
       await storage.clearUserBudgets(userId);
+      
+      console.log('RESTORE: Clearing existing user goals...');
+      await storage.clearUserGoals(userId);
+      
+      console.log('RESTORE: Clearing existing user expense reminders...');
+      await storage.clearUserExpenseReminders(userId);
+      
+      console.log('RESTORE: Clearing existing user collaborative goals...');
+      await storage.clearUserCollaborativeGoals(userId);
 
       // Restore transactions
       console.log(`RESTORE: Restoring ${backupData.transactions.length} transactions...`);
@@ -1725,6 +1734,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Restore goals if present
+      if (backupData.goals && backupData.goals.length > 0) {
+        console.log(`RESTORE: Restoring ${backupData.goals.length} goals...`);
+        for (const goal of backupData.goals) {
+          await storage.createGoal({
+            ...goal,
+            userId,
+            id: undefined // Let database generate new IDs
+          });
+        }
+      }
+
+      // Restore expense reminders if present
+      if (backupData.expenseReminders && backupData.expenseReminders.length > 0) {
+        console.log(`RESTORE: Restoring ${backupData.expenseReminders.length} expense reminders...`);
+        for (const reminder of backupData.expenseReminders) {
+          await storage.createExpenseReminder({
+            ...reminder,
+            userId,
+            id: undefined // Let database generate new IDs
+          });
+        }
+      }
+
+      // Restore collaborative goals if present
+      if (backupData.collaborativeGoals && backupData.collaborativeGoals.length > 0) {
+        console.log(`RESTORE: Restoring ${backupData.collaborativeGoals.length} collaborative goals...`);
+        for (const colGoal of backupData.collaborativeGoals) {
+          await storage.createCollaborativeGoal({
+            ...colGoal,
+            createdBy: userId,
+            id: undefined // Let database generate new IDs
+          });
+        }
+      }
+
       // Update backup settings with restore timestamp
       console.log('RESTORE: Updating backup settings with restore timestamp...');
       let settings = await storage.getUserBackupSettings(userId);
@@ -1736,7 +1781,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log(`RESTORE: Backup restoration completed successfully for user ${userId}`);
-      console.log(`RESTORE: Restored ${backupData.transactions.length} transactions and ${backupData.budgets.length} budgets`);
+      console.log(`RESTORE: Restored ${backupData.transactions.length} transactions, ${backupData.budgets.length} budgets, ${backupData.goals?.length || 0} goals, ${backupData.expenseReminders?.length || 0} expense reminders, ${backupData.collaborativeGoals?.length || 0} collaborative goals`);
 
       res.json({
         success: true,
@@ -1744,7 +1789,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         restoredData: {
           transactions: backupData.transactions.length,
           budgets: backupData.budgets.length,
-          categories: backupData.categories.length
+          categories: backupData.categories.length,
+          goals: backupData.goals?.length || 0,
+          expenseReminders: backupData.expenseReminders?.length || 0,
+          collaborativeGoals: backupData.collaborativeGoals?.length || 0
         },
         timestamp: new Date().toISOString()
       });
