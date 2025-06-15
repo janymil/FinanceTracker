@@ -23,19 +23,16 @@ export default function CollaborativeGoalDetailPage() {
   const [inviteEmail, setInviteEmail] = useState("");
 
   const { data: goal, isLoading } = useQuery({
-    queryKey: ['/api/collaborative-goals', id],
+    queryKey: [`/api/collaborative-goals/${id}`],
     enabled: !!id,
   });
-
-  // Debug log to see the actual data structure
-  console.log('Goal data received:', goal);
 
   const addContributionMutation = useMutation({
     mutationFn: async (data: { amount: string; note: string }) => {
       return apiRequest('POST', `/api/collaborative-goals/${id}/contributions`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/collaborative-goals', id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/collaborative-goals/${id}`] });
       setContributionAmount("");
       setContributionNote("");
       toast({
@@ -69,7 +66,7 @@ export default function CollaborativeGoalDetailPage() {
           description: `An invitation email has been sent to ${response.email}.`,
         });
       }
-      queryClient.invalidateQueries({ queryKey: ['/api/collaborative-goals', id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/collaborative-goals/${id}`] });
     },
     onError: (error: any) => {
       toast({
