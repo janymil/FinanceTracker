@@ -1,8 +1,9 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useState, useEffect, useMemo, lazy, Suspense } from "react";
+import { useState, useEffect, useMemo, lazy, Suspense, startTransition } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { DashboardSkeleton } from "@/components/dashboard-skeleton";
 
 // Core components for immediate display
 import FinancialCards from "@/components/financial-cards";
@@ -11,18 +12,18 @@ import BudgetOverview from "@/components/budget-overview";
 import RequirePlan from "@/components/require-plan";
 import UpgradeBanner from "@/components/upgrade-banner";
 
-// Secondary components (loaded normally for stability)
-import TrendsChart from "@/components/trends-chart";
-import { ExpenseChart } from "@/components/expense-chart";
-import FinancialHealthScore from "@/components/financial-health-score";
-import QuickFinancialSnapshot from "@/components/quick-financial-snapshot";
-import ContextualFinancialTips from "@/components/contextual-financial-tips";
-import RemindersStreaks from "@/components/reminders-streaks";
-import ExpensePrediction from "@/components/expense-prediction";
-import DailyRecommendations from "@/components/daily-recommendations";
-import AutoCategorization from "@/components/auto-categorization";
-import AIFinancialTips from "@/components/ai-financial-tips";
-import TransactionRemindersWidget from "@/components/transaction-reminders-widget";
+// Lazy-loaded secondary components for performance
+const TrendsChart = lazy(() => import("@/components/trends-chart"));
+const ExpenseChart = lazy(() => import("@/components/expense-chart").then(module => ({ default: module.ExpenseChart })));
+const FinancialHealthScore = lazy(() => import("@/components/financial-health-score"));
+const QuickFinancialSnapshot = lazy(() => import("@/components/quick-financial-snapshot"));
+const ContextualFinancialTips = lazy(() => import("@/components/contextual-financial-tips"));
+const RemindersStreaks = lazy(() => import("@/components/reminders-streaks"));
+const ExpensePrediction = lazy(() => import("@/components/expense-prediction"));
+const DailyRecommendations = lazy(() => import("@/components/daily-recommendations"));
+const AutoCategorization = lazy(() => import("@/components/auto-categorization"));
+const AIFinancialTips = lazy(() => import("@/components/ai-financial-tips"));
+const TransactionRemindersWidget = lazy(() => import("@/components/transaction-reminders-widget"));
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,6 +80,18 @@ export default function Dashboard() {
   const startDate = new Date(`${selectedMonth}-01`);
   const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
 
+  // Core data loads immediately
+  const { data: transactions, isLoading: transactionsLoading } = useQuery({
+    queryKey: ['/api/transactions'],
+    enabled: !!user,
+  });
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["/api/categories"],
+    enabled: !!user,
+  });
+
+  // Secondary data loads after a delay for better perceived performance
   const { data: financialSummary, isLoading: summaryLoading } = useQuery({
     queryKey: ['/api/financial-summary', startDate.toISOString(), endDate.toISOString()],
     queryFn: async () => {
@@ -90,22 +103,12 @@ export default function Dashboard() {
       if (!response.ok) throw new Error('Failed to fetch financial summary');
       return response.json();
     },
-    enabled: !!user,
-  });
-
-  const { data: transactions, isLoading: transactionsLoading } = useQuery({
-    queryKey: ['/api/transactions'],
-    enabled: !!user,
+    enabled: !!user && !!transactions, // Wait for transactions first
   });
 
   const { data: budgets } = useQuery({
     queryKey: ['/api/budgets'],
-    enabled: !!user,
-  });
-
-  const { data: categories = [] } = useQuery({
-    queryKey: ["/api/categories"],
-    enabled: !!user,
+    enabled: !!user && !!transactions, // Wait for transactions first
   });
 
   const createTransactionMutation = useMutation({
