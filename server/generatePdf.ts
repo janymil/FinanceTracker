@@ -273,7 +273,7 @@ export async function generatePdfReport(data: PDFData): Promise<Buffer> {
     });
 
     // Wait for charts to load
-    await page.waitForTimeout(3000);
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     const pdfBuffer = await page.pdf({
       format: 'A4',
