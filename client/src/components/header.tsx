@@ -441,10 +441,10 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
             <DropdownMenuContent align="end" className="w-56">
               <div className="px-2 py-1.5">
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  Jan Milata
+                  {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user?.email}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  jan.milata@gmail.com
+                  {user?.email}
                 </p>
               </div>
               <DropdownMenuSeparator />

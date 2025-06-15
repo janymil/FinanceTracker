@@ -54,24 +54,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       let user = await storage.getUser(userId);
+      const auth = req.auth();
+      const clerkUser = auth?.user;
       
-      // If user doesn't exist, create them using Clerk user data
-      if (!user) {
-        const auth = req.auth();
-        const clerkUser = auth?.user;
-        const userData = {
-          id: userId,
-          email: clerkUser?.emailAddresses?.[0]?.emailAddress || `${userId}@clerk.user`,
-          firstName: clerkUser?.firstName || null,
-          lastName: clerkUser?.lastName || null,
-          profileImageUrl: clerkUser?.imageUrl || null,
-          plan: 'free',
-          stripeCustomerId: null,
-          stripeSubscriptionId: null,
-          settings: null
-        };
-        user = await storage.upsertUser(userData);
-      }
+      // Always sync latest Clerk data (for existing users) or create new user
+      const userData = {
+        id: userId,
+        email: clerkUser?.emailAddresses?.[0]?.emailAddress || user?.email || `${userId}@clerk.user`,
+        firstName: clerkUser?.firstName || null,
+        lastName: clerkUser?.lastName || null,
+        profileImageUrl: clerkUser?.imageUrl || null,
+        plan: user?.plan || 'free',
+        stripeCustomerId: user?.stripeCustomerId || null,
+        stripeSubscriptionId: user?.stripeSubscriptionId || null,
+        settings: user?.settings || null
+      };
+      user = await storage.upsertUser(userData);
 
       res.json(user);
     } catch (error) {
