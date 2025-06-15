@@ -13,6 +13,7 @@ import {
   goalContributions,
   challengeActivities,
   milestoneAchievements,
+  financialMascots,
   type User,
   type InsertUser,
   type Transaction,
@@ -138,6 +139,12 @@ export interface IStorage {
   getGoalContributions(goalId: number): Promise<Array<GoalContribution & { user: User }>>;
   updateGoalProgress(goalId: number): Promise<void>;
   createChallengeActivity(activity: InsertChallengeActivity): Promise<ChallengeActivity>;
+
+  // Financial Mascot operations
+  getUserMascot(userId: string): Promise<FinancialMascot | undefined>;
+  createMascot(mascot: InsertFinancialMascot): Promise<FinancialMascot>;
+  updateMascot(userId: string, updates: Partial<InsertFinancialMascot>): Promise<FinancialMascot>;
+  toggleMascot(userId: string, enabled: boolean): Promise<FinancialMascot>;
   getGoalActivities(goalId: number): Promise<Array<ChallengeActivity & { user: User }>>;
 
   // Milestone and achievement tracking

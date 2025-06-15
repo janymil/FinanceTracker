@@ -239,6 +239,20 @@ export const milestoneAchievements = pgTable("milestone_achievements", {
   achievedAt: timestamp("achieved_at").defaultNow(),
 });
 
+// Financial Health Mascots
+export const financialMascots = pgTable("financial_mascots", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  imageUrl: text("image_url").notNull(),
+  healthScore: integer("health_score").notNull(),
+  mood: varchar("mood", { length: 50 }).notNull(), // excellent, good, neutral, concerned, worried
+  generationPrompt: text("generation_prompt").notNull(),
+  isEnabled: boolean("is_enabled").default(true).notNull(),
+  lastGenerated: timestamp("last_generated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Schema exports
 export type InsertUser = typeof users.$inferInsert;
 export type UpsertUser = typeof users.$inferInsert;
@@ -282,6 +296,9 @@ export type ChallengeActivity = typeof challengeActivities.$inferSelect;
 
 export type InsertMilestoneAchievement = typeof milestoneAchievements.$inferInsert;
 export type MilestoneAchievement = typeof milestoneAchievements.$inferSelect;
+
+export type InsertFinancialMascot = typeof financialMascots.$inferInsert;
+export type FinancialMascot = typeof financialMascots.$inferSelect;
 
 // Insert schemas
 export const insertTransactionSchema = createInsertSchema(transactions).omit({
