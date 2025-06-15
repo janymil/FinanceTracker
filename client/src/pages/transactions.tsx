@@ -134,18 +134,18 @@ export default function Transactions() {
     mutationFn: async ({ id, ...data }: { id: number } & typeof newTransaction) => {
       // Only send fields that have actually changed from the original transaction
       const updateData: any = {};
-      
+
       if (editingTransaction) {
         // Convert the original amount to string for comparison
         const originalAmount = editingTransaction.amount.toString();
         if (data.amount !== originalAmount) {
           updateData.amount = parseFloat(data.amount);
         }
-        
+
         if (data.description !== editingTransaction.description) {
           updateData.description = data.description;
         }
-        
+
         // Format original date for comparison
         const originalDate = editingTransaction.date instanceof Date 
           ? editingTransaction.date.toISOString().split('T')[0]
@@ -153,11 +153,11 @@ export default function Transactions() {
         if (data.date !== originalDate) {
           updateData.date = data.date;
         }
-        
+
         if (data.type !== editingTransaction.type) {
           updateData.type = data.type;
         }
-        
+
         // Find original category ID
         const originalCategory = (categories as Category[]).find(
           cat => cat.name === editingTransaction.categoryName
@@ -166,15 +166,15 @@ export default function Transactions() {
         if (data.categoryId !== originalCategoryId) {
           updateData.categoryId = data.categoryId ? parseInt(data.categoryId) : null;
         }
-        
+
         if (data.isRecurring !== Boolean(editingTransaction.isRecurring)) {
           updateData.isRecurring = data.isRecurring;
         }
-        
+
         if (data.recurringFrequency !== (editingTransaction.recurringFrequency || "monthly")) {
           updateData.recurringFrequency = data.recurringFrequency;
         }
-        
+
         // Format original recurring end date for comparison
         const originalRecurringEndDate = editingTransaction.recurringEndDate 
           ? (editingTransaction.recurringEndDate instanceof Date 
@@ -184,16 +184,16 @@ export default function Transactions() {
         if (data.recurringEndDate !== originalRecurringEndDate) {
           updateData.recurringEndDate = data.recurringEndDate || null;
         }
-        
+
         if (data.paymentUrl !== (editingTransaction.paymentUrl || "")) {
           updateData.paymentUrl = data.paymentUrl;
         }
-        
+
         if (data.referenceNote !== (editingTransaction.referenceNote || "")) {
           updateData.referenceNote = data.referenceNote;
         }
       }
-      
+
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
       return await res.json();
     },
@@ -420,8 +420,8 @@ export default function Transactions() {
                   Add Transaction
                 </Button>
               </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+                <DialogHeader className="flex-shrink-0">
                   <DialogTitle>
                     {editingTransaction ? "Edit Transaction" : "Add New Transaction"}
                   </DialogTitle>
@@ -430,7 +430,7 @@ export default function Transactions() {
                   </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4">
+                <div className="flex-1 overflow-y-auto space-y-4 px-1">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="amount">Amount</Label>

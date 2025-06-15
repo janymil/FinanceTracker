@@ -54,7 +54,7 @@ export default function Dashboard() {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
+
   // Defer expensive rendering to prevent Suspense errors
   const deferredSelectedMonth = useDeferredValue(selectedMonth);
   const deferredUser = useDeferredValue(user);
@@ -71,7 +71,7 @@ export default function Dashboard() {
       window.history.replaceState({}, '', '/dashboard');
     }
   }, [toast]);
-  
+
   const [newTransaction, setNewTransaction] = useState({
     amount: "",
     description: "",
@@ -173,7 +173,7 @@ export default function Dashboard() {
   const generateMonthOptions = () => {
     const options = [];
     const now = new Date();
-    
+
     for (let i = 0; i < 12; i++) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const year = date.getFullYear();
@@ -185,7 +185,7 @@ export default function Dashboard() {
       });
       options.push({ value, label });
     }
-    
+
     return options;
   };
 
@@ -252,7 +252,7 @@ export default function Dashboard() {
                       Record a new income or expense transaction
                     </DialogDescription>
                   </DialogHeader>
-                  
+
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -418,17 +418,19 @@ export default function Dashboard() {
                       </div>
                     </RequirePlan>
 
-                    <div className="flex justify-end gap-2 pt-4">
-                      <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button 
-                        onClick={handleSubmit}
-                        disabled={!newTransaction.amount || !newTransaction.description || createTransactionMutation.isPending}
-                      >
-                        Add
-                      </Button>
-                    </div>
+                    
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-4 border-t flex-shrink-0">
+                    <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleSubmit}
+                      disabled={!newTransaction.amount || !newTransaction.description || createTransactionMutation.isPending}
+                    >
+                      Add Transaction
+                    </Button>
                   </div>
                 </DialogContent>
               </Dialog>
@@ -539,11 +541,11 @@ export default function Dashboard() {
             {/* Advanced Features */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <LazyTransactionRemindersWidget />
-              
+
               <RequirePlan plan="standard">
                 <LazyRemindersStreaks />
               </RequirePlan>
-              
+
               <RequirePlan plan="standard">
                 <LazyAutoCategorization transactions={transactions as any} />
               </RequirePlan>
