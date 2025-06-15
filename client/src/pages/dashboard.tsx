@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useState, useEffect, useMemo, lazy, Suspense, startTransition } from "react";
+import { useState, useEffect, useMemo, lazy, Suspense, startTransition, useDeferredValue, useTransition } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardSkeleton } from "@/components/dashboard-skeleton";
@@ -44,11 +44,16 @@ interface Category {
 export default function Dashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [isPending, startTransition] = useTransition();
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  // Defer expensive rendering to prevent Suspense errors
+  const deferredSelectedMonth = useDeferredValue(selectedMonth);
+  const deferredUser = useDeferredValue(user);
 
   useEffect(() => {
     // Check for subscription success
@@ -470,8 +475,8 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Basic/Premium User Content */}
-        {(user?.plan === 'standard' || user?.plan === 'premium') && (
+        {/* Basic/Premium User Content - Rendered with startTransition */}
+        {(deferredUser?.plan === 'standard' || deferredUser?.plan === 'premium') && !isPending && (
           <div className="space-y-8">
             {/* Advanced Analytics Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -500,15 +505,17 @@ export default function Dashboard() {
                 isPremium={user?.plan === 'premium'}
               />
 
-              <ExpenseChart summary={{
-                totalExpenses: Math.abs(financialSummary?.totalExpenses || 0),
-                expensesByCategory: financialSummary?.transactionsByCategory
-                  ?.filter((cat: any) => cat.type === 'expense')
-                  ?.map((cat: any, index: number) => ({
-                    category: cat.categoryName,
-                    amount: Math.abs(cat.amount)
-                  })) || []
-              }} />
+              <Suspense fallback={<div className="h-96 bg-white dark:bg-gray-800 rounded-xl animate-pulse border"></div>}>
+                <ExpenseChart summary={{
+                  totalExpenses: Math.abs(financialSummary?.totalExpenses || 0),
+                  expensesByCategory: financialSummary?.transactionsByCategory
+                    ?.filter((cat: any) => cat.type === 'expense')
+                    ?.map((cat: any, index: number) => ({
+                      category: cat.categoryName,
+                      amount: Math.abs(cat.amount)
+                    })) || []
+                }} />
+              </Suspense>
             </div>
 
             {/* Budget Categories */}
