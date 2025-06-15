@@ -136,10 +136,10 @@ function AppContent() {
 
 export default function App() {
   const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_dXNlZnVsLXJlZGZpc2gtMTUuY2xlcmsuYWNjb3VudHMuZGV2JA';
-  
+
   console.log('Environment variable VITE_CLERK_PUBLISHABLE_KEY:', import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
   console.log('Using publishable key:', publishableKey);
-  
+
   if (!publishableKey) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -150,7 +150,7 @@ export default function App() {
       </div>
     );
   }
-  
+
   return (
     <ClerkProvider publishableKey={publishableKey}>
       <QueryClientProvider client={queryClient}>
