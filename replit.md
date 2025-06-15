@@ -198,6 +198,7 @@ Changelog:
 - June 15, 2025. Updated frontend to use ClerkProvider, useAuth hook with Clerk patterns, and signOut functionality
 - June 15, 2025. Migrated backend from isAuthenticated to requireAuth middleware with proper Clerk user access patterns
 - June 15, 2025. Updated user data handling to use Clerk's sessionClaims for firstName, lastName, email, and profileImageUrl
+- June 15, 2025. Fixed Clerk authentication loading states and screen blinking issues with proper ClerkProvider configuration
 ```
 
 ## User Preferences
