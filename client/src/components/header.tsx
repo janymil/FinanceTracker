@@ -276,94 +276,92 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                   </div>
                 </div>
 
-                {/* Smart Bill Assistant - Standard/Premium only, expenses only */}
-                {newTransaction.type === "expense" && (
-                  <RequirePlan plan="standard">
-                    <div className="space-y-4 border-t pt-4">
-                      <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Smart Bill Assistant
-                      </div>
-                      <div>
-                        <Label htmlFor="paymentUrl">Payment URL (Optional)</Label>
-                        <Input
-                          id="paymentUrl"
-                          type="url"
-                          value={newTransaction.paymentUrl}
-                          onChange={(e) => setNewTransaction({ ...newTransaction, paymentUrl: e.target.value })}
-                          placeholder="https://example.com/pay"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          Link to where you can pay this bill
-                        </p>
-                      </div>
-                      <div>
-                        <Label htmlFor="referenceNote">Reference Note (Optional)</Label>
-                        <Input
-                          id="referenceNote"
-                          value={newTransaction.referenceNote}
-                          onChange={(e) => setNewTransaction({ ...newTransaction, referenceNote: e.target.value })}
-                          placeholder="Account #123456, Reference: ABC789"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          Account number or other reference information
-                        </p>
-                      </div>
-                    </div>
-                  </RequirePlan>
-                )}
-
-                {/* Recurring transaction options - Standard/Premium only */}
+                {/* Premium Features - Standard/Premium only */}
                 <RequirePlan plan="standard">
                   <div className="space-y-4 border-t pt-4">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="recurring"
-                        checked={newTransaction.isRecurring}
-                        onCheckedChange={(checked) => 
-                          setNewTransaction({ ...newTransaction, isRecurring: checked as boolean })
-                        }
-                      />
-                      <label htmlFor="recurring" className="flex items-center text-sm font-medium">
-                        <Repeat className="h-4 w-4 mr-2" />
-                        Make this a recurring transaction
-                      </label>
-                    </div>
-
-                    {newTransaction.isRecurring && (
-                      <div className="grid grid-cols-2 gap-4 pl-6">
-                        <div>
-                          <Label htmlFor="frequency">Frequency</Label>
-                          <Select
-                            value={newTransaction.recurringFrequency}
-                            onValueChange={(value) => setNewTransaction({ 
-                              ...newTransaction, 
-                              recurringFrequency: value as "weekly" | "monthly" | "yearly" 
-                            })}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select frequency" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="weekly">Weekly</SelectItem>
-                              <SelectItem value="monthly">Monthly</SelectItem>
-                              <SelectItem value="yearly">Yearly</SelectItem>
-                            </SelectContent>
-                          </Select>
+                    {/* Smart Bill Assistant - for expenses only */}
+                    {newTransaction.type === "expense" && (
+                      <div className="space-y-4">
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Smart Bill Assistant
                         </div>
                         <div>
-                          <Label htmlFor="endDate">End Date (Optional)</Label>
+                          <Label htmlFor="paymentUrl">Payment URL (Optional)</Label>
                           <Input
-                            id="endDate"
-                            type="date"
-                            value={newTransaction.recurringEndDate}
-                            onChange={(e) => setNewTransaction({ 
-                              ...newTransaction, 
-                              recurringEndDate: e.target.value 
-                            })}
+                            id="paymentUrl"
+                            type="url"
+                            value={newTransaction.paymentUrl}
+                            onChange={(e) => setNewTransaction({ ...newTransaction, paymentUrl: e.target.value })}
+                            placeholder="https://example.com/pay"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Link to where you can pay this bill
+                          </p>
+                        </div>
+                        <div>
+                          <Label htmlFor="referenceNote">Reference Note (Optional)</Label>
+                          <Input
+                            id="referenceNote"
+                            value={newTransaction.referenceNote}
+                            onChange={(e) => setNewTransaction({ ...newTransaction, referenceNote: e.target.value })}
+                            placeholder="Invoice number, account reference, etc."
                           />
                         </div>
                       </div>
                     )}
+
+                    {/* Recurring transaction options */}
+                    <div className={newTransaction.type === "expense" ? "border-t pt-4 space-y-4" : "space-y-4"}>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="recurring"
+                          checked={newTransaction.isRecurring}
+                          onCheckedChange={(checked) => 
+                            setNewTransaction({ ...newTransaction, isRecurring: checked as boolean })
+                          }
+                        />
+                        <label htmlFor="recurring" className="flex items-center text-sm font-medium">
+                          <Repeat className="h-4 w-4 mr-2" />
+                          Make this a recurring transaction
+                        </label>
+                      </div>
+
+                      {newTransaction.isRecurring && (
+                        <div className="grid grid-cols-2 gap-4 pl-6">
+                          <div>
+                            <Label htmlFor="frequency">Frequency</Label>
+                            <Select
+                              value={newTransaction.recurringFrequency}
+                              onValueChange={(value) => setNewTransaction({ 
+                                ...newTransaction, 
+                                recurringFrequency: value as "weekly" | "monthly" | "yearly" 
+                              })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select frequency" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="weekly">Weekly</SelectItem>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                                <SelectItem value="yearly">Yearly</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label htmlFor="endDate">End Date (Optional)</Label>
+                            <Input
+                              id="endDate"
+                              type="date"
+                              value={newTransaction.recurringEndDate}
+                              onChange={(e) => setNewTransaction({ 
+                                ...newTransaction, 
+                                recurringEndDate: e.target.value 
+                              })}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </RequirePlan>
 

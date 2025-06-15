@@ -409,7 +409,7 @@ export default function Transactions() {
                     </Select>
                   </div>
 
-                  {/* Recurring transaction options - Standard/Premium only */}
+                  {/* Premium Features - Standard/Premium only */}
                   <RequirePlan plan="standard">
                     <div className="space-y-4 border-t pt-4">
                       <div className="flex items-center space-x-2">
