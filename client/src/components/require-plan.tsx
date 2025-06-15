@@ -124,3 +124,5 @@ export default function RequirePlan({ plan, children, feature, description, bene
     />
   );
 }
+
+export { RequirePlan };
