@@ -1258,7 +1258,7 @@ export class DatabaseStorage implements IStorage {
     return Math.random().toString(36).substring(2, 10).toUpperCase();
   }
 
-  async getUserCollaborativeGoals(userId: string): Promise<Array<CollaborativeGoal & { participants: CollaborativeGoalParticipant[], creator: User }>> {
+  async getUserCollaborativeGoals(userId: string): Promise<Array<CollaborativeGoal & { participants: Array<CollaborativeGoalParticipant & { user: User }>, creator: User }>> {
     const goals = await db
       .select({
         goal: collaborativeGoals,
@@ -1274,18 +1274,27 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    // Get participants for each goal
+    // Get participants for each goal with user data
     const result = [];
     for (const { goal, creator } of goals) {
-      const participants = await db
-        .select()
+      const participantsWithUsers = await db
+        .select({
+          participant: collaborativeGoalParticipants,
+          user: users,
+        })
         .from(collaborativeGoalParticipants)
+        .innerJoin(users, eq(collaborativeGoalParticipants.userId, users.id))
         .where(
           and(
             eq(collaborativeGoalParticipants.goalId, goal.id),
             eq(collaborativeGoalParticipants.status, "active")
           )
         );
+
+      const participants = participantsWithUsers.map(({ participant, user }) => ({
+        ...participant,
+        user,
+      }));
 
       result.push({ ...goal, participants, creator });
     }

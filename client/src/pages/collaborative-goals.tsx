@@ -488,9 +488,9 @@ export default function CollaborativeGoalsPage() {
                           <div className="flex -space-x-2">
                             {goal.participants.slice(0, 4).map((participant) => (
                               <Avatar key={participant.id} className="border-2 border-white dark:border-gray-800 w-8 h-8">
-                                <AvatarImage src={participant.user.profileImageUrl} />
+                                <AvatarImage src={participant.user?.profileImageUrl || ''} />
                                 <AvatarFallback className="text-xs">
-                                  {participant.user.firstName?.[0]}{participant.user.lastName?.[0]}
+                                  {participant.user?.firstName?.[0] || '?'}{participant.user?.lastName?.[0] || ''}
                                 </AvatarFallback>
                               </Avatar>
                             ))}
