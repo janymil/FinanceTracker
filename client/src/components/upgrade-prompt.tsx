@@ -13,7 +13,7 @@ interface UpgradePromptProps {
 }
 
 export default function UpgradePrompt({ 
-  requiredPlan, 
+  requiredPlan = 'premium', 
   feature, 
   description, 
   benefits, 

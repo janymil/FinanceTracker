@@ -14,6 +14,7 @@ import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import RequirePlan from "@/components/require-plan";
 
 interface Goal {
   id: number;
@@ -216,7 +217,7 @@ export default function Goals() {
   };
 
   return (
-    <div>
+    <RequirePlan plan="standard">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -537,6 +538,6 @@ export default function Goals() {
           </div>
         )}
       </div>
-    </div>
+    </RequirePlan>
   );
 }
