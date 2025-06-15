@@ -57,7 +57,7 @@ interface UserSettings {
 }
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, clerkUser } = useAuth();
   const { toast } = useToast();
   
   // Form states
@@ -71,16 +71,16 @@ export default function ProfilePage() {
 
   // Update form data when user data loads
   useEffect(() => {
-    if (user) {
+    if (user && clerkUser) {
       setProfileData({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        email: user.email || '',
-        phone: user.phone || '',
+        firstName: clerkUser.firstName || user.firstName || '',
+        lastName: clerkUser.lastName || user.lastName || '',
+        email: clerkUser.emailAddresses?.[0]?.emailAddress || user.email || '',
+        phone: clerkUser.phoneNumbers?.[0]?.phoneNumber || user.phone || '',
         website: user.website || ''
       });
     }
-  }, [user]);
+  }, [user, clerkUser]);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
