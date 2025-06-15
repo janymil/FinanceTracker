@@ -1568,426 +1568,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
           contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
           break;
         case 'pdf':
-          const ReactPDF = await import('@react-pdf/renderer');
-          const { ChartJSNodeCanvas } = await import('chartjs-node-canvas');
+          // Use simple text-based PDF generation instead of complex React PDF
+          const jsPDF = (await import('jspdf')).default;
+          const doc = new jsPDF();
           
-          // Create charts using Chart.js
-          const chartJSNodeCanvas = new ChartJSNodeCanvas({ 
-            width: 400, 
-            height: 300,
-            backgroundColour: '#ffffff'
-          });
+          // Header
+          doc.setFontSize(20);
+          doc.setTextColor(79, 70, 229);
+          doc.text('FinanzerPro - Financial Report', 20, 30);
           
-          // Generate income vs expenses chart
-          let incomeExpenseChart = null;
+          doc.setFontSize(12);
+          doc.setTextColor(100, 100, 100);
+          doc.text(`${start.toLocaleDateString()} to ${end.toLocaleDateString()}`, 20, 40);
+          
+          let yPosition = 60;
+          
+          // Financial Summary
           if (exportData.summary) {
-            const chartConfig = {
-              type: 'doughnut' as const,
-              data: {
-                labels: ['Income', 'Expenses'],
-                datasets: [{
-                  data: [exportData.summary.totalIncome, exportData.summary.totalExpenses],
-                  backgroundColor: ['#10b981', '#ef4444'],
-                  borderWidth: 0
-                }]
-              },
-              options: {
-                responsive: false,
-                plugins: {
-                  legend: {
-                    position: 'bottom' as const,
-                    labels: {
-                      padding: 20,
-                      font: { size: 14 }
-                    }
-                  }
-                }
-              }
-            };
-            incomeExpenseChart = await chartJSNodeCanvas.renderToBuffer(chartConfig);
+            doc.setFontSize(16);
+            doc.setTextColor(79, 70, 229);
+            doc.text('Financial Summary', 20, yPosition);
+            yPosition += 15;
+            
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Total Income: $${exportData.summary.totalIncome.toFixed(2)}`, 20, yPosition);
+            yPosition += 8;
+            doc.text(`Total Expenses: $${exportData.summary.totalExpenses.toFixed(2)}`, 20, yPosition);
+            yPosition += 8;
+            doc.text(`Net Amount: $${exportData.summary.netAmount.toFixed(2)}`, 20, yPosition);
+            yPosition += 8;
+            doc.text(`Total Transactions: ${exportData.summary.transactionCount}`, 20, yPosition);
+            yPosition += 20;
           }
           
-          // Generate monthly trend chart if we have transactions
-          let monthlyTrendChart = null;
-          if (exportData.transactions && exportData.transactions.length > 0) {
-            // Process transactions by month
-            const monthlyData: { [key: string]: { income: number; expenses: number } } = {};
-            
+          // Process category data
+          const categoryTotals: { [key: string]: number } = {};
+          if (exportData.transactions) {
             exportData.transactions.forEach((t: any) => {
-              const month = new Date(t.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
-              if (!monthlyData[month]) {
-                monthlyData[month] = { income: 0, expenses: 0 };
-              }
-              if (t.type === 'income') {
-                monthlyData[month].income += parseFloat(t.amount);
-              } else {
-                monthlyData[month].expenses += parseFloat(t.amount);
+              if (t.type === 'expense') {
+                const category = t.categoryId || 'Other';
+                categoryTotals[category] = (categoryTotals[category] || 0) + parseFloat(t.amount);
               }
             });
-            
-            const months = Object.keys(monthlyData).sort();
-            const incomeData = months.map(month => monthlyData[month].income);
-            const expenseData = months.map(month => monthlyData[month].expenses);
-            
-            const trendConfig = {
-              type: 'line' as const,
-              data: {
-                labels: months,
-                datasets: [
-                  {
-                    label: 'Income',
-                    data: incomeData,
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    tension: 0.3
-                  },
-                  {
-                    label: 'Expenses',
-                    data: expenseData,
-                    borderColor: '#ef4444',
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                    tension: 0.3
-                  }
-                ]
-              },
-              options: {
-                responsive: false,
-                plugins: {
-                  legend: {
-                    position: 'top' as const
-                  }
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    ticks: {
-                      callback: function(value: any) {
-                        return '$' + value;
-                      }
-                    }
-                  }
-                }
-              }
-            };
-            monthlyTrendChart = await chartJSNodeCanvas.renderToBuffer(trendConfig);
           }
           
-          // Create React PDF Document
-          const PDFDocument = () => ReactPDF.createElement(ReactPDF.Document, null,
-            // Page 1 - Summary and Overview
-            ReactPDF.createElement(ReactPDF.Page, { 
-              size: 'A4', 
-              style: { 
-                fontFamily: 'Helvetica',
-                padding: 30,
-                backgroundColor: '#ffffff'
-              }
-            },
-              // Header
-              ReactPDF.createElement(ReactPDF.View, {
-                style: {
-                  backgroundColor: '#4f46e5',
-                  padding: 20,
-                  marginBottom: 20,
-                  borderRadius: 8
-                }
-              },
-                ReactPDF.createElement(ReactPDF.Text, {
-                  style: {
-                    fontSize: 24,
-                    color: '#ffffff',
-                    textAlign: 'center',
-                    fontWeight: 'bold'
-                  }
-                }, 'FinanzerPro - Financial Report'),
-                ReactPDF.createElement(ReactPDF.Text, {
-                  style: {
-                    fontSize: 12,
-                    color: '#e0e7ff',
-                    textAlign: 'center',
-                    marginTop: 5
-                  }
-                }, `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`)
-              ),
-              
-              // Financial Summary Section
-              exportData.summary ? ReactPDF.createElement(ReactPDF.View, {
-                style: {
-                  backgroundColor: '#f8fafc',
-                  padding: 20,
-                  marginBottom: 20,
-                  borderRadius: 8,
-                  borderLeft: '4px solid #4f46e5'
-                }
-              },
-                ReactPDF.createElement(ReactPDF.Text, {
-                  style: {
-                    fontSize: 18,
-                    color: '#4f46e5',
-                    fontWeight: 'bold',
-                    marginBottom: 15
-                  }
-                }, 'Financial Summary'),
-                
-                ReactPDF.createElement(ReactPDF.View, {
-                  style: {
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    marginBottom: 8
-                  }
-                },
-                  ReactPDF.createElement(ReactPDF.Text, {
-                    style: { fontSize: 12, fontWeight: 'bold' }
-                  }, 'Total Income:'),
-                  ReactPDF.createElement(ReactPDF.Text, {
-                    style: { fontSize: 12, color: '#10b981', fontWeight: 'bold' }
-                  }, `$${exportData.summary.totalIncome.toFixed(2)}`)
-                ),
-                
-                ReactPDF.createElement(ReactPDF.View, {
-                  style: {
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    marginBottom: 8
-                  }
-                },
-                  ReactPDF.createElement(ReactPDF.Text, {
-                    style: { fontSize: 12, fontWeight: 'bold' }
-                  }, 'Total Expenses:'),
-                  ReactPDF.createElement(ReactPDF.Text, {
-                    style: { fontSize: 12, color: '#ef4444', fontWeight: 'bold' }
-                  }, `$${exportData.summary.totalExpenses.toFixed(2)}`)
-                ),
-                
-                ReactPDF.createElement(ReactPDF.View, {
-                  style: {
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    marginBottom: 8,
-                    paddingTop: 8,
-                    borderTop: '1px solid #e2e8f0'
-                  }
-                },
-                  ReactPDF.createElement(ReactPDF.Text, {
-                    style: { fontSize: 14, fontWeight: 'bold' }
-                  }, 'Net Amount:'),
-                  ReactPDF.createElement(ReactPDF.Text, {
-                    style: { 
-                      fontSize: 14, 
-                      color: exportData.summary.netAmount >= 0 ? '#10b981' : '#ef4444',
-                      fontWeight: 'bold' 
-                    }
-                  }, `$${exportData.summary.netAmount.toFixed(2)}`)
-                ),
-                
-                ReactPDF.createElement(ReactPDF.View, {
-                  style: {
-                    flexDirection: 'row',
-                    justifyContent: 'space-between'
-                  }
-                },
-                  ReactPDF.createElement(ReactPDF.Text, {
-                    style: { fontSize: 12 }
-                  }, 'Total Transactions:'),
-                  ReactPDF.createElement(ReactPDF.Text, {
-                    style: { fontSize: 12, fontWeight: 'bold' }
-                  }, exportData.summary.transactionCount.toString())
-                )
-              ) : null,
-              
-              // Income vs Expenses Chart
-              incomeExpenseChart ? ReactPDF.createElement(ReactPDF.View, {
-                style: {
-                  marginBottom: 20,
-                  alignItems: 'center'
-                }
-              },
-                ReactPDF.createElement(ReactPDF.Text, {
-                  style: {
-                    fontSize: 16,
-                    color: '#4f46e5',
-                    fontWeight: 'bold',
-                    marginBottom: 10,
-                    textAlign: 'center'
-                  }
-                }, 'Income vs Expenses'),
-                ReactPDF.createElement(ReactPDF.Image, {
-                  src: incomeExpenseChart,
-                  style: {
-                    width: 300,
-                    height: 225
-                  }
-                })
-              ) : null,
-              
-              // Footer
-              ReactPDF.createElement(ReactPDF.Text, {
-                style: {
-                  position: 'absolute',
-                  bottom: 30,
-                  left: 0,
-                  right: 0,
-                  textAlign: 'center',
-                  fontSize: 10,
-                  color: '#6b7280'
-                }
-              }, `Generated by FinanzerPro on ${new Date().toLocaleDateString()}`)
-            ),
-            
-            // Page 2 - Charts and Trends
-            monthlyTrendChart ? ReactPDF.createElement(ReactPDF.Page, {
-              size: 'A4',
-              style: {
-                fontFamily: 'Helvetica',
-                padding: 30,
-                backgroundColor: '#ffffff'
-              }
-            },
-              ReactPDF.createElement(ReactPDF.Text, {
-                style: {
-                  fontSize: 20,
-                  color: '#4f46e5',
-                  fontWeight: 'bold',
-                  marginBottom: 20,
-                  textAlign: 'center'
-                }
-              }, 'Monthly Trends'),
-              
-              ReactPDF.createElement(ReactPDF.View, {
-                style: {
-                  alignItems: 'center',
-                  marginBottom: 30
-                }
-              },
-                ReactPDF.createElement(ReactPDF.Image, {
-                  src: monthlyTrendChart,
-                  style: {
-                    width: 500,
-                    height: 375
-                  }
-                })
-              )
-            ) : null,
-            
-            // Page 3 - Transaction Details
-            exportData.transactions && exportData.transactions.length > 0 ? ReactPDF.createElement(ReactPDF.Page, {
-              size: 'A4',
-              style: {
-                fontFamily: 'Helvetica',
-                padding: 30,
-                backgroundColor: '#ffffff'
-              }
-            },
-              ReactPDF.createElement(ReactPDF.Text, {
-                style: {
-                  fontSize: 18,
-                  color: '#4f46e5',
-                  fontWeight: 'bold',
-                  marginBottom: 15
-                }
-              }, 'Recent Transactions'),
-              
-              // Transaction table header
-              ReactPDF.createElement(ReactPDF.View, {
-                style: {
-                  flexDirection: 'row',
-                  backgroundColor: '#4f46e5',
-                  padding: 8,
-                  marginBottom: 5
-                }
-              },
-                ReactPDF.createElement(ReactPDF.Text, {
-                  style: {
-                    color: '#ffffff',
-                    fontSize: 10,
-                    fontWeight: 'bold',
-                    width: '15%'
-                  }
-                }, 'Date'),
-                ReactPDF.createElement(ReactPDF.Text, {
-                  style: {
-                    color: '#ffffff',
-                    fontSize: 10,
-                    fontWeight: 'bold',
-                    width: '35%'
-                  }
-                }, 'Description'),
-                ReactPDF.createElement(ReactPDF.Text, {
-                  style: {
-                    color: '#ffffff',
-                    fontSize: 10,
-                    fontWeight: 'bold',
-                    width: '20%'
-                  }
-                }, 'Amount'),
-                ReactPDF.createElement(ReactPDF.Text, {
-                  style: {
-                    color: '#ffffff',
-                    fontSize: 10,
-                    fontWeight: 'bold',
-                    width: '15%'
-                  }
-                }, 'Type'),
-                ReactPDF.createElement(ReactPDF.Text, {
-                  style: {
-                    color: '#ffffff',
-                    fontSize: 10,
-                    fontWeight: 'bold',
-                    width: '15%'
-                  }
-                }, 'Category')
-              ),
-              
-              // Transaction rows
-              ...exportData.transactions.slice(0, 30).map((t: any, index: number) =>
-                ReactPDF.createElement(ReactPDF.View, {
-                  key: index,
-                  style: {
-                    flexDirection: 'row',
-                    backgroundColor: index % 2 === 0 ? '#f9fafb' : '#ffffff',
-                    padding: 6,
-                    borderBottom: '1px solid #e5e7eb'
-                  }
-                },
-                  ReactPDF.createElement(ReactPDF.Text, {
-                    style: {
-                      fontSize: 9,
-                      width: '15%'
-                    }
-                  }, new Date(t.date).toLocaleDateString()),
-                  ReactPDF.createElement(ReactPDF.Text, {
-                    style: {
-                      fontSize: 9,
-                      width: '35%'
-                    }
-                  }, t.description.length > 30 ? t.description.substring(0, 30) + '...' : t.description),
-                  ReactPDF.createElement(ReactPDF.Text, {
-                    style: {
-                      fontSize: 9,
-                      width: '20%',
-                      color: t.type === 'income' ? '#10b981' : '#ef4444',
-                      fontWeight: 'bold'
-                    }
-                  }, `$${parseFloat(t.amount).toFixed(2)}`),
-                  ReactPDF.createElement(ReactPDF.Text, {
-                    style: {
-                      fontSize: 9,
-                      width: '15%'
-                    }
-                  }, t.type.charAt(0).toUpperCase() + t.type.slice(1)),
-                  ReactPDF.createElement(ReactPDF.Text, {
-                    style: {
-                      fontSize: 9,
-                      width: '15%'
-                    }
-                  }, t.categoryId || 'Other')
-                )
-              )
-            ) : null
-          );
+          const topCategories = Object.entries(categoryTotals)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 5);
           
-          const pdfBuffer = await ReactPDF.pdf(PDFDocument()).toBuffer();
-          responseData = pdfBuffer;
+          // Top Categories
+          if (topCategories.length > 0) {
+            doc.setFontSize(14);
+            doc.setTextColor(79, 70, 229);
+            doc.text('Top Spending Categories', 20, yPosition);
+            yPosition += 12;
+            
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            topCategories.forEach(([category, amount]) => {
+              doc.text(`${category}: $${amount.toFixed(2)}`, 20, yPosition);
+              yPosition += 6;
+            });
+            yPosition += 15;
+          }
+          
+          // Recent Transactions
+          if (exportData.transactions && exportData.transactions.length > 0) {
+            // Add new page for transactions if needed
+            if (yPosition > 220) {
+              doc.addPage();
+              yPosition = 20;
+            }
+            
+            doc.setFontSize(14);
+            doc.setTextColor(79, 70, 229);
+            doc.text('Recent Transactions', 20, yPosition);
+            yPosition += 15;
+            
+            // Table headers
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+            doc.text('Date', 20, yPosition);
+            doc.text('Description', 50, yPosition);
+            doc.text('Amount', 120, yPosition);
+            doc.text('Type', 150, yPosition);
+            doc.text('Category', 170, yPosition);
+            yPosition += 8;
+            
+            // Transaction rows
+            exportData.transactions.slice(0, 25).forEach((t: any, index: number) => {
+              if (yPosition > 270) {
+                doc.addPage();
+                yPosition = 20;
+                // Re-add headers on new page
+                doc.text('Date', 20, yPosition);
+                doc.text('Description', 50, yPosition);
+                doc.text('Amount', 120, yPosition);
+                doc.text('Type', 150, yPosition);
+                doc.text('Category', 170, yPosition);
+                yPosition += 8;
+              }
+              
+              doc.setFontSize(8);
+              doc.text(new Date(t.date).toLocaleDateString(), 20, yPosition);
+              const desc = t.description.length > 20 ? t.description.substring(0, 20) + '...' : t.description;
+              doc.text(desc, 50, yPosition);
+              
+              // Color code amounts
+              if (t.type === 'income') {
+                doc.setTextColor(16, 185, 129);
+              } else {
+                doc.setTextColor(239, 68, 68);
+              }
+              doc.text(`$${parseFloat(t.amount).toFixed(2)}`, 120, yPosition);
+              
+              doc.setTextColor(0, 0, 0);
+              doc.text(t.type.charAt(0).toUpperCase() + t.type.slice(1), 150, yPosition);
+              doc.text(t.categoryId || 'Other', 170, yPosition);
+              yPosition += 6;
+            });
+          }
+          
+          // Footer
+          const pageCount = doc.getNumberOfPages();
+          for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text(`Generated by FinanzerPro on ${new Date().toLocaleDateString()} - Page ${i} of ${pageCount}`, 20, 285);
+          }
+          
+          responseData = Buffer.from(doc.output('arraybuffer'));
           filename = `financial-report-${new Date().toISOString().split('T')[0]}.pdf`;
           contentType = 'application/pdf';
           break;
