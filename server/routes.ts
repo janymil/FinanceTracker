@@ -1007,7 +1007,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const transactions = await storage.getUserTransactions(userId, 100);
       const budgets = await storage.getUserBudgets(userId);
       const categories = await storage.getCategories();
-      const summary = await storage.getUserFinancialSummary(userId);
+      
+      // Calculate summary from transactions
+      const totalIncome = transactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      const totalExpenses = transactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      
+      const summary = {
+        totalIncome,
+        totalExpenses,
+        netBalance: totalIncome - totalExpenses
+      };
 
       // Create category map
       const categoryMap = new Map();
@@ -1570,7 +1583,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/backup-status', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
       const user = await storage.getUser(userId);
 
       if (!user || user.plan !== 'premium') {
@@ -1639,7 +1655,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Cache management endpoints (admin/debugging)
   app.get('/api/admin/cache/stats', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const user = await storage.getUser(userId);
 
       // Only allow premium users to view cache stats for now
       if (!user || user.plan !== 'premium') {
@@ -1656,7 +1676,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/cache/clear', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const user = await storage.getUser(userId);
 
       // Only allow premium users to clear cache for now
       if (!user || user.plan !== 'premium') {
