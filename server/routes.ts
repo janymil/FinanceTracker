@@ -1414,11 +1414,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           categoryBreakdown[category] = (categoryBreakdown[category] || 0) + parseFloat(t.amount);
         });
 
-      // Prepare PDF data
+      // Prepare PDF data with proper data transformation
       const pdfData = {
-        transactions: monthlyTransactions,
-        budgets,
-        goals,
+        transactions: monthlyTransactions.map(t => ({
+          id: t.id,
+          amount: t.amount,
+          description: t.description,
+          date: t.date.toISOString(),
+          type: t.type as 'income' | 'expense',
+          categoryId: t.categoryId?.toString() || null
+        })),
+        budgets: budgets.map(b => ({
+          id: b.id,
+          name: b.categoryId.toString(), // Use categoryId as name for now
+          amount: b.amount,
+          spent: "0", // Calculate spent amount from transactions
+          categoryId: b.categoryId,
+          period: b.period
+        })),
+        goals: goals.map((g: any) => ({
+          id: g.id,
+          name: g.name,
+          targetAmount: g.targetAmount,
+          currentAmount: g.currentAmount,
+          targetDate: g.targetDate
+        })),
         summary: {
           totalIncome: income,
           totalExpenses: expenses,
@@ -1430,6 +1450,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         userName: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email || 'User'
       };
+
+      console.log('PDF Data prepared:', JSON.stringify(pdfData, null, 2));
 
       // Generate PDF
       const pdfBuffer = await generatePdfReport(pdfData);
