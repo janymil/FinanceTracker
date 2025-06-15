@@ -17,6 +17,8 @@ import Dashboard from "@/pages/dashboard";
 
 // Other components loaded on demand
 import AuthPage from "@/pages/auth-page";
+import ClerkSignInPage from "@/pages/clerk-sign-in";
+import ClerkSignUpPage from "@/pages/clerk-sign-up";
 import TransactionsPage from "@/pages/transactions";
 import IncomePage from "@/pages/income";
 import ExpensesPage from "@/pages/expenses";
@@ -61,7 +63,7 @@ function AppContent() {
   }
 
   // Public routes for guest users
-  const publicRoutes = ['/', '/pricing', '/privacy-policy', '/terms-of-service', '/cookie-policy', '/contact', '/help'];
+  const publicRoutes = ['/', '/pricing', '/privacy-policy', '/terms-of-service', '/cookie-policy', '/contact', '/help', '/sign-in-clerk', '/sign-up-clerk'];
   const currentPath = window.location.pathname;
   const isOnPublicRoute = publicRoutes.includes(currentPath);
 
@@ -83,6 +85,8 @@ function AppContent() {
           <Route path="/cookie-policy" component={CookiePolicy} />
           <Route path="/contact" component={Contact} />
           <Route path="/help" component={Help} />
+          <Route path="/sign-in-clerk" component={ClerkSignInPage} />
+          <Route path="/sign-up-clerk" component={ClerkSignUpPage} />
           <Route component={NotFoundPage} />
         </Switch>
         <Footer />
