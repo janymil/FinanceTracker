@@ -3,17 +3,25 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, FileText, Brain, Crown } from "lucide-react";
-import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
-import { useState } from "react";
+import { Calendar, TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, FileText, Brain, Download, Zap, Crown } from "lucide-react";
+import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from "date-fns";
+import { useState, useMemo } from "react";
 import RequirePlan from "@/components/require-plan";
+import MonthFilter from "@/components/month-filter";
+
+import InteractiveChart from "@/components/interactive-chart";
+import AIInsights from "@/components/ai-insights";
+import AutoCategorization from "@/components/auto-categorization";
 
 export default function Reports() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [selectedPeriod, setSelectedPeriod] = useState("month");
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
 
   if (!user) {
     return null;
@@ -22,12 +30,22 @@ export default function Reports() {
   const hasStandardOrBetter = user?.plan === 'standard' || user?.plan === 'premium';
   const hasPremium = user?.plan === 'premium';
 
-  // Get date range
+  // Calculate date ranges based on selected period
   const getDateRange = () => {
     const now = new Date();
     switch (selectedPeriod) {
+      case "week":
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - 7);
+        return { startDate: weekStart, endDate: now };
       case "month":
         return { startDate: startOfMonth(now), endDate: endOfMonth(now) };
+      case "quarter":
+        const quarterStart = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
+        const quarterEnd = new Date(quarterStart);
+        quarterEnd.setMonth(quarterStart.getMonth() + 3);
+        quarterEnd.setDate(0);
+        return { startDate: quarterStart, endDate: quarterEnd };
       case "year":
         return { startDate: startOfYear(now), endDate: endOfYear(now) };
       default:
@@ -37,143 +55,514 @@ export default function Reports() {
 
   const { startDate, endDate } = getDateRange();
 
-  // Fetch data
+  // Fetch financial summary data
+  const { data: financialSummary, isLoading: summaryLoading } = useQuery({
+    queryKey: ['/api/financial-summary', startDate.toISOString(), endDate.toISOString()],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString()
+      });
+      const response = await fetch(`/api/financial-summary?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch financial summary');
+      return response.json();
+    },
+    enabled: !!user,
+  });
+
+  // Fetch transactions for recent activity
   const { data: transactions } = useQuery({
     queryKey: ['/api/transactions'],
+    enabled: !!user,
   });
 
-  const { data: financialSummary } = useQuery({
-    queryKey: ['/api/financial-summary', format(startDate, 'yyyy-MM-dd'), format(endDate, 'yyyy-MM-dd')],
-  });
+  // Filter transactions based on selected month
+  const filteredTransactions = useMemo(() => {
+    if (!Array.isArray(transactions) || transactions.length === 0) {
+      return [];
+    }
+    
+    if (selectedMonth) {
+      const [year, month] = selectedMonth.split('-');
+      return transactions.filter((transaction: any) => {
+        const transactionDate = new Date(transaction.date);
+        return transactionDate.getFullYear() === parseInt(year) && 
+               transactionDate.getMonth() === parseInt(month) - 1;
+      });
+    }
+    
+    return transactions;
+  }, [transactions, selectedMonth]);
+
+  // Generate dynamic chart data from filtered transactions
+  const generateChartData = () => {
+    if (!Array.isArray(filteredTransactions) || filteredTransactions.length === 0) {
+      return [];
+    }
+
+    // Group transactions by month
+    const monthlyData: { [key: string]: { income: number; expenses: number } } = {};
+    
+    filteredTransactions.forEach((transaction: any) => {
+      const date = new Date(transaction.date);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = { income: 0, expenses: 0 };
+      }
+      
+      const amount = parseFloat(transaction.amount);
+      if (transaction.type === 'income') {
+        monthlyData[monthKey].income += amount;
+      } else {
+        monthlyData[monthKey].expenses += amount;
+      }
+    });
+
+    // Convert to chart format and sort by date
+    const chartData = Object.entries(monthlyData)
+      .map(([date, data]) => ({
+        date,
+        income: data.income,
+        expenses: data.expenses,
+        balance: data.income - data.expenses
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    return chartData;
+  };
+
+  const dynamicChartData = generateChartData();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Reports & Analytics
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-1">
-              Comprehensive financial insights and analysis
-            </p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-              <SelectTrigger className="w-40">
-                <Calendar className="h-4 w-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="month">This Month</SelectItem>
-                <SelectItem value="year">This Year</SelectItem>
-              </SelectContent>
-            </Select>
+    <div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Advanced Reports & Analytics
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300 mt-1">
+                AI-powered insights, interactive charts, and comprehensive financial analysis
+              </p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+                <SelectTrigger className="w-40">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                  <SelectItem value="quarter">This Quarter</SelectItem>
+                  <SelectItem value="year">This Year</SelectItem>
+                  <SelectItem value="custom">Custom Range</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="summary" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="summary" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Summary
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Analytics
-          </TabsTrigger>
-        </TabsList>
+        {/* Month Navigation Filter */}
+        <MonthFilter 
+          selectedMonth={selectedMonth}
+          onMonthSelect={setSelectedMonth}
+          onDateRangeReset={() => setSelectedPeriod("month")}
+        />
 
-        {/* Summary Tab */}
-        <TabsContent value="summary" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Income</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  ${financialSummary?.totalIncome?.toFixed(2) || '0.00'}
-                </div>
-              </CardContent>
-            </Card>
+        {/* Reports Tabs - Basic available for all, Advanced for Premium */}
+        <Tabs defaultValue="summary" className="space-y-6">
+          <TabsList className={`grid w-full ${hasPremium ? 'grid-cols-4' : hasStandardOrBetter ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            <TabsTrigger value="summary" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Summary
+            </TabsTrigger>
+            {hasStandardOrBetter && (
+              <TabsTrigger value="analytics" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Analytics
+              </TabsTrigger>
+            )}
+            {hasPremium && (
+              <TabsTrigger value="insights" className="flex items-center gap-2">
+                <Brain className="h-4 w-4" />
+                AI Insights
+              </TabsTrigger>
+            )}
+            {hasPremium && (
+              <TabsTrigger value="categorization" className="flex items-center gap-2">
+                <Zap className="h-4 w-4" />
+                Auto-Tag
+              </TabsTrigger>
+            )}
+          </TabsList>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
-                <TrendingDown className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  ${financialSummary?.totalExpenses?.toFixed(2) || '0.00'}
-                </div>
-              </CardContent>
-            </Card>
+          {/* Interactive Analytics */}
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <RequirePlan plan="standard">
+                <InteractiveChart
+                  data={dynamicChartData}
+                  chartType="line"
+                  title="Income vs Expenses Trend"
+                  description="Track your cash flow over time with interactive zoom and insights"
+                  onExport={() => console.log("Exporting chart...")}
+                />
+              </RequirePlan>
+              <RequirePlan plan="standard">
+                <InteractiveChart
+                  data={dynamicChartData}
+                  chartType="bar"
+                  title="Monthly Comparison"
+                  description="Compare monthly performance with detailed tooltips"
+                />
+              </RequirePlan>
+            </div>
+            <RequirePlan plan="standard">
+              <InteractiveChart
+                data={dynamicChartData}
+                chartType="area"
+                title="Financial Overview"
+                description="Comprehensive view of your financial health with trend analysis"
+              />
+            </RequirePlan>
+          </TabsContent>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Net Savings</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  ${((financialSummary?.totalIncome || 0) - (financialSummary?.totalExpenses || 0)).toFixed(2)}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {/* AI Insights */}
+          <TabsContent value="insights" className="space-y-6">
+            <RequirePlan plan="premium">
+              <AIInsights 
+                data={{
+                  transactions: Array.isArray(transactions) ? transactions : [],
+                  budgets: [],
+                  goals: []
+                }}
+              />
+            </RequirePlan>
+          </TabsContent>
 
-          {!hasStandardOrBetter && (
-            <Card className="border-2 border-dashed border-gray-300 dark:border-gray-600">
-              <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-                <BarChart3 className="h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Advanced Analytics Available</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4 max-w-md">
-                  Unlock interactive charts and detailed analysis with Standard plan.
-                </p>
-                <Button 
-                  onClick={() => setLocation("/subscribe")}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  <Crown className="h-4 w-4 mr-2" />
-                  Upgrade to Standard
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
 
-        {/* Analytics Tab */}
-        <TabsContent value="analytics" className="space-y-6">
-          <RequirePlan plan="standard">
-            <div className="grid grid-cols-1 gap-6">
+
+          {/* Auto-Categorization */}
+          <TabsContent value="categorization" className="space-y-6">
+            <RequirePlan plan="standard">
+              <AutoCategorization 
+                transactions={Array.isArray(transactions) ? transactions : []}
+              />
+            </RequirePlan>
+          </TabsContent>
+
+          {/* Financial Summary - Available for All Users */}
+          <TabsContent value="summary" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Monthly Overview */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Advanced Analytics</CardTitle>
+                  <CardTitle>Monthly Overview</CardTitle>
                   <CardDescription>
-                    Interactive charts and detailed financial analysis
+                    Basic financial summary for {selectedPeriod === "month" ? "this month" : selectedPeriod}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-12">
-                    <BarChart3 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      Interactive Charts Coming Soon
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      Advanced analytics features will be available here
-                    </p>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-green-100 dark:bg-green-800 rounded-full">
+                          <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-green-900 dark:text-green-100">Total Income</p>
+                          <p className="text-xs text-green-600 dark:text-green-400">Current month</p>
+                        </div>
+                      </div>
+                      <p className="text-xl font-bold text-green-700 dark:text-green-300">
+                        {summaryLoading ? (
+                          <Skeleton className="h-6 w-16" />
+                        ) : (
+                          `$${financialSummary?.totalIncome?.toFixed(2) || '0.00'}`
+                        )}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-red-100 dark:bg-red-800 rounded-full">
+                          <PieChart className="h-4 w-4 text-red-600 dark:text-red-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-red-900 dark:text-red-100">Total Expenses</p>
+                          <p className="text-xs text-red-600 dark:text-red-400">Current month</p>
+                        </div>
+                      </div>
+                      <p className="text-xl font-bold text-red-700 dark:text-red-300">
+                        {summaryLoading ? (
+                          <Skeleton className="h-6 w-16" />
+                        ) : (
+                          `$${financialSummary?.totalExpenses?.toFixed(2) || '0.00'}`
+                        )}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-full">
+                          <BarChart3 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Net Balance</p>
+                          <p className="text-xs text-blue-600 dark:text-blue-400">Income - Expenses</p>
+                        </div>
+                      </div>
+                      <p className="text-xl font-bold text-blue-700 dark:text-blue-300">
+                        {summaryLoading ? (
+                          <Skeleton className="h-6 w-16" />
+                        ) : (
+                          `$${((financialSummary?.totalIncome || 0) - (financialSummary?.totalExpenses || 0)).toFixed(2)}`
+                        )}
+                      </p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Recent Activity */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Activity</CardTitle>
+                  <CardDescription>
+                    Latest transactions and account activity
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {!Array.isArray(transactions) || transactions.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="mx-auto h-12 w-12 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+                        <FileText className="h-6 w-6 text-gray-400" />
+                      </div>
+                      <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                        No Recent Transactions
+                      </h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-300">
+                        Add transactions to see your recent activity here
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {(transactions as any[]).slice(0, 5).map((transaction: any) => (
+                        <div key={transaction.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-full ${
+                              transaction.type === 'income' 
+                                ? 'bg-green-100 dark:bg-green-900' 
+                                : 'bg-red-100 dark:bg-red-900'
+                            }`}>
+                              {transaction.type === 'income' ? (
+                                <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+                              ) : (
+                                <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                {transaction.description}
+                              </p>
+                              <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {new Date(transaction.date).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className={`text-sm font-semibold ${
+                              transaction.type === 'income' 
+                                ? 'text-green-600 dark:text-green-400' 
+                                : 'text-red-600 dark:text-red-400'
+                            }`}>
+                              {transaction.type === 'income' ? '+' : '-'}$
+                              {parseFloat(transaction.amount).toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                      {Array.isArray(transactions) && transactions.length > 5 && (
+                        <div className="text-center pt-2">
+                          <p className="text-xs text-gray-500">
+                            Showing 5 of {Array.isArray(transactions) ? transactions.length : 0} transactions
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
-          </RequirePlan>
-        </TabsContent>
-      </Tabs>
+
+            {/* Category Breakdown - Basic for Free Users */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Category Breakdown</CardTitle>
+                <CardDescription>
+                  {hasStandardOrBetter ? "Detailed spending analysis by category" : "Standard category overview (upgrade for detailed analysis)"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {!Array.isArray(financialSummary?.transactionsByCategory) || financialSummary.transactionsByCategory.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="mx-auto h-16 w-16 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+                      <PieChart className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                      No Category Data
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto mb-6">
+                      Add transactions to see detailed category breakdowns and spending patterns
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {(financialSummary.transactionsByCategory as any[])
+                      .filter((cat: any) => cat.type === 'expense')
+                      .sort((a: any, b: any) => b.amount - a.amount)
+                      .slice(0, 6)
+                      .map((category: any, index: number) => {
+                        const percentage = financialSummary.totalExpenses > 0 
+                          ? (category.amount / financialSummary.totalExpenses) * 100 
+                          : 0;
+                        return (
+                          <div key={index} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+                                <PieChart className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                  {category.categoryName}
+                                </p>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
+                                  {percentage.toFixed(1)}% of expenses
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                ${category.amount.toFixed(2)}
+                              </p>
+                              <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-1">
+                                <div 
+                                  className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
+                                  style={{ width: `${Math.min(percentage, 100)}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    
+                    {Array.isArray(financialSummary.transactionsByCategory) && financialSummary.transactionsByCategory.filter((cat: any) => cat.type === 'expense').length > 6 && (
+                      <div className="text-center pt-2">
+                        <p className="text-xs text-gray-500">
+                          Showing top 6 expense categories
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Financial Statistics</CardTitle>
+                <CardDescription>
+                  Key metrics from your financial data
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
+                    <div className="p-2 bg-green-100 dark:bg-green-900 rounded-full w-fit mx-auto mb-2">
+                      <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {Array.isArray(transactions) ? transactions.length : 0}
+                    </div>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Total Transactions</span>
+                  </div>
+                  
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full w-fit mx-auto mb-2">
+                      <PieChart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {Array.isArray(financialSummary?.transactionsByCategory) 
+                        ? financialSummary.transactionsByCategory.filter((cat: any) => cat.type === 'expense').length 
+                        : 0}
+                    </div>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Categories Used</span>
+                  </div>
+                  
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-full w-fit mx-auto mb-2">
+                      <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                      ${((financialSummary?.totalIncome || 0) / Math.max(
+                        Array.isArray(transactions) ? transactions.filter((t: any) => t.type === 'income').length : 1, 
+                        1
+                      )).toFixed(0)}
+                    </div>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Avg Income</span>
+                  </div>
+                  
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
+                    <div className="p-2 bg-red-100 dark:bg-red-900 rounded-full w-fit mx-auto mb-2">
+                      <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                      ${((financialSummary?.totalExpenses || 0) / Math.max(
+                        Array.isArray(transactions) ? transactions.filter((t: any) => t.type === 'expense').length : 1, 
+                        1
+                      )).toFixed(0)}
+                    </div>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Avg Expense</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Upgrade Banner for Free Users */}
+            {!hasStandardOrBetter && (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                      <Crown className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        Unlock Advanced Reports
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300">
+                        Get AI insights, interactive charts, export tools, and auto-categorization
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => setLocation("/subscribe")}
+                    className="bg-premium hover:bg-premium/90"
+                  >
+                    <Crown className="h-4 w-4 mr-2" />
+                    Upgrade Now
+                  </Button>
+                </div>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
