@@ -10,19 +10,15 @@ export default function Landing() {
   const [, setLocation] = useLocation();
   
   const handleLogin = () => {
-    window.location.href = '/api/login';
+    setLocation('/sign-in-clerk');
   };
 
   const handleGetStarted = (plan: string) => {
-    // All users start with Replit Auth (they get free plan by default)
-    // After login, they can upgrade if they chose a paid plan
-    if (plan === 'free') {
-      window.location.href = '/api/login';
-    } else {
-      // Store the desired plan and redirect to Replit login
+    // Store the desired plan for after authentication
+    if (plan !== 'free') {
       localStorage.setItem('selectedPlan', plan);
-      window.location.href = '/api/login';
     }
+    setLocation('/sign-in-clerk');
   };
 
   return (
