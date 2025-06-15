@@ -137,7 +137,7 @@ export class BunnyStorage {
     }
   }
 
-  async createBackup(userId: number, backupData: any): Promise<string> {
+  async createBackup(userId: string | number, backupData: any): Promise<string> {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `backup-${timestamp}.json`;
     const filePath = `backups/user-${userId}/${filename}`;
@@ -155,7 +155,7 @@ export class BunnyStorage {
     return filename;
   }
 
-  async getUserBackups(userId: number): Promise<StorageFileInfo[]> {
+  async getUserBackups(userId: string | number): Promise<StorageFileInfo[]> {
     console.log(`Getting backups for user ${userId} from 'backups/user-${userId}' folder`);
     
     // Look directly in the user's backup folder
@@ -185,7 +185,7 @@ export class BunnyStorage {
     return [];
   }
 
-  async cleanupOldBackups(userId: number, retentionDays: number): Promise<number> {
+  async cleanupOldBackups(userId: string | number, retentionDays: number): Promise<number> {
     const backups = await this.getUserBackups(userId);
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
@@ -207,13 +207,13 @@ export class BunnyStorage {
     return deletedCount;
   }
 
-  async restoreBackup(userId: number, backupFilename: string): Promise<any> {
+  async restoreBackup(userId: string | number, backupFilename: string): Promise<any> {
     const filePath = `backups/user-${userId}/${backupFilename}`;
     const backupData = await this.downloadFile(filePath);
     return JSON.parse(backupData);
   }
 
-  async getBackupInfo(userId: number): Promise<{
+  async getBackupInfo(userId: string | number): Promise<{
     totalBackups: number;
     totalSize: number;
     oldestBackup: string | null;
