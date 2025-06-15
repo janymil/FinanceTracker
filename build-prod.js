@@ -22,11 +22,12 @@ await build({
   entryPoints: ['client/src/main.tsx'],
   bundle: true,
   outfile: 'dist/public/main.js',
-  format: 'esm',
+  format: 'iife',
   jsx: 'automatic',
   define: {
     'import.meta.env.NODE_ENV': '"production"',
     'import.meta.env.VITE_CLERK_PUBLISHABLE_KEY': `"${process.env.VITE_CLERK_PUBLISHABLE_KEY || ''}"`,
+    'global': 'globalThis',
   },
   loader: {
     '.css': 'css',
@@ -36,7 +37,6 @@ await build({
     '.svg': 'file',
   },
   minify: true,
-  splitting: false,
   target: 'es2020',
   external: [],
 });
