@@ -2,14 +2,14 @@ import { storage } from './storage';
 import { bunnyStorage } from './bunnyStorage';
 
 interface ScheduledBackup {
-  userId: number;
+  userId: string;
   scheduledTime: Date;
   retryCount: number;
 }
 
 class BackupScheduler {
-  private scheduledBackups: Map<number, NodeJS.Timeout> = new Map();
-  private activeBackups: Set<number> = new Set();
+  private scheduledBackups: Map<string, NodeJS.Timeout> = new Map();
+  private activeBackups: Set<string> = new Set();
   private readonly RETRY_ATTEMPTS = 3;
   private readonly RETRY_DELAY = 5 * 60 * 1000; // 5 minutes
 
@@ -45,7 +45,7 @@ class BackupScheduler {
     }
   }
 
-  async scheduleUserBackup(userId: number) {
+  async scheduleUserBackup(userId: string) {
     try {
       const settings = await storage.getUserBackupSettings(userId);
       if (!settings || !settings.autoBackup) {
@@ -147,7 +147,7 @@ class BackupScheduler {
     return nextBackup;
   }
 
-  private async performBackup(userId: number, retryCount = 0) {
+  private async performBackup(userId: string, retryCount = 0) {
     if (this.activeBackups.has(userId)) {
       console.log(`Backup already in progress for user ${userId}`);
       return;
@@ -216,7 +216,7 @@ class BackupScheduler {
     }
   }
 
-  private async collectUserData(userId: number) {
+  private async collectUserData(userId: string) {
     const [transactions, budgets, expenseReminders, goals] = await Promise.all([
       storage.getUserTransactions(userId),
       storage.getUserBudgets(userId),
@@ -248,7 +248,7 @@ class BackupScheduler {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
-  private clearUserSchedule(userId: number) {
+  private clearUserSchedule(userId: string) {
     const existingTimeout = this.scheduledBackups.get(userId);
     if (existingTimeout) {
       clearTimeout(existingTimeout);
