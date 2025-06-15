@@ -20,12 +20,16 @@ export class DataEncryption {
     if (!text) return text;
     
     try {
-      const cipher = crypto.createCipher(ALGORITHM, ENCRYPTION_KEY);
+      const iv = crypto.randomBytes(16);
+      const cipher = crypto.createCipheriv(ALGORITHM, ENCRYPTION_KEY, iv);
       
       let encrypted = cipher.update(text, 'utf8', 'hex');
       encrypted += cipher.final('hex');
       
-      return encrypted;
+      const authTag = cipher.getAuthTag();
+      
+      // Format: iv:authTag:encryptedData
+      return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
     } catch (error) {
       console.error('Encryption error:', error);
       return text; // Return original text if encryption fails
@@ -44,15 +48,17 @@ export class DataEncryption {
     
     try {
       const parts = encryptedData.split(':');
-      if (parts.length !== 2) {
+      if (parts.length !== 3) {
         // If format is incorrect, return as-is (legacy data)
         return encryptedData;
       }
       
       const iv = Buffer.from(parts[0], 'hex');
-      const encrypted = parts[1];
+      const authTag = Buffer.from(parts[1], 'hex');
+      const encrypted = parts[2];
       
-      const decipher = crypto.createDecipher('aes-256-cbc', ENCRYPTION_KEY);
+      const decipher = crypto.createDecipheriv(ALGORITHM, ENCRYPTION_KEY, iv);
+      decipher.setAuthTag(authTag);
       
       let decrypted = decipher.update(encrypted, 'hex', 'utf8');
       decrypted += decipher.final('utf8');
