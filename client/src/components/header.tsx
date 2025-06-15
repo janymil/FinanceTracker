@@ -79,7 +79,6 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { user } = useAuth();
-  const { signOut } = useClerk();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -471,7 +470,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => signOut({ redirectUrl: '/' })}>
+              <DropdownMenuItem onClick={() => window.location.href = '/api/logout'}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
               </DropdownMenuItem>
