@@ -198,6 +198,8 @@ Changelog:
 - June 15, 2025. Verified system is running purely on Replit Auth with no remaining Clerk dependencies
 - June 15, 2025. Fixed critical transaction editing bug where all fields were being overwritten instead of preserving existing data
 - June 15, 2025. Modified updateTransaction storage method to only update specific fields provided, preventing data loss during edits
+- June 15, 2025. Completely disabled encryption system to resolve database type mismatch issues with encrypted amount fields
+- June 15, 2025. Fixed recurring transaction editing bug - expense and income pages now properly populate recurring checkbox state from database
 ```
 
 ## User Preferences

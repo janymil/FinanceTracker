@@ -351,14 +351,19 @@ export default function Expenses() {
     // Convert date to proper format for date input (YYYY-MM-DD)
     const formattedDate = new Date(transaction.date).toISOString().split('T')[0];
     
+    // Format recurring end date if it exists
+    const formattedRecurringEndDate = transaction.recurringEndDate 
+      ? new Date(transaction.recurringEndDate).toISOString().split('T')[0]
+      : "";
+    
     setNewExpense({
       amount: transaction.amount,
       description: transaction.description,
       date: formattedDate,
       categoryId: category ? category.id.toString() : "",
-      isRecurring: false,
-      recurringFrequency: "monthly",
-      recurringEndDate: "",
+      isRecurring: Boolean(transaction.isRecurring),
+      recurringFrequency: (transaction.recurringFrequency as "weekly" | "monthly" | "yearly") || "monthly",
+      recurringEndDate: formattedRecurringEndDate,
       paymentUrl: transaction.paymentUrl || "",
       referenceNote: transaction.referenceNote || "",
     });
