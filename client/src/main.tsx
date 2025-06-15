@@ -12,6 +12,10 @@ if (!PUBLISHABLE_KEY) {
 createRoot(document.getElementById("root")!).render(
   <ClerkProvider 
     publishableKey={PUBLISHABLE_KEY}
+    afterSignInUrl="/"
+    afterSignUpUrl="/"
+    signInUrl="/auth"
+    signUpUrl="/auth"
   >
     <App />
   </ClerkProvider>
