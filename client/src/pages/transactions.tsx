@@ -687,6 +687,15 @@ export default function Transactions() {
                               <Badge variant="outline">{transaction.categoryName}</Badge>
                             </>
                           )}
+                          {transaction.isRecurring && (
+                            <>
+                              <span>•</span>
+                              <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                                <Repeat className="h-3 w-3 mr-1" />
+                                Recurring
+                              </Badge>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>

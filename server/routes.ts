@@ -963,14 +963,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Automatic transaction reminders (Standard/Premium only)
   app.get('/api/transaction-reminders', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
 
       if (!user || user.plan === 'free') {
         return res.status(403).json({ message: "Transaction reminders require Standard or Premium subscription" });
       }
 
       const daysAhead = req.query.days ? parseInt(req.query.days as string) : 7;
-      const reminders = await storage.getUpcomingTransactionReminders(req.user.id, daysAhead);
+      const reminders = await storage.getUpcomingTransactionReminders(userId, daysAhead);
       res.json(reminders);
     } catch (error) {
       console.error("Error fetching transaction reminders:", error);
