@@ -79,7 +79,9 @@ export default function Navigation() {
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={clerkUser?.imageUrl || user?.profileImageUrl} alt={clerkUser?.firstName || user?.firstName || "User"} />
                     <AvatarFallback className="bg-primary text-white">
-                      {clerkUser?.firstName?.[0] || user?.firstName?.[0] || clerkUser?.emailAddresses?.[0]?.emailAddress?.[0] || user?.email?.[0] || "U"}
+                      {(user?.firstName && user?.firstName !== 'user' ? user.firstName[0] : 
+                        clerkUser?.firstName && clerkUser?.firstName !== 'user' ? clerkUser.firstName[0] : 
+                        clerkUser?.emailAddresses?.[0]?.emailAddress?.[0] || user?.email?.[0] || "U")?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:block">
