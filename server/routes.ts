@@ -33,13 +33,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("Auth user endpoint called");
+      console.log("req.user:", req.user);
+      console.log("req.session:", req.session);
+      console.log("req.isAuthenticated():", req.isAuthenticated());
+      
       const userId = req.user?.id || req.user?.claims?.sub || req.session?.userId;
+      console.log("Extracted userId:", userId);
       
       if (!userId) {
         return res.status(401).json({ message: "No user ID found" });
       }
 
       const user = await storage.getUser(userId);
+      console.log("Found user:", user);
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
