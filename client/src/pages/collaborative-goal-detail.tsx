@@ -102,10 +102,10 @@ export default function CollaborativeGoalDetailPage() {
     );
   }
 
-  const currentAmount = parseFloat(goal.currentAmount);
-  const targetAmount = parseFloat(goal.targetAmount);
-  const progressPercentage = (currentAmount / targetAmount) * 100;
-  const daysRemaining = Math.ceil((new Date(goal.targetDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+  const currentAmount = parseFloat(goal?.currentAmount || '0');
+  const targetAmount = parseFloat(goal?.targetAmount || '0');
+  const progressPercentage = targetAmount > 0 ? (currentAmount / targetAmount) * 100 : 0;
+  const daysRemaining = goal?.targetDate ? Math.ceil((new Date(goal.targetDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 0;
 
   const handleAddContribution = (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,12 +148,12 @@ export default function CollaborativeGoalDetailPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{goal.name}</h1>
-            <p className="text-gray-600 dark:text-gray-400">{goal.description}</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{goal?.name || 'Loading...'}</h1>
+            <p className="text-gray-600 dark:text-gray-400">{goal?.description || ''}</p>
           </div>
         </div>
-        <Badge variant={goal.status === 'active' ? 'default' : 'secondary'}>
-          {goal.status}
+        <Badge variant={goal?.status === 'active' ? 'default' : 'secondary'}>
+          {goal?.status || 'unknown'}
         </Badge>
       </div>
 
@@ -177,7 +177,7 @@ export default function CollaborativeGoalDetailPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{goal.participants.length}</div>
+            <div className="text-2xl font-bold">{goal?.participants?.length || 0}</div>
             <p className="text-xs text-muted-foreground">Active members</p>
           </CardContent>
         </Card>
@@ -189,7 +189,7 @@ export default function CollaborativeGoalDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{daysRemaining > 0 ? daysRemaining : 0}</div>
-            <p className="text-xs text-muted-foreground">Until {format(new Date(goal.targetDate), 'MMM dd, yyyy')}</p>
+            <p className="text-xs text-muted-foreground">Until {goal?.targetDate ? format(new Date(goal.targetDate), 'MMM dd, yyyy') : 'No date set'}</p>
           </CardContent>
         </Card>
 
@@ -199,7 +199,7 @@ export default function CollaborativeGoalDetailPage() {
             <Trophy className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-bold capitalize">{goal.category}</div>
+            <div className="text-lg font-bold capitalize">{goal?.category || 'General'}</div>
             <p className="text-xs text-muted-foreground">Goal type</p>
           </CardContent>
         </Card>
@@ -291,7 +291,7 @@ export default function CollaborativeGoalDetailPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {goal.participants.map((participant: any) => (
+            {goal?.participants?.map((participant: any) => (
               <div key={participant.id} className="flex items-center space-x-3 p-3 border rounded-lg">
                 <Avatar>
                   <AvatarImage src={participant.user?.profileImageUrl || ''} />
