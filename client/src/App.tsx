@@ -17,10 +17,6 @@ import Dashboard from "@/pages/dashboard";
 
 // Other components loaded on demand
 import AuthPage from "@/pages/auth-page";
-import ChooseAuth from "@/pages/choose-auth";
-import ClerkSignInPage from "@/pages/clerk-sign-in";
-import ClerkSignUpPage from "@/pages/clerk-sign-up";
-import ClerkTest from "@/pages/clerk-test";
 import TransactionsPage from "@/pages/transactions";
 import IncomePage from "@/pages/income";
 import ExpensesPage from "@/pages/expenses";
@@ -87,10 +83,7 @@ function AppContent() {
           <Route path="/cookie-policy" component={CookiePolicy} />
           <Route path="/contact" component={Contact} />
           <Route path="/help" component={Help} />
-          <Route path="/choose-auth" component={ChooseAuth} />
-          <Route path="/sign-in-clerk" component={ClerkSignInPage} />
-          <Route path="/sign-up-clerk" component={ClerkSignUpPage} />
-          <Route path="/clerk-test" component={ClerkTest} />
+          <Route path="/auth" component={AuthPage} />
           <Route component={NotFoundPage} />
         </Switch>
         <Footer />
