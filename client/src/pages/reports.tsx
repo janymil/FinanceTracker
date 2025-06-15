@@ -135,8 +135,7 @@ export default function Reports() {
   const dynamicChartData = generateChartData();
 
   return (
-    <RequirePlan plan="standard">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -200,6 +199,77 @@ export default function Reports() {
             )}
           </TabsList>
 
+          {/* Summary Tab - Available for all users */}
+          <TabsContent value="summary" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Basic financial summary cards available to all users */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Income</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {summary?.totalIncome ? `$${summary.totalIncome.toFixed(2)}` : '$0.00'}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    +2.5% from last period
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+                  <TrendingDown className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {summary?.totalExpenses ? `$${summary.totalExpenses.toFixed(2)}` : '$0.00'}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    -1.2% from last period
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Net Savings</CardTitle>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {summary ? `$${(summary.totalIncome - summary.totalExpenses).toFixed(2)}` : '$0.00'}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    +12.3% from last period
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Upgrade prompt for advanced features */}
+            {!hasStandardOrBetter && (
+              <Card className="border-2 border-dashed border-gray-300 dark:border-gray-600">
+                <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+                  <BarChart3 className="h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Advanced Analytics Available</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4 max-w-md">
+                    Unlock interactive charts, detailed breakdowns, and comprehensive financial analysis with Standard plan.
+                  </p>
+                  <Button 
+                    onClick={() => setLocation("/subscribe")}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Crown className="h-4 w-4 mr-2" />
+                    Upgrade to Standard
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
           {/* Interactive Analytics */}
           <TabsContent value="analytics" className="space-y-6">
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -254,82 +324,11 @@ export default function Reports() {
               />
             </RequirePlan>
           </TabsContent>
-
-          {/* Financial Summary - Available for All Users */}
-          <TabsContent value="summary" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Monthly Overview */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Monthly Overview</CardTitle>
-                  <CardDescription>
-                    Basic financial summary for {selectedPeriod === "month" ? "this month" : selectedPeriod}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-100 dark:bg-green-800 rounded-full">
-                          <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-green-900 dark:text-green-100">Total Income</p>
-                          <p className="text-xs text-green-600 dark:text-green-400">Current month</p>
-                        </div>
-                      </div>
-                      <p className="text-xl font-bold text-green-700 dark:text-green-300">
-                        {summaryLoading ? (
-                          <Skeleton className="h-6 w-16" />
-                        ) : (
-                          `$${financialSummary?.totalIncome?.toFixed(2) || '0.00'}`
-                        )}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-red-100 dark:bg-red-800 rounded-full">
-                          <PieChart className="h-4 w-4 text-red-600 dark:text-red-400" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-red-900 dark:text-red-100">Total Expenses</p>
-                          <p className="text-xs text-red-600 dark:text-red-400">Current month</p>
-                        </div>
-                      </div>
-                      <p className="text-xl font-bold text-red-700 dark:text-red-300">
-                        {summaryLoading ? (
-                          <Skeleton className="h-6 w-16" />
-                        ) : (
-                          `$${financialSummary?.totalExpenses?.toFixed(2) || '0.00'}`
-                        )}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-full">
-                          <BarChart3 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Net Balance</p>
-                          <p className="text-xs text-blue-600 dark:text-blue-400">Income - Expenses</p>
-                        </div>
-                      </div>
-                      <p className="text-xl font-bold text-blue-700 dark:text-blue-300">
-                        {summaryLoading ? (
-                          <Skeleton className="h-6 w-16" />
-                        ) : (
-                          `$${((financialSummary?.totalIncome || 0) - (financialSummary?.totalExpenses || 0)).toFixed(2)}`
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Recent Activity */}
-              <Card>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
                 <CardHeader>
                   <CardTitle>Recent Activity</CardTitle>
                   <CardDescription>
@@ -563,6 +562,6 @@ export default function Reports() {
           </TabsContent>
         </Tabs>
       </div>
-    </RequirePlan>
+    </div>
   );
 }
