@@ -8,6 +8,23 @@ if (!process.env.CLERK_SECRET_KEY) {
 // Initialize Clerk middleware
 export const clerkMiddleware = ClerkExpressWithAuth();
 
+// Bridge middleware to maintain compatibility with existing code
+export const isAuthenticated = (req: any, res: Response, next: NextFunction) => {
+  if (!req.auth?.userId) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  
+  // Bridge Clerk auth to existing user structure for compatibility
+  req.user = {
+    id: req.auth.userId,
+    claims: {
+      sub: req.auth.userId
+    }
+  };
+  
+  next();
+};
+
 // Enhanced request interface with Clerk auth
 export interface AuthenticatedRequest extends Request {
   auth: {

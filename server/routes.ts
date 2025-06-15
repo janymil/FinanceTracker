@@ -4,7 +4,7 @@ import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { users, transactions, budgets, categories, goals, type Transaction, type Budget, type Goal } from "@shared/schema";
-import { clerkMiddleware, requireAuth, requirePlan, type AuthenticatedRequest } from "./clerkAuth";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setCookieConsent } from "./cookieMiddleware";
 import { insertTransactionSchema, insertBudgetSchema, insertGoalSchema, insertExpenseReminderSchema } from "@shared/schema";
 import { z } from "zod";
@@ -13,6 +13,7 @@ import {
   categorizeExpense, 
   generateSpendingInsights, 
   generateTrendPredictions,
+  generateAIFinancialHealthScore,
   type ExpenseCategorizationResult 
 } from "./openai";
 import { aiCache } from "./cache";
@@ -27,13 +28,13 @@ const COLORS = [
 ];
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Clerk middleware
-  app.use(clerkMiddleware);
+  // Auth middleware
+  await setupAuth(app);
 
   // Auth routes
-  app.get('/api/auth/user', requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.auth.userId;
+      const userId = req.user.claims.sub;
       
       if (!userId) {
         return res.status(401).json({ message: "No user ID found" });
