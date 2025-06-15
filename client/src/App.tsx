@@ -135,12 +135,10 @@ function AppContent() {
 }
 
 export default function App() {
-  // Try multiple ways to access the environment variable
-  const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 
-                         (window as any).__CLERK_PUBLISHABLE_KEY__ || 
-                         'pk_test_dXNlZnVsLXJlZGZpc2gtMTUuY2xlcmsuYWNjb3VudHMuZGV2JA';
+  const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_dXNlZnVsLXJlZGZpc2gtMTUuY2xlcmsuYWNjb3VudHMuZGV2JA';
   
-  console.log('Clerk publishable key loaded:', publishableKey ? 'YES' : 'NO');
+  console.log('Environment variable VITE_CLERK_PUBLISHABLE_KEY:', import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
+  console.log('Using publishable key:', publishableKey);
   
   if (!publishableKey) {
     return (
