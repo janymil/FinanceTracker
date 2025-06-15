@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, lazy, Suspense, startTransition, useDefer
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardSkeleton } from "@/components/dashboard-skeleton";
+import { LazyWrapper } from "@/components/lazy-wrapper";
 
 // Core components for immediate display
 import FinancialCards from "@/components/financial-cards";
@@ -12,18 +13,20 @@ import BudgetOverview from "@/components/budget-overview";
 import RequirePlan from "@/components/require-plan";
 import UpgradeBanner from "@/components/upgrade-banner";
 
-// Lazy-loaded secondary components for performance
-const TrendsChart = lazy(() => import("@/components/trends-chart"));
-const ExpenseChart = lazy(() => import("@/components/expense-chart").then(module => ({ default: module.ExpenseChart })));
-const FinancialHealthScore = lazy(() => import("@/components/financial-health-score"));
-const QuickFinancialSnapshot = lazy(() => import("@/components/quick-financial-snapshot"));
-const ContextualFinancialTips = lazy(() => import("@/components/contextual-financial-tips"));
-const RemindersStreaks = lazy(() => import("@/components/reminders-streaks"));
-const ExpensePrediction = lazy(() => import("@/components/expense-prediction"));
-const DailyRecommendations = lazy(() => import("@/components/daily-recommendations"));
-const AutoCategorization = lazy(() => import("@/components/auto-categorization"));
-const AIFinancialTips = lazy(() => import("@/components/ai-financial-tips"));
-const TransactionRemindersWidget = lazy(() => import("@/components/transaction-reminders-widget"));
+// Modular lazy components with React 18 concurrent features
+import {
+  LazyTrendsChart,
+  LazyExpenseChart,
+  LazyFinancialHealthScore,
+  LazyQuickFinancialSnapshot,
+  LazyContextualFinancialTips,
+  LazyRemindersStreaks,
+  LazyExpensePrediction,
+  LazyDailyRecommendations,
+  LazyAutoCategorization,
+  LazyAIFinancialTips,
+  LazyTransactionRemindersWidget
+} from "@/components/dashboard/lazy-components";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -480,23 +483,31 @@ export default function Dashboard() {
           <div className="space-y-8">
             {/* Advanced Analytics Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <FinancialHealthScore 
-                summary={financialSummary}
-                budgets={budgets as any}
-              />
-              <QuickFinancialSnapshot 
-                summary={financialSummary}
-                transactions={transactions as any}
-              />
-              <ContextualFinancialTips
-                summary={financialSummary}
-                transactions={transactions as any}
-                budgets={budgets as any}
-              />
+              <LazyWrapper fallback={<div className="h-48 bg-white dark:bg-gray-800 rounded-xl animate-pulse border"></div>}>
+                <FinancialHealthScore 
+                  summary={financialSummary}
+                  budgets={budgets as any}
+                />
+              </LazyWrapper>
+              <LazyWrapper fallback={<div className="h-48 bg-white dark:bg-gray-800 rounded-xl animate-pulse border"></div>}>
+                <QuickFinancialSnapshot 
+                  summary={financialSummary}
+                  transactions={transactions as any}
+                />
+              </LazyWrapper>
+              <LazyWrapper fallback={<div className="h-48 bg-white dark:bg-gray-800 rounded-xl animate-pulse border"></div>}>
+                <ContextualFinancialTips
+                  summary={financialSummary}
+                  transactions={transactions as any}
+                  budgets={budgets as any}
+                />
+              </LazyWrapper>
             </div>
 
             {/* Interactive Charts */}
-            <TrendsChart />
+            <LazyWrapper fallback={<div className="h-64 bg-white dark:bg-gray-800 rounded-xl animate-pulse border"></div>}>
+              <TrendsChart />
+            </LazyWrapper>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <TransactionList
