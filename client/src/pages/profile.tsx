@@ -14,6 +14,7 @@ import { Separator } from "../components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../components/ui/alert-dialog";
 import { useToast } from "../hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { 
   User, 
   Lock, 
@@ -113,7 +114,19 @@ export default function ProfilePage() {
       if (!response.ok) throw new Error('Failed to update profile');
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (updatedUser) => {
+      // Invalidate user auth cache to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      
+      // Update local state with the new data
+      setProfileData({
+        firstName: updatedUser.firstName || '',
+        lastName: updatedUser.lastName || '',
+        email: updatedUser.email || '',
+        phone: updatedUser.phone || '',
+        website: updatedUser.website || ''
+      });
+      
       toast({ title: "Profile updated successfully" });
     },
     onError: () => {
