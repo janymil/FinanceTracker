@@ -23,7 +23,6 @@ import {
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
-import UpgradeBanner from "@/components/upgrade-banner";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -464,13 +463,8 @@ export default function Income() {
                     </Select>
                   </div>
 
-                  {/* Show upgrade banner for free users */}
-                  {user?.plan === "free" && (
-                    <UpgradeBanner message="Unlock recurring income tracking and advanced features" />
-                  )}
-
                   {/* Recurring transaction options - Standard/Premium only */}
-                  {user?.plan !== "free" && (
+                  <RequirePlan plan="standard">
                     <div className="space-y-4 border-t pt-4">
                       <div className="flex items-center space-x-2">
                         <Checkbox
@@ -522,7 +516,7 @@ export default function Income() {
                         </div>
                       )}
                     </div>
-                  )}
+                  </RequirePlan>
 
                   <div className="flex justify-end gap-2 pt-4">
                     <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
