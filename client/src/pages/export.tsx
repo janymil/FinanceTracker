@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import RequirePlan from "@/components/require-plan";
+import { ExportTools } from "@/components/export-tools";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
@@ -1185,6 +1186,9 @@ export default function ExportPage() {
                   </Button>
                 </CardContent>
               </Card>
+
+              {/* PDF Report Generator */}
+              <ExportTools />
 
               {/* Quick Export Templates */}
               <Card>
