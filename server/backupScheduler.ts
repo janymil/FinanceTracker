@@ -276,29 +276,29 @@ class BackupScheduler {
     await this.performBackup(userId);
   }
 
-  async updateUserSchedule(userId: number): Promise<void> {
+  async updateUserSchedule(userId: string): Promise<void> {
     await this.scheduleUserBackup(userId);
   }
 
-  async pauseUserBackups(userId: number): Promise<void> {
+  async pauseUserBackups(userId: string): Promise<void> {
     this.clearUserSchedule(userId);
     await storage.updateBackupSettings(userId, {
       status: 'paused'
     });
   }
 
-  async resumeUserBackups(userId: number): Promise<void> {
+  async resumeUserBackups(userId: string): Promise<void> {
     await storage.updateBackupSettings(userId, {
       status: 'active'
     });
     await this.scheduleUserBackup(userId);
   }
 
-  getScheduledBackups(): number[] {
+  getScheduledBackups(): string[] {
     return Array.from(this.scheduledBackups.keys());
   }
 
-  getActiveBackups(): number[] {
+  getActiveBackups(): string[] {
     return Array.from(this.activeBackups);
   }
 }
