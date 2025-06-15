@@ -1529,6 +1529,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
             XLSX.utils.book_append_sheet(workbook, goalsSheet, 'Goals');
           }
           
+          // Add financial summary sheet
+          if (exportData.summary) {
+            const summaryData = [
+              { Metric: 'Total Income', Value: exportData.summary.totalIncome },
+              { Metric: 'Total Expenses', Value: exportData.summary.totalExpenses },
+              { Metric: 'Net Amount', Value: exportData.summary.netAmount },
+              { Metric: 'Transaction Count', Value: exportData.summary.transactionCount },
+              { Metric: 'Budget Count', Value: exportData.budgets?.length || 0 },
+              { Metric: 'Goal Count', Value: exportData.goals?.length || 0 },
+              { Metric: 'Export Date', Value: new Date().toISOString().split('T')[0] },
+              { Metric: 'Date Range', Value: `${start.toDateString()} to ${end.toDateString()}` }
+            ];
+            const summarySheet = XLSX.utils.json_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(workbook, summarySheet, 'Financial Summary');
+          }
+          
+          // Add charts sheet with category breakdown
+          if (exportData.transactions && exportData.transactions.length > 0) {
+            const categoryBreakdown: { [key: string]: number } = {};
+            exportData.transactions.forEach((t: any) => {
+              const category = t.categoryId || 'Uncategorized';
+              categoryBreakdown[category] = (categoryBreakdown[category] || 0) + parseFloat(t.amount);
+            });
+            
+            const chartData = Object.entries(categoryBreakdown).map(([category, amount]) => ({
+              Category: category,
+              Amount: amount,
+              Percentage: ((amount / exportData.summary.totalExpenses) * 100).toFixed(2) + '%'
+            }));
+            
+            const chartSheet = XLSX.utils.json_to_sheet(chartData);
+            XLSX.utils.book_append_sheet(workbook, chartSheet, 'Charts & Graphs');
+          }
+          
           responseData = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
           filename = `financial-data-${new Date().toISOString().split('T')[0]}.xlsx`;
           contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -1587,12 +1621,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
           }
           
-          responseData = doc.output('arraybuffer');
+          responseData = Buffer.from(doc.output('arraybuffer'));
           filename = `financial-report-${new Date().toISOString().split('T')[0]}.pdf`;
           contentType = 'application/pdf';
           break;
         default:
-          responseData = exportData;
+          responseData = JSON.stringify(exportData, null, 2);
           filename = `financial-data-${new Date().toISOString().split('T')[0]}.json`;
           contentType = 'application/json';
       }
