@@ -476,92 +476,93 @@ export default function Expenses() {
                     </Select>
                   </div>
 
-                  {/* Smart Bill Assistant - Standard/Premium only */}
+                  {/* Advanced Features - Standard/Premium only */}
                   <RequirePlan plan="standard">
-                    <div className="space-y-4 border-t pt-4">
-                      <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Smart Bill Assistant
-                      </div>
-                      <div>
-                        <Label htmlFor="paymentUrl">Payment URL (Optional)</Label>
-                        <Input
-                          id="paymentUrl"
-                          type="url"
-                          value={newExpense.paymentUrl}
-                          onChange={(e) => setNewExpense({ ...newExpense, paymentUrl: e.target.value })}
-                          placeholder="https://example.com/pay"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          Link to where you can pay this bill
-                        </p>
-                      </div>
-                      <div>
-                        <Label htmlFor="referenceNote">Reference Note (Optional)</Label>
-                        <Input
-                          id="referenceNote"
-                          value={newExpense.referenceNote}
-                          onChange={(e) => setNewExpense({ ...newExpense, referenceNote: e.target.value })}
-                          placeholder="Account #123456, Reference: ABC789"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          Account number or other reference information
-                        </p>
-                      </div>
-                    </div>
-                  </RequirePlan>
-
-                  {/* Recurring transaction options - Standard/Premium only */}
-                  <RequirePlan plan="standard">
-                    <div className="space-y-4 border-t pt-4">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="recurring"
-                          checked={newExpense.isRecurring}
-                          onCheckedChange={(checked) => 
-                            setNewExpense({ ...newExpense, isRecurring: checked as boolean })
-                          }
-                        />
-                        <label htmlFor="recurring" className="flex items-center text-sm font-medium">
-                          <Repeat className="h-4 w-4 mr-2" />
-                          Make this a recurring expense
-                        </label>
-                      </div>
-
-                      {newExpense.isRecurring && (
-                        <div className="grid grid-cols-2 gap-4 pl-6">
-                          <div>
-                            <Label htmlFor="frequency">Frequency</Label>
-                            <Select
-                              value={newExpense.recurringFrequency}
-                              onValueChange={(value) => setNewExpense({ 
-                                ...newExpense, 
-                                recurringFrequency: value as "weekly" | "monthly" | "yearly" 
-                              })}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select frequency" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="weekly">Weekly</SelectItem>
-                                <SelectItem value="monthly">Monthly</SelectItem>
-                                <SelectItem value="yearly">Yearly</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="endDate">End Date (Optional)</Label>
-                            <Input
-                              id="endDate"
-                              type="date"
-                              value={newExpense.recurringEndDate}
-                              onChange={(e) => setNewExpense({ 
-                                ...newExpense, 
-                                recurringEndDate: e.target.value 
-                              })}
-                            />
-                          </div>
+                    <div className="space-y-6 border-t pt-4">
+                      {/* Smart Bill Assistant */}
+                      <div className="space-y-4">
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Smart Bill Assistant
                         </div>
-                      )}
+                        <div>
+                          <Label htmlFor="paymentUrl">Payment URL (Optional)</Label>
+                          <Input
+                            id="paymentUrl"
+                            type="url"
+                            value={newExpense.paymentUrl}
+                            onChange={(e) => setNewExpense({ ...newExpense, paymentUrl: e.target.value })}
+                            placeholder="https://example.com/pay"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Link to where you can pay this bill
+                          </p>
+                        </div>
+                        <div>
+                          <Label htmlFor="referenceNote">Reference Note (Optional)</Label>
+                          <Input
+                            id="referenceNote"
+                            value={newExpense.referenceNote}
+                            onChange={(e) => setNewExpense({ ...newExpense, referenceNote: e.target.value })}
+                            placeholder="Account #123456, Reference: ABC789"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Account number or other reference information
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Recurring transaction options */}
+                      <div className="space-y-4 border-t pt-4">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="recurring"
+                            checked={newExpense.isRecurring}
+                            onCheckedChange={(checked) => 
+                              setNewExpense({ ...newExpense, isRecurring: checked as boolean })
+                            }
+                          />
+                          <label htmlFor="recurring" className="flex items-center text-sm font-medium">
+                            <Repeat className="h-4 w-4 mr-2" />
+                            Make this a recurring expense
+                          </label>
+                        </div>
+
+                        {newExpense.isRecurring && (
+                          <div className="grid grid-cols-2 gap-4 pl-6">
+                            <div>
+                              <Label htmlFor="frequency">Frequency</Label>
+                              <Select
+                                value={newExpense.recurringFrequency}
+                                onValueChange={(value) => setNewExpense({ 
+                                  ...newExpense, 
+                                  recurringFrequency: value as "weekly" | "monthly" | "yearly" 
+                                })}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select frequency" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="weekly">Weekly</SelectItem>
+                                  <SelectItem value="monthly">Monthly</SelectItem>
+                                  <SelectItem value="yearly">Yearly</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label htmlFor="endDate">End Date (Optional)</Label>
+                              <Input
+                                id="endDate"
+                                type="date"
+                                value={newExpense.recurringEndDate}
+                                onChange={(e) => setNewExpense({ 
+                                  ...newExpense, 
+                                  recurringEndDate: e.target.value 
+                                })}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </RequirePlan>
 

@@ -4,27 +4,8 @@ import type { Request, Response, NextFunction } from 'express';
 export const setupClerkAuth = (app: any) => {
   // Add Clerk middleware to handle authentication
   app.use(clerkMiddleware({
-    secretKey: process.env.CLERK_SECRET_KEY,
     publishableKey: process.env.VITE_CLERK_PUBLISHABLE_KEY,
-    // Disable redirects for API routes
-    signInUrl: '/auth',
-    signUpUrl: '/auth',
-    afterSignInUrl: '/',
-    afterSignUpUrl: '/',
-    // Configure for API usage
-    apiRoutes: ['/api/*'],
-    // Improve session handling
-    jwtKey: process.env.CLERK_JWT_KEY,
-    // Allow longer session duration
-    sessionTokenTemplate: {
-      standard: {
-        nbf: '{{session.created_at}}',
-        exp: '{{session.expire_at}}',
-        iat: '{{session.created_at}}',
-        iss: process.env.CLERK_SECRET_KEY?.split('_')[1],
-        sub: '{{user.id}}'
-      }
-    }
+    secretKey: process.env.CLERK_SECRET_KEY,
   }));
 };
 
