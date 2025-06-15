@@ -173,7 +173,7 @@ export default function RequirePlan({ plan, children, feature, description, bene
               Upgrade Now
             </Button>
           </Link>
-          <Link href="/pricing">
+          <Link href="/subscribe">
             <Button size="sm" variant="outline">
               View Plans
             </Button>
