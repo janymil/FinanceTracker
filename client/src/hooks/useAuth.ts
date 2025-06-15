@@ -14,12 +14,12 @@ export function useAuth() {
     enabled: !!clerkUser && isLoaded,
   });
 
-  // Prevent flashing by ensuring stable loading states
-  const isLoading = !isLoaded;
+  // Stable loading and authentication states
+  const isLoading = !isLoaded || (clerkUser && isLoadingAppUser);
   const isAuthenticated = !!clerkUser && isLoaded;
 
   return {
-    user: isAuthenticated ? appUser : null,
+    user: isAuthenticated && appUser ? appUser : null,
     clerkUser,
     isLoading,
     isAuthenticated,
