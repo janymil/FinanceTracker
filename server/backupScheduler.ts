@@ -272,7 +272,7 @@ class BackupScheduler {
   }
 
   // Public methods for manual control
-  async triggerManualBackup(userId: number): Promise<void> {
+  async triggerManualBackup(userId: string): Promise<void> {
     await this.performBackup(userId);
   }
 

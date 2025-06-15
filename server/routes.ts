@@ -1428,7 +1428,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/backup', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
       const user = await storage.getUser(userId);
 
       if (!user || user.plan !== 'premium') {
