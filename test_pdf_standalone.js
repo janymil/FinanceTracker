@@ -1,4 +1,5 @@
-const { generatePdfReport } = require('./server/generatePdf');
+import { generatePdfReport } from './server/generatePdf.js';
+import fs from 'fs';
 
 // Test data similar to what the application would generate
 const testData = {
@@ -36,7 +37,6 @@ async function testPdfGeneration() {
     console.log('Testing PDF generation with Puppeteer + Google Charts...');
     const pdfBuffer = await generatePdfReport(testData);
     
-    const fs = require('fs');
     fs.writeFileSync('test_pdf_output.pdf', pdfBuffer);
     
     console.log('✓ PDF generated successfully!');
