@@ -45,9 +45,15 @@ export default function Reports() {
     // Otherwise use the selected period
     switch (selectedPeriod) {
       case "week":
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - 7);
-        return { startDate: weekStart, endDate: now };
+        const today = new Date(now);
+        const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - dayOfWeek); // Start of current week (Sunday)
+        weekStart.setHours(0, 0, 0, 0);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6); // End of current week (Saturday)
+        weekEnd.setHours(23, 59, 59, 999);
+        return { startDate: weekStart, endDate: weekEnd };
       case "month":
         return { startDate: startOfMonth(now), endDate: endOfMonth(now) };
       case "quarter":
@@ -263,9 +269,17 @@ export default function Reports() {
               {/* Monthly Overview */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Monthly Overview</CardTitle>
+                  <CardTitle>
+                    {selectedPeriod === "week" ? "Weekly Overview" : 
+                     selectedPeriod === "month" ? "Monthly Overview" :
+                     selectedPeriod === "quarter" ? "Quarterly Overview" :
+                     selectedPeriod === "year" ? "Yearly Overview" : "Financial Overview"}
+                  </CardTitle>
                   <CardDescription>
-                    Basic financial summary for {selectedPeriod === "month" ? "this month" : selectedPeriod}
+                    Basic financial summary for {selectedPeriod === "week" ? "this week" : 
+                                                 selectedPeriod === "month" ? "this month" :
+                                                 selectedPeriod === "quarter" ? "this quarter" :
+                                                 selectedPeriod === "year" ? "this year" : selectedPeriod}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -277,7 +291,12 @@ export default function Reports() {
                         </div>
                         <div>
                           <p className="text-sm font-medium text-green-900 dark:text-green-100">Total Income</p>
-                          <p className="text-xs text-green-600 dark:text-green-400">Current month</p>
+                          <p className="text-xs text-green-600 dark:text-green-400">
+                            {selectedPeriod === "week" ? "Current week" : 
+                             selectedPeriod === "month" ? "Current month" :
+                             selectedPeriod === "quarter" ? "Current quarter" :
+                             selectedPeriod === "year" ? "Current year" : "Current period"}
+                          </p>
                         </div>
                       </div>
                       <p className="text-xl font-bold text-green-700 dark:text-green-300">
@@ -296,7 +315,12 @@ export default function Reports() {
                         </div>
                         <div>
                           <p className="text-sm font-medium text-red-900 dark:text-red-100">Total Expenses</p>
-                          <p className="text-xs text-red-600 dark:text-red-400">Current month</p>
+                          <p className="text-xs text-red-600 dark:text-red-400">
+                            {selectedPeriod === "week" ? "Current week" : 
+                             selectedPeriod === "month" ? "Current month" :
+                             selectedPeriod === "quarter" ? "Current quarter" :
+                             selectedPeriod === "year" ? "Current year" : "Current period"}
+                          </p>
                         </div>
                       </div>
                       <p className="text-xl font-bold text-red-700 dark:text-red-300">
@@ -315,7 +339,12 @@ export default function Reports() {
                         </div>
                         <div>
                           <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Net Balance</p>
-                          <p className="text-xs text-blue-600 dark:text-blue-400">Income - Expenses</p>
+                          <p className="text-xs text-blue-600 dark:text-blue-400">
+                            {selectedPeriod === "week" ? "Current week" : 
+                             selectedPeriod === "month" ? "Current month" :
+                             selectedPeriod === "quarter" ? "Current quarter" :
+                             selectedPeriod === "year" ? "Current year" : "Current period"}
+                          </p>
                         </div>
                       </div>
                       <p className="text-xl font-bold text-blue-700 dark:text-blue-300">
