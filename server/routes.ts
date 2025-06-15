@@ -2375,13 +2375,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Current password and new password are required" });
       }
 
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: "New password must be at least 8 characters long" });
+      }
+
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Password changes not supported with Replit Auth
-      return res.status(400).json({ message: "Password changes are handled by Replit authentication" });
+      // Import bcrypt for password hashing
+      const bcrypt = require('bcrypt');
+
+      // If user has an existing password, verify the current password
+      if (user.password) {
+        const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+        if (!isCurrentPasswordValid) {
+          return res.status(400).json({ message: "Current password is incorrect" });
+        }
+      }
+
+      // Hash the new password
+      const saltRounds = 12;
+      const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+      // Update the password in the database
+      await storage.updateUserPassword(userId, hashedNewPassword);
 
       res.json({ message: "Password changed successfully" });
     } catch (error) {
