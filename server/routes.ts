@@ -166,6 +166,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const transactionId = parseInt(req.params.id);
       
+      console.log('Transaction update request body:', req.body);
+      
       // Only update fields that are actually provided in the request
       const updateData: any = { userId }; // Always include userId for security
       
@@ -199,6 +201,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.body.referenceNote !== undefined) {
         updateData.referenceNote = req.body.referenceNote;
       }
+
+      console.log('Processed update data:', updateData);
 
       const transaction = await storage.updateTransaction(transactionId, updateData);
       res.json(transaction);
