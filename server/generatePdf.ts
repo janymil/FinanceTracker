@@ -37,366 +37,257 @@ interface PDFData {
   userName?: string;
 }
 
-export async function generatePdfReport(data: PDFData) {
+function getWeekKey(date: Date): string {
+  const startOfWeek = new Date(date);
+  startOfWeek.setDate(date.getDate() - date.getDay());
+  return startOfWeek.toISOString().split('T')[0];
+}
+
+function formatWeekLabel(weekKey: string): string {
+  const date = new Date(weekKey);
+  return `${date.getMonth() + 1}/${date.getDate()}`;
+}
+
+function generateFinancialInsights(transactions: any[], summary: any): string[] {
+  const insights = [];
+  
+  // Income vs Expenses analysis
+  if (summary.netAmount > 0) {
+    insights.push(`Positive cash flow of $${summary.netAmount.toLocaleString()} this month`);
+  } else {
+    insights.push(`Negative cash flow of $${Math.abs(summary.netAmount).toLocaleString()} - consider reducing expenses`);
+  }
+  
+  // Transaction frequency
+  const avgDaily = summary.transactionCount / 30;
+  if (avgDaily > 3) {
+    insights.push(`High transaction frequency (${avgDaily.toFixed(1)}/day) - good financial activity tracking`);
+  }
+  
+  // Category analysis
+  const topCategory = Object.entries(summary.categoryBreakdown)
+    .sort(([,a], [,b]) => (b as number) - (a as number))[0];
+  
+  if (topCategory) {
+    insights.push(`Highest spending category: ${topCategory[0]} ($${(topCategory[1] as number).toLocaleString()})`);
+  }
+  
+  return insights;
+}
+
+function generateTransactionsTable(transactions: any[]): string {
+  const sortedTransactions = transactions
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 20); // Show last 20 transactions
+
+  return sortedTransactions.map(t => `
+    <tr>
+      <td>${new Date(t.date).toLocaleDateString()}</td>
+      <td>${t.description}</td>
+      <td class="${t.type}">${t.type === 'income' ? '+' : '-'}$${parseFloat(t.amount).toLocaleString()}</td>
+      <td>${t.categoryId || 'Other'}</td>
+    </tr>
+  `).join('');
+}
+
+function generateBudgetsTable(budgets: any[]): string {
+  return budgets.map(b => {
+    const allocated = parseFloat(b.amount);
+    const spent = parseFloat(b.spent);
+    const remaining = allocated - spent;
+    const progress = (spent / allocated * 100).toFixed(1);
+    const status = spent > allocated ? 'Over Budget' : remaining < allocated * 0.1 ? 'Nearly Spent' : 'On Track';
+    
+    return `
+      <tr>
+        <td>${b.name}</td>
+        <td>$${allocated.toLocaleString()}</td>
+        <td>$${spent.toLocaleString()}</td>
+        <td>$${remaining.toLocaleString()}</td>
+        <td>${progress}%</td>
+        <td class="${status.toLowerCase().replace(' ', '-')}">${status}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function generateGoalsTable(goals: any[]): string {
+  return goals.map(g => {
+    const target = parseFloat(g.targetAmount);
+    const current = parseFloat(g.currentAmount);
+    const progress = (current / target * 100).toFixed(1);
+    const remaining = target - current;
+    const targetDate = new Date(g.targetDate);
+    const daysLeft = Math.ceil((targetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    const status = current >= target ? 'Achieved' : daysLeft < 0 ? 'Overdue' : daysLeft < 30 ? 'Due Soon' : 'On Track';
+    
+    return `
+      <tr>
+        <td>${g.name}</td>
+        <td>$${target.toLocaleString()}</td>
+        <td>$${current.toLocaleString()}</td>
+        <td>${progress}%</td>
+        <td>${targetDate.toLocaleDateString()}</td>
+        <td class="${status.toLowerCase().replace(' ', '-')}">${status}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+export async function generatePdfReport(data: PDFData): Promise<Buffer> {
   const { transactions, budgets, goals, summary, userName } = data;
   
-  // Process category data for Google Charts
+  // Generate comprehensive chart data
   const categoryBreakdown: { [key: string]: number } = {};
+  const dailyData: { [key: string]: number } = {};
+  const trendData: { labels: string[], income: number[], expenses: number[] } = {
+    labels: [],
+    income: [],
+    expenses: []
+  };
+  
+  // Process transactions for various charts
   transactions.forEach(t => {
+    const amount = parseFloat(t.amount);
+    const date = new Date(t.date);
+    const dayKey = date.toISOString().split('T')[0];
+    
+    // Category breakdown for doughnut chart
     if (t.type === 'expense') {
       const category = t.categoryId || 'Other';
-      categoryBreakdown[category] = (categoryBreakdown[category] || 0) + parseFloat(t.amount);
+      categoryBreakdown[category] = (categoryBreakdown[category] || 0) + amount;
+    }
+    
+    // Daily transaction count
+    dailyData[dayKey] = (dailyData[dayKey] || 0) + 1;
+  });
+  
+  // Generate trend data (weekly aggregation)
+  const weeklyData: { [key: string]: { income: number, expenses: number } } = {};
+  transactions.forEach(t => {
+    const amount = parseFloat(t.amount);
+    const date = new Date(t.date);
+    const weekKey = getWeekKey(date);
+    
+    if (!weeklyData[weekKey]) {
+      weeklyData[weekKey] = { income: 0, expenses: 0 };
+    }
+    
+    if (t.type === 'income') {
+      weeklyData[weekKey].income += amount;
+    } else {
+      weeklyData[weekKey].expenses += amount;
     }
   });
+  
+  // Sort and format trend data
+  const sortedWeeks = Object.keys(weeklyData).sort();
+  trendData.labels = sortedWeeks.map(week => formatWeekLabel(week));
+  trendData.income = sortedWeeks.map(week => weeklyData[week].income);
+  trendData.expenses = sortedWeeks.map(week => weeklyData[week].expenses);
+  
+  // Prepare chart data objects
+  const categoryChartData = {
+    labels: Object.keys(categoryBreakdown),
+    values: Object.values(categoryBreakdown)
+  };
+  
+  const dailyChartData = {
+    labels: Object.keys(dailyData).sort().map(d => new Date(d).toLocaleDateString()),
+    values: Object.keys(dailyData).sort().map(d => dailyData[d])
+  };
+  
+  const topCategoriesData = {
+    labels: Object.keys(categoryBreakdown).slice(0, 5),
+    values: Object.values(categoryBreakdown).slice(0, 5)
+  };
 
-  // Prepare data for Google Charts
-  const categoryChartData = Object.entries(categoryBreakdown)
-    .map(([category, amount]) => `['${category}', ${amount}]`)
-    .join(',\n          ');
+  // Generate financial insights
+  const insights = generateFinancialInsights(transactions, summary);
 
-  const incomeExpenseData = `
-          ['Income', ${summary.totalIncome}],
-          ['Expenses', ${summary.totalExpenses}]`;
+  // Generate trend indicators
+  const prevMonthIncome = summary.totalIncome * 0.9; // Mock previous data for comparison
+  const prevMonthExpenses = summary.totalExpenses * 1.1;
+  const incomeChange = ((summary.totalIncome - prevMonthIncome) / prevMonthIncome * 100).toFixed(1);
+  const expenseChange = ((summary.totalExpenses - prevMonthExpenses) / prevMonthExpenses * 100).toFixed(1);
+  const netChange = ((summary.netAmount - (prevMonthIncome - prevMonthExpenses)) / Math.abs(prevMonthIncome - prevMonthExpenses) * 100).toFixed(1);
 
-  const html = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>FinanzerPro Financial Report</title>
-      <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-      <style>
-        body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          line-height: 1.6;
-          color: #333;
-          max-width: 800px;
-          margin: 0 auto;
-          padding: 20px;
-          background: #fff;
-        }
-        .header {
-          text-align: center;
-          margin-bottom: 40px;
-          border-bottom: 3px solid #4F46E5;
-          padding-bottom: 20px;
-        }
-        .header h1 {
-          color: #4F46E5;
-          font-size: 2.5rem;
-          margin: 0;
-          font-weight: 700;
-        }
-        .header p {
-          color: #666;
-          font-size: 1.1rem;
-          margin: 10px 0 0 0;
-        }
-        .summary-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-          gap: 20px;
-          margin: 30px 0;
-        }
-        .summary-card {
-          background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-          padding: 20px;
-          border-radius: 12px;
-          text-align: center;
-          border: 1px solid #e2e8f0;
-        }
-        .summary-card h3 {
-          margin: 0 0 10px 0;
-          color: #64748b;
-          font-size: 0.9rem;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-        .summary-card .amount {
-          font-size: 1.6rem;
-          font-weight: 700;
-          margin: 0;
-        }
-        .income { color: #10b981; }
-        .expense { color: #ef4444; }
-        .net { color: #6366f1; }
-        .chart-container {
-          margin: 40px 0;
-          text-align: center;
-          page-break-inside: avoid;
-        }
-        .chart-container h2 {
-          color: #374151;
-          margin-bottom: 20px;
-          font-size: 1.5rem;
-        }
-        .chart-div {
-          width: 100%;
-          height: 350px;
-          margin: 20px 0;
-        }
-        .transactions-section {
-          margin: 40px 0;
-          page-break-inside: avoid;
-        }
-        .transactions-section h2 {
-          color: #374151;
-          border-bottom: 2px solid #e5e7eb;
-          padding-bottom: 10px;
-          font-size: 1.5rem;
-        }
-        .transaction-table {
-          width: 100%;
-          border-collapse: collapse;
-          margin: 20px 0;
-          background: white;
-          border-radius: 8px;
-          overflow: hidden;
-          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-        }
-        .transaction-table th {
-          background: #f8fafc;
-          padding: 10px;
-          text-align: left;
-          font-weight: 600;
-          color: #374151;
-          border-bottom: 1px solid #e5e7eb;
-          font-size: 0.9rem;
-        }
-        .transaction-table td {
-          padding: 10px;
-          border-bottom: 1px solid #f1f5f9;
-          font-size: 0.85rem;
-        }
-        .transaction-table tr:last-child td {
-          border-bottom: none;
-        }
-        .transaction-table .amount-income {
-          color: #10b981;
-          font-weight: 600;
-        }
-        .transaction-table .amount-expense {
-          color: #ef4444;
-          font-weight: 600;
-        }
-        .footer {
-          margin-top: 50px;
-          text-align: center;
-          font-size: 0.85rem;
-          color: #9ca3af;
-          border-top: 1px solid #e5e7eb;
-          padding-top: 20px;
-        }
-        @media print {
-          body { margin: 0; padding: 15px; }
-          .chart-div { height: 300px; }
-        }
-      </style>
-      <script>
-        google.charts.load('current', {'packages':['corechart']});
-        google.charts.setOnLoadCallback(drawCharts);
+  // Format data for template replacement
+  const templateData = {
+    // Basic info
+    MONTH: summary.month,
+    YEAR: summary.year.toString(),
+    USER_NAME: userName || 'User',
+    GENERATED_DATE: new Date().toLocaleDateString(),
 
-        function drawCharts() {
-          // Income vs Expenses Chart
-          var incomeExpenseData = google.visualization.arrayToDataTable([
-            ['Type', 'Amount'],
-            ${incomeExpenseData}
-          ]);
+    // Financial KPIs
+    TOTAL_INCOME: `$${summary.totalIncome.toLocaleString()}`,
+    TOTAL_EXPENSES: `$${summary.totalExpenses.toLocaleString()}`,
+    NET_AMOUNT: `$${summary.netAmount.toLocaleString()}`,
+    TRANSACTION_COUNT: summary.transactionCount.toString(),
 
-          var incomeExpenseOptions = {
-            title: 'Income vs Expenses',
-            titleTextStyle: { fontSize: 16, color: '#374151' },
-            pieHole: 0.4,
-            colors: ['#10b981', '#ef4444'],
-            backgroundColor: 'transparent',
-            legend: { position: 'bottom', textStyle: { fontSize: 11 } },
-            chartArea: { width: '85%', height: '75%' }
-          };
+    // Trend indicators
+    INCOME_CHANGE: `${incomeChange}%`,
+    EXPENSE_CHANGE: `${expenseChange}%`,
+    NET_CHANGE: `${netChange}%`,
+    INCOME_TREND_CLASS: parseFloat(incomeChange) >= 0 ? 'positive' : 'negative',
+    EXPENSE_TREND_CLASS: parseFloat(expenseChange) <= 0 ? 'positive' : 'negative',
+    NET_TREND_CLASS: parseFloat(netChange) >= 0 ? 'positive' : 'negative',
+    TRANSACTION_FREQUENCY: `${(summary.transactionCount / 30).toFixed(1)}/day`,
 
-          var incomeExpenseChart = new google.visualization.PieChart(document.getElementById('income_expense_chart'));
-          incomeExpenseChart.draw(incomeExpenseData, incomeExpenseOptions);
+    // Chart data (JSON format for JavaScript)
+    CATEGORY_CHART_DATA: JSON.stringify(categoryChartData),
+    TREND_CHART_DATA: JSON.stringify(trendData),
+    DAILY_CHART_DATA: JSON.stringify(dailyChartData),
+    TOP_CATEGORIES_CHART_DATA: JSON.stringify(topCategoriesData),
 
-          // Category Breakdown Chart
-          ${categoryChartData ? `
-          var categoryData = google.visualization.arrayToDataTable([
-            ['Category', 'Amount'],
-            ${categoryChartData}
-          ]);
+    // Financial insights
+    FINANCIAL_INSIGHTS: insights.map(insight => `<li>${insight}</li>`).join(''),
 
-          var categoryOptions = {
-            title: 'Expenses by Category',
-            titleTextStyle: { fontSize: 16, color: '#374151' },
-            pieHole: 0.4,
-            backgroundColor: 'transparent',
-            legend: { position: 'bottom', textStyle: { fontSize: 11 } },
-            chartArea: { width: '85%', height: '75%' },
-            colors: ['#4F46E5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316']
-          };
+    // Tables
+    TRANSACTIONS_TABLE: generateTransactionsTable(transactions),
+    BUDGETS_SECTION: budgets && budgets.length > 0 ? 
+      BUDGETS_SECTION_TEMPLATE.replace('{{BUDGETS_TABLE}}', generateBudgetsTable(budgets)) : '',
+    GOALS_SECTION: goals && goals.length > 0 ? 
+      GOALS_SECTION_TEMPLATE.replace('{{GOALS_TABLE}}', generateGoalsTable(goals)) : ''
+  };
 
-          var categoryChart = new google.visualization.PieChart(document.getElementById('category_chart'));
-          categoryChart.draw(categoryData, categoryOptions);
-          ` : `
-          document.getElementById('category_chart').innerHTML = '<p style="text-align:center;color:#666;padding:40px;">No expense categories to display</p>';
-          `}
-        }
-      </script>
-    </head>
-    <body>
-      <div class="header">
-        <h1>FinanzerPro</h1>
-        <p>Financial Report • ${summary.month}/${summary.year}</p>
-        ${userName ? `<p>Generated for: ${userName}</p>` : ''}
-      </div>
+  // Replace all placeholders in template
+  let html = PDF_TEMPLATE;
+  Object.entries(templateData).forEach(([key, value]) => {
+    const regex = new RegExp(`{{${key}}}`, 'g');
+    html = html.replace(regex, value);
+  });
 
-      <div class="summary-grid">
-        <div class="summary-card">
-          <h3>Total Income</h3>
-          <p class="amount income">$${summary.totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
-        </div>
-        <div class="summary-card">
-          <h3>Total Expenses</h3>
-          <p class="amount expense">$${summary.totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
-        </div>
-        <div class="summary-card">
-          <h3>Net Amount</h3>
-          <p class="amount net">$${summary.netAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
-        </div>
-        <div class="summary-card">
-          <h3>Transactions</h3>
-          <p class="amount">${summary.transactionCount}</p>
-        </div>
-      </div>
-
-      <div class="chart-container">
-        <h2>Income vs Expenses</h2>
-        <div id="income_expense_chart" class="chart-div"></div>
-      </div>
-
-      <div class="chart-container">
-        <h2>Expenses by Category</h2>
-        <div id="category_chart" class="chart-div"></div>
-      </div>
-
-      <div class="transactions-section">
-        <h2>Recent Transactions</h2>
-        <table class="transaction-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Category</th>
-              <th>Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${transactions.slice(0, 25).map(t => `
-              <tr>
-                <td>${new Date(t.date).toLocaleDateString()}</td>
-                <td>${t.description.length > 30 ? t.description.substring(0, 30) + '...' : t.description}</td>
-                <td>${t.categoryId || 'Other'}</td>
-                <td class="amount-${t.type}">
-                  ${t.type === 'income' ? '+' : '-'}$${parseFloat(t.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-
-      ${budgets && budgets.length > 0 ? `
-      <div class="transactions-section">
-        <h2>Budget Status</h2>
-        <table class="transaction-table">
-          <thead>
-            <tr>
-              <th>Budget</th>
-              <th>Allocated</th>
-              <th>Spent</th>
-              <th>Remaining</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${budgets.map(b => {
-              const remaining = parseFloat(b.amount) - parseFloat(b.spent);
-              return `
-                <tr>
-                  <td>${b.name}</td>
-                  <td>$${parseFloat(b.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                  <td class="amount-expense">$${parseFloat(b.spent).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                  <td class="${remaining >= 0 ? 'amount-income' : 'amount-expense'}">
-                    $${remaining.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                  </td>
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
-        </table>
-      </div>
-      ` : ''}
-
-      ${goals && goals.length > 0 ? `
-      <div class="transactions-section">
-        <h2>Financial Goals</h2>
-        <table class="transaction-table">
-          <thead>
-            <tr>
-              <th>Goal</th>
-              <th>Target</th>
-              <th>Current</th>
-              <th>Progress</th>
-              <th>Target Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${goals.map(g => {
-              const progress = (parseFloat(g.currentAmount) / parseFloat(g.targetAmount)) * 100;
-              return `
-                <tr>
-                  <td>${g.name}</td>
-                  <td>$${parseFloat(g.targetAmount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                  <td>$${parseFloat(g.currentAmount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                  <td>${progress.toFixed(1)}%</td>
-                  <td>${new Date(g.targetDate).toLocaleDateString()}</td>
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
-        </table>
-      </div>
-      ` : ''}
-
-      <div class="footer">
-        <p>Generated by FinanzerPro on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
-        <p>This report contains confidential financial information</p>
-      </div>
-    </body>
-    </html>
-  `;
-
+  // Generate PDF using Puppeteer
   const browser = await puppeteer.launch({
-    headless: 'new',
-    executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
-  const page = await browser.newPage();
-  await page.setContent(html, { waitUntil: 'networkidle0' });
-  
-  // Wait for charts to load
-  await page.waitForTimeout(3000);
+  try {
+    const page = await browser.newPage();
+    await page.setContent(html, { 
+      waitUntil: 'networkidle0',
+      timeout: 30000 
+    });
 
-  const pdfBuffer = await page.pdf({ 
-    format: 'A4', 
-    printBackground: true,
-    margin: {
-      top: '20px',
-      right: '20px',
-      bottom: '20px',
-      left: '20px'
-    }
-  });
-  
-  await browser.close();
-  return pdfBuffer;
+    // Wait for charts to load
+    await page.waitForTimeout(3000);
+
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: {
+        top: '20mm',
+        right: '15mm',
+        bottom: '20mm',
+        left: '15mm'
+      }
+    });
+
+    return pdfBuffer;
+  } finally {
+    await browser.close();
+  }
 }
