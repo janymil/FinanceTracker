@@ -10,7 +10,16 @@ if (!PUBLISHABLE_KEY) {
 }
 
 createRoot(document.getElementById("root")!).render(
-  <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+  <ClerkProvider 
+    publishableKey={PUBLISHABLE_KEY}
+    afterSignOutUrl="/"
+    appearance={{
+      elements: {
+        rootBox: "mx-auto",
+        card: "shadow-lg border-0",
+      }
+    }}
+  >
     <App />
   </ClerkProvider>
 );
