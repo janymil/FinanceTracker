@@ -154,7 +154,7 @@ export default function App() {
   }
   
   return (
-    <ClerkProvider publishableKey={publishableKey}
+    <ClerkProvider publishableKey={publishableKey}>
       <QueryClientProvider client={queryClient}>
         <AppContent />
         <Toaster />
