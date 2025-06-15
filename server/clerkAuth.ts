@@ -19,16 +19,14 @@ export const setupClerkAuth = (app: any) => {
 // Middleware to require authentication
 export const isAuthenticated = (req: any, res: Response, next: NextFunction) => {
   try {
-    console.log('Auth middleware - req.auth:', req.auth);
-    console.log('Auth middleware - headers:', req.headers.authorization);
+    // Use req.auth() as a function (new Clerk API)
+    const auth = req.auth();
     
     // Check if user is authenticated via Clerk
-    if (!req.auth || !req.auth.userId) {
-      console.log('Authentication failed - no auth or userId');
+    if (!auth || !auth.userId) {
       return res.status(401).json({ message: 'Authentication required' });
     }
     
-    console.log('Authentication successful for user:', req.auth.userId);
     next();
   } catch (error) {
     console.error('Authentication error:', error);
@@ -38,5 +36,10 @@ export const isAuthenticated = (req: any, res: Response, next: NextFunction) => 
 
 // Helper to get user ID from Clerk
 export const getUserId = (req: any): string | null => {
-  return req.auth?.userId || null;
+  try {
+    const auth = req.auth();
+    return auth?.userId || null;
+  } catch (error) {
+    return null;
+  }
 };

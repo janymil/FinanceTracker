@@ -57,7 +57,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If user doesn't exist, create them using Clerk user data
       if (!user) {
-        const clerkUser = req.auth.user;
+        const auth = req.auth();
+        const clerkUser = auth?.user;
         const userData = {
           id: userId,
           email: clerkUser?.emailAddresses?.[0]?.emailAddress || null,

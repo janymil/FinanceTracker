@@ -61,13 +61,13 @@ function AppContent() {
   }
 
   // Public routes for guest users
-  const publicRoutes = ['/', '/pricing', '/privacy-policy', '/terms-of-service', '/cookie-policy', '/contact', '/help', '/choose-auth', '/sign-in-clerk', '/sign-up-clerk'];
+  const publicRoutes = ['/', '/pricing', '/privacy-policy', '/terms-of-service', '/cookie-policy', '/contact', '/help', '/auth'];
   const currentPath = window.location.pathname;
   const isOnPublicRoute = publicRoutes.includes(currentPath);
 
-  // If clearly unauthenticated and on a protected route, redirect to login
+  // If clearly unauthenticated and on a protected route, redirect to auth
   if (isUnauthenticated && !isOnPublicRoute) {
-    window.location.href = '/sign-in-clerk';
+    window.location.href = '/auth';
     return <AppLoader />;
   }
 
