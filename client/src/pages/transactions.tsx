@@ -65,7 +65,7 @@ export default function Transactions() {
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  
+
   const [newTransaction, setNewTransaction] = useState({
     amount: "",
     description: "",
@@ -182,11 +182,11 @@ export default function Transactions() {
   const filteredTransactions = transactions.filter((transaction: Transaction) => {
     const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          transaction.categoryName?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesType = filterType === "all" || transaction.type === filterType;
-    
+
     const matchesCategory = filterCategory === "all" || transaction.categoryName === filterCategory;
-    
+
     // Check month filter first (horizontal filter takes priority)
     let matchesMonth = true;
     if (selectedMonth) {
@@ -195,13 +195,13 @@ export default function Transactions() {
       matchesMonth = transactionDate.getFullYear() === parseInt(year) && 
                      transactionDate.getMonth() === parseInt(month) - 1;
     }
-    
+
     let matchesDate = true;
     if (dateRange !== "all" && !selectedMonth) {
       const transactionDate = new Date(transaction.date);
       const today = new Date();
       const currentYear = today.getFullYear();
-      
+
       switch (dateRange) {
         case "today":
           matchesDate = transactionDate.toDateString() === today.toDateString();
@@ -256,7 +256,7 @@ export default function Transactions() {
           break;
       }
     }
-    
+
     return matchesSearch && matchesType && matchesCategory && matchesMonth && matchesDate;
   });
 
@@ -274,16 +274,21 @@ export default function Transactions() {
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
-    const categoryId = categories.find(cat => cat.name === transaction.categoryName)?.id?.toString() || "";
+
+    // Find the category ID from the transaction's category name
+    const matchingCategory = (categories as Category[]).find(
+      cat => cat.name === transaction.categoryName
+    );
+
     setNewTransaction({
       amount: transaction.amount,
       description: transaction.description,
       date: transaction.date,
       type: transaction.type,
-      categoryId: categoryId,
+      categoryId: matchingCategory ? matchingCategory.id.toString() : "",
       isRecurring: transaction.isRecurring || false,
-      recurringFrequency: transaction.recurringFrequency || "monthly",
-      recurringEndDate: transaction.recurringEndDate || "",
+      recurringFrequency: (transaction.recurringFrequency as "weekly" | "monthly" | "yearly") || "monthly",
+      recurringEndDate: transaction.recurringEndDate ? new Date(transaction.recurringEndDate).toISOString().split('T')[0] : "",
       paymentUrl: transaction.paymentUrl || "",
       referenceNote: transaction.referenceNote || "",
     });
@@ -348,7 +353,7 @@ export default function Transactions() {
                     {editingTransaction ? "Update the transaction details" : "Record a new income or expense transaction"}
                   </DialogDescription>
                 </DialogHeader>
-                
+
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
