@@ -64,7 +64,7 @@ export interface IStorage {
   // Transaction operations
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
   getUserTransactions(userId: number, limit?: number): Promise<Transaction[]>;
-  updateTransaction(id: number, transaction: InsertTransaction): Promise<Transaction>;
+  updateTransaction(id: number, transaction: Partial<InsertTransaction>): Promise<Transaction>;
   deleteTransaction(id: number, userId: number): Promise<void>;
 
   // Budget operations
@@ -321,23 +321,46 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
-  async updateTransaction(id: number, transaction: InsertTransaction): Promise<Transaction> {
-        // Encrypt sensitive fields if they're being updated
-        const encryptedTransaction = { ...transaction };
-        if (transaction.amount) {
-            encryptedTransaction.amount = DataEncryption.encryptAmount(transaction.amount);
+  async updateTransaction(id: number, transaction: Partial<InsertTransaction>): Promise<Transaction> {
+        // Only encrypt and update fields that are actually provided
+        const updateFields: any = {};
+        
+        // Only update fields that are explicitly provided
+        if (transaction.amount !== undefined) {
+            updateFields.amount = DataEncryption.encryptAmount(transaction.amount);
         }
-        if (transaction.description) {
-            encryptedTransaction.description = DataEncryption.encryptDescription(transaction.description);
+        if (transaction.description !== undefined) {
+            updateFields.description = DataEncryption.encryptDescription(transaction.description);
         }
-        if (transaction.referenceNote) {
-            encryptedTransaction.referenceNote = DataEncryption.encrypt(transaction.referenceNote);
+        if (transaction.referenceNote !== undefined) {
+            updateFields.referenceNote = DataEncryption.encrypt(transaction.referenceNote);
+        }
+        if (transaction.categoryId !== undefined) {
+            updateFields.categoryId = transaction.categoryId;
+        }
+        if (transaction.date !== undefined) {
+            updateFields.date = transaction.date;
+        }
+        if (transaction.type !== undefined) {
+            updateFields.type = transaction.type;
+        }
+        if (transaction.isRecurring !== undefined) {
+            updateFields.isRecurring = transaction.isRecurring;
+        }
+        if (transaction.recurringFrequency !== undefined) {
+            updateFields.recurringFrequency = transaction.recurringFrequency;
+        }
+        if (transaction.recurringEndDate !== undefined) {
+            updateFields.recurringEndDate = transaction.recurringEndDate;
+        }
+        if (transaction.paymentUrl !== undefined) {
+            updateFields.paymentUrl = transaction.paymentUrl;
         }
 
         const [updatedTransaction] = await db
             .update(transactions)
-            .set(encryptedTransaction)
-            .where(and(eq(transactions.id, id), eq(transactions.userId, transaction.userId)))
+            .set(updateFields)
+            .where(and(eq(transactions.id, id), eq(transactions.userId, transaction.userId!)))
             .returning();
 
         // Decrypt for return value

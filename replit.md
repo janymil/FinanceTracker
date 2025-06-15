@@ -196,6 +196,8 @@ Changelog:
 - June 14, 2025. Created secure admin login form that appears before showing any sensitive admin data or functionality
 - June 15, 2025. Completely removed all Clerk authentication traces from the system including environment variables and references
 - June 15, 2025. Verified system is running purely on Replit Auth with no remaining Clerk dependencies
+- June 15, 2025. Fixed critical transaction editing bug where all fields were being overwritten instead of preserving existing data
+- June 15, 2025. Modified updateTransaction storage method to only update specific fields provided, preventing data loss during edits
 ```
 
 ## User Preferences
