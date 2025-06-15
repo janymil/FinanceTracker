@@ -18,11 +18,11 @@ interface QuickSnapshotProps {
 export default function QuickFinancialSnapshot({ summary, transactions }: QuickSnapshotProps) {
   const getTopCategories = () => {
     if (!summary?.transactionsByCategory) return { topExpense: null, topIncome: null };
-    
+
     const expenseCategories = summary.transactionsByCategory
       .filter(cat => cat.type === 'expense')
       .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount));
-    
+
     const incomeCategories = summary.transactionsByCategory
       .filter(cat => cat.type === 'income')
       .sort((a, b) => b.amount - a.amount);
@@ -35,11 +35,11 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
 
   const getSpendingTrend = () => {
     if (!transactions || transactions.length < 2) return 'stable';
-    
+
     const recentTransactions = transactions
       .filter(t => t.type === 'expense')
       .slice(0, 5);
-    
+
     const olderTransactions = transactions
       .filter(t => t.type === 'expense')
       .slice(5, 10);
@@ -63,8 +63,46 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
     }).format(Math.abs(amount));
   };
 
-  const { topExpense, topIncome } = getTopCategories();
-  const spendingTrend = getSpendingTrend();
+  const topExpense = summary?.transactionsByCategory && Array.isArray(summary.transactionsByCategory)
+    ? summary.transactionsByCategory
+        .filter((cat: any) => cat.type === 'expense' && cat.amount < 0)
+        .sort((a: any, b: any) => Math.abs(b.amount) - Math.abs(a.amount))[0]
+    : null;
+
+  const topIncome = summary?.transactionsByCategory && Array.isArray(summary.transactionsByCategory)
+    ? summary.transactionsByCategory
+        .filter((cat: any) => cat.type === 'income' && cat.amount > 0)
+        .sort((a: any, b: any) => Math.abs(b.amount) - Math.abs(a.amount))[0]
+    : null;
+
+  // Calculate spending trend based on available data
+  const currentMonthExpenses = Math.abs(summary?.totalExpenses || 0);
+  const hasTransactionData = transactions && Array.isArray(transactions) && transactions.length > 0;
+
+  // More sophisticated trend calculation if we have transaction data
+  let spendingTrend = 'stable';
+  if (hasTransactionData) {
+    const now = new Date();
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const lastMonthExpenses = transactions
+      .filter(t => {
+        const tDate = new Date(t.date);
+        return t.type === 'expense' && tDate >= lastMonth && tDate < currentMonth;
+      })
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+    if (currentMonthExpenses > lastMonthExpenses * 1.1) {
+      spendingTrend = 'increasing';
+    } else if (currentMonthExpenses < lastMonthExpenses * 0.9) {
+      spendingTrend = 'decreasing';
+    }
+  } else {
+    // Fallback trend calculation
+    spendingTrend = currentMonthExpenses > 500 ? 'increasing' : 
+                   currentMonthExpenses < 200 ? 'decreasing' : 'stable';
+  }
 
   const insights = [
     {
@@ -113,7 +151,7 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
           <DollarSign className="h-5 w-5 text-blue-600" />
           Quick Financial Snapshot
         </h3>
-        
+
         <div className="grid grid-cols-2 gap-4">
           {insights.map((insight, index) => {
             const IconComponent = insight.icon;

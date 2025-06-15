@@ -130,6 +130,41 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
   const healthData = calculateHealthScore();
   const StatusIcon = healthData.icon || CheckCircle;
 
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="animate-pulse">
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
+            <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+            <div className="space-y-2">
+              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center py-8">
+            <div className="text-4xl text-gray-300 dark:text-gray-600 mb-4">⚠️</div>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              Unable to Load Health Score
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              Please try again in a moment
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-3">

@@ -17,11 +17,17 @@ interface Budget {
   endDate: string;
 }
 
-export default function BudgetOverview() {
+interface BudgetOverviewProps {
+  className?: string;
+  isLimited?: boolean;
+}
+
+export default function BudgetOverview({ className, isLimited = false }: BudgetOverviewProps) {
   const [, setLocation] = useLocation();
-  
+
   const { data: budgets, isLoading: budgetsLoading } = useQuery({
     queryKey: ['/api/budgets'],
+    enabled: !!user && !isLimited,
   });
 
   const { data: transactions, isLoading: transactionsLoading } = useQuery({
@@ -49,7 +55,7 @@ export default function BudgetOverview() {
 
   const budgetsWithSpending = useMemo(() => {
     if (!budgets || !transactions) return [];
-    
+
     return (budgets as any[])
       .map((budget: any) => {
         // Calculate total spending for this category in the current month
@@ -71,6 +77,31 @@ export default function BudgetOverview() {
       })
       .sort((a: any, b: any) => b.spent - a.spent); // Sort by spending amount descending
   }, [budgets, transactions]);
+
+  if (isLimited) {
+    return (
+      <Card className={className}>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <CardTitle className="text-lg font-semibold">Budget by Category</CardTitle>
+            <div className="bg-standard-light text-standard px-2 py-1 rounded text-xs font-medium">
+              Standard Feature
+            </div>
+          </div>
+
+          <div className="text-center py-8">
+            <div className="text-4xl text-gray-300 dark:text-gray-600 mb-4">📊</div>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
+              Detailed expense breakdown and budget tracking available with Standard
+            </p>
+            <Button className="bg-standard hover:bg-standard/90 text-white">
+              Upgrade to Standard
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (budgetsLoading || transactionsLoading) {
     return (
@@ -131,7 +162,7 @@ export default function BudgetOverview() {
               const spent = budget.spent;
               const budgetAmount = parseFloat(budget.amount);
               const percentage = Math.round((spent / budgetAmount) * 100);
-              
+
               return (
                 <div key={budget.id} className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -143,12 +174,12 @@ export default function BudgetOverview() {
                     </div>
                     <span className="text-sm text-gray-600 dark:text-gray-400">{percentage}%</span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-2">
                     <span>{formatCurrency(spent)} / {formatCurrency(budget.amount)}</span>
                     <span>{new Date(budget.startDate).toLocaleDateString('en-US')} - {new Date(budget.endDate).toLocaleDateString('en-US')}</span>
                   </div>
-                  
+
                   <Progress 
                     value={Math.min(percentage, 100)} 
                     className="h-2"

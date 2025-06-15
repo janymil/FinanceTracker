@@ -488,24 +488,7 @@ export default function Dashboard() {
                 isPremium={false}
               />
 
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Budget Overview</h3>
-                  <div className="bg-standard-light text-standard px-2 py-1 rounded text-xs font-medium">
-                    Standard Feature
-                  </div>
-                </div>
-
-                <div className="text-center py-8">
-                  <div className="text-4xl text-gray-300 dark:text-gray-600 mb-4">📊</div>
-                  <p className="text-gray-500 dark:text-gray-400 mb-4">
-                    Detailed expense breakdown and budget tracking available with Standard
-                  </p>
-                  <Button className="bg-standard hover:bg-standard/90 text-white">
-                    Upgrade to Standard
-                  </Button>
-                </div>
-              </div>
+              <BudgetOverview isLimited={true} />
             </div>
           </div>
         )}

@@ -27,16 +27,18 @@ interface TransactionReminder {
 }
 
 export default function TransactionRemindersWidget() {
-  const { data: reminders = [], isLoading } = useQuery<TransactionReminder[]>({
+  const { data: reminders = [], isLoading, error } = useQuery<TransactionReminder[]>({
     queryKey: ["/api/transaction-reminders", { days: 30 }],
     queryFn: () => fetch("/api/transaction-reminders?days=30").then(res => res.json()),
     enabled: true,
+    retry: 1,
+    refetchOnWindowFocus: false,
   });
 
   const getReminderPriority = (reminder: TransactionReminder) => {
     const dueDate = new Date(reminder.dueDate);
     const today = new Date();
-    
+
     if (isToday(dueDate)) return "high";
     if (isTomorrow(dueDate)) return "medium";
     if (isWithinInterval(dueDate, { start: today, end: addDays(today, 7) })) return "low";
@@ -62,6 +64,75 @@ export default function TransactionRemindersWidget() {
       : "text-red-600 bg-red-100 dark:bg-red-900/20";
   };
 
+  if (isLoading) {
+    return (
+      <RequirePlan plan="standard">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5" />
+                  Upcoming Transactions
+                  <Badge className="bg-blue-600 text-white">
+                    <Crown className="h-3 w-3 mr-1" />
+                    Standard+
+                  </Badge>
+                </CardTitle>
+                <CardDescription>
+                  Automatic reminders from your future and recurring transactions
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </RequirePlan>
+    );
+  }
+
+  // Handle API not implemented yet
+  if (error) {
+    return (
+      <RequirePlan plan="standard">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5" />
+                  Upcoming Transactions
+                  <Badge className="bg-blue-600 text-white">
+                    <Crown className="h-3 w-3 mr-1" />
+                    Standard+
+                  </Badge>
+                </CardTitle>
+                <CardDescription>
+                  Automatic reminders from your future and recurring transactions
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="text-center py-8">
+              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+              <p className="text-gray-600 dark:text-gray-300">Error loading transactions</p>
+            </div>
+          </CardContent>
+        </Card>
+      </RequirePlan>
+    );
+  }
+
   return (
     <RequirePlan plan="standard">
       <Card>
@@ -83,19 +154,14 @@ export default function TransactionRemindersWidget() {
           </div>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="space-y-3">
-              <div className="h-16 bg-gray-100 dark:bg-gray-800 rounded animate-pulse" />
-              <div className="h-16 bg-gray-100 dark:bg-gray-800 rounded animate-pulse" />
-            </div>
-          ) : reminders.length > 0 ? (
+          {reminders.length > 0 ? (
             <div className="space-y-3">
               {reminders.slice(0, 6).map((reminder) => {
                 const priority = getReminderPriority(reminder);
                 const priorityColor = getPriorityColor(priority);
                 const TypeIcon = getTypeIcon(reminder.type);
                 const typeColor = getTypeColor(reminder.type);
-                
+
                 return (
                   <div key={reminder.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
@@ -137,7 +203,7 @@ export default function TransactionRemindersWidget() {
                   </div>
                 );
               })}
-              
+
               {reminders.length > 6 && (
                 <p className="text-xs text-gray-500 text-center">
                   +{reminders.length - 6} more upcoming transactions
