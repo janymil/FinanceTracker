@@ -173,35 +173,35 @@ export default function Reports() {
       />
 
       {/* Reports Tabs - Basic available for all, Advanced for Premium */}
-        <Tabs defaultValue="summary" className="space-y-6">
-          <TabsList className={`grid w-full ${hasPremium ? 'grid-cols-4' : hasStandardOrBetter ? 'grid-cols-2' : 'grid-cols-1'}`}>
-            <TabsTrigger value="summary" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Summary
+      <Tabs defaultValue="summary" className="space-y-6">
+        <TabsList className={`grid w-full ${hasPremium ? 'grid-cols-4' : hasStandardOrBetter ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          <TabsTrigger value="summary" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Summary
+          </TabsTrigger>
+          {hasStandardOrBetter && (
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Analytics
             </TabsTrigger>
-            {hasStandardOrBetter && (
-              <TabsTrigger value="analytics" className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                Analytics
-              </TabsTrigger>
-            )}
-            {hasPremium && (
-              <TabsTrigger value="insights" className="flex items-center gap-2">
-                <Brain className="h-4 w-4" />
-                AI Insights
-              </TabsTrigger>
-            )}
-            {hasPremium && (
-              <TabsTrigger value="categorization" className="flex items-center gap-2">
-                <Zap className="h-4 w-4" />
-                Auto-Tag
-              </TabsTrigger>
-            )}
-          </TabsList>
+          )}
+          {hasPremium && (
+            <TabsTrigger value="insights" className="flex items-center gap-2">
+              <Brain className="h-4 w-4" />
+              AI Insights
+            </TabsTrigger>
+          )}
+          {hasPremium && (
+            <TabsTrigger value="categorization" className="flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              Auto-Tag
+            </TabsTrigger>
+          )}
+        </TabsList>
 
-          {/* Summary Tab - Available for all users */}
-          <TabsContent value="summary" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Summary Tab - Available for all users */}
+        <TabsContent value="summary" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Basic financial summary cards available to all users */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -270,60 +270,59 @@ export default function Reports() {
             )}
           </TabsContent>
 
-          {/* Interactive Analytics */}
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <RequirePlan plan="standard">
-                <InteractiveChart
-                  data={dynamicChartData}
-                  chartType="line"
-                  title="Income vs Expenses Trend"
-                  description="Track your cash flow over time with interactive zoom and insights"
-                  onExport={() => console.log("Exporting chart...")}
-                />
-              </RequirePlan>
-              <RequirePlan plan="standard">
-                <InteractiveChart
-                  data={dynamicChartData}
-                  chartType="bar"
-                  title="Monthly Comparison"
-                  description="Compare monthly performance with detailed tooltips"
-                />
-              </RequirePlan>
-            </div>
+        {/* Interactive Analytics */}
+        <TabsContent value="analytics" className="space-y-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <RequirePlan plan="standard">
               <InteractiveChart
                 data={dynamicChartData}
-                chartType="area"
-                title="Financial Overview"
-                description="Comprehensive view of your financial health with trend analysis"
+                chartType="line"
+                title="Income vs Expenses Trend"
+                description="Track your cash flow over time with interactive zoom and insights"
+                onExport={() => console.log("Exporting chart...")}
               />
             </RequirePlan>
-          </TabsContent>
-
-          {/* AI Insights */}
-          <TabsContent value="insights" className="space-y-6">
-            <RequirePlan plan="premium">
-              <AIInsights 
-                data={{
-                  transactions: Array.isArray(transactions) ? transactions : [],
-                  budgets: [],
-                  goals: []
-                }}
-              />
-            </RequirePlan>
-          </TabsContent>
-
-          {/* Auto-Categorization */}
-          <TabsContent value="categorization" className="space-y-6">
             <RequirePlan plan="standard">
-              <AutoCategorization 
-                transactions={Array.isArray(transactions) ? transactions : []}
+              <InteractiveChart
+                data={dynamicChartData}
+                chartType="bar"
+                title="Monthly Comparison"
+                description="Compare monthly performance with detailed tooltips"
               />
             </RequirePlan>
-          </TabsContent>
-        </Tabs>
-      </div>
+          </div>
+          <RequirePlan plan="standard">
+            <InteractiveChart
+              data={dynamicChartData}
+              chartType="area"
+              title="Financial Overview"
+              description="Comprehensive view of your financial health with trend analysis"
+            />
+          </RequirePlan>
+        </TabsContent>
+
+        {/* AI Insights */}
+        <TabsContent value="insights" className="space-y-6">
+          <RequirePlan plan="premium">
+            <AIInsights 
+              data={{
+                transactions: Array.isArray(transactions) ? transactions : [],
+                budgets: [],
+                goals: []
+              }}
+            />
+          </RequirePlan>
+        </TabsContent>
+
+        {/* Auto-Categorization */}
+        <TabsContent value="categorization" className="space-y-6">
+          <RequirePlan plan="standard">
+            <AutoCategorization 
+              transactions={Array.isArray(transactions) ? transactions : []}
+            />
+          </RequirePlan>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
