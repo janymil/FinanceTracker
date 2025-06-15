@@ -6,11 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrendingUp, TrendingDown, BarChart3, LineChart, Calendar, Crown, Download, Filter, RefreshCw } from "lucide-react";
+import { TrendingUp, TrendingDown, BarChart3, LineChart as LineChartIcon, Calendar, Crown, Download, Filter, RefreshCw } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears, subDays, subWeeks } from "date-fns";
 import { useState, useMemo } from "react";
 import RequirePlan from "@/components/require-plan";
-import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart as RechartsBarChart, Bar, Area, AreaChart } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, Area, AreaChart } from "recharts";
 
 export default function Trends() {
   const { user } = useAuth();
@@ -170,6 +170,118 @@ export default function Trends() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value);
+  };
+
+  // Day of week spending analysis
+  const getDayOfWeekData = () => {
+    if (!transactions || !Array.isArray(transactions)) return [];
+    
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayTotals = new Array(7).fill(0);
+    
+    transactions
+      .filter(t => t.type === 'expense')
+      .forEach(transaction => {
+        const date = new Date(transaction.date);
+        const dayOfWeek = date.getDay();
+        dayTotals[dayOfWeek] += parseFloat(transaction.amount);
+      });
+    
+    return dayNames.map((day, index) => ({
+      day,
+      amount: dayTotals[index]
+    }));
+  };
+
+  // Monthly day spending analysis
+  const getMonthlyDayData = () => {
+    if (!transactions || !Array.isArray(transactions)) return [];
+    
+    const dayTotals = new Array(31).fill(0);
+    const dayCounts = new Array(31).fill(0);
+    
+    transactions
+      .filter(t => t.type === 'expense')
+      .forEach(transaction => {
+        const date = new Date(transaction.date);
+        const dayOfMonth = date.getDate() - 1; // 0-indexed
+        dayTotals[dayOfMonth] += parseFloat(transaction.amount);
+        dayCounts[dayOfMonth]++;
+      });
+    
+    return Array.from({ length: 31 }, (_, i) => ({
+      day: (i + 1).toString(),
+      amount: dayCounts[i] > 0 ? dayTotals[i] / dayCounts[i] : 0
+    }));
+  };
+
+  // Category frequency analysis
+  const getCategoryFrequencyData = () => {
+    if (!transactions || !Array.isArray(transactions) || !categories) return [];
+    
+    const categoryStats = new Map();
+    
+    transactions
+      .filter(t => t.type === 'expense')
+      .forEach(transaction => {
+        const categoryId = transaction.categoryId;
+        const category = categories.find(c => c.id === categoryId);
+        const categoryName = category?.name || 'Other';
+        
+        if (!categoryStats.has(categoryName)) {
+          categoryStats.set(categoryName, {
+            name: categoryName,
+            frequency: 0,
+            total: 0
+          });
+        }
+        
+        const stats = categoryStats.get(categoryName);
+        stats.frequency++;
+        stats.total += parseFloat(transaction.amount);
+      });
+    
+    return Array.from(categoryStats.values())
+      .map(stat => ({
+        ...stat,
+        average: stat.frequency > 0 ? stat.total / stat.frequency : 0
+      }))
+      .sort((a, b) => b.frequency - a.frequency)
+      .slice(0, 9); // Top 9 categories
+  };
+
+  // Generate insights for day of week patterns
+  const getDayOfWeekInsight = () => {
+    const data = getDayOfWeekData();
+    if (data.length === 0) return "No spending data available.";
+    
+    const maxSpending = Math.max(...data.map(d => d.amount));
+    const maxDay = data.find(d => d.amount === maxSpending);
+    const weekendSpending = data[0].amount + data[6].amount; // Sunday + Saturday
+    const weekdaySpending = data.slice(1, 6).reduce((sum, d) => sum + d.amount, 0);
+    
+    if (weekendSpending > weekdaySpending) {
+      return `You spend more on weekends (${formatCurrency(weekendSpending)}) than weekdays. ${maxDay?.day} is your highest spending day.`;
+    } else {
+      return `You spend more on weekdays (${formatCurrency(weekdaySpending)}) than weekends. ${maxDay?.day} is your highest spending day.`;
+    }
+  };
+
+  // Generate insights for monthly day patterns
+  const getMonthlyDayInsight = () => {
+    const data = getMonthlyDayData();
+    if (data.length === 0) return "No spending data available.";
+    
+    const firstWeek = data.slice(0, 7).reduce((sum, d) => sum + d.amount, 0) / 7;
+    const lastWeek = data.slice(-7).reduce((sum, d) => sum + d.amount, 0) / 7;
+    
+    if (firstWeek > lastWeek * 1.2) {
+      return `You tend to spend more at the beginning of the month (${formatCurrency(firstWeek)} avg) than at the end (${formatCurrency(lastWeek)} avg).`;
+    } else if (lastWeek > firstWeek * 1.2) {
+      return `You tend to spend more at the end of the month (${formatCurrency(lastWeek)} avg) than at the beginning (${formatCurrency(firstWeek)} avg).`;
+    } else {
+      return `Your spending is relatively consistent throughout the month.`;
+    }
   };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -390,29 +502,92 @@ export default function Trends() {
 
           {/* Spending Patterns */}
           <TabsContent value="patterns" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Day of Week Patterns */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Day of Week Patterns</CardTitle>
+                  <CardDescription>Your spending behavior across different days</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={getDayOfWeekData()}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="day" />
+                        <YAxis />
+                        <Tooltip formatter={(value) => [formatCurrency(Number(value)), 'Amount']} />
+                        <Bar dataKey="amount" fill="#8884d8" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {getDayOfWeekInsight()}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Monthly Day Patterns */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Monthly Spending Cycles</CardTitle>
+                  <CardDescription>How your spending varies throughout the month</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={getMonthlyDayData()}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="day" />
+                        <YAxis />
+                        <Tooltip formatter={(value) => [formatCurrency(Number(value)), 'Amount']} />
+                        <Line type="monotone" dataKey="amount" stroke="#82ca9d" strokeWidth={2} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {getMonthlyDayInsight()}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Category Frequency Analysis */}
             <Card>
               <CardHeader>
-                <CardTitle>Spending Patterns Analysis</CardTitle>
-                <CardDescription>
-                  Identify recurring patterns in your financial behavior
-                </CardDescription>
+                <CardTitle>Category Spending Frequency</CardTitle>
+                <CardDescription>How often you spend in each category</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <h4 className="font-medium">Day of Week Patterns</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Most spending occurs on weekends, with Friday being the highest spending day.
-                      </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {getCategoryFrequencyData().map((category) => (
+                    <div key={category.name} className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium">{category.name}</h4>
+                        <Badge variant="outline">{category.frequency} times</Badge>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span>Total:</span>
+                          <span className="font-medium">{formatCurrency(category.total)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Average:</span>
+                          <span className="font-medium">{formatCurrency(category.average)}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full" 
+                            style={{ width: `${(category.frequency / Math.max(...getCategoryFrequencyData().map(c => c.frequency))) * 100}%` }}
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div className="space-y-4">
-                      <h4 className="font-medium">Monthly Cycles</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Spending typically peaks at the beginning of each month, aligned with income.
-                      </p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
