@@ -119,11 +119,36 @@ export default function CollaborativeGoalsPage() {
   // Create goal mutation
   const createGoalMutation = useMutation({
     mutationFn: async (goalData: any) => {
-      // Convert date string to proper Date object
+      // Debug logging to see what format we're getting
+      console.log("Goal data before processing:", goalData);
+      
+      // Handle different date formats that might come from the input
+      let targetDate: Date;
+      if (goalData.targetDate) {
+        // Try parsing the date - handle both ISO strings and DD/MM/YYYY format
+        const dateStr = goalData.targetDate;
+        if (dateStr.includes('/')) {
+          // Handle DD/MM/YYYY or MM/DD/YYYY format
+          const parts = dateStr.split('/');
+          if (parts.length === 3) {
+            // Assume DD/MM/YYYY format based on your screenshot
+            targetDate = new Date(parts[2], parts[1] - 1, parts[0]);
+          } else {
+            targetDate = new Date(dateStr);
+          }
+        } else {
+          targetDate = new Date(dateStr);
+        }
+      } else {
+        targetDate = new Date();
+      }
+      
       const processedData = {
         ...goalData,
-        targetDate: new Date(goalData.targetDate).toISOString()
+        targetDate: targetDate
       };
+      
+      console.log("Goal data after processing:", processedData);
       const response = await apiRequest("POST", "/api/collaborative-goals", processedData);
       return response.json();
     },
