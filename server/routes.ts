@@ -1351,6 +1351,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Dedicated PDF export endpoint
+  app.post('/api/export-pdf', isAuthenticated, async (req: any, res) => {
+    try {
+      console.log('PDF Export Request:', req.body);
+      
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        console.log('PDF Export Error: No user ID');
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const user = await storage.getUser(userId);
+      console.log('PDF Export User:', user?.plan);
+
+      if (!user || user.plan === 'free') {
+        console.log('PDF Export Error: Plan restriction');
+        return res.status(403).json({ message: "PDF export requires Standard or Premium subscription" });
+      }
+
+      const { month, year } = req.body;
+      console.log('PDF Export Parameters:', { month, year });
+
+      // Parse month and year
+      const targetYear = year || new Date().getFullYear();
+      const targetMonth = month ? new Date(Date.parse(month + " 1, 2000")).getMonth() : new Date().getMonth();
+
+      // Get date range for the specified month
+      const start = new Date(targetYear, targetMonth, 1);
+      const end = new Date(targetYear, targetMonth + 1, 0);
+
+      // Get all user data
+      const transactions = await storage.getUserTransactions(userId);
+      const budgets = await storage.getUserBudgets(userId);
+      let goals = [];
+      try {
+        goals = await storage.getUserGoals(userId);
+      } catch (error) {
+        console.log('Goals not available for user:', userId);
+      }
+
+      // Filter transactions for the specified month
+      const monthlyTransactions = transactions.filter(t => {
+        const transactionDate = new Date(t.date);
+        return transactionDate >= start && transactionDate <= end;
+      });
+
+      // Calculate financial summary
+      const income = monthlyTransactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      
+      const expenses = monthlyTransactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+      // Calculate category breakdown
+      const categoryBreakdown: { [key: string]: number } = {};
+      monthlyTransactions
+        .filter(t => t.type === 'expense')
+        .forEach(t => {
+          const category = t.categoryId?.toString() || 'Other';
+          categoryBreakdown[category] = (categoryBreakdown[category] || 0) + parseFloat(t.amount);
+        });
+
+      // Prepare PDF data
+      const pdfData = {
+        transactions: monthlyTransactions,
+        budgets,
+        goals,
+        summary: {
+          totalIncome: income,
+          totalExpenses: expenses,
+          netAmount: income - expenses,
+          transactionCount: monthlyTransactions.length,
+          categoryBreakdown,
+          month: month || new Date().toLocaleDateString('en-US', { month: 'long' }),
+          year: targetYear
+        },
+        userName: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email || 'User'
+      };
+
+      // Generate PDF
+      const pdfBuffer = await generatePdfReport(pdfData);
+      
+      // Send PDF response
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="finanzerpro-report-${month}-${targetYear}.pdf"`);
+      res.send(pdfBuffer);
+
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      res.status(500).json({ 
+        message: "Failed to generate PDF report", 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   app.post('/api/export', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub;
