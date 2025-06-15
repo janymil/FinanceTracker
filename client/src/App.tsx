@@ -135,9 +135,14 @@ function AppContent() {
 }
 
 export default function App() {
-  const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  // Debug all environment variables
+  console.log('All Vite env vars:', import.meta.env);
+  
+  const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || process.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-  console.log('Environment variable VITE_CLERK_PUBLISHABLE_KEY:', publishableKey ? 'Found' : 'Missing');
+  console.log('VITE_CLERK_PUBLISHABLE_KEY from import.meta.env:', import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
+  console.log('VITE_CLERK_PUBLISHABLE_KEY from process.env:', process.env.VITE_CLERK_PUBLISHABLE_KEY);
+  console.log('Final publishableKey:', publishableKey ? 'Found' : 'Missing');
 
   if (!publishableKey) {
     return (
@@ -145,7 +150,7 @@ export default function App() {
         <div className="text-center">
           <p className="text-red-600">Clerk publishable key is missing</p>
           <p className="text-sm text-gray-500 mt-2">Check your VITE_CLERK_PUBLISHABLE_KEY in Secrets</p>
-          <p className="text-xs text-gray-400 mt-1">Restart the development server after adding the key</p>
+          <p className="text-xs text-gray-400 mt-1">Environment variables: {JSON.stringify(Object.keys(import.meta.env))}</p>
         </div>
       </div>
     );
