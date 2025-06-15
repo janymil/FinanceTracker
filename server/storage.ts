@@ -39,6 +39,8 @@ import {
   type InsertChallengeActivity,
   type MilestoneAchievement,
   type InsertMilestoneAchievement,
+  type FinancialMascot,
+  type InsertFinancialMascot,
 } from "@shared/schema";
 import { db } from "./db";
 import { DataEncryption } from "./encryption";
@@ -1703,6 +1705,54 @@ export class DatabaseStorage implements IStorage {
       .from(milestoneAchievements)
       .where(eq(milestoneAchievements.userId, userId))
       .orderBy(desc(milestoneAchievements.achievedAt));
+  }
+
+  // Financial Mascot operations
+  async getUserMascot(userId: string): Promise<FinancialMascot | undefined> {
+    const [mascot] = await db
+      .select()
+      .from(financialMascots)
+      .where(eq(financialMascots.userId, userId))
+      .orderBy(desc(financialMascots.createdAt))
+      .limit(1);
+    return mascot;
+  }
+
+  async createMascot(mascot: InsertFinancialMascot): Promise<FinancialMascot> {
+    const [newMascot] = await db
+      .insert(financialMascots)
+      .values({
+        ...mascot,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastGenerated: new Date()
+      })
+      .returning();
+    return newMascot;
+  }
+
+  async updateMascot(userId: string, updates: Partial<InsertFinancialMascot>): Promise<FinancialMascot> {
+    const [updatedMascot] = await db
+      .update(financialMascots)
+      .set({
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(eq(financialMascots.userId, userId))
+      .returning();
+    return updatedMascot;
+  }
+
+  async toggleMascot(userId: string, enabled: boolean): Promise<FinancialMascot> {
+    const [updatedMascot] = await db
+      .update(financialMascots)
+      .set({
+        isEnabled: enabled,
+        updatedAt: new Date()
+      })
+      .where(eq(financialMascots.userId, userId))
+      .returning();
+    return updatedMascot;
   }
 }
 

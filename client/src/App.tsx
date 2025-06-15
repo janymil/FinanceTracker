@@ -11,6 +11,7 @@ import Header from "@/components/header";
 import Sidebar from "@/components/sidebar";
 import { Footer } from "@/components/footer";
 import { CookieBanner } from "@/components/cookie-banner";
+import { FinancialMascot } from "@/components/financial-mascot";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 

@@ -3152,6 +3152,159 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
     }
   });
 
+  // Financial Mascot endpoints
+  app.get('/api/mascot', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const mascot = await storage.getUserMascot(userId);
+      
+      if (!mascot) {
+        // Return default mascot state for new users
+        return res.json({
+          id: null,
+          userId,
+          imageUrl: null,
+          healthScore: 50,
+          mood: "neutral",
+          lastGenerated: null,
+          isEnabled: true
+        });
+      }
+      
+      res.json(mascot);
+    } catch (error) {
+      console.error("Error fetching mascot:", error);
+      res.status(500).json({ message: "Failed to fetch mascot" });
+    }
+  });
+
+  app.post('/api/mascot/generate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get user's current financial health
+      const financialSummary = await storage.getUserFinancialSummary(
+        userId,
+        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
+        new Date()
+      );
+
+      // Calculate financial health score
+      const totalIncome = financialSummary.totalIncome || 0;
+      const totalExpenses = financialSummary.totalExpenses || 0;
+      const netAmount = totalIncome - totalExpenses;
+      
+      // Simple health score calculation (0-100)
+      let healthScore = 50; // Default neutral
+      if (totalIncome > 0) {
+        const savingsRate = netAmount / totalIncome;
+        if (savingsRate > 0.3) healthScore = 90;
+        else if (savingsRate > 0.2) healthScore = 80;
+        else if (savingsRate > 0.1) healthScore = 70;
+        else if (savingsRate > 0) healthScore = 60;
+        else if (savingsRate > -0.1) healthScore = 40;
+        else if (savingsRate > -0.2) healthScore = 30;
+        else healthScore = 20;
+      }
+
+      // Determine mood based on health score
+      let mood = "neutral";
+      if (healthScore >= 80) mood = "excellent";
+      else if (healthScore >= 60) mood = "good";
+      else if (healthScore >= 40) mood = "neutral";
+      else if (healthScore >= 20) mood = "concerned";
+      else mood = "worried";
+
+      // Generate DALL-E 3 prompt based on financial health
+      const personalityTraits = {
+        excellent: "confident, cheerful, glowing with success, wearing a small crown or gold accessories",
+        good: "happy, optimistic, well-dressed, with a slight smile and bright eyes",
+        neutral: "calm, balanced, thoughtful, with a gentle expression",
+        concerned: "slightly worried, furrowed brow, but still hopeful, looking determined",
+        worried: "anxious, stressed, but cute and sympathetic, needing encouragement"
+      };
+
+      const prompt = `A cute, friendly financial advisor mascot character that is ${personalityTraits[mood]}. The character should be a small, adorable creature (like a mix between a piggy bank and a friendly animal) with expressive eyes. The style should be modern, clean, and professional but approachable. The character represents someone's financial health and should look ${mood}. Background should be simple and clean. Digital art style, high quality, 3D rendered look.`;
+
+      // Generate image using DALL-E 3
+      const OpenAI = require('openai');
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const response = await openai.images.generate({
+        model: "dall-e-3", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        prompt: prompt,
+        n: 1,
+        size: "1024x1024",
+        quality: "standard",
+      });
+
+      const imageUrl = response.data[0].url;
+
+      // Check if user already has a mascot
+      const existingMascot = await storage.getUserMascot(userId);
+      
+      let mascot;
+      if (existingMascot) {
+        // Update existing mascot
+        mascot = await storage.updateMascot(userId, {
+          imageUrl,
+          healthScore,
+          mood,
+          generationPrompt: prompt,
+          lastGenerated: new Date(),
+        });
+      } else {
+        // Create new mascot
+        mascot = await storage.createMascot({
+          userId,
+          imageUrl,
+          healthScore,
+          mood,
+          generationPrompt: prompt,
+          isEnabled: true,
+        });
+      }
+
+      res.json(mascot);
+    } catch (error) {
+      console.error("Error generating mascot:", error);
+      res.status(500).json({ message: "Failed to generate mascot" });
+    }
+  });
+
+  app.post('/api/mascot/toggle', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const { enabled } = req.body;
+
+      // Check if mascot exists, if not create a default one
+      let mascot = await storage.getUserMascot(userId);
+      
+      if (!mascot) {
+        mascot = await storage.createMascot({
+          userId,
+          imageUrl: '', // Will be generated when user first enables
+          healthScore: 50,
+          mood: 'neutral',
+          generationPrompt: 'Default mascot',
+          isEnabled: enabled,
+        });
+      } else {
+        mascot = await storage.toggleMascot(userId, enabled);
+      }
+
+      res.json(mascot);
+    } catch (error) {
+      console.error("Error toggling mascot:", error);
+      res.status(500).json({ message: "Failed to toggle mascot" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
