@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import UpgradePrompt from './upgrade-prompt';
-import { Target, Crosshair, BarChart3, Calendar, TrendingUp } from 'lucide-react';
+import { Target, Crosshair, BarChart3, Calendar, TrendingUp, Users } from 'lucide-react';
 
 type PlanType = 'free' | 'standard' | 'premium';
 
@@ -82,11 +82,30 @@ const featureConfigs = {
     ],
     requiredPlan: "premium" as PlanType,
     icon: BarChart3
+  },
+  collaborative: {
+    feature: "Collaborative Goals",
+    description: "Work together with friends and family to achieve shared financial goals",
+    benefits: [
+      "Create shared savings goals with others",
+      "Track group progress in real-time",
+      "Send invitations and manage participants",
+      "Celebrate milestones together"
+    ],
+    icon: Users
   }
 };
 
 export default function RequirePlan({ plan, children, feature, description, benefits }: RequirePlanProps) {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   if (!user) {
     return null;
@@ -110,6 +129,7 @@ export default function RequirePlan({ plan, children, feature, description, bene
     else if (path.includes('/analytics')) featureKey = 'analytics';
     else if (path.includes('/trends')) featureKey = 'trends';
     else if (path.includes('/calendar')) featureKey = 'calendar';
+    else if (path.includes('/collaborative')) featureKey = 'collaborative';
   }
 
   const config = featureConfigs[featureKey as keyof typeof featureConfigs];
