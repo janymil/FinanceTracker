@@ -173,9 +173,9 @@ export default function Reports() {
           onDateRangeReset={() => setSelectedPeriod("month")}
         />
 
-        {/* Reports Tabs - Basic available for all, Advanced for Premium */}
+        {/* Reports Tabs - Summary for all, Analytics/Auto-Tag for standard+, AI Insights for premium */}
         <Tabs defaultValue="summary" className="space-y-6">
-          <TabsList className={`grid w-full ${hasPremium ? 'grid-cols-4' : hasStandardOrBetter ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          <TabsList className={`grid w-full ${hasPremium ? 'grid-cols-4' : hasStandardOrBetter ? 'grid-cols-3' : 'grid-cols-1'}`}>
             <TabsTrigger value="summary" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Summary
@@ -186,16 +186,16 @@ export default function Reports() {
                 Analytics
               </TabsTrigger>
             )}
+            {hasStandardOrBetter && (
+              <TabsTrigger value="categorization" className="flex items-center gap-2">
+                <Zap className="h-4 w-4" />
+                Auto-Tag
+              </TabsTrigger>
+            )}
             {hasPremium && (
               <TabsTrigger value="insights" className="flex items-center gap-2">
                 <Brain className="h-4 w-4" />
                 AI Insights
-              </TabsTrigger>
-            )}
-            {hasPremium && (
-              <TabsTrigger value="categorization" className="flex items-center gap-2">
-                <Zap className="h-4 w-4" />
-                Auto-Tag
               </TabsTrigger>
             )}
           </TabsList>
@@ -231,7 +231,16 @@ export default function Reports() {
             </RequirePlan>
           </TabsContent>
 
-          {/* AI Insights */}
+          {/* Auto-Categorization - Standard+ Users */}
+          <TabsContent value="categorization" className="space-y-6">
+            <RequirePlan plan="standard">
+              <AutoCategorization 
+                transactions={Array.isArray(transactions) ? transactions : []}
+              />
+            </RequirePlan>
+          </TabsContent>
+
+          {/* AI Insights - Premium Users Only (Last Tab) */}
           <TabsContent value="insights" className="space-y-6">
             <RequirePlan plan="premium">
               <AIInsights 
@@ -240,17 +249,6 @@ export default function Reports() {
                   budgets: [],
                   goals: []
                 }}
-              />
-            </RequirePlan>
-          </TabsContent>
-
-
-
-          {/* Auto-Categorization */}
-          <TabsContent value="categorization" className="space-y-6">
-            <RequirePlan plan="standard">
-              <AutoCategorization 
-                transactions={Array.isArray(transactions) ? transactions : []}
               />
             </RequirePlan>
           </TabsContent>
