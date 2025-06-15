@@ -18,7 +18,7 @@ import {
 import { aiCache } from "./cache";
 import { batchProcessor } from "./batch-processor";
 import { adminAuth, adminLogin, adminLogout } from "./adminAuth";
-import { pdfGenerator } from "./pdfGenerator";
+import { generatePdfReport } from "./generatePdf";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -1586,7 +1586,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userName: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email || 'User'
           };
           
-          responseData = await pdfGenerator.generatePDF(pdfData);
+          responseData = await generatePdfReport(pdfData);
           filename = `financial-report-${new Date().toISOString().split('T')[0]}.pdf`;
           contentType = 'application/pdf';
           break;

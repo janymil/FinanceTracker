@@ -79,8 +79,8 @@ export class PDFGeneratorService {
         break;
         
       case 'category-breakdown':
-        const categories = Object.keys(data.categoryBreakdown);
-        const amounts = Object.values(data.categoryBreakdown);
+        const categories = Object.keys(data.categoryBreakdown || {});
+        const amounts = Object.values(data.categoryBreakdown || {});
         chartConfig = {
           type: 'bar',
           data: {
