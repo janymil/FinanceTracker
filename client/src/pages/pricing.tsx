@@ -99,7 +99,7 @@ export default function Pricing() {
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Last 3 transactions view</span>
+                    <span>Up to 100 transactions</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
@@ -283,7 +283,7 @@ export default function Pricing() {
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Last 3 transactions view</span>
+                    <span>Up to 100 transactions</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />

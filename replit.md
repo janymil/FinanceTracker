@@ -48,7 +48,7 @@ FinanzerPro is a full-stack personal finance management application built with R
 - **Financial Summary**: Aggregated analytics including income/expense totals and category breakdowns
 
 ### Subscription Tiers
-- **Free Plan**: Basic transaction tracking (limited to 3 transactions)
+- **Free Plan**: Basic transaction tracking (up to 100 transactions)
 - **Standard Plan**: Enhanced features with up to 100 transactions, budgeting, goals, transaction reminders, AI categorization
 - **Premium Plan**: Unlimited transactions, advanced analytics, AI insights, data export, predictions, recommendations
 

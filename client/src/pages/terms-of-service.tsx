@@ -69,7 +69,7 @@ export default function TermsOfService() {
             </p>
             <h3 className="text-lg font-semibold mb-2">2.1 Service Plans</h3>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li><strong>Free Plan:</strong> Basic transaction tracking (limited to 3 transactions)</li>
+              <li><strong>Free Plan:</strong> Basic transaction tracking (limited to 100 transactions)</li>
               <li><strong>Standard Plan:</strong> Enhanced features including budgeting, goals, AI categorization, and reminders</li>
               <li><strong>Premium Plan:</strong> Unlimited transactions, advanced analytics, AI insights, data export, and cloud backup</li>
             </ul>

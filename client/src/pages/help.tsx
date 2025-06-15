@@ -104,7 +104,7 @@ export default function Help() {
     {
       id: "subscription-plans",
       question: "What are the differences between subscription plans?",
-      answer: "Free plan allows 3 transactions, Standard plan ($4.99/month) includes up to 100 transactions with AI features, budgeting, and goals. Premium plan ($9.99/month) offers unlimited transactions, advanced analytics, cloud backup, and data import/export."
+      answer: "Free plan allows 100 transactions, Standard plan ($4.99/month) includes up to 100 transactions with AI features, budgeting, and goals. Premium plan ($9.99/month) offers unlimited transactions, advanced analytics, cloud backup, and data import/export."
     },
     {
       id: "data-security",
@@ -140,7 +140,7 @@ export default function Help() {
 
   const planFeatures = {
     free: [
-      "Up to 3 transactions",
+      "Up to 100 transactions",
       "Basic transaction tracking",
       "Simple dashboard",
       "Mobile responsive design"

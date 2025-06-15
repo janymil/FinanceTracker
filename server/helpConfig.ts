@@ -39,7 +39,7 @@ export function getCurrentAppConfig(): AppConfiguration {
         "Basic transaction tracking",
         "Manual expense categorization",
         "Simple dashboard view",
-        "Limited to 3 transactions"
+        "Up to 100 transactions"
       ],
       standard: [
         "Up to 100 transactions",
@@ -80,7 +80,7 @@ export function getCurrentAppConfig(): AppConfiguration {
     },
     limits: {
       free: {
-        transactions: 3,
+        transactions: 100,
         budgets: 0,
         goals: 0
       },
