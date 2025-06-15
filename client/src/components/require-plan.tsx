@@ -152,8 +152,17 @@ export default function RequirePlan({ plan, children, feature, description, bene
      document.querySelector('[role="dialog"]') !== null);
 
   if (isFormContext) {
+    // Check if an upgrade box already exists in this dialog to prevent duplicates
+    const existingUpgradeBox = typeof window !== 'undefined' && 
+      document.querySelector('[data-upgrade-box="true"]');
+    
+    if (existingUpgradeBox) {
+      // If an upgrade box already exists, just return null to prevent duplicates
+      return null;
+    }
+
     return (
-      <div className="border-2 border-dashed border-blue-300 dark:border-blue-600 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
+      <div data-upgrade-box="true" className="border-2 border-dashed border-blue-300 dark:border-blue-600 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
             {config?.icon ? <config.icon className="h-4 w-4 text-blue-600 dark:text-blue-400" /> : <Lock className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
