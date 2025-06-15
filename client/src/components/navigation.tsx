@@ -83,8 +83,8 @@ export default function Navigation() {
                     </AvatarFallback>
                   </Avatar>
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:block">
-                    {clerkUser?.firstName ? `${clerkUser.firstName} ${clerkUser.lastName || ''}`.trim() : 
-                     user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 
+                    {user?.firstName && user?.firstName !== 'user' ? `${user.firstName} ${user.lastName || ''}`.trim() : 
+                     clerkUser?.firstName && clerkUser?.firstName !== 'user' ? `${clerkUser.firstName} ${clerkUser.lastName || ''}`.trim() : 
                      clerkUser?.emailAddresses?.[0]?.emailAddress || user?.email}
                   </span>
                   <ChevronDown className="h-4 w-4 text-gray-500" />
