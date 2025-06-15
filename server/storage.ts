@@ -282,7 +282,7 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getUserTransactions(userId: number, limit?: number): Promise<Transaction[]> {
+  async getUserTransactions(userId: string, limit?: number): Promise<Transaction[]> {
     let query = db
       .select({
         id: transactions.id,
@@ -374,7 +374,7 @@ export class DatabaseStorage implements IStorage {
         };
   }
 
-  async deleteTransaction(id: number, userId: number): Promise<void> {
+  async deleteTransaction(id: number, userId: string): Promise<void> {
     await db
       .delete(transactions)
       .where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
@@ -395,7 +395,7 @@ export class DatabaseStorage implements IStorage {
     return newBudget;
   }
 
-  async getUserBudgets(userId: number): Promise<Budget[]> {
+  async getUserBudgets(userId: string): Promise<Budget[]> {
     const budgetData = await db
       .select({
         id: budgets.id,
@@ -460,7 +460,7 @@ export class DatabaseStorage implements IStorage {
     return updatedBudget;
   }
 
-  async deleteBudget(id: number, userId: number): Promise<void> {
+  async deleteBudget(id: number, userId: string): Promise<void> {
     await db
       .delete(budgets)
       .where(and(eq(budgets.id, id), eq(budgets.userId, userId)));
@@ -481,7 +481,7 @@ export class DatabaseStorage implements IStorage {
     return newGoal;
   }
 
-  async getUserGoals(userId: number): Promise<Goal[]> {
+  async getUserGoals(userId: string): Promise<Goal[]> {
     return await db
       .select()
       .from(goals)
@@ -498,7 +498,7 @@ export class DatabaseStorage implements IStorage {
     return updatedGoal;
   }
 
-  async deleteGoal(id: number, userId: number): Promise<void> {
+  async deleteGoal(id: number, userId: string): Promise<void> {
     await db
       .delete(goals)
       .where(and(eq(goals.id, id), eq(goals.userId, userId)));
