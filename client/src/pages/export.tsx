@@ -1372,23 +1372,7 @@ export default function ExportPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label className="text-sm font-medium flex items-center">
-                        <Shield className="h-4 w-4 mr-2" />
-                        Encrypt Backups
-                      </Label>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        End-to-end encryption for your data
-                      </p>
-                    </div>
-                    <Switch
-                      checked={backupSettings.encryptBackups}
-                      onCheckedChange={(checked) =>
-                        setBackupSettings({ ...backupSettings, encryptBackups: checked })
-                      }
-                    />
-                  </div>
+
 
                   <Button 
                     onClick={() => backupSettingsMutation.mutate(backupSettings)}
