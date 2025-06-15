@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { TrendingUp, Shield, AlertTriangle, CheckCircle, HelpCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useAuth } from "@/hooks/useAuth";
 
 interface FinancialHealthProps {
   summary?: {
@@ -16,6 +17,7 @@ interface FinancialHealthProps {
 export default function FinancialHealthScore({ summary, budgets }: FinancialHealthProps) {
   const [useAIScore, setUseAIScore] = useState(false);
   const [aiScore, setAIScore] = useState<any>(null);
+  const { isLoading } = useAuth();
 
   // Fetch AI-powered financial health score
   const fetchAIScore = async () => {
