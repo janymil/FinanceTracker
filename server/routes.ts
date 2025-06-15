@@ -1698,6 +1698,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Begin restore transaction
       console.log('RESTORE: Starting database restoration process...');
       
+      // Helper function to convert date strings back to Date objects
+      const convertDates = (obj: any): any => {
+        if (!obj) return obj;
+        
+        const converted = { ...obj };
+        
+        // Convert all potential date fields
+        if (converted.date && typeof converted.date === 'string') {
+          converted.date = new Date(converted.date);
+        }
+        if (converted.startDate && typeof converted.startDate === 'string') {
+          converted.startDate = new Date(converted.startDate);
+        }
+        if (converted.endDate && typeof converted.endDate === 'string') {
+          converted.endDate = new Date(converted.endDate);
+        }
+        if (converted.targetDate && typeof converted.targetDate === 'string') {
+          converted.targetDate = new Date(converted.targetDate);
+        }
+        // Handle null targetDate values properly
+        if (converted.targetDate === null) {
+          converted.targetDate = null;
+        }
+        if (converted.nextDueDate && typeof converted.nextDueDate === 'string') {
+          converted.nextDueDate = new Date(converted.nextDueDate);
+        }
+        if (converted.createdAt && typeof converted.createdAt === 'string') {
+          converted.createdAt = new Date(converted.createdAt);
+        }
+        if (converted.updatedAt && typeof converted.updatedAt === 'string') {
+          converted.updatedAt = new Date(converted.updatedAt);
+        }
+        
+        return converted;
+      };
+
       // Clear existing user data completely
       console.log('RESTORE: Clearing existing user transactions...');
       await storage.clearUserTransactions(userId);
@@ -1717,8 +1753,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Restore transactions
       console.log(`RESTORE: Restoring ${backupData.transactions.length} transactions...`);
       for (const transaction of backupData.transactions) {
+        const convertedTransaction = convertDates(transaction);
         await storage.createTransaction({
-          ...transaction,
+          ...convertedTransaction,
           userId,
           id: undefined // Let database generate new IDs
         });
@@ -1727,8 +1764,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Restore budgets
       console.log(`RESTORE: Restoring ${backupData.budgets.length} budgets...`);
       for (const budget of backupData.budgets) {
+        const convertedBudget = convertDates(budget);
         await storage.createBudget({
-          ...budget,
+          ...convertedBudget,
           userId,
           id: undefined // Let database generate new IDs
         });
@@ -1738,8 +1776,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (backupData.goals && backupData.goals.length > 0) {
         console.log(`RESTORE: Restoring ${backupData.goals.length} goals...`);
         for (const goal of backupData.goals) {
+          const convertedGoal = convertDates(goal);
           await storage.createGoal({
-            ...goal,
+            ...convertedGoal,
             userId,
             id: undefined // Let database generate new IDs
           });
@@ -1750,8 +1789,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (backupData.expenseReminders && backupData.expenseReminders.length > 0) {
         console.log(`RESTORE: Restoring ${backupData.expenseReminders.length} expense reminders...`);
         for (const reminder of backupData.expenseReminders) {
+          const convertedReminder = convertDates(reminder);
           await storage.createExpenseReminder({
-            ...reminder,
+            ...convertedReminder,
             userId,
             id: undefined // Let database generate new IDs
           });
@@ -1762,8 +1802,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (backupData.collaborativeGoals && backupData.collaborativeGoals.length > 0) {
         console.log(`RESTORE: Restoring ${backupData.collaborativeGoals.length} collaborative goals...`);
         for (const colGoal of backupData.collaborativeGoals) {
+          const convertedColGoal = convertDates(colGoal);
           await storage.createCollaborativeGoal({
-            ...colGoal,
+            ...convertedColGoal,
             createdBy: userId,
             id: undefined // Let database generate new IDs
           });
