@@ -119,7 +119,12 @@ export default function CollaborativeGoalsPage() {
   // Create goal mutation
   const createGoalMutation = useMutation({
     mutationFn: async (goalData: any) => {
-      const response = await apiRequest("POST", "/api/collaborative-goals", goalData);
+      // Convert date string to proper Date object
+      const processedData = {
+        ...goalData,
+        targetDate: new Date(goalData.targetDate).toISOString()
+      };
+      const response = await apiRequest("POST", "/api/collaborative-goals", processedData);
       return response.json();
     },
     onSuccess: () => {
