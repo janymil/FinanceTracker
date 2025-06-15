@@ -71,7 +71,7 @@ function AppContent() {
 
   // If clearly unauthenticated and on a protected route, redirect to login
   if (isUnauthenticated && !isOnPublicRoute) {
-    window.location.href = '/api/login';
+    window.location.href = '/sign-in-clerk';
     return <AppLoader />;
   }
 

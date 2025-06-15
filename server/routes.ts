@@ -2604,7 +2604,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { plan, session_id } = req.query;
       
       if (!session_id || !plan) {
-        return res.redirect('/auth?error=invalid_params');
+        return res.redirect('/sign-in-clerk?error=invalid_params');
       }
 
       // Verify the session with Stripe
@@ -2613,12 +2613,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // For free plans, we don't require payment completion
       const planRequiresPayment = plan !== 'free';
       if (planRequiresPayment && session.payment_status !== 'paid') {
-        return res.redirect('/auth?error=payment_not_completed');
+        return res.redirect('/sign-in-clerk?error=payment_not_completed');
       }
       
       // For free plans, check setup completion
       if (plan === 'free' && session.mode === 'setup' && session.status !== 'complete') {
-        return res.redirect('/auth?error=setup_not_completed');
+        return res.redirect('/sign-in-clerk?error=setup_not_completed');
       }
 
       // Map plan names to database values  
@@ -2632,7 +2632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const dbPlan = planMapping[plan as keyof typeof planMapping];
       if (!dbPlan) {
-        return res.redirect('/auth?error=invalid_plan');
+        return res.redirect('/sign-in-clerk?error=invalid_plan');
       }
 
       // Store plan selection and redirect to signup/login page
@@ -2641,11 +2641,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const customerParam = session.customer ? `&customer=${session.customer}` : '';
       const subscriptionParam = session.subscription ? `&subscription=${session.subscription}` : '';
       
-      return res.redirect(`/auth?plan=${planParam}&success=true${customerParam}${subscriptionParam}`);
+      return res.redirect(`/sign-in-clerk?plan=${planParam}&success=true${customerParam}${subscriptionParam}`);
 
     } catch (error) {
       console.error('Error processing subscription success:', error);
-      return res.redirect('/auth?error=subscription_processing_failed');
+      return res.redirect('/sign-in-clerk?error=subscription_processing_failed');
     }
   });
 
