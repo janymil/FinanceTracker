@@ -200,6 +200,8 @@ Changelog:
 - June 15, 2025. Modified updateTransaction storage method to only update specific fields provided, preventing data loss during edits
 - June 15, 2025. Completely disabled encryption system to resolve database type mismatch issues with encrypted amount fields
 - June 15, 2025. Fixed recurring transaction editing bug - expense and income pages now properly populate recurring checkbox state from database
+- June 15, 2025. Fixed upcoming transactions widget to show recurring transactions correctly - updated calculateNextOccurrence method to find next future dates instead of single period addition
+- June 15, 2025. Expanded transaction reminders widget window from 7 days to 30 days to capture monthly recurring transactions properly
 ```
 
 ## User Preferences

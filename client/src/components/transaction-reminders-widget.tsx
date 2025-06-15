@@ -28,7 +28,8 @@ interface TransactionReminder {
 
 export default function TransactionRemindersWidget() {
   const { data: reminders = [], isLoading } = useQuery<TransactionReminder[]>({
-    queryKey: ["/api/transaction-reminders"],
+    queryKey: ["/api/transaction-reminders", { days: 30 }],
+    queryFn: () => fetch("/api/transaction-reminders?days=30").then(res => res.json()),
     enabled: true,
   });
 
