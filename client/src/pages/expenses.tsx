@@ -57,6 +57,7 @@ export default function Expenses() {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [filterRecurring, setFilterRecurring] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   
@@ -230,6 +231,10 @@ export default function Expenses() {
                          transaction.categoryName?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCategory = filterCategory === "all" || transaction.categoryName === filterCategory;
+
+    const matchesRecurring = filterRecurring === "all" || 
+                           (filterRecurring === "recurring" && transaction.isRecurring) ||
+                           (filterRecurring === "one-time" && !transaction.isRecurring);
     
     // Month filter takes precedence over date range
     if (selectedMonth) {
@@ -237,7 +242,7 @@ export default function Expenses() {
       const [year, month] = selectedMonth.split('-');
       const monthMatches = transactionDate.getFullYear() === parseInt(year) && 
                           transactionDate.getMonth() === parseInt(month) - 1;
-      return matchesSearch && matchesCategory && monthMatches;
+      return matchesSearch && matchesCategory && matchesRecurring && monthMatches;
     }
     
     let matchesDate = true;
@@ -301,7 +306,7 @@ export default function Expenses() {
       }
     }
     
-    return matchesSearch && matchesCategory && matchesDate;
+    return matchesSearch && matchesCategory && matchesRecurring && matchesDate;
   });
 
   const expenseCategories = categories.filter((cat: Category) => cat.type === "expense");
@@ -729,6 +734,20 @@ export default function Expenses() {
               </div>
 
               <div>
+                <Label>Recurring</Label>
+                <Select value={filterRecurring} onValueChange={setFilterRecurring}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Expenses</SelectItem>
+                    <SelectItem value="recurring">Recurring Only</SelectItem>
+                    <SelectItem value="one-time">One-time Only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
                 <Label>Date Range</Label>
                 <Select value={dateRange} onValueChange={setDateRange}>
                   <SelectTrigger>
@@ -764,7 +783,7 @@ export default function Expenses() {
           <CardHeader>
             <CardTitle>Expense Transactions ({filteredExpenses.length})</CardTitle>
             <CardDescription>
-              {searchTerm || filterCategory !== "all" || dateRange !== "all" 
+              {searchTerm || filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all" 
                 ? "Filtered expense transactions" 
                 : "All your expense transactions"}
             </CardDescription>
@@ -816,6 +835,14 @@ export default function Expenses() {
                               <span>•</span>
                               <Badge variant="outline" className="text-red-600 border-red-600">
                                 {transaction.categoryName}
+                              </Badge>
+                            </>
+                          )}
+                          {transaction.isRecurring && (
+                            <>
+                              <span>•</span>
+                              <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                🔄 {transaction.recurringFrequency}
                               </Badge>
                             </>
                           )}
