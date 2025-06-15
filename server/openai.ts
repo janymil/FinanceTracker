@@ -42,6 +42,15 @@ export interface FinancialForecast {
   riskFactors: string[];
 }
 
+export interface FinancialHealthData {
+  score: number;
+  trend: 'improving' | 'declining' | 'stable';
+  category: 'excellent' | 'good' | 'fair' | 'poor';
+  insights: string[];
+  achievements: string[];
+  warnings: string[];
+}
+
 export async function categorizeExpense(description: string, amount: number): Promise<ExpenseCategorizationResult> {
   try {
     // Check cache first
@@ -650,6 +659,172 @@ Analysis Requirements:
         recommendations: [],
         riskFactors: []
       }
+    };
+  }
+}
+
+export async function generateFinancialHealthScore(financialData: {
+  transactions: Array<{
+    id: number;
+    amount: string;
+    description: string;
+    date: string;
+    type: string;
+    categoryName: string;
+  }>;
+  budgets: Array<{
+    categoryId: number;
+    amount: string;
+    spent: number;
+  }>;
+  summary: {
+    totalIncome: number;
+    totalExpenses: number;
+    netBalance: number;
+  };
+}): Promise<FinancialHealthData> {
+  try {
+    const { transactions, budgets, summary } = financialData;
+    
+    // Create hash for caching
+    const dataHash = aiCache.createDataHash(financialData);
+    const cached = aiCache.get(`financial_health_${dataHash}`);
+    if (cached) {
+      console.log('Using cached financial health data');
+      return cached;
+    }
+
+    // Prepare data for AI analysis
+    const recentTransactions = transactions
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 50);
+
+    const categorySpending = new Map();
+    transactions.forEach(t => {
+      if (t.type === 'expense') {
+        const current = categorySpending.get(t.categoryName) || 0;
+        categorySpending.set(t.categoryName, current + parseFloat(t.amount));
+      }
+    });
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert financial health analyst. Analyze the user's financial data and provide a comprehensive health assessment.
+
+Calculate a financial health score (0-100) based on:
+- Income vs expenses ratio
+- Budget adherence 
+- Spending patterns
+- Emergency fund adequacy
+- Debt management
+- Savings rate
+
+Categorize the score:
+- 80-100: excellent
+- 60-79: good  
+- 40-59: fair
+- 0-39: poor
+
+Determine trend based on recent spending patterns:
+- improving: positive financial trajectory
+- declining: concerning financial habits
+- stable: consistent financial behavior
+
+Provide specific insights, achievements, and actionable warnings.
+
+Respond with JSON in this exact format:
+{
+  "score": 75,
+  "trend": "improving",
+  "category": "good",
+  "insights": ["Specific financial insights"],
+  "achievements": ["Recent positive financial behaviors"],
+  "warnings": ["Areas needing attention"]
+}`
+        },
+        {
+          role: "user",
+          content: `Financial Summary:
+- Total Income: $${summary.totalIncome}
+- Total Expenses: $${summary.totalExpenses}
+- Net Balance: $${summary.netBalance}
+- Savings Rate: ${summary.totalIncome > 0 ? ((summary.totalIncome - summary.totalExpenses) / summary.totalIncome * 100).toFixed(1) : 0}%
+
+Recent Transactions (${recentTransactions.length}):
+${recentTransactions.slice(0, 20).map(t => 
+  `${t.date.split('T')[0]}: ${t.description} - $${t.amount} (${t.categoryName})`
+).join('\n')}
+
+Budgets (${budgets.length}):
+${budgets.map(b => {
+  const utilization = b.amount ? (b.spent / parseFloat(b.amount) * 100).toFixed(1) : 0;
+  return `Budget: $${b.amount}, Spent: $${b.spent} (${utilization}% used)`;
+}).join('\n')}
+
+Top Spending Categories:
+${Array.from(categorySpending.entries())
+  .sort(([,a], [,b]) => b - a)
+  .slice(0, 5)
+  .map(([cat, amount]) => `${cat}: $${amount.toFixed(2)}`)
+  .join('\n')}
+
+Analyze this financial data and provide a comprehensive health assessment.`
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.2
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    
+    const healthData: FinancialHealthData = {
+      score: Math.max(0, Math.min(100, result.score || 50)),
+      trend: result.trend || 'stable',
+      category: result.category || 'fair',
+      insights: Array.isArray(result.insights) ? result.insights : [],
+      achievements: Array.isArray(result.achievements) ? result.achievements : [],
+      warnings: Array.isArray(result.warnings) ? result.warnings : []
+    };
+
+    // Cache the result for 30 minutes
+    aiCache.set(`financial_health_${dataHash}`, healthData, 1800);
+    
+    return healthData;
+  } catch (error) {
+    console.error('Error generating financial health score:', error);
+    
+    // Return fallback data based on simple calculations
+    const { summary } = financialData;
+    const savingsRate = summary.totalIncome > 0 ? 
+      (summary.totalIncome - summary.totalExpenses) / summary.totalIncome : 0;
+    
+    let score = 50;
+    let category: 'excellent' | 'good' | 'fair' | 'poor' = 'fair';
+    
+    if (savingsRate > 0.2) {
+      score = 85;
+      category = 'excellent';
+    } else if (savingsRate > 0.1) {
+      score = 70;
+      category = 'good';
+    } else if (savingsRate > 0) {
+      score = 55;
+      category = 'fair';
+    } else {
+      score = 30;
+      category = 'poor';
+    }
+    
+    return {
+      score,
+      trend: 'stable',
+      category,
+      insights: ['Financial analysis temporarily unavailable'],
+      achievements: summary.netBalance > 0 ? ['Positive net balance'] : [],
+      warnings: summary.netBalance < 0 ? ['Expenses exceed income'] : []
     };
   }
 }
