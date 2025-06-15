@@ -251,6 +251,26 @@ export class DatabaseStorage implements IStorage {
 
     const [newTransaction] = await db.insert(transactions).values(encryptedTransaction).returning();
 
+    // If this is a recurring transaction, create a recurring transaction record
+    if (transaction.isRecurring && transaction.recurringFrequency) {
+      try {
+        await db.insert(recurringTransactions).values({
+          userId: transaction.userId,
+          categoryId: transaction.categoryId,
+          description: transaction.description,
+          amount: transaction.amount,
+          type: transaction.type,
+          frequency: transaction.recurringFrequency,
+          startDate: transaction.date,
+          endDate: transaction.recurringEndDate,
+          isActive: true,
+          lastProcessed: transaction.date,
+        });
+      } catch (error) {
+        console.error('Error creating recurring transaction record:', error);
+      }
+    }
+
     // Decrypt for return
     return {
       ...newTransaction,
@@ -610,6 +630,38 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(expenseReminders.dueDate);
+
+    return results;
+  }
+
+  async getUserRecurringTransactions(userId: string): Promise<any[]> {
+    const results = await db
+      .select({
+        id: recurringTransactions.id,
+        userId: recurringTransactions.userId,
+        categoryId: recurringTransactions.categoryId,
+        description: recurringTransactions.description,
+        amount: recurringTransactions.amount,
+        type: recurringTransactions.type,
+        frequency: recurringTransactions.frequency,
+        startDate: recurringTransactions.startDate,
+        endDate: recurringTransactions.endDate,
+        isActive: recurringTransactions.isActive,
+        lastProcessed: recurringTransactions.lastProcessed,
+        createdAt: recurringTransactions.createdAt,
+        categoryName: categories.name,
+        categoryIcon: categories.icon,
+        categoryColor: categories.color,
+      })
+      .from(recurringTransactions)
+      .leftJoin(categories, eq(recurringTransactions.categoryId, categories.id))
+      .where(
+        and(
+          eq(recurringTransactions.userId, userId),
+          eq(recurringTransactions.isActive, true)
+        )
+      )
+      .orderBy(desc(recurringTransactions.createdAt));
 
     return results;
   }

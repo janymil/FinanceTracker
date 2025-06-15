@@ -20,16 +20,12 @@ export class DataEncryption {
     if (!text) return text;
     
     try {
-      const iv = crypto.randomBytes(16);
-      const cipher = crypto.createCipherGCM(ALGORITHM, ENCRYPTION_KEY, iv);
+      const cipher = crypto.createCipher(ALGORITHM, ENCRYPTION_KEY);
       
       let encrypted = cipher.update(text, 'utf8', 'hex');
       encrypted += cipher.final('hex');
       
-      const authTag = cipher.getAuthTag();
-      
-      // Return IV:authTag:encrypted
-      return iv.toString('hex') + ':' + authTag.toString('hex') + ':' + encrypted;
+      return encrypted;
     } catch (error) {
       console.error('Encryption error:', error);
       return text; // Return original text if encryption fails

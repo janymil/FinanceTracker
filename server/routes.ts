@@ -450,6 +450,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Recurring transactions endpoint
+  app.get('/api/recurring-transactions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      if (user?.plan === 'free') {
+        return res.status(403).json({ message: "Recurring transactions require Standard or Premium subscription" });
+      }
+
+      const recurringTransactions = await storage.getUserRecurringTransactions(userId);
+      res.json(recurringTransactions);
+    } catch (error) {
+      console.error("Error fetching recurring transactions:", error);
+      res.status(500).json({ message: "Failed to fetch recurring transactions" });
+    }
+  });
+
   // Financial summary
   app.get('/api/financial-summary', isAuthenticated, async (req: any, res) => {
     try {
