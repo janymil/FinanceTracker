@@ -1,7 +1,9 @@
 import React, { ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import UpgradePrompt from './upgrade-prompt';
-import { Target, Crosshair, BarChart3, Calendar, TrendingUp, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Link } from 'wouter';
+import { Target, Crosshair, BarChart3, Calendar, TrendingUp, Users, Lock } from 'lucide-react';
 
 type PlanType = 'free' | 'standard' | 'premium';
 
@@ -111,15 +113,11 @@ export default function RequirePlan({ plan, children, feature, description, bene
     return null;
   }
 
-  // Support both Clerk and Replit auth systems
+  // Get user plan from database user object
   let userPlan: PlanType = 'free';
   
-  // Check for Clerk user with publicMetadata.plan
-  if (user.publicMetadata && typeof user.publicMetadata === 'object' && 'plan' in user.publicMetadata) {
-    userPlan = (user.publicMetadata.plan as PlanType) || 'free';
-  }
-  // Check for Replit user with direct plan property
-  else if (user.plan) {
+  // Check for plan property directly on user object (from database)
+  if (user && 'plan' in user && user.plan) {
     userPlan = (user.plan as PlanType) || 'free';
   }
 
@@ -144,6 +142,44 @@ export default function RequirePlan({ plan, children, feature, description, bene
   }
 
   const config = featureConfigs[featureKey as keyof typeof featureConfigs];
+
+  // For form sections, show a compact inline upgrade message instead of full page
+  const isFormContext = typeof window !== 'undefined' && 
+    (window.location.pathname.includes('/income') || 
+     window.location.pathname.includes('/expenses') || 
+     window.location.pathname.includes('/transactions'));
+
+  if (isFormContext) {
+    return (
+      <div className="border-2 border-dashed border-blue-300 dark:border-blue-600 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
+            {config?.icon ? <config.icon className="h-4 w-4 text-blue-600 dark:text-blue-400" /> : <Lock className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
+          </div>
+          <div>
+            <h4 className="font-medium text-blue-900 dark:text-blue-100">
+              {feature || config?.feature || "Premium Feature"}
+            </h4>
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              Available with {plan.charAt(0).toUpperCase() + plan.slice(1)} plan
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Link href="/subscribe">
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+              Upgrade Now
+            </Button>
+          </Link>
+          <Link href="/pricing">
+            <Button size="sm" variant="outline">
+              View Plans
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <UpgradePrompt
