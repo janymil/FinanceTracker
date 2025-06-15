@@ -7,6 +7,12 @@ import {
   goals,
   expenseReminders,
   backupSettings,
+  friendships,
+  collaborativeGoals,
+  collaborativeGoalParticipants,
+  goalContributions,
+  challengeActivities,
+  milestoneAchievements,
   type User,
   type InsertUser,
   type Transaction,
@@ -20,6 +26,18 @@ import {
   type InsertExpenseReminder,
   type BackupSettings,
   type InsertBackupSettings,
+  type Friendship,
+  type InsertFriendship,
+  type CollaborativeGoal,
+  type InsertCollaborativeGoal,
+  type CollaborativeGoalParticipant,
+  type InsertCollaborativeGoalParticipant,
+  type GoalContribution,
+  type InsertGoalContribution,
+  type ChallengeActivity,
+  type InsertChallengeActivity,
+  type MilestoneAchievement,
+  type InsertMilestoneAchievement,
 } from "@shared/schema";
 import { db } from "./db";
 import { DataEncryption } from "./encryption";
@@ -93,6 +111,34 @@ export interface IStorage {
   updateUserPassword(userId: number, hashedPassword: string): Promise<void>;
   getUserSettings(userId: number): Promise<any>;
   updateUserSettings(userId: number, settings: any): Promise<void>;
+
+  // Collaborative Savings Goals
+  // Friend management
+  sendFriendRequest(requesterId: string, recipientEmail: string): Promise<Friendship>;
+  acceptFriendRequest(friendshipId: number, userId: string): Promise<Friendship>;
+  rejectFriendRequest(friendshipId: number, userId: string): Promise<void>;
+  getUserFriends(userId: string): Promise<Array<Friendship & { friend: User }>>;
+  getPendingFriendRequests(userId: string): Promise<Array<Friendship & { requester: User }>>;
+
+  // Collaborative goal management
+  createCollaborativeGoal(goal: InsertCollaborativeGoal): Promise<CollaborativeGoal>;
+  getUserCollaborativeGoals(userId: string): Promise<Array<CollaborativeGoal & { participants: CollaborativeGoalParticipant[], creator: User }>>;
+  getCollaborativeGoal(goalId: number, userId: string): Promise<(CollaborativeGoal & { participants: Array<CollaborativeGoalParticipant & { user: User }>, creator: User, contributions: GoalContribution[], activities: ChallengeActivity[] }) | undefined>;
+  joinCollaborativeGoal(goalId: number, userId: string, personalTarget?: number): Promise<CollaborativeGoalParticipant>;
+  leaveCollaborativeGoal(goalId: number, userId: string): Promise<void>;
+  updateCollaborativeGoal(goalId: number, userId: string, updates: Partial<InsertCollaborativeGoal>): Promise<CollaborativeGoal>;
+  deleteCollaborativeGoal(goalId: number, userId: string): Promise<void>;
+
+  // Goal contributions and activities
+  addGoalContribution(contribution: InsertGoalContribution): Promise<GoalContribution>;
+  getGoalContributions(goalId: number): Promise<Array<GoalContribution & { user: User }>>;
+  updateGoalProgress(goalId: number): Promise<void>;
+  createChallengeActivity(activity: InsertChallengeActivity): Promise<ChallengeActivity>;
+  getGoalActivities(goalId: number): Promise<Array<ChallengeActivity & { user: User }>>;
+
+  // Milestone and achievement tracking
+  checkAndCreateMilestones(goalId: number): Promise<MilestoneAchievement[]>;
+  getUserAchievements(userId: string): Promise<MilestoneAchievement[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -907,6 +953,538 @@ export class DatabaseStorage implements IStorage {
       dataSize: "Encrypted", // Don't expose actual size for security
       lastActivity: lastTransaction?.date || null,
     };
+  }
+
+  // Collaborative Savings Goals Implementation
+  // Friend management
+  async sendFriendRequest(requesterId: string, recipientEmail: string): Promise<Friendship> {
+    // Find recipient by email
+    const [recipient] = await db.select().from(users).where(eq(users.email, recipientEmail));
+    if (!recipient) {
+      throw new Error("User not found with that email address");
+    }
+
+    // Check if friendship already exists
+    const existingFriendship = await db
+      .select()
+      .from(friendships)
+      .where(
+        or(
+          and(eq(friendships.requesterId, requesterId), eq(friendships.recipientId, recipient.id)),
+          and(eq(friendships.requesterId, recipient.id), eq(friendships.recipientId, requesterId))
+        )
+      );
+
+    if (existingFriendship.length > 0) {
+      throw new Error("Friendship request already exists or you are already friends");
+    }
+
+    const [friendship] = await db
+      .insert(friendships)
+      .values({
+        requesterId,
+        recipientId: recipient.id,
+        status: "pending",
+      })
+      .returning();
+
+    return friendship;
+  }
+
+  async acceptFriendRequest(friendshipId: number, userId: string): Promise<Friendship> {
+    const [friendship] = await db
+      .update(friendships)
+      .set({ 
+        status: "accepted", 
+        acceptedAt: new Date() 
+      })
+      .where(
+        and(
+          eq(friendships.id, friendshipId),
+          eq(friendships.recipientId, userId),
+          eq(friendships.status, "pending")
+        )
+      )
+      .returning();
+
+    if (!friendship) {
+      throw new Error("Friend request not found or already processed");
+    }
+
+    return friendship;
+  }
+
+  async rejectFriendRequest(friendshipId: number, userId: string): Promise<void> {
+    await db
+      .delete(friendships)
+      .where(
+        and(
+          eq(friendships.id, friendshipId),
+          eq(friendships.recipientId, userId),
+          eq(friendships.status, "pending")
+        )
+      );
+  }
+
+  async getUserFriends(userId: string): Promise<Array<Friendship & { friend: User }>> {
+    const friends = await db
+      .select({
+        friendship: friendships,
+        friend: users,
+      })
+      .from(friendships)
+      .innerJoin(
+        users,
+        or(
+          and(eq(friendships.requesterId, userId), eq(users.id, friendships.recipientId)),
+          and(eq(friendships.recipientId, userId), eq(users.id, friendships.requesterId))
+        )
+      )
+      .where(
+        and(
+          or(eq(friendships.requesterId, userId), eq(friendships.recipientId, userId)),
+          eq(friendships.status, "accepted")
+        )
+      );
+
+    return friends.map(f => ({ ...f.friendship, friend: f.friend }));
+  }
+
+  async getPendingFriendRequests(userId: string): Promise<Array<Friendship & { requester: User }>> {
+    const requests = await db
+      .select({
+        friendship: friendships,
+        requester: users,
+      })
+      .from(friendships)
+      .innerJoin(users, eq(friendships.requesterId, users.id))
+      .where(
+        and(
+          eq(friendships.recipientId, userId),
+          eq(friendships.status, "pending")
+        )
+      );
+
+    return requests.map(r => ({ ...r.friendship, requester: r.requester }));
+  }
+
+  // Collaborative goal management
+  async createCollaborativeGoal(goal: InsertCollaborativeGoal): Promise<CollaborativeGoal> {
+    const [createdGoal] = await db
+      .insert(collaborativeGoals)
+      .values({
+        ...goal,
+        joinCode: this.generateJoinCode(),
+      })
+      .returning();
+
+    // Add creator as participant
+    await db.insert(collaborativeGoalParticipants).values({
+      goalId: createdGoal.id,
+      userId: goal.createdBy,
+      role: "creator",
+      status: "active",
+    });
+
+    return createdGoal;
+  }
+
+  private generateJoinCode(): string {
+    return Math.random().toString(36).substring(2, 10).toUpperCase();
+  }
+
+  async getUserCollaborativeGoals(userId: string): Promise<Array<CollaborativeGoal & { participants: CollaborativeGoalParticipant[], creator: User }>> {
+    const goals = await db
+      .select({
+        goal: collaborativeGoals,
+        creator: users,
+      })
+      .from(collaborativeGoals)
+      .innerJoin(users, eq(collaborativeGoals.createdBy, users.id))
+      .innerJoin(collaborativeGoalParticipants, eq(collaborativeGoals.id, collaborativeGoalParticipants.goalId))
+      .where(
+        and(
+          eq(collaborativeGoalParticipants.userId, userId),
+          eq(collaborativeGoalParticipants.status, "active")
+        )
+      );
+
+    // Get participants for each goal
+    const result = [];
+    for (const { goal, creator } of goals) {
+      const participants = await db
+        .select()
+        .from(collaborativeGoalParticipants)
+        .where(
+          and(
+            eq(collaborativeGoalParticipants.goalId, goal.id),
+            eq(collaborativeGoalParticipants.status, "active")
+          )
+        );
+
+      result.push({ ...goal, participants, creator });
+    }
+
+    return result;
+  }
+
+  async getCollaborativeGoal(goalId: number, userId: string): Promise<(CollaborativeGoal & { participants: Array<CollaborativeGoalParticipant & { user: User }>, creator: User, contributions: GoalContribution[], activities: ChallengeActivity[] }) | undefined> {
+    // Check if user is participant
+    const [participant] = await db
+      .select()
+      .from(collaborativeGoalParticipants)
+      .where(
+        and(
+          eq(collaborativeGoalParticipants.goalId, goalId),
+          eq(collaborativeGoalParticipants.userId, userId),
+          eq(collaborativeGoalParticipants.status, "active")
+        )
+      );
+
+    if (!participant) {
+      return undefined;
+    }
+
+    const [goalWithCreator] = await db
+      .select({
+        goal: collaborativeGoals,
+        creator: users,
+      })
+      .from(collaborativeGoals)
+      .innerJoin(users, eq(collaborativeGoals.createdBy, users.id))
+      .where(eq(collaborativeGoals.id, goalId));
+
+    if (!goalWithCreator) {
+      return undefined;
+    }
+
+    // Get participants with user details
+    const participants = await db
+      .select({
+        participant: collaborativeGoalParticipants,
+        user: users,
+      })
+      .from(collaborativeGoalParticipants)
+      .innerJoin(users, eq(collaborativeGoalParticipants.userId, users.id))
+      .where(
+        and(
+          eq(collaborativeGoalParticipants.goalId, goalId),
+          eq(collaborativeGoalParticipants.status, "active")
+        )
+      );
+
+    // Get contributions
+    const contributions = await db
+      .select()
+      .from(goalContributions)
+      .where(eq(goalContributions.goalId, goalId))
+      .orderBy(desc(goalContributions.createdAt));
+
+    // Get activities
+    const activities = await db
+      .select()
+      .from(challengeActivities)
+      .where(eq(challengeActivities.goalId, goalId))
+      .orderBy(desc(challengeActivities.createdAt));
+
+    return {
+      ...goalWithCreator.goal,
+      creator: goalWithCreator.creator,
+      participants: participants.map(p => ({ ...p.participant, user: p.user })),
+      contributions,
+      activities,
+    };
+  }
+
+  async joinCollaborativeGoal(goalId: number, userId: string, personalTarget?: number): Promise<CollaborativeGoalParticipant> {
+    // Check if goal exists and is active
+    const [goal] = await db
+      .select()
+      .from(collaborativeGoals)
+      .where(
+        and(
+          eq(collaborativeGoals.id, goalId),
+          eq(collaborativeGoals.status, "active")
+        )
+      );
+
+    if (!goal) {
+      throw new Error("Goal not found or not active");
+    }
+
+    // Check if already participant
+    const [existingParticipant] = await db
+      .select()
+      .from(collaborativeGoalParticipants)
+      .where(
+        and(
+          eq(collaborativeGoalParticipants.goalId, goalId),
+          eq(collaborativeGoalParticipants.userId, userId)
+        )
+      );
+
+    if (existingParticipant) {
+      throw new Error("Already a participant in this goal");
+    }
+
+    const [participant] = await db
+      .insert(collaborativeGoalParticipants)
+      .values({
+        goalId,
+        userId,
+        personalTarget: personalTarget ? personalTarget.toString() : null,
+        role: "participant",
+        status: "active",
+      })
+      .returning();
+
+    // Create activity
+    await this.createChallengeActivity({
+      goalId,
+      userId,
+      activityType: "join",
+      title: "Joined the challenge",
+      description: "Welcome to the savings challenge!",
+    });
+
+    return participant;
+  }
+
+  async leaveCollaborativeGoal(goalId: number, userId: string): Promise<void> {
+    await db
+      .update(collaborativeGoalParticipants)
+      .set({ status: "left" })
+      .where(
+        and(
+          eq(collaborativeGoalParticipants.goalId, goalId),
+          eq(collaborativeGoalParticipants.userId, userId)
+        )
+      );
+
+    // Create activity
+    await this.createChallengeActivity({
+      goalId,
+      userId,
+      activityType: "leave",
+      title: "Left the challenge",
+      description: "User has left the savings challenge",
+    });
+  }
+
+  async updateCollaborativeGoal(goalId: number, userId: string, updates: Partial<InsertCollaborativeGoal>): Promise<CollaborativeGoal> {
+    // Check if user is creator
+    const [goal] = await db
+      .select()
+      .from(collaborativeGoals)
+      .where(
+        and(
+          eq(collaborativeGoals.id, goalId),
+          eq(collaborativeGoals.createdBy, userId)
+        )
+      );
+
+    if (!goal) {
+      throw new Error("Goal not found or you don't have permission to update it");
+    }
+
+    const [updatedGoal] = await db
+      .update(collaborativeGoals)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(collaborativeGoals.id, goalId))
+      .returning();
+
+    return updatedGoal;
+  }
+
+  async deleteCollaborativeGoal(goalId: number, userId: string): Promise<void> {
+    // Check if user is creator
+    const [goal] = await db
+      .select()
+      .from(collaborativeGoals)
+      .where(
+        and(
+          eq(collaborativeGoals.id, goalId),
+          eq(collaborativeGoals.createdBy, userId)
+        )
+      );
+
+    if (!goal) {
+      throw new Error("Goal not found or you don't have permission to delete it");
+    }
+
+    // Delete related data
+    await db.delete(milestoneAchievements).where(eq(milestoneAchievements.goalId, goalId));
+    await db.delete(challengeActivities).where(eq(challengeActivities.goalId, goalId));
+    await db.delete(goalContributions).where(eq(goalContributions.goalId, goalId));
+    await db.delete(collaborativeGoalParticipants).where(eq(collaborativeGoalParticipants.goalId, goalId));
+    await db.delete(collaborativeGoals).where(eq(collaborativeGoals.id, goalId));
+  }
+
+  // Goal contributions and activities
+  async addGoalContribution(contribution: InsertGoalContribution): Promise<GoalContribution> {
+    const [newContribution] = await db
+      .insert(goalContributions)
+      .values(contribution)
+      .returning();
+
+    // Update participant contribution
+    await db
+      .update(collaborativeGoalParticipants)
+      .set({
+        currentContribution: sql`${collaborativeGoalParticipants.currentContribution} + ${contribution.amount}`,
+        lastContribution: new Date(),
+      })
+      .where(
+        and(
+          eq(collaborativeGoalParticipants.goalId, contribution.goalId),
+          eq(collaborativeGoalParticipants.userId, contribution.userId)
+        )
+      );
+
+    // Update goal total
+    await this.updateGoalProgress(contribution.goalId);
+
+    // Create activity
+    await this.createChallengeActivity({
+      goalId: contribution.goalId,
+      userId: contribution.userId,
+      activityType: "contribution",
+      title: "Made a contribution",
+      description: contribution.description || `Contributed $${contribution.amount}`,
+      amount: contribution.amount,
+    });
+
+    // Check for milestones
+    await this.checkAndCreateMilestones(contribution.goalId);
+
+    return newContribution;
+  }
+
+  async getGoalContributions(goalId: number): Promise<Array<GoalContribution & { user: User }>> {
+    const contributions = await db
+      .select({
+        contribution: goalContributions,
+        user: users,
+      })
+      .from(goalContributions)
+      .innerJoin(users, eq(goalContributions.userId, users.id))
+      .where(eq(goalContributions.goalId, goalId))
+      .orderBy(desc(goalContributions.createdAt));
+
+    return contributions.map(c => ({ ...c.contribution, user: c.user }));
+  }
+
+  async updateGoalProgress(goalId: number): Promise<void> {
+    const [result] = await db
+      .select({
+        total: sql<number>`COALESCE(SUM(${goalContributions.amount}), 0)`,
+      })
+      .from(goalContributions)
+      .where(eq(goalContributions.goalId, goalId));
+
+    await db
+      .update(collaborativeGoals)
+      .set({
+        currentAmount: result.total.toString(),
+        updatedAt: new Date(),
+      })
+      .where(eq(collaborativeGoals.id, goalId));
+  }
+
+  async createChallengeActivity(activity: InsertChallengeActivity): Promise<ChallengeActivity> {
+    const [newActivity] = await db
+      .insert(challengeActivities)
+      .values(activity)
+      .returning();
+
+    return newActivity;
+  }
+
+  async getGoalActivities(goalId: number): Promise<Array<ChallengeActivity & { user: User }>> {
+    const activities = await db
+      .select({
+        activity: challengeActivities,
+        user: users,
+      })
+      .from(challengeActivities)
+      .innerJoin(users, eq(challengeActivities.userId, users.id))
+      .where(eq(challengeActivities.goalId, goalId))
+      .orderBy(desc(challengeActivities.createdAt));
+
+    return activities.map(a => ({ ...a.activity, user: a.user }));
+  }
+
+  // Milestone and achievement tracking
+  async checkAndCreateMilestones(goalId: number): Promise<MilestoneAchievement[]> {
+    const [goal] = await db
+      .select()
+      .from(collaborativeGoals)
+      .where(eq(collaborativeGoals.id, goalId));
+
+    if (!goal) return [];
+
+    const achievements: MilestoneAchievement[] = [];
+    const currentAmount = parseFloat(goal.currentAmount);
+    const targetAmount = parseFloat(goal.targetAmount);
+    const percentageComplete = (currentAmount / targetAmount) * 100;
+
+    // Check for percentage milestones (25%, 50%, 75%, 100%)
+    const milestones = [25, 50, 75, 100];
+    
+    for (const milestone of milestones) {
+      if (percentageComplete >= milestone) {
+        // Check if milestone already achieved
+        const [existing] = await db
+          .select()
+          .from(milestoneAchievements)
+          .where(
+            and(
+              eq(milestoneAchievements.goalId, goalId),
+              eq(milestoneAchievements.milestoneType, "percentage"),
+              eq(milestoneAchievements.targetAmount, (targetAmount * milestone / 100).toString())
+            )
+          );
+
+        if (!existing) {
+          const [achievement] = await db
+            .insert(milestoneAchievements)
+            .values({
+              goalId,
+              userId: null, // Group milestone
+              milestoneType: "percentage",
+              title: `${milestone}% Complete!`,
+              description: `The group has reached ${milestone}% of the savings goal!`,
+              targetAmount: (targetAmount * milestone / 100).toString(),
+              achievedAmount: currentAmount.toString(),
+              rewardType: "badge",
+              rewardData: { type: "percentage", value: milestone },
+            })
+            .returning();
+
+          achievements.push(achievement);
+
+          // Create activity for milestone
+          await this.createChallengeActivity({
+            goalId,
+            userId: goal.createdBy, // Use creator as activity creator
+            activityType: "milestone",
+            title: `Milestone Achieved: ${milestone}% Complete!`,
+            description: `Congratulations! The group has reached ${milestone}% of the savings goal!`,
+            amount: currentAmount.toString(),
+          });
+        }
+      }
+    }
+
+    return achievements;
+  }
+
+  async getUserAchievements(userId: string): Promise<MilestoneAchievement[]> {
+    return await db
+      .select()
+      .from(milestoneAchievements)
+      .where(eq(milestoneAchievements.userId, userId))
+      .orderBy(desc(milestoneAchievements.achievedAt));
   }
 }
 
