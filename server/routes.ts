@@ -29,12 +29,12 @@ const COLORS = [
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  app.use(clerkMiddleware());
+  app.use(clerkMiddleware);
 
   // Auth routes
   app.get('/api/auth/user', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       
       if (!userId) {
         return res.status(401).json({ message: "No user ID found" });
@@ -42,15 +42,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let user = await storage.getUser(userId);
       
-      // If user doesn't exist, create them using the claims data
+      // If user doesn't exist, create them using Clerk data
       if (!user) {
-        const claims = req.user.claims;
         const userData = {
-          id: claims.sub,
-          email: claims.email,
-          firstName: claims.first_name,
-          lastName: claims.last_name,
-          profileImageUrl: claims.profile_image_url || null,
+          id: userId,
+          email: req.auth.sessionClaims?.email || null,
+          firstName: req.auth.sessionClaims?.first_name || null,
+          lastName: req.auth.sessionClaims?.last_name || null,
+          profileImageUrl: req.auth.sessionClaims?.image_url || null,
           plan: 'free',
           stripeCustomerId: null,
           stripeSubscriptionId: null,
@@ -69,7 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Transaction routes
   app.post('/api/transactions', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       // Check if recurring transactions are being used and require appropriate plan
@@ -135,7 +134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/transactions', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       // Plan-based limits: free = 3, standard = 100, premium = unlimited
@@ -158,7 +157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/transactions/:id', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -185,7 +184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/transactions/:id', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -204,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Budget routes
   app.post('/api/budgets', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -233,7 +232,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/budgets/:id', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -278,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/budgets', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -422,7 +421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Financial summary
   app.get('/api/financial-summary', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const { startDate, endDate } = req.query;
 
       if (!startDate || !endDate) {
@@ -1924,7 +1923,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       // Check if user is admin (you can customize this logic)
@@ -2061,7 +2060,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
   // Friend management routes
   app.post('/api/friends/request', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const { recipientEmail } = req.body;
       
       const friendship = await storage.sendFriendRequest(userId, recipientEmail);
@@ -2074,7 +2073,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.post('/api/friends/accept/:id', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const friendshipId = parseInt(req.params.id);
       
       const friendship = await storage.acceptFriendRequest(friendshipId, userId);
@@ -2087,7 +2086,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.delete('/api/friends/reject/:id', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const friendshipId = parseInt(req.params.id);
       
       await storage.rejectFriendRequest(friendshipId, userId);
@@ -2100,7 +2099,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.get('/api/friends', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const friends = await storage.getUserFriends(userId);
       res.json(friends);
     } catch (error) {
@@ -2111,7 +2110,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.get('/api/friends/requests', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const requests = await storage.getPendingFriendRequests(userId);
       res.json(requests);
     } catch (error) {
@@ -2123,7 +2122,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
   // Collaborative goals routes
   app.post('/api/collaborative-goals', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const goalData = {
         ...req.body,
         createdBy: userId,
@@ -2139,7 +2138,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.get('/api/collaborative-goals', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const goals = await storage.getUserCollaborativeGoals(userId);
       res.json(goals);
     } catch (error) {
@@ -2150,7 +2149,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.get('/api/collaborative-goals/:id', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const goalId = parseInt(req.params.id);
       
       const goal = await storage.getCollaborativeGoal(goalId, userId);
@@ -2167,7 +2166,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.post('/api/collaborative-goals/:id/join', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const goalId = parseInt(req.params.id);
       const { personalTarget } = req.body;
       
@@ -2181,7 +2180,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.post('/api/collaborative-goals/:id/leave', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const goalId = parseInt(req.params.id);
       
       await storage.leaveCollaborativeGoal(goalId, userId);
@@ -2194,7 +2193,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.put('/api/collaborative-goals/:id', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const goalId = parseInt(req.params.id);
       
       const goal = await storage.updateCollaborativeGoal(goalId, userId, req.body);
@@ -2207,7 +2206,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.delete('/api/collaborative-goals/:id', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const goalId = parseInt(req.params.id);
       
       await storage.deleteCollaborativeGoal(goalId, userId);
@@ -2221,7 +2220,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
   // Goal contributions
   app.post('/api/collaborative-goals/:id/contribute', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const goalId = parseInt(req.params.id);
       
       const contributionData = {
@@ -2262,7 +2261,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.get('/api/achievements', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const achievements = await storage.getUserAchievements(userId);
       res.json(achievements);
     } catch (error) {
