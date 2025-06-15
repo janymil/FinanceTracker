@@ -1655,6 +1655,143 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Restore backup endpoint (premium users only)
+  app.post('/api/restore-backup', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        console.log('RESTORE: Authentication required');
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.plan !== 'premium') {
+        console.log(`RESTORE: User ${userId} attempted restore without premium plan`);
+        return res.status(403).json({ message: "Data restore requires Premium subscription" });
+      }
+
+      const { backupFilename } = req.body;
+      if (!backupFilename) {
+        console.log('RESTORE: No backup filename provided');
+        return res.status(400).json({ message: "Backup filename is required" });
+      }
+
+      console.log(`RESTORE: Starting restore process for user ${userId} with backup ${backupFilename}`);
+      
+      // Get backup from Bunny.net storage
+      const { bunnyStorage } = await import('./bunnyStorage');
+      
+      console.log('RESTORE: Downloading backup data from cloud storage...');
+      const backupData = await bunnyStorage.restoreBackup(userId, backupFilename);
+      
+      console.log('RESTORE: Backup data downloaded successfully, parsing content...');
+      console.log(`RESTORE: Backup contains ${Object.keys(backupData).length} data sections`);
+
+      // Validate backup data structure
+      if (!backupData.transactions || !backupData.budgets || !backupData.categories) {
+        console.log('RESTORE: Invalid backup structure detected');
+        return res.status(400).json({ message: "Invalid backup file structure" });
+      }
+
+      console.log(`RESTORE: Backup validation passed - transactions: ${backupData.transactions.length}, budgets: ${backupData.budgets.length}, categories: ${backupData.categories.length}`);
+
+      // Begin restore transaction
+      console.log('RESTORE: Starting database restoration process...');
+      
+      // Clear existing user data
+      console.log('RESTORE: Clearing existing user transactions...');
+      await storage.clearUserTransactions(userId);
+      
+      console.log('RESTORE: Clearing existing user budgets...');
+      await storage.clearUserBudgets(userId);
+
+      // Restore transactions
+      console.log(`RESTORE: Restoring ${backupData.transactions.length} transactions...`);
+      for (const transaction of backupData.transactions) {
+        await storage.createTransaction({
+          ...transaction,
+          userId,
+          id: undefined // Let database generate new IDs
+        });
+      }
+
+      // Restore budgets
+      console.log(`RESTORE: Restoring ${backupData.budgets.length} budgets...`);
+      for (const budget of backupData.budgets) {
+        await storage.createBudget({
+          ...budget,
+          userId,
+          id: undefined // Let database generate new IDs
+        });
+      }
+
+      // Update backup settings with restore timestamp
+      console.log('RESTORE: Updating backup settings with restore timestamp...');
+      let settings = await storage.getUserBackupSettings(userId);
+      if (settings) {
+        await storage.updateBackupSettings(userId, {
+          ...settings,
+          lastRestoreDate: new Date().toISOString()
+        });
+      }
+
+      console.log(`RESTORE: Backup restoration completed successfully for user ${userId}`);
+      console.log(`RESTORE: Restored ${backupData.transactions.length} transactions and ${backupData.budgets.length} budgets`);
+
+      res.json({
+        success: true,
+        message: "Data restored successfully from backup",
+        restoredData: {
+          transactions: backupData.transactions.length,
+          budgets: backupData.budgets.length,
+          categories: backupData.categories.length
+        },
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error("RESTORE ERROR: Failed to restore backup:", error);
+      console.error("RESTORE ERROR Details:", error instanceof Error ? error.message : 'Unknown error');
+      res.status(500).json({ message: "Failed to restore backup: " + (error instanceof Error ? error.message : 'Unknown error') });
+    }
+  });
+
+  // Get available backups for restore (premium users only)
+  app.get('/api/available-backups', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "Backup access requires Premium subscription" });
+      }
+
+      console.log(`RESTORE: Getting available backups for user ${userId}`);
+      
+      const { bunnyStorage } = await import('./bunnyStorage');
+      const backups = await bunnyStorage.getUserBackups(userId);
+      
+      console.log(`RESTORE: Found ${backups.length} available backups for user ${userId}`);
+
+      const availableBackups = backups.map(backup => ({
+        filename: backup.ObjectName,
+        size: backup.Length || backup.Size || 0,
+        date: backup.DateCreated,
+        formattedSize: formatFileSize(backup.Length || backup.Size || 0),
+        formattedDate: new Date(backup.DateCreated).toLocaleString()
+      }));
+
+      res.json({ backups: availableBackups });
+
+    } catch (error) {
+      console.error("Error getting available backups:", error);
+      res.status(500).json({ message: "Failed to get available backups" });
+    }
+  });
+
   // Debug Bunny.net storage endpoint (premium users only)
   app.get('/api/debug/storage', isAuthenticated, async (req: any, res) => {
     try {

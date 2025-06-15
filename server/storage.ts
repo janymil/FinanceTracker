@@ -66,12 +66,14 @@ export interface IStorage {
   getUserTransactions(userId: number, limit?: number): Promise<Transaction[]>;
   updateTransaction(id: number, transaction: Partial<InsertTransaction>): Promise<Transaction>;
   deleteTransaction(id: number, userId: number): Promise<void>;
+  clearUserTransactions(userId: string): Promise<void>;
 
   // Budget operations
   createBudget(budget: InsertBudget): Promise<Budget>;
   getUserBudgets(userId: number): Promise<Budget[]>;
   updateBudget(id: number, budget: Partial<InsertBudget>): Promise<Budget>;
   deleteBudget(id: number, userId: number): Promise<void>;
+  clearUserBudgets(userId: string): Promise<void>;
 
   // Goal operations
   createGoal(goal: InsertGoal): Promise<Goal>;
@@ -378,6 +380,12 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
   }
 
+  async clearUserTransactions(userId: string): Promise<void> {
+    await db
+      .delete(transactions)
+      .where(eq(transactions.userId, userId));
+  }
+
   // Budget operations
   async createBudget(budget: InsertBudget): Promise<Budget> {
     const [newBudget] = await db
@@ -456,6 +464,12 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(budgets)
       .where(and(eq(budgets.id, id), eq(budgets.userId, userId)));
+  }
+
+  async clearUserBudgets(userId: string): Promise<void> {
+    await db
+      .delete(budgets)
+      .where(eq(budgets.userId, userId));
   }
 
   // Goal operations
