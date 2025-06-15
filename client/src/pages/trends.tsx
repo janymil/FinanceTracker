@@ -422,7 +422,7 @@ export default function Trends() {
               <CardContent>
                 <div className="h-96 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <RechartsLineChart data={generateTrendData}>
+                    <LineChart data={generateTrendData}>
                       <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                       <XAxis dataKey="period" className="text-xs" />
                       <YAxis tickFormatter={formatCurrency} className="text-xs" />
@@ -450,7 +450,7 @@ export default function Trends() {
                         strokeDasharray="5 5"
                         name="Net Balance"
                       />
-                    </RechartsLineChart>
+                    </LineChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
