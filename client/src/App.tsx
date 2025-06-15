@@ -135,20 +135,26 @@ function AppContent() {
 }
 
 export default function App() {
-  const publishableKey = 'pk_test_dXNlZnVsLXJlZGZpc2gtMTUuY2xlcmsuYWNjb3VudHMuZGV2JA';
+  // Try multiple ways to access the environment variable
+  const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 
+                         (window as any).__CLERK_PUBLISHABLE_KEY__ || 
+                         'pk_test_dXNlZnVsLXJlZGZpc2gtMTUuY2xlcmsuYWNjb3VudHMuZGV2JA';
+  
+  console.log('Clerk publishable key loaded:', publishableKey ? 'YES' : 'NO');
   
   if (!publishableKey) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600">Clerk publishable key is missing</p>
+          <p className="text-sm text-gray-500 mt-2">Check your VITE_CLERK_PUBLISHABLE_KEY in Secrets</p>
         </div>
       </div>
     );
   }
   
   return (
-    <ClerkProvider publishableKey={publishableKey}>
+    <ClerkProvider publishableKey={publishableKey}
       <QueryClientProvider client={queryClient}>
         <AppContent />
         <Toaster />
