@@ -30,9 +30,19 @@ export default function Reports() {
   const hasStandardOrBetter = user?.plan === 'standard' || user?.plan === 'premium';
   const hasPremium = user?.plan === 'premium';
 
-  // Calculate date ranges based on selected period
+  // Calculate date ranges based on selected period and month
   const getDateRange = () => {
     const now = new Date();
+    
+    // If a specific month is selected, use that month's dates
+    if (selectedMonth) {
+      const [year, month] = selectedMonth.split('-');
+      const monthStart = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const monthEnd = new Date(parseInt(year), parseInt(month), 0);
+      return { startDate: monthStart, endDate: monthEnd };
+    }
+    
+    // Otherwise use the selected period
     switch (selectedPeriod) {
       case "week":
         const weekStart = new Date(now);
@@ -57,7 +67,7 @@ export default function Reports() {
 
   // Fetch financial summary data
   const { data: financialSummary, isLoading: summaryLoading } = useQuery({
-    queryKey: ['/api/financial-summary', startDate.toISOString(), endDate.toISOString()],
+    queryKey: ['/api/financial-summary', startDate.toISOString(), endDate.toISOString(), selectedMonth, selectedPeriod],
     queryFn: async () => {
       const params = new URLSearchParams({
         startDate: startDate.toISOString(),
@@ -72,27 +82,21 @@ export default function Reports() {
 
   // Fetch transactions for recent activity
   const { data: transactions } = useQuery({
-    queryKey: ['/api/transactions'],
+    queryKey: ['/api/transactions', selectedMonth, selectedPeriod],
     enabled: !!user,
   });
 
-  // Filter transactions based on selected month
+  // Filter transactions based on selected period and month
   const filteredTransactions = useMemo(() => {
     if (!Array.isArray(transactions) || transactions.length === 0) {
       return [];
     }
     
-    if (selectedMonth) {
-      const [year, month] = selectedMonth.split('-');
-      return transactions.filter((transaction: any) => {
-        const transactionDate = new Date(transaction.date);
-        return transactionDate.getFullYear() === parseInt(year) && 
-               transactionDate.getMonth() === parseInt(month) - 1;
-      });
-    }
-    
-    return transactions;
-  }, [transactions, selectedMonth]);
+    return transactions.filter((transaction: any) => {
+      const transactionDate = new Date(transaction.date);
+      return transactionDate >= startDate && transactionDate <= endDate;
+    });
+  }, [transactions, startDate, endDate]);
 
   // Generate dynamic chart data from filtered transactions
   const generateChartData = () => {
