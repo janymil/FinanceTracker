@@ -178,8 +178,8 @@ export default function TermsOfService() {
             <p className="mb-4">
               For questions about these Terms of Service, please contact us at:
             </p>
-            <p className="mb-2">Email: legal@financeflow.app</p>
-            <p>Address: 123 Finance Street, San Francisco, CA 94105</p>
+            <p className="mb-2">Email: info@finanzerpro.com</p>
+            <p>Address: 2105 Vista Oeste NW, Albuquerque, NM 87120</p>
           </section>
         </div>
       </div>
