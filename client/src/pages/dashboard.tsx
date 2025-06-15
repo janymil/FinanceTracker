@@ -445,15 +445,42 @@ export default function Dashboard() {
           selectedMonth={selectedMonth}
         />
 
-        {/* Financial Health Mascot - Available for all users */}
-        <div className="mb-8">
-          <FinancialHealthMascot />
-        </div>
+
 
         {/* Free User Content */}
         {user?.plan === 'free' && (
           <div className="space-y-8">
             <UpgradeBanner />
+
+            {/* Simple Financial Health Score for Free Users */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <LazyFinancialHealthScore 
+                summary={financialSummary}
+                budgets={budgets as any}
+              />
+              <LazyQuickFinancialSnapshot 
+                summary={financialSummary}
+                transactions={transactions as any}
+              />
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">AI Financial Tips</h3>
+                  <div className="bg-standard-light text-standard px-2 py-1 rounded text-xs font-medium">
+                    Standard Feature
+                  </div>
+                </div>
+
+                <div className="text-center py-8">
+                  <div className="text-4xl text-gray-300 dark:text-gray-600 mb-4">🤖</div>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">
+                    AI-powered financial tips available with Standard plan
+                  </p>
+                  <Button className="bg-standard hover:bg-standard/90 text-white">
+                    Upgrade to Standard
+                  </Button>
+                </div>
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <TransactionList
@@ -465,18 +492,18 @@ export default function Dashboard() {
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Budget Overview</h3>
-                  <div className="bg-premium-light text-premium px-2 py-1 rounded text-xs font-medium">
-                    Premium Feature
+                  <div className="bg-standard-light text-standard px-2 py-1 rounded text-xs font-medium">
+                    Standard Feature
                   </div>
                 </div>
 
                 <div className="text-center py-8">
                   <div className="text-4xl text-gray-300 dark:text-gray-600 mb-4">📊</div>
                   <p className="text-gray-500 dark:text-gray-400 mb-4">
-                    Detailed expense breakdown and budget tracking available with Premium
+                    Detailed expense breakdown and budget tracking available with Standard
                   </p>
-                  <Button className="bg-premium hover:bg-premium/90 text-white">
-                    Upgrade to Premium
+                  <Button className="bg-standard hover:bg-standard/90 text-white">
+                    Upgrade to Standard
                   </Button>
                 </div>
               </div>
@@ -487,12 +514,9 @@ export default function Dashboard() {
         {/* Basic/Premium User Content - Rendered with startTransition */}
         {(deferredUser?.plan === 'standard' || deferredUser?.plan === 'premium') && !isPending && (
           <div className="space-y-8">
-            {/* Advanced Analytics Row */}
+            {/* Advanced Analytics Row - AI-driven for Standard/Premium */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <LazyFinancialHealthScore 
-                summary={financialSummary}
-                budgets={budgets as any}
-              />
+              <FinancialHealthMascot />
               <LazyQuickFinancialSnapshot 
                 summary={financialSummary}
                 transactions={transactions as any}
