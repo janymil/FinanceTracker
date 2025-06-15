@@ -65,30 +65,6 @@ export default function AuthPage() {
 
         {/* Authentication Section */}
         <div className="w-full max-w-md mx-auto">
-          {/* Help Text for Rate Limiting */}
-          <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-800">
-                  <span className="text-blue-600 dark:text-blue-300 text-sm font-medium">💡</span>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                  Email Verification Tips
-                </h3>
-                <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
-                  <p>If you see "Too many requests" during verification:</p>
-                  <ul className="mt-1 ml-4 list-disc space-y-1">
-                    <li>Wait 2-3 minutes before trying again</li>
-                    <li>Check your spam/junk folder for the verification email</li>
-                    <li>Use the "Resend" link after waiting</li>
-                    <li>Try signing in with Google or GitHub instead</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
