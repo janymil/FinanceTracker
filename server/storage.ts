@@ -504,6 +504,12 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(goals.id, id), eq(goals.userId, userId)));
   }
 
+  async clearUserGoals(userId: string): Promise<void> {
+    await db
+      .delete(goals)
+      .where(eq(goals.userId, userId));
+  }
+
   // Category operations
   async getCategories(): Promise<Category[]> {
     return await db.select().from(categories);
@@ -866,6 +872,12 @@ export class DatabaseStorage implements IStorage {
       .update(expenseReminders)
       .set({ isCompleted: true, updatedAt: new Date() })
       .where(and(eq(expenseReminders.id, id), eq(expenseReminders.userId, userId)));
+  }
+
+  async clearUserExpenseReminders(userId: string): Promise<void> {
+    await db
+      .delete(expenseReminders)
+      .where(eq(expenseReminders.userId, userId));
   }
 
   // Backup settings operations
@@ -1471,6 +1483,39 @@ export class DatabaseStorage implements IStorage {
     await db.delete(goalContributions).where(eq(goalContributions.goalId, goalId));
     await db.delete(collaborativeGoalParticipants).where(eq(collaborativeGoalParticipants.goalId, goalId));
     await db.delete(collaborativeGoals).where(eq(collaborativeGoals.id, goalId));
+  }
+
+  async clearUserCollaborativeGoals(userId: string): Promise<void> {
+    // Get all collaborative goals created by user
+    const userGoals = await db
+      .select({ id: collaborativeGoals.id })
+      .from(collaborativeGoals)
+      .where(eq(collaborativeGoals.createdBy, userId));
+
+    // Delete all related data for each goal
+    for (const goal of userGoals) {
+      await db.delete(milestoneAchievements).where(eq(milestoneAchievements.goalId, goal.id));
+      await db.delete(challengeActivities).where(eq(challengeActivities.goalId, goal.id));
+      await db.delete(goalContributions).where(eq(goalContributions.goalId, goal.id));
+      await db.delete(collaborativeGoalParticipants).where(eq(collaborativeGoalParticipants.goalId, goal.id));
+    }
+
+    // Delete the goals themselves
+    await db.delete(collaborativeGoals).where(eq(collaborativeGoals.createdBy, userId));
+
+    // Also remove user as participant from other goals
+    await db.delete(collaborativeGoalParticipants).where(eq(collaborativeGoalParticipants.userId, userId));
+    await db.delete(goalContributions).where(eq(goalContributions.userId, userId));
+    await db.delete(challengeActivities).where(eq(challengeActivities.userId, userId));
+    await db.delete(milestoneAchievements).where(eq(milestoneAchievements.userId, userId));
+    
+    // Remove friendships
+    await db.delete(friendships).where(
+      or(
+        eq(friendships.requesterId, userId),
+        eq(friendships.recipientId, userId)
+      )
+    );
   }
 
   // Goal contributions and activities

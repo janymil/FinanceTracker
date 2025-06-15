@@ -253,7 +253,18 @@ export class BunnyStorage {
   async restoreBackup(userId: string | number, backupFilename: string): Promise<any> {
     const filePath = `backups/user-${userId}/${backupFilename}`;
     const backupData = await this.downloadFile(filePath);
-    return JSON.parse(backupData);
+    
+    // Handle case where downloadFile returns an object instead of string
+    if (typeof backupData === 'object') {
+      return backupData;
+    }
+    
+    // Handle string response
+    if (typeof backupData === 'string') {
+      return JSON.parse(backupData);
+    }
+    
+    throw new Error('Invalid backup data format');
   }
 
   async getBackupInfo(userId: string | number): Promise<{
