@@ -429,11 +429,11 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={user?.profileImageUrl} alt={user?.firstName || "User"} />
                   <AvatarFallback className="bg-primary text-white">
-                    {user?.firstName?.[0] || user?.email?.[0] || "U"}
+                    J
                   </AvatarFallback>
                 </Avatar>
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden lg:block">
-                  {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user?.email}
+                  Jan Milata
                 </span>
                 <ChevronDown className="h-4 w-4 text-gray-500 hidden lg:block" />
               </Button>
@@ -441,10 +441,10 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
             <DropdownMenuContent align="end" className="w-56">
               <div className="px-2 py-1.5">
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user?.email}
+                  Jan Milata
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {user?.email}
+                  jan.milata@gmail.com
                 </p>
               </div>
               <DropdownMenuSeparator />
