@@ -295,7 +295,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Goals routes
   app.get('/api/goals', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -312,7 +312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/goals', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -343,7 +343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/goals/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -371,7 +371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/goals/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
