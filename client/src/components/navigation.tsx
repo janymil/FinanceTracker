@@ -13,7 +13,7 @@ import { TrendingUp, Crown, ChevronDown, User, Settings, LogOut } from "lucide-r
 import { Link } from "wouter";
 
 export default function Navigation() {
-  const { user } = useAuth();
+  const { user, clerkUser } = useAuth();
 
   const handleLogout = () => {
     window.location.href = "/api/logout";
@@ -77,13 +77,15 @@ export default function Navigation() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2 h-auto p-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.profileImageUrl} alt={user?.firstName || "User"} />
+                    <AvatarImage src={clerkUser?.imageUrl || user?.profileImageUrl} alt={clerkUser?.firstName || user?.firstName || "User"} />
                     <AvatarFallback className="bg-primary text-white">
-                      {user?.firstName?.[0] || user?.email?.[0] || "U"}
+                      {clerkUser?.firstName?.[0] || user?.firstName?.[0] || clerkUser?.emailAddresses?.[0]?.emailAddress?.[0] || user?.email?.[0] || "U"}
                     </AvatarFallback>
                   </Avatar>
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:block">
-                    {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user?.email}
+                    {clerkUser?.firstName ? `${clerkUser.firstName} ${clerkUser.lastName || ''}`.trim() : 
+                     user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 
+                     clerkUser?.emailAddresses?.[0]?.emailAddress || user?.email}
                   </span>
                   <ChevronDown className="h-4 w-4 text-gray-500" />
                 </Button>
