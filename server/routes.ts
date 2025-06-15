@@ -728,8 +728,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
             if (userId) {
               // Update user plan and premium status
-              await storage.updateUserPlan(parseInt(userId), plan);
-              await storage.updateUserPremiumStatus(parseInt(userId), true);
+              await storage.updateUserPlan(userId, plan);
+              await storage.updateUserPremiumStatus(userId, true);
               console.log(`Plan updated for user ${userId} to ${plan}`);
             }
           }
@@ -745,8 +745,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
             if (userId) {
               // Optionally downgrade to free plan after payment failure
-              await storage.updateUserPlan(parseInt(userId), 'free');
-              await storage.updateUserPremiumStatus(parseInt(userId), false);
+              await storage.updateUserPlan(userId, 'free');
+              await storage.updateUserPremiumStatus(userId, false);
               console.log(`Plan downgraded for user ${userId} due to payment failure`);
             }
           }
@@ -758,8 +758,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           if (deletedUserId) {
             // Downgrade to free plan when subscription is cancelled
-            await storage.updateUserPlan(parseInt(deletedUserId), 'free');
-            await storage.updateUserPremiumStatus(parseInt(deletedUserId), false);
+            await storage.updateUserPlan(deletedUserId, 'free');
+            await storage.updateUserPremiumStatus(deletedUserId, false);
             console.log(`Plan downgraded for user ${deletedUserId} due to subscription cancellation`);
           }
           break;
