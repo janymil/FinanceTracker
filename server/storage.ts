@@ -111,7 +111,7 @@ export interface IStorage {
   getUsersWithOverdueBackups(): Promise<Array<{ userId: number }>>;
 
   // Profile Management
-  updateUserProfile(userId: number, profileData: { firstName: string; lastName: string; email: string; phone?: string; website?: string }): Promise<void>;
+  updateUserProfile(userId: string, profileData: { firstName: string; lastName: string; email: string; phone?: string; website?: string }): Promise<void>;
   updateUserPassword(userId: number, hashedPassword: string): Promise<void>;
   getUserSettings(userId: number): Promise<any>;
   updateUserSettings(userId: number, settings: any): Promise<void>;
@@ -948,15 +948,16 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async updateUserProfile(userId: number, profileData: { firstName: string; lastName: string; email: string; phone?: string; website?: string }): Promise<void> {
+  async updateUserProfile(userId: string, profileData: { firstName: string; lastName: string; email: string; phone?: string; website?: string }): Promise<void> {
     const updateData: any = {
-      firstName: profileData.firstName ? DataEncryption.encrypt(profileData.firstName) : null,
-      lastName: profileData.lastName ? DataEncryption.encrypt(profileData.lastName) : null,
+      firstName: profileData.firstName || null,
+      lastName: profileData.lastName || null,
       email: profileData.email,
+      updatedAt: new Date()
     };
 
     if (profileData.phone) {
-      updateData.phone = DataEncryption.encrypt(profileData.phone);
+      updateData.phone = profileData.phone;
     }
     if (profileData.website) {
       updateData.website = profileData.website;
