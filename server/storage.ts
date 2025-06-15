@@ -53,7 +53,7 @@ export interface IStorage {
   updateUserStripeInfo(userId: string, customerId: string, subscriptionId: string): Promise<User>;
   updateUserPlan(userId: string, plan: string): Promise<User>;
   updateUserPremiumStatus(userId: string, isPremium: boolean): Promise<User>;
-  
+
   // Admin operations
   getAllUsers(): Promise<User[]>;
   updateUser(userId: string, userData: Partial<User>): Promise<User>;
@@ -82,6 +82,8 @@ export interface IStorage {
   // Category operations
   getCategories(): Promise<Category[]>;
   createCategory(category: { name: string; icon: string; color: string; type: string }): Promise<Category>;
+  updateCategory(categoryId: number, category: { name: string; icon: string; color: string; type: string }): Promise<Category>;
+  deleteCategory(categoryId: number): Promise<Category>;
 
   // Expense reminder operations (Standard/Premium only)
   createExpenseReminder(reminder: InsertExpenseReminder): Promise<ExpenseReminder>;
@@ -462,6 +464,43 @@ export class DatabaseStorage implements IStorage {
       .returning();
 
     return newCategory;
+  }
+
+  async updateCategory(categoryId: number, updateData: { name: string; icon: string; color: string; type: 'income' | 'expense' }) {
+    const [category] = await db
+      .update(categories)
+      .set(updateData)
+      .where(eq(categories.id, categoryId))
+      .returning();
+
+    if (!category) {
+      throw new Error("Category not found");
+    }
+
+    return category;
+  }
+
+  async deleteCategory(categoryId: number) {
+    // Check if category is in use by any transactions
+    const transactionsUsingCategory = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(transactions)
+      .where(eq(transactions.categoryId, categoryId));
+
+    if (transactionsUsingCategory[0].count > 0) {
+      throw new Error("Cannot delete category that is in use by transactions");
+    }
+
+    const [deletedCategory] = await db
+      .delete(categories)
+      .where(eq(categories.id, categoryId))
+      .returning();
+
+    if (!deletedCategory) {
+      throw new Error("Category not found");
+    }
+
+    return deletedCategory;
   }
 
   // Analytics
@@ -855,19 +894,19 @@ export class DatabaseStorage implements IStorage {
   async deleteUserCompletely(userId: string): Promise<void> {
     // Delete all user's data in correct order (respecting foreign keys)
     // Note: This properly handles encrypted data deletion
-    
+
     // Delete goals first
     await db.delete(goals).where(eq(goals.userId, userId));
-    
+
     // Delete budgets
     await db.delete(budgets).where(eq(budgets.userId, userId));
-    
+
     // Delete transactions (encrypted data will be properly removed)
     await db.delete(transactions).where(eq(transactions.userId, userId));
-    
+
     // Delete expense reminders
     await db.delete(expenseReminders).where(eq(expenseReminders.userId, userId));
-    
+
     // Finally delete the user
     await db.delete(users).where(eq(users.id, userId));
   }
@@ -911,7 +950,7 @@ export class DatabaseStorage implements IStorage {
     userStats.forEach(stat => {
       const count = Number(stat.count);
       stats.totalUsers += count;
-      
+
       if (stat.plan === 'free') {
         stats.freeUsers = count;
       } else if (stat.plan === 'standard') {
@@ -1452,7 +1491,7 @@ export class DatabaseStorage implements IStorage {
 
     // Check for percentage milestones (25%, 50%, 75%, 100%)
     const milestones = [25, 50, 75, 100];
-    
+
     for (const milestone of milestones) {
       if (percentageComplete >= milestone) {
         // Check if milestone already achieved

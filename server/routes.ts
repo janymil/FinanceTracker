@@ -418,6 +418,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put('/api/categories/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const categoryId = parseInt(req.params.id);
+      const { name, icon, color, type } = req.body;
+
+      if (!name || !icon || !color || !type) {
+        return res.status(400).json({ message: "Name, icon, color, and type are required" });
+      }
+
+      if (!['income', 'expense'].includes(type)) {
+        return res.status(400).json({ message: "Type must be 'income' or 'expense'" });
+      }
+
+      const category = await storage.updateCategory(categoryId, { name, icon, color, type });
+      res.json(category);
+    } catch (error) {
+      console.error("Error updating category:", error);
+      res.status(400).json({ message: "Failed to update category" });
+    }
+  });
+
+  app.delete('/api/categories/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const categoryId = parseInt(req.params.id);
+      await storage.deleteCategory(categoryId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      res.status(500).json({ message: "Failed to delete category" });
+    }
+  });
+
   // Financial summary
   app.get('/api/financial-summary', isAuthenticated, async (req: any, res) => {
     try {
