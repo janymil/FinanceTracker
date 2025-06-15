@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
+import UpgradeBanner from "@/components/upgrade-banner";
 import { Link } from "wouter";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -277,8 +278,13 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                   </div>
                 </div>
 
+                {/* Show upgrade banner for free users */}
+                {user?.plan === "free" && (
+                  <UpgradeBanner message="Unlock advanced transaction features like recurring transactions and bill assistant" />
+                )}
+
                 {/* Premium Features - Standard/Premium only */}
-                <RequirePlan plan="standard">
+                {user?.plan !== "free" && (
                   <div className="space-y-4 border-t pt-4">
                     {/* Smart Bill Assistant - for expenses only */}
                     {newTransaction.type === "expense" && (
@@ -364,7 +370,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                       )}
                     </div>
                   </div>
-                </RequirePlan>
+                )}
 
                 <div className="flex justify-end gap-2 pt-4">
                   <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
