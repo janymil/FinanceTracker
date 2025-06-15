@@ -964,8 +964,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/transaction-reminders', isAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.id);
+      console.log(`Transaction reminders check - User: ${req.user.id}, Plan: ${user?.plan}`);
 
       if (!user || user.plan === 'free') {
+        console.log(`Transaction reminders blocked - User plan: ${user?.plan}`);
         return res.status(403).json({ message: "Transaction reminders require Standard or Premium subscription" });
       }
 
