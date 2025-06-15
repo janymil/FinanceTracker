@@ -50,12 +50,22 @@ const AppLoader = () => (
 );
 
 function AppContent() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, error } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Show optimized loading state
   if (isLoading) {
+    return <AppLoader />;
+  }
+
+  // List of public routes that don't require authentication
+  const publicRoutes = ['/', '/pricing', '/privacy-policy', '/terms-of-service', '/cookie-policy', '/contact', '/help'];
+  const isPublicRoute = publicRoutes.includes(window.location.pathname);
+
+  // If there's an authentication error but we're on a protected route, redirect to login
+  if (error && !user && !isPublicRoute) {
+    window.location.href = '/api/login';
     return <AppLoader />;
   }
 
