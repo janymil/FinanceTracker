@@ -92,6 +92,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = getUserId(req);
       const user = await storage.getUser(userId);
 
+      // Check transaction limits for free plan users
+      if (user?.plan === 'free') {
+        const existingTransactions = await storage.getUserTransactions(userId);
+        if (existingTransactions.length >= 100) {
+          return res.status(403).json({ 
+            message: "Free plan limited to 100 transactions. Upgrade to Standard or Premium for unlimited transactions." 
+          });
+        }
+      }
+
       // Check if recurring transactions are being used and require appropriate plan
       if (req.body.isRecurring && user?.plan === 'free') {
         return res.status(403).json({ 

@@ -229,6 +229,8 @@ Changelog:
 - June 15, 2025. Eliminated old separate Clerk pages and unified authentication flow under single /auth route with enhanced user experience
 - June 15, 2025. Completed Clerk authentication migration with working token passing, database user creation, and email fallback system
 - June 15, 2025. Fixed authentication redirect loops and database constraint issues - Clerk auth system fully operational
+- June 15, 2025. Increased free plan transaction limit from 3 to 100 transactions across all configuration files, pricing pages, and backend enforcement
+- June 15, 2025. Updated transaction-list display limit and added proper backend validation to enforce 100-transaction limit for free users
 ```
 
 ## User Preferences

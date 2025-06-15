@@ -112,7 +112,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
     .filter(t => t.type === 'income')
     .slice(0, 5);
   
-  const limitForFree = !isPremium ? 3 : 5;
+  const limitForFree = !isPremium ? 100 : 5;
 
   const renderTransactionList = (transactionList: Transaction[], type: string) => (
     <div className="space-y-3">
