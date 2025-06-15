@@ -45,6 +45,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(404).json({ error: 'Callback endpoint no longer exists. Authentication handled by Clerk' });
   });
 
+  // Authentication reset endpoint for token mismatch issues
+  app.post('/api/clear-auth', (req, res) => {
+    // Clear any server-side session data if needed
+    res.clearCookie('__session', { path: '/', domain: '.replit.dev' });
+    res.clearCookie('__session', { path: '/' });
+    res.json({ message: 'Authentication cleared successfully' });
+  });
+
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {

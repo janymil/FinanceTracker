@@ -51,9 +51,17 @@ const AppLoader = () => (
 );
 
 function AppContent() {
-  const { user, isLoading, isUnauthenticated } = useAuth();
+  const { user, isLoading, isUnauthenticated, resetAuth } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Add auth reset for token mismatch issues
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('auth_reset') === 'true') {
+      resetAuth?.();
+    }
+  }, [resetAuth]);
 
   // Show loading state
   if (isLoading) {
