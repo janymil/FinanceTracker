@@ -54,8 +54,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       let user = await storage.getUser(userId);
-      const auth = req.auth();
-      const clerkUser = auth?.user;
+      
+      // Get full user data from Clerk
+      const { clerkClient } = await import('@clerk/express');
+      let clerkUser;
+      try {
+        clerkUser = await clerkClient.users.getUser(userId);
+      } catch (error) {
+        console.error('Error fetching Clerk user:', error);
+        clerkUser = null;
+      }
       
       // Always sync latest Clerk data (for existing users) or create new user
       const userData = {
