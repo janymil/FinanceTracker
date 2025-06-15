@@ -38,6 +38,11 @@ interface Transaction {
   categoryName?: string;
   categoryIcon?: string;
   categoryColor?: string;
+  isRecurring?: boolean;
+  recurringFrequency?: "weekly" | "monthly" | "yearly";
+  recurringEndDate?: string;
+  paymentUrl?: string;
+  referenceNote?: string;
 }
 
 interface Category {
@@ -55,6 +60,7 @@ export default function Income() {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [filterRecurring, setFilterRecurring] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   
@@ -217,13 +223,17 @@ export default function Income() {
     
     const matchesCategory = filterCategory === "all" || transaction.categoryName === filterCategory;
     
+    const matchesRecurring = filterRecurring === "all" || 
+                           (filterRecurring === "recurring" && transaction.isRecurring) ||
+                           (filterRecurring === "one-time" && !transaction.isRecurring);
+    
     // Month filter takes precedence over date range
     if (selectedMonth) {
       const transactionDate = new Date(transaction.date);
       const [year, month] = selectedMonth.split('-');
       const monthMatches = transactionDate.getFullYear() === parseInt(year) && 
                           transactionDate.getMonth() === parseInt(month) - 1;
-      return matchesSearch && matchesCategory && monthMatches;
+      return matchesSearch && matchesCategory && matchesRecurring && monthMatches;
     }
     
     let matchesDate = true;
@@ -287,7 +297,7 @@ export default function Income() {
       }
     }
     
-    return matchesSearch && matchesCategory && matchesDate;
+    return matchesSearch && matchesCategory && matchesRecurring && matchesDate;
   });
 
   const incomeCategories = categories.filter((cat: Category) => cat.type === "income");
@@ -644,7 +654,7 @@ export default function Income() {
         {/* Filters and Search */}
         <Card className="mb-6">
           <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
