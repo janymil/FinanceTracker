@@ -2909,6 +2909,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
       const goalData = {
         ...req.body,
         createdBy: userId,
+        targetDate: new Date(req.body.targetDate), // Convert string back to Date object
       };
       
       const goal = await storage.createCollaborativeGoal(goalData);
