@@ -231,7 +231,6 @@ Changelog:
 - June 15, 2025. Fixed authentication redirect loops and database constraint issues - Clerk auth system fully operational
 - June 15, 2025. Increased free plan transaction limit from 3 to 100 transactions across all configuration files, pricing pages, and backend enforcement
 - June 15, 2025. Updated transaction-list display limit and added proper backend validation to enforce 100-transaction limit for free users
-- June 15, 2025. Standardized RequirePlan component to consistently show compact inline upgrade prompts across all pages instead of inconsistent large banners
 ```
 
 ## User Preferences

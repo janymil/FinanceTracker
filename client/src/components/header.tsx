@@ -366,19 +366,17 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                   </div>
                 </RequirePlan>
 
-                
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4 border-t flex-shrink-0">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleSubmit}
-                  disabled={!newTransaction.amount || !newTransaction.description || createTransactionMutation.isPending}
-                >
-                  Add Transaction
-                </Button>
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleSubmit}
+                    disabled={!newTransaction.amount || !newTransaction.description || createTransactionMutation.isPending}
+                  >
+                    {createTransactionMutation.isPending ? "Adding..." : "Add Transaction"}
+                  </Button>
+                </div>
               </div>
             </DialogContent>
           </Dialog>
