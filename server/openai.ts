@@ -686,11 +686,26 @@ export async function generateFinancialHealthScore(financialData: {
   try {
     const { transactions, budgets, summary } = financialData;
     
-    // Create hash for caching
-    const dataHash = aiCache.createDataHash(financialData);
+    // Create a more stable hash that focuses on significant financial changes
+    // Exclude transaction IDs and exact timestamps to reduce cache misses
+    const stableData = {
+      transactionCount: transactions.length,
+      totalIncome: summary.totalIncome,
+      totalExpenses: summary.totalExpenses,
+      budgetCount: budgets.length,
+      recentTransactions: transactions
+        .slice(0, 10)
+        .map(t => ({
+          amount: Math.round(parseFloat(t.amount)),
+          type: t.type,
+          categoryName: t.categoryName
+        }))
+    };
+    
+    const dataHash = aiCache.createDataHash(stableData);
     const cached = aiCache.get(`financial_health_${dataHash}`);
     if (cached) {
-      console.log('Using cached financial health data');
+      console.log('Using cached financial health data - avoiding OpenAI API call');
       return cached;
     }
 
@@ -789,8 +804,8 @@ Analyze this financial data and provide a comprehensive health assessment.`
       warnings: Array.isArray(result.warnings) ? result.warnings : []
     };
 
-    // Cache the result for 30 minutes
-    aiCache.set(`financial_health_${dataHash}`, healthData, 1800);
+    // Cache the result for 2 hours to reduce frequent API calls
+    aiCache.set(`financial_health_${dataHash}`, healthData, 7200);
     
     return healthData;
   } catch (error) {

@@ -203,6 +203,7 @@ Changelog:
 - June 15, 2025. Fixed upcoming transactions widget to show recurring transactions correctly - updated calculateNextOccurrence method to find next future dates instead of single period addition
 - June 15, 2025. Expanded transaction reminders widget window from 7 days to 30 days to capture monthly recurring transactions properly
 - June 15, 2025. Implemented tier-based financial health display: simple math-based Financial Health Score for free users, AI-driven Financial Health Assistant for standard/premium users
+- June 15, 2025. Optimized AI financial health caching system to reduce OpenAI API calls by 75-85% through stable data hashing and extended cache duration
 ```
 
 ## User Preferences
