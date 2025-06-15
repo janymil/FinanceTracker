@@ -632,7 +632,7 @@ export default function Transactions() {
         {/* Filters and Search */}
         <Card className="mb-6">
           <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               <div>
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
@@ -674,6 +674,20 @@ export default function Transactions() {
                         {category}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Recurring</Label>
+                <Select value={filterRecurring} onValueChange={setFilterRecurring}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Transactions</SelectItem>
+                    <SelectItem value="recurring">Recurring Only</SelectItem>
+                    <SelectItem value="one-time">One-time Only</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

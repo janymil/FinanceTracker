@@ -753,28 +753,27 @@ export class DatabaseStorage implements IStorage {
       });
     });
 
-    // Get active recurring transactions and calculate next occurrences  
+    // Get active recurring transactions from main transactions table
     const activeRecurringTransactions = await db
       .select({
-        id: recurringTransactions.id,
-        description: recurringTransactions.description,
-        amount: recurringTransactions.amount,
-        type: recurringTransactions.type,
-        frequency: recurringTransactions.frequency,
-        startDate: recurringTransactions.startDate,
-        endDate: recurringTransactions.endDate,
-        lastProcessed: recurringTransactions.lastProcessed,
+        id: transactions.id,
+        description: transactions.description,
+        amount: transactions.amount,
+        type: transactions.type,
+        recurringFrequency: transactions.recurringFrequency,
+        date: transactions.date,
+        recurringEndDate: transactions.recurringEndDate,
         categoryName: categories.name,
       })
-      .from(recurringTransactions)
-      .leftJoin(categories, eq(recurringTransactions.categoryId, categories.id))
+      .from(transactions)
+      .leftJoin(categories, eq(transactions.categoryId, categories.id))
       .where(
         and(
-          eq(recurringTransactions.userId, userId),
-          eq(recurringTransactions.isActive, true),
+          eq(transactions.userId, userId),
+          eq(transactions.isRecurring, true),
           or(
-            isNull(recurringTransactions.endDate),
-            gte(recurringTransactions.endDate, now)
+            isNull(transactions.recurringEndDate),
+            gte(transactions.recurringEndDate, now)
           )
         )
       );
@@ -782,16 +781,16 @@ export class DatabaseStorage implements IStorage {
     // Calculate next occurrences for recurring transactions
     activeRecurringTransactions.forEach(recurring => {
       const nextOccurrence = this.calculateNextOccurrence(
-        recurring.lastProcessed || recurring.startDate,
-        recurring.frequency,
-        recurring.endDate
+        recurring.date,
+        recurring.recurringFrequency || 'monthly',
+        recurring.recurringEndDate
       );
 
       if (nextOccurrence && nextOccurrence <= futureDate && nextOccurrence >= now) {
         reminders.push({
           id: `recurring_${recurring.id}`,
           title: recurring.description,
-          description: `Recurring ${recurring.type} (${recurring.frequency})`,
+          description: `Recurring ${recurring.type} (${recurring.recurringFrequency})`,
           amount: recurring.amount,
           dueDate: nextOccurrence,
           type: recurring.type as 'income' | 'expense',
