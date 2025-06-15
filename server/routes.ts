@@ -3229,10 +3229,25 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
         worried: "anxious, stressed, but cute and sympathetic, needing encouragement"
       };
 
-      const prompt = `A cute, friendly financial advisor mascot character that is ${personalityTraits[mood as keyof typeof personalityTraits]}. The character should be a small, adorable creature (like a mix between a piggy bank and a friendly animal) with expressive eyes. The style should be modern, clean, and professional but approachable. The character represents someone's financial health and should look ${mood}. Background should be simple and clean. Digital art style, high quality, 3D rendered look.`;
+      // Create unique characteristics based on user ID for personalization
+      const userIdNumber = parseInt(userId.slice(-4), 10); // Use last 4 digits of user ID
+      const uniqueTraits = [
+        "wearing glasses", "with a bow tie", "holding a tiny calculator", "with a small hat",
+        "wearing a vest", "with a monocle", "holding coins", "with a briefcase",
+        "wearing suspenders", "with a pocket watch", "holding a chart", "with a cape"
+      ];
+      const colorSchemes = [
+        "blue and gold", "green and silver", "purple and white", "orange and blue",
+        "red and gold", "teal and cream", "pink and gray", "navy and yellow"
+      ];
+      
+      const uniqueTrait = uniqueTraits[userIdNumber % uniqueTraits.length];
+      const colorScheme = colorSchemes[userIdNumber % colorSchemes.length];
+      
+      const prompt = `A cute, friendly financial advisor mascot character that is ${personalityTraits[mood as keyof typeof personalityTraits]}. The character should be a small, adorable creature (like a mix between a piggy bank and a friendly animal) with expressive eyes, ${uniqueTrait}, in ${colorScheme} colors. The style should be modern, clean, and professional but approachable. The character represents someone's financial health and should look ${mood}. Background should be simple and clean. Digital art style, high quality, 3D rendered look. Unique identifier: ${userId.slice(-6)}.`;
 
       // Generate image using DALL-E 3
-      const OpenAI = require('openai');
+      const OpenAI = (await import('openai')).default;
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
       const response = await openai.images.generate({
@@ -3243,7 +3258,10 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
         quality: "standard",
       });
 
-      const imageUrl = response.data[0].url;
+      const imageUrl = response.data?.[0]?.url;
+      if (!imageUrl) {
+        throw new Error("Failed to generate mascot image - no URL returned from DALL-E 3");
+      }
 
       // Check if user already has a mascot
       const existingMascot = await storage.getUserMascot(userId);
