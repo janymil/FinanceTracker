@@ -12,6 +12,7 @@ import TransactionList from "@/components/transaction-list";
 import BudgetOverview from "@/components/budget-overview";
 import RequirePlan from "@/components/require-plan";
 import UpgradeBanner from "@/components/upgrade-banner";
+import FinancialHealthMascot from "@/components/financial-health-mascot";
 
 // Modular lazy components with React 18 concurrent features
 import {
@@ -443,6 +444,11 @@ export default function Dashboard() {
           budgetsData={budgets as any}
           selectedMonth={selectedMonth}
         />
+
+        {/* Financial Health Mascot - Available for all users */}
+        <div className="mb-8">
+          <FinancialHealthMascot />
+        </div>
 
         {/* Free User Content */}
         {user?.plan === 'free' && (

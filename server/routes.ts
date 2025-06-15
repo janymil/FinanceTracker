@@ -995,6 +995,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Financial Health Score (Free for all users)
+  app.get('/api/financial-health', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // Get user's financial data
+      const transactions = await storage.getUserTransactions(userId, 100);
+      const budgets = await storage.getUserBudgets(userId);
+      const categories = await storage.getCategories();
+      const summary = await storage.getUserFinancialSummary(userId);
+
+      // Create category map
+      const categoryMap = new Map();
+      categories.forEach(cat => {
+        categoryMap.set(cat.id, cat.name);
+      });
+
+      // Process transactions with category names
+      const processedTransactions = transactions.map(t => ({
+        id: t.id,
+        amount: t.amount,
+        description: t.description,
+        date: t.date.toISOString(),
+        type: t.type,
+        categoryName: categoryMap.get(t.categoryId) || 'Other'
+      }));
+
+      // Calculate budget spending
+      const budgetSpending = new Map();
+      transactions.forEach(t => {
+        if (t.type === 'expense' && t.categoryId) {
+          const current = budgetSpending.get(t.categoryId) || 0;
+          budgetSpending.set(t.categoryId, current + parseFloat(t.amount));
+        }
+      });
+
+      const processedBudgets = budgets
+        .filter(b => b.categoryId !== null)
+        .map(b => ({
+          categoryId: b.categoryId as number,
+          amount: b.amount,
+          spent: budgetSpending.get(b.categoryId) || 0
+        }));
+
+      // Generate financial health score
+      const { generateFinancialHealthScore } = await import('./openai');
+      const healthData = await generateFinancialHealthScore({
+        transactions: processedTransactions,
+        budgets: processedBudgets,
+        summary: {
+          totalIncome: summary.totalIncome,
+          totalExpenses: summary.totalExpenses,
+          netBalance: summary.totalIncome - summary.totalExpenses
+        }
+      });
+
+      res.json(healthData);
+    } catch (error) {
+      console.error("Error generating financial health score:", error);
+      res.status(500).json({ message: "Failed to generate financial health score" });
+    }
+  });
+
   // Automatic transaction reminders (Standard/Premium only)
   app.get('/api/transaction-reminders', isAuthenticated, async (req: any, res) => {
     try {
