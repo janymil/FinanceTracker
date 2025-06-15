@@ -1426,10 +1426,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })),
         budgets: budgets.map(b => ({
           id: b.id,
-          name: b.categoryId.toString(), // Use categoryId as name for now
+          name: b.categoryId?.toString() || "Uncategorized", 
           amount: b.amount,
           spent: "0", // Calculate spent amount from transactions
-          categoryId: b.categoryId,
+          categoryId: b.categoryId || 0,
           period: b.period
         })),
         goals: goals.map((g: any) => ({
@@ -1463,6 +1463,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error("Error generating PDF:", error);
+      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
       res.status(500).json({ 
         message: "Failed to generate PDF report", 
         error: error instanceof Error ? error.message : 'Unknown error' 
