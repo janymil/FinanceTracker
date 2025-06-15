@@ -779,14 +779,35 @@ export class DatabaseStorage implements IStorage {
       );
 
     // Calculate next occurrences for recurring transactions
+    console.log(`=== DEBUGGING RECURRING TRANSACTIONS FOR USER ${userId} ===`);
+    console.log(`Current time: ${now.toISOString()}`);
+    console.log(`Future date limit: ${futureDate.toISOString()}`);
+    console.log(`Found ${activeRecurringTransactions.length} active recurring transactions`);
+    
     activeRecurringTransactions.forEach(recurring => {
+      console.log(`\n--- Processing recurring transaction ID ${recurring.id} ---`);
+      console.log(`Description: ${recurring.description}`);
+      console.log(`Type: ${recurring.type}`);
+      console.log(`Frequency: ${recurring.recurringFrequency}`);
+      console.log(`Original date: ${recurring.date.toISOString()}`);
+      console.log(`End date: ${recurring.recurringEndDate?.toISOString() || 'No end date'}`);
+      
       const nextOccurrence = this.calculateNextOccurrence(
         recurring.date,
         recurring.recurringFrequency || 'monthly',
         recurring.recurringEndDate
       );
 
+      console.log(`Next occurrence calculated: ${nextOccurrence?.toISOString() || 'null'}`);
+      
+      if (nextOccurrence) {
+        console.log(`Checking conditions:`);
+        console.log(`  nextOccurrence <= futureDate: ${nextOccurrence <= futureDate} (${nextOccurrence.toISOString()} <= ${futureDate.toISOString()})`);
+        console.log(`  nextOccurrence >= now: ${nextOccurrence >= now} (${nextOccurrence.toISOString()} >= ${now.toISOString()})`);
+      }
+
       if (nextOccurrence && nextOccurrence <= futureDate && nextOccurrence >= now) {
+        console.log(`✓ Adding reminder for transaction ${recurring.id}`);
         reminders.push({
           id: `recurring_${recurring.id}`,
           title: recurring.description,
@@ -798,30 +819,45 @@ export class DatabaseStorage implements IStorage {
           isRecurring: true,
           source: 'recurring_transaction'
         });
+      } else {
+        console.log(`✗ NOT adding reminder for transaction ${recurring.id}`);
       }
     });
+    
+    console.log(`\nTotal reminders generated: ${reminders.length}`);
+    console.log(`=== END RECURRING TRANSACTIONS DEBUG ===\n`);
 
     return reminders.sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
   }
 
   private calculateNextOccurrence(lastDate: Date, frequency: string, endDate: Date | null): Date | null {
+    const now = new Date();
     const next = new Date(lastDate);
+    
+    console.log(`calculateNextOccurrence: lastDate=${lastDate.toISOString()}, frequency=${frequency}, now=${now.toISOString()}`);
 
-    switch (frequency) {
-      case 'weekly':
-        next.setDate(next.getDate() + 7);
-        break;
-      case 'monthly':
-        next.setMonth(next.getMonth() + 1);
-        break;
-      case 'yearly':
-        next.setFullYear(next.getFullYear() + 1);
-        break;
-      default:
-        return null;
+    // Keep adding periods until we find a future date
+    while (next <= now) {
+      switch (frequency) {
+        case 'weekly':
+          next.setDate(next.getDate() + 7);
+          break;
+        case 'monthly':
+          next.setMonth(next.getMonth() + 1);
+          break;
+        case 'yearly':
+          next.setFullYear(next.getFullYear() + 1);
+          break;
+        default:
+          console.log(`calculateNextOccurrence: unknown frequency ${frequency}`);
+          return null;
+      }
     }
 
+    console.log(`calculateNextOccurrence: calculated next occurrence = ${next.toISOString()}`);
+
     if (endDate && next > endDate) {
+      console.log(`calculateNextOccurrence: next occurrence ${next.toISOString()} is after end date ${endDate.toISOString()}`);
       return null;
     }
 
