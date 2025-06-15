@@ -15,7 +15,8 @@ class APICache {
     categorization: Number.MAX_SAFE_INTEGER, // No expiration - categories are stable
     insights: 24 * 60 * 60 * 1000,          // 24 hours - daily insights refresh
     trends: Number.MAX_SAFE_INTEGER,         // No expiration - only invalidate on data change
-    tips: 48 * 60 * 60 * 1000               // 48 hours - tips change less frequently
+    tips: 48 * 60 * 60 * 1000,              // 48 hours - tips change less frequently
+    financialHealth: 24 * 60 * 60 * 1000    // 24 hours - financial health cache
   };
 
   private generateKey(prefix: string, data: any): string {
@@ -90,6 +91,16 @@ class APICache {
   setTips(financialDataHash: string, result: any) {
     const key = `tips:${financialDataHash}`;
     this.set(key, result, this.DEFAULT_TTL.tips);
+  }
+
+  getFinancialHealth(userId: string, dataHash: string) {
+    const key = `financial_health:${userId}:${dataHash}`;
+    return this.get(key);
+  }
+
+  setFinancialHealth(userId: string, dataHash: string, result: any) {
+    const key = `financial_health:${userId}:${dataHash}`;
+    this.set(key, result, this.DEFAULT_TTL.financialHealth);
   }
 
   // Utility method to create hash for complex data

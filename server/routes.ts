@@ -1022,6 +1022,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         netBalance: totalIncome - totalExpenses
       };
 
+      // Create a stable data hash that only changes with significant financial changes
+      // This prevents cache misses from minor data changes like transaction IDs or exact timestamps
+      const stableFinancialData = {
+        transactionCount: transactions.length,
+        totalIncome: Math.round(totalIncome),
+        totalExpenses: Math.round(totalExpenses),
+        budgetCount: budgets.length,
+        recentTransactionTypes: transactions
+          .slice(0, 10)
+          .map(t => ({ type: t.type, amount: Math.round(parseFloat(t.amount)) })),
+        budgetAllocations: budgets.map(b => ({ 
+          categoryId: b.categoryId, 
+          amount: Math.round(parseFloat(b.amount)) 
+        }))
+      };
+
+      const dataHash = aiCache.createDataHash(stableFinancialData);
+      
+      // Check cache first - 24 hour expiration
+      const cachedHealth = aiCache.getFinancialHealth(userId, dataHash);
+      if (cachedHealth) {
+        console.log('Financial health: Using cached data - avoiding OpenAI API call');
+        return res.json(cachedHealth);
+      }
+
       // Create category map
       const categoryMap = new Map();
       categories.forEach(cat => {
@@ -1055,7 +1080,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           spent: budgetSpending.get(b.categoryId) || 0
         }));
 
-      // Generate financial health score
+      // Generate financial health score with OpenAI
+      console.log('Financial health: Making new OpenAI API call - no cached data available');
       const { generateFinancialHealthScore } = await import('./openai');
       const healthData = await generateFinancialHealthScore({
         transactions: processedTransactions,
@@ -1066,6 +1092,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           netBalance: summary.totalIncome - summary.totalExpenses
         }
       });
+
+      // Cache the result for 24 hours
+      aiCache.setFinancialHealth(userId, dataHash, healthData);
+      console.log('Financial health: Cached new result for 24 hours');
 
       res.json(healthData);
     } catch (error) {
