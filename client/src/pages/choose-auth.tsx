@@ -8,7 +8,7 @@ export default function ChooseAuth() {
   const [, setLocation] = useLocation();
 
   const handleReplitLogin = () => {
-    window.location.href = '/api/login';
+    window.location.href = '/sign-in-clerk';
   };
 
   const handleClerkLogin = () => {

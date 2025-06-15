@@ -268,7 +268,7 @@ export default function Subscribe() {
               <p className="text-gray-600 dark:text-gray-300">
                 Already have an account?{' '}
                 <a 
-                  href="/api/login"
+                  href="/sign-in-clerk"
                   className="text-blue-600 hover:text-blue-700 font-medium"
                 >
                   Sign in here
