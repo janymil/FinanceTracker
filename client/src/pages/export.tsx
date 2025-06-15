@@ -510,11 +510,83 @@ export default function ExportPage() {
     backupMutation.mutate();
   };
 
-  const handleRestoreData = () => {
-    toast({
-      title: "Restore initiated",
-      description: "Data restore has been started. This may take a few minutes.",
-    });
+  // Restore backup mutation
+  const restoreMutation = useMutation({
+    mutationFn: async (backupFilename: string) => {
+      console.log('RESTORE FRONTEND: Starting restore process with backup:', backupFilename);
+      
+      const response = await fetch("/api/restore-backup", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ backupFilename }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        console.error('RESTORE FRONTEND ERROR:', errorData);
+        throw new Error(errorData.message || 'Restore failed');
+      }
+
+      const result = await response.json();
+      console.log('RESTORE FRONTEND SUCCESS:', result);
+      return result;
+    },
+    onSuccess: (result) => {
+      console.log('RESTORE FRONTEND: Restore completed successfully', result);
+      toast({
+        title: "Restore Successful",
+        description: `Restored ${result.restoredData.transactions} transactions and ${result.restoredData.budgets} budgets from backup.`,
+      });
+      // Invalidate all relevant queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/backup-status"] });
+    },
+    onError: (error) => {
+      console.error('RESTORE FRONTEND: Restore failed', error);
+      toast({
+        title: "Restore Failed",
+        description: error.message || "Failed to restore data. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleRestoreData = async () => {
+    console.log('RESTORE FRONTEND: User clicked restore button');
+    
+    // Get the latest backup filename
+    try {
+      const response = await fetch('/api/available-backups');
+      if (!response.ok) {
+        throw new Error('Failed to get available backups');
+      }
+      
+      const data = await response.json();
+      console.log('RESTORE FRONTEND: Available backups:', data.backups);
+      
+      if (data.backups && data.backups.length > 0) {
+        const latestBackup = data.backups[0]; // Assuming sorted by date, latest first
+        console.log('RESTORE FRONTEND: Restoring latest backup:', latestBackup.filename);
+        restoreMutation.mutate(latestBackup.filename);
+      } else {
+        toast({
+          title: "No Backups Found",
+          description: "No backup files are available to restore from.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('RESTORE FRONTEND: Error getting backups:', error);
+      toast({
+        title: "Restore Failed",
+        description: "Could not retrieve backup files. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusIcon = (status: string) => {
@@ -1364,10 +1436,20 @@ export default function ExportPage() {
                   <Button 
                     variant="outline"
                     onClick={handleRestoreData}
+                    disabled={restoreMutation.isPending}
                     className="w-full flex items-center gap-2"
                   >
-                    <Download className="h-4 w-4" />
-                    Restore from Backup
+                    {restoreMutation.isPending ? (
+                      <>
+                        <Download className="h-4 w-4 animate-spin" />
+                        Restoring Data...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4" />
+                        Restore from Backup
+                      </>
+                    )}
                   </Button>
 
                   {backupStatus.status === 'synced' && !isBackingUp && (
