@@ -63,6 +63,7 @@ export default function Transactions() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [filterRecurring, setFilterRecurring] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
 
@@ -246,6 +247,10 @@ export default function Transactions() {
 
     const matchesCategory = filterCategory === "all" || transaction.categoryName === filterCategory;
 
+    const matchesRecurring = filterRecurring === "all" || 
+                           (filterRecurring === "recurring" && transaction.isRecurring) ||
+                           (filterRecurring === "one-time" && !transaction.isRecurring);
+
     // Check month filter first (horizontal filter takes priority)
     let matchesMonth = true;
     if (selectedMonth) {
@@ -316,7 +321,7 @@ export default function Transactions() {
       }
     }
 
-    return matchesSearch && matchesType && matchesCategory && matchesMonth && matchesDate;
+    return matchesSearch && matchesType && matchesCategory && matchesRecurring && matchesMonth && matchesDate;
   });
 
   const availableCategories = Array.from(new Set(transactions.map((t: Transaction) => t.categoryName).filter(Boolean)));
@@ -728,7 +733,7 @@ export default function Transactions() {
           <CardHeader>
             <CardTitle>Transactions ({filteredTransactions.length})</CardTitle>
             <CardDescription>
-              {searchTerm || filterType !== "all" || filterCategory !== "all" || dateRange !== "all" 
+              {searchTerm || filterType !== "all" || filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all" 
                 ? "Filtered transactions" 
                 : "All your transactions"}
             </CardDescription>
@@ -780,6 +785,14 @@ export default function Transactions() {
                             <>
                               <span>•</span>
                               <Badge variant="outline">{transaction.categoryName}</Badge>
+                            </>
+                          )}
+                          {transaction.isRecurring && (
+                            <>
+                              <span>•</span>
+                              <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                🔄 {transaction.recurringFrequency}
+                              </Badge>
                             </>
                           )}
                         </div>
