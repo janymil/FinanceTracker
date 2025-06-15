@@ -1440,6 +1440,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
           filename = `transactions-${new Date().toISOString().split('T')[0]}.csv`;
           contentType = 'text/csv';
           break;
+        case 'excel':
+          const XLSX = require('xlsx');
+          const workbook = XLSX.utils.book_new();
+          
+          // Add transactions sheet
+          if (exportData.transactions && exportData.transactions.length > 0) {
+            const transactionsSheet = XLSX.utils.json_to_sheet(exportData.transactions.map((t: any) => ({
+              Date: t.date,
+              Description: t.description,
+              Amount: t.amount,
+              Type: t.type,
+              Category: t.categoryId
+            })));
+            XLSX.utils.book_append_sheet(workbook, transactionsSheet, 'Transactions');
+          }
+          
+          // Add budgets sheet
+          if (exportData.budgets && exportData.budgets.length > 0) {
+            const budgetsSheet = XLSX.utils.json_to_sheet(exportData.budgets);
+            XLSX.utils.book_append_sheet(workbook, budgetsSheet, 'Budgets');
+          }
+          
+          // Add goals sheet  
+          if (exportData.goals && exportData.goals.length > 0) {
+            const goalsSheet = XLSX.utils.json_to_sheet(exportData.goals);
+            XLSX.utils.book_append_sheet(workbook, goalsSheet, 'Goals');
+          }
+          
+          responseData = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+          filename = `financial-data-${new Date().toISOString().split('T')[0]}.xlsx`;
+          contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+          break;
+        case 'pdf':
+          const jsPDF = require('jspdf').jsPDF;
+          const doc = new jsPDF();
+          
+          // Title
+          doc.setFontSize(20);
+          doc.text('Financial Report', 20, 20);
+          
+          // Date range
+          doc.setFontSize(12);
+          doc.text(`Report Period: ${start.toLocaleDateString()} - ${end.toLocaleDateString()}`, 20, 30);
+          
+          let yPosition = 50;
+          
+          // Summary section
+          if (exportData.transactions) {
+            const totalIncome = exportData.transactions
+              .filter((t: any) => t.type === 'income')
+              .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
+            const totalExpenses = exportData.transactions
+              .filter((t: any) => t.type === 'expense')
+              .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
+            const netAmount = totalIncome - totalExpenses;
+            
+            doc.setFontSize(14);
+            doc.text('Summary', 20, yPosition);
+            yPosition += 10;
+            
+            doc.setFontSize(12);
+            doc.text(`Total Income: $${totalIncome.toFixed(2)}`, 20, yPosition);
+            yPosition += 8;
+            doc.text(`Total Expenses: $${totalExpenses.toFixed(2)}`, 20, yPosition);
+            yPosition += 8;
+            doc.text(`Net Amount: $${netAmount.toFixed(2)}`, 20, yPosition);
+            yPosition += 15;
+          }
+          
+          // Transactions section
+          if (exportData.transactions && exportData.transactions.length > 0) {
+            doc.setFontSize(14);
+            doc.text('Recent Transactions', 20, yPosition);
+            yPosition += 10;
+            
+            doc.setFontSize(10);
+            exportData.transactions.slice(0, 20).forEach((t: any) => {
+              if (yPosition > 280) {
+                doc.addPage();
+                yPosition = 20;
+              }
+              doc.text(`${t.date} - ${t.description} - $${t.amount} (${t.type})`, 20, yPosition);
+              yPosition += 6;
+            });
+          }
+          
+          responseData = doc.output('arraybuffer');
+          filename = `financial-report-${new Date().toISOString().split('T')[0]}.pdf`;
+          contentType = 'application/pdf';
+          break;
         default:
           responseData = exportData;
           filename = `financial-data-${new Date().toISOString().split('T')[0]}.json`;

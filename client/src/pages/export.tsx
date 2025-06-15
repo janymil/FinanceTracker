@@ -388,10 +388,10 @@ export default function ExportPage() {
       }
 
       // For file downloads, we need to handle blob response
-      if (options.format === 'csv' || options.format === 'excel') {
+      if (options.format === 'csv' || options.format === 'excel' || options.format === 'pdf') {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const filename = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || 'export.csv';
+        const filename = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || `export.${options.format}`;
         return { downloadUrl: url, filename };
       }
 
