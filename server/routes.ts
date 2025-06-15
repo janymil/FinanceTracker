@@ -158,7 +158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/transactions/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -220,7 +220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/transactions/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -239,7 +239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Budget routes
   app.post('/api/budgets', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -268,7 +268,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/budgets/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -317,7 +317,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/budgets', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -335,7 +335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Goals routes
   app.get('/api/goals', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -352,7 +352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/goals', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -383,7 +383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/goals/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -411,7 +411,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/goals/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -493,7 +493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Recurring transactions endpoint
   app.get('/api/recurring-transactions', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -511,7 +511,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Financial summary
   app.get('/api/financial-summary', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const { startDate, endDate } = req.query;
 
       if (!startDate || !endDate) {
@@ -2734,7 +2734,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
 
       // Check if user is admin (you can customize this logic)
@@ -2871,7 +2871,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
   // Friend management routes
   app.post('/api/friends/request', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const { recipientEmail } = req.body;
       
       const friendship = await storage.sendFriendRequest(userId, recipientEmail);
@@ -2884,7 +2884,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.post('/api/friends/accept/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const friendshipId = parseInt(req.params.id);
       
       const friendship = await storage.acceptFriendRequest(friendshipId, userId);
@@ -2897,7 +2897,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.delete('/api/friends/reject/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const friendshipId = parseInt(req.params.id);
       
       await storage.rejectFriendRequest(friendshipId, userId);
@@ -2910,7 +2910,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.get('/api/friends', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const friends = await storage.getUserFriends(userId);
       res.json(friends);
     } catch (error) {
@@ -2921,7 +2921,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.get('/api/friends/requests', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const requests = await storage.getPendingFriendRequests(userId);
       res.json(requests);
     } catch (error) {
@@ -2933,7 +2933,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
   // Collaborative goals routes
   app.post('/api/collaborative-goals', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const goalData = {
         ...req.body,
         createdBy: userId,
@@ -2950,7 +2950,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.get('/api/collaborative-goals', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const goals = await storage.getUserCollaborativeGoals(userId);
       res.json(goals);
     } catch (error) {
@@ -2961,7 +2961,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.get('/api/collaborative-goals/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const goalId = parseInt(req.params.id);
       
       const goal = await storage.getCollaborativeGoal(goalId, userId);
@@ -2978,7 +2978,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.post('/api/collaborative-goals/:id/join', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const goalId = parseInt(req.params.id);
       const { personalTarget } = req.body;
       
@@ -2992,7 +2992,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.post('/api/collaborative-goals/:id/leave', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const goalId = parseInt(req.params.id);
       
       await storage.leaveCollaborativeGoal(goalId, userId);
@@ -3005,7 +3005,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.put('/api/collaborative-goals/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const goalId = parseInt(req.params.id);
       
       const goal = await storage.updateCollaborativeGoal(goalId, userId, req.body);
@@ -3018,7 +3018,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.delete('/api/collaborative-goals/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const goalId = parseInt(req.params.id);
       
       await storage.deleteCollaborativeGoal(goalId, userId);
@@ -3032,7 +3032,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
   // Goal contributions
   app.post('/api/collaborative-goals/:id/contribute', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const goalId = parseInt(req.params.id);
       
       const contributionData = {
@@ -3143,7 +3143,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
 
   app.get('/api/achievements', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const achievements = await storage.getUserAchievements(userId);
       res.json(achievements);
     } catch (error) {
