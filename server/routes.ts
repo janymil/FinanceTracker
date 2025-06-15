@@ -18,6 +18,7 @@ import {
 import { aiCache } from "./cache";
 import { batchProcessor } from "./batch-processor";
 import { adminAuth, adminLogin, adminLogout } from "./adminAuth";
+import { pdfGenerator } from "./pdfGenerator";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -1568,9 +1569,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
           break;
         case 'pdf':
-          // Use simple text-based PDF generation instead of complex React PDF
-          const jsPDF = (await import('jspdf')).default;
-          const doc = new jsPDF();
+          // Use Puppeteer + Google Charts for professional PDF generation
+          const pdfData = {
+            transactions: exportData.transactions || [],
+            budgets: exportData.budgets || [],
+            goals: exportData.goals || [],
+            summary: exportData.summary || {
+              totalIncome: 0,
+              totalExpenses: 0,
+              netAmount: 0,
+              transactionCount: 0,
+              categoryBreakdown: {},
+              month: new Date().toLocaleDateString('en-US', { month: 'long' }),
+              year: new Date().getFullYear()
+            },
+            userName: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email || 'User'
+          };
+          
+          responseData = await pdfGenerator.generatePDF(pdfData);
+          filename = `financial-report-${new Date().toISOString().split('T')[0]}.pdf`;
+          contentType = 'application/pdf';
+          break;
           
           // Header
           doc.setFontSize(20);
