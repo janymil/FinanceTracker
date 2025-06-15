@@ -36,3 +36,12 @@ export const getUserId = (req: any): string | null => {
     return null;
   }
 };
+
+// Helper to get user ID and throw if not authenticated (for use after isAuthenticated middleware)
+export const requireUserId = (req: any): string => {
+  const userId = getUserId(req);
+  if (!userId) {
+    throw new Error('User ID not found after authentication');
+  }
+  return userId;
+};
