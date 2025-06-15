@@ -21,6 +21,7 @@ import {
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import RequirePlan from "@/components/require-plan";
 
 interface CategorySuggestion {
   id: string;
@@ -208,17 +209,18 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
 
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Brain className="h-5 w-5" />
-          Auto-Categorization
-          <Badge className="bg-blue-600 text-white">Standard+</Badge>
-        </CardTitle>
-        <CardDescription>
-          AI-powered transaction categorization with machine learning
-        </CardDescription>
-      </CardHeader>
+    <RequirePlan requiredPlan="standard" feature="Auto-Categorization">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="h-5 w-5" />
+            Auto-Categorization
+            <Badge className="bg-blue-600 text-white">Standard+</Badge>
+          </CardTitle>
+          <CardDescription>
+            AI-powered transaction categorization with machine learning
+          </CardDescription>
+        </CardHeader>
       <CardContent>
         <div className="space-y-6">
           {/* Action Button */}
@@ -381,5 +383,6 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
         </div>
       </CardContent>
     </Card>
+    </RequirePlan>
   );
 }

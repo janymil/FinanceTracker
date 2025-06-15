@@ -771,9 +771,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = await storage.getUser(req.user.id);
 
-      // Require premium plan for auto-categorization
-      if (!user || user.plan !== 'premium') {
-        return res.status(403).json({ message: "Auto-categorization requires premium plan" });
+      // Require standard+ plan for auto-categorization
+      if (!user || !['standard', 'premium'].includes(user.plan || '')) {
+        return res.status(403).json({ message: "Auto-categorization requires standard or premium plan" });
       }
 
       // Get uncategorized transactions
