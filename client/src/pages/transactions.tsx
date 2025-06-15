@@ -420,7 +420,7 @@ export default function Transactions() {
                   Add Transaction
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingTransaction ? "Edit Transaction" : "Add New Transaction"}

@@ -143,11 +143,13 @@ export default function RequirePlan({ plan, children, feature, description, bene
 
   const config = featureConfigs[featureKey as keyof typeof featureConfigs];
 
-  // For form sections, show a compact inline upgrade message instead of full page
+  // For form sections and transaction dialogs, show a compact inline upgrade message instead of full page
   const isFormContext = typeof window !== 'undefined' && 
     (window.location.pathname.includes('/income') || 
      window.location.pathname.includes('/expenses') || 
-     window.location.pathname.includes('/transactions'));
+     window.location.pathname.includes('/transactions') ||
+     // Check if we're inside a dialog by looking for dialog-specific elements
+     document.querySelector('[role="dialog"]') !== null);
 
   if (isFormContext) {
     return (
