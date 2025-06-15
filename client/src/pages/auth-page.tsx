@@ -79,13 +79,26 @@ export default function AuthPage() {
                   signInUrl="#sign-in"
                   appearance={{
                     elements: {
-                      formButtonPrimary: "bg-blue-600 hover:bg-blue-700 text-white",
-                      card: "shadow-none border-0",
-                      headerTitle: "text-2xl font-bold text-gray-900 dark:text-white",
-                      headerSubtitle: "text-gray-600 dark:text-gray-400",
-                      socialButtonsBlockButton: "border border-gray-300 dark:border-gray-600",
-                      formFieldInput: "border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white",
-                      footerActionLink: "text-blue-600 hover:text-blue-700"
+                      formButtonPrimary: "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105",
+                      card: "shadow-none border-0 bg-transparent",
+                      rootBox: "w-full",
+                      headerTitle: "text-3xl font-bold text-gray-900 dark:text-white mb-2",
+                      headerSubtitle: "text-gray-600 dark:text-gray-400 mb-6",
+                      socialButtonsBlockButton: "border-2 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium py-3 px-4 rounded-lg transition-all duration-200 hover:shadow-md",
+                      socialButtonsBlockButtonText: "font-medium",
+                      dividerLine: "bg-gray-200 dark:bg-gray-600",
+                      dividerText: "text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-4",
+                      formFieldInput: "border-2 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg py-3 px-4 transition-all duration-200 focus:shadow-md",
+                      formFieldLabel: "text-gray-700 dark:text-gray-300 font-medium mb-2",
+                      footerActionLink: "text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors duration-200",
+                      identityPreviewText: "text-gray-600 dark:text-gray-400",
+                      identityPreviewEditButton: "text-blue-600 hover:text-blue-700 dark:text-blue-400",
+                      formResendCodeLink: "text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium",
+                      otpCodeFieldInput: "border-2 border-gray-200 dark:border-gray-600 focus:border-blue-500 text-center text-lg font-mono bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg transition-all duration-200"
+                    },
+                    layout: {
+                      socialButtonsPlacement: "top",
+                      showOptionalFields: true
                     }
                   }}
                 />
@@ -100,13 +113,26 @@ export default function AuthPage() {
                   signUpUrl="#sign-up"
                   appearance={{
                     elements: {
-                      formButtonPrimary: "bg-blue-600 hover:bg-blue-700 text-white",
-                      card: "shadow-none border-0",
-                      headerTitle: "text-2xl font-bold text-gray-900 dark:text-white",
-                      headerSubtitle: "text-gray-600 dark:text-gray-400",
-                      socialButtonsBlockButton: "border border-gray-300 dark:border-gray-600",
-                      formFieldInput: "border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white",
-                      footerActionLink: "text-blue-600 hover:text-blue-700"
+                      formButtonPrimary: "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105",
+                      card: "shadow-none border-0 bg-transparent",
+                      rootBox: "w-full",
+                      headerTitle: "text-3xl font-bold text-gray-900 dark:text-white mb-2",
+                      headerSubtitle: "text-gray-600 dark:text-gray-400 mb-6",
+                      socialButtonsBlockButton: "border-2 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium py-3 px-4 rounded-lg transition-all duration-200 hover:shadow-md",
+                      socialButtonsBlockButtonText: "font-medium",
+                      dividerLine: "bg-gray-200 dark:bg-gray-600",
+                      dividerText: "text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-4",
+                      formFieldInput: "border-2 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg py-3 px-4 transition-all duration-200 focus:shadow-md",
+                      formFieldLabel: "text-gray-700 dark:text-gray-300 font-medium mb-2",
+                      footerActionLink: "text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors duration-200",
+                      identityPreviewText: "text-gray-600 dark:text-gray-400",
+                      identityPreviewEditButton: "text-blue-600 hover:text-blue-700 dark:text-blue-400",
+                      formResendCodeLink: "text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium",
+                      otpCodeFieldInput: "border-2 border-gray-200 dark:border-gray-600 focus:border-blue-500 text-center text-lg font-mono bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg transition-all duration-200",
+                      alternativeMethodsBlockButton: "border-2 border-gray-200 dark:border-gray-600 hover:border-blue-300 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-lg transition-all duration-200"
+                    },
+                    layout: {
+                      socialButtonsPlacement: "top"
                     }
                   }}
                 />

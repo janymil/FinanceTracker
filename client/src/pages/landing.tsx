@@ -10,7 +10,7 @@ export default function Landing() {
   const [, setLocation] = useLocation();
   
   const handleLogin = () => {
-    setLocation('/sign-in-clerk');
+    setLocation('/auth');
   };
 
   const handleGetStarted = (plan: string) => {
@@ -18,7 +18,7 @@ export default function Landing() {
     if (plan !== 'free') {
       localStorage.setItem('selectedPlan', plan);
     }
-    setLocation('/sign-in-clerk');
+    setLocation('/auth');
   };
 
   return (
