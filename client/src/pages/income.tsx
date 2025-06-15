@@ -687,6 +687,20 @@ export default function Income() {
               </div>
 
               <div>
+                <Label>Recurring</Label>
+                <Select value={filterRecurring} onValueChange={setFilterRecurring}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Income</SelectItem>
+                    <SelectItem value="recurring">Recurring Only</SelectItem>
+                    <SelectItem value="one-time">One-time Only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
                 <Label>Date Range</Label>
                 <Select value={dateRange} onValueChange={setDateRange}>
                   <SelectTrigger>
@@ -722,7 +736,7 @@ export default function Income() {
           <CardHeader>
             <CardTitle>Income Transactions ({filteredIncomes.length})</CardTitle>
             <CardDescription>
-              {searchTerm || filterCategory !== "all" || dateRange !== "all" 
+              {searchTerm || filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all" 
                 ? "Filtered income transactions" 
                 : "All your income transactions"}
             </CardDescription>
@@ -740,7 +754,7 @@ export default function Income() {
                   No Income Found
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  {searchTerm || filterCategory !== "all" || dateRange !== "all"
+                  {searchTerm || filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all"
                     ? "Try adjusting your filters or search terms"
                     : "Add your first income transaction to get started"}
                 </p>
@@ -774,6 +788,14 @@ export default function Income() {
                               <span>•</span>
                               <Badge variant="outline" className="text-green-600 border-green-600">
                                 {transaction.categoryName}
+                              </Badge>
+                            </>
+                          )}
+                          {transaction.isRecurring && (
+                            <>
+                              <span>•</span>
+                              <Badge variant="outline" className="text-blue-600 border-blue-600">
+                                Recurring
                               </Badge>
                             </>
                           )}
