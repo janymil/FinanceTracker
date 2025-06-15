@@ -62,12 +62,25 @@ export default function ProfilePage() {
   
   // Form states
   const [profileData, setProfileData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
+    firstName: '',
+    lastName: '',
+    email: '',
     phone: '',
     website: ''
   });
+
+  // Update form data when user data loads
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        website: user.website || ''
+      });
+    }
+  }, [user]);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',

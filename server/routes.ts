@@ -2350,7 +2350,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         website
       });
 
-      res.json({ message: "Profile updated successfully" });
+      // Return updated user data
+      const updatedUser = await storage.getUser(userId);
+      res.json({
+        message: "Profile updated successfully",
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        email: updatedUser.email,
+        phone: updatedUser.phone || '',
+        website: updatedUser.website || ''
+      });
     } catch (error) {
       console.error("Error updating profile:", error);
       res.status(500).json({ message: "Failed to update profile" });
