@@ -68,7 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Transaction routes
   app.post('/api/transactions', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
 
       // Check if recurring transactions are being used and require appropriate plan
@@ -134,7 +134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/transactions', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
 
       // Plan-based limits: free = 3, standard = 100, premium = unlimited
@@ -157,7 +157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/transactions/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -184,7 +184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/transactions/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
