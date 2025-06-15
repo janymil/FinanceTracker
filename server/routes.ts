@@ -958,15 +958,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Trend Predictions (Premium only)
   app.get('/api/trend-predictions', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
 
       if (!user || user.plan !== 'premium') {
         return res.status(403).json({ message: "AI trend predictions require Premium subscription" });
       }
 
-      const transactions = await storage.getUserTransactions(req.user.id, 200);
+      const transactions = await storage.getUserTransactions(userId, 200);
       const categories = await storage.getCategories();
-      const budgets = await storage.getUserBudgets(req.user.id);
+      const budgets = await storage.getUserBudgets(userId);
 
       const categoryMap = new Map();
       categories.forEach(cat => {
@@ -983,10 +988,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           categoryId: t.categoryId || 1 // Default to first category if null
         })),
         categoryMap,
-        budgets.map(b => ({
-          categoryId: b.categoryId,
-          amount: b.amount
-        }))
+        budgets
+          .filter(b => b.categoryId !== null)
+          .map(b => ({
+            categoryId: b.categoryId as number,
+            amount: b.amount
+          }))
       );
 
       res.json(predictions);
