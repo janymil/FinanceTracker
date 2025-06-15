@@ -10,7 +10,7 @@ export default function Landing() {
   const [, setLocation] = useLocation();
   
   const handleLogin = () => {
-    setLocation("/auth");
+    window.location.href = '/api/login';
   };
 
   const handleGetStarted = (plan: string) => {
