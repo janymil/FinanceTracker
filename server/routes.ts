@@ -30,6 +30,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
   // Transaction routes
   app.post('/api/transactions', isAuthenticated, async (req: any, res) => {
     try {
@@ -1553,20 +1565,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Verify current password
-      const { comparePasswords } = await import('./auth');
-      const isCurrentPasswordValid = await comparePasswords(currentPassword, user.password);
-      
-      if (!isCurrentPasswordValid) {
-        return res.status(400).json({ message: "Current password is incorrect" });
-      }
-
-      // Hash new password
-      const { hashPassword } = await import('./auth');
-      const hashedNewPassword = await hashPassword(newPassword);
-
-      // Update password
-      await storage.updateUserPassword(userId, hashedNewPassword);
+      // Password changes not supported with Replit Auth
+      return res.status(400).json({ message: "Password changes are handled by Replit authentication" });
 
       res.json({ message: "Password changed successfully" });
     } catch (error) {
