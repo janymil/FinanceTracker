@@ -212,9 +212,10 @@ Changelog:
 - June 15, 2025. Fixed critical authentication bug - replaced all req.user.id instances with req.user?.claims?.sub throughout routes.ts
 - June 15, 2025. AI trend predictions endpoint now working correctly for premium users - Forecasts tab displays AI-powered financial predictions
 - June 15, 2025. Fixed Reports page filtering system - both month dropdown and period filters (week/month/quarter/year) now work correctly
-- June 15, 2025. Corrected "This Week" filter calculation to use proper current week boundaries (Sunday to Saturday) instead of previous 7 days
+- June 15, 2025. Corrected "This Week" filter calculation to use proper current week boundaries (Monday to Sunday) instead of previous 7 days
 - June 15, 2025. Updated all Reports page UI text to dynamically change based on selected period (Weekly Overview, Current week, etc.)
 - June 15, 2025. Resolved infinite API loop issue that was causing performance problems during filter changes
+- June 15, 2025. Fixed week calculation to start from Monday instead of Sunday per international standard
 ```
 
 ## User Preferences

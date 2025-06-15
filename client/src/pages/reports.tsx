@@ -47,11 +47,12 @@ export default function Reports() {
       case "week":
         const today = new Date(now);
         const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert Sunday=0 to Sunday=6, Monday=1 to Monday=0
         const weekStart = new Date(today);
-        weekStart.setDate(today.getDate() - dayOfWeek); // Start of current week (Sunday)
+        weekStart.setDate(today.getDate() - daysFromMonday); // Start of current week (Monday)
         weekStart.setHours(0, 0, 0, 0);
         const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6); // End of current week (Saturday)
+        weekEnd.setDate(weekStart.getDate() + 6); // End of current week (Sunday)
         weekEnd.setHours(23, 59, 59, 999);
         return { startDate: weekStart, endDate: weekEnd };
       case "month":
