@@ -8,7 +8,7 @@ export default function ClerkSignInPage() {
         <SignIn 
           routing="path"
           path="/sign-in-clerk"
-          redirectUrl="/"
+          fallbackRedirectUrl="/"
           signUpUrl="/sign-up-clerk"
           appearance={{
             elements: {
