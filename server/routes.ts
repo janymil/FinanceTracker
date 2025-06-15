@@ -1407,8 +1407,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (includeGoals) {
-        // Note: Goals endpoint doesn't exist in storage, would need to implement
-        exportData.goals = [];
+        try {
+          exportData.goals = await storage.getUserGoals(userId);
+        } catch (error) {
+          exportData.goals = [];
+        }
+      }
+
+      // Add financial summary
+      if (exportData.transactions && exportData.transactions.length > 0) {
+        const income = exportData.transactions
+          .filter((t: any) => t.type === 'income')
+          .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
+        
+        const expenses = exportData.transactions
+          .filter((t: any) => t.type === 'expense')
+          .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
+        
+        exportData.summary = {
+          totalIncome: income,
+          totalExpenses: expenses,
+          netAmount: income - expenses,
+          transactionCount: exportData.transactions.length,
+          dateRange: { start: start.toISOString(), end: end.toISOString() }
+        };
       }
 
       // Add metadata
@@ -1431,20 +1453,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
           contentType = 'application/json';
           break;
         case 'csv':
-          if (exportData.transactions) {
-            const csvHeader = 'Date,Description,Amount,Type,Category\n';
-            const csvRows = exportData.transactions.map((t: any) => 
-              `${t.date},${t.description},${t.amount},${t.type},${t.categoryId}`
-            ).join('\n');
-            responseData = csvHeader + csvRows;
-          } else {
-            responseData = 'No transaction data to export';
+          let csvContent = '';
+          
+          // Add transactions section
+          if (exportData.transactions && exportData.transactions.length > 0) {
+            csvContent += 'TRANSACTIONS\n';
+            csvContent += 'Date,Description,Amount,Type,Category\n';
+            exportData.transactions.forEach((t: any) => {
+              csvContent += `${t.date},"${t.description}",${t.amount},${t.type},${t.categoryId}\n`;
+            });
+            csvContent += '\n';
           }
-          filename = `transactions-${new Date().toISOString().split('T')[0]}.csv`;
+          
+          // Add budgets section
+          if (exportData.budgets && exportData.budgets.length > 0) {
+            csvContent += 'BUDGETS\n';
+            csvContent += 'Category,Amount,Period,Start Date,End Date\n';
+            exportData.budgets.forEach((b: any) => {
+              csvContent += `${b.categoryId},${b.amount},${b.period},${b.startDate},${b.endDate}\n`;
+            });
+            csvContent += '\n';
+          }
+          
+          // Add goals section
+          if (exportData.goals && exportData.goals.length > 0) {
+            csvContent += 'GOALS\n';
+            csvContent += 'Title,Target Amount,Current Amount,Target Date,Description\n';
+            exportData.goals.forEach((g: any) => {
+              csvContent += `"${g.title}",${g.targetAmount},${g.currentAmount},${g.targetDate},"${g.description || ''}"\n`;
+            });
+            csvContent += '\n';
+          }
+          
+          // Add financial summary
+          if (exportData.summary) {
+            csvContent += 'FINANCIAL SUMMARY\n';
+            csvContent += 'Metric,Value\n';
+            csvContent += `Total Income,${exportData.summary.totalIncome || 0}\n`;
+            csvContent += `Total Expenses,${exportData.summary.totalExpenses || 0}\n`;
+            csvContent += `Net Amount,${(exportData.summary.totalIncome || 0) - (exportData.summary.totalExpenses || 0)}\n`;
+            csvContent += `Transaction Count,${exportData.transactions?.length || 0}\n`;
+            csvContent += `Budget Count,${exportData.budgets?.length || 0}\n`;
+            csvContent += `Goal Count,${exportData.goals?.length || 0}\n`;
+          }
+          
+          responseData = csvContent || 'No data to export';
+          filename = `financial-data-${new Date().toISOString().split('T')[0]}.csv`;
           contentType = 'text/csv';
           break;
         case 'excel':
-          const XLSX = require('xlsx');
+          const XLSX = await import('xlsx');
           const workbook = XLSX.utils.book_new();
           
           // Add transactions sheet
@@ -1476,7 +1534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
           break;
         case 'pdf':
-          const jsPDF = require('jspdf').jsPDF;
+          const { jsPDF } = await import('jspdf');
           const doc = new jsPDF();
           
           // Title
