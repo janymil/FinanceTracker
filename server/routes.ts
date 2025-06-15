@@ -13,6 +13,7 @@ import {
   categorizeExpense, 
   generateSpendingInsights, 
   generateTrendPredictions,
+  generateAIFinancialHealthScore,
   type ExpenseCategorizationResult 
 } from "./openai";
 import { aiCache } from "./cache";
@@ -89,7 +90,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Transaction routes
   app.post('/api/transactions', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = requireUserId(req);
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
       const user = await storage.getUser(userId);
 
       // Check transaction limits for free plan users
@@ -165,7 +169,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/transactions', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = requireUserId(req);
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
       const user = await storage.getUser(userId);
 
       // Plan-based limits: free = 3, standard = 100, premium = unlimited
@@ -188,7 +195,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/transactions/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = requireUserId(req);
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -541,7 +551,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Financial summary
   app.get('/api/financial-summary', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = requireUserId(req);
+      const userId = getUserId(req);
       
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
@@ -2163,7 +2173,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (settings) {
         await storage.updateBackupSettings(userId, {
           ...settings,
-          lastRestoreDate: new Date().toISOString()
+          lastBackupDate: new Date()
         });
       }
 
