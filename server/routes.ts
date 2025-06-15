@@ -203,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Budget routes
   app.post('/api/budgets', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -232,7 +232,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/budgets/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -277,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/budgets', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -421,7 +421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Financial summary
   app.get('/api/financial-summary', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const { startDate, endDate } = req.query;
 
       if (!startDate || !endDate) {
