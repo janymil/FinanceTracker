@@ -224,6 +224,9 @@ Changelog:
 - June 15, 2025. Built comprehensive backend infrastructure for mascot generation, storage, and management with real financial health data connection
 - June 15, 2025. Added financial_mascots database table with user-specific mascot persistence and settings
 - June 15, 2025. Enhanced mascot uniqueness algorithm using user ID-based trait selection for truly personalized financial advisor companions
+- June 15, 2025. Completed modern authentication system with Clerk - created attractive unified auth page with gradient styling and proper email verification
+- June 15, 2025. Fixed deprecated Clerk redirect props (redirectUrl → fallbackRedirectUrl/forceRedirectUrl) and added helpful guidance for rate limiting issues
+- June 15, 2025. Eliminated old separate Clerk pages and unified authentication flow under single /auth route with enhanced user experience
 ```
 
 ## User Preferences
