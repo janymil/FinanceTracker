@@ -122,7 +122,7 @@ export const expenseReminders = pgTable("expense_reminders", {
 // Financial goals
 export const goals = pgTable("goals", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   targetAmount: decimal("target_amount", { precision: 12, scale: 2 }).notNull(),
