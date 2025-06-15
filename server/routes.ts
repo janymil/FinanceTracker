@@ -979,7 +979,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: Date.now()
       };
 
-      console.log(`Generating fresh AI tip for user ${requireUserId(req)} with ${transactions.length} transactions`);
+      console.log(`Generating fresh AI tip for user ${getUserId(req)} with ${transactions.length} transactions`);
       
       const tips = await generateFinancialTips(financialData);
       const tip = tips.length > 0 ? tips[0] : null;
@@ -1007,14 +1007,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Spending Insights endpoint
   app.get('/api/ai/insights', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(requireUserId(req));
+      const user = await storage.getUser(getUserId(req));
 
       // Require premium plan for AI insights
       if (!user || user.plan !== 'premium') {
         return res.status(403).json({ message: "AI spending insights require premium plan" });
       }
 
-      const transactions = await storage.getUserTransactions(requireUserId(req), 100);
+      const transactions = await storage.getUserTransactions(getUserId(req), 100);
 
       const insights = await generateSpendingInsights(transactions.map(t => ({
         description: t.description,
@@ -1036,7 +1036,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { summary, budgets, useAdvancedFactors } = req.body;
 
-      const transactions = await storage.getUserTransactions(requireUserId(req), 100);
+      const transactions = await storage.getUserTransactions(getUserId(req), 100);
 
       const aiScore = await generateAIFinancialHealthScore({
         summary,
@@ -2907,7 +2907,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
   // Admin routes - secure admin panel for user management
   const isAdmin = async (req: any, res: any, next: any) => {
     try {
-      if (!requireUserId(req)) {
+      if (!getUserId(req)) {
         return res.status(401).json({ message: "Authentication required" });
       }
 
