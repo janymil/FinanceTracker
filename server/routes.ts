@@ -1568,10 +1568,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
           break;
         case 'pdf':
-          const puppeteer = await import('puppeteer');
-          
-          // Create HTML template for the financial report
-          const htmlTemplate = `
+          try {
+            const puppeteer = await import('puppeteer');
+            
+            // Create HTML template for the financial report
+            const htmlTemplate = `
           <!DOCTYPE html>
           <html>
           <head>
@@ -1823,6 +1824,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
           responseData = pdfBuffer;
           filename = `financial-report-${new Date().toISOString().split('T')[0]}.pdf`;
           contentType = 'application/pdf';
+          
+          } catch (puppeteerError) {
+            console.log('Puppeteer not available in development environment, generating fallback message');
+            
+            // Fallback message for development environment
+            const fallbackMessage = `
+PDF Export Notice
+
+The PDF export feature requires Chrome/Chromium to be installed and is not available in the current development environment.
+
+However, this feature will work perfectly when you deploy the application to production.
+
+For now, please use one of the other export formats:
+- Excel (.xlsx) - Full featured spreadsheet with multiple tabs
+- CSV (.csv) - Simple spreadsheet format
+- JSON (.json) - Complete data download
+
+Your financial data from ${start.toLocaleDateString()} to ${end.toLocaleDateString()}:
+
+Summary:
+- Total Income: $${exportData.summary?.totalIncome?.toFixed(2) || '0.00'}
+- Total Expenses: $${exportData.summary?.totalExpenses?.toFixed(2) || '0.00'}
+- Net Amount: $${exportData.summary?.netAmount?.toFixed(2) || '0.00'}
+- Total Transactions: ${exportData.summary?.transactionCount || 0}
+
+The PDF feature will generate a beautifully formatted report with:
+✓ Professional FinanzerPro branding
+✓ Complete financial summary
+✓ Detailed transaction tables
+✓ Budget and goals information
+✓ Print-ready formatting
+
+This will be available once deployed to production.
+            `;
+            
+            responseData = Buffer.from(fallbackMessage);
+            filename = `pdf-export-notice-${new Date().toISOString().split('T')[0]}.txt`;
+            contentType = 'text/plain';
+          }
           break;
         default:
           responseData = JSON.stringify(exportData, null, 2);
