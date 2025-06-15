@@ -2671,14 +2671,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // AI Help Chat endpoint
   // Stripe payment endpoints
-  app.post("/api/create-checkout-session", async (req: Request, res: Response) => {
+  app.post("/api/create-checkout-session", isAuthenticated, async (req: any, res: Response) => {
     try {
       const { plan } = req.body;
+      const userId = getUserId(req);
       
-      // Allow anonymous users to go through checkout for all plans
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      // Get user from database
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
       const baseUrl = `${req.headers.origin || 'http://localhost:5000'}`;
       const successUrl = `${baseUrl}/api/subscription-success?plan=${plan}&session_id={CHECKOUT_SESSION_ID}`;
-      const cancelUrl = `${baseUrl}/auth`;
+      const cancelUrl = `${baseUrl}/subscribe`;
 
       // Plan pricing in cents (Stripe uses cents)
       const planPrices = {
@@ -2744,7 +2754,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
           metadata: {
             plan: plan,
-            userId: req.session?.userId?.toString() || 'anonymous'
+            userId: userId
           }
         };
       } else {
@@ -2760,7 +2770,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           cancel_url: cancelUrl,
           metadata: {
             plan: plan,
-            userId: req.session?.userId?.toString() || 'anonymous'
+            userId: userId
           }
         };
       }
@@ -2780,7 +2790,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { plan, session_id } = req.query;
       
       if (!session_id || !plan) {
-        return res.redirect('/sign-in-clerk?error=invalid_params');
+        return res.redirect('/?error=invalid_params');
       }
 
       // Verify the session with Stripe
@@ -2789,12 +2799,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // For free plans, we don't require payment completion
       const planRequiresPayment = plan !== 'free';
       if (planRequiresPayment && session.payment_status !== 'paid') {
-        return res.redirect('/sign-in-clerk?error=payment_not_completed');
+        return res.redirect('/?error=payment_not_completed');
       }
       
       // For free plans, check setup completion
       if (plan === 'free' && session.mode === 'setup' && session.status !== 'complete') {
-        return res.redirect('/sign-in-clerk?error=setup_not_completed');
+        return res.redirect('/?error=setup_not_completed');
       }
 
       // Map plan names to database values  
@@ -2806,22 +2816,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'premium-yearly': 'premium'
       };
 
-      const dbPlan = planMapping[plan as keyof typeof planMapping];
+      const dbPlan = planMapping[plan as keyof typeof planMapping] as 'free' | 'standard' | 'premium';
       if (!dbPlan) {
-        return res.redirect('/sign-in-clerk?error=invalid_plan');
+        return res.redirect('/?error=invalid_plan');
       }
 
-      // Store plan selection and redirect to signup/login page
-      // This creates a unified flow where users complete Stripe first, then create account
-      const planParam = encodeURIComponent(dbPlan);
-      const customerParam = session.customer ? `&customer=${session.customer}` : '';
-      const subscriptionParam = session.subscription ? `&subscription=${session.subscription}` : '';
-      
-      return res.redirect(`/sign-in-clerk?plan=${planParam}&success=true${customerParam}${subscriptionParam}`);
+      // Get user ID from session metadata
+      const userId = session.metadata?.userId;
+      if (!userId || userId === 'anonymous') {
+        return res.redirect('/?error=user_not_found');
+      }
+
+      // Update user's plan in database
+      try {
+        await storage.updateUserPlan(userId, dbPlan);
+        
+        // Store Stripe customer and subscription info if available
+        if (session.customer) {
+          await storage.updateUserStripeInfo(
+            userId, 
+            session.customer as string,
+            (session.subscription as string) || ''
+          );
+        }
+        
+        console.log(`Successfully upgraded user ${userId} to ${dbPlan} plan`);
+        
+        // Redirect to success page
+        return res.redirect(`/?upgrade=success&plan=${dbPlan}`);
+        
+      } catch (dbError) {
+        console.error('Error updating user plan in database:', dbError);
+        return res.redirect('/?error=plan_update_failed');
+      }
 
     } catch (error) {
       console.error('Error processing subscription success:', error);
-      return res.redirect('/sign-in-clerk?error=subscription_processing_failed');
+      return res.redirect('/?error=subscription_processing_failed');
     }
   });
 
