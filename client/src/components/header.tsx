@@ -429,11 +429,11 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={user?.profileImageUrl} alt={user?.firstName || "User"} />
                   <AvatarFallback className="bg-primary text-white">
-                    J
+                    {user?.firstName?.[0] || user?.email?.[0] || "U"}
                   </AvatarFallback>
                 </Avatar>
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden lg:block">
-                  Jan Milata
+                  {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user?.email}
                 </span>
                 <ChevronDown className="h-4 w-4 text-gray-500 hidden lg:block" />
               </Button>
