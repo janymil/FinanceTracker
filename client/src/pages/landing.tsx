@@ -643,10 +643,10 @@ export default function Landing() {
             
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Is there a free trial for paid plans?
+                What payment methods do you accept?
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Yes, both Standard and Premium plans come with a 7-day free trial. No credit card required to start.
+                We accept all major credit cards including Visa, MasterCard, American Express, and Discover. All payments are processed securely through Stripe.
               </p>
             </div>
             
