@@ -1,4 +1,5 @@
 import puppeteer from 'puppeteer';
+import { PDF_TEMPLATE, BUDGETS_SECTION_TEMPLATE, GOALS_SECTION_TEMPLATE } from './pdfTemplate.js';
 
 interface PDFData {
   transactions: Array<{

@@ -1,4 +1,4 @@
-import { generatePdfReport } from './server/generatePdf.js';
+import { generatePdfReport } from './server/generatePdf.ts';
 import fs from 'fs';
 
 // Test data similar to what the application would generate
