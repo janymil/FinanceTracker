@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
+import UpgradeBanner from "@/components/upgrade-banner";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -476,8 +477,13 @@ export default function Expenses() {
                     </Select>
                   </div>
 
+                  {/* Show upgrade banner for free users */}
+                  {user?.plan === "free" && (
+                    <UpgradeBanner message="Unlock recurring expenses, smart bill assistant, and more advanced features" />
+                  )}
+
                   {/* Smart Bill Assistant - Standard/Premium only */}
-                  <RequirePlan plan="standard">
+                  {user?.plan !== "free" && (
                     <div className="space-y-4 border-t pt-4">
                       <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         Smart Bill Assistant
@@ -508,10 +514,10 @@ export default function Expenses() {
                         </p>
                       </div>
                     </div>
-                  </RequirePlan>
+                  )}
 
                   {/* Recurring transaction options - Standard/Premium only */}
-                  <RequirePlan plan="standard">
+                  {user?.plan !== "free" && (
                     <div className="space-y-4 border-t pt-4">
                       <div className="flex items-center space-x-2">
                         <Checkbox
@@ -563,7 +569,7 @@ export default function Expenses() {
                         </div>
                       )}
                     </div>
-                  </RequirePlan>
+                  )}
 
                   <div className="flex justify-end gap-2 pt-4">
                     <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
