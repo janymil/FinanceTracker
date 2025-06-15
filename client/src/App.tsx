@@ -50,27 +50,28 @@ const AppLoader = () => (
 );
 
 function AppContent() {
-  const { user, isLoading, error } = useAuth();
+  const { user, isLoading, isUnauthenticated } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Show optimized loading state
+  // Show loading state
   if (isLoading) {
     return <AppLoader />;
   }
 
-  // List of public routes that don't require authentication
+  // Public routes for guest users
   const publicRoutes = ['/', '/pricing', '/privacy-policy', '/terms-of-service', '/cookie-policy', '/contact', '/help'];
-  const isPublicRoute = publicRoutes.includes(window.location.pathname);
+  const currentPath = window.location.pathname;
+  const isOnPublicRoute = publicRoutes.includes(currentPath);
 
-  // If there's an authentication error but we're on a protected route, redirect to login
-  if (error && !user && !isPublicRoute) {
+  // If clearly unauthenticated and on a protected route, redirect to login
+  if (isUnauthenticated && !isOnPublicRoute) {
     window.location.href = '/api/login';
     return <AppLoader />;
   }
 
-  // Guest user routes
-  if (!user) {
+  // Show guest routes if no user and on public route OR while authentication is uncertain
+  if (!user && (isOnPublicRoute || !isUnauthenticated)) {
     return (
       <>
         <Switch>
