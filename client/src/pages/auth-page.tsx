@@ -1,34 +1,91 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
-import { DollarSign, TrendingUp, Shield } from "lucide-react";
+import { Loader2, DollarSign, TrendingUp, Shield } from "lucide-react";
+
+const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(1, "Password is required"),
+});
+
+const registerSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  plan: z.string().optional(),
+  stripeCustomerId: z.string().optional(),
+  stripeSubscriptionId: z.string().optional(),
+});
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
-  const { user } = useAuth();
+  const { user, loginMutation, registerMutation } = useAuth();
+  const [activeTab, setActiveTab] = useState("register");
 
   // Extract URL parameters from Stripe redirect
   const urlParams = new URLSearchParams(window.location.search);
   const selectedPlan = urlParams.get('plan') || 'free';
   const stripeSuccess = urlParams.get('success') === 'true';
+  const stripeCustomer = urlParams.get('customer');
+  const stripeSubscription = urlParams.get('subscription');
   const error = urlParams.get('error');
 
+  const loginForm = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const registerForm = useForm({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      firstName: "",
+      lastName: "",
+      plan: selectedPlan,
+    },
+  });
+
   // Redirect if already logged in
-  useEffect(() => {
-    if (user) {
-      setLocation("/");
-    }
-  }, [user, setLocation]);
-
-  const handleSignIn = () => {
-    window.location.href = "/api/login";
-  };
-
   if (user) {
+    setLocation("/");
     return null;
   }
+
+  const onLogin = (data: z.infer<typeof loginSchema>) => {
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        setLocation("/");
+      },
+    });
+  };
+
+  const onRegister = (data: z.infer<typeof registerSchema>) => {
+    const registrationData = {
+      ...data,
+      plan: selectedPlan,
+      stripeCustomerId: stripeCustomer,
+      stripeSubscriptionId: stripeSubscription,
+    };
+
+    registerMutation.mutate(registrationData, {
+      onSuccess: () => {
+        setLocation("/");
+      },
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
@@ -93,7 +150,7 @@ export default function AuthPage() {
                      'There was an error processing your request'}
                   </span>
                 ) : (
-                  'Sign in with your Replit account to get started'
+                  'Create an account or sign in to get started'
                 )}
               </CardDescription>
               {stripeSuccess && selectedPlan && (
@@ -105,26 +162,123 @@ export default function AuthPage() {
               )}
             </CardHeader>
             <CardContent>
-              <Button 
-                onClick={handleSignIn}
-                className="w-full"
-                size="lg"
-              >
-                Sign In with Replit
-              </Button>
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="login">Sign In</TabsTrigger>
+                  <TabsTrigger value="register">Sign Up</TabsTrigger>
+                </TabsList>
 
-              <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-                <p>
-                  By signing in, you agree to our{" "}
-                  <a href="/terms" className="underline hover:text-gray-900 dark:hover:text-gray-200">
-                    Terms of Service
-                  </a>{" "}
-                  and{" "}
-                  <a href="/privacy" className="underline hover:text-gray-900 dark:hover:text-gray-200">
-                    Privacy Policy
-                  </a>
-                </p>
-              </div>
+                <TabsContent value="login">
+                  <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="login-email">Email</Label>
+                      <Input
+                        id="login-email"
+                        type="email"
+                        {...loginForm.register("email")}
+                        placeholder="Enter your email"
+                      />
+                      {loginForm.formState.errors.email && (
+                        <p className="text-sm text-red-600">{loginForm.formState.errors.email.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="login-password">Password</Label>
+                      <Input
+                        id="login-password"
+                        type="password"
+                        {...loginForm.register("password")}
+                        placeholder="Enter your password"
+                      />
+                      {loginForm.formState.errors.password && (
+                        <p className="text-sm text-red-600">{loginForm.formState.errors.password.message}</p>
+                      )}
+                    </div>
+
+                    <Button 
+                      type="submit" 
+                      className="w-full"
+                      disabled={loginMutation.isPending}
+                    >
+                      {loginMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Signing In...
+                        </>
+                      ) : (
+                        "Sign In"
+                      )}
+                    </Button>
+                  </form>
+                </TabsContent>
+
+                <TabsContent value="register">
+                  <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
+
+                    <div className="space-y-2">
+                      <Label htmlFor="register-email">Email</Label>
+                      <Input
+                        id="register-email"
+                        type="email"
+                        {...registerForm.register("email")}
+                        placeholder="Enter your email"
+                      />
+                      {registerForm.formState.errors.email && (
+                        <p className="text-sm text-red-600">{registerForm.formState.errors.email.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="register-password">Password</Label>
+                      <Input
+                        id="register-password"
+                        type="password"
+                        {...registerForm.register("password")}
+                        placeholder="Create a password"
+                      />
+                      {registerForm.formState.errors.password && (
+                        <p className="text-sm text-red-600">{registerForm.formState.errors.password.message}</p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="register-firstName">First Name</Label>
+                        <Input
+                          id="register-firstName"
+                          {...registerForm.register("firstName")}
+                          placeholder="First name"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="register-lastName">Last Name</Label>
+                        <Input
+                          id="register-lastName"
+                          {...registerForm.register("lastName")}
+                          placeholder="Last name"
+                        />
+                      </div>
+                    </div>
+
+                    <Button 
+                      type="submit" 
+                      className="w-full"
+                      disabled={registerMutation.isPending}
+                    >
+                      {registerMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating Account...
+                        </>
+                      ) : (
+                        "Create Account"
+                      )}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </div>

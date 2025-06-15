@@ -13,7 +13,7 @@ const getEncryptionKey = (): Buffer => {
 };
 
 const ENCRYPTION_KEY = getEncryptionKey();
-const ALGORITHM = 'aes-256-ctr';
+const ALGORITHM = 'aes-256-gcm';
 
 export class DataEncryption {
   static encrypt(text: string): string {

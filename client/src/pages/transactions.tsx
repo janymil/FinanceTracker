@@ -43,6 +43,8 @@ interface Transaction {
   isRecurring?: boolean;
   recurringFrequency?: "weekly" | "monthly" | "yearly";
   recurringEndDate?: string;
+  paymentUrl?: string;
+  referenceNote?: string;
 }
 
 interface Category {
@@ -73,6 +75,8 @@ export default function Transactions() {
     isRecurring: false,
     recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
     recurringEndDate: "",
+    paymentUrl: "",
+    referenceNote: "",
   });
 
   const { data: transactions = [], isLoading } = useQuery({
@@ -108,6 +112,8 @@ export default function Transactions() {
         isRecurring: false,
         recurringFrequency: "monthly",
         recurringEndDate: "",
+        paymentUrl: "",
+        referenceNote: "",
       });
       toast({
         title: "Transaction Added",
@@ -268,21 +274,18 @@ export default function Transactions() {
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
-    
-    // Find the category ID from the transaction's category name
-    const matchingCategory = (categories as Category[]).find(
-      cat => cat.name === transaction.categoryName
-    );
-    
+    const categoryId = categories.find(cat => cat.name === transaction.categoryName)?.id?.toString() || "";
     setNewTransaction({
       amount: transaction.amount,
       description: transaction.description,
       date: transaction.date,
       type: transaction.type,
-      categoryId: matchingCategory ? matchingCategory.id.toString() : "",
+      categoryId: categoryId,
       isRecurring: transaction.isRecurring || false,
-      recurringFrequency: (transaction.recurringFrequency as "weekly" | "monthly" | "yearly") || "monthly",
-      recurringEndDate: transaction.recurringEndDate ? new Date(transaction.recurringEndDate).toISOString().split('T')[0] : "",
+      recurringFrequency: transaction.recurringFrequency || "monthly",
+      recurringEndDate: transaction.recurringEndDate || "",
+      paymentUrl: transaction.paymentUrl || "",
+      referenceNote: transaction.referenceNote || "",
     });
     setIsDialogOpen(true);
   };
@@ -327,6 +330,8 @@ export default function Transactions() {
                       isRecurring: false,
                       recurringFrequency: "monthly",
                       recurringEndDate: "",
+                      paymentUrl: "",
+                      referenceNote: "",
                     });
                   }}
                 >
@@ -685,15 +690,6 @@ export default function Transactions() {
                             <>
                               <span>•</span>
                               <Badge variant="outline">{transaction.categoryName}</Badge>
-                            </>
-                          )}
-                          {transaction.isRecurring && (
-                            <>
-                              <span>•</span>
-                              <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                                <Repeat className="h-3 w-3 mr-1" />
-                                Recurring
-                              </Badge>
                             </>
                           )}
                         </div>

@@ -1,68 +1,119 @@
-import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Plus, Search, Calendar, Settings, User, LogOut, Crown } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { 
+  Crown, 
+  ChevronDown, 
+  User, 
+  Settings, 
+  LogOut, 
+  Menu,
+  Plus,
+  Bell,
+  Search,
+  Repeat,
+  HelpCircle
+} from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import RequirePlan from "@/components/require-plan";
+import { Link } from "wouter";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 
-interface NewTransaction {
-  amount: number;
-  description: string;
-  date: string;
+interface Category {
+  id: number;
+  name: string;
+  icon: string;
+  color: string;
   type: "income" | "expense";
-  categoryId: string;
-  isRecurring: boolean;
-  recurringFrequency: "weekly" | "monthly" | "yearly";
-  recurringEndDate: string;
 }
 
-export default function Header() {
-  const { user, logoutMutation } = useAuth();
-  const [, setLocation] = useLocation();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newTransaction, setNewTransaction] = useState<NewTransaction>({
-    amount: 0,
-    description: "",
-    date: new Date().toISOString().split('T')[0],
-    type: "expense",
-    categoryId: "",
-    isRecurring: false,
-    recurringFrequency: "monthly",
-    recurringEndDate: "",
+async function apiRequest(method: string, url: string, data?: any) {
+  const response = await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: data ? JSON.stringify(data) : undefined,
   });
 
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(error || "Network error");
+  }
+
+  return response;
+}
+
+interface HeaderProps {
+  onMenuClick: () => void;
+  sidebarCollapsed: boolean;
+}
+
+export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const [newTransaction, setNewTransaction] = useState({
+    amount: "",
+    description: "",
+    date: new Date().toISOString().split('T')[0],
+    type: "expense" as "income" | "expense",
+    categoryId: "",
+    isRecurring: false,
+    recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
+    recurringEndDate: "",
+    paymentUrl: "",
+    referenceNote: "",
+  });
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["/api/categories"],
+    enabled: !!user,
+  });
 
   const createTransactionMutation = useMutation({
-    mutationFn: async (transaction: NewTransaction) => {
-      const response = await fetch("/api/transactions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(transaction),
+    mutationFn: async (transactionData: typeof newTransaction) => {
+      const res = await apiRequest("POST", "/api/transactions", {
+        ...transactionData,
+        amount: parseFloat(transactionData.amount),
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to create transaction");
-      }
-
-      return response.json();
+      return await res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       setIsDialogOpen(false);
       setNewTransaction({
-        amount: 0,
+        amount: "",
         description: "",
         date: new Date().toISOString().split('T')[0],
         type: "expense",
@@ -70,169 +121,250 @@ export default function Header() {
         isRecurring: false,
         recurringFrequency: "monthly",
         recurringEndDate: "",
+        paymentUrl: "",
+        referenceNote: "",
+      });
+      toast({
+        title: "Transaction Added",
+        description: "Transaction has been created successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
       });
     },
   });
 
   const handleSubmit = () => {
-    if (newTransaction.amount && newTransaction.description) {
-      createTransactionMutation.mutate(newTransaction);
+    if (!newTransaction.amount || !newTransaction.description) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
     }
+    createTransactionMutation.mutate(newTransaction);
   };
 
-  const handleLogout = () => {
-    logoutMutation.mutate();
-  };
 
-  const handleProfile = () => {
-    setLocation("/profile");
-  };
-
-  const handleSettings = () => {
-    setLocation("/profile");
-  };
-
-  const getUserInitials = (user: any) => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
-    }
-    if (user?.email) {
-      return user.email[0].toUpperCase();
-    }
-    return "U";
-  };
-
-  const getUserDisplayName = (user: any) => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName} ${user.lastName}`;
-    }
-    if (user?.email) {
-      return user.email;
-    }
-    return "User";
-  };
 
   return (
-    <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-      <div className="flex items-center justify-between">
-        {/* Left side - Quick add transaction */}
+    <header className={cn(
+      "bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 h-16 fixed top-0 right-0 z-40 transition-all duration-300",
+      sidebarCollapsed ? "lg:left-16" : "lg:left-64",
+      "left-0"
+    )}>
+      <div className="flex items-center justify-between h-full px-4">
+        {/* Left side - Mobile menu button and quick actions */}
         <div className="flex items-center space-x-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onMenuClick}
+            className="lg:hidden"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+
+          {/* Quick add transaction button */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
+              <Button 
+                size="sm" 
+                className="bg-primary hover:bg-primary/90"
+                onClick={() => {
+                  setNewTransaction({
+                    amount: "",
+                    description: "",
+                    date: new Date().toISOString().split('T')[0],
+                    type: "expense",
+                    categoryId: "",
+                    isRecurring: false,
+                    recurringFrequency: "monthly",
+                    recurringEndDate: "",
+                    paymentUrl: "",
+                    referenceNote: "",
+                  });
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
                 Add Transaction
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add New Transaction</DialogTitle>
+                <DialogDescription>
+                  Record a new income or expense transaction
+                </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4 py-4">
+
+              <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                  <div>
                     <Label htmlFor="amount">Amount</Label>
                     <Input
                       id="amount"
                       type="number"
+                      step="0.01"
+                      value={newTransaction.amount}
+                      onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })}
                       placeholder="0.00"
-                      value={newTransaction.amount || ""}
-                      onChange={(e) => setNewTransaction({ ...newTransaction, amount: parseFloat(e.target.value) || 0 })}
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div>
+                    <Label htmlFor="date">Date</Label>
+                    <Input
+                      id="date"
+                      type="date"
+                      value={newTransaction.date}
+                      onChange={(e) => setNewTransaction({ ...newTransaction, date: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={newTransaction.description}
+                    onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })}
+                    placeholder="What was this transaction for?"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
                     <Label htmlFor="type">Type</Label>
-                    <Select value={newTransaction.type} onValueChange={(value: "income" | "expense") => setNewTransaction({ ...newTransaction, type: value })}>
+                    <Select
+                      value={newTransaction.type}
+                      onValueChange={(value: "income" | "expense") => 
+                        setNewTransaction({ ...newTransaction, type: value })
+                      }
+                    >
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="expense">Expense</SelectItem>
                         <SelectItem value="income">Income</SelectItem>
+                        <SelectItem value="expense">Expense</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="category">Category</Label>
+                    <Select
+                      value={newTransaction.categoryId}
+                      onValueChange={(value) => setNewTransaction({ ...newTransaction, categoryId: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(categories as Category[])
+                          .filter((cat: Category) => cat.type === newTransaction.type)
+                          .map((category: Category) => (
+                            <SelectItem key={category.id} value={category.id.toString()}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Input
-                    id="description"
-                    placeholder="Transaction description"
-                    value={newTransaction.description}
-                    onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })}
-                  />
-                </div>
+                {/* Premium Features - Standard/Premium only */}
+                <RequirePlan plan="standard">
+                  <div className="space-y-4 border-t pt-4">
+                    {/* Smart Bill Assistant - for expenses only */}
+                    {newTransaction.type === "expense" && (
+                      <div className="space-y-4">
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Smart Bill Assistant
+                        </div>
+                        <div>
+                          <Label htmlFor="paymentUrl">Payment URL (Optional)</Label>
+                          <Input
+                            id="paymentUrl"
+                            type="url"
+                            value={newTransaction.paymentUrl}
+                            onChange={(e) => setNewTransaction({ ...newTransaction, paymentUrl: e.target.value })}
+                            placeholder="https://example.com/pay"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Link to where you can pay this bill
+                          </p>
+                        </div>
+                        <div>
+                          <Label htmlFor="referenceNote">Reference Note (Optional)</Label>
+                          <Input
+                            id="referenceNote"
+                            value={newTransaction.referenceNote}
+                            onChange={(e) => setNewTransaction({ ...newTransaction, referenceNote: e.target.value })}
+                            placeholder="Invoice number, account reference, etc."
+                          />
+                        </div>
+                      </div>
+                    )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="date">Date</Label>
-                  <Input
-                    id="date"
-                    type="date"
-                    value={newTransaction.date}
-                    onChange={(e) => setNewTransaction({ ...newTransaction, date: e.target.value })}
-                  />
-                </div>
+                    {/* Recurring transaction options */}
+                    <div className={newTransaction.type === "expense" ? "border-t pt-4 space-y-4" : "space-y-4"}>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="recurring"
+                          checked={newTransaction.isRecurring}
+                          onCheckedChange={(checked) => 
+                            setNewTransaction({ ...newTransaction, isRecurring: checked as boolean })
+                          }
+                        />
+                        <label htmlFor="recurring" className="flex items-center text-sm font-medium">
+                          <Repeat className="h-4 w-4 mr-2" />
+                          Make this a recurring transaction
+                        </label>
+                      </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="categoryId">Category (Optional)</Label>
-                  <Select value={newTransaction.categoryId} onValueChange={(value) => setNewTransaction({ ...newTransaction, categoryId: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">No category</SelectItem>
-                      <SelectItem value="1">Food</SelectItem>
-                      <SelectItem value="2">Entertainment</SelectItem>
-                      <SelectItem value="3">Housing</SelectItem>
-                      <SelectItem value="4">Transportation</SelectItem>
-                      <SelectItem value="5">Healthcare</SelectItem>
-                      <SelectItem value="6">Shopping</SelectItem>
-                      <SelectItem value="7">Salary</SelectItem>
-                      <SelectItem value="8">Freelance</SelectItem>
-                      <SelectItem value="9">Investments</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="recurring"
-                    checked={newTransaction.isRecurring}
-                    onCheckedChange={(checked) => setNewTransaction({ ...newTransaction, isRecurring: checked })}
-                  />
-                  <Label htmlFor="recurring">Recurring transaction</Label>
-                  {user?.plan === 'free' && (
-                    <Badge variant="outline" className="ml-2">Premium</Badge>
-                  )}
-                </div>
-
-                {newTransaction.isRecurring && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="frequency">Frequency</Label>
-                      <Select value={newTransaction.recurringFrequency} onValueChange={(value: "weekly" | "monthly" | "yearly") => setNewTransaction({ ...newTransaction, recurringFrequency: value })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="weekly">Weekly</SelectItem>
-                          <SelectItem value="monthly">Monthly</SelectItem>
-                          <SelectItem value="yearly">Yearly</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="endDate">End Date (Optional)</Label>
-                      <Input
-                        id="endDate"
-                        type="date"
-                        value={newTransaction.recurringEndDate}
-                        onChange={(e) => setNewTransaction({ ...newTransaction, recurringEndDate: e.target.value })}
-                      />
+                      {newTransaction.isRecurring && (
+                        <div className="grid grid-cols-2 gap-4 pl-6">
+                          <div>
+                            <Label htmlFor="frequency">Frequency</Label>
+                            <Select
+                              value={newTransaction.recurringFrequency}
+                              onValueChange={(value) => setNewTransaction({ 
+                                ...newTransaction, 
+                                recurringFrequency: value as "weekly" | "monthly" | "yearly" 
+                              })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select frequency" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="weekly">Weekly</SelectItem>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                                <SelectItem value="yearly">Yearly</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label htmlFor="endDate">End Date (Optional)</Label>
+                            <Input
+                              id="endDate"
+                              type="date"
+                              value={newTransaction.recurringEndDate}
+                              onChange={(e) => setNewTransaction({ 
+                                ...newTransaction, 
+                                recurringEndDate: e.target.value 
+                              })}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
+                </RequirePlan>
 
                 <div className="flex justify-end gap-2 pt-4">
                   <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
@@ -269,46 +401,77 @@ export default function Header() {
             <Search className="h-4 w-4" />
           </Button>
 
-          {/* Premium badge */}
-          {user?.plan && user.plan !== 'free' && (
-            <Badge variant="secondary" className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0">
+          {/* Notifications */}
+          <Button variant="ghost" size="sm" className="relative">
+            <Bell className="h-4 w-4" />
+            <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
+          </Button>
+
+          {/* Premium status */}
+          {user?.plan === 'premium' ? (
+            <Badge className="bg-premium text-white hidden sm:flex">
               <Crown className="h-3 w-3 mr-1" />
-              {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}
+              Premium
             </Badge>
+          ) : (
+            <Link href="/subscribe">
+              <Button size="sm" className="bg-premium hover:bg-premium/90 text-white hidden sm:flex">
+                <Crown className="h-4 w-4 mr-1" />
+                Upgrade
+              </Button>
+            </Link>
           )}
 
-          {/* User menu */}
+          {/* User dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+              <Button variant="ghost" className="flex items-center space-x-2 h-auto p-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.profileImageUrl || ""} alt={getUserDisplayName(user)} />
-                  <AvatarFallback>{getUserInitials(user)}</AvatarFallback>
+                  <AvatarImage src={user?.profileImageUrl} alt={user?.firstName || "User"} />
+                  <AvatarFallback className="bg-primary text-white">
+                    {user?.firstName?.[0] || user?.email?.[0] || "U"}
+                  </AvatarFallback>
                 </Avatar>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden lg:block">
+                  {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user?.email}
+                </span>
+                <ChevronDown className="h-4 w-4 text-gray-500 hidden lg:block" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{getUserDisplayName(user)}</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-56">
+              <div className="px-2 py-1.5">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user?.email}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {user?.email}
+                </p>
+              </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleProfile}>
-                <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
+              <DropdownMenuItem asChild>
+                <Link href="/profile">
+                  <User className="h-4 w-4 mr-2" />
+                  Profile & Account Configuration
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleSettings}>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
+              <DropdownMenuItem asChild>
+                <Link href="/help">
+                  <HelpCircle className="h-4 w-4 mr-2" />
+                  Help & Documentation
+                </Link>
               </DropdownMenuItem>
+              {user?.plan !== 'premium' && (
+                <DropdownMenuItem asChild>
+                  <Link href="/subscribe">
+                    <Crown className="h-4 w-4 mr-2" />
+                    Upgrade to Premium
+                  </Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+              <DropdownMenuItem onClick={() => window.location.href = '/api/logout'}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
