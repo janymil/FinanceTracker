@@ -108,16 +108,7 @@ export default function Dashboard() {
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString()
       });
-      const response = await fetch(`/api/financial-summary?${params}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        console.error('Financial summary API error:', response.status, response.statusText);
-        throw new Error(`Failed to fetch financial summary: ${response.status}`);
-      }
+      const response = await apiRequest("GET", `/api/financial-summary?${params}`);
       return response.json();
     },
     enabled: !!user && !!transactions, // Wait for transactions first
