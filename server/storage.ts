@@ -666,7 +666,7 @@ export class DatabaseStorage implements IStorage {
     return results;
   }
 
-  async getUpcomingTransactionReminders(userId: string, daysAhead: number = 7): Promise<Array<{
+  async getUpcomingTransactionReminders(userId: number, daysAhead: number = 7): Promise<Array<{
     id: string;
     title: string;
     description: string;

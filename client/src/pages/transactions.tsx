@@ -40,11 +40,6 @@ interface Transaction {
   categoryName?: string;
   categoryIcon?: string;
   categoryColor?: string;
-  isRecurring?: boolean;
-  recurringFrequency?: "weekly" | "monthly" | "yearly";
-  recurringEndDate?: string;
-  paymentUrl?: string;
-  referenceNote?: string;
 }
 
 interface Category {
@@ -75,8 +70,6 @@ export default function Transactions() {
     isRecurring: false,
     recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
     recurringEndDate: "",
-    paymentUrl: "",
-    referenceNote: "",
   });
 
   const { data: transactions = [], isLoading } = useQuery({
@@ -112,8 +105,6 @@ export default function Transactions() {
         isRecurring: false,
         recurringFrequency: "monthly",
         recurringEndDate: "",
-        paymentUrl: "",
-        referenceNote: "",
       });
       toast({
         title: "Transaction Added",
@@ -274,18 +265,15 @@ export default function Transactions() {
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
-    const categoryId = categories.find(cat => cat.name === transaction.categoryName)?.id?.toString() || "";
     setNewTransaction({
       amount: transaction.amount,
       description: transaction.description,
       date: transaction.date,
       type: transaction.type,
-      categoryId: categoryId,
-      isRecurring: transaction.isRecurring || false,
-      recurringFrequency: transaction.recurringFrequency || "monthly",
-      recurringEndDate: transaction.recurringEndDate || "",
-      paymentUrl: transaction.paymentUrl || "",
-      referenceNote: transaction.referenceNote || "",
+      categoryId: "", // You'd need to map category name to ID
+      isRecurring: false,
+      recurringFrequency: "monthly",
+      recurringEndDate: "",
     });
     setIsDialogOpen(true);
   };
@@ -330,8 +318,6 @@ export default function Transactions() {
                       isRecurring: false,
                       recurringFrequency: "monthly",
                       recurringEndDate: "",
-                      paymentUrl: "",
-                      referenceNote: "",
                     });
                   }}
                 >

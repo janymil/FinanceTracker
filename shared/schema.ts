@@ -71,7 +71,7 @@ export const transactions = pgTable("transactions", {
 // Recurring transactions table (separate for cleaner implementation)
 export const recurringTransactions = pgTable("recurring_transactions", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: integer("user_id").notNull().references(() => users.id),
   categoryId: integer("category_id").references(() => categories.id),
   amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
   description: text("description").notNull(),
@@ -87,7 +87,7 @@ export const recurringTransactions = pgTable("recurring_transactions", {
 // Budget categories
 export const budgets = pgTable("budgets", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: integer("user_id").notNull().references(() => users.id),
   categoryId: integer("category_id").references(() => categories.id),
   amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
   period: varchar("period", { length: 20 }).notNull(), // 'monthly', 'yearly'
@@ -99,7 +99,7 @@ export const budgets = pgTable("budgets", {
 // Expense reminders for future and recurring payments
 export const expenseReminders = pgTable("expense_reminders", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: integer("user_id").notNull().references(() => users.id),
   categoryId: integer("category_id").references(() => categories.id),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
