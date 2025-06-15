@@ -139,6 +139,7 @@ function AppContent() {
           </div>
         </main>
       </div>
+      <FinancialMascot />
       <CookieBanner />
     </div>
   );

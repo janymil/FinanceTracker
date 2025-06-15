@@ -3229,7 +3229,7 @@ Keep responses helpful, concise, and focused on FinanzerPro features. If asked a
         worried: "anxious, stressed, but cute and sympathetic, needing encouragement"
       };
 
-      const prompt = `A cute, friendly financial advisor mascot character that is ${personalityTraits[mood]}. The character should be a small, adorable creature (like a mix between a piggy bank and a friendly animal) with expressive eyes. The style should be modern, clean, and professional but approachable. The character represents someone's financial health and should look ${mood}. Background should be simple and clean. Digital art style, high quality, 3D rendered look.`;
+      const prompt = `A cute, friendly financial advisor mascot character that is ${personalityTraits[mood as keyof typeof personalityTraits]}. The character should be a small, adorable creature (like a mix between a piggy bank and a friendly animal) with expressive eyes. The style should be modern, clean, and professional but approachable. The character represents someone's financial health and should look ${mood}. Background should be simple and clean. Digital art style, high quality, 3D rendered look.`;
 
       // Generate image using DALL-E 3
       const OpenAI = require('openai');
