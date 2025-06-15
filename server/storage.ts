@@ -166,30 +166,49 @@ export class DatabaseStorage implements IStorage {
     return newUser;
   }
 
-  async upsertUser(user: any): Promise<User> {
+  async upsertUser(userData: any): Promise<User> {
+    console.log("Storage upsertUser called with:", userData);
     try {
       // Try to insert new user first
       const [newUser] = await db
         .insert(users)
-        .values(user)
+        .values({
+          id: userData.id,
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          profileImageUrl: userData.profileImageUrl,
+          plan: userData.plan || 'free',
+          stripeCustomerId: userData.stripeCustomerId,
+          stripeSubscriptionId: userData.stripeSubscriptionId,
+          settings: userData.settings,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
         .returning();
+      console.log("User inserted successfully:", newUser);
       return newUser;
     } catch (error: any) {
+      console.log("Insert failed with error:", error);
       // If it's a constraint violation (user already exists), update instead
-      if (error.code === '23505') {
+      if (error.code === '23505' || error.message?.includes('duplicate key')) {
+        console.log("User exists, updating instead");
         const [existingUser] = await db
           .update(users)
           .set({
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            profileImageUrl: user.profileImageUrl,
+            email: userData.email,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            profileImageUrl: userData.profileImageUrl,
+            plan: userData.plan || 'free',
             updatedAt: new Date(),
           })
-          .where(eq(users.id, user.id))
+          .where(eq(users.id, userData.id))
           .returning();
+        console.log("User updated successfully:", existingUser);
         return existingUser;
       }
+      console.error("Upsert failed with unexpected error:", error);
       throw error;
     }
   }
