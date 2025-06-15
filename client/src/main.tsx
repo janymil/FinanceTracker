@@ -15,7 +15,6 @@ createRoot(document.getElementById("root")!).render(
     fallbackRedirectUrl="/"
     signInUrl="/auth"
     signUpUrl="/auth"
-    afterSignOutUrl="/"
   >
     <App />
   </ClerkProvider>
