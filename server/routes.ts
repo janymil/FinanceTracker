@@ -259,7 +259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/budgets/:id', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -295,7 +295,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Goals routes
   app.get('/api/goals', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -312,7 +312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/goals', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -343,7 +343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/goals/:id', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -371,7 +371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/goals/:id', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -444,7 +444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Expense breakdown for current month
   app.get('/api/expense-breakdown', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       
       // Get current month date range
       const now = new Date();
@@ -475,7 +475,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update user plan
   app.post('/api/update-plan', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const { plan } = req.body;
 
       if (!plan || !['free', 'standard', 'premium'].includes(plan)) {
@@ -498,7 +498,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const { plan = 'premium' } = req.body;
       let user = await storage.getUser(userId);
 
@@ -684,7 +684,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auto-categorization endpoint for bulk processing
   app.post('/api/auto-categorize', requireAuth, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(req.auth.userId);
 
       // Require premium plan for auto-categorization
       if (!user || user.plan !== 'premium') {
@@ -692,7 +692,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get uncategorized transactions
-      const transactions = await storage.getUserTransactions(req.user.id);
+      const transactions = await storage.getUserTransactions(req.auth.userId);
       const uncategorized = transactions.filter(t => !t.categoryId);
 
       if (uncategorized.length === 0) {
@@ -731,7 +731,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Categorization endpoint
   app.post('/api/ai/categorize', requireAuth, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(req.auth.userId);
 
       // Require standard+ plan for AI categorization
       if (!user || !['standard', 'premium'].includes(user.plan || '')) {
@@ -755,7 +755,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Financial Tips endpoint - bypasses cache for fresh responses
   app.post('/api/ai/tip', requireAuth, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(req.auth.userId);
 
       // Require premium plan for AI tips
       if (!user || user.plan !== 'premium') {
@@ -766,8 +766,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentDate = new Date();
       const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
       
-      const financialSummary = await storage.getUserFinancialSummary(req.user.id, startOfYear, currentDate);
-      const transactions = await storage.getUserTransactions(req.user.id, 100);
+      const financialSummary = await storage.getUserFinancialSummary(req.auth.userId, startOfYear, currentDate);
+      const transactions = await storage.getUserTransactions(req.auth.userId, 100);
       const categories = await storage.getCategories();
 
       // Create category name mapping
@@ -790,7 +790,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: Date.now()
       };
 
-      console.log(`Generating fresh AI tip for user ${req.user.id} with ${transactions.length} transactions`);
+      console.log(`Generating fresh AI tip for user ${req.auth.userId} with ${transactions.length} transactions`);
       
       const tips = await generateFinancialTips(financialData);
       const tip = tips.length > 0 ? tips[0] : null;
@@ -818,14 +818,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Spending Insights endpoint
   app.get('/api/ai/insights', requireAuth, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(req.auth.userId);
 
       // Require premium plan for AI insights
       if (!user || user.plan !== 'premium') {
         return res.status(403).json({ message: "AI spending insights require premium plan" });
       }
 
-      const transactions = await storage.getUserTransactions(req.user.id, 100);
+      const transactions = await storage.getUserTransactions(req.auth.userId, 100);
 
       const insights = await generateSpendingInsights(transactions.map(t => ({
         description: t.description,
@@ -847,7 +847,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { summary, budgets, useAdvancedFactors } = req.body;
 
-      const transactions = await storage.getUserTransactions(req.user.id, 100);
+      const transactions = await storage.getUserTransactions(req.auth.userId, 100);
 
       const aiScore = await generateAIFinancialHealthScore({
         summary,
@@ -872,15 +872,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Trend Predictions (Premium only)
   app.get('/api/trend-predictions', requireAuth, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(req.auth.userId);
 
       if (!user || user.plan !== 'premium') {
         return res.status(403).json({ message: "AI trend predictions require Premium subscription" });
       }
 
-      const transactions = await storage.getUserTransactions(req.user.id, 200);
+      const transactions = await storage.getUserTransactions(req.auth.userId, 200);
       const categories = await storage.getCategories();
-      const budgets = await storage.getUserBudgets(req.user.id);
+      const budgets = await storage.getUserBudgets(req.auth.userId);
 
       const categoryMap = new Map();
       categories.forEach(cat => {
@@ -913,14 +913,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Automatic transaction reminders (Standard/Premium only)
   app.get('/api/transaction-reminders', requireAuth, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(req.auth.userId);
 
       if (!user || user.plan === 'free') {
         return res.status(403).json({ message: "Transaction reminders require Standard or Premium subscription" });
       }
 
       const daysAhead = req.query.days ? parseInt(req.query.days as string) : 7;
-      const reminders = await storage.getUpcomingTransactionReminders(req.user.id, daysAhead);
+      const reminders = await storage.getUpcomingTransactionReminders(req.auth.userId, daysAhead);
       res.json(reminders);
     } catch (error) {
       console.error("Error fetching transaction reminders:", error);
@@ -931,7 +931,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Expense Reminders API (Standard/Premium only) - Smart Bill Assistant feature
   app.post('/api/expense-reminders', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan === 'free') {
@@ -957,7 +957,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/expense-reminders', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan === 'free') {
@@ -974,7 +974,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/expense-reminders/upcoming', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan === 'free') {
@@ -992,7 +992,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/expense-reminders/:id', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan === 'free') {
@@ -1023,7 +1023,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/expense-reminders/:id', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan === 'free') {
@@ -1041,7 +1041,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/expense-reminders/:id/complete', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan === 'free') {
@@ -1060,7 +1060,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Data Import/Export endpoints (Premium only)
   app.post('/api/import/transactions', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan !== 'premium') {
@@ -1149,7 +1149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/export', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan !== 'premium') {
@@ -1255,7 +1255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/backup', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan !== 'premium') {
@@ -1306,7 +1306,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Backup settings endpoints
   app.get('/api/backup-settings', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan !== 'premium') {
@@ -1349,7 +1349,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/backup-settings', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan !== 'premium') {
@@ -1410,7 +1410,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/backup-status', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan !== 'premium') {
@@ -1479,7 +1479,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Cache management endpoints (admin/debugging)
   app.get('/api/admin/cache/stats', requireAuth, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(req.auth.userId);
 
       // Only allow premium users to view cache stats for now
       if (!user || user.plan !== 'premium') {
@@ -1496,7 +1496,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/cache/clear', requireAuth, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(req.auth.userId);
 
       // Only allow premium users to clear cache for now
       if (!user || user.plan !== 'premium') {
@@ -1519,7 +1519,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Profile management endpoints
   app.get('/api/profile', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user) {
@@ -1542,7 +1542,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/profile', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const { firstName, lastName, email, phone, website } = req.body;
 
       // Basic validation
@@ -1576,7 +1576,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/change-password', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const { currentPassword, newPassword } = req.body;
 
       if (!currentPassword || !newPassword) {
@@ -1600,7 +1600,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/user-settings', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const settings = await storage.getUserSettings(userId);
       
       res.json(settings || {
@@ -1632,7 +1632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/user-settings', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.auth.userId;
       const settings = req.body;
 
       await storage.updateUserSettings(userId, settings);
