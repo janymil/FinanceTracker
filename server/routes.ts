@@ -585,7 +585,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/financial-summary', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
-      
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
