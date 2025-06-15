@@ -327,13 +327,13 @@ export class DatabaseStorage implements IStorage {
         
         // Only update fields that are explicitly provided
         if (transaction.amount !== undefined) {
-            updateFields.amount = DataEncryption.encryptAmount(transaction.amount);
+            updateFields.amount = transaction.amount;
         }
         if (transaction.description !== undefined) {
-            updateFields.description = DataEncryption.encryptDescription(transaction.description);
+            updateFields.description = transaction.description;
         }
         if (transaction.referenceNote !== undefined) {
-            updateFields.referenceNote = DataEncryption.encrypt(transaction.referenceNote);
+            updateFields.referenceNote = transaction.referenceNote;
         }
         if (transaction.categoryId !== undefined) {
             updateFields.categoryId = transaction.categoryId;
@@ -363,12 +363,12 @@ export class DatabaseStorage implements IStorage {
             .where(and(eq(transactions.id, id), eq(transactions.userId, transaction.userId!)))
             .returning();
 
-        // Decrypt for return value
+        // Return value without decryption (encryption disabled)
         return {
             ...updatedTransaction,
-            amount: DataEncryption.decryptAmount(updatedTransaction.amount),
-            description: DataEncryption.decryptDescription(updatedTransaction.description),
-            referenceNote: updatedTransaction.referenceNote ? DataEncryption.decrypt(updatedTransaction.referenceNote) : null
+            amount: updatedTransaction.amount,
+            description: updatedTransaction.description,
+            referenceNote: updatedTransaction.referenceNote
         };
   }
 
