@@ -291,25 +291,31 @@ export default function CollaborativeGoalDetailPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {goal?.participants?.map((participant: any) => (
-              <div key={participant.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                <Avatar>
-                  <AvatarImage src={participant.user?.profileImageUrl || ''} />
-                  <AvatarFallback>
-                    {participant.user?.firstName?.[0] || '?'}{participant.user?.lastName?.[0] || ''}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <p className="font-medium text-sm">
-                    {participant.user?.firstName} {participant.user?.lastName}
-                  </p>
-                  <p className="text-xs text-muted-foreground">{participant.user?.email}</p>
-                  <Badge variant="outline" className="text-xs mt-1">
-                    {participant.role}
-                  </Badge>
+            {goal?.participants?.length > 0 ? (
+              goal.participants.map((participant: any) => (
+                <div key={participant.id} className="flex items-center space-x-3 p-3 border rounded-lg">
+                  <Avatar>
+                    <AvatarImage src={participant.user?.profileImageUrl || ''} />
+                    <AvatarFallback>
+                      {participant.user?.firstName?.[0] || '?'}{participant.user?.lastName?.[0] || ''}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">
+                      {participant.user?.firstName} {participant.user?.lastName}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{participant.user?.email}</p>
+                    <Badge variant="outline" className="text-xs mt-1">
+                      {participant.role}
+                    </Badge>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center text-muted-foreground py-8">
+                No participants yet
               </div>
-            ))}
+            )}
           </div>
         </CardContent>
       </Card>
@@ -342,7 +348,7 @@ export default function CollaborativeGoalDetailPage() {
                         <p className="text-xs text-muted-foreground">{contribution.note}</p>
                       )}
                       <p className="text-xs text-muted-foreground">
-                        {format(new Date(contribution.createdAt), 'MMM dd, yyyy')}
+                        {contribution.createdAt ? format(new Date(contribution.createdAt), 'MMM dd, yyyy') : 'No date'}
                       </p>
                     </div>
                   </div>
@@ -379,7 +385,7 @@ export default function CollaborativeGoalDetailPage() {
                     <p className="font-medium text-sm">{activity.title}</p>
                     <p className="text-xs text-muted-foreground">{activity.description}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {format(new Date(activity.createdAt), 'MMM dd, yyyy HH:mm')}
+                      {activity.createdAt ? format(new Date(activity.createdAt), 'MMM dd, yyyy HH:mm') : 'No date'}
                     </p>
                   </div>
                   {activity.amount && (
