@@ -209,6 +209,8 @@ Changelog:
 - June 15, 2025. Implemented comprehensive date field conversion helper to properly handle JSON serialization/deserialization of Date objects in backup/restore operations
 - June 15, 2025. Completed fully functional cloud backup and restore system with real Bunny.net CDN integration for premium users
 - June 15, 2025. PDF export system remains with existing Puppeteer infrastructure - left as-is per user preference
+- June 15, 2025. Fixed critical authentication bug - replaced all req.user.id instances with req.user?.claims?.sub throughout routes.ts
+- June 15, 2025. AI trend predictions endpoint now working correctly for premium users - Forecasts tab displays AI-powered financial predictions
 ```
 
 ## User Preferences

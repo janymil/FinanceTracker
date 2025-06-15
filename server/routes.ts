@@ -295,7 +295,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/budgets/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
       const user = await storage.getUser(userId);
 
       if (user?.plan === 'free') {
@@ -530,7 +534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Expense breakdown for current month
   app.get('/api/expense-breakdown', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       
       // Get current month date range
       const now = new Date();
@@ -561,7 +565,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update user plan
   app.post('/api/update-plan', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       const { plan } = req.body;
 
       if (!plan || !['free', 'standard', 'premium'].includes(plan)) {
@@ -584,7 +588,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       const { plan = 'premium' } = req.body;
       let user = await storage.getUser(userId);
 
@@ -770,7 +774,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auto-categorization endpoint for bulk processing
   app.post('/api/auto-categorize', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(req.user?.claims?.sub);
 
       // Require standard+ plan for auto-categorization
       if (!user || !['standard', 'premium'].includes(user.plan || '')) {
@@ -778,7 +782,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get uncategorized transactions
-      const transactions = await storage.getUserTransactions(req.user.id);
+      const transactions = await storage.getUserTransactions(req.user?.claims?.sub);
       const uncategorized = transactions.filter(t => !t.categoryId);
 
       if (uncategorized.length === 0) {
@@ -817,7 +821,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Categorization endpoint
   app.post('/api/ai/categorize', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(req.user?.claims?.sub);
 
       // Require standard+ plan for AI categorization
       if (!user || !['standard', 'premium'].includes(user.plan || '')) {
@@ -841,7 +845,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Financial Tips endpoint - bypasses cache for fresh responses
   app.post('/api/ai/tip', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(req.user?.claims?.sub);
 
       // Require premium plan for AI tips
       if (!user || user.plan !== 'premium') {
@@ -852,8 +856,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentDate = new Date();
       const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
       
-      const financialSummary = await storage.getUserFinancialSummary(req.user.id, startOfYear, currentDate);
-      const transactions = await storage.getUserTransactions(req.user.id, 100);
+      const financialSummary = await storage.getUserFinancialSummary(req.user?.claims?.sub, startOfYear, currentDate);
+      const transactions = await storage.getUserTransactions(req.user?.claims?.sub, 100);
       const categories = await storage.getCategories();
 
       // Create category name mapping
@@ -876,7 +880,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: Date.now()
       };
 
-      console.log(`Generating fresh AI tip for user ${req.user.id} with ${transactions.length} transactions`);
+      console.log(`Generating fresh AI tip for user ${req.user?.claims?.sub} with ${transactions.length} transactions`);
       
       const tips = await generateFinancialTips(financialData);
       const tip = tips.length > 0 ? tips[0] : null;
@@ -904,14 +908,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Spending Insights endpoint
   app.get('/api/ai/insights', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(req.user?.claims?.sub);
 
       // Require premium plan for AI insights
       if (!user || user.plan !== 'premium') {
         return res.status(403).json({ message: "AI spending insights require premium plan" });
       }
 
-      const transactions = await storage.getUserTransactions(req.user.id, 100);
+      const transactions = await storage.getUserTransactions(req.user?.claims?.sub, 100);
 
       const insights = await generateSpendingInsights(transactions.map(t => ({
         description: t.description,
@@ -933,7 +937,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { summary, budgets, useAdvancedFactors } = req.body;
 
-      const transactions = await storage.getUserTransactions(req.user.id, 100);
+      const transactions = await storage.getUserTransactions(req.user?.claims?.sub, 100);
 
       const aiScore = await generateAIFinancialHealthScore({
         summary,
@@ -1142,7 +1146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Expense Reminders API (Standard/Premium only) - Smart Bill Assistant feature
   app.post('/api/expense-reminders', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan === 'free') {
@@ -1168,7 +1172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/expense-reminders', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan === 'free') {
@@ -1185,7 +1189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/expense-reminders/upcoming', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan === 'free') {
@@ -1203,7 +1207,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/expense-reminders/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan === 'free') {
@@ -1234,7 +1238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/expense-reminders/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan === 'free') {
@@ -1252,7 +1256,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/expense-reminders/:id/complete', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan === 'free') {
@@ -1271,7 +1275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Data Import/Export endpoints (Premium only)
   app.post('/api/import/transactions', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan !== 'premium') {
@@ -1789,7 +1793,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Backup settings endpoints
   app.get('/api/backup-settings', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan !== 'premium') {
@@ -1832,7 +1836,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/backup-settings', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       const user = await storage.getUser(userId);
 
       if (!user || user.plan !== 'premium') {
@@ -2298,7 +2302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Profile management endpoints
   app.get('/api/profile', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       const user = await storage.getUser(userId);
 
       if (!user) {
@@ -2321,7 +2325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/profile', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       const { firstName, lastName, email, phone, website } = req.body;
 
       // Basic validation
@@ -2355,7 +2359,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/change-password', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       const { currentPassword, newPassword } = req.body;
 
       if (!currentPassword || !newPassword) {
@@ -2379,7 +2383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/user-settings', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       const settings = await storage.getUserSettings(userId);
       
       res.json(settings || {
@@ -2411,7 +2415,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/user-settings', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.claims?.sub;
       const settings = req.body;
 
       await storage.updateUserSettings(userId, settings);
