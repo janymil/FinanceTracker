@@ -998,8 +998,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Automatic transaction reminders (Standard/Premium only)
   app.get('/api/transaction-reminders', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
-      console.log(`Transaction reminders check - User: ${req.user.id}, User object:`, JSON.stringify(user, null, 2));
+      const userId = req.user?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "No user ID found" });
+      }
+
+      const user = await storage.getUser(userId);
+      console.log(`Transaction reminders check - User: ${userId}, User object:`, JSON.stringify(user, null, 2));
 
       if (!user || user.plan === 'free') {
         console.log(`Transaction reminders blocked - User plan: ${user?.plan}`);
@@ -1007,8 +1013,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const daysAhead = req.query.days ? parseInt(req.query.days as string) : 7;
-      const reminders = await storage.getUpcomingTransactionReminders(req.user.id, daysAhead);
-      console.log(`Found ${reminders.length} reminders for user ${req.user.id}`);
+      const reminders = await storage.getUpcomingTransactionReminders(userId, daysAhead);
+      console.log(`Found ${reminders.length} reminders for user ${userId}`);
       res.json(reminders);
     } catch (error) {
       console.error("Error fetching transaction reminders:", error);
