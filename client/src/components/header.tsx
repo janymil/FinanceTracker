@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
+import { useClerk } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -78,6 +79,7 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { user } = useAuth();
+  const { signOut } = useClerk();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -469,7 +471,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => window.location.href = '/api/logout'}>
+              <DropdownMenuItem onClick={() => signOut()}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
               </DropdownMenuItem>
