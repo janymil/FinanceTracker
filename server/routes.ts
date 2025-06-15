@@ -61,7 +61,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const clerkUser = auth?.user;
         const userData = {
           id: userId,
-          email: clerkUser?.emailAddresses?.[0]?.emailAddress || null,
+          email: clerkUser?.emailAddresses?.[0]?.emailAddress || `${userId}@clerk.user`,
           firstName: clerkUser?.firstName || null,
           lastName: clerkUser?.lastName || null,
           profileImageUrl: clerkUser?.imageUrl || null,

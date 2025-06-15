@@ -180,7 +180,7 @@ export class DatabaseStorage implements IStorage {
         .insert(users)
         .values({
           id: userData.id,
-          email: userData.email,
+          email: userData.email || `${userData.id}@clerk.user`, // Fallback email for Clerk users
           firstName: userData.firstName,
           lastName: userData.lastName,
           profileImageUrl: userData.profileImageUrl,
@@ -194,16 +194,27 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return newUser;
     } catch (error: any) {
-      // If it's a constraint violation (user already exists), just fetch the existing user
+      // If it's a constraint violation (user already exists), fetch and potentially update the existing user
       if (error.code === '23505' || error.message?.includes('duplicate key')) {
         const [existingUser] = await db.select().from(users).where(eq(users.id, userData.id));
         if (existingUser) {
+          // Update existing user if needed (e.g., if email is missing)
+          if (!existingUser.email || existingUser.email.endsWith('@clerk.user')) {
+            const emailToUse = userData.email || `${userData.id}@clerk.user`;
+            const [updatedUser] = await db
+              .update(users)
+              .set({
+                email: emailToUse,
+                firstName: userData.firstName || existingUser.firstName,
+                lastName: userData.lastName || existingUser.lastName,
+                profileImageUrl: userData.profileImageUrl || existingUser.profileImageUrl,
+                updatedAt: new Date()
+              })
+              .where(eq(users.id, userData.id))
+              .returning();
+            return updatedUser;
+          }
           return existingUser;
-        }
-        // If not found by ID, try by email
-        const [userByEmail] = await db.select().from(users).where(eq(users.email, userData.email));
-        if (userByEmail) {
-          return userByEmail;
         }
       }
       throw error;
