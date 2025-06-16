@@ -224,9 +224,9 @@ export default function Transactions() {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
       return await res.json();
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
       toast({
         title: "Transaction Deleted",
         description: "Transaction has been removed successfully",
