@@ -93,8 +93,8 @@ export default function Expenses() {
         amount: parseFloat(expenseData.amount),
         type: "expense",
       });
-      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
       
       setIsDialogOpen(false);
       setNewExpense({
@@ -137,8 +137,8 @@ export default function Expenses() {
       };
       
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
-      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
       
       setEditingTransaction(null);
       setIsDialogOpen(false);
@@ -158,8 +158,8 @@ export default function Expenses() {
   const deleteExpense = async (id: number) => {
     try {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
-      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
       
       toast({
         title: "Expense Deleted",

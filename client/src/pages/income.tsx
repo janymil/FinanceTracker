@@ -94,8 +94,8 @@ export default function Income() {
         amount: parseFloat(incomeData.amount),
         type: "income",
       });
-      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
       
       setIsDialogOpen(false);
       setNewIncome({
