@@ -104,7 +104,7 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
+      queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
       queryClient.refetchQueries({ queryKey: ["/api/financial-summary"] });
       setIsDialogOpen(false);
       setNewTransaction({

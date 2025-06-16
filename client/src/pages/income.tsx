@@ -123,7 +123,7 @@ export default function Income() {
     },
     onError: (err, newIncomeData, context) => {
       // If the mutation fails, use the context to roll back
-      queryClient.setQueryData(["/api/transactions"], context?.previousTransactions);
+      queryClient.setQueryData(["transactions", user?.id], context?.previousTransactions);
       toast({
         title: "Error",
         description: "Failed to add income. Please try again.",
@@ -132,7 +132,7 @@ export default function Income() {
     },
     onSuccess: (newTransaction) => {
       // Update with real data from server
-      queryClient.setQueryData(["/api/transactions", user?.id], (old: any) => {
+      queryClient.setQueryData(["transactions", user?.id], (old: any) => {
         if (!old) return [newTransaction];
         // Replace the optimistic update with real data
         return [newTransaction, ...old.filter((t: any) => t.id !== Date.now())];
