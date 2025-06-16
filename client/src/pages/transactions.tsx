@@ -104,16 +104,12 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: (newTransaction) => {
-      // Immediately add the new transaction to cache
-      queryClient.setQueryData(["transactions", user?.id], (old: any[]) => {
-        if (!old) return [newTransaction];
-        return [newTransaction, ...old];
-      });
-      
-      // Invalidate financial summary to recalculate totals
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
-      
       setIsDialogOpen(false);
+      
+      // Refresh the page to show changes immediately  
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
       setNewTransaction({
         amount: "",
         description: "",
@@ -208,21 +204,17 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: async (updatedTransaction) => {
-      // Immediately update the cache with the new transaction data
-      queryClient.setQueryData(["transactions", user?.id], (old: any[]) => {
-        if (!old) return old;
-        return old.map(t => t.id === updatedTransaction.id ? updatedTransaction : t);
-      });
-      
-      // Also invalidate financial summary to recalculate totals
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
-      
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
         title: "Transaction Updated",
         description: "Transaction has been updated successfully",
       });
+      
+      // Refresh the page to show changes immediately
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     },
     onError: (error: Error) => {
       toast({
@@ -239,19 +231,15 @@ export default function Transactions() {
       return { deletedId: id };
     },
     onSuccess: async ({ deletedId }) => {
-      // Immediately remove the transaction from cache
-      queryClient.setQueryData(["transactions", user?.id], (old: any[]) => {
-        if (!old) return old;
-        return old.filter(t => t.id !== deletedId);
-      });
-      
-      // Invalidate financial summary to recalculate totals
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
-      
       toast({
         title: "Transaction Deleted",
         description: "Transaction has been removed successfully",
       });
+      
+      // Refresh the page to show changes immediately
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     },
     onError: (error: Error) => {
       toast({
