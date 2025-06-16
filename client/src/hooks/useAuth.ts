@@ -36,32 +36,11 @@ export function useAuth() {
   // Get our database user record that syncs with Clerk
   const { data: user, isLoading: dbUserLoading } = useQuery<User>({
     queryKey: ["/api/auth/user"],
-    queryFn: getQueryFn({ 
-      on401: "returnNull",
-      onError: (error: any) => {
-        // Handle JWT token errors by triggering sign out
-        if (error?.message?.includes('jwt') || error?.message?.includes('token')) {
-          console.log('JWT/Token error, triggering sign out');
-          localStorage.setItem('clerk-db-jwt-error', 'true');
-          window.dispatchEvent(new StorageEvent('storage', {
-            key: 'clerk-db-jwt-error',
-            newValue: 'true'
-          }));
-        }
-      }
-    }),
     enabled: !!clerkUser && isSignedIn,
-    retry: (failureCount, error: any) => {
-      // Don't retry on JWT/auth errors
-      if (error?.message?.includes('jwt') || error?.message?.includes('token') || error?.status === 401) {
-        return false;
-      }
-      return failureCount < 3;
-    },
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: true,
+    staleTime: 0, // Always fetch fresh data
+    refetchOnWindowFocus: false,
     refetchInterval: false,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retry: false, // Disable retries for faster loading
   });
 
   const isLoading = !userLoaded || !authLoaded || (isSignedIn && dbUserLoading);

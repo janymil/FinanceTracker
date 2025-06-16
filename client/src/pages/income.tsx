@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,15 +74,34 @@ export default function Income() {
     recurringEndDate: "",
   });
 
-  const { data: transactions = [], isLoading } = useQuery({
-    queryKey: ["/api/transactions"],
-    enabled: isAuthenticated,
-  });
+  // Use direct state management instead of React Query for immediate updates
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
     enabled: isAuthenticated,
   });
+
+  // Fetch transactions directly
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    
+    const fetchTransactions = async () => {
+      try {
+        setIsLoading(true);
+        const response = await apiRequest("GET", "/api/transactions");
+        const data = await response.json();
+        setTransactions(data);
+      } catch (error) {
+        console.error("Failed to fetch transactions:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, [isAuthenticated]);
 
   const createIncomeMutation = useMutation({
     mutationFn: async (incomeData: typeof newIncome) => {
@@ -93,14 +112,13 @@ export default function Income() {
       });
       return await res.json();
     },
-    onSuccess: async (newTransaction) => {
+    onSuccess: (newTransaction) => {
       console.log("New transaction created:", newTransaction);
       
-      // Clear cache and force immediate refetch
-      queryClient.removeQueries({ queryKey: ["/api/transactions"] });
-      const refetchResult = await queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
-      console.log("Refetch result:", refetchResult);
+      // Immediately add to local state for instant display
+      setTransactions(prev => [newTransaction, ...prev]);
       
+      // Update other React Query caches
       queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       queryClient.invalidateQueries({ queryKey: ["/api/expense-breakdown"] });
       
