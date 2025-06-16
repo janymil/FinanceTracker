@@ -76,7 +76,7 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
-      staleTime: 30 * 1000, // 30 seconds cache to prevent excessive requests
+      staleTime: 0, // Immediate cache refresh
       structuralSharing: false, // Force new object references
       gcTime: 5 * 60 * 1000, // 5 minutes garbage collection
       retry: (failureCount, error: any) => {
