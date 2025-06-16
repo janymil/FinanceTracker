@@ -95,10 +95,10 @@ export default function Income() {
     },
     onMutate: async (newIncomeData) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ["/api/transactions"] });
+      await queryClient.cancelQueries({ queryKey: ["transactions"] });
       
       // Snapshot the previous value
-      const previousTransactions = queryClient.getQueryData(["/api/transactions"]);
+      const previousTransactions = queryClient.getQueryData(["transactions"]);
       
       // Optimistically update to the new value
       const optimisticTransaction = {
@@ -111,7 +111,7 @@ export default function Income() {
         categoryName: categories.find((cat: any) => cat.id.toString() === newIncomeData.categoryId)?.name || null
       };
       
-      queryClient.setQueryData(["/api/transactions"], (old: any) => {
+      queryClient.setQueryData(["transactions"], (old: any) => {
         return old ? [optimisticTransaction, ...old] : [optimisticTransaction];
       });
       
@@ -209,8 +209,8 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
-      await queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -233,8 +233,8 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
-      await queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       toast({
         title: "Income Deleted",
         description: "Income transaction has been removed successfully",
