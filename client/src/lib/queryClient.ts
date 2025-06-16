@@ -12,10 +12,12 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
   try {
     if (typeof window !== 'undefined' && window.Clerk?.session) {
       const token = await window.Clerk.session.getToken();
+      console.log('Clerk token available:', !!token);
       if (token) {
         return { Authorization: `Bearer ${token}` };
       }
     }
+    console.log('No Clerk session available');
   } catch (error) {
     console.warn('Failed to get Clerk token:', error);
   }
