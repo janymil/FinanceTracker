@@ -202,7 +202,7 @@ export default function Transactions() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       toast({
         title: "Transaction Deleted",
         description: "Transaction has been removed successfully",
