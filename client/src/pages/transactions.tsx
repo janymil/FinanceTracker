@@ -104,9 +104,6 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ predicate: (query) => 
-        query.queryKey[0] === "transactions" || query.queryKey[0] === "financial-summary" 
-      });
       setIsDialogOpen(false);
       toast({
         title: "Transaction Added",
@@ -136,9 +133,6 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ predicate: (query) => 
-        query.queryKey[0] === "transactions" || query.queryKey[0] === "financial-summary" 
-      });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -179,8 +173,6 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -203,8 +195,6 @@ export default function Transactions() {
       return { deletedId: id };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       toast({
         title: "Transaction Deleted",
         description: "Transaction has been removed successfully",
@@ -842,9 +832,6 @@ export default function Transactions() {
                               console.log("DIRECT FETCH EDIT: Response status:", response.status);
                               
                               if (response.ok) {
-                                await queryClient.refetchQueries({ predicate: (query) => 
-                                  query.queryKey[0] === "transactions" || query.queryKey[0] === "financial-summary" 
-                                });
                                 toast({
                                   title: "Transaction Updated",
                                   description: "Transaction has been updated successfully",

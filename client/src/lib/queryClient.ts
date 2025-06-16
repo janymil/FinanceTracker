@@ -68,25 +68,34 @@ export const getQueryFn: <T>(options: {
     return await res.json();
   };
 
+// Create a global mutation helper that handles cache updates
+export const invalidateAllFinancialData = () => {
+  queryClient.invalidateQueries();
+  // Force immediate refetch of active queries
+  setTimeout(() => {
+    queryClient.refetchQueries({ type: 'active' });
+  }, 100);
+};
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: 0, // Always fresh data for immediate updates
-      gcTime: 30 * 60 * 1000, // 30 minutes garbage collection
-      retry: (failureCount, error: any) => {
-        // Don't retry on auth errors
-        if (error?.status === 401 || error?.status === 403) return false;
-        return failureCount < 2; // Only retry twice for other errors
-      },
-      retryDelay: 500, // Faster retry delay
+      staleTime: 0,
+      gcTime: 5 * 60 * 1000, // Shorter cache time
+      retry: 1, // Minimal retries
+      retryDelay: 200,
       networkMode: 'online',
     },
     mutations: {
       retry: false,
       networkMode: 'online',
+      onSuccess: () => {
+        // Global mutation success handler - invalidate everything
+        invalidateAllFinancialData();
+      },
     },
   },
 });
