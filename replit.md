@@ -266,6 +266,9 @@ Changelog:
 - June 16, 2025. Replaced all visible page reloads with proper React Query cache invalidation for seamless user experience
 - June 16, 2025. Fixed dashboard "Add Transaction" button category field by correcting query key mismatch between header and other components
 - June 16, 2025. Implemented comprehensive React Query refetch system providing immediate visual feedback without page refreshes across all transaction operations
+- June 16, 2025. Standardized all API cache invalidation patterns across entire application - /api/transactions→["transactions"], /api/budgets→["budgets"], /api/goals→["goals"], /api/ai→["ai"]
+- June 16, 2025. Updated budget.tsx, goals.tsx, ai-financial-tips.tsx, and auto-categorization.tsx to follow consistent queryClient.invalidateQueries pattern after all mutations
+- June 16, 2025. Ensured every POST/PUT/DELETE operation to specified endpoints triggers immediate cache invalidation for real-time UI updates across all application features
 ```
 
 ## User Preferences
