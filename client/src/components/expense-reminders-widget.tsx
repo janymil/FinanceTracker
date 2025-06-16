@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -85,87 +85,61 @@ export default function FinancialRemindersWidget() {
     queryKey: ["/api/categories"],
   });
 
-  const createReminderMutation = useMutation({
-    mutationFn: async (reminderData: any) => {
-      const response = await fetch('/api/expense-reminders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(reminderData),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to create reminder');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
+  const createReminder = async (reminderData: any) => {
+    try {
+      const response = await apiRequest('POST', '/api/expense-reminders', reminderData);
+      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
       setIsDialogOpen(false);
       resetForm();
       toast({
         title: "Reminder Created",
         description: "Expense reminder has been set successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  const completeReminderMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await fetch(`/api/expense-reminders/${id}/complete`, {
-        method: 'POST',
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to complete reminder');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
+  const completeReminder = async (id: number) => {
+    try {
+      const response = await apiRequest('POST', `/api/expense-reminders/${id}/complete`);
+      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
       toast({
         title: "Reminder Completed",
         description: "Expense reminder marked as completed",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  const deleteReminderMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await fetch(`/api/expense-reminders/${id}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to delete reminder');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
+  const deleteReminder = async (id: number) => {
+    try {
+      const response = await apiRequest('DELETE', `/api/expense-reminders/${id}`);
+      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
       toast({
         title: "Reminder Deleted",
         description: "Expense reminder has been deleted",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   const resetForm = () => {
     setNewReminder({
@@ -186,7 +160,7 @@ export default function FinancialRemindersWidget() {
 
   const handleSubmit = () => {
     if (!newReminder.title || !newReminder.dueDate) return;
-    createReminderMutation.mutate(newReminder);
+    createReminder(newReminder);
   };
 
   const getReminderPriority = (reminder: ExpenseReminder) => {
@@ -416,7 +390,7 @@ export default function FinancialRemindersWidget() {
                     </Button>
                     <Button 
                       onClick={handleSubmit}
-                      disabled={!newReminder.title || !newReminder.dueDate || createReminderMutation.isPending}
+                      disabled={!newReminder.title || !newReminder.dueDate}
                       className="flex-1"
                     >
                       {editingReminder ? "Update" : "Create"} Reminder
@@ -499,16 +473,14 @@ export default function FinancialRemindersWidget() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => completeReminderMutation.mutate(reminder.id)}
-                        disabled={completeReminderMutation.isPending}
+                        onClick={() => completeReminder(reminder.id)}
                       >
                         <CheckCircle className="h-3 w-3" />
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => deleteReminderMutation.mutate(reminder.id)}
-                        disabled={deleteReminderMutation.isPending}
+                        onClick={() => deleteReminder(reminder.id)}
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>
