@@ -101,9 +101,20 @@ export default function Income() {
       });
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (newTransaction) => {
+      // Invalidate all transaction-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/expense-breakdown"] });
+      
+      // Optionally, update the cache directly for immediate UI update
+      queryClient.setQueryData(["/api/transactions"], (oldData: any) => {
+        if (oldData && Array.isArray(oldData)) {
+          return [newTransaction, ...oldData];
+        }
+        return [newTransaction];
+      });
+      
       setIsDialogOpen(false);
       setNewIncome({
         amount: "",
@@ -181,8 +192,10 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: () => {
+      // Invalidate all transaction-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/expense-breakdown"] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -205,8 +218,10 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: () => {
+      // Invalidate all transaction-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/expense-breakdown"] });
       toast({
         title: "Income Deleted",
         description: "Income transaction has been removed successfully",
