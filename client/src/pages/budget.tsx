@@ -83,8 +83,7 @@ export default function Budget() {
         ...budgetData,
         amount: parseFloat(budgetData.amount),
       });
-      await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      await queryClient.invalidateQueries({ queryKey: ["budgets"] });
       setIsDialogOpen(false);
       setNewBudget({
         amount: "",
@@ -111,8 +110,7 @@ export default function Budget() {
         ...data,
         amount: parseFloat(data.amount),
       });
-      await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      await queryClient.invalidateQueries({ queryKey: ["budgets"] });
       setEditingBudget(null);
       setIsDialogOpen(false);
       toast({
@@ -131,8 +129,7 @@ export default function Budget() {
   const deleteBudget = async (id: number) => {
     try {
       const res = await apiRequest("DELETE", `/api/budgets/${id}`);
-      await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      await queryClient.invalidateQueries({ queryKey: ["budgets"] });
       toast({
         title: "Budget Deleted",
         description: "Budget has been removed successfully",

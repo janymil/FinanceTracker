@@ -62,8 +62,7 @@ export default function Goals() {
   const createGoal = async (goalData: any) => {
     try {
       const res = await apiRequest("POST", "/api/goals", goalData);
-      await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
+      await queryClient.invalidateQueries({ queryKey: ["goals"] });
       setIsDialogOpen(false);
       setNewGoal({ name: "", targetAmount: "", targetDate: "", category: "", description: "" });
       toast({
