@@ -477,7 +477,7 @@ export default function Expenses() {
                   </div>
 
                   {/* Advanced Features - Standard/Premium only */}
-                  <RequirePlan plan="standard">
+                  <RequirePlan plan="standard" compact={true}>
                     <div className="space-y-6 border-t pt-4">
                       {/* Smart Bill Assistant */}
                       <div className="space-y-4">

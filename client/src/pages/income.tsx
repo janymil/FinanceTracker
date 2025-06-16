@@ -464,7 +464,7 @@ export default function Income() {
                   </div>
 
                   {/* Recurring transaction options - Standard/Premium only */}
-                  <RequirePlan plan="standard">
+                  <RequirePlan plan="standard" compact={true}>
                     <div className="space-y-4 border-t pt-4">
                       <div className="flex items-center space-x-2">
                         <Checkbox
