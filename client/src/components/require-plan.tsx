@@ -103,13 +103,12 @@ const featureConfigs = {
 };
 
 export default function RequirePlan({ plan, children, feature, description, benefits, compact }: RequirePlanProps) {
-  const isReady = useClerkUserReady();
-  const { user } = useAuth();
+  const { isReady, user } = useClerkUserReady();
 
   // Get user's plan from database
   const { data: databaseUser, isLoading } = useQuery({
     queryKey: ["auth-user", user?.id],
-    enabled: isReady,
+    enabled: isReady && !!user?.id,
     staleTime: 5 * 60 * 1000, // 5 minutes - plan doesn't change often
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/auth/user");
@@ -117,16 +116,12 @@ export default function RequirePlan({ plan, children, feature, description, bene
     },
   });
 
-  if (isLoading || !isReady) {
+  if (isLoading || !isReady || !user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center p-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
-  }
-
-  if (!user) {
-    return null;
   }
 
   // Get user plan from database user object
