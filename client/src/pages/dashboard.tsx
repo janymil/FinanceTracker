@@ -155,7 +155,7 @@ export default function Dashboard() {
 
   // Core data loads immediately with better error handling
   const { data: transactions, isLoading: transactionsLoading, error: transactionsError } = useQuery({
-    queryKey: ['/api/transactions', user?.id],
+    queryKey: ['transactions', user?.id],
     enabled: isReady,
     staleTime: 30 * 1000, // 30 seconds for transactions
     queryFn: async () => {
@@ -165,7 +165,7 @@ export default function Dashboard() {
   });
 
   const { data: categories = [] } = useQuery({
-    queryKey: ["/api/categories"],
+    queryKey: ["categories"],
     enabled: isReady,
     staleTime: 5 * 60 * 1000, // 5 minutes for categories (they change less often)
     queryFn: async () => {
@@ -176,7 +176,7 @@ export default function Dashboard() {
 
   // Load financial summary immediately alongside transactions
   const { data: financialSummary, isLoading: summaryLoading } = useQuery({
-    queryKey: ['/api/financial-summary', user?.id, startDate.toISOString(), endDate.toISOString()],
+    queryKey: ['financial-summary', user?.id, startDate.toISOString(), endDate.toISOString()],
     queryFn: async () => {
       const params = new URLSearchParams({
         startDate: startDate.toISOString(),
@@ -190,7 +190,7 @@ export default function Dashboard() {
   });
 
   const { data: budgets, error: budgetsError } = useQuery({
-    queryKey: ['/api/budgets', user?.id],
+    queryKey: ['budgets', user?.id],
     enabled: isReady && !!transactions, // Wait for transactions first
     retry: false, // Don't retry on 403 errors for free users
   });
