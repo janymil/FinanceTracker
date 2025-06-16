@@ -257,17 +257,21 @@ export default function ProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="rounded-lg border overflow-hidden min-h-[600px]">
+              <div className="rounded-lg border overflow-hidden">
                 <UserProfile 
                   routing="hash"
                   appearance={{
                     elements: {
-                      rootBox: "w-full min-h-[500px]",
-                      card: "border-0 shadow-none min-h-[500px]",
+                      rootBox: "w-full max-w-none",
+                      card: "border-0 shadow-none",
                       navbar: "hidden",
-                      pageScrollBox: "p-4 min-h-[400px]",
-                      profileSectionPrimaryButton: "bg-primary hover:bg-primary/90",
-                      formButtonPrimary: "bg-primary hover:bg-primary/90"
+                      pageScrollBox: "p-4",
+                      profileSection: "max-w-none",
+                      profileSectionContent: "max-w-none grid grid-cols-[1fr_auto] gap-4 items-center",
+                      profileSectionPrimaryButton: "bg-primary hover:bg-primary/90 ml-4",
+                      formButtonPrimary: "bg-primary hover:bg-primary/90",
+                      formFieldInput: "max-w-md",
+                      profileSectionItem: "grid grid-cols-[1fr_auto] gap-4 items-center"
                     }
                   }}
                 />
@@ -300,12 +304,23 @@ export default function ProfilePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="p-4 bg-muted/50 rounded-lg">
-                  <h4 className="font-medium mb-2">Password & Security Management</h4>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    For security reasons, password changes and two-factor authentication are managed through Clerk's secure interface.
-                  </p>
-                  <UserProfile />
+                <div className="rounded-lg border overflow-hidden security-only">
+                  <UserProfile 
+                    routing="hash"
+                    appearance={{
+                      elements: {
+                        rootBox: "w-full max-w-none",
+                        card: "border-0 shadow-none",
+                        navbar: "border-b",
+                        pageScrollBox: "p-4",
+                        profileSection: "max-w-none",
+                        profileSectionContent: "max-w-none",
+                        profileSectionPrimaryButton: "bg-primary hover:bg-primary/90",
+                        formButtonPrimary: "bg-primary hover:bg-primary/90",
+                        formFieldInput: "max-w-md"
+                      }
+                    }}
+                  />
                 </div>
                 
                 <div className="mt-4 p-4 bg-muted/50 rounded-lg">
