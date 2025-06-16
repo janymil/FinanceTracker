@@ -336,8 +336,16 @@ export default function Income() {
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
-    // Find the category ID for this transaction
-    const category = categories.find((cat: Category) => cat.name === transaction.categoryName);
+    
+    // Find the category ID - check both categoryId field and categoryName
+    let categoryId = "";
+    if (transaction.categoryId) {
+      categoryId = transaction.categoryId.toString();
+    } else if (transaction.categoryName) {
+      const category = categories.find((cat: Category) => cat.name === transaction.categoryName);
+      categoryId = category ? category.id.toString() : "";
+    }
+    
     // Convert date to proper format for date input (YYYY-MM-DD)
     const formattedDate = new Date(transaction.date).toISOString().split('T')[0];
     
@@ -350,7 +358,7 @@ export default function Income() {
       amount: transaction.amount,
       description: transaction.description,
       date: formattedDate,
-      categoryId: category ? category.id.toString() : "",
+      categoryId: categoryId,
       isRecurring: Boolean(transaction.isRecurring),
       recurringFrequency: (transaction.recurringFrequency as "weekly" | "monthly" | "yearly") || "monthly",
       recurringEndDate: formattedRecurringEndDate,

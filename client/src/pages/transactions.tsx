@@ -918,10 +918,16 @@ export default function Transactions() {
                           onClick={() => {
                             setEditingTransaction(transaction);
                             
-                            // Find the category ID from the transaction's category name
-                            const matchingCategory = (categories as Category[]).find(
-                              cat => cat.name === transaction.categoryName
-                            );
+                            // Find the category ID - check both categoryId field and categoryName
+                            let categoryId = "";
+                            if (transaction.categoryId) {
+                              categoryId = transaction.categoryId.toString();
+                            } else if (transaction.categoryName) {
+                              const matchingCategory = (categories as Category[]).find(
+                                cat => cat.name === transaction.categoryName
+                              );
+                              categoryId = matchingCategory ? matchingCategory.id.toString() : "";
+                            }
                             
                             setNewTransaction({
                               amount: transaction.amount.toString(),
@@ -930,7 +936,7 @@ export default function Transactions() {
                                 ? transaction.date.toISOString().split('T')[0]
                                 : new Date(transaction.date).toISOString().split('T')[0],
                               type: transaction.type,
-                              categoryId: matchingCategory ? matchingCategory.id.toString() : "",
+                              categoryId: categoryId,
                               isRecurring: Boolean(transaction.isRecurring),
                               recurringFrequency: transaction.recurringFrequency || "monthly",
                               recurringEndDate: transaction.recurringEndDate || "",
