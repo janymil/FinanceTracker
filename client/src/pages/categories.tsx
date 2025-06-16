@@ -8,8 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Edit3, Trash2 } from "lucide-react";
-import { categoryIcons, Icon } from "@/lib/icons";
+import { Plus, Edit3, Trash2, TrendingUp, DollarSign } from "lucide-react";
+import { categoryIcons } from "@/lib/icons";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
