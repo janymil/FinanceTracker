@@ -52,19 +52,19 @@ export default function Navigation() {
           
           <div className="flex items-center space-x-4">
             {user?.plan === 'premium' ? (
-              <Badge className="bg-premium text-white">
-                <Crown className="h-3 w-3 mr-1" />
-                Premium
+              <Badge className="bg-premium text-white text-xs px-2 py-1">
+                <Crown className="h-2 w-2 mr-1" />
+                Pro
               </Badge>
             ) : user?.plan === 'standard' ? (
-              <Badge className="bg-blue-600 text-white">
-                <Crown className="h-3 w-3 mr-1" />
-                Standard
+              <Badge className="bg-blue-600 text-white text-xs px-2 py-1">
+                <Crown className="h-2 w-2 mr-1" />
+                Std
               </Badge>
             ) : (
               <>
-                <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                  Free Plan
+                <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs px-2 py-1">
+                  Free
                 </Badge>
                 <Link href="/subscribe">
                   <Button size="sm" className="bg-premium hover:bg-premium/90 text-white">
