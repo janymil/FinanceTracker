@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+// import puppeteer from 'puppeteer';
 import { PDF_TEMPLATE, BUDGETS_SECTION_TEMPLATE, GOALS_SECTION_TEMPLATE } from './pdfTemplate.js';
 
 interface PDFData {
@@ -259,35 +259,6 @@ export async function generatePdfReport(data: PDFData): Promise<Buffer> {
     html = html.replace(regex, value);
   });
 
-  // Generate PDF using Puppeteer
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
-
-  try {
-    const page = await browser.newPage();
-    await page.setContent(html, { 
-      waitUntil: 'networkidle0',
-      timeout: 30000 
-    });
-
-    // Wait for charts to load
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '20mm',
-        right: '15mm',
-        bottom: '20mm',
-        left: '15mm'
-      }
-    });
-
-    return pdfBuffer;
-  } finally {
-    await browser.close();
-  }
+  // PDF generation temporarily disabled
+  throw new Error('PDF generation is temporarily unavailable');
 }
