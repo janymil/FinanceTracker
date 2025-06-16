@@ -42,7 +42,7 @@ export function FinancialMascot() {
   });
 
   // Get mascot data
-  const { data: mascot, isLoading } = useQuery<MascotData>({
+  const { data: mascot, isLoading, refetch } = useQuery<MascotData>({
     queryKey: ["/api/mascot"],
     queryFn: async () => {
       const token = await window.Clerk.session?.getToken();
@@ -57,8 +57,8 @@ export function FinancialMascot() {
       return response.json();
     },
     enabled: isReady && !!user?.id,
-    staleTime: 0,
-    gcTime: 0,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    gcTime: 1000 * 60 * 10, // Keep in garbage collection for 10 minutes
   });
 
 
@@ -67,7 +67,8 @@ export function FinancialMascot() {
   const generateMascot = async () => {
     try {
       const response = await apiRequest('POST', '/api/mascot/generate');
-      await queryClient.invalidateQueries({ queryKey: ["/api/mascot"] });
+      // Force immediate refetch to show new image
+      await refetch();
       toast({ title: "New mascot generated!" });
       setIsGenerating(false);
     } catch (error: any) {
