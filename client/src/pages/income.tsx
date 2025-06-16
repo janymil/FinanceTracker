@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useTransactions } from "@/hooks/useTransactions";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -491,7 +491,7 @@ export default function Income() {
                     </Button>
                     <Button 
                       onClick={handleSubmit}
-                      disabled={!newIncome.amount || !newIncome.description || updateIncomeMutation.isPending}
+                      disabled={!newIncome.amount || !newIncome.description}
                       className="bg-green-600 hover:bg-green-700"
                     >
                       {editingTransaction ? "Update" : "Add Income"}
@@ -784,7 +784,7 @@ export default function Income() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => deleteIncomeMutation.mutate(transaction.id)}
+                          onClick={() => deleteIncome(transaction.id)}
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>

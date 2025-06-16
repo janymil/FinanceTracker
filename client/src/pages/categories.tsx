@@ -55,72 +55,63 @@ export default function Categories() {
     },
   });
 
-  const createCategoryMutation = useMutation({
-    mutationFn: async (categoryData: typeof newCategory) => {
+  const createCategory = async (categoryData: typeof newCategory) => {
+    try {
       const res = await apiRequest("POST", "/api/categories", categoryData);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      await res.json();
+      await queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
       setIsDialogOpen(false);
       setNewCategory({ name: "", icon: "dollar-sign", color: "#3B82F6", type: "expense" });
       toast({
         title: "Category Created",
         description: "New category has been added successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  const updateCategoryMutation = useMutation({
-    mutationFn: async ({ id, ...data }: { id: number } & typeof newCategory) => {
+  const updateCategory = async ({ id, ...data }: { id: number } & typeof newCategory) => {
+    try {
       const res = await apiRequest("PUT", `/api/categories/${id}`, data);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      await res.json();
+      await queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
       setEditingCategory(null);
       setIsDialogOpen(false);
       toast({
         title: "Category Updated",
         description: "Category has been updated successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  const deleteCategoryMutation = useMutation({
-    mutationFn: async (id: number) => {
+  const deleteCategory = async (id: number) => {
+    try {
       const res = await apiRequest("DELETE", `/api/categories/${id}`);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      await res.json();
+      await queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
       toast({
         title: "Category Deleted",
         description: "Category has been removed successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   const expenseCategories = categories.filter((cat: Category) => cat.type === "expense");
   const incomeCategories = categories.filter((cat: Category) => cat.type === "income");
@@ -129,9 +120,9 @@ export default function Categories() {
     if (!newCategory.name.trim()) return;
 
     if (editingCategory) {
-      updateCategoryMutation.mutate({ id: editingCategory.id, ...newCategory });
+      updateCategory({ id: editingCategory.id, ...newCategory });
     } else {
-      createCategoryMutation.mutate(newCategory);
+      createCategory(newCategory);
     }
   };
 
