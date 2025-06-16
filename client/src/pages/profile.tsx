@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { useUser } from "@clerk/clerk-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -58,6 +59,7 @@ interface UserSettings {
 
 export default function ProfilePage() {
   const { user, clerkUser } = useAuth();
+  const { user: clerkUserDirect } = useUser();
   const { toast } = useToast();
   
   // Form states
@@ -153,19 +155,21 @@ export default function ProfilePage() {
 
   const updatePasswordMutation = useMutation({
     mutationFn: async (data: typeof passwordData) => {
-      // Use Clerk's password update functionality
-      if (!clerkUser) {
+      // Use Clerk's proper password update functionality
+      if (!clerkUserDirect) {
         throw new Error('User not found');
       }
       
       try {
-        await clerkUser.updatePassword({
+        await clerkUserDirect.updatePassword({
           currentPassword: data.currentPassword,
           newPassword: data.newPassword
         });
         return { success: true };
       } catch (error: any) {
-        throw new Error(error.errors?.[0]?.message || 'Failed to change password');
+        // Handle Clerk-specific error format
+        const errorMessage = error.errors?.[0]?.longMessage || error.errors?.[0]?.message || 'Failed to change password';
+        throw new Error(errorMessage);
       }
     },
     onSuccess: () => {
@@ -207,13 +211,18 @@ export default function ProfilePage() {
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!clerkUser) {
+    if (!clerkUserDirect) {
       toast({ title: "User not found", variant: "destructive" });
       return;
     }
     
     if (!passwordData.currentPassword) {
       toast({ title: "Current password is required", variant: "destructive" });
+      return;
+    }
+    
+    if (!passwordData.newPassword) {
+      toast({ title: "New password is required", variant: "destructive" });
       return;
     }
     
