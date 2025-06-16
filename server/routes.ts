@@ -585,15 +585,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { startDate, endDate } = req.query;
 
+      let summary;
       if (!startDate || !endDate) {
-        return res.status(400).json({ message: "Start date and end date are required" });
+        // No date range provided - get all transactions
+        summary = await storage.getUserFinancialSummary(userId);
+      } else {
+        // Date range provided - filter by dates
+        summary = await storage.getUserFinancialSummary(
+          userId,
+          new Date(startDate as string),
+          new Date(endDate as string)
+        );
       }
-
-      const summary = await storage.getUserFinancialSummary(
-        userId,
-        new Date(startDate as string),
-        new Date(endDate as string)
-      );
 
       res.json(summary);
     } catch (error) {
