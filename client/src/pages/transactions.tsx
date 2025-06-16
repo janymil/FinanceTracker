@@ -105,27 +105,8 @@ export default function Transactions() {
     },
     onSuccess: (newTransaction) => {
       setIsDialogOpen(false);
-      
-      // Refresh the page to show changes immediately  
-      setTimeout(() => {
-        window.location.reload();
-      }, 100);
-      setNewTransaction({
-        amount: "",
-        description: "",
-        date: new Date().toISOString().split('T')[0],
-        type: "expense",
-        categoryId: "",
-        isRecurring: false,
-        recurringFrequency: "monthly",
-        recurringEndDate: "",
-        paymentUrl: "",
-        referenceNote: "",
-      });
-      toast({
-        title: "Transaction Added",
-        description: "Transaction has been created successfully",
-      });
+      // Refresh the page immediately to show changes
+      window.location.reload();
     },
     onError: (error: Error) => {
       toast({
@@ -206,15 +187,8 @@ export default function Transactions() {
     onSuccess: async (updatedTransaction) => {
       setEditingTransaction(null);
       setIsDialogOpen(false);
-      toast({
-        title: "Transaction Updated",
-        description: "Transaction has been updated successfully",
-      });
-      
-      // Refresh the page to show changes immediately
-      setTimeout(() => {
-        window.location.reload();
-      }, 100);
+      // Refresh the page immediately to show changes
+      window.location.reload();
     },
     onError: (error: Error) => {
       toast({
@@ -231,15 +205,8 @@ export default function Transactions() {
       return { deletedId: id };
     },
     onSuccess: async ({ deletedId }) => {
-      toast({
-        title: "Transaction Deleted",
-        description: "Transaction has been removed successfully",
-      });
-      
-      // Refresh the page to show changes immediately
-      setTimeout(() => {
-        window.location.reload();
-      }, 100);
+      // Refresh the page immediately to show changes
+      window.location.reload();
     },
     onError: (error: Error) => {
       toast({
