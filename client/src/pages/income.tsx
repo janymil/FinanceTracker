@@ -94,8 +94,8 @@ export default function Income() {
         amount: parseFloat(incomeData.amount),
         type: "income",
       });
-      await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       
       setIsDialogOpen(false);
       setNewIncome({
@@ -140,8 +140,6 @@ export default function Income() {
       
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
       await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
       await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
       await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       setEditingTransaction(null);
@@ -163,8 +161,6 @@ export default function Income() {
     try {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
       await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
       await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
       await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       toast({

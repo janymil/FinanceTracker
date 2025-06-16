@@ -93,8 +93,8 @@ export default function Expenses() {
         amount: parseFloat(expenseData.amount),
         type: "expense",
       });
-      await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       
       setIsDialogOpen(false);
       setNewExpense({
