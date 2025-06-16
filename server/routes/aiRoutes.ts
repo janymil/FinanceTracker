@@ -377,7 +377,7 @@ export function registerAIRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      const mascot = await storage.getMascot(userId);
+      const mascot = await storage.getUserMascot(userId);
       res.json(mascot);
     } catch (error) {
       console.error("Error getting mascot:", error);
@@ -416,13 +416,27 @@ export function registerAIRoutes(app: Express) {
       const imageUrl = await generateMascotImage(userId, healthScore);
 
       // Create or update mascot
-      const mascot = await storage.createOrUpdateMascot(userId, {
-        imageUrl,
-        healthScore,
-        mood: healthScore >= 70 ? 'happy' : healthScore >= 40 ? 'neutral' : 'concerned',
-        lastGenerated: new Date().toISOString(),
-        isEnabled: true
-      });
+      const existingMascot = await storage.getUserMascot(userId);
+      let mascot;
+      
+      if (existingMascot) {
+        mascot = await storage.updateMascot(userId, {
+          imageUrl,
+          healthScore,
+          mood: healthScore >= 70 ? 'happy' : healthScore >= 40 ? 'neutral' : 'concerned',
+          lastGenerated: new Date().toISOString(),
+          isEnabled: true
+        });
+      } else {
+        mascot = await storage.createMascot({
+          userId,
+          imageUrl,
+          healthScore,
+          mood: healthScore >= 70 ? 'happy' : healthScore >= 40 ? 'neutral' : 'concerned',
+          lastGenerated: new Date().toISOString(),
+          isEnabled: true
+        });
+      }
 
       res.json(mascot);
     } catch (error) {

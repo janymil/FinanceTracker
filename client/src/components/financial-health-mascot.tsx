@@ -89,8 +89,7 @@ export default function FinancialHealthMascot() {
     gcTime: 0,
   });
 
-  // Debug logging
-  console.log("Financial Health Mascot Debug:", { isReady, userId: user?.id, healthData, isLoading });
+
 
   useEffect(() => {
     if (healthData) {
