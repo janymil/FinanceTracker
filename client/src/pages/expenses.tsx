@@ -214,8 +214,13 @@ export default function Expenses() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
-      queryClient.refetchQueries({ queryKey: ["/api/financial-summary"] });
+      console.log("Delete mutation success - triggering refetch");
+      queryClient.refetchQueries({ queryKey: ["/api/transactions"] }).then(() => {
+        console.log("Transactions refetch completed");
+      });
+      queryClient.refetchQueries({ queryKey: ["/api/financial-summary"] }).then(() => {
+        console.log("Financial summary refetch completed");
+      });
       toast({
         title: "Expense Deleted",
         description: "Expense transaction has been removed successfully",
