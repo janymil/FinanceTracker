@@ -143,24 +143,21 @@ export default function RequirePlan({ plan, children, feature, description, bene
 
   const config = featureConfigs[featureKey as keyof typeof featureConfigs];
 
-  // For form sections and transaction dialogs, show a compact inline upgrade message instead of full page
-  const isFormContext = typeof window !== 'undefined' && 
-    (window.location.pathname.includes('/income') || 
-     window.location.pathname.includes('/expenses') || 
-     window.location.pathname.includes('/transactions') ||
-     // Check if we're inside a dialog by looking for dialog-specific elements
-     document.querySelector('[role="dialog"]') !== null);
+  // Check if we're in a dialog context (transaction buttons in dashboard)
+  const isDialogContext = typeof window !== 'undefined' && 
+    document.querySelector('[role="dialog"]') !== null;
 
-  if (isFormContext) {
+  // For transaction dialogs, show the small upgrade box like in the screenshot
+  if (isDialogContext) {
     return (
-      <div className="border-2 border-dashed border-blue-300 dark:border-blue-600 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
-            {config?.icon ? <config.icon className="h-4 w-4 text-blue-600 dark:text-blue-400" /> : <Lock className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
+      <div className="border-2 border-dashed border-blue-300 dark:border-blue-600 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20 mb-4">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
+            <Lock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           </div>
-          <div>
-            <h4 className="font-medium text-blue-900 dark:text-blue-100">
-              {feature || config?.feature || "Premium Feature"}
+          <div className="flex-1">
+            <h4 className="font-semibold text-blue-900 dark:text-blue-100 text-lg">
+              {plan.charAt(0).toUpperCase() + plan.slice(1)} Feature
             </h4>
             <p className="text-sm text-blue-700 dark:text-blue-300">
               Available with {plan.charAt(0).toUpperCase() + plan.slice(1)} plan
@@ -174,7 +171,7 @@ export default function RequirePlan({ plan, children, feature, description, bene
             </Button>
           </Link>
           <Link href="/subscribe">
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-400 dark:hover:bg-blue-900/30">
               View Plans
             </Button>
           </Link>
