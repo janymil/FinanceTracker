@@ -777,8 +777,8 @@ export default function Transactions() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => {
-                            console.log("QUICK EDIT: Starting for transaction:", transaction.id);
+                          onClick={async () => {
+                            console.log("DIRECT FETCH EDIT: Starting for transaction:", transaction.id);
                             
                             // Prompt user for new amount
                             const newAmountStr = prompt(`Edit amount for "${transaction.description}":`, transaction.amount.toString());
@@ -801,7 +801,6 @@ export default function Transactions() {
                             
                             // Build complete update data
                             const updateData = {
-                              id: transaction.id,
                               amount: newAmount,
                               description: transaction.description,
                               date: transaction.date instanceof Date 
@@ -816,8 +815,38 @@ export default function Transactions() {
                               referenceNote: transaction.referenceNote || ""
                             };
                             
-                            console.log("QUICK EDIT: Calling direct mutation with:", updateData);
-                            directEditMutation.mutate(updateData);
+                            console.log("DIRECT FETCH EDIT: Sending data:", updateData);
+                            
+                            try {
+                              const response = await fetch(`/api/transactions/${transaction.id}`, {
+                                method: 'PUT',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(updateData)
+                              });
+                              
+                              console.log("DIRECT FETCH EDIT: Response status:", response.status);
+                              
+                              if (response.ok) {
+                                console.log("DIRECT FETCH EDIT: Success - reloading page");
+                                window.location.reload();
+                              } else {
+                                console.error("DIRECT FETCH EDIT: Failed:", response.status);
+                                toast({
+                                  title: "Edit Failed",
+                                  description: `Error: ${response.status}`,
+                                  variant: "destructive",
+                                });
+                              }
+                            } catch (error) {
+                              console.error("DIRECT FETCH EDIT: Error:", error);
+                              toast({
+                                title: "Edit Failed",
+                                description: "Network error occurred",
+                                variant: "destructive",
+                              });
+                            }
                           }}
                         >
                           <Edit3 className="h-3 w-3" />
