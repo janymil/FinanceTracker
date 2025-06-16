@@ -258,6 +258,8 @@ Changelog:
 - June 16, 2025. Completed comprehensive analysis and optimization of refetchQueries vs invalidateQueries usage patterns
 - June 16, 2025. Standardized cache operations: create/delete use invalidateQueries (efficient), edit uses refetchQueries (immediate feedback)
 - June 16, 2025. Fixed mixed queryKey formats across financial-summary endpoints and eliminated redundant cache operations for better performance
+- June 16, 2025. Optimized useTransactions hook configuration with proper staleTime (30s) and gcTime (5min) for better cache behavior
+- June 16, 2025. Verified transaction rendering patterns correctly use React Query data directly without state copying issues
 - June 16, 2025. Completed comprehensive authentication migration from custom useAuth hook to direct Clerk integration with useClerkUserReady
 - June 16, 2025. Created optimized useClerkUserReady hook using Clerk's native isLoaded && isSignedIn && !!user?.id conditions for reliable timing
 - June 16, 2025. Updated all major pages (dashboard, expenses, income, transactions) to use proper Clerk authentication patterns for React Query enabled flags

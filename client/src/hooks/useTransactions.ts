@@ -12,10 +12,10 @@ export function useTransactions() {
       const response = await apiRequest("GET", "/api/transactions");
       return response.json();
     },
-    staleTime: 0, // Always fresh
-    gcTime: 0, // Don't cache results
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
+    staleTime: 30 * 1000, // 30 seconds - reasonable cache time
+    gcTime: 5 * 60 * 1000, // 5 minutes garbage collection
+    refetchOnMount: false, // Don't refetch on mount if data is fresh
+    refetchOnWindowFocus: false, // Don't refetch on focus
     retry: (failureCount, error: any) => {
       // Don't retry if authentication failed due to timing
       if (error?.status === 401 && !isReady) return false;
