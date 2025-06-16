@@ -46,8 +46,9 @@ import RequirePlan from "@/components/require-plan";
 import { Link } from "wouter";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { invalidateAllUserData } from "@/lib/queryClient";
 
 interface Category {
   id: number;

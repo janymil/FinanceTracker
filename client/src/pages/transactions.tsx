@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
-import { apiRequest, queryClient, invalidateFinancialData } from "@/lib/queryClient";
+import { apiRequest, invalidateAllUserData } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import MonthFilter from "@/components/month-filter";
 import { format } from "date-fns";
@@ -109,8 +109,7 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      invalidateAllUserData();
       setIsDialogOpen(false);
       setNewTransaction({
         amount: "",
@@ -206,7 +205,7 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: () => {
-      invalidateFinancialData();
+      invalidateAllUserData();
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -229,8 +228,7 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      invalidateAllUserData();
       toast({
         title: "Transaction Deleted",
         description: "Transaction has been removed successfully",
