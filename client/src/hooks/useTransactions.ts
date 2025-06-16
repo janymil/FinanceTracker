@@ -12,10 +12,11 @@ export function useTransactions() {
       const response = await apiRequest("GET", "/api/transactions");
       return response.json();
     },
-    staleTime: 0, // Always fresh
-    gcTime: 0, // Don't cache results - force immediate updates
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
     retry: (failureCount, error: any) => {
-      // Don't retry if authentication failed due to timing
       if (error?.status === 401 && !isReady) return false;
       return failureCount < 3;
     },
