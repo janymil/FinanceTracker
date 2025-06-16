@@ -12,7 +12,12 @@ interface AdminRequest extends Request {
 }
 
 export const adminAuth = (req: AdminRequest, res: Response, next: NextFunction) => {
-  if (req.session?.isAdminAuthenticated) {
+  // Initialize session if it doesn't exist
+  if (!req.session) {
+    req.session = {};
+  }
+  
+  if (req.session.isAdminAuthenticated) {
     return next();
   }
   
@@ -26,6 +31,11 @@ export const adminLogin = async (req: AdminRequest, res: Response) => {
     return res.status(400).json({ message: 'Password required' });
   }
   
+  // Initialize session if it doesn't exist
+  if (!req.session) {
+    req.session = {};
+  }
+  
   // Simple password check - in production, use hashed passwords
   if (password === ADMIN_PASSWORD) {
     req.session.isAdminAuthenticated = true;
@@ -36,6 +46,8 @@ export const adminLogin = async (req: AdminRequest, res: Response) => {
 };
 
 export const adminLogout = (req: AdminRequest, res: Response) => {
-  req.session.isAdminAuthenticated = false;
+  if (req.session) {
+    req.session.isAdminAuthenticated = false;
+  }
   res.json({ message: 'Admin logged out successfully' });
 };

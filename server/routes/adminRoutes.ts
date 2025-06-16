@@ -2,36 +2,23 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { storage } from "../storage";
 import { adminAuth, adminLogin, adminLogout } from "../adminAuth";
 
-interface AdminRequest extends Request {
-  session: any;
-}
-
 export function registerAdminRoutes(app: Express) {
-  // Admin authentication middleware
-  const requireAdminAuth = (req: AdminRequest, res: Response, next: NextFunction) => {
-    if (!req.session?.adminAuthenticated) {
-      return res.status(401).json({ message: "Admin authentication required" });
-    }
-    next();
-  };
-
   // Admin login
-  app.post('/api/admin-analytics/login', adminLogin, (req: AdminRequest, res: Response) => {
-    res.json({ success: true, message: "Admin login successful" });
-  });
+  app.post('/api/admin-analytics/login', adminLogin);
 
   // Admin logout
-  app.post('/api/admin-analytics/logout', adminLogout, (req: AdminRequest, res: Response) => {
-    res.json({ success: true, message: "Admin logout successful" });
-  });
+  app.post('/api/admin-analytics/logout', adminLogout);
 
   // Check admin auth status
-  app.get('/api/admin-analytics/auth-status', (req: AdminRequest, res: Response) => {
-    res.json({ authenticated: !!req.session?.adminAuthenticated });
+  app.get('/api/admin-analytics/auth-status', (req: any, res: Response) => {
+    if (!req.session) {
+      req.session = {};
+    }
+    res.json({ authenticated: !!req.session?.isAdminAuthenticated });
   });
 
   // Admin dashboard - get all users
-  app.get('/api/admin-analytics/users', requireAdminAuth, async (req: AdminRequest, res: Response) => {
+  app.get('/api/admin-analytics/users', adminAuth, async (req: any, res: Response) => {
     try {
       const users = await storage.getAllUsers();
       res.json(users);
@@ -42,7 +29,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Admin analytics - get user transaction stats
-  app.get('/api/admin-analytics/user-stats', requireAdminAuth, async (req: AdminRequest, res: Response) => {
+  app.get('/api/admin-analytics/user-stats', adminAuth, async (req: any, res: Response) => {
     try {
       const users = await storage.getAllUsers();
       const stats = users.map(user => ({
@@ -60,7 +47,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Admin - update user subscription plan (MOST IMPORTANT FOR USER)
-  app.put('/api/admin-analytics/users/:userId/plan', requireAdminAuth, async (req: AdminRequest, res: Response) => {
+  app.put('/api/admin-analytics/users/:userId/plan', adminAuth, async (req: any, res: Response) => {
     try {
       const { userId } = req.params;
       const { plan } = req.body;
@@ -86,7 +73,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Admin analytics - get system overview
-  app.get('/api/admin-analytics/overview', requireAdminAuth, async (req: AdminRequest, res: Response) => {
+  app.get('/api/admin-analytics/overview', adminAuth, async (req: any, res: Response) => {
     try {
       const users = await storage.getAllUsers();
       const planCounts = users.reduce((acc, user) => {
@@ -107,7 +94,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Admin analytics - get subscription plan distribution
-  app.get('/api/admin-analytics/plans', requireAdminAuth, async (req: AdminRequest, res: Response) => {
+  app.get('/api/admin-analytics/plans', adminAuth, async (req: any, res: Response) => {
     try {
       const users = await storage.getAllUsers();
       const planStats = users.reduce((acc, user) => {
