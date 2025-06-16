@@ -12,15 +12,11 @@ export function useTransactions() {
       const response = await apiRequest("GET", "/api/transactions");
       return response.json();
     },
-    staleTime: 30 * 1000, // 30 seconds - reasonable cache time
+    staleTime: 30 * 1000, // 30 seconds cache
     gcTime: 5 * 60 * 1000, // 5 minutes garbage collection
-    refetchOnMount: false, // Don't refetch on mount if data is fresh
-    refetchOnWindowFocus: false, // Don't refetch on focus
-    retry: (failureCount, error: any) => {
-      // Don't retry if authentication failed due to timing
-      if (error?.status === 401 && !isReady) return false;
-      return failureCount < 3;
-    },
-    retryDelay: 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: false, // Disable retries to prevent loops
   });
 }
