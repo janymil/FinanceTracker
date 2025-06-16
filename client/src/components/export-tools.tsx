@@ -191,7 +191,7 @@ export function ExportTools() {
   
   // Get transactions for chart generation
   const { data: transactions = [] } = useQuery<Transaction[]>({
-    queryKey: ['/api/transactions'],
+    queryKey: ['transactions', user?.id],
   });
   
   // Get financial summary

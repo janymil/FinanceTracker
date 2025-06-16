@@ -112,7 +112,7 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
       toast({
         title: "Category Applied",
         description: "Transaction has been categorized successfully",

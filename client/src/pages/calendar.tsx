@@ -42,7 +42,7 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const { data: transactions = [], isLoading } = useQuery({
-    queryKey: ["/api/transactions"],
+    queryKey: ["transactions", user?.id],
   });
 
   const { data: categories = [] } = useQuery({

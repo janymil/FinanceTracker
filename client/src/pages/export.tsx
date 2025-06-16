@@ -162,7 +162,7 @@ export default function ExportPage() {
 
   // Fetch data for export
   const { data: transactions = [] } = useQuery({
-    queryKey: ["/api/transactions"],
+    queryKey: ["transactions", user?.id],
   });
 
   const { data: budgets = [] } = useQuery({
@@ -333,7 +333,7 @@ export default function ExportPage() {
         errors: response.errors || []
       } : null);
       setImportStep('complete');
-      queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial-summary'] });
 
       toast({
@@ -541,7 +541,7 @@ export default function ExportPage() {
         description: `Restored ${result.restoredData.transactions} transactions and ${result.restoredData.budgets} budgets from backup.`,
       });
       // Invalidate all relevant queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
       queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
       queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       queryClient.invalidateQueries({ queryKey: ["/api/backup-status"] });

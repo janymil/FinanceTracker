@@ -33,7 +33,7 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
   });
 
   const { data: transactions, isLoading: transactionsLoading } = useQuery({
-    queryKey: ['/api/transactions'],
+    queryKey: ['transactions', user?.id],
   });
 
   const formatCurrency = (amount: string | number) => {

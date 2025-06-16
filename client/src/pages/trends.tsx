@@ -19,7 +19,7 @@ export default function Trends() {
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const { data: transactions, isLoading: transactionsLoading } = useQuery({
-    queryKey: ["/api/transactions"],
+    queryKey: ["transactions", user?.id],
     enabled: !!user
   });
 

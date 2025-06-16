@@ -89,7 +89,7 @@ export default function Reports() {
 
   // Fetch transactions for recent activity
   const { data: transactions } = useQuery({
-    queryKey: ['/api/transactions', selectedMonth, selectedPeriod],
+    queryKey: ['transactions', user?.id, selectedMonth, selectedPeriod],
     enabled: !!user,
   });
 
