@@ -252,6 +252,8 @@ Changelog:
 - June 16, 2025. Applied enabled: isAuthenticated && !!user?.id condition across all pages (expenses, income, transactions, dashboard)
 - June 16, 2025. Fixed cache invalidation system to use proper queryKey patterns with user?.id for consistent data updates
 - June 16, 2025. Resolved data loading regression where empty results were returned due to queries running before user authentication completed
+- June 16, 2025. SOLVED: Fixed real-time UI updates by adding gcTime: 0 to useTransactions hook - React Query cache was preventing immediate updates after mutations
+- June 16, 2025. All transaction operations (create, edit, delete) now provide instant visual feedback without page reloads across dashboard, expenses, income, and transactions pages
 - June 16, 2025. Fixed critical queryKey inconsistency preventing UI updates after edit/delete operations
 - June 16, 2025. Standardized all edit/delete mutations to use ["/api/transactions", user?.id] and ["/api/financial-summary", user?.id] queryKey format
 - June 16, 2025. Fixed cache invalidation system - UI now updates immediately after mutations by using matching queryKey patterns across all pages
