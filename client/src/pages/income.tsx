@@ -145,6 +145,8 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
       queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
       queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       setEditingTransaction(null);
