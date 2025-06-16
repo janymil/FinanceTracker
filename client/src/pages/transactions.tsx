@@ -184,8 +184,18 @@ export default function Transactions() {
         }
       }
       
+      console.log("Sending PUT request with data:", updateData);
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
-      return await res.json();
+      console.log("PUT response status:", res.status);
+      
+      if (!res.ok) {
+        console.error("PUT request failed:", res.status, res.statusText);
+        throw new Error(`Update failed: ${res.status}`);
+      }
+      
+      const result = await res.json();
+      console.log("PUT response data:", result);
+      return result;
     },
     onSuccess: async (updatedTransaction) => {
       console.log("Edit success callback triggered, reloading page...");
