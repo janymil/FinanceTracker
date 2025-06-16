@@ -98,10 +98,10 @@ export default function Income() {
     },
     onMutate: async (newIncomeData) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ["transactions"] });
+      await queryClient.cancelQueries({ queryKey: ["transactions", user?.id] });
       
       // Snapshot the previous value
-      const previousTransactions = queryClient.getQueryData(["transactions"]);
+      const previousTransactions = queryClient.getQueryData(["transactions", user?.id]);
       
       // Optimistically update to the new value
       const optimisticTransaction = {
@@ -114,7 +114,7 @@ export default function Income() {
         categoryName: categories.find((cat: any) => cat.id.toString() === newIncomeData.categoryId)?.name || null
       };
       
-      queryClient.setQueryData(["transactions"], (old: any) => {
+      queryClient.setQueryData(["transactions", user?.id], (old: any) => {
         return old ? [optimisticTransaction, ...old] : [optimisticTransaction];
       });
       
