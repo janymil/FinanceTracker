@@ -55,6 +55,25 @@ export default function AdminAnalytics() {
   const [isDeletingUser, setIsDeletingUser] = useState(false);
   const { toast } = useToast();
 
+  // Check authentication status on component mount
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const response = await fetch('/api/admin-analytics/auth-status', {
+          credentials: 'include'
+        });
+        const data = await response.json();
+        if (data.authenticated) {
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.error('Error checking auth status:', error);
+      }
+    };
+    
+    checkAuthStatus();
+  }, []);
+
   const { data: users = [], isLoading: usersLoading } = useQuery({
     queryKey: ['/api/admin-analytics/users'],
     enabled: isAuthenticated,
@@ -74,6 +93,11 @@ export default function AdminAnalytics() {
       
       setIsAuthenticated(true);
       setPassword("");
+      
+      // Fetch data immediately after successful authentication
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/users'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/overview'] });
+      
       toast({
         title: "Success",
         description: "Admin login successful",
