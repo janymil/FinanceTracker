@@ -578,7 +578,29 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Analytics
-  async getUserFinancialSummary(userId: string, startDate: Date, endDate: Date) {
+  async getUserFinancialSummary(userId: string, startDate?: Date, endDate?: Date) {
+    // Build WHERE conditions based on whether dates are provided
+    const baseIncomeConditions = [
+      eq(transactions.userId, userId),
+      eq(transactions.type, 'income')
+    ];
+    
+    const baseExpenseConditions = [
+      eq(transactions.userId, userId),
+      eq(transactions.type, 'expense')
+    ];
+    
+    const baseCategoryConditions = [
+      eq(transactions.userId, userId)
+    ];
+
+    // Add date filters only if dates are provided
+    if (startDate && endDate) {
+      baseIncomeConditions.push(gte(transactions.date, startDate), lte(transactions.date, endDate));
+      baseExpenseConditions.push(gte(transactions.date, startDate), lte(transactions.date, endDate));
+      baseCategoryConditions.push(gte(transactions.date, startDate), lte(transactions.date, endDate));
+    }
+
     // Get income and expense totals with counts
     const incomeResult = await db
       .select({
@@ -586,14 +608,7 @@ export class DatabaseStorage implements IStorage {
         count: count(transactions.id),
       })
       .from(transactions)
-      .where(
-        and(
-          eq(transactions.userId, userId),
-          eq(transactions.type, 'income'),
-          gte(transactions.date, startDate),
-          lte(transactions.date, endDate)
-        )
-      );
+      .where(and(...baseIncomeConditions));
 
     const expenseResult = await db
       .select({
@@ -601,14 +616,7 @@ export class DatabaseStorage implements IStorage {
         count: count(transactions.id),
       })
       .from(transactions)
-      .where(
-        and(
-          eq(transactions.userId, userId),
-          eq(transactions.type, 'expense'),
-          gte(transactions.date, startDate),
-          lte(transactions.date, endDate)
-        )
-      );
+      .where(and(...baseExpenseConditions));
 
     // Get transactions by category
     const categoryResults = await db
@@ -619,13 +627,7 @@ export class DatabaseStorage implements IStorage {
       })
       .from(transactions)
       .leftJoin(categories, eq(transactions.categoryId, categories.id))
-      .where(
-        and(
-          eq(transactions.userId, userId),
-          gte(transactions.date, startDate),
-          lte(transactions.date, endDate)
-        )
-      )
+      .where(and(...baseCategoryConditions))
       .groupBy(categories.name, transactions.type);
 
     const totalIncome = Number(incomeResult[0]?.total || 0);
