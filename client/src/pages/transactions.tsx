@@ -83,10 +83,8 @@ export default function Transactions() {
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["/api/transactions"],
     enabled: !!user,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/transactions");
-      return response.json();
-    },
+    staleTime: 0, // Always refetch when invalidated
+    gcTime: 0, // Don't cache stale data
   });
 
   const { data: categories = [] } = useQuery({
