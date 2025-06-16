@@ -112,7 +112,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       setIsDialogOpen(false);
       setNewTransaction({
         amount: "",

@@ -334,7 +334,7 @@ export default function ExportPage() {
       } : null);
       setImportStep('complete');
       queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['financial-summary', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial-summary'] });
 
       toast({
         title: "Import completed",
@@ -543,7 +543,7 @@ export default function ExportPage() {
       // Invalidate all relevant queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
       queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       queryClient.invalidateQueries({ queryKey: ["/api/backup-status"] });
     },
     onError: (error) => {

@@ -98,10 +98,10 @@ export default function Income() {
     },
     onMutate: async (newIncomeData) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.cancelQueries({ queryKey: ["transactions"] });
       
       // Snapshot the previous value
-      const previousTransactions = queryClient.getQueryData(["transactions", user?.id]);
+      const previousTransactions = queryClient.getQueryData(["transactions"]);
       
       // Optimistically update to the new value
       const optimisticTransaction = {
@@ -114,7 +114,7 @@ export default function Income() {
         categoryName: categories.find((cat: any) => cat.id.toString() === newIncomeData.categoryId)?.name || null
       };
       
-      queryClient.setQueryData(["transactions", user?.id], (old: any) => {
+      queryClient.setQueryData(["transactions"], (old: any) => {
         return old ? [optimisticTransaction, ...old] : [optimisticTransaction];
       });
       
@@ -123,7 +123,7 @@ export default function Income() {
     },
     onError: (err, newIncomeData, context) => {
       // If the mutation fails, use the context to roll back
-      queryClient.setQueryData(["transactions", user?.id], context?.previousTransactions);
+      queryClient.setQueryData(["/api/transactions"], context?.previousTransactions);
       toast({
         title: "Error",
         description: "Failed to add income. Please try again.",
@@ -132,13 +132,15 @@ export default function Income() {
     },
     onSuccess: (newTransaction) => {
       // Update with real data from server
-      queryClient.setQueryData(["transactions", user?.id], (old: any) => {
+      queryClient.setQueryData(["/api/transactions", user?.id], (old: any) => {
         if (!old) return [newTransaction];
         // Replace the optimistic update with real data
         return [newTransaction, ...old.filter((t: any) => t.id !== Date.now())];
       });
       
-      queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary", user?.id] });
+      queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
+      queryClient.refetchQueries({ queryKey: ["/api/expense-breakdown"] });
       
       setIsDialogOpen(false);
       setNewIncome({
@@ -233,9 +235,9 @@ export default function Income() {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
       return await res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       toast({
         title: "Income Deleted",
         description: "Income transaction has been removed successfully",

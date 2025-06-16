@@ -105,10 +105,10 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
   }
 
   const displayTransactions = filteredTransactions || [];
-  const expenseTransactions = [...displayTransactions]
+  const expenseTransactions = displayTransactions
     .filter(t => t.type === 'expense')
     .slice(0, 5);
-  const incomeTransactions = [...displayTransactions]
+  const incomeTransactions = displayTransactions
     .filter(t => t.type === 'income')
     .slice(0, 5);
 
@@ -122,7 +122,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
           <p className="text-sm">Start by adding your first transaction</p>
         </div>
       ) : (
-        [...transactionList].slice(0, limitForFree).map((transaction) => (
+        transactionList.slice(0, limitForFree).map((transaction) => (
           <div
             key={transaction.id}
             className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
