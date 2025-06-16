@@ -102,16 +102,8 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: (newTransaction) => {
-      // Update the cache directly for immediate UI update
-      queryClient.setQueryData(["/api/transactions"], (oldData: any) => {
-        if (oldData && Array.isArray(oldData)) {
-          return [newTransaction, ...oldData];
-        }
-        return [newTransaction];
-      });
-      
-      // Then invalidate queries to ensure server sync
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      // Force immediate refetch for instant display
+      queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       queryClient.invalidateQueries({ queryKey: ["/api/expense-breakdown"] });
       
