@@ -104,9 +104,12 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: (newTransaction) => {
+      console.log("Create success callback triggered, reloading page...");
       setIsDialogOpen(false);
-      // Refresh the page immediately to show changes
-      window.location.reload();
+      // Refresh the page to show changes
+      setTimeout(() => {
+        window.location.reload();
+      }, 50);
     },
     onError: (error: Error) => {
       toast({
@@ -185,10 +188,13 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: async (updatedTransaction) => {
+      console.log("Edit success callback triggered, reloading page...");
       setEditingTransaction(null);
       setIsDialogOpen(false);
-      // Refresh the page immediately to show changes
-      window.location.reload();
+      // Force hard refresh to bypass cache
+      setTimeout(() => {
+        window.location.reload();
+      }, 50);
     },
     onError: (error: Error) => {
       toast({
@@ -205,8 +211,11 @@ export default function Transactions() {
       return { deletedId: id };
     },
     onSuccess: async ({ deletedId }) => {
-      // Refresh the page immediately to show changes
-      window.location.reload();
+      console.log("Delete success callback triggered, reloading page...");
+      // Refresh the page to show changes
+      setTimeout(() => {
+        window.location.reload();
+      }, 50);
     },
     onError: (error: Error) => {
       toast({
