@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/useAuth";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState, useEffect, useMemo, startTransition, useDeferredValue, useTransition } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -73,7 +73,7 @@ interface Category {
 }
 
 export default function Dashboard() {
-  const { user, isAuthenticated } = useAuth();
+  const { isReady, user } = useClerkUserReady();
   const { toast } = useToast();
 
   // Check for subscription success/error messages

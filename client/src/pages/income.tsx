@@ -76,12 +76,12 @@ export default function Income() {
 
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["/api/transactions", user?.id],
-    enabled: isAuthenticated && !!user?.id,
+    enabled: isReady,
   });
 
   const { data: categories = [] } = useQuery({
-    queryKey: ["/api/categories", user?.id],
-    enabled: isAuthenticated && !!user?.id,
+    queryKey: ["/api/categories"],
+    enabled: isReady,
   });
 
   const createIncomeMutation = useMutation({
