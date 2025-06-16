@@ -58,6 +58,7 @@ export default function Help() {
   };
 
   const sendChatMessage = async (message: string) => {
+    setIsLoading(true);
     try {
       const data = await apiRequest('POST', '/api/help-chat', { message });
       setChatMessages(prev => [...prev, {
@@ -71,6 +72,8 @@ export default function Help() {
         content: "Sorry, I'm having trouble right now. Please try again later.",
         timestamp: new Date()
       }]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -84,7 +87,7 @@ export default function Help() {
     };
 
     setChatMessages(prev => [...prev, userMessage]);
-    chatMutation.mutate(chatInput);
+    sendChatMessage(chatInput);
     setChatInput("");
   };
 
@@ -617,7 +620,7 @@ export default function Help() {
                       </div>
                     </div>
                   ))}
-                  {chatMutation.isPending && (
+                  {isLoading && (
                     <div className="flex justify-start">
                       <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
                         <p className="text-sm">Thinking...</p>
@@ -633,11 +636,11 @@ export default function Help() {
                   onChange={(e) => setChatInput(e.target.value)}
                   placeholder="Ask about FinanzerPro features..."
                   onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                  disabled={chatMutation.isPending}
+                  disabled={isLoading}
                 />
                 <Button
                   onClick={handleSendMessage}
-                  disabled={!chatInput.trim() || chatMutation.isPending}
+                  disabled={!chatInput.trim() || isLoading}
                   size="icon"
                 >
                   <Send className="h-4 w-4" />
