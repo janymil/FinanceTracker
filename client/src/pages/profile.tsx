@@ -344,18 +344,33 @@ export default function ProfilePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="rounded-lg border overflow-hidden">
+                <div className="rounded-lg border overflow-hidden min-h-[600px]">
                   <UserProfile 
                     routing="hash"
                     appearance={{
                       elements: {
-                        rootBox: "w-full",
-                        card: "border-0 shadow-none",
-                        navbar: "hidden",
-                        pageScrollBox: "p-0"
+                        rootBox: "w-full min-h-[500px]",
+                        card: "border-0 shadow-none min-h-[500px]",
+                        navbar: "block",
+                        pageScrollBox: "p-4 min-h-[400px]",
+                        profileSectionPrimaryButton: "bg-primary hover:bg-primary/90",
+                        formButtonPrimary: "bg-primary hover:bg-primary/90"
                       }
                     }}
                   />
+                </div>
+                
+                <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                  <h4 className="font-medium mb-2">Password Management</h4>
+                  <p className="text-sm text-muted-foreground">
+                    To change your password, click on the "Security" section above. You can:
+                  </p>
+                  <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+                    <li>• Update your current password</li>
+                    <li>• Enable two-factor authentication</li>
+                    <li>• Manage connected accounts</li>
+                    <li>• View security activity</li>
+                  </ul>
                 </div>
               </CardContent>
             </Card>
