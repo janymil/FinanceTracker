@@ -487,7 +487,6 @@ export default function Dashboard() {
         {/* Free User Content */}
         {user?.plan === 'free' && (
           <div className="space-y-8">
-            <UpgradeBanner />
 
             {/* Simple Financial Health Score for Free Users */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
