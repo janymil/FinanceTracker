@@ -77,19 +77,11 @@ export default function Income() {
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["/api/transactions"],
     enabled: isAuthenticated,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/transactions");
-      return response.json();
-    },
   });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
     enabled: isAuthenticated,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/categories");
-      return response.json();
-    },
   });
 
   const createIncomeMutation = useMutation({
@@ -101,9 +93,9 @@ export default function Income() {
       });
       return await res.json();
     },
-    onSuccess: (newTransaction) => {
+    onSuccess: async (newTransaction) => {
       // Force immediate refetch for instant display
-      queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       queryClient.invalidateQueries({ queryKey: ["/api/expense-breakdown"] });
       
