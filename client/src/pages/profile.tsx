@@ -14,7 +14,7 @@ import { Separator } from "../components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../components/ui/alert-dialog";
 import { useToast } from "../hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { 
   User, 
   Lock, 
@@ -119,12 +119,7 @@ export default function ProfilePage() {
   // Mutations
   const updateProfileMutation = useMutation({
     mutationFn: async (data: typeof profileData) => {
-      const response = await fetch('/api/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) throw new Error('Failed to update profile');
+      const response = await apiRequest('PUT', '/api/profile', data);
       return response.json();
     },
     onSuccess: (updatedUser) => {
