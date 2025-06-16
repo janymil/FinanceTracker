@@ -40,9 +40,11 @@ interface DayData {
 export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const { isReady, user } = useClerkUserReady();
 
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["transactions", user?.id],
+    enabled: isReady,
   });
 
   const { data: categories = [] } = useQuery({

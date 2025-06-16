@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, FileText } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { useClerkUserReady } from '@/hooks/useClerkUserReady';
 
 interface MonthlySummary {
   totalIncome: number;
@@ -188,10 +189,12 @@ async function generateExpenseReportPdf(data: MonthlySummary) {
 
 export function ExportTools() {
   const [isGenerating, setIsGenerating] = useState(false);
+  const { isReady, user } = useClerkUserReady();
   
   // Get transactions for chart generation
   const { data: transactions = [] } = useQuery<Transaction[]>({
     queryKey: ['transactions', user?.id],
+    enabled: isReady,
   });
   
   // Get financial summary
