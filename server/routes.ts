@@ -184,6 +184,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let limit = undefined; // Show all transactions user has stored
 
       const transactions = await storage.getUserTransactions(userId, limit);
+      
+      console.log('🔍 GET /api/transactions DEBUG');
+      console.log('🔍 User ID:', userId);
+      console.log('🔍 Transactions count:', transactions.length);
+      console.log('🔍 First transaction ID 104 amount:', transactions.find(t => t.id === 104)?.amount);
+      console.log('🔍 All transaction amounts:', transactions.map(t => ({ id: t.id, amount: t.amount })));
+      
       res.json(transactions);
     } catch (error) {
       console.error("Error fetching transactions:", error);
