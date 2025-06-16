@@ -1,6 +1,7 @@
 import { Switch, Route } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/hooks/useAuth";
+import { useClerkPersistence } from "@/hooks/useClerkPersistence";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { SignedIn, SignedOut, useClerk } from "@clerk/clerk-react";
@@ -53,6 +54,9 @@ function AppContent() {
   const clerk = useClerk();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  
+  // Initialize session persistence
+  useClerkPersistence();
 
   // Wait for Clerk to be loaded before rendering anything
   if (!clerk.loaded) {

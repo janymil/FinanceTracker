@@ -368,7 +368,7 @@ export default function Dashboard() {
                           size="sm"
                           onClick={() => setNewTransaction({ ...newTransaction, type: "expense" })}
                         >
-                          <ArrowDownLeft className="h-4 w-4 mr-2" />
+                          <ArrowDownRight className="h-4 w-4 mr-2" />
                           Expense
                         </Button>
                       </div>
