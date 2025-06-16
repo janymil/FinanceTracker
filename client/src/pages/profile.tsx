@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, UserProfile } from "@clerk/clerk-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -84,17 +84,7 @@ export default function ProfilePage() {
     }
   }, [user, clerkUser]);
 
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
 
-  const [showPasswords, setShowPasswords] = useState({
-    current: false,
-    new: false,
-    confirm: false
-  });
 
   const [settings, setSettings] = useState<UserSettings>({
     notifications: {
@@ -153,37 +143,7 @@ export default function ProfilePage() {
     }
   });
 
-  const updatePasswordMutation = useMutation({
-    mutationFn: async (data: typeof passwordData) => {
-      // Use Clerk's proper password update functionality
-      if (!clerkUserDirect) {
-        throw new Error('User not found');
-      }
-      
-      try {
-        await clerkUserDirect.updatePassword({
-          currentPassword: data.currentPassword,
-          newPassword: data.newPassword
-        });
-        return { success: true };
-      } catch (error: any) {
-        // Handle Clerk-specific error format
-        const errorMessage = error.errors?.[0]?.longMessage || error.errors?.[0]?.message || 'Failed to change password';
-        throw new Error(errorMessage);
-      }
-    },
-    onSuccess: () => {
-      toast({ title: "Password changed successfully" });
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    },
-    onError: (error: Error) => {
-      toast({ 
-        title: "Failed to change password", 
-        description: error.message,
-        variant: "destructive" 
-      });
-    }
-  });
+
 
   const updateSettingsMutation = useMutation({
     mutationFn: async (data: UserSettings) => {
@@ -208,36 +168,7 @@ export default function ProfilePage() {
     updateProfileMutation.mutate(profileData);
   };
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!clerkUserDirect) {
-      toast({ title: "User not found", variant: "destructive" });
-      return;
-    }
-    
-    if (!passwordData.currentPassword) {
-      toast({ title: "Current password is required", variant: "destructive" });
-      return;
-    }
-    
-    if (!passwordData.newPassword) {
-      toast({ title: "New password is required", variant: "destructive" });
-      return;
-    }
-    
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast({ title: "Passwords don't match", variant: "destructive" });
-      return;
-    }
-    
-    if (passwordData.newPassword.length < 8) {
-      toast({ title: "Password must be at least 8 characters", variant: "destructive" });
-      return;
-    }
-    
-    updatePasswordMutation.mutate(passwordData);
-  };
+
 
   const handleSettingsUpdate = (section: keyof UserSettings, key: string, value: any) => {
     const newSettings = {
@@ -409,84 +340,25 @@ export default function ProfilePage() {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Change Password</CardTitle>
+                <CardTitle>Account Security</CardTitle>
                 <CardDescription>
-                  Update your Clerk account password to keep your account secure
+                  Manage your password, two-factor authentication, and security settings through Clerk's secure interface
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handlePasswordSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="currentPassword">Current Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="currentPassword"
-                        type={showPasswords.current ? "text" : "password"}
-                        value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                        placeholder="Enter current password"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3"
-                        onClick={() => setShowPasswords({...showPasswords, current: !showPasswords.current})}
-                      >
-                        {showPasswords.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="newPassword">New Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="newPassword"
-                        type={showPasswords.new ? "text" : "password"}
-                        value={passwordData.newPassword}
-                        onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                        placeholder="Enter new password"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3"
-                        onClick={() => setShowPasswords({...showPasswords, new: !showPasswords.new})}
-                      >
-                        {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="confirmPassword"
-                        type={showPasswords.confirm ? "text" : "password"}
-                        value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                        placeholder="Confirm new password"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3"
-                        onClick={() => setShowPasswords({...showPasswords, confirm: !showPasswords.confirm})}
-                      >
-                        {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <Button type="submit" disabled={updatePasswordMutation.isPending}>
-                    <Lock className="h-4 w-4 mr-2" />
-                    {updatePasswordMutation.isPending ? 'Updating...' : 'Update Password'}
-                  </Button>
-                </form>
+                <div className="rounded-lg border overflow-hidden">
+                  <UserProfile 
+                    routing="hash"
+                    appearance={{
+                      elements: {
+                        rootBox: "w-full",
+                        card: "border-0 shadow-none",
+                        navbar: "hidden",
+                        pageScrollBox: "p-0"
+                      }
+                    }}
+                  />
+                </div>
               </CardContent>
             </Card>
 
