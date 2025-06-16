@@ -218,18 +218,18 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                     >
                       <Icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
                       {!isCollapsed && (
-                        <span className="flex items-center justify-between w-full">
-                          {item.title}
+                        <div className="flex items-center justify-between w-full min-w-0">
+                          <span className="truncate">{item.title}</span>
                           {item.badge && !accessible && (
-                            <Badge className={cn(
-                              "text-white text-xs ml-2 rounded-full px-2 py-1 max-w-20 overflow-hidden text-ellipsis whitespace-nowrap",
+                            <div className={cn(
+                              "inline-flex items-center px-2 py-0.5 ml-2 text-[10px] font-medium text-white rounded-full border-0 shrink-0",
                               item.badge === "Standard" ? "bg-blue-500" : "bg-purple-500"
                             )}>
-                              <Crown className="h-3 w-3 mr-1 flex-shrink-0" />
-                              <span className="truncate">{item.badge}</span>
-                            </Badge>
+                              <Crown className="h-2.5 w-2.5 mr-1" />
+                              <span className="leading-none">{item.badge}</span>
+                            </div>
                           )}
-                        </span>
+                        </div>
                       )}
                     </Button>
                   </Link>
