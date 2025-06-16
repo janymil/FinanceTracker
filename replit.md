@@ -243,6 +243,10 @@ Changelog:
 - June 16, 2025. Implemented comprehensive session persistence system to maintain user login across server restarts using Clerk localStorage integration
 - June 16, 2025. Fixed authentication timing issues across all major pages by using isAuthenticated state instead of user presence for React Query enabled flags
 - June 16, 2025. Enhanced useAuth hook with session recovery functionality and automatic token persistence to localStorage
+- June 16, 2025. Fixed React Query cache invalidation system - replaced invalidateQueries with refetchQueries for immediate UI updates after creating transactions
+- June 16, 2025. Removed subscription restrictions from transaction editing and deleting endpoints - free users can now edit/delete transactions
+- June 16, 2025. Fixed duplicate onError key compilation error in income.tsx mutation configuration
+- June 16, 2025. Set React Query staleTime to 0 to ensure fresh data fetching and prevent cached data display issues
 ```
 
 ## User Preferences

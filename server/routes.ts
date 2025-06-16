@@ -259,10 +259,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const user = await storage.getUser(userId);
 
-      if (user?.plan === 'free') {
-        return res.status(403).json({ message: "Standard or Premium subscription required" });
-      }
-
       const transactionId = parseInt(req.params.id);
       await storage.deleteTransaction(transactionId, userId);
       res.json({ success: true });
