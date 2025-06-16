@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import RequirePlan from "@/components/require-plan";
 import { ExportTools } from "@/components/export-tools";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useUser } from "@clerk/clerk-react";
 import {
   Download,
   Upload,
@@ -116,6 +117,7 @@ function formatFileSize(bytes: number): string {
 
 export default function ExportPage() {
   const { toast } = useToast();
+  const { user } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
@@ -159,6 +161,9 @@ export default function ExportPage() {
   const [importProgress, setImportProgress] = useState(0);
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [backupProgress, setBackupProgress] = useState(0);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isUpdatingBackupSettings, setIsUpdatingBackupSettings] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
 
   // Fetch data for export
   const { data: transactions = [] } = useQuery({
@@ -294,10 +299,11 @@ export default function ExportPage() {
     }
   };
 
-  const importMutation = useMutation({
-    mutationFn: async () => {
-      if (!importOptions.file || !importResult?.preview) return;
+  const importData = async () => {
+    if (!importOptions.file || !importResult?.preview) return;
 
+    setIsImporting(true);
+    try {
       // Convert preview data to transactions
       const transactionsToImport = importResult.preview.map(item => ({
         description: item.description,
@@ -307,25 +313,11 @@ export default function ExportPage() {
         categoryId: (categories as any[]).find((cat: any) => cat.name.toLowerCase() === item.category.toLowerCase())?.id || 1,
       }));
 
-      // Send all transactions to the bulk import endpoint
-      const response = await fetch('/api/import/transactions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          transactions: transactionsToImport,
-          mergeStrategy: importOptions.mergeStrategy
-        }),
+      const response = await apiRequest('POST', '/api/import/transactions', {
+        transactions: transactionsToImport,
+        mergeStrategy: importOptions.mergeStrategy
       });
 
-      if (!response.ok) {
-        throw new Error('Import failed');
-      }
-
-      return await response.json();
-    },
-    onSuccess: (response) => {
       setImportResult(prev => prev ? { 
         ...prev, 
         imported: response.imported || 0,
@@ -333,26 +325,26 @@ export default function ExportPage() {
         errors: response.errors || []
       } : null);
       setImportStep('complete');
-      queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['/api/financial-summary'] });
+      await queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/financial-summary'] });
 
       toast({
         title: "Import completed",
         description: response.message || `Successfully imported ${response.imported} transactions.`,
       });
-    },
-    onError: (error) => {
+    } catch (error) {
       toast({
         title: "Import failed",
         description: "Failed to import transactions. Please try again.",
         variant: "destructive",
       });
-    },
-  });
+    } finally {
+      setIsImporting(false);
+    }
+  };
 
   const handleImportConfirm = () => {
-    setIsImporting(true);
-    importMutation.mutate();
+    importData();
   };
 
   const resetImport = () => {
