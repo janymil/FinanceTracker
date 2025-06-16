@@ -31,15 +31,19 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
           useAdvancedFactors: true
         })
       });
+      if (!response.ok) {
+        throw new Error('AI score not available');
+      }
       const data = await response.json();
       setAIScore(data);
     } catch (error) {
       console.error('Failed to fetch AI score:', error);
+      setAIScore(null);
     }
   };
 
   const calculateHealthScore = () => {
-    if (!summary) return { score: 0, status: 'Loading...', color: 'gray' };
+    if (!summary || isLoading) return { score: 0, status: 'Loading...', color: 'gray' };
 
     // Return AI score if available and enabled
     if (useAIScore && aiScore) {
@@ -132,7 +136,7 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
   const healthData = calculateHealthScore();
   const StatusIcon = healthData.icon || CheckCircle;
 
-  if (isLoading) {
+  if (isLoading && !summary) {
     return (
       <Card>
         <CardContent className="p-6">
@@ -149,7 +153,7 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
     );
   }
 
-  if (error) {
+  if (error && !summary) {
     return (
       <Card>
         <CardContent className="p-6">
@@ -160,6 +164,24 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
             </h3>
             <p className="text-gray-600 dark:text-gray-300 text-sm">
               Please try again in a moment
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!summary) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center py-8">
+            <div className="text-4xl text-gray-300 dark:text-gray-600 mb-4">📊</div>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              Add Transactions
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              Add some transactions to see your financial health score
             </p>
           </div>
         </CardContent>
