@@ -44,6 +44,18 @@ export function FinancialMascot() {
   // Get mascot data
   const { data: mascot, isLoading } = useQuery<MascotData>({
     queryKey: ["/api/mascot"],
+    queryFn: async () => {
+      const token = await window.Clerk.session?.getToken();
+      const response = await fetch("/api/mascot", {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        credentials: "include"
+      });
+      if (!response.ok) throw new Error('Failed to fetch mascot');
+      return response.json();
+    },
     enabled: isReady && !!user?.id,
     staleTime: 0,
     gcTime: 0,
