@@ -223,15 +223,11 @@ export default function ProfilePage() {
         </Button>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="profile">
+      <Tabs defaultValue="account" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="account">
             <User className="h-4 w-4 mr-2" />
-            Profile
-          </TabsTrigger>
-          <TabsTrigger value="security">
-            <Lock className="h-4 w-4 mr-2" />
-            Security
+            Account Settings
           </TabsTrigger>
           <TabsTrigger value="notifications">
             <Bell className="h-4 w-4 mr-2" />
@@ -251,56 +247,24 @@ export default function ProfilePage() {
 
         {/* Account Settings Tab */}
         <TabsContent value="account">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Account Settings</CardTitle>
-                <CardDescription>
-                  Manage your profile information, password, security settings, and account preferences through Clerk's secure interface
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="max-w-2xl">
-                  <UserProfile 
-                    routing="hash"
-                    appearance={{
-                      elements: {
-                        rootBox: "w-full max-w-2xl",
-                        card: "border-0 shadow-none max-w-2xl",
-                        navbar: "hidden",
-                        pageScrollBox: "p-0 max-w-2xl",
-                        profileSection: "max-w-2xl",
-                        profileSectionContent: "max-w-2xl",
-                        profileSectionPrimaryButton: "bg-primary hover:bg-primary/90 text-sm px-3 py-1.5",
-                        formButtonPrimary: "bg-primary hover:bg-primary/90 text-sm",
-                        formFieldInput: "max-w-sm text-sm",
-                        formFieldLabel: "text-sm",
-                        profileSectionItem: "py-2 max-w-2xl"
-                      }
-                    }}
-                  />
-                </div>
-                
-                <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-                  <h4 className="font-medium mb-2">Account Management</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Use the interface above to manage:
-                  </p>
-                  <ul className="text-sm text-muted-foreground mt-2 space-y-1">
-                    <li>• Profile information and display name</li>
-                    <li>• Email addresses and verification</li>
-                    <li>• Change your account password</li>
-                    <li>• Enable two-factor authentication (2FA)</li>
-                    <li>• Connected social accounts</li>
-                    <li>• Session and device management</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Account Settings</CardTitle>
+              <CardDescription>
+                Manage your profile information, password, security settings, and account preferences
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <UserProfile />
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Privacy Settings</CardTitle>
+        {/* Notifications Tab */}
+        <TabsContent value="notifications">
+          <Card>
+            <CardHeader>
+              <CardTitle>Notification Settings</CardTitle>
                 <CardDescription>
                   Control how your data is used and shared
                 </CardDescription>
