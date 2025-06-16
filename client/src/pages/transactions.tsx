@@ -1,7 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { useTransactions } from "@/hooks/useTransactions";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +25,7 @@ import {
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import MonthFilter from "@/components/month-filter";
 import { format } from "date-fns";
@@ -81,17 +79,40 @@ export default function Transactions() {
     referenceNote: "",
   });
 
-  const { data: transactions = [], isLoading } = useTransactions();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ["categories"],
-    enabled: isReady,
-    retry: (failureCount, error: any) => {
-      if (error?.status === 401 && !isReady) return false;
-      return failureCount < 3;
-    },
-    retryDelay: 1000,
-  });
+  // Load data when component mounts or user changes
+  useEffect(() => {
+    if (isReady && user?.id) {
+      loadTransactions();
+      loadCategories();
+    }
+  }, [isReady, user?.id]);
+
+  const loadTransactions = async () => {
+    try {
+      setIsLoading(true);
+      const res = await apiRequest("GET", "/api/transactions");
+      const data = await res.json();
+      setTransactions(data);
+    } catch (error) {
+      console.error("Failed to load transactions:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const res = await apiRequest("GET", "/api/categories");
+      const data = await res.json();
+      setCategories(data);
+    } catch (error) {
+      console.error("Failed to load categories:", error);
+    }
+  };
 
 
 
@@ -101,8 +122,10 @@ export default function Transactions() {
         ...transactionData,
         amount: parseFloat(transactionData.amount),
       });
-      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      const newTransaction = await res.json();
+      
+      // Update local state immediately
+      setTransactions(prev => [newTransaction, ...prev]);
       
       setIsDialogOpen(false);
       toast({
@@ -121,19 +144,17 @@ export default function Transactions() {
   // Direct edit function that bypasses form system
   const directEditTransaction = async (transactionData: any) => {
     try {
-      console.log("DIRECT EDIT: Starting with data:", transactionData);
       const res = await apiRequest("PUT", `/api/transactions/${transactionData.id}`, transactionData);
-      console.log("DIRECT EDIT: Response status:", res.status);
       
       if (!res.ok) {
         throw new Error(`Edit failed: ${res.status}`);
       }
       
-      await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
-      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+      const updatedTransaction = await res.json();
+      
+      // Update local state immediately
+      setTransactions(prev => prev.map(t => t.id === transactionData.id ? updatedTransaction : t));
+      
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -141,7 +162,6 @@ export default function Transactions() {
         description: "Transaction has been updated successfully",
       });
     } catch (error: any) {
-      console.log("DIRECT EDIT: Error occurred:", error.message);
       toast({
         title: "Edit Failed",
         description: error.message,
@@ -170,9 +190,10 @@ export default function Transactions() {
       if (!res.ok) {
         throw new Error(`Update failed: ${res.status}`);
       }
-      await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      const updatedTransaction = await res.json();
+      
+      // Update local state immediately
+      setTransactions(prev => prev.map(t => t.id === id ? updatedTransaction : t));
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -191,8 +212,10 @@ export default function Transactions() {
   const deleteTransaction = async (id: number) => {
     try {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
-      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      await res.json();
+      
+      // Update local state immediately
+      setTransactions(prev => prev.filter(t => t.id !== id));
       
       toast({
         title: "Transaction Deleted",
