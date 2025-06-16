@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useUser, UserProfile, UserButton } from "@clerk/clerk-react";
+import { SecuritySection } from "../components/SecuritySection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -304,29 +305,7 @@ export default function ProfilePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="max-w-2xl">
-                  <UserProfile 
-                    routing="hash"
-                    appearance={{
-                      elements: {
-                        rootBox: "w-full max-w-2xl",
-                        card: "border-0 shadow-none max-w-2xl",
-                        navbar: "hidden",
-                        pageScrollBox: "p-0",
-                        profileSection: "max-w-2xl",
-                        profileSectionContent: "max-w-2xl",
-                        profileSectionPrimaryButton: "bg-primary hover:bg-primary/90 text-sm px-3 py-1.5",
-                        formButtonPrimary: "bg-primary hover:bg-primary/90 text-sm",
-                        formFieldInput: "max-w-sm text-sm",
-                        formFieldLabel: "text-sm",
-                        profileSectionItem: "py-2 max-w-2xl"
-                      },
-                      layout: {
-                        unsafe_disableDevelopmentModeWarnings: true
-                      }
-                    }}
-                  />
-                </div>
+                <SecuritySection />
                 
                 <div className="mt-4 p-4 bg-muted/50 rounded-lg">
                   <h4 className="font-medium mb-2">Security Features</h4>
