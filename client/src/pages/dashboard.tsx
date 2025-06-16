@@ -154,10 +154,18 @@ export default function Dashboard() {
   const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
 
   // Core data loads immediately
-  const { data: transactions, isLoading: transactionsLoading } = useQuery({
+  const { data: transactions, isLoading: transactionsLoading, error: transactionsError } = useQuery({
     queryKey: ['/api/transactions'],
     enabled: !!user,
   });
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Dashboard - User:', user ? 'Authenticated' : 'Not authenticated');
+    console.log('Dashboard - Transactions loading:', transactionsLoading);
+    console.log('Dashboard - Transactions data:', transactions);
+    console.log('Dashboard - Transactions error:', transactionsError);
+  }, [user, transactionsLoading, transactions, transactionsError]);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
