@@ -171,7 +171,7 @@ export default function Dashboard() {
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     enabled: isReady,
-    staleTime: 5 * 60 * 1000, // 5 minutes for categories (they change less often)
+    staleTime: 0, // Always fresh for immediate updates
     retry: (failureCount, error: any) => {
       if (error?.status === 401 && !isReady) return false;
       return failureCount < 3;
@@ -195,7 +195,7 @@ export default function Dashboard() {
       return response.json();
     },
     enabled: isReady, // Load immediately when authenticated
-    staleTime: 60 * 1000, // 1 minute for financial summary
+    staleTime: 0, // Always fresh for immediate updates
     retry: (failureCount, error: any) => {
       if (error?.status === 401 && !isReady) return false;
       return failureCount < 3;
