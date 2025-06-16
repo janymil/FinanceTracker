@@ -17,32 +17,13 @@ export const isAuthenticated = (req: any, res: Response, next: NextFunction) => 
     
     // Check if user is authenticated via Clerk
     if (!auth || !auth.userId) {
-      // Add CORS headers for better client handling
-      res.header('Access-Control-Allow-Origin', '*');
-      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-      
-      return res.status(401).json({ 
-        message: 'Authentication required',
-        code: 'AUTH_REQUIRED',
-        timestamp: new Date().toISOString()
-      });
+      return res.status(401).json({ message: 'Authentication required' });
     }
     
     next();
   } catch (error) {
     console.error('Authentication error:', error);
-    
-    // Add CORS headers for better client handling
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    
-    res.status(401).json({ 
-      message: 'Authentication failed',
-      code: 'AUTH_FAILED',
-      timestamp: new Date().toISOString()
-    });
+    res.status(401).json({ message: 'Authentication failed' });
   }
 };
 
