@@ -117,9 +117,9 @@ export default function CollaborativeGoalsPage() {
     queryKey: ["/api/friends/requests"],
   });
 
-  // Create goal mutation
-  const createGoalMutation = useMutation({
-    mutationFn: async (goalData: any) => {
+  // Create goal function
+  const createGoal = async (goalData: any) => {
+    try {
       // Debug logging to see what format we're getting
       console.log("Goal data before processing:", goalData);
       
@@ -150,11 +150,8 @@ export default function CollaborativeGoalsPage() {
       };
       
       console.log("Goal data after processing:", processedData);
-      const response = await apiRequest("POST", "/api/collaborative-goals", processedData);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/collaborative-goals"] });
+      const data = await apiRequest("POST", "/api/collaborative-goals", processedData);
+      await queryClient.invalidateQueries({ queryKey: ["/api/collaborative-goals"] });
       setCreateGoalOpen(false);
       setNewGoal({
         name: "",
@@ -168,15 +165,14 @@ export default function CollaborativeGoalsPage() {
         title: "Success!",
         description: "Collaborative goal created successfully",
       });
-    },
-    onError: (error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   // Send friend request mutation
   const sendFriendRequestMutation = useMutation({

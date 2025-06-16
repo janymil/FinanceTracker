@@ -144,7 +144,7 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
 
   const handleAICategorize = async (transaction: any) => {
     try {
-      const result = await aiCategorizeMutation.mutateAsync({
+      const result = await aiCategorize({
         description: transaction.description,
         amount: parseFloat(transaction.amount)
       });
@@ -235,16 +235,15 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
             <Button 
               onClick={() => {
                 if (transactions.length > 0) {
-                  categorizeMutation.mutate();
+                  autoCategorize();
                 } else {
                   generateMockSuggestions();
                 }
               }}
-              disabled={categorizeMutation.isPending}
               className="flex items-center gap-2"
             >
               <Sparkles className="h-4 w-4" />
-              {categorizeMutation.isPending ? "Analyzing..." : "Auto-Categorize"}
+              Auto-Categorize
             </Button>
           </div>
 
@@ -313,14 +312,9 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
                             await handleAICategorize(transaction);
                           }
                         }}
-                        disabled={aiCategorizeMutation.isPending}
                         className="text-blue-600 border-blue-200 hover:bg-blue-50"
                       >
-                        {aiCategorizeMutation.isPending ? (
-                          <div className="h-3 w-3 animate-spin rounded-full border border-blue-600 border-t-transparent" />
-                        ) : (
-                          <Brain className="h-3 w-3" />
-                        )}
+                        <Brain className="h-3 w-3" />
                       </Button>
                       <Button
                         size="sm"
@@ -371,14 +365,7 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
           </div>
 
           {/* Status */}
-          {categorizeMutation.isPending && (
-            <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-              <span className="text-sm text-blue-700 dark:text-blue-300">
-                Analyzing transaction patterns...
-              </span>
-            </div>
-          )}
+
         </div>
       </CardContent>
     </Card>
