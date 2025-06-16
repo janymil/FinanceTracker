@@ -260,12 +260,11 @@ export default function ProfilePage() {
               <div className="rounded-lg border overflow-hidden min-h-[600px]">
                 <UserProfile 
                   routing="hash"
-                  path="/profile"
                   appearance={{
                     elements: {
                       rootBox: "w-full min-h-[500px]",
                       card: "border-0 shadow-none min-h-[500px]",
-                      navbar: "hidden", // Hide navbar to show only profile content
+                      navbar: "hidden",
                       pageScrollBox: "p-4 min-h-[400px]",
                       profileSectionPrimaryButton: "bg-primary hover:bg-primary/90",
                       formButtonPrimary: "bg-primary hover:bg-primary/90"
