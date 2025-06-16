@@ -101,10 +101,10 @@ function AuthenticatedApp({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSi
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
 }) {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
 
   // Show loading while user data is being fetched
-  if (isLoading || !isAuthenticated || !user) {
+  if (isLoading || !user) {
     return <AppLoader />;
   }
 
