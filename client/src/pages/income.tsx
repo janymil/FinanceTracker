@@ -94,8 +94,13 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: async (newTransaction) => {
-      // Force immediate refetch for instant display
-      await queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
+      console.log("New transaction created:", newTransaction);
+      
+      // Clear cache and force immediate refetch
+      queryClient.removeQueries({ queryKey: ["/api/transactions"] });
+      const refetchResult = await queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
+      console.log("Refetch result:", refetchResult);
+      
       queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       queryClient.invalidateQueries({ queryKey: ["/api/expense-breakdown"] });
       
