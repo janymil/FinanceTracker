@@ -541,7 +541,7 @@ export default function Transactions() {
                     </Button>
                     <Button 
                       onClick={handleSubmit}
-                      disabled={!newTransaction.amount || !newTransaction.description || updateTransactionMutation.isPending}
+                      disabled={!newTransaction.amount || !newTransaction.description}
                     >
                       {editingTransaction ? "Update" : "Add"}
                     </Button>

@@ -46,7 +46,7 @@ import RequirePlan from "@/components/require-plan";
 import { Link } from "wouter";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
 interface Category {
@@ -376,9 +376,9 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                   </Button>
                   <Button 
                     onClick={handleSubmit}
-                    disabled={!newTransaction.amount || !newTransaction.description || createTransactionMutation.isPending}
+                    disabled={!newTransaction.amount || !newTransaction.description}
                   >
-                    {createTransactionMutation.isPending ? "Adding..." : "Add Transaction"}
+                    Add Transaction
                   </Button>
                 </div>
               </div>
