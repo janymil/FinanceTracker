@@ -198,6 +198,8 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
       queryClient.refetchQueries({ queryKey: ["/api/financial-summary"] });
       setEditingTransaction(null);
@@ -222,6 +224,8 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
       queryClient.refetchQueries({ queryKey: ["/api/financial-summary"] });
       toast({
