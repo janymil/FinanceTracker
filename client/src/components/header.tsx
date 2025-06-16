@@ -98,7 +98,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   });
 
   const { data: categories = [] } = useQuery({
-    queryKey: ["/api/categories"],
+    queryKey: ["categories"],
     enabled: !!user,
   });
 
@@ -274,6 +274,11 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                               {category.name}
                             </SelectItem>
                           ))}
+                        {(categories as Category[]).filter((cat: Category) => cat.type === newTransaction.type).length === 0 && (
+                          <div className="px-2 py-1 text-sm text-gray-500">
+                            No categories available for {newTransaction.type}
+                          </div>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
