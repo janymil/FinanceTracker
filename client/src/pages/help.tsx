@@ -28,7 +28,7 @@ import {
   ChevronDown,
   ChevronRight
 } from "lucide-react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
@@ -51,35 +51,28 @@ export default function Help() {
   ]);
   const [chatInput, setChatInput] = useState("");
   const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = () => {
     setLocation('/auth');
   };
 
-  const chatMutation = useMutation({
-    mutationFn: async (message: string) => {
-      const response = await fetch("/api/help-chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to get help response");
-      }
-
-      return response.json();
-    },
-    onSuccess: (data) => {
+  const sendChatMessage = async (message: string) => {
+    try {
+      const data = await apiRequest('POST', '/api/help-chat', { message });
       setChatMessages(prev => [...prev, {
         role: "assistant",
         content: data.response,
         timestamp: new Date()
       }]);
+    } catch (error) {
+      setChatMessages(prev => [...prev, {
+        role: "assistant",
+        content: "Sorry, I'm having trouble right now. Please try again later.",
+        timestamp: new Date()
+      }]);
     }
-  });
+  };
 
   const handleSendMessage = () => {
     if (!chatInput.trim()) return;
