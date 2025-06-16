@@ -95,19 +95,16 @@ function AppContent() {
   );
 }
 
-import { useAuth, useUser } from "@clerk/clerk-react";
-
 function AuthenticatedApp({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSidebarCollapsed }: {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
 }) {
-  const { isSignedIn: isAuthenticated } = useAuth();
-  const { user } = useUser();
+  const { user, isAuthenticated, isLoading } = useAuth();
 
   // Show loading while user data is being fetched
-  if (!isAuthenticated || !user) {
+  if (isLoading || !isAuthenticated || !user) {
     return <AppLoader />;
   }
 
