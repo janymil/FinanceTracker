@@ -83,8 +83,6 @@ export default function Transactions() {
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["/api/transactions"],
     enabled: !!user,
-    staleTime: 0, // Always refetch when invalidated
-    gcTime: 0, // Don't cache stale data
   });
 
   const { data: categories = [] } = useQuery({
@@ -160,18 +158,9 @@ export default function Transactions() {
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
       return await res.json();
     },
-    onSuccess: (updatedTransaction) => {
-      console.log("=== FRONTEND UPDATE SUCCESS ===");
-      console.log("Updated transaction received:", updatedTransaction);
-      console.log("Current transactions in cache:", transactions);
-      
-      // Force a complete refetch of transactions instead of cache manipulation
-      queryClient.refetchQueries({ queryKey: ["/api/transactions"] })
-        .then(() => {
-          console.log("Refetch completed");
-        });
-      
-      // Also invalidate related queries
+    onSuccess: () => {
+      // Simple invalidation - let React Query handle the rest
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ predicate: (query) => 
         query.queryKey[0] === '/api/financial-summary' 
       });
