@@ -51,7 +51,7 @@ interface Category {
 }
 
 export default function Expenses() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -75,7 +75,7 @@ export default function Expenses() {
 
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["/api/transactions"],
-    enabled: !!user,
+    enabled: isAuthenticated,
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/transactions");
       return response.json();
@@ -84,7 +84,7 @@ export default function Expenses() {
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
-    enabled: !!user,
+    enabled: isAuthenticated,
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/categories");
       return response.json();

@@ -35,7 +35,7 @@ const categoryColors = [
 ];
 
 export default function Categories() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -48,7 +48,7 @@ export default function Categories() {
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
-    enabled: !!user,
+    enabled: isAuthenticated,
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/categories");
       return response.json();
