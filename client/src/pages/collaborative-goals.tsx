@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -547,9 +547,8 @@ export default function CollaborativeGoalsPage() {
                     <DialogFooter>
                       <Button 
                         onClick={handleSendFriendRequest}
-                        disabled={sendFriendRequestMutation.isPending}
                       >
-                        {sendFriendRequestMutation.isPending ? "Sending..." : "Send Request"}
+                        Send Request
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -582,16 +581,14 @@ export default function CollaborativeGoalsPage() {
                             <div className="flex gap-2">
                               <Button 
                                 size="sm" 
-                                onClick={() => acceptFriendMutation.mutate(request.id)}
-                                disabled={acceptFriendMutation.isPending}
+                                onClick={() => acceptFriendRequest(request.id)}
                               >
                                 Accept
                               </Button>
                               <Button 
                                 size="sm" 
                                 variant="outline"
-                                onClick={() => rejectFriendMutation.mutate(request.id)}
-                                disabled={rejectFriendMutation.isPending}
+                                onClick={() => rejectFriendRequest(request.id)}
                               >
                                 Decline
                               </Button>

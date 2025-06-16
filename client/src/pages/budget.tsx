@@ -77,16 +77,14 @@ export default function Budget() {
     enabled: !!user,
   });
 
-  const createBudgetMutation = useMutation({
-    mutationFn: async (budgetData: typeof newBudget) => {
+  const createBudget = async (budgetData: typeof newBudget) => {
+    try {
       const res = await apiRequest("POST", "/api/budgets", {
         ...budgetData,
         amount: parseFloat(budgetData.amount),
       });
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      await res.json();
+      await queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
       setIsDialogOpen(false);
       setNewBudget({
         amount: "",
@@ -98,62 +96,55 @@ export default function Budget() {
         title: "Budget Created",
         description: "Budget has been created successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  const updateBudgetMutation = useMutation({
-    mutationFn: async ({ id, ...data }: { id: number } & typeof newBudget) => {
+  const updateBudget = async ({ id, ...data }: { id: number } & typeof newBudget) => {
+    try {
       const res = await apiRequest("PUT", `/api/budgets/${id}`, {
         ...data,
         amount: parseFloat(data.amount),
       });
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      await res.json();
+      await queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
       setEditingBudget(null);
       setIsDialogOpen(false);
       toast({
         title: "Budget Updated",
         description: "Budget has been updated successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  const deleteBudgetMutation = useMutation({
-    mutationFn: async (id: number) => {
+  const deleteBudget = async (id: number) => {
+    try {
       const res = await apiRequest("DELETE", `/api/budgets/${id}`);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      await res.json();
+      await queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
       toast({
         title: "Budget Deleted",
         description: "Budget has been removed successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   const expenseCategories = categories.filter((cat: Category) => cat.type === "expense");
   const totalBudget = budgets.reduce((sum: number, budget: Budget) => sum + parseFloat(budget.amount.toString() || '0'), 0);
@@ -164,9 +155,9 @@ export default function Budget() {
     if (!newBudget.amount || !newBudget.categoryId) return;
 
     if (editingBudget) {
-      updateBudgetMutation.mutate({ id: editingBudget.id, ...newBudget });
+      updateBudget({ id: editingBudget.id, ...newBudget });
     } else {
-      createBudgetMutation.mutate(newBudget);
+      createBudget(newBudget);
     }
   };
 
@@ -306,7 +297,7 @@ export default function Budget() {
                       </Button>
                       <Button 
                         onClick={handleSubmit}
-                        disabled={!newBudget.amount || !newBudget.categoryId || createBudgetMutation.isPending || updateBudgetMutation.isPending}
+                        disabled={!newBudget.amount || !newBudget.categoryId}
                       >
                         {editingBudget ? "Update" : "Create"} Budget
                       </Button>
