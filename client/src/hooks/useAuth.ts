@@ -33,22 +33,13 @@ export function useAuth() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [signOut]);
   
-  // Get our database user record that syncs with Clerk
-  const { data: user, isLoading: dbUserLoading } = useQuery<User>({
-    queryKey: ["/api/auth/user"],
-    enabled: !!clerkUser && isSignedIn,
-    staleTime: 0, // Always fetch fresh data
-    refetchOnWindowFocus: false,
-    refetchInterval: false,
-    retry: false, // Disable retries for faster loading
-  });
-
-  const isLoading = !userLoaded || !authLoaded || (isSignedIn && dbUserLoading);
-  const isAuthenticated = !!isSignedIn && !!clerkUser && !!user;
+  // Simplified: use Clerk user directly without database dependency for faster loading
+  const isLoading = !userLoaded || !authLoaded;
+  const isAuthenticated = !!isSignedIn && !!clerkUser;
   const isUnauthenticated = authLoaded && !isSignedIn;
 
   return {
-    user,
+    user: clerkUser, // Use Clerk user directly
     clerkUser,
     isLoading,
     isAuthenticated,
