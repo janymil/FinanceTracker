@@ -96,52 +96,9 @@ export default function Income() {
       });
       return await res.json();
     },
-    onMutate: async (newIncomeData) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ["transactions"] });
-      
-      // Snapshot the previous value
-      const previousTransactions = queryClient.getQueryData(["transactions"]);
-      
-      // Optimistically update to the new value
-      const optimisticTransaction = {
-        id: Date.now(), // Temporary ID
-        ...newIncomeData,
-        amount: newIncomeData.amount,
-        type: "income",
-        date: new Date(newIncomeData.date).toISOString(),
-        userId: user?.id,
-        categoryName: categories.find((cat: any) => cat.id.toString() === newIncomeData.categoryId)?.name || null
-      };
-      
-      queryClient.setQueryData(["transactions"], (old: any) => {
-        return old ? [optimisticTransaction, ...old] : [optimisticTransaction];
-      });
-      
-      // Return a context object with the snapshotted value
-      return { previousTransactions };
-    },
-    onError: (err, newIncomeData, context) => {
-      // If the mutation fails, use the context to roll back
-      queryClient.setQueryData(["/api/transactions"], context?.previousTransactions);
-      toast({
-        title: "Error",
-        description: "Failed to add income. Please try again.",
-        variant: "destructive",
-      });
-    },
-    onSuccess: (newTransaction) => {
-      // Update with real data from server
-      queryClient.setQueryData(["/api/transactions", user?.id], (old: any) => {
-        if (!old) return [newTransaction];
-        // Replace the optimistic update with real data
-        return [newTransaction, ...old.filter((t: any) => t.id !== Date.now())];
-      });
-      
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["/api/expense-breakdown"] });
-      
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       setIsDialogOpen(false);
       setNewIncome({
         amount: "",
@@ -151,10 +108,19 @@ export default function Income() {
         isRecurring: false,
         recurringFrequency: "monthly",
         recurringEndDate: "",
+        paymentUrl: "",
+        referenceNote: "",
       });
       toast({
         title: "Income Added",
         description: "Income transaction has been created successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
       });
     },
   });
@@ -187,8 +153,7 @@ export default function Income() {
         title: "Income Updated",
         description: "Income transaction has been updated successfully",
       });
-      // Force page reload for immediate visual feedback
-      window.location.reload();
+
     },
     onError: (error: Error) => {
       toast({
