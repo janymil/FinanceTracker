@@ -153,8 +153,8 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
   ];
 
   const isActive = (href: string) => {
-    if (href === "/") return location === "/";
-    return location.startsWith(href);
+    if (href === "/") return currentPath === "/";
+    return currentPath.startsWith(href);
   };
 
   const canAccess = (premium: boolean) => {
