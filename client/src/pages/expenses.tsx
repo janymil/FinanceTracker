@@ -152,6 +152,8 @@ export default function Expenses() {
         title: "Expense Updated",
         description: "Expense transaction has been updated successfully",
       });
+      // Force page reload for immediate visual feedback
+      window.location.reload();
     },
     onError: (error: Error) => {
       toast({

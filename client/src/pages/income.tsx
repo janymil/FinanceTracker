@@ -187,6 +187,8 @@ export default function Income() {
         title: "Income Updated",
         description: "Income transaction has been updated successfully",
       });
+      // Force page reload for immediate visual feedback
+      window.location.reload();
     },
     onError: (error: Error) => {
       toast({
