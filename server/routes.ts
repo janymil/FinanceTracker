@@ -20,7 +20,7 @@ import {
 import { aiCache } from "./cache";
 import { batchProcessor } from "./batch-processor";
 import { adminAuth, adminLogin, adminLogout } from "./adminAuth";
-import { generatePdfReport } from "./pdfExport";
+// PDF functionality removed
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 

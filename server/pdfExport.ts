@@ -1,103 +1,4 @@
-import React from 'react';
-import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
-
-// Styles for PDF document
-const styles = StyleSheet.create({
-  page: {
-    flexDirection: 'column',
-    backgroundColor: '#ffffff',
-    padding: 30,
-    fontFamily: 'Helvetica',
-  },
-  header: {
-    fontSize: 24,
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#2563eb',
-  },
-  section: {
-    margin: 10,
-    padding: 10,
-    flexGrow: 1,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    marginBottom: 10,
-    fontWeight: 'bold',
-    color: '#1f2937',
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 5,
-    padding: 5,
-    backgroundColor: '#f9fafb',
-  },
-  summaryLabel: {
-    fontSize: 12,
-    color: '#374151',
-  },
-  summaryValue: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#1f2937',
-  },
-  transactionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 3,
-    padding: 3,
-    borderBottom: '1 solid #e5e7eb',
-  },
-  transactionDate: {
-    fontSize: 10,
-    color: '#6b7280',
-    width: '20%',
-  },
-  transactionDesc: {
-    fontSize: 10,
-    color: '#1f2937',
-    width: '50%',
-  },
-  transactionAmount: {
-    fontSize: 10,
-    color: '#1f2937',
-    width: '20%',
-    textAlign: 'right',
-  },
-  expenseAmount: {
-    color: '#dc2626',
-  },
-  incomeAmount: {
-    color: '#059669',
-  },
-  categoryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 3,
-    padding: 3,
-  },
-  categoryName: {
-    fontSize: 11,
-    color: '#1f2937',
-    width: '70%',
-  },
-  categoryAmount: {
-    fontSize: 11,
-    color: '#1f2937',
-    width: '30%',
-    textAlign: 'right',
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 30,
-    right: 30,
-    textAlign: 'center',
-    fontSize: 8,
-    color: '#6b7280',
-  },
-});
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 interface TransactionData {
   id: number;
@@ -128,128 +29,268 @@ interface PdfData {
   }>;
 }
 
-// PDF Document Component
-const FinancialReportDocument: React.FC<{ data: PdfData }> = ({ data }) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      {/* Header */}
-      <Text style={styles.header}>Financial Report</Text>
-      
-      {/* User Info */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Report Details</Text>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Period:</Text>
-          <Text style={styles.summaryValue}>{data.period}</Text>
-        </View>
-        {data.user.name && (
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>User:</Text>
-            <Text style={styles.summaryValue}>{data.user.name}</Text>
-          </View>
-        )}
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Generated:</Text>
-          <Text style={styles.summaryValue}>{new Date().toLocaleDateString()}</Text>
-        </View>
-      </View>
-
-      {/* Financial Summary */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Financial Summary</Text>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Total Income:</Text>
-          <Text style={[styles.summaryValue, styles.incomeAmount]}>
-            ${data.summary.totalIncome.toFixed(2)}
-          </Text>
-        </View>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Total Expenses:</Text>
-          <Text style={[styles.summaryValue, styles.expenseAmount]}>
-            ${data.summary.totalExpenses.toFixed(2)}
-          </Text>
-        </View>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Net Income:</Text>
-          <Text style={[
-            styles.summaryValue,
-            data.summary.netIncome >= 0 ? styles.incomeAmount : styles.expenseAmount
-          ]}>
-            ${data.summary.netIncome.toFixed(2)}
-          </Text>
-        </View>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Total Transactions:</Text>
-          <Text style={styles.summaryValue}>{data.summary.transactionCount}</Text>
-        </View>
-      </View>
-
-      {/* Category Breakdown */}
-      {data.categoryBreakdown.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Category Breakdown</Text>
-          {data.categoryBreakdown.map((category, index) => (
-            <View key={index} style={styles.categoryRow}>
-              <Text style={styles.categoryName}>
-                {category.category} ({category.type})
-              </Text>
-              <Text style={[
-                styles.categoryAmount,
-                category.type === 'expense' ? styles.expenseAmount : styles.incomeAmount
-              ]}>
-                ${category.amount.toFixed(2)}
-              </Text>
-            </View>
-          ))}
-        </View>
-      )}
-
-      {/* Recent Transactions */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Transactions</Text>
-        <View style={styles.transactionRow}>
-          <Text style={[styles.transactionDate, { fontWeight: 'bold' }]}>Date</Text>
-          <Text style={[styles.transactionDesc, { fontWeight: 'bold' }]}>Description</Text>
-          <Text style={[styles.transactionAmount, { fontWeight: 'bold' }]}>Amount</Text>
-        </View>
-        {data.transactions.slice(0, 20).map((transaction, index) => (
-          <View key={index} style={styles.transactionRow}>
-            <Text style={styles.transactionDate}>
-              {new Date(transaction.date).toLocaleDateString()}
-            </Text>
-            <Text style={styles.transactionDesc}>
-              {transaction.description}
-              {transaction.categoryName && ` (${transaction.categoryName})`}
-            </Text>
-            <Text style={[
-              styles.transactionAmount,
-              transaction.type === 'expense' ? styles.expenseAmount : styles.incomeAmount
-            ]}>
-              {transaction.type === 'expense' ? '-' : '+'}${parseFloat(transaction.amount).toFixed(2)}
-            </Text>
-          </View>
-        ))}
-        {data.transactions.length > 20 && (
-          <Text style={{ fontSize: 10, fontStyle: 'italic', marginTop: 10, textAlign: 'center' }}>
-            Showing first 20 transactions of {data.transactions.length} total
-          </Text>
-        )}
-      </View>
-
-      {/* Footer */}
-      <Text style={styles.footer}>
-        Generated by FinanzerPro - Personal Finance Management
-      </Text>
-    </Page>
-  </Document>
-);
-
-// Generate PDF Buffer
 export async function generatePdfReport(data: PdfData): Promise<Buffer> {
   try {
-    const doc = React.createElement(FinancialReportDocument, { data });
-    const pdfBuffer = await pdf(doc).toBuffer();
-    return pdfBuffer;
+    // Create a new PDF document
+    const pdfDoc = await PDFDocument.create();
+    
+    // Embed fonts
+    const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const helveticaBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    
+    // Add a page
+    const page = pdfDoc.addPage([595, 842]); // A4 size
+    const { width, height } = page.getSize();
+    
+    let yPosition = height - 50;
+    
+    // Header
+    page.drawText('FinanzerPro Financial Report', {
+      x: 50,
+      y: yPosition,
+      size: 24,
+      font: helveticaBoldFont,
+      color: rgb(0.15, 0.11, 0.56), // FinanzerPro brand color
+    });
+    
+    yPosition -= 40;
+    
+    // Report Details
+    page.drawText('Report Details', {
+      x: 50,
+      y: yPosition,
+      size: 16,
+      font: helveticaBoldFont,
+      color: rgb(0.12, 0.16, 0.22),
+    });
+    
+    yPosition -= 25;
+    
+    page.drawText(`Period: ${data.period}`, {
+      x: 50,
+      y: yPosition,
+      size: 12,
+      font: helveticaFont,
+      color: rgb(0.22, 0.26, 0.32),
+    });
+    
+    yPosition -= 20;
+    
+    if (data.user.name) {
+      page.drawText(`User: ${data.user.name}`, {
+        x: 50,
+        y: yPosition,
+        size: 12,
+        font: helveticaFont,
+        color: rgb(0.22, 0.26, 0.32),
+      });
+      yPosition -= 20;
+    }
+    
+    page.drawText(`Generated: ${new Date().toLocaleDateString()}`, {
+      x: 50,
+      y: yPosition,
+      size: 12,
+      font: helveticaFont,
+      color: rgb(0.22, 0.26, 0.32),
+    });
+    
+    yPosition -= 40;
+    
+    // Financial Summary
+    page.drawText('Financial Summary', {
+      x: 50,
+      y: yPosition,
+      size: 16,
+      font: helveticaBoldFont,
+      color: rgb(0.12, 0.16, 0.22),
+    });
+    
+    yPosition -= 25;
+    
+    const summaryItems = [
+      { label: 'Total Income:', value: `$${data.summary.totalIncome.toFixed(2)}`, color: rgb(0.02, 0.53, 0.41) },
+      { label: 'Total Expenses:', value: `$${data.summary.totalExpenses.toFixed(2)}`, color: rgb(0.86, 0.16, 0.16) },
+      { label: 'Net Income:', value: `$${data.summary.netIncome.toFixed(2)}`, color: data.summary.netIncome >= 0 ? rgb(0.02, 0.53, 0.41) : rgb(0.86, 0.16, 0.16) },
+      { label: 'Total Transactions:', value: data.summary.transactionCount.toString(), color: rgb(0.12, 0.16, 0.22) },
+    ];
+    
+    summaryItems.forEach(item => {
+      page.drawText(item.label, {
+        x: 50,
+        y: yPosition,
+        size: 12,
+        font: helveticaFont,
+        color: rgb(0.22, 0.26, 0.32),
+      });
+      
+      page.drawText(item.value, {
+        x: 200,
+        y: yPosition,
+        size: 12,
+        font: helveticaBoldFont,
+        color: item.color,
+      });
+      
+      yPosition -= 20;
+    });
+    
+    yPosition -= 20;
+    
+    // Category Breakdown
+    if (data.categoryBreakdown.length > 0) {
+      page.drawText('Category Breakdown', {
+        x: 50,
+        y: yPosition,
+        size: 16,
+        font: helveticaBoldFont,
+        color: rgb(0.12, 0.16, 0.22),
+      });
+      
+      yPosition -= 25;
+      
+      // Show top 10 categories
+      const topCategories = data.categoryBreakdown.slice(0, 10);
+      
+      topCategories.forEach(category => {
+        const categoryColor = category.type === 'expense' ? rgb(0.86, 0.16, 0.16) : rgb(0.02, 0.53, 0.41);
+        
+        page.drawText(`${category.category} (${category.type}):`, {
+          x: 50,
+          y: yPosition,
+          size: 11,
+          font: helveticaFont,
+          color: rgb(0.22, 0.26, 0.32),
+        });
+        
+        page.drawText(`$${category.amount.toFixed(2)}`, {
+          x: 350,
+          y: yPosition,
+          size: 11,
+          font: helveticaBoldFont,
+          color: categoryColor,
+        });
+        
+        yPosition -= 18;
+      });
+      
+      yPosition -= 20;
+    }
+    
+    // Recent Transactions
+    page.drawText('Recent Transactions', {
+      x: 50,
+      y: yPosition,
+      size: 16,
+      font: helveticaBoldFont,
+      color: rgb(0.12, 0.16, 0.22),
+    });
+    
+    yPosition -= 25;
+    
+    // Table headers
+    page.drawText('Date', {
+      x: 50,
+      y: yPosition,
+      size: 10,
+      font: helveticaBoldFont,
+      color: rgb(0.12, 0.16, 0.22),
+    });
+    
+    page.drawText('Description', {
+      x: 130,
+      y: yPosition,
+      size: 10,
+      font: helveticaBoldFont,
+      color: rgb(0.12, 0.16, 0.22),
+    });
+    
+    page.drawText('Amount', {
+      x: 450,
+      y: yPosition,
+      size: 10,
+      font: helveticaBoldFont,
+      color: rgb(0.12, 0.16, 0.22),
+    });
+    
+    yPosition -= 15;
+    
+    // Show recent transactions (max 15 to fit on page)
+    const recentTransactions = data.transactions.slice(0, 15);
+    
+    recentTransactions.forEach(transaction => {
+      const transactionColor = transaction.type === 'expense' ? rgb(0.86, 0.16, 0.16) : rgb(0.02, 0.53, 0.41);
+      
+      // Date
+      page.drawText(new Date(transaction.date).toLocaleDateString(), {
+        x: 50,
+        y: yPosition,
+        size: 9,
+        font: helveticaFont,
+        color: rgb(0.42, 0.45, 0.50),
+      });
+      
+      // Description (truncate if too long)
+      const description = transaction.description.length > 30 
+        ? transaction.description.substring(0, 30) + '...' 
+        : transaction.description;
+      
+      page.drawText(description, {
+        x: 130,
+        y: yPosition,
+        size: 9,
+        font: helveticaFont,
+        color: rgb(0.12, 0.16, 0.22),
+      });
+      
+      // Category if available
+      if (transaction.categoryName) {
+        page.drawText(`(${transaction.categoryName})`, {
+          x: 280,
+          y: yPosition,
+          size: 8,
+          font: helveticaFont,
+          color: rgb(0.50, 0.54, 0.60),
+        });
+      }
+      
+      // Amount
+      const prefix = transaction.type === 'expense' ? '-' : '+';
+      page.drawText(`${prefix}$${parseFloat(transaction.amount).toFixed(2)}`, {
+        x: 450,
+        y: yPosition,
+        size: 9,
+        font: helveticaBoldFont,
+        color: transactionColor,
+      });
+      
+      yPosition -= 15;
+    });
+    
+    if (data.transactions.length > 15) {
+      yPosition -= 10;
+      page.drawText(`Showing 15 of ${data.transactions.length} total transactions`, {
+        x: 50,
+        y: yPosition,
+        size: 8,
+        font: helveticaFont,
+        color: rgb(0.50, 0.54, 0.60),
+      });
+    }
+    
+    // Footer
+    page.drawText('Generated by FinanzerPro - Personal Finance Management', {
+      x: 50,
+      y: 30,
+      size: 8,
+      font: helveticaFont,
+      color: rgb(0.42, 0.45, 0.50),
+    });
+    
+    // Generate PDF bytes
+    const pdfBytes = await pdfDoc.save();
+    return Buffer.from(pdfBytes);
+    
   } catch (error) {
     console.error('Error generating PDF:', error);
     throw new Error('Failed to generate PDF report');
