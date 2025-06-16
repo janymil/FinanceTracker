@@ -8,19 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { 
-  Plus, 
-  Edit3, 
-  Trash2, 
-  DollarSign, 
-  TrendingUp, 
-  Home, 
-  Car, 
-  ShoppingBag, 
-  Utensils,
-  Heart,
-  Gamepad2
-} from "lucide-react";
+import { Plus, Edit3, Trash2 } from "lucide-react";
+import { categoryIcons, Icon } from "@/lib/icons";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -33,17 +22,6 @@ interface Category {
   transactionCount: number;
   isInUse: boolean;
 }
-
-const categoryIcons = {
-  "dollar-sign": DollarSign,
-  "trending-up": TrendingUp,
-  "home": Home,
-  "car": Car,
-  "shopping-bag": ShoppingBag,
-  "utensils": Utensils,
-  "heart": Heart,
-  "gamepad-2": Gamepad2,
-};
 
 const categoryColors = [
   { name: "Blue", value: "#3B82F6" },
@@ -177,7 +155,7 @@ export default function Categories() {
   };
 
   const CategoryCard = ({ category }: { category: Category }) => {
-    const IconComponent = categoryIcons[category.icon as keyof typeof categoryIcons] || DollarSign;
+    const IconComponent = categoryIcons[category.icon as keyof typeof categoryIcons] || categoryIcons["dollar-sign"];
     
     return (
       <Card className="group relative hover:shadow-md transition-shadow">
