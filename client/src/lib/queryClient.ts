@@ -68,13 +68,9 @@ export const getQueryFn: <T>(options: {
     return await res.json();
   };
 
-// Create a global mutation helper that handles cache updates
-export const invalidateAllFinancialData = () => {
-  queryClient.invalidateQueries();
-  // Force immediate refetch of active queries
-  setTimeout(() => {
-    queryClient.refetchQueries({ type: 'active' });
-  }, 100);
+// Simple solution: force page reload for immediate updates
+export const refreshPage = () => {
+  window.location.reload();
 };
 
 export const queryClient = new QueryClient({
@@ -83,19 +79,15 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: 0,
-      gcTime: 5 * 60 * 1000, // Shorter cache time
-      retry: 1, // Minimal retries
-      retryDelay: 200,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      retry: 2,
+      retryDelay: 1000,
       networkMode: 'online',
     },
     mutations: {
       retry: false,
       networkMode: 'online',
-      onSuccess: () => {
-        // Global mutation success handler - invalidate everything
-        invalidateAllFinancialData();
-      },
     },
   },
 });

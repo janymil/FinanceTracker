@@ -110,7 +110,8 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
       });
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      await forceRefreshFinancialData();
       setIsDialogOpen(false);
       setNewTransaction({
         amount: "",
