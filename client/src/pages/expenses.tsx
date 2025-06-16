@@ -210,8 +210,12 @@ export default function Expenses() {
 
   const deleteExpenseMutation = useMutation({
     mutationFn: async (id: number) => {
+      console.log("Starting delete mutation for transaction:", id);
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
-      return await res.json();
+      console.log("Delete response received:", res.status);
+      const result = await res.json();
+      console.log("Delete result:", result);
+      return result;
     },
     onSuccess: () => {
       console.log("Delete mutation success - triggering refetch");
