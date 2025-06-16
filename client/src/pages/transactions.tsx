@@ -136,8 +136,9 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      queryClient.refetchQueries({ predicate: (query) => 
+        query.queryKey[0] === "transactions" || query.queryKey[0] === "financial-summary" 
+      });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -841,8 +842,9 @@ export default function Transactions() {
                               console.log("DIRECT FETCH EDIT: Response status:", response.status);
                               
                               if (response.ok) {
-                                await queryClient.invalidateQueries({ queryKey: ["transactions"] });
-                                await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+                                await queryClient.refetchQueries({ predicate: (query) => 
+                                  query.queryKey[0] === "transactions" || query.queryKey[0] === "financial-summary" 
+                                });
                                 toast({
                                   title: "Transaction Updated",
                                   description: "Transaction has been updated successfully",

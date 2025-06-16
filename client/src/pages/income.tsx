@@ -169,8 +169,9 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      queryClient.refetchQueries({ predicate: (query) => 
+        query.queryKey[0] === "transactions" || query.queryKey[0] === "financial-summary" 
+      });
       toast({
         title: "Income Deleted",
         description: "Income transaction has been removed successfully",
