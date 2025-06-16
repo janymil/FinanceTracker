@@ -56,12 +56,12 @@ export default function AdminAnalytics() {
   const { toast } = useToast();
 
   const { data: users = [], isLoading: usersLoading } = useQuery({
-    queryKey: ['/api/admin/users'],
+    queryKey: ['/api/admin-analytics/users'],
     enabled: isAuthenticated,
   });
 
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['/api/admin/stats'],
+    queryKey: ['/api/admin-analytics/overview'],
     enabled: isAuthenticated,
   });
 
@@ -70,7 +70,7 @@ export default function AdminAnalytics() {
     setIsLoggingIn(true);
     
     try {
-      await apiRequest('POST', '/api/admin/login', { password });
+      await apiRequest('POST', '/api/admin-analytics/login', { password });
       
       setIsAuthenticated(true);
       setPassword("");
@@ -114,18 +114,18 @@ export default function AdminAnalytics() {
   const updateUser = async ({ id, userData }: { id: string; userData: any }) => {
     setIsUpdatingUser(true);
     try {
-      await apiRequest('PUT', `/api/admin/users/${id}`, userData);
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      await apiRequest('PUT', `/api/admin-analytics/users/${id}/plan`, userData);
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/users'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/overview'] });
       setEditingUser(null);
       toast({
         title: "Success",
-        description: "User updated successfully",
+        description: "User plan updated successfully",
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update user",
+        description: "Failed to update user plan",
         variant: "destructive",
       });
     } finally {
@@ -136,9 +136,9 @@ export default function AdminAnalytics() {
   const deleteUser = async (userId: string) => {
     setIsDeletingUser(true);
     try {
-      await apiRequest('DELETE', `/api/admin/users/${userId}`);
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      await apiRequest('DELETE', `/api/admin-analytics/users/${userId}`);
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/users'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/overview'] });
       toast({
         title: "Success",
         description: "User deleted successfully",
