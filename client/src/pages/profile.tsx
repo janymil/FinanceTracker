@@ -6,7 +6,7 @@ import { Button } from "../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Badge } from "../components/ui/badge";
-import { User, Lock, Bell, Palette, CreditCard } from "lucide-react";
+import { User, Bell, Palette, CreditCard } from "lucide-react";
 
 export default function ProfilePage() {
   const { user } = useUser();
@@ -42,20 +42,13 @@ export default function ProfilePage() {
             </Badge>
           </div>
         </div>
-        <Button variant="outline">
-          Change Photo
-        </Button>
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile">
             <User className="h-4 w-4 mr-2" />
             Profile
-          </TabsTrigger>
-          <TabsTrigger value="security">
-            <Lock className="h-4 w-4 mr-2" />
-            Security
           </TabsTrigger>
           <TabsTrigger value="notifications">
             <Bell className="h-4 w-4 mr-2" />
@@ -75,24 +68,9 @@ export default function ProfilePage() {
         <TabsContent value="profile">
           <Card>
             <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
+              <CardTitle>Account Management</CardTitle>
               <CardDescription>
-                Manage your profile details, name, email addresses, and connected accounts through Clerk's secure interface
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <UserProfile />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Security Tab */}
-        <TabsContent value="security">
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Security</CardTitle>
-              <CardDescription>
-                Manage your password, two-factor authentication, and security settings through Clerk's secure interface
+                Manage your profile details, security settings, password, and connected accounts through Clerk's secure interface
               </CardDescription>
             </CardHeader>
             <CardContent>
