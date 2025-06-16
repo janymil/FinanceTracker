@@ -36,7 +36,8 @@ FinanzerPro is a full-stack personal finance management application built with R
 ## Key Components
 
 ### Authentication System
-- Clerk authentication as primary system (JWT-based)
+- Replit Auth (OpenID Connect) for secure user authentication
+- Session-based authentication using PostgreSQL session store
 - Plan-based access control (free, standard, premium)
 - Stripe integration for subscription management after account creation
 
@@ -265,10 +266,6 @@ Changelog:
 - June 16, 2025. Replaced all visible page reloads with proper React Query cache invalidation for seamless user experience
 - June 16, 2025. Fixed dashboard "Add Transaction" button category field by correcting query key mismatch between header and other components
 - June 16, 2025. Implemented comprehensive React Query refetch system providing immediate visual feedback without page refreshes across all transaction operations
-- June 16, 2025. Cleaned up session management architecture - removed conflicting express-session, memorystore, and connect-pg-simple packages, using only Clerk JWT authentication
-- June 16, 2025. Removed heavy PDF dependencies (puppeteer, canvas, chartjs-node-canvas, chart.js, pdf-lib, @react-pdf/renderer) to reduce bundle size by 75%
-- June 16, 2025. Simplified export functionality to CSV only, eliminated PDF generation endpoints and compilation errors
-- June 16, 2025. Added nanoid package for secure ID generation throughout the application
 ```
 
 ## User Preferences

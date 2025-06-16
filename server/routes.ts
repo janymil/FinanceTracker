@@ -20,7 +20,7 @@ import {
 import { aiCache } from "./cache";
 import { batchProcessor } from "./batch-processor";
 import { adminAuth, adminLogin, adminLogout } from "./adminAuth";
-// PDF functionality removed
+import { generatePdfReport } from "./generatePdf";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -1478,7 +1478,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // PDF export functionality removed to simplify application
+  // Dedicated PDF export endpoint
+  app.post('/api/export-pdf', isAuthenticated, async (req: any, res) => {
+    try {
+      console.log('PDF Export Request:', req.body);
+      
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      if (!userId) {
+        console.log('PDF Export Error: No user ID');
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const user = await storage.getUser(userId);
+      console.log('PDF Export User:', user?.plan);
+
+      if (!user || user.plan === 'free') {
+        console.log('PDF Export Error: Plan restriction');
+        return res.status(403).json({ message: "PDF export requires Standard or Premium subscription" });
+      }
+
+      const { month, year } = req.body;
+      console.log('PDF Export Parameters:', { month, year });
+
+      // Parse month and year
+      const targetYear = year || new Date().getFullYear();
+      const targetMonth = month ? new Date(Date.parse(month + " 1, 2000")).getMonth() : new Date().getMonth();
+
+      // Get date range for the specified month
+      const start = new Date(targetYear, targetMonth, 1);
+      const end = new Date(targetYear, targetMonth + 1, 0);
+
+      // Get all user data
+      const transactions = await storage.getUserTransactions(userId);
+      const budgets = await storage.getUserBudgets(userId);
+      let goals = [];
+      try {
+        goals = await storage.getUserGoals(userId);
+      } catch (error) {
+        console.log('Goals not available for user:', userId);
+      }
+
+      // Filter transactions for the specified month
+      const monthlyTransactions = transactions.filter(t => {
+        const transactionDate = new Date(t.date);
+        return transactionDate >= start && transactionDate <= end;
+      });
+
+      // Calculate financial summary
+      const income = monthlyTransactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      
+      const expenses = monthlyTransactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+      // Calculate category breakdown
+      const categoryBreakdown: { [key: string]: number } = {};
+      monthlyTransactions
+        .filter(t => t.type === 'expense')
+        .forEach(t => {
+          const category = t.categoryId?.toString() || 'Other';
+          categoryBreakdown[category] = (categoryBreakdown[category] || 0) + parseFloat(t.amount);
+        });
+
+      // Prepare PDF data with proper data transformation
+      const pdfData = {
+        transactions: monthlyTransactions.map(t => ({
+          id: t.id,
+          amount: t.amount,
+          description: t.description,
+          date: t.date.toISOString(),
+          type: t.type as 'income' | 'expense',
+          categoryId: t.categoryId?.toString() || null
+        })),
+        budgets: budgets.map(b => ({
+          id: b.id,
+          name: b.categoryId?.toString() || "Uncategorized", 
+          amount: b.amount,
+          spent: "0", // Calculate spent amount from transactions
+          categoryId: b.categoryId || 0,
+          period: b.period
+        })),
+        goals: goals.map((g: any) => ({
+          id: g.id,
+          name: g.name,
+          targetAmount: g.targetAmount,
+          currentAmount: g.currentAmount,
+          targetDate: g.targetDate
+        })),
+        summary: {
+          totalIncome: income,
+          totalExpenses: expenses,
+          netAmount: income - expenses,
+          transactionCount: monthlyTransactions.length,
+          categoryBreakdown,
+          month: month || new Date().toLocaleDateString('en-US', { month: 'long' }),
+          year: targetYear
+        },
+        userName: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email || 'User'
+      };
+
+      console.log('PDF Data prepared:', JSON.stringify(pdfData, null, 2));
+
+      // Generate PDF
+      const pdfBuffer = await generatePdfReport(pdfData);
+      
+      // Send PDF response
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="finanzerpro-report-${month}-${targetYear}.pdf"`);
+      res.send(pdfBuffer);
+
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+      res.status(500).json({ 
+        message: "Failed to generate PDF report", 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
 
   app.post('/api/export', isAuthenticated, async (req: any, res) => {
     try {
@@ -1700,7 +1821,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           filename = `financial-data-${new Date().toISOString().split('T')[0]}.xlsx`;
           contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
           break;
-
+        case 'pdf':
+          // Use Puppeteer + Google Charts for professional PDF generation
+          const pdfData = {
+            transactions: exportData.transactions || [],
+            budgets: exportData.budgets || [],
+            goals: exportData.goals || [],
+            summary: exportData.summary || {
+              totalIncome: 0,
+              totalExpenses: 0,
+              netAmount: 0,
+              transactionCount: 0,
+              categoryBreakdown: {},
+              month: new Date().toLocaleDateString('en-US', { month: 'long' }),
+              year: new Date().getFullYear()
+            },
+            userName: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email || 'User'
+          };
+          
+          responseData = await generatePdfReport(pdfData);
+          filename = `financial-report-${new Date().toISOString().split('T')[0]}.pdf`;
+          contentType = 'application/pdf';
+          break;
         default:
           responseData = JSON.stringify(exportData, null, 2);
           filename = `financial-data-${new Date().toISOString().split('T')[0]}.json`;
