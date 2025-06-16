@@ -296,6 +296,52 @@ export default function ProfilePage() {
 
             <Card>
               <CardHeader>
+                <CardTitle>Security & Password</CardTitle>
+                <CardDescription>
+                  Manage your password, two-factor authentication, and security settings
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="max-w-2xl">
+                  <UserProfile 
+                    routing="hash"
+                    appearance={{
+                      elements: {
+                        rootBox: "w-full max-w-2xl",
+                        card: "border-0 shadow-none max-w-2xl",
+                        navbar: "border-b",
+                        pageScrollBox: "p-0 max-w-2xl",
+                        profileSection: "max-w-2xl",
+                        profileSectionContent: "max-w-2xl",
+                        profileSectionPrimaryButton: "bg-primary hover:bg-primary/90 text-sm px-3 py-1.5",
+                        formButtonPrimary: "bg-primary hover:bg-primary/90 text-sm",
+                        formFieldInput: "max-w-sm text-sm",
+                        formFieldLabel: "text-sm",
+                        profileSectionItem: "py-2 max-w-2xl",
+                        navbarButton: "text-sm",
+                        navbarButtonActive: "border-b-2 border-primary text-primary"
+                      }
+                    }}
+                  />
+                </div>
+                
+                <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                  <h4 className="font-medium mb-2">Security Management</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Click on the "Security" tab above to access:
+                  </p>
+                  <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+                    <li>• Change your account password</li>
+                    <li>• Enable two-factor authentication (2FA)</li>
+                    <li>• Manage active sessions</li>
+                    <li>• View security activity</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
                 <CardTitle>Privacy Settings</CardTitle>
                 <CardDescription>
                   Control how your data is used and shared

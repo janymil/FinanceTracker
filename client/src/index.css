@@ -192,12 +192,27 @@
   font-weight: 500 !important;
 }
 
-/* Completely hide navigation */
-.cl-navbar,
-.cl-userPreview,
-.cl-profileSection__navbar,
-[data-localization-key*="navbar"] {
+/* Hide navigation for the first UserProfile (Account Settings) but show it for Security section */
+.max-w-2xl:first-of-type .cl-navbar,
+.max-w-2xl:first-of-type .cl-userPreview {
   display: none !important;
+}
+
+/* Show navbar for security section */
+.cl-navbar {
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  padding: 0.5rem 1rem !important;
+}
+
+.cl-navbarButton {
+  padding: 0.5rem 1rem !important;
+  font-size: 0.875rem !important;
+  border-radius: 0.375rem !important;
+}
+
+.cl-navbarButton[data-localization-key*="security"] {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
 }
 
 /* Reduce excessive padding */
