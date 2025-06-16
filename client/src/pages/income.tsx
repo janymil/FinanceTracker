@@ -849,7 +849,70 @@ export default function Income() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => handleEdit(transaction)}
+                          onClick={async () => {
+                            console.log("DIRECT FETCH EDIT: Starting for transaction:", transaction.id);
+                            
+                            const newAmountStr = prompt(`Edit amount for "${transaction.description}":`, transaction.amount.toString());
+                            if (newAmountStr === null) return;
+                            
+                            const newAmount = parseFloat(newAmountStr);
+                            if (isNaN(newAmount) || newAmount <= 0) {
+                              toast({
+                                title: "Invalid Amount",
+                                description: "Please enter a valid positive number",
+                                variant: "destructive",
+                              });
+                              return;
+                            }
+                            
+                            const matchingCategory = (categories as any[]).find(
+                              cat => cat.name === transaction.categoryName
+                            );
+                            
+                            const updateData = {
+                              amount: newAmount,
+                              description: transaction.description,
+                              date: transaction.date instanceof Date 
+                                ? transaction.date.toISOString().split('T')[0]
+                                : new Date(transaction.date).toISOString().split('T')[0],
+                              type: transaction.type,
+                              categoryId: matchingCategory ? matchingCategory.id : null,
+                              isRecurring: Boolean(transaction.isRecurring),
+                              recurringFrequency: transaction.recurringFrequency || "monthly",
+                              recurringEndDate: transaction.recurringEndDate || null,
+                              paymentUrl: transaction.paymentUrl || "",
+                              referenceNote: transaction.referenceNote || ""
+                            };
+                            
+                            console.log("DIRECT FETCH EDIT: Sending data:", updateData);
+                            
+                            try {
+                              const response = await fetch(`/api/transactions/${transaction.id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(updateData)
+                              });
+                              
+                              console.log("DIRECT FETCH EDIT: Response status:", response.status);
+                              
+                              if (response.ok) {
+                                console.log("DIRECT FETCH EDIT: Success - reloading page");
+                                window.location.reload();
+                              } else {
+                                toast({
+                                  title: "Edit Failed",
+                                  description: `Error: ${response.status}`,
+                                  variant: "destructive",
+                                });
+                              }
+                            } catch (error) {
+                              toast({
+                                title: "Edit Failed", 
+                                description: "Network error occurred",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
                         >
                           <Edit3 className="h-3 w-3" />
                         </Button>
