@@ -42,7 +42,8 @@ import {
   ArrowUpRight,
   ArrowDownLeft,
   Sparkles,
-  DollarSign
+  DollarSign,
+  Repeat
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
