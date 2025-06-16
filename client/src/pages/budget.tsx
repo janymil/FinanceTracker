@@ -94,7 +94,12 @@ export default function Budget() {
       return await res.json();
     },
     onSuccess: () => {
+      // Invalidate all budget-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === '/api/financial-summary' 
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-health"] });
       setIsDialogOpen(false);
       setNewBudget({
         amount: "",
@@ -125,7 +130,12 @@ export default function Budget() {
       return await res.json();
     },
     onSuccess: () => {
+      // Invalidate all budget-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === '/api/financial-summary' 
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-health"] });
       setEditingBudget(null);
       setIsDialogOpen(false);
       toast({
@@ -148,7 +158,12 @@ export default function Budget() {
       return await res.json();
     },
     onSuccess: () => {
+      // Invalidate all budget-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === '/api/financial-summary' 
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-health"] });
       toast({
         title: "Budget Deleted",
         description: "Budget has been removed successfully",
