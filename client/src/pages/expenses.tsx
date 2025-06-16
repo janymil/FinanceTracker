@@ -76,19 +76,11 @@ export default function Expenses() {
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["/api/transactions"],
     enabled: isAuthenticated,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/transactions");
-      return response.json();
-    },
   });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
     enabled: isAuthenticated,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/categories");
-      return response.json();
-    },
   });
 
   const createExpenseMutation = useMutation({
@@ -210,21 +202,12 @@ export default function Expenses() {
 
   const deleteExpenseMutation = useMutation({
     mutationFn: async (id: number) => {
-      console.log("Starting delete mutation for transaction:", id);
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
-      console.log("Delete response received:", res.status);
-      const result = await res.json();
-      console.log("Delete result:", result);
-      return result;
+      return await res.json();
     },
     onSuccess: () => {
-      console.log("Delete mutation success - triggering refetch");
-      queryClient.refetchQueries({ queryKey: ["/api/transactions"] }).then(() => {
-        console.log("Transactions refetch completed");
-      });
-      queryClient.refetchQueries({ queryKey: ["/api/financial-summary"] }).then(() => {
-        console.log("Financial summary refetch completed");
-      });
+      queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
+      queryClient.refetchQueries({ queryKey: ["/api/financial-summary"] });
       toast({
         title: "Expense Deleted",
         description: "Expense transaction has been removed successfully",

@@ -83,19 +83,11 @@ export default function Transactions() {
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["/api/transactions"],
     enabled: isAuthenticated,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/transactions");
-      return response.json();
-    },
   });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
     enabled: isAuthenticated,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/categories");
-      return response.json();
-    },
   });
 
 
