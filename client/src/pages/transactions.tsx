@@ -161,15 +161,15 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: (updatedTransaction) => {
-      console.log("Update mutation success, updated transaction:", updatedTransaction);
+      console.log("=== FRONTEND UPDATE SUCCESS ===");
+      console.log("Updated transaction received:", updatedTransaction);
+      console.log("Current transactions in cache:", transactions);
       
-      // Update the cache directly with the new data
-      queryClient.setQueryData(["/api/transactions"], (oldData: any) => {
-        if (!oldData) return oldData;
-        return oldData.map((t: any) => 
-          t.id === updatedTransaction.id ? updatedTransaction : t
-        );
-      });
+      // Force a complete refetch of transactions instead of cache manipulation
+      queryClient.refetchQueries({ queryKey: ["/api/transactions"] })
+        .then(() => {
+          console.log("Refetch completed");
+        });
       
       // Also invalidate related queries
       queryClient.invalidateQueries({ predicate: (query) => 
