@@ -222,11 +222,11 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                           {item.title}
                           {item.badge && !accessible && (
                             <Badge className={cn(
-                              "text-white text-xs ml-2",
+                              "text-white text-xs ml-2 rounded-full px-2 py-1 max-w-20 overflow-hidden text-ellipsis whitespace-nowrap",
                               item.badge === "Standard" ? "bg-blue-500" : "bg-purple-500"
                             )}>
-                              <Crown className="h-3 w-3 mr-1" />
-                              {item.badge}
+                              <Crown className="h-3 w-3 mr-1 flex-shrink-0" />
+                              <span className="truncate">{item.badge}</span>
                             </Badge>
                           )}
                         </span>
