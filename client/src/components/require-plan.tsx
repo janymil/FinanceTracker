@@ -1,5 +1,8 @@
 import React, { ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useQuery } from '@tanstack/react-query';
+import { useClerkUserReady } from '@/hooks/useClerkUserReady';
+import { apiRequest } from '@/lib/queryClient';
 import UpgradePrompt from './upgrade-prompt';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
@@ -100,9 +103,21 @@ const featureConfigs = {
 };
 
 export default function RequirePlan({ plan, children, feature, description, benefits, compact }: RequirePlanProps) {
-  const { user, isLoading } = useAuth();
+  const isReady = useClerkUserReady();
+  const { user } = useAuth();
 
-  if (isLoading) {
+  // Get user's plan from database
+  const { data: databaseUser, isLoading } = useQuery({
+    queryKey: ["auth-user", user?.id],
+    enabled: isReady,
+    staleTime: 5 * 60 * 1000, // 5 minutes - plan doesn't change often
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/auth/user");
+      return response.json();
+    },
+  });
+
+  if (isLoading || !isReady) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
@@ -115,12 +130,7 @@ export default function RequirePlan({ plan, children, feature, description, bene
   }
 
   // Get user plan from database user object
-  let userPlan: PlanType = 'free';
-  
-  // Check for plan property directly on user object (from database)
-  if (user && 'plan' in user && user.plan) {
-    userPlan = (user.plan as PlanType) || 'free';
-  }
+  const userPlan: PlanType = databaseUser?.plan || 'free';
 
   const requiredPlanLevel = planHierarchy[plan];
   const userPlanLevel = planHierarchy[userPlan];

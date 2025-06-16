@@ -157,6 +157,17 @@ export default function Dashboard() {
   // Core data loads immediately with shared cache
   const { data: transactions, isLoading: transactionsLoading, error: transactionsError } = useTransactions();
 
+  // Get user's plan from database
+  const { data: databaseUser } = useQuery({
+    queryKey: ["auth-user", user?.id],
+    enabled: isReady,
+    staleTime: 5 * 60 * 1000, // 5 minutes - plan doesn't change often
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/auth/user");
+      return response.json();
+    },
+  });
+
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     enabled: isReady,
@@ -534,7 +545,7 @@ export default function Dashboard() {
 
 
         {/* Free User Content */}
-        {user?.plan === 'free' && (
+        {databaseUser?.plan === 'free' && (
           <div className="space-y-8">
 
             {/* Simple Financial Health Score for Free Users */}
@@ -580,7 +591,7 @@ export default function Dashboard() {
         )}
 
         {/* Basic/Premium User Content */}
-        {(user?.plan === 'standard' || user?.plan === 'premium') && (
+        {(databaseUser?.plan === 'standard' || databaseUser?.plan === 'premium') && (
           <div className="space-y-8">
             {/* Advanced Analytics Row - AI-driven for Standard/Premium */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -603,7 +614,7 @@ export default function Dashboard() {
               <TransactionList
                 transactions={transactions as any}
                 isLoading={transactionsLoading}
-                isPremium={user?.plan === 'premium'}
+                isPremium={databaseUser?.plan === 'premium'}
               />
 
               <LazyExpenseChart summary={{
