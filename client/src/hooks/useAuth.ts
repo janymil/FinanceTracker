@@ -2,23 +2,54 @@ import { useUser, useAuth as useClerkAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
 import { getQueryFn } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
+import { useEffect } from "react";
 
 export function useAuth() {
   const { user: clerkUser, isLoaded: userLoaded } = useUser();
-  const { isSignedIn, isLoaded: authLoaded } = useClerkAuth();
+  const { isSignedIn, isLoaded: authLoaded, signOut } = useClerkAuth();
+  
+  // Clear authentication state on JWT errors to force re-authentication
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'clerk-db-jwt-error') {
+        console.log('JWT error detected, clearing authentication');
+        signOut();
+        localStorage.removeItem('clerk-db-jwt-error');
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [signOut]);
   
   // Get our database user record that syncs with Clerk
   const { data: user, isLoading: dbUserLoading } = useQuery<User>({
     queryKey: ["/api/auth/user"],
-    queryFn: getQueryFn({ on401: "returnNull" }),
+    queryFn: getQueryFn({ 
+      on401: "returnNull",
+      onError: (error: any) => {
+        // Handle JWT token errors by triggering sign out
+        if (error?.message?.includes('jwt') || error?.message?.includes('token')) {
+          console.log('JWT/Token error, triggering sign out');
+          localStorage.setItem('clerk-db-jwt-error', 'true');
+          window.dispatchEvent(new StorageEvent('storage', {
+            key: 'clerk-db-jwt-error',
+            newValue: 'true'
+          }));
+        }
+      }
+    }),
     enabled: !!clerkUser && isSignedIn,
     retry: (failureCount, error: any) => {
-      return failureCount < 3 && error?.status !== 401;
+      // Don't retry on JWT/auth errors
+      if (error?.message?.includes('jwt') || error?.message?.includes('token') || error?.status === 401) {
+        return false;
+      }
+      return failureCount < 3;
     },
-    staleTime: 5 * 60 * 1000, // Increase stale time to 5 minutes
-    refetchOnWindowFocus: true, // Re-enable refetch on focus to handle reconnections
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: true,
     refetchInterval: false,
-    // Add retry delay to handle temporary server issues
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
