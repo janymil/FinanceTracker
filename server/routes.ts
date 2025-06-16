@@ -173,16 +173,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/transactions', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
+      console.log('Transactions API - User ID:', userId);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
       const user = await storage.getUser(userId);
+      console.log('Transactions API - User found:', user ? 'Yes' : 'No');
 
       // No viewing limits - users can see all their stored transactions
       // Storage limits are enforced at creation time
       let limit = undefined; // Show all transactions user has stored
 
       const transactions = await storage.getUserTransactions(userId, limit);
+      console.log('Transactions API - Transactions count:', transactions.length);
+      console.log('Transactions API - Sample transaction:', transactions[0] || 'None');
       res.json(transactions);
     } catch (error) {
       console.error("Error fetching transactions:", error);
