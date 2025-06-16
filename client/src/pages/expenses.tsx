@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useTransactions } from "@/hooks/useTransactions";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -527,7 +527,7 @@ export default function Expenses() {
                     </Button>
                     <Button 
                       onClick={handleSubmit}
-                      disabled={!newExpense.amount || !newExpense.description || updateExpenseMutation.isPending}
+                      disabled={!newExpense.amount || !newExpense.description}
                       className="bg-red-600 hover:bg-red-700"
                     >
                       {editingTransaction ? "Update" : "Add Expense"}
@@ -820,7 +820,7 @@ export default function Expenses() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => deleteExpenseMutation.mutate(transaction.id)}
+                          onClick={() => deleteExpense(transaction.id)}
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>

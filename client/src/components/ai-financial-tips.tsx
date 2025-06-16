@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,10 +24,10 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const { toast } = useToast();
   const [currentTip, setCurrentTip] = useState<string | null>(null);
 
-  const generateTipMutation = useMutation({
-    mutationFn: async () => {
-      if (!summary) return null;
-      
+  const generateTip = async () => {
+    if (!summary) return;
+    
+    try {
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
       
@@ -42,9 +42,8 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
           }))
       });
       
-      return response.json();
-    },
-    onSuccess: (data) => {
+      const data = await response.json();
+      
       if (data?.tip) {
         setCurrentTip(data.tip);
         toast({
@@ -52,15 +51,14 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
           description: "Your personalized financial tip is ready!",
         });
       }
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to generate AI tip",
         variant: "destructive",
       });
     }
-  });
+  };
 
   return (
     <Card>
@@ -92,16 +90,12 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
               </p>
             </div>
             <Button 
-              onClick={() => generateTipMutation.mutate()}
-              disabled={generateTipMutation.isPending || !summary}
+              onClick={generateTip}
+              disabled={!summary}
               className="flex items-center gap-2"
             >
-              {generateTipMutation.isPending ? (
-                <RefreshCw className="h-4 w-4 animate-spin" />
-              ) : (
-                <TrendingUp className="h-4 w-4" />
-              )}
-              {generateTipMutation.isPending ? "Analyzing..." : "Get AI Tip"}
+              <TrendingUp className="h-4 w-4" />
+              Get AI Tip
             </Button>
           </div>
 
