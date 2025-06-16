@@ -11,12 +11,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { TrendingUp, Crown, ChevronDown, User, Settings, LogOut } from "lucide-react";
 import { Link } from "wouter";
+import { useClerk } from "@clerk/clerk-react";
 
 export default function Navigation() {
   const { user, clerkUser } = useAuth();
+  const { signOut } = useClerk();
 
-  const handleLogout = () => {
-    window.location.href = "/api/logout";
+  const handleLogout = async () => {
+    await signOut({ redirectUrl: '/' });
   };
 
   return (

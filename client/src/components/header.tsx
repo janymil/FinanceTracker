@@ -2,6 +2,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useClerk } from "@clerk/clerk-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -80,6 +81,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { signOut } = useClerk();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const [newTransaction, setNewTransaction] = useState({
@@ -469,7 +471,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => window.location.href = '/api/logout'}>
+              <DropdownMenuItem onClick={async () => await signOut({ redirectUrl: '/' })}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
               </DropdownMenuItem>
