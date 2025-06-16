@@ -196,11 +196,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      const user = await storage.getUser(userId);
-
-      if (user?.plan === 'free') {
-        return res.status(403).json({ message: "Standard or Premium subscription required" });
-      }
 
       const transactionId = parseInt(req.params.id);
       
@@ -260,11 +255,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
-      }
-      const user = await storage.getUser(userId);
-
-      if (user?.plan === 'free') {
-        return res.status(403).json({ message: "Standard or Premium subscription required" });
       }
 
       const transactionId = parseInt(req.params.id);
