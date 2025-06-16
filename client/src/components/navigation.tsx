@@ -49,21 +49,21 @@ export default function Navigation() {
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             {user?.plan === 'premium' ? (
-              <Badge className="bg-premium text-white text-xs px-2 py-1">
-                <Crown className="h-2 w-2 mr-1" />
-                Pro
+              <Badge className="bg-purple-600 text-white text-xs px-3 py-1 rounded-full">
+                <Crown className="h-3 w-3 mr-1" />
+                Premium
               </Badge>
             ) : user?.plan === 'standard' ? (
-              <Badge className="bg-blue-600 text-white text-xs px-2 py-1">
-                <Crown className="h-2 w-2 mr-1" />
-                Std
+              <Badge className="bg-blue-600 text-white text-xs px-3 py-1 rounded-full">
+                <Crown className="h-3 w-3 mr-1" />
+                Standard
               </Badge>
             ) : (
               <>
-                <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs px-2 py-1">
+                <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs px-3 py-1 rounded-full">
                   Free
                 </Badge>
                 <Link href="/subscribe">
@@ -74,7 +74,7 @@ export default function Navigation() {
                 </Link>
               </>
             )}
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2 h-auto p-2">
