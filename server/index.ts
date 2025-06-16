@@ -11,6 +11,23 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cookieConsentMiddleware);
 
+// Add headers for better session persistence
+app.use((req, res, next) => {
+  // Set cache headers for API routes to prevent stale data
+  if (req.path.startsWith('/api')) {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+  }
+  
+  // Add CORS headers for client-server communication
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  next();
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

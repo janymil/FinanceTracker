@@ -31,7 +31,7 @@ export async function apiRequest(
   const headers: Record<string, string> = {
     ...authHeaders,
   };
-  
+
   if (data) {
     headers["Content-Type"] = "application/json";
   }
@@ -48,25 +48,54 @@ export async function apiRequest(
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
-export const getQueryFn: <T>(options: {
-  on401: UnauthorizedBehavior;
-}) => QueryFunction<T> =
-  ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
-    const authHeaders = await getAuthHeaders();
-    
-    const res = await fetch(queryKey[0] as string, {
-      headers: authHeaders,
+export const getQueryFn = (options: {
+  on401?: "signOut" | "returnNull";
+  onError?: (error: any) => void;
+} = {}) => async ({ queryKey }: { queryKey: readonly unknown[] }) => {
+  const { on401 = "signOut", onError } = options;
+  const url = queryKey[0] as string;
+
+  try {
+    const response = await fetch(url, {
       credentials: "include",
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+      },
     });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+    if (!response.ok) {
+      if (response.status === 401) {
+        // Check if this might be a server restart by looking at response headers or timing
+        const isServerRestart = !response.headers.get('x-powered-by') || 
+                               response.headers.get('connection') === 'close';
+
+        if (on401 === "signOut" && !isServerRestart) {
+          // Only force sign out if it's not a server restart
+          setTimeout(() => {
+            window.location.href = "/auth";
+          }, 1000); // Small delay to allow for potential reconnection
+          return null;
+        } else {
+          return null;
+        }
+      }
+      throw new Error(`Request failed: ${response.status}`);
     }
 
-    await throwIfResNotOk(res);
-    return await res.json();
-  };
+    return response.json();
+  } catch (error: any) {
+    // Handle network errors that might indicate server restart
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      error.code = 'NETWORK_ERROR';
+    }
+
+    if (onError) {
+      onError(error);
+    }
+    throw error;
+  }
+};
 
 export const queryClient = new QueryClient({
   defaultOptions: {
