@@ -120,11 +120,38 @@ export default function Transactions() {
     },
   });
 
+  // Direct edit mutation that bypasses form system
+  const directEditMutation = useMutation({
+    mutationFn: async (transactionData: any) => {
+      console.log("DIRECT EDIT: Starting with data:", transactionData);
+      const res = await apiRequest("PUT", `/api/transactions/${transactionData.id}`, transactionData);
+      console.log("DIRECT EDIT: Response status:", res.status);
+      
+      if (!res.ok) {
+        throw new Error(`Edit failed: ${res.status}`);
+      }
+      
+      return await res.json();
+    },
+    onSuccess: () => {
+      console.log("DIRECT EDIT: Success - reloading page immediately");
+      setEditingTransaction(null);
+      setIsDialogOpen(false);
+      window.location.reload();
+    },
+    onError: (error: Error) => {
+      console.log("DIRECT EDIT: Error occurred:", error.message);
+      toast({
+        title: "Edit Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Keep original mutation for form submission
   const updateTransactionMutation = useMutation({
     mutationFn: async ({ id, ...data }: { id: number } & typeof newTransaction) => {
-      console.log("EDIT: Starting mutation for transaction", id);
-      
-      // Send current form state directly
       const updateData = {
         amount: parseFloat(newTransaction.amount),
         description: newTransaction.description,
@@ -138,23 +165,15 @@ export default function Transactions() {
         referenceNote: newTransaction.referenceNote || ""
       };
       
-      console.log("EDIT: Sending data:", updateData);
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
-      console.log("EDIT: Response status:", res.status);
-      
       if (!res.ok) {
         throw new Error(`Update failed: ${res.status}`);
       }
-      
-      const result = await res.json();
-      console.log("EDIT: Success - reloading page in 100ms");
-      return result;
+      return await res.json();
     },
     onSuccess: () => {
-      console.log("EDIT: Success callback executing reload...");
       setEditingTransaction(null);
       setIsDialogOpen(false);
-      // Immediate page reload
       window.location.reload();
     },
     onError: (error: Error) => {
@@ -758,7 +777,48 @@ export default function Transactions() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => handleEdit(transaction)}
+                          onClick={() => {
+                            console.log("QUICK EDIT: Starting for transaction:", transaction.id);
+                            
+                            // Prompt user for new amount
+                            const newAmountStr = prompt(`Edit amount for "${transaction.description}":`, transaction.amount.toString());
+                            if (newAmountStr === null) return; // User cancelled
+                            
+                            const newAmount = parseFloat(newAmountStr);
+                            if (isNaN(newAmount) || newAmount <= 0) {
+                              toast({
+                                title: "Invalid Amount",
+                                description: "Please enter a valid positive number",
+                                variant: "destructive",
+                              });
+                              return;
+                            }
+                            
+                            // Find matching category
+                            const matchingCategory = (categories as Category[]).find(
+                              cat => cat.name === transaction.categoryName
+                            );
+                            
+                            // Build complete update data
+                            const updateData = {
+                              id: transaction.id,
+                              amount: newAmount,
+                              description: transaction.description,
+                              date: transaction.date instanceof Date 
+                                ? transaction.date.toISOString().split('T')[0]
+                                : new Date(transaction.date).toISOString().split('T')[0],
+                              type: transaction.type,
+                              categoryId: matchingCategory ? matchingCategory.id : null,
+                              isRecurring: Boolean(transaction.isRecurring),
+                              recurringFrequency: transaction.recurringFrequency || "monthly",
+                              recurringEndDate: transaction.recurringEndDate || null,
+                              paymentUrl: transaction.paymentUrl || "",
+                              referenceNote: transaction.referenceNote || ""
+                            };
+                            
+                            console.log("QUICK EDIT: Calling direct mutation with:", updateData);
+                            directEditMutation.mutate(updateData);
+                          }}
                         >
                           <Edit3 className="h-3 w-3" />
                         </Button>
