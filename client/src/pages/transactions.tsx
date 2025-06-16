@@ -36,6 +36,7 @@ interface Transaction {
   description: string;
   date: string;
   type: "income" | "expense";
+  categoryId?: number;
   categoryName?: string;
   categoryIcon?: string;
   categoryColor?: string;
@@ -322,9 +323,134 @@ export default function Transactions() {
     if (!newTransaction.amount || !newTransaction.description) return;
 
     if (editingTransaction) {
-      updateTransaction({ id: editingTransaction.id, ...newTransaction });
+      // Edit existing transaction
+      try {
+        const updateData = {
+          amount: parseFloat(newTransaction.amount),
+          description: newTransaction.description,
+          date: newTransaction.date,
+          type: newTransaction.type,
+          categoryId: newTransaction.categoryId ? parseInt(newTransaction.categoryId) : null,
+          isRecurring: newTransaction.isRecurring,
+          recurringFrequency: newTransaction.recurringFrequency,
+          recurringEndDate: newTransaction.recurringEndDate || null,
+          paymentUrl: newTransaction.paymentUrl || "",
+          referenceNote: newTransaction.referenceNote || ""
+        };
+
+        const response = await fetch(`/api/transactions/${editingTransaction.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updateData)
+        });
+
+        if (response.ok) {
+          const updatedTransaction = await response.json();
+          
+          // Update transactions in state immediately
+          setTransactions(prev => prev.map(t => 
+            t.id === editingTransaction.id ? updatedTransaction : t
+          ));
+          
+          toast({
+            title: "Transaction Updated",
+            description: "Transaction has been updated successfully",
+          });
+          
+          setIsDialogOpen(false);
+          setEditingTransaction(null);
+          setNewTransaction({
+            amount: "",
+            description: "",
+            date: new Date().toISOString().split('T')[0],
+            type: "expense",
+            categoryId: "",
+            isRecurring: false,
+            recurringFrequency: "monthly",
+            recurringEndDate: "",
+            paymentUrl: "",
+            referenceNote: "",
+          });
+        } else {
+          toast({
+            title: "Update Failed",
+            description: "Failed to update transaction",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Edit transaction error:", error);
+        toast({
+          title: "Update Failed",
+          description: "Network error occurred",
+          variant: "destructive",
+        });
+      }
     } else {
-      await createTransaction(newTransaction);
+      // Create new transaction
+      try {
+        const createData = {
+          amount: parseFloat(newTransaction.amount),
+          description: newTransaction.description,
+          date: newTransaction.date,
+          type: newTransaction.type,
+          categoryId: newTransaction.categoryId ? parseInt(newTransaction.categoryId) : null,
+          isRecurring: newTransaction.isRecurring,
+          recurringFrequency: newTransaction.recurringFrequency,
+          recurringEndDate: newTransaction.recurringEndDate || null,
+          paymentUrl: newTransaction.paymentUrl || "",
+          referenceNote: newTransaction.referenceNote || ""
+        };
+
+        const response = await fetch('/api/transactions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(createData)
+        });
+
+        if (response.ok) {
+          const newTransactionData = await response.json();
+          
+          // Add new transaction to state immediately
+          setTransactions(prev => [...prev, newTransactionData]);
+          
+          toast({
+            title: "Transaction Added",
+            description: "Transaction has been added successfully",
+          });
+          
+          setIsDialogOpen(false);
+          setNewTransaction({
+            amount: "",
+            description: "",
+            date: new Date().toISOString().split('T')[0],
+            type: "expense",
+            categoryId: "",
+            isRecurring: false,
+            recurringFrequency: "monthly",
+            recurringEndDate: "",
+            paymentUrl: "",
+            referenceNote: "",
+          });
+        } else {
+          toast({
+            title: "Creation Failed",
+            description: "Failed to create transaction",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Create transaction error:", error);
+        toast({
+          title: "Creation Failed",
+          description: "Network error occurred",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -801,78 +927,29 @@ export default function Transactions() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={async () => {
-                            console.log("DIRECT FETCH EDIT: Starting for transaction:", transaction.id);
+                          onClick={() => {
+                            setEditingTransaction(transaction);
                             
-                            // Prompt user for new amount
-                            const newAmountStr = prompt(`Edit amount for "${transaction.description}":`, transaction.amount.toString());
-                            if (newAmountStr === null) return; // User cancelled
-                            
-                            const newAmount = parseFloat(newAmountStr);
-                            if (isNaN(newAmount) || newAmount <= 0) {
-                              toast({
-                                title: "Invalid Amount",
-                                description: "Please enter a valid positive number",
-                                variant: "destructive",
-                              });
-                              return;
-                            }
-                            
-                            // Find matching category
+                            // Find the category ID from the transaction's category name
                             const matchingCategory = (categories as Category[]).find(
                               cat => cat.name === transaction.categoryName
                             );
                             
-                            // Build complete update data
-                            const updateData = {
-                              amount: newAmount,
+                            setNewTransaction({
+                              amount: transaction.amount.toString(),
                               description: transaction.description,
                               date: transaction.date instanceof Date 
                                 ? transaction.date.toISOString().split('T')[0]
                                 : new Date(transaction.date).toISOString().split('T')[0],
                               type: transaction.type,
-                              categoryId: matchingCategory ? matchingCategory.id : null,
+                              categoryId: matchingCategory ? matchingCategory.id.toString() : "",
                               isRecurring: Boolean(transaction.isRecurring),
                               recurringFrequency: transaction.recurringFrequency || "monthly",
-                              recurringEndDate: transaction.recurringEndDate || null,
+                              recurringEndDate: transaction.recurringEndDate || "",
                               paymentUrl: transaction.paymentUrl || "",
                               referenceNote: transaction.referenceNote || ""
-                            };
-                            
-                            console.log("DIRECT FETCH EDIT: Sending data:", updateData);
-                            
-                            try {
-                              const response = await fetch(`/api/transactions/${transaction.id}`, {
-                                method: 'PUT',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify(updateData)
-                              });
-                              
-                              console.log("DIRECT FETCH EDIT: Response status:", response.status);
-                              
-                              if (response.ok) {
-                                toast({
-                                  title: "Transaction Updated",
-                                  description: "Transaction has been updated successfully",
-                                });
-                              } else {
-                                console.error("DIRECT FETCH EDIT: Failed:", response.status);
-                                toast({
-                                  title: "Edit Failed",
-                                  description: `Error: ${response.status}`,
-                                  variant: "destructive",
-                                });
-                              }
-                            } catch (error) {
-                              console.error("DIRECT FETCH EDIT: Error:", error);
-                              toast({
-                                title: "Edit Failed",
-                                description: "Network error occurred",
-                                variant: "destructive",
-                              });
-                            }
+                            });
+                            setIsDialogOpen(true);
                           }}
                         >
                           <Edit3 className="h-3 w-3" />
