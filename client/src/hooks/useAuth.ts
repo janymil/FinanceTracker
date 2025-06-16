@@ -8,6 +8,17 @@ export function useAuth() {
   const { user: clerkUser, isLoaded: userLoaded } = useUser();
   const { isSignedIn, isLoaded: authLoaded, signOut } = useClerkAuth();
   
+  // Don't proceed if Clerk isn't loaded yet
+  if (!userLoaded || !authLoaded) {
+    return {
+      user: null,
+      clerkUser: null,
+      isLoading: true,
+      isAuthenticated: false,
+      isUnauthenticated: false,
+    };
+  }
+  
   // Clear authentication state on JWT errors to force re-authentication
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {

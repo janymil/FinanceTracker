@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { SignedIn, SignedOut, useClerk } from "@clerk/clerk-react";
 
 // Core components loaded immediately
 import Header from "@/components/header";
@@ -51,30 +52,19 @@ const AppLoader = () => (
 );
 
 function AppContent() {
-  const { user, isLoading, isUnauthenticated } = useAuth();
+  const clerk = useClerk();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Show loading state
-  if (isLoading) {
+  // Wait for Clerk to be loaded before rendering anything
+  if (!clerk.loaded) {
     return <AppLoader />;
   }
 
-  // Public routes for guest users
-  const publicRoutes = ['/', '/pricing', '/privacy-policy', '/terms-of-service', '/cookie-policy', '/contact', '/help', '/auth'];
-  const currentPath = window.location.pathname;
-  const isOnPublicRoute = publicRoutes.includes(currentPath);
-
-  // If clearly unauthenticated and on a protected route, redirect to auth
-  if (isUnauthenticated && !isOnPublicRoute) {
-    window.location.href = '/auth';
-    return <AppLoader />;
-  }
-
-  // Show guest routes if no user and on public route OR while authentication is uncertain
-  if (!user && (isOnPublicRoute || !isUnauthenticated)) {
-    return (
-      <>
+  return (
+    <>
+      {/* Public routes for unauthenticated users */}
+      <SignedOut>
         <Switch>
           <Route path="/" component={Landing} />
           <Route path="/pricing" component={Pricing} />
@@ -84,15 +74,38 @@ function AppContent() {
           <Route path="/contact" component={Contact} />
           <Route path="/help" component={Help} />
           <Route path="/auth" component={AuthPage} />
-          <Route component={NotFoundPage} />
+          <Route component={Landing} />
         </Switch>
         <Footer />
         <CookieBanner />
-      </>
-    );
+      </SignedOut>
+
+      {/* Protected routes for authenticated users */}
+      <SignedIn>
+        <AuthenticatedApp 
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          sidebarCollapsed={sidebarCollapsed}
+          setSidebarCollapsed={setSidebarCollapsed}
+        />
+      </SignedIn>
+    </>
+  );
+}
+
+function AuthenticatedApp({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSidebarCollapsed }: {
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+  sidebarCollapsed: boolean;
+  setSidebarCollapsed: (collapsed: boolean) => void;
+}) {
+  const { user, isLoading } = useAuth();
+
+  // Show loading while user data is being fetched
+  if (isLoading || !user) {
+    return <AppLoader />;
   }
 
-  // Authenticated user layout
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header 
