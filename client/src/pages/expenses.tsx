@@ -144,10 +144,14 @@ export default function Expenses() {
       return await res.json();
     },
     onSuccess: () => {
+      console.log("EXPENSE UPDATE SUCCESS - User ID:", user?.id);
+      console.log("Invalidating queries with keys:", ["transactions", user?.id], ["financial-summary", user?.id]);
+      
       queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
       queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
       queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
       queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+      
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({

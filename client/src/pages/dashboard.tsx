@@ -224,10 +224,14 @@ export default function Dashboard() {
       return await res.json();
     },
     onSuccess: () => {
+      console.log("DASHBOARD CREATE SUCCESS - User ID:", user?.id);
+      console.log("Invalidating queries with keys:", ["transactions", user?.id], ["financial-summary", user?.id]);
+      
       queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
       queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
       queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
       queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+      
       setIsDialogOpen(false);
       setNewTransaction({
         amount: "",
