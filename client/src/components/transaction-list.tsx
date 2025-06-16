@@ -36,20 +36,20 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
   // Filter and search transactions
   const filteredTransactions = useMemo(() => {
     if (!transactions) return [];
-    
+
     return transactions.filter(transaction => {
       // Search filter
       const matchesSearch = searchTerm === "" || 
         transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (transaction.categoryName && transaction.categoryName.toLowerCase().includes(searchTerm.toLowerCase()));
-      
+
       // Type filter
       const matchesType = filterType === "all" || transaction.type === filterType;
-      
+
       return matchesSearch && matchesType;
     });
   }, [transactions, searchTerm, filterType]);
-  
+
   const formatCurrency = (amount: string) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -111,7 +111,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
   const incomeTransactions = displayTransactions
     .filter(t => t.type === 'income')
     .slice(0, 5);
-  
+
   const limitForFree = !isPremium ? 100 : 5;
 
   const renderTransactionList = (transactionList: Transaction[], type: string) => (
@@ -215,27 +215,30 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
               Income
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="expenses" className="mt-4">
             {renderTransactionList(expenseTransactions, 'expenses')}
           </TabsContent>
-          
+
           <TabsContent value="income" className="mt-4">
             {renderTransactionList(incomeTransactions, 'income')}
           </TabsContent>
         </Tabs>
-        
+
         {!isPremium && (
           <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+            <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-2">
+              Free plan: {transactions?.length || 0}/100 transaction entries used
+            </div>
             <Link href="/subscribe">
               <Button variant="ghost" className="w-full text-premium hover:text-premium/80">
-                <Lock className="h-4 w-4 mr-2" />
-                View all transactions with Premium
+                <Crown className="h-4 w-4 mr-2" />
+                Upgrade for unlimited transaction storage
               </Button>
             </Link>
           </div>
         )}
-        
+
         {isPremium && (
           <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
             <Button 

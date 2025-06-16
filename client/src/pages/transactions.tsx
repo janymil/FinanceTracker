@@ -426,7 +426,10 @@ export default function Transactions() {
                     {editingTransaction ? "Edit Transaction" : "Add New Transaction"}
                   </DialogTitle>
                   <DialogDescription>
-                    {editingTransaction ? "Update the transaction details" : "Record a new income or expense transaction"}
+                    {editingTransaction ? "Update the transaction details" : 
+                     user?.plan === 'free' ? 
+                     `Record a new transaction (${transactions?.length || 0}/100 entries used)` :
+                     "Record a new income or expense transaction"}
                   </DialogDescription>
                 </DialogHeader>
 

@@ -28,14 +28,30 @@ import {
   LazyAIFinancialTips,
   LazyTransactionRemindersWidget
 } from "@/components/dashboard/lazy-components";
+import { 
+  Plus, 
+  CreditCard, 
+  TrendingUp, 
+  TrendingDown, 
+  Calendar,
+  BarChart3,
+  PieChart,
+  Target,
+  Bell,
+  Settings,
+  ArrowUpRight,
+  ArrowDownLeft,
+  Sparkles,
+  DollarSign
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Calendar, ArrowUpRight, ArrowDownLeft, Repeat } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Link } from "wouter";
 
 interface Category {
   id: number;
@@ -55,7 +71,7 @@ export default function Dashboard() {
     const upgrade = urlParams.get('upgrade');
     const plan = urlParams.get('plan');
     const error = urlParams.get('error');
-    
+
     if (upgrade === 'success' && plan) {
       toast({
         title: "Subscription Successful!",
@@ -91,7 +107,7 @@ export default function Dashboard() {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
+
   // Defer expensive rendering to prevent Suspense errors
   const deferredSelectedMonth = useDeferredValue(selectedMonth);
   const deferredUser = useDeferredValue(user);
@@ -108,7 +124,7 @@ export default function Dashboard() {
       window.history.replaceState({}, '', '/dashboard');
     }
   }, [toast]);
-  
+
   const [newTransaction, setNewTransaction] = useState({
     amount: "",
     description: "",
@@ -211,7 +227,7 @@ export default function Dashboard() {
   const generateMonthOptions = () => {
     const options = [];
     const now = new Date();
-    
+
     for (let i = 0; i < 12; i++) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const year = date.getFullYear();
@@ -223,7 +239,7 @@ export default function Dashboard() {
       });
       options.push({ value, label });
     }
-    
+
     return options;
   };
 
@@ -290,7 +306,7 @@ export default function Dashboard() {
                       Record a new income or expense transaction
                     </DialogDescription>
                   </DialogHeader>
-                  
+
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -512,7 +528,7 @@ export default function Dashboard() {
                     AI-powered financial tips available with Standard plan
                   </p>
                   <Button className="bg-standard hover:bg-standard/90 text-white">
-                    Upgrade to Standard
+                  <Link href="/pricing">Upgrade to Standard</Link>
                   </Button>
                 </div>
               </div>
@@ -576,11 +592,11 @@ export default function Dashboard() {
             {/* Advanced Features */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <LazyTransactionRemindersWidget />
-              
+
               <RequirePlan plan="standard">
                 <LazyRemindersStreaks />
               </RequirePlan>
-              
+
               <RequirePlan plan="standard">
                 <LazyAutoCategorization transactions={transactions as any} />
               </RequirePlan>

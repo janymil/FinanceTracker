@@ -9,10 +9,10 @@ import { useAuth } from "@/hooks/useAuth";
 export default function Pricing() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
-  
+
   // Get user's current plan
   const userPlan = user && 'plan' in user && user.plan ? user.plan : 'free';
-  
+
   const handleGetStarted = (plan: string) => {
     if (user) {
       if (plan === 'free') {
@@ -64,10 +64,10 @@ export default function Pricing() {
                 <TabsTrigger value="yearly">Yearly</TabsTrigger>
               </TabsList>
             </div>
-            
+
             <TabsContent value="monthly">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
+
             {/* Free Plan */}
             <Card className={`border-2 relative ${isCurrentPlan('free') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}`}>
               {isCurrentPlan('free') && (
@@ -99,7 +99,7 @@ export default function Pricing() {
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Up to 100 transactions</span>
+                    <span>Up to 100 transaction entries</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
@@ -251,7 +251,7 @@ export default function Pricing() {
 
             <TabsContent value="yearly">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
+
             {/* Free Plan - Yearly */}
             <Card className={`border-2 relative ${isCurrentPlan('free') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}`}>
               {isCurrentPlan('free') && (
@@ -283,7 +283,7 @@ export default function Pricing() {
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Up to 100 transactions</span>
+                    <span>Up to 100 transaction entries</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />

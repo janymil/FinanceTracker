@@ -104,7 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const existingTransactions = await storage.getUserTransactions(userId);
         if (existingTransactions.length >= 100) {
           return res.status(403).json({ 
-            message: "Free plan limited to 100 transactions. Upgrade to Standard or Premium for unlimited transactions." 
+            message: "Free plan limited to 100 transaction entries. Upgrade to Standard or Premium for unlimited transaction storage." 
           });
         }
       }
@@ -178,15 +178,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const user = await storage.getUser(userId);
 
-      // Plan-based limits: free = 3, standard = 100, premium = unlimited
-      let limit;
-      if (user?.plan === 'free') {
-        limit = 3;
-      } else if (user?.plan === 'standard') {
-        limit = 100;
-      } else {
-        limit = undefined; // unlimited for premium
-      }
+      // No viewing limits - users can see all their stored transactions
+      // Storage limits are enforced at creation time
+      let limit = undefined; // Show all transactions user has stored
 
       const transactions = await storage.getUserTransactions(userId, limit);
       res.json(transactions);
