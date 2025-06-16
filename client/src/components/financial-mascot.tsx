@@ -99,8 +99,21 @@ export function FinancialMascot() {
     toggleMascotMutation.mutate(enabled);
   };
 
-  // Don't render if user is not authenticated or mascot is disabled
-  if (!user || !mascot?.isEnabled || isLoading) {
+  // Auto-generate mascot if none exists
+  useEffect(() => {
+    if (user && mascot && mascot.id === null && !isGenerating) {
+      console.log('Auto-generating mascot for new user');
+      handleGenerate();
+    }
+  }, [user, mascot, isGenerating]);
+
+  // Don't render if user is not authenticated
+  if (!user || isLoading) {
+    return null;
+  }
+
+  // Don't render if mascot is explicitly disabled (but allow for null id during initial generation)
+  if (mascot && mascot.isEnabled === false) {
     return null;
   }
 
