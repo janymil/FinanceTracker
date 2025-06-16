@@ -155,8 +155,8 @@ export default function Dashboard() {
 
   // Core data loads immediately with better error handling
   const { data: transactions, isLoading: transactionsLoading, error: transactionsError } = useQuery({
-    queryKey: ['/api/transactions'],
-    enabled: isAuthenticated,
+    queryKey: ['/api/transactions', user?.id],
+    enabled: isAuthenticated && !!user?.id,
     staleTime: 30 * 1000, // 30 seconds for transactions
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/transactions");
@@ -165,8 +165,8 @@ export default function Dashboard() {
   });
 
   const { data: categories = [] } = useQuery({
-    queryKey: ["/api/categories"],
-    enabled: isAuthenticated,
+    queryKey: ["/api/categories", user?.id],
+    enabled: isAuthenticated && !!user?.id,
     staleTime: 5 * 60 * 1000, // 5 minutes for categories (they change less often)
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/categories");
@@ -176,7 +176,7 @@ export default function Dashboard() {
 
   // Load financial summary immediately alongside transactions
   const { data: financialSummary, isLoading: summaryLoading } = useQuery({
-    queryKey: ['/api/financial-summary', startDate.toISOString(), endDate.toISOString()],
+    queryKey: ['/api/financial-summary', user?.id, startDate.toISOString(), endDate.toISOString()],
     queryFn: async () => {
       const params = new URLSearchParams({
         startDate: startDate.toISOString(),
@@ -185,13 +185,13 @@ export default function Dashboard() {
       const response = await apiRequest("GET", `/api/financial-summary?${params}`);
       return response.json();
     },
-    enabled: isAuthenticated, // Load immediately when authenticated
+    enabled: isAuthenticated && !!user?.id, // Load immediately when authenticated
     staleTime: 60 * 1000, // 1 minute for financial summary
   });
 
   const { data: budgets, error: budgetsError } = useQuery({
-    queryKey: ['/api/budgets'],
-    enabled: isAuthenticated && !!transactions, // Wait for transactions first
+    queryKey: ['/api/budgets', user?.id],
+    enabled: isAuthenticated && !!user?.id && !!transactions, // Wait for transactions first
     retry: false, // Don't retry on 403 errors for free users
   });
 

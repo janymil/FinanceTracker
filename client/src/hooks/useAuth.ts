@@ -34,6 +34,8 @@ export function useAuth() {
   }, [signOut]);
   
   // Get our database user record that syncs with Clerk
+  const canFetchUser = userLoaded && authLoaded && isSignedIn && !!clerkUser?.id;
+  
   const { data: user, isLoading: dbUserLoading } = useQuery<User>({
     queryKey: ["/api/auth/user"],
     queryFn: getQueryFn({ 
@@ -50,7 +52,7 @@ export function useAuth() {
         }
       }
     }),
-    enabled: userLoaded && authLoaded && !!clerkUser && isSignedIn,
+    enabled: canFetchUser,
     retry: (failureCount, error: any) => {
       // Don't retry on JWT/auth errors
       if (error?.message?.includes('jwt') || error?.message?.includes('token') || error?.status === 401) {
@@ -65,7 +67,7 @@ export function useAuth() {
   });
 
   const isLoading = !userLoaded || !authLoaded || dbUserLoading;
-  const isAuthenticated = !!isSignedIn && !!clerkUser && !!user;
+  const isAuthenticated = canFetchUser && !!user?.id;
   const isUnauthenticated = authLoaded && !isSignedIn;
 
   return {
