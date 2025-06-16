@@ -102,18 +102,18 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: (newTransaction) => {
-      // Invalidate all transaction-related queries
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/expense-breakdown"] });
-      
-      // Optionally, update the cache directly for immediate UI update
+      // Update the cache directly for immediate UI update
       queryClient.setQueryData(["/api/transactions"], (oldData: any) => {
         if (oldData && Array.isArray(oldData)) {
           return [newTransaction, ...oldData];
         }
         return [newTransaction];
       });
+      
+      // Then invalidate queries to ensure server sync
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/expense-breakdown"] });
       
       setIsDialogOpen(false);
       setNewIncome({
@@ -192,8 +192,8 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: () => {
-      // Invalidate all transaction-related queries
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      // Force immediate refetch of transactions
+      queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       queryClient.invalidateQueries({ queryKey: ["/api/expense-breakdown"] });
       setEditingTransaction(null);
@@ -218,8 +218,8 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: () => {
-      // Invalidate all transaction-related queries
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      // Force immediate refetch of transactions
+      queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       queryClient.invalidateQueries({ queryKey: ["/api/expense-breakdown"] });
       toast({
