@@ -174,59 +174,61 @@ export default function CollaborativeGoalsPage() {
     }
   };
 
-  // Send friend request mutation
-  const sendFriendRequestMutation = useMutation({
-    mutationFn: async (email: string) => {
-      const response = await apiRequest("POST", "/api/friends/request", { recipientEmail: email });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
+  // Send friend request function
+  const sendFriendRequest = async (email: string) => {
+    try {
+      const data = await apiRequest("POST", "/api/friends/request", { recipientEmail: email });
+      await queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
       setAddFriendOpen(false);
       setFriendEmail("");
       toast({
         title: "Success!",
         description: "Friend request sent successfully",
       });
-    },
-    onError: (error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  // Accept friend request mutation
-  const acceptFriendMutation = useMutation({
-    mutationFn: async (requestId: number) => {
-      const response = await apiRequest("POST", `/api/friends/accept/${requestId}`);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/friends/requests"] });
+  // Accept friend request function
+  const acceptFriendRequest = async (requestId: number) => {
+    try {
+      const data = await apiRequest("POST", `/api/friends/accept/${requestId}`);
+      await queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/friends/requests"] });
       toast({
         title: "Success!",
         description: "Friend request accepted",
       });
-    },
-  });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
-  // Reject friend request mutation
-  const rejectFriendMutation = useMutation({
-    mutationFn: async (requestId: number) => {
-      const response = await apiRequest("DELETE", `/api/friends/reject/${requestId}`);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/friends/requests"] });
+  // Reject friend request function
+  const rejectFriendRequest = async (requestId: number) => {
+    try {
+      const data = await apiRequest("DELETE", `/api/friends/reject/${requestId}`);
+      await queryClient.invalidateQueries({ queryKey: ["/api/friends/requests"] });
       toast({
         title: "Friend request rejected",
       });
-    },
-  });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleCreateGoal = () => {
     if (!newGoal.name || !newGoal.targetAmount || !newGoal.targetDate) {
@@ -238,7 +240,7 @@ export default function CollaborativeGoalsPage() {
       return;
     }
 
-    createGoalMutation.mutate(newGoal);
+    createGoal(newGoal);
   };
 
   const handleSendFriendRequest = () => {
@@ -251,7 +253,7 @@ export default function CollaborativeGoalsPage() {
       return;
     }
 
-    sendFriendRequestMutation.mutate(friendEmail);
+    sendFriendRequest(friendEmail);
   };
 
   const getProgressPercentage = (current: string, target: string) => {
@@ -392,9 +394,8 @@ export default function CollaborativeGoalsPage() {
                     <DialogFooter>
                       <Button 
                         onClick={handleCreateGoal}
-                        disabled={createGoalMutation.isPending}
                       >
-                        {createGoalMutation.isPending ? "Creating..." : "Create Goal"}
+                        Create Goal
                       </Button>
                     </DialogFooter>
                   </DialogContent>
