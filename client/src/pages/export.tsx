@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -164,6 +164,44 @@ export default function ExportPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [isUpdatingBackupSettings, setIsUpdatingBackupSettings] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
+
+  // Export mutation
+  const exportMutation = useMutation({
+    mutationFn: async (options: any) => {
+      const response = await fetch("/api/export", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(options),
+      });
+      if (!response.ok) throw new Error("Export failed");
+      return response;
+    },
+  });
+
+  // Backup mutation
+  const backupMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/create-backup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!response.ok) throw new Error("Backup failed");
+      return response.json();
+    },
+  });
+
+  // Backup settings mutation
+  const backupSettingsMutation = useMutation({
+    mutationFn: async (settings: any) => {
+      const response = await fetch("/api/backup-settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settings),
+      });
+      if (!response.ok) throw new Error("Settings update failed");
+      return response.json();
+    },
+  });
 
   // Fetch data for export
   const { data: transactions = [] } = useQuery({
