@@ -204,10 +204,10 @@ export default function Dashboard() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
+      queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       setIsDialogOpen(false);
       setNewTransaction({
         amount: "",
