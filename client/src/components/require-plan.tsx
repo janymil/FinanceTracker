@@ -13,6 +13,7 @@ interface RequirePlanProps {
   feature?: string;
   description?: string;
   benefits?: string[];
+  compact?: boolean;
 }
 
 const planHierarchy: Record<PlanType, number> = {
@@ -98,7 +99,7 @@ const featureConfigs = {
   }
 };
 
-export default function RequirePlan({ plan, children, feature, description, benefits }: RequirePlanProps) {
+export default function RequirePlan({ plan, children, feature, description, benefits, compact }: RequirePlanProps) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
@@ -143,12 +144,8 @@ export default function RequirePlan({ plan, children, feature, description, bene
 
   const config = featureConfigs[featureKey as keyof typeof featureConfigs];
 
-  // Check if we're in a dialog context (transaction buttons in dashboard)
-  const isDialogContext = typeof window !== 'undefined' && 
-    document.querySelector('[role="dialog"]') !== null;
-
-  // For transaction dialogs, show the small upgrade box like in the screenshot
-  if (isDialogContext) {
+  // Show compact version if explicitly requested via prop OR if in dialog context
+  if (compact || (typeof window !== 'undefined' && document.querySelector('[role="dialog"]') !== null)) {
     return (
       <div className="border-2 border-dashed border-blue-300 dark:border-blue-600 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20 mb-4">
         <div className="flex items-center gap-3 mb-3">

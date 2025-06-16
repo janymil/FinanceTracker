@@ -278,7 +278,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                 </div>
 
                 {/* Premium Features - Standard/Premium only */}
-                <RequirePlan plan="standard">
+                <RequirePlan plan="standard" compact={true}>
                   <div className="space-y-4 border-t pt-4">
                     {/* Smart Bill Assistant - for expenses only */}
                     {newTransaction.type === "expense" && (
