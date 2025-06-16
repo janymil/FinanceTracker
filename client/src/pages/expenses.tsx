@@ -183,11 +183,9 @@ export default function Expenses() {
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
       return await res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -209,11 +207,9 @@ export default function Expenses() {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
       return await res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
       toast({
         title: "Expense Deleted",
         description: "Expense transaction has been removed successfully",
@@ -230,6 +226,9 @@ export default function Expenses() {
 
   // Filter only expense transactions
   const expenseTransactions = transactions.filter((transaction: Transaction) => transaction.type === "expense");
+  
+  // Debug log to track re-renders
+  console.log("Expenses component rendered", expenseTransactions);
   
   // Apply additional filters
   const filteredExpenses = expenseTransactions.filter((transaction: Transaction) => {

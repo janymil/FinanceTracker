@@ -208,11 +208,9 @@ export default function Income() {
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
       return await res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -234,11 +232,9 @@ export default function Income() {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
       return await res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
       toast({
         title: "Income Deleted",
         description: "Income transaction has been removed successfully",
