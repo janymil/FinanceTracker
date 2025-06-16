@@ -193,7 +193,7 @@ export default function ProfilePage() {
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="flex items-center gap-4 mb-8">
         <Avatar className="h-20 w-20">
-          <AvatarImage src={user?.profileImageUrl} alt={user?.firstName || "User"} />
+          <AvatarImage src={user?.profileImageUrl ?? undefined} alt={user?.firstName || "User"} />
           <AvatarFallback className="bg-primary text-white text-xl">
             {user?.firstName?.[0] || user?.email?.[0] || "U"}
           </AvatarFallback>
@@ -300,21 +300,12 @@ export default function ProfilePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="rounded-lg border overflow-hidden min-h-[600px]">
-                  <UserProfile 
-                    routing="hash"
-                    path="/security"
-                    appearance={{
-                      elements: {
-                        rootBox: "w-full min-h-[500px]",
-                        card: "border-0 shadow-none min-h-[500px]",
-                        navbar: "hidden", // Hide navbar to show only security content
-                        pageScrollBox: "p-4 min-h-[400px]",
-                        profileSectionPrimaryButton: "bg-primary hover:bg-primary/90",
-                        formButtonPrimary: "bg-primary hover:bg-primary/90"
-                      }
-                    }}
-                  />
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <h4 className="font-medium mb-2">Password & Security Management</h4>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    For security reasons, password changes and two-factor authentication are managed through Clerk's secure interface.
+                  </p>
+                  <UserProfile />
                 </div>
                 
                 <div className="mt-4 p-4 bg-muted/50 rounded-lg">

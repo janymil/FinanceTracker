@@ -9,16 +9,10 @@ import "./index.css";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: (failureCount, error: any) => {
-        if (error?.code === 'NETWORK_ERROR' || error?.name === 'TypeError') {
-          return failureCount < 5;
-        }
-        return failureCount < 2;
-      },
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
-      refetchOnWindowFocus: true,
-      staleTime: 2 * 60 * 1000,
-      networkMode: 'always',
+      retry: 2,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
     },
   },
 });
