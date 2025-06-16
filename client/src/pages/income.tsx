@@ -135,8 +135,8 @@ export default function Income() {
         return [newTransaction, ...old.filter((t: any) => t.id !== Date.now())];
       });
       
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/expense-breakdown"] });
+      queryClient.refetchQueries({ queryKey: ["/api/financial-summary"] });
+      queryClient.refetchQueries({ queryKey: ["/api/expense-breakdown"] });
       
       setIsDialogOpen(false);
       setNewIncome({
@@ -210,8 +210,8 @@ export default function Income() {
     onSuccess: () => {
       // Force immediate refetch of transactions
       queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/expense-breakdown"] });
+      queryClient.refetchQueries({ queryKey: ["/api/financial-summary"] });
+      queryClient.refetchQueries({ queryKey: ["/api/expense-breakdown"] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -236,8 +236,8 @@ export default function Income() {
     onSuccess: () => {
       // Force immediate refetch of transactions
       queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/expense-breakdown"] });
+      queryClient.refetchQueries({ queryKey: ["/api/financial-summary"] });
+      queryClient.refetchQueries({ queryKey: ["/api/expense-breakdown"] });
       toast({
         title: "Income Deleted",
         description: "Income transaction has been removed successfully",
