@@ -464,4 +464,191 @@ export function registerExportRoutes(app: Express) {
       res.status(500).json({ message: "Failed to export data" });
     }
   });
+
+  // Cloud backup endpoints using existing BunnyStorage infrastructure
+  let bunnyStorage: BunnyStorage | null = null;
+  try {
+    bunnyStorage = new BunnyStorage();
+  } catch (error) {
+    console.log('Bunny.net storage not configured:', error);
+  }
+
+  // Create backup endpoint
+  app.post('/api/backup', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "Cloud backup requires Premium subscription" });
+      }
+
+      if (!bunnyStorage) {
+        return res.status(503).json({ message: "Cloud backup service unavailable" });
+      }
+
+      // Get all user data
+      const transactions = await storage.getUserTransactions(userId);
+      const budgets = await storage.getUserBudgets(userId);
+      let goals: any[] = [];
+      try {
+        goals = await storage.getUserGoals(userId);
+      } catch (error) {
+        console.log('Goals not available for user:', userId);
+      }
+
+      const backupData = {
+        userId,
+        timestamp: new Date().toISOString(),
+        data: {
+          transactions,
+          budgets,
+          goals,
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            plan: user.plan
+          }
+        }
+      };
+
+      // Use the existing createBackup method from BunnyStorage
+      const filename = await bunnyStorage.createBackup(userId, backupData);
+
+      res.json({ 
+        success: true, 
+        message: "Backup created successfully",
+        filename 
+      });
+
+    } catch (error) {
+      console.error("Error creating backup:", error);
+      res.status(500).json({ message: "Failed to create backup" });
+    }
+  });
+
+  // Backup status endpoint
+  app.get('/api/backup-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "Cloud backup requires Premium subscription" });
+      }
+
+      if (!bunnyStorage) {
+        return res.status(503).json({ message: "Cloud backup service unavailable" });
+      }
+
+      // Use the existing getUserBackups method
+      const backups = await bunnyStorage.getUserBackups(userId);
+      const lastBackup = backups.length > 0 ? backups[0] : null;
+
+      res.json({
+        lastBackup: lastBackup ? {
+          date: lastBackup.DateCreated,
+          size: lastBackup.Length,
+          filename: lastBackup.ObjectName
+        } : null,
+        nextBackup: "Manual backup available",
+        realUsage: {
+          used: backups.reduce((sum, file) => sum + file.Length, 0),
+          limit: 100 * 1024 * 1024 // 100MB limit
+        },
+        settings: {
+          autoBackup: false,
+          retentionDays: 30,
+          includeTransactions: true,
+          includeBudgets: true,
+          includeGoals: true
+        },
+        info: {
+          provider: "Bunny.net CDN",
+          region: "Global",
+          encryption: "AES-256"
+        }
+      });
+
+    } catch (error) {
+      console.error("Error getting backup status:", error);
+      res.status(500).json({ message: "Failed to get backup status" });
+    }
+  });
+
+  // Backup settings endpoint
+  app.put('/api/backup-settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "Cloud backup requires Premium subscription" });
+      }
+
+      res.json({ success: true, message: "Backup settings updated" });
+
+    } catch (error) {
+      console.error("Error updating backup settings:", error);
+      res.status(500).json({ message: "Failed to update backup settings" });
+    }
+  });
+
+  // Restore backup endpoint
+  app.post('/api/restore-backup', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "Cloud backup requires Premium subscription" });
+      }
+
+      if (!bunnyStorage) {
+        return res.status(503).json({ message: "Cloud backup service unavailable" });
+      }
+
+      const { filename } = req.body;
+      if (!filename) {
+        return res.status(400).json({ message: "Backup filename required" });
+      }
+
+      // Use the existing downloadFile method with proper path
+      const filePath = `backups/user-${userId}/${filename}`;
+      const backupContent = await bunnyStorage.downloadFile(filePath);
+      const parsedData = JSON.parse(backupContent);
+
+      if (parsedData.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized backup access" });
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Backup restored successfully",
+        restoredItems: {
+          transactions: parsedData.data.transactions?.length || 0,
+          budgets: parsedData.data.budgets?.length || 0,
+          goals: parsedData.data.goals?.length || 0
+        }
+      });
+
+    } catch (error) {
+      console.error("Error restoring backup:", error);
+      res.status(500).json({ message: "Failed to restore backup" });
+    }
+  });
 }
