@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, invalidateFinancialData } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import MonthFilter from "@/components/month-filter";
 import { format } from "date-fns";
@@ -206,8 +206,7 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      invalidateFinancialData();
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({

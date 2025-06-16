@@ -74,7 +74,7 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: 15 * 60 * 1000, // 15 minutes - much more aggressive caching
+      staleTime: 30 * 1000, // 30 seconds - allow frequent updates for transaction data
       gcTime: 30 * 60 * 1000, // 30 minutes garbage collection
       retry: false, // Disable retries for faster loading
       networkMode: 'online',
@@ -85,3 +85,17 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// Universal cache invalidation for ALL user data changes
+export const invalidateAllUserData = () => {
+  // Invalidate all API queries - this covers everything
+  queryClient.invalidateQueries();
+  
+  // Force immediate refetch of critical data that users see most
+  queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
+  queryClient.refetchQueries({ queryKey: ["/api/financial-summary"] });
+  queryClient.refetchQueries({ queryKey: ["/api/budgets"] });
+};
+
+// Backward compatibility alias
+export const invalidateFinancialData = invalidateAllUserData;
