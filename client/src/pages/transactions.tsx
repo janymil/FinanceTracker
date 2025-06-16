@@ -840,8 +840,8 @@ export default function Transactions() {
                               console.log("DIRECT FETCH EDIT: Response status:", response.status);
                               
                               if (response.ok) {
-                                await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-                                await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+                                await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+                                await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
                                 toast({
                                   title: "Transaction Updated",
                                   description: "Transaction has been updated successfully",
