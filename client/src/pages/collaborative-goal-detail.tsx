@@ -1,5 +1,5 @@
 import { useParams, useLocation } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,33 +27,28 @@ export default function CollaborativeGoalDetailPage() {
     enabled: !!id,
   });
 
-  const addContributionMutation = useMutation({
-    mutationFn: async (data: { amount: string; note: string }) => {
-      return apiRequest('POST', `/api/collaborative-goals/${id}/contributions`, data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/collaborative-goals/${id}`] });
+  const addContribution = async (data: { amount: string; note: string }) => {
+    try {
+      await apiRequest('POST', `/api/collaborative-goals/${id}/contributions`, data);
+      await queryClient.invalidateQueries({ queryKey: [`/api/collaborative-goals/${id}`] });
       setContributionAmount("");
       setContributionNote("");
       toast({
         title: "Contribution Added",
         description: "Your contribution has been recorded successfully.",
       });
-    },
-    onError: () => {
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to add contribution. Please try again.",
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  const inviteFriendMutation = useMutation({
-    mutationFn: async (email: string) => {
-      return apiRequest('POST', `/api/collaborative-goals/${id}/invite`, { email });
-    },
-    onSuccess: (response) => {
+  const inviteFriend = async (email: string) => {
+    try {
+      const response = await apiRequest('POST', `/api/collaborative-goals/${id}/invite`, { email });
       setInviteEmail("");
       if (response.existingUser) {
         toast({
@@ -66,16 +61,15 @@ export default function CollaborativeGoalDetailPage() {
           description: `An invitation email has been sent to ${response.email}.`,
         });
       }
-      queryClient.invalidateQueries({ queryKey: [`/api/collaborative-goals/${id}`] });
-    },
-    onError: (error: any) => {
+      await queryClient.invalidateQueries({ queryKey: [`/api/collaborative-goals/${id}`] });
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to send invitation. Please try again.",
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   if (isLoading) {
     return (
