@@ -338,13 +338,7 @@ export default function Transactions() {
           referenceNote: newTransaction.referenceNote || ""
         };
 
-        const response = await fetch(`/api/transactions/${editingTransaction.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(updateData)
-        });
+        const response = await apiRequest('PUT', `/api/transactions/${editingTransaction.id}`, updateData);
 
         if (response.ok) {
           const updatedTransaction = await response.json();
@@ -404,13 +398,7 @@ export default function Transactions() {
           referenceNote: newTransaction.referenceNote || ""
         };
 
-        const response = await fetch('/api/transactions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(createData)
-        });
+        const response = await apiRequest('POST', '/api/transactions', createData);
 
         if (response.ok) {
           const newTransactionData = await response.json();
