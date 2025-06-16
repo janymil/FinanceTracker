@@ -145,7 +145,7 @@ export default function Categories() {
       });
       return;
     }
-    deleteCategory(id);
+    deleteCategoryAction(id);
   };
 
   const CategoryCard = ({ category }: { category: Category }) => {

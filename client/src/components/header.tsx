@@ -46,8 +46,8 @@ import RequirePlan from "@/components/require-plan";
 import { Link } from "wouter";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useCategories } from "@/hooks/useCategories";
 import { queryClient } from "@/lib/queryClient";
 
 interface Category {
