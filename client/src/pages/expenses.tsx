@@ -76,11 +76,19 @@ export default function Expenses() {
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["/api/transactions"],
     enabled: !!user,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/transactions");
+      return response.json();
+    },
   });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
     enabled: !!user,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/categories");
+      return response.json();
+    },
   });
 
   const createExpenseMutation = useMutation({
