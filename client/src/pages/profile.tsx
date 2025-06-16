@@ -42,9 +42,6 @@ export default function ProfilePage() {
             </Badge>
           </div>
         </div>
-        <Button variant="outline">
-          Change Photo
-        </Button>
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
