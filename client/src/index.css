@@ -192,27 +192,50 @@
   font-weight: 500 !important;
 }
 
-/* Hide navigation for the first UserProfile (Account Settings) but show it for Security section */
-.max-w-2xl:first-of-type .cl-navbar,
-.max-w-2xl:first-of-type .cl-userPreview {
+/* Hide navigation and security sections for profile-only component */
+.profile-only .cl-navbar,
+.profile-only .cl-userPreview {
+  display: none !important;
+}
+
+/* Hide security-related sections in profile-only view */
+.profile-only [data-localization-key*="security"],
+.profile-only [data-localization-key*="password"],
+.profile-only [data-localization-key*="two-factor"],
+.profile-only [data-localization-key*="2fa"],
+.profile-only .cl-profileSection:has([data-localization-key*="security"]),
+.profile-only .cl-profileSection:has([data-localization-key*="password"]) {
   display: none !important;
 }
 
 /* Show navbar for security section */
-.cl-navbar {
+.security-only .cl-navbar {
+  display: block !important;
   border-bottom: 1px solid hsl(var(--border)) !important;
   padding: 0.5rem 1rem !important;
 }
 
-.cl-navbarButton {
+.security-only .cl-navbarButton {
   padding: 0.5rem 1rem !important;
   font-size: 0.875rem !important;
   border-radius: 0.375rem !important;
 }
 
-.cl-navbarButton[data-localization-key*="security"] {
+/* Hide profile tab in security-only component */
+.security-only .cl-navbarButton[data-localization-key*="profile"],
+.security-only .cl-navbarButton:first-child {
+  display: none !important;
+}
+
+/* Make security tab active by default */
+.security-only .cl-navbarButton[data-localization-key*="security"] {
   background-color: hsl(var(--primary)) !important;
   color: hsl(var(--primary-foreground)) !important;
+}
+
+/* Hide profile sections in security-only component */
+.security-only .cl-profileSection:not(:has([data-localization-key*="security"])):not(:has([data-localization-key*="password"])) {
+  display: none !important;
 }
 
 /* Reduce excessive padding */

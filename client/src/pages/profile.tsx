@@ -256,7 +256,7 @@ export default function ProfilePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="max-w-2xl">
+                <div className="max-w-2xl profile-only">
                   <UserProfile 
                     routing="hash"
                     appearance={{
@@ -302,7 +302,7 @@ export default function ProfilePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="max-w-2xl">
+                <div className="max-w-2xl security-only">
                   <UserProfile 
                     routing="hash"
                     appearance={{
