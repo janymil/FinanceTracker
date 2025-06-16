@@ -18,7 +18,6 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { 
   User, 
-  Lock, 
   Bell, 
   Shield, 
   Palette, 
@@ -30,9 +29,7 @@ import {
   CreditCard,
   Trash2,
   Camera,
-  Save,
-  Eye,
-  EyeOff
+  Save
 } from "lucide-react";
 
 interface UserSettings {
