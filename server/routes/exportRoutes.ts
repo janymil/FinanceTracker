@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { generatePdfReport } from "../generatePdf";
+import { BunnyStorage } from "../bunnyStorage";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
