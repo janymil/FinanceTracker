@@ -76,6 +76,7 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       staleTime: 0, // Always consider data stale to enable immediate updates
       gcTime: 30 * 60 * 1000, // 30 minutes garbage collection
+      structuralSharing: false, // Prevent cached object references to force React re-renders
       retry: (failureCount, error: any) => {
         // Don't retry on auth errors
         if (error?.status === 401 || error?.status === 403) return false;
