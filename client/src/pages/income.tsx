@@ -145,8 +145,6 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
