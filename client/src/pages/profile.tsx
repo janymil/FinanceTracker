@@ -29,7 +29,8 @@ import {
   CreditCard,
   Trash2,
   Camera,
-  Save
+  Save,
+  Lock
 } from "lucide-react";
 
 interface UserSettings {
