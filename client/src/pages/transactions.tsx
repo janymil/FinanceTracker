@@ -95,31 +95,28 @@ export default function Transactions() {
 
 
 
-  const createTransactionMutation = useMutation({
-    mutationFn: async (transactionData: typeof newTransaction) => {
+  const createTransaction = async (transactionData: typeof newTransaction) => {
+    try {
       const res = await apiRequest("POST", "/api/transactions", {
         ...transactionData,
         amount: parseFloat(transactionData.amount),
       });
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      
       setIsDialogOpen(false);
       toast({
         title: "Transaction Added",
         description: "Transaction has been created successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   // Direct edit mutation that bypasses form system
   const directEditMutation = useMutation({

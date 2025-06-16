@@ -497,7 +497,7 @@ export default function Income() {
                     </Button>
                     <Button 
                       onClick={handleSubmit}
-                      disabled={!newIncome.amount || !newIncome.description || createIncomeMutation.isPending || updateIncomeMutation.isPending}
+                      disabled={!newIncome.amount || !newIncome.description || updateIncomeMutation.isPending}
                       className="bg-green-600 hover:bg-green-700"
                     >
                       {editingTransaction ? "Update" : "Add Income"}

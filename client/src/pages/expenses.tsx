@@ -539,7 +539,7 @@ export default function Expenses() {
                     </Button>
                     <Button 
                       onClick={handleSubmit}
-                      disabled={!newExpense.amount || !newExpense.description || createExpenseMutation.isPending || updateExpenseMutation.isPending}
+                      disabled={!newExpense.amount || !newExpense.description || updateExpenseMutation.isPending}
                       className="bg-red-600 hover:bg-red-700"
                     >
                       {editingTransaction ? "Update" : "Add Expense"}

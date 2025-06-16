@@ -215,19 +215,14 @@ export default function Dashboard() {
     retryDelay: 1000,
   });
 
-  const createTransactionMutation = useMutation({
-    mutationFn: async (transactionData: typeof newTransaction) => {
+  const createTransaction = async (transactionData: typeof newTransaction) => {
+    try {
       const res = await apiRequest("POST", "/api/transactions", {
         ...transactionData,
         amount: parseFloat(transactionData.amount),
       });
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       
       setIsDialogOpen(false);
       setNewTransaction({
@@ -246,15 +241,14 @@ export default function Dashboard() {
         title: "Transaction Added",
         description: "Transaction has been created successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   if (!user) {
     return null;
@@ -288,9 +282,9 @@ export default function Dashboard() {
     return options;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!newTransaction.amount || !newTransaction.description) return;
-    createTransactionMutation.mutate(newTransaction);
+    await createTransaction(newTransaction);
   };
 
   return (
@@ -523,7 +517,7 @@ export default function Dashboard() {
                       </Button>
                       <Button 
                         onClick={handleSubmit}
-                        disabled={!newTransaction.amount || !newTransaction.description || createTransactionMutation.isPending}
+                        disabled={!newTransaction.amount || !newTransaction.description}
                       >
                         Add
                       </Button>
