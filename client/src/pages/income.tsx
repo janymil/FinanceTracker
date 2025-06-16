@@ -190,8 +190,10 @@ export default function Income() {
     try {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
       await res.json();
-      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+      
+      // Update local state immediately
+      setTransactions(prev => prev.filter(t => t.id !== id));
+      
       toast({
         title: "Income Deleted",
         description: "Income transaction has been removed successfully",
