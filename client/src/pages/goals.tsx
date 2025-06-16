@@ -81,8 +81,7 @@ export default function Goals() {
   const updateGoal = async ({ id, data }: { id: number; data: any }) => {
     try {
       const res = await apiRequest("PUT", `/api/goals/${id}`, data);
-      await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
+      await queryClient.invalidateQueries({ queryKey: ["goals"] });
       setIsEditDialogOpen(false);
       setEditingGoal(null);
       toast({
@@ -101,8 +100,7 @@ export default function Goals() {
   const deleteGoal = async (id: number) => {
     try {
       const res = await apiRequest("DELETE", `/api/goals/${id}`);
-      await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
+      await queryClient.invalidateQueries({ queryKey: ["goals"] });
       toast({
         title: "Goal Deleted",
         description: "Your financial goal has been deleted successfully.",
@@ -126,8 +124,7 @@ export default function Goals() {
         description: goal.description,
       };
       const res = await apiRequest("POST", "/api/goals", duplicateData);
-      await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
+      await queryClient.invalidateQueries({ queryKey: ["goals"] });
       toast({
         title: "Goal Duplicated",
         description: "Your financial goal has been duplicated successfully.",

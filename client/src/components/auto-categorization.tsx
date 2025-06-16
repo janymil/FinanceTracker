@@ -122,6 +122,7 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
   const aiCategorize = async ({ description, amount }: { description: string; amount: number }) => {
     try {
       const data = await apiRequest("POST", "/api/ai/categorize", { description, amount });
+      await queryClient.invalidateQueries({ queryKey: ["ai"] });
       return data;
     } catch (error: any) {
       toast({

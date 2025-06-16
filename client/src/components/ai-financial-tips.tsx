@@ -41,6 +41,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             amount: cat.amount
           }))
       });
+      await queryClient.invalidateQueries({ queryKey: ["ai"] });
       
       const data = await response.json();
       
