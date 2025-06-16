@@ -959,22 +959,22 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async updateUserProfile(userId: string, profileData: { firstName: string; lastName: string; email: string; phone?: string; website?: string }): Promise<void> {
+  async updateUserProfile(userId: string, profileData: { firstName: string; lastName: string; email: string; phone?: string | null; website?: string | null }): Promise<void> {
     const updateData: any = {
-      firstName: profileData.firstName || null,
-      lastName: profileData.lastName || null,
+      firstName: profileData.firstName,
+      lastName: profileData.lastName,
       email: profileData.email,
+      phone: profileData.phone || null,
+      website: profileData.website || null,
       updatedAt: new Date()
     };
 
-    if (profileData.phone) {
-      updateData.phone = profileData.phone;
+    const result = await db.update(users).set(updateData).where(eq(users.id, userId));
+    
+    // Verify the update was successful
+    if (!result) {
+      throw new Error('Failed to update user profile in database');
     }
-    if (profileData.website) {
-      updateData.website = profileData.website;
-    }
-
-    await db.update(users).set(updateData).where(eq(users.id, userId));
   }
 
   async updateUserPassword(userId: string, hashedPassword: string): Promise<void> {

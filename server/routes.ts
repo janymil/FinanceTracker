@@ -2487,6 +2487,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
+      
       const { firstName, lastName, email, phone, website } = req.body;
 
       // Basic validation
@@ -2494,8 +2495,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "First name, last name, and email are required" });
       }
 
-      // Check if email is already taken by another user
-      if (email !== req.user.email) {
+      // Get current user to check email change
+      const currentUser = await storage.getUser(userId);
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if email is already taken by another user (only if email is changing)
+      if (email !== currentUser.email) {
         const existingUser = await storage.getUserByEmail(email);
         if (existingUser && existingUser.id !== userId) {
           return res.status(400).json({ message: "Email already in use" });
@@ -2504,26 +2511,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Update user profile
       await storage.updateUserProfile(userId, {
-        firstName,
-        lastName,
-        email,
-        phone,
-        website
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+        phone: phone?.trim() || null,
+        website: website?.trim() || null
       });
 
       // Return updated user data
       const updatedUser = await storage.getUser(userId);
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to retrieve updated user data" });
+      }
+
       res.json({
-        message: "Profile updated successfully",
-        firstName: updatedUser.firstName,
-        lastName: updatedUser.lastName,
-        email: updatedUser.email,
+        firstName: updatedUser.firstName || '',
+        lastName: updatedUser.lastName || '',
+        email: updatedUser.email || '',
         phone: updatedUser.phone || '',
         website: updatedUser.website || ''
       });
     } catch (error) {
       console.error("Error updating profile:", error);
-      res.status(500).json({ message: "Failed to update profile" });
+      res.status(500).json({ 
+        message: "Failed to update profile", 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
     }
   });
 

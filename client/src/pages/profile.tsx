@@ -120,25 +120,34 @@ export default function ProfilePage() {
   const updateProfileMutation = useMutation({
     mutationFn: async (data: typeof profileData) => {
       const response = await apiRequest('PUT', '/api/profile', data);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update profile');
+      }
       return response.json();
     },
-    onSuccess: (updatedUser) => {
+    onSuccess: (result) => {
       // Invalidate user auth cache to refresh the UI
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
       
       // Update local state with the new data
       setProfileData({
-        firstName: updatedUser.firstName || '',
-        lastName: updatedUser.lastName || '',
-        email: updatedUser.email || '',
-        phone: updatedUser.phone || '',
-        website: updatedUser.website || ''
+        firstName: result.firstName || '',
+        lastName: result.lastName || '',
+        email: result.email || '',
+        phone: result.phone || '',
+        website: result.website || ''
       });
       
       toast({ title: "Profile updated successfully" });
     },
-    onError: () => {
-      toast({ title: "Failed to update profile", variant: "destructive" });
+    onError: (error: Error) => {
+      console.error('Profile update error:', error);
+      toast({ 
+        title: "Failed to update profile", 
+        description: error.message || "Please try again later",
+        variant: "destructive" 
+      });
     }
   });
 
