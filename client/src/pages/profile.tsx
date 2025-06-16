@@ -304,20 +304,25 @@ export default function ProfilePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="rounded-lg border overflow-hidden security-only">
+                <div className="max-w-2xl">
                   <UserProfile 
                     routing="hash"
                     appearance={{
                       elements: {
-                        rootBox: "w-full max-w-none",
-                        card: "border-0 shadow-none",
-                        navbar: "border-b",
-                        pageScrollBox: "p-4",
-                        profileSection: "max-w-none",
-                        profileSectionContent: "max-w-none",
-                        profileSectionPrimaryButton: "bg-primary hover:bg-primary/90",
-                        formButtonPrimary: "bg-primary hover:bg-primary/90",
-                        formFieldInput: "max-w-md"
+                        rootBox: "w-full max-w-2xl",
+                        card: "border-0 shadow-none max-w-2xl",
+                        navbar: "hidden",
+                        pageScrollBox: "p-0",
+                        profileSection: "max-w-2xl",
+                        profileSectionContent: "max-w-2xl",
+                        profileSectionPrimaryButton: "bg-primary hover:bg-primary/90 text-sm px-3 py-1.5",
+                        formButtonPrimary: "bg-primary hover:bg-primary/90 text-sm",
+                        formFieldInput: "max-w-sm text-sm",
+                        formFieldLabel: "text-sm",
+                        profileSectionItem: "py-2 max-w-2xl"
+                      },
+                      layout: {
+                        unsafe_disableDevelopmentModeWarnings: true
                       }
                     }}
                   />

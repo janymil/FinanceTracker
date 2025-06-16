@@ -126,68 +126,71 @@
 
 /* Clerk UserProfile Layout Improvements */
 
-/* Fix wide layout and bring buttons closer to text */
-.cl-profileSection__content,
-.cl-profileSection__item {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
+/* Make Clerk interface more compact and responsive */
+.cl-profileSection__content {
+  max-width: 100% !important;
+  display: grid !important;
+  grid-template-columns: 1fr auto !important;
   gap: 1rem !important;
-  max-width: none !important;
-  width: 100% !important;
+  align-items: center !important;
 }
 
-.cl-profileSection__primaryButton,
-.cl-button {
-  margin-left: auto !important;
-  flex-shrink: 0 !important;
+.cl-profileSection__item {
+  display: grid !important;
+  grid-template-columns: 1fr auto !important;
+  gap: 1rem !important;
+  align-items: center !important;
+  padding: 0.5rem 0 !important;
+  max-width: 100% !important;
+}
+
+.cl-profileSection__primaryButton {
+  margin: 0 !important;
+  padding: 0.375rem 0.75rem !important;
+  font-size: 0.875rem !important;
   white-space: nowrap !important;
 }
 
-/* Compact form fields */
+/* Compact form styling */
 .cl-formField {
-  max-width: 600px !important;
+  max-width: 100% !important;
+  margin-bottom: 0.75rem !important;
 }
 
 .cl-formFieldInput {
-  max-width: 400px !important;
+  max-width: 300px !important;
+  font-size: 0.875rem !important;
 }
 
-/* Profile section item layout */
-.cl-profileSection__item > div:first-child {
-  flex: 1 !important;
-  min-width: 0 !important;
+.cl-formFieldLabel {
+  font-size: 0.875rem !important;
+  margin-bottom: 0.25rem !important;
 }
 
-.cl-profileSection__item > div:last-child {
-  flex-shrink: 0 !important;
-  margin-left: 1rem !important;
-}
-
-/* Hide Profile tab in Security section */
-.security-only .cl-navbar .cl-navbarButton:first-child,
-.security-only .cl-navbar [data-localization-key*="profile"],
-.security-only .cl-userPreview,
-.security-only .cl-navbar__menuButton[aria-label*="Profile"] {
+/* Hide navigation completely for security-only view */
+.cl-navbar {
   display: none !important;
 }
 
-/* Force Security tab to be active and only visible tab */
-.security-only .cl-navbar .cl-navbarButton[data-localization-key*="security"] {
-  border-bottom: 2px solid hsl(var(--primary)) !important;
-  color: hsl(var(--primary)) !important;
+.cl-userPreview {
+  display: none !important;
 }
 
-/* Remove excessive padding and margins */
+/* Reduce overall padding and spacing */
 .cl-profileSection {
-  padding: 1rem !important;
+  padding: 0.75rem !important;
 }
 
-.cl-profileSection__item {
-  padding: 0.75rem 0 !important;
-  border-bottom: 1px solid hsl(var(--border)) !important;
+.cl-rootBox {
+  max-width: 600px !important;
 }
 
-.cl-profileSection__item:last-child {
-  border-bottom: none !important;
+.cl-card {
+  max-width: 600px !important;
+}
+
+/* Make buttons more compact */
+.cl-button {
+  padding: 0.375rem 0.75rem !important;
+  font-size: 0.875rem !important;
 }
