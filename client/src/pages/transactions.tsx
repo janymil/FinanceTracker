@@ -192,27 +192,24 @@ export default function Transactions() {
     },
   });
 
-  const deleteTransactionMutation = useMutation({
-    mutationFn: async (id: number) => {
+  const deleteTransaction = async (id: number) => {
+    try {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
-      return { deletedId: id };
-    },
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      
       toast({
         title: "Transaction Deleted",
         description: "Transaction has been removed successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   // Filter transactions based on search and filters
   const filteredTransactions = transactions.filter((transaction: Transaction) => {
@@ -302,13 +299,13 @@ export default function Transactions() {
 
   const availableCategories = Array.from(new Set(transactions.map((t: Transaction) => t.categoryName).filter(Boolean)));
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!newTransaction.amount || !newTransaction.description) return;
 
     if (editingTransaction) {
       updateTransactionMutation.mutate({ id: editingTransaction.id, ...newTransaction });
     } else {
-      createTransactionMutation.mutate(newTransaction);
+      await createTransaction(newTransaction);
     }
   };
 
@@ -544,7 +541,7 @@ export default function Transactions() {
                     </Button>
                     <Button 
                       onClick={handleSubmit}
-                      disabled={!newTransaction.amount || !newTransaction.description || createTransactionMutation.isPending || updateTransactionMutation.isPending}
+                      disabled={!newTransaction.amount || !newTransaction.description || updateTransactionMutation.isPending}
                     >
                       {editingTransaction ? "Update" : "Add"}
                     </Button>
@@ -864,7 +861,7 @@ export default function Transactions() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => deleteTransactionMutation.mutate(transaction.id)}
+                          onClick={() => deleteTransaction(transaction.id)}
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
