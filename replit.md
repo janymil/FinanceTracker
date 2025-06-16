@@ -247,6 +247,11 @@ Changelog:
 - June 16, 2025. Removed subscription restrictions from transaction editing and deleting endpoints - free users can now edit/delete transactions
 - June 16, 2025. Fixed duplicate onError key compilation error in income.tsx mutation configuration
 - June 16, 2025. Set React Query staleTime to 0 to ensure fresh data fetching and prevent cached data display issues
+- June 16, 2025. Fixed critical authentication timing issue - implemented proper enabled conditions for all React Query calls
+- June 16, 2025. Updated useAuth hook with canFetchUser variable to ensure queries only run when user is fully loaded and authenticated
+- June 16, 2025. Applied enabled: isAuthenticated && !!user?.id condition across all pages (expenses, income, transactions, dashboard)
+- June 16, 2025. Fixed cache invalidation system to use proper queryKey patterns with user?.id for consistent data updates
+- June 16, 2025. Resolved data loading regression where empty results were returned due to queries running before user authentication completed
 ```
 
 ## User Preferences
