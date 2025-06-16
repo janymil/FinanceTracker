@@ -122,45 +122,40 @@ export default function Transactions() {
 
   const updateTransactionMutation = useMutation({
     mutationFn: async ({ id, ...data }: { id: number } & typeof newTransaction) => {
-      console.log("Starting edit mutation for transaction", id);
-      console.log("Form data received:", data);
+      console.log("EDIT: Starting mutation for transaction", id);
       
-      // Send all form data - simplified approach
+      // Send current form state directly
       const updateData = {
-        amount: parseFloat(data.amount),
-        description: data.description,
-        date: data.date,
-        type: data.type,
-        categoryId: parseInt(data.categoryId),
-        isRecurring: data.isRecurring,
-        recurringFrequency: data.recurringFrequency,
-        recurringEndDate: data.recurringEndDate || null,
-        paymentUrl: data.paymentUrl || "",
-        referenceNote: data.referenceNote || ""
+        amount: parseFloat(newTransaction.amount),
+        description: newTransaction.description,
+        date: newTransaction.date,
+        type: newTransaction.type,
+        categoryId: parseInt(newTransaction.categoryId),
+        isRecurring: newTransaction.isRecurring,
+        recurringFrequency: newTransaction.recurringFrequency,
+        recurringEndDate: newTransaction.recurringEndDate || null,
+        paymentUrl: newTransaction.paymentUrl || "",
+        referenceNote: newTransaction.referenceNote || ""
       };
       
-      console.log("Sending PUT request with data:", updateData);
+      console.log("EDIT: Sending data:", updateData);
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
-      console.log("PUT response status:", res.status);
+      console.log("EDIT: Response status:", res.status);
       
       if (!res.ok) {
-        console.error("PUT request failed:", res.status, res.statusText);
         throw new Error(`Update failed: ${res.status}`);
       }
       
       const result = await res.json();
-      console.log("PUT response data:", result);
-      console.log("Mutation function completed successfully");
+      console.log("EDIT: Success - reloading page in 100ms");
       return result;
     },
-    onSuccess: async (updatedTransaction) => {
-      console.log("Edit success callback triggered, reloading page...");
+    onSuccess: () => {
+      console.log("EDIT: Success callback executing reload...");
       setEditingTransaction(null);
       setIsDialogOpen(false);
-      // Force hard refresh to bypass cache
-      setTimeout(() => {
-        window.location.reload();
-      }, 50);
+      // Immediate page reload
+      window.location.reload();
     },
     onError: (error: Error) => {
       toast({
