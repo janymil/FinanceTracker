@@ -70,11 +70,19 @@ export default function Budget() {
   const { data: budgets = [], isLoading } = useQuery({
     queryKey: ["/api/budgets"],
     enabled: !!user,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/budgets");
+      return response.json();
+    },
   });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
     enabled: !!user,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/categories");
+      return response.json();
+    },
   });
 
   const createBudgetMutation = useMutation({

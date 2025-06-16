@@ -57,6 +57,10 @@ export default function Goals() {
   const { data: goals = [], isLoading } = useQuery({
     queryKey: ["/api/goals"],
     enabled: !!user,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/goals");
+      return response.json();
+    },
   });
 
   const createGoalMutation = useMutation({
