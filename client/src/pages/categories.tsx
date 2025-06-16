@@ -95,8 +95,8 @@ export default function Categories() {
       const res = await apiRequest("PUT", `/api/categories/${id}`, data);
       const updatedCat = await res.json();
       
-      // Update shared state immediately
-      updateCategory(updatedCat);
+      // Update local state immediately
+      setCategories(prev => prev.map(cat => cat.id === updatedCat.id ? updatedCat : cat));
       setEditingCategory(null);
       setIsDialogOpen(false);
       
@@ -118,8 +118,8 @@ export default function Categories() {
       const res = await apiRequest("DELETE", `/api/categories/${id}`);
       await res.json();
       
-      // Update shared state immediately
-      deleteCategory(id);
+      // Update local state immediately
+      setCategories(prev => prev.filter(cat => cat.id !== id));
       
       toast({
         title: "Category Deleted",
