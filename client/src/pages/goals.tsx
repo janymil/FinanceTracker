@@ -59,75 +59,66 @@ export default function Goals() {
     enabled: !!user,
   });
 
-  const createGoalMutation = useMutation({
-    mutationFn: async (goalData: any) => {
+  const createGoal = async (goalData: any) => {
+    try {
       const res = await apiRequest("POST", "/api/goals", goalData);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
+      await res.json();
+      await queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
       setIsDialogOpen(false);
       setNewGoal({ name: "", targetAmount: "", targetDate: "", category: "", description: "" });
       toast({
         title: "Goal Created",
         description: "Your financial goal has been created successfully.",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  const updateGoalMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+  const updateGoal = async ({ id, data }: { id: number; data: any }) => {
+    try {
       const res = await apiRequest("PUT", `/api/goals/${id}`, data);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
+      await res.json();
+      await queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
       setIsEditDialogOpen(false);
       setEditingGoal(null);
       toast({
         title: "Goal Updated",
         description: "Your financial goal has been updated successfully.",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  const deleteGoalMutation = useMutation({
-    mutationFn: async (id: number) => {
+  const deleteGoal = async (id: number) => {
+    try {
       const res = await apiRequest("DELETE", `/api/goals/${id}`);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
+      await res.json();
+      await queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
       toast({
         title: "Goal Deleted",
         description: "Your financial goal has been deleted successfully.",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  const duplicateGoalMutation = useMutation({
-    mutationFn: async (goal: Goal) => {
+  const duplicateGoal = async (goal: Goal) => {
+    try {
       const duplicateData = {
         name: `${goal.name} (Copy)`,
         targetAmount: goal.targetAmount,
@@ -136,26 +127,23 @@ export default function Goals() {
         description: goal.description,
       };
       const res = await apiRequest("POST", "/api/goals", duplicateData);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
+      await res.json();
+      await queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
       toast({
         title: "Goal Duplicated",
         description: "Your financial goal has been duplicated successfully.",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   const handleCreateGoal = () => {
-    createGoalMutation.mutate({
+    createGoal({
       name: newGoal.name,
       targetAmount: parseFloat(newGoal.targetAmount),
       targetDate: newGoal.targetDate,
@@ -180,7 +168,7 @@ export default function Goals() {
   const handleUpdateGoal = () => {
     if (!editingGoal) return;
     
-    updateGoalMutation.mutate({
+    updateGoal({
       id: editingGoal.id,
       data: {
         name: editGoal.name,
@@ -194,11 +182,11 @@ export default function Goals() {
   };
 
   const handleDeleteGoal = (id: number) => {
-    deleteGoalMutation.mutate(id);
+    deleteGoal(id);
   };
 
   const handleDuplicateGoal = (goal: Goal) => {
-    duplicateGoalMutation.mutate(goal);
+    duplicateGoal(goal);
   };
 
   const getProgressPercentage = (current: number, target: number) => {
@@ -304,8 +292,8 @@ export default function Goals() {
                   <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button onClick={handleCreateGoal} disabled={createGoalMutation.isPending}>
-                    {createGoalMutation.isPending ? "Creating..." : "Create Goal"}
+                  <Button onClick={handleCreateGoal}>
+                    Create Goal
                   </Button>
                 </div>
               </DialogContent>
@@ -390,8 +378,8 @@ export default function Goals() {
                   <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button onClick={handleUpdateGoal} disabled={updateGoalMutation.isPending}>
-                    {updateGoalMutation.isPending ? "Updating..." : "Update Goal"}
+                  <Button onClick={handleUpdateGoal}>
+                    Update Goal
                   </Button>
                 </div>
               </DialogContent>

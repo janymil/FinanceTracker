@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -421,7 +421,7 @@ export default function Budget() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => deleteBudgetMutation.mutate(budget.id)}
+                            onClick={() => deleteBudget(budget.id)}
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
