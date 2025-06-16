@@ -189,8 +189,7 @@ export default function Expenses() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      invalidateAllUserData();
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -213,8 +212,7 @@ export default function Expenses() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      invalidateAllUserData();
       toast({
         title: "Expense Deleted",
         description: "Expense transaction has been removed successfully",
