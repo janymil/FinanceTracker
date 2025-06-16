@@ -81,7 +81,7 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
   };
 
   const { data: uncategorizedTransactions } = useQuery({
-    queryKey: ["/api/transactions", "uncategorized"],
+    queryKey: ["transactions", user?.id, "uncategorized"],
     enabled: !!user,
   });
 
