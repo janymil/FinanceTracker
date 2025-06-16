@@ -262,6 +262,8 @@ Changelog:
 - June 16, 2025. Verified transaction rendering patterns correctly use React Query data directly without state copying issues
 - June 16, 2025. CRITICAL FIX: Resolved React re-rendering issue in transaction-list.tsx by forcing fresh array references with spread operator before slice()
 - June 16, 2025. Fixed transaction list not updating after edits/deletes by ensuring React sees new array references and triggers re-renders
+- June 16, 2025. Enhanced QueryClient configuration with structuralSharing: false to force new object references and guarantee React re-renders
+- June 16, 2025. Set staleTime: 0 in QueryClient for immediate data freshness after mutations, ensuring UI updates reflect server state instantly
 - June 16, 2025. Completed comprehensive authentication migration from custom useAuth hook to direct Clerk integration with useClerkUserReady
 - June 16, 2025. Created optimized useClerkUserReady hook using Clerk's native isLoaded && isSignedIn && !!user?.id conditions for reliable timing
 - June 16, 2025. Updated all major pages (dashboard, expenses, income, transactions) to use proper Clerk authentication patterns for React Query enabled flags
