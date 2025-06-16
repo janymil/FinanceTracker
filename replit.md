@@ -253,8 +253,11 @@ Changelog:
 - June 16, 2025. Fixed cache invalidation system to use proper queryKey patterns with user?.id for consistent data updates
 - June 16, 2025. Resolved data loading regression where empty results were returned due to queries running before user authentication completed
 - June 16, 2025. Fixed critical queryKey inconsistency preventing UI updates after edit/delete operations
-- June 16, 2025. Standardized all edit/delete mutations to use ["/api/transactions", user?.id] and ["/api/financial-summary", user?.id] queryKey format
+- June 16, 2025. Standardized all edit/delete mutations to use ["transactions", user?.id] and ["financial-summary", user?.id] queryKey format
 - June 16, 2025. Fixed cache invalidation system - UI now updates immediately after mutations by using matching queryKey patterns across all pages
+- June 16, 2025. Completed comprehensive analysis and optimization of refetchQueries vs invalidateQueries usage patterns
+- June 16, 2025. Standardized cache operations: create/delete use invalidateQueries (efficient), edit uses refetchQueries (immediate feedback)
+- June 16, 2025. Fixed mixed queryKey formats across financial-summary endpoints and eliminated redundant cache operations for better performance
 - June 16, 2025. Completed comprehensive authentication migration from custom useAuth hook to direct Clerk integration with useClerkUserReady
 - June 16, 2025. Created optimized useClerkUserReady hook using Clerk's native isLoaded && isSignedIn && !!user?.id conditions for reliable timing
 - June 16, 2025. Updated all major pages (dashboard, expenses, income, transactions) to use proper Clerk authentication patterns for React Query enabled flags

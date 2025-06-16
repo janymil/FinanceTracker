@@ -138,9 +138,7 @@ export default function Income() {
         return [newTransaction, ...old.filter((t: any) => t.id !== Date.now())];
       });
       
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["/api/expense-breakdown"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
       
       setIsDialogOpen(false);
       setNewIncome({
