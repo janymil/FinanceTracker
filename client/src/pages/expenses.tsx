@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,7 +51,7 @@ interface Category {
 }
 
 export default function Expenses() {
-  const { user, isAuthenticated } = useAuth();
+  const { isReady, user } = useClerkUserReady();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -75,12 +75,12 @@ export default function Expenses() {
 
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["/api/transactions", user?.id],
-    enabled: isAuthenticated && !!user?.id,
+    enabled: isReady,
   });
 
   const { data: categories = [] } = useQuery({
-    queryKey: ["/api/categories", user?.id],
-    enabled: isAuthenticated && !!user?.id,
+    queryKey: ["/api/categories"],
+    enabled: isReady,
   });
 
   const createExpenseMutation = useMutation({
