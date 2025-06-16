@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@clerk/clerk-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +41,8 @@ interface DayData {
 export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const { isReady, user } = useClerkUserReady();
+  const { isLoaded, isSignedIn, user } = useUser();
+  const isReady = isLoaded && isSignedIn && !!user?.id;
 
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["transactions", user?.id],
