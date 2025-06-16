@@ -149,9 +149,20 @@ export default function Dashboard() {
     referenceNote: "",
   });
 
-  // Get start and end dates for the selected month
-  const startDate = new Date(`${selectedMonth}-01`);
-  const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+  // Get start and end dates for the selected month or all time
+  const getDateRange = (selectedMonth: string) => {
+    if (selectedMonth === 'all-time') {
+      return {
+        startDate: null,
+        endDate: null
+      };
+    }
+    const startDate = new Date(`${selectedMonth}-01`);
+    const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+    return { startDate, endDate };
+  };
+
+  const { startDate, endDate } = getDateRange(selectedMonth);
 
   // Core data loads immediately
   const { data: transactions, isLoading: transactionsLoading, error: transactionsError } = useQuery({
@@ -174,14 +185,21 @@ export default function Dashboard() {
 
   // Secondary data loads after a delay for better perceived performance
   const { data: financialSummary, isLoading: summaryLoading } = useQuery({
-    queryKey: ['/api/financial-summary', startDate.toISOString(), endDate.toISOString()],
+    queryKey: ['/api/financial-summary', selectedMonth, startDate?.toISOString(), endDate?.toISOString()],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString()
-      });
-      const response = await apiRequest("GET", `/api/financial-summary?${params}`);
-      return response.json();
+      if (selectedMonth === 'all-time') {
+        // For "All Time", call without date parameters
+        const response = await apiRequest("GET", "/api/financial-summary");
+        return response.json();
+      } else {
+        // For specific months, include date range
+        const params = new URLSearchParams({
+          startDate: startDate!.toISOString(),
+          endDate: endDate!.toISOString()
+        });
+        const response = await apiRequest("GET", `/api/financial-summary?${params}`);
+        return response.json();
+      }
     },
     enabled: !!user && !!transactions, // Wait for transactions first
   });
@@ -235,6 +253,9 @@ export default function Dashboard() {
   }
 
   const formatMonth = (monthStr: string) => {
+    if (monthStr === 'all-time') {
+      return 'All Time';
+    }
     const [year, month] = monthStr.split('-');
     return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', {
       month: 'long',
@@ -242,9 +263,13 @@ export default function Dashboard() {
     });
   };
 
-  // Generate dynamic month options (current month + last 11 months)
+  // Generate dynamic month options (All Time + current month + last 11 months)
   const generateMonthOptions = () => {
     const options = [];
+    
+    // Add "All Time" option first
+    options.push({ value: 'all-time', label: 'All Time' });
+    
     const now = new Date();
 
     for (let i = 0; i < 12; i++) {
