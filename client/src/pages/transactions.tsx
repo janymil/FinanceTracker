@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useTransactions } from "@/hooks/useTransactions";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -118,9 +118,9 @@ export default function Transactions() {
     }
   };
 
-  // Direct edit mutation that bypasses form system
-  const directEditMutation = useMutation({
-    mutationFn: async (transactionData: any) => {
+  // Direct edit function that bypasses form system
+  const directEditTransaction = async (transactionData: any) => {
+    try {
       console.log("DIRECT EDIT: Starting with data:", transactionData);
       const res = await apiRequest("PUT", `/api/transactions/${transactionData.id}`, transactionData);
       console.log("DIRECT EDIT: Response status:", res.status);
@@ -129,33 +129,30 @@ export default function Transactions() {
         throw new Error(`Edit failed: ${res.status}`);
       }
       
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+      await res.json();
+      await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
         title: "Transaction Updated",
         description: "Transaction has been updated successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       console.log("DIRECT EDIT: Error occurred:", error.message);
       toast({
         title: "Edit Failed",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  // Keep original mutation for form submission
-  const updateTransactionMutation = useMutation({
-    mutationFn: async ({ id, ...data }: { id: number } & typeof newTransaction) => {
+  // Form submission function
+  const updateTransaction = async ({ id, ...data }: { id: number } & typeof newTransaction) => {
+    try {
       const updateData = {
         amount: parseFloat(newTransaction.amount),
         description: newTransaction.description,
@@ -173,24 +170,23 @@ export default function Transactions() {
       if (!res.ok) {
         throw new Error(`Update failed: ${res.status}`);
       }
-      return await res.json();
-    },
-    onSuccess: () => {
+      await res.json();
+      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
         title: "Transaction Updated",
         description: "Transaction has been updated successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   const deleteTransaction = async (id: number) => {
     try {
@@ -303,7 +299,7 @@ export default function Transactions() {
     if (!newTransaction.amount || !newTransaction.description) return;
 
     if (editingTransaction) {
-      updateTransactionMutation.mutate({ id: editingTransaction.id, ...newTransaction });
+      updateTransaction({ id: editingTransaction.id, ...newTransaction });
     } else {
       await createTransaction(newTransaction);
     }

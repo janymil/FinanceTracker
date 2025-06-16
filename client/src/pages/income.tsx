@@ -122,8 +122,8 @@ export default function Income() {
     }
   };
 
-  const updateIncomeMutation = useMutation({
-    mutationFn: async ({ id, ...data }: { id: number } & typeof newIncome) => {
+  const updateIncome = async ({ id, ...data }: { id: number } & typeof newIncome) => {
+    try {
       // Always send complete transaction data
       const updateData = {
         amount: parseFloat(data.amount),
@@ -139,52 +139,46 @@ export default function Income() {
       };
       
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+      await res.json();
+      await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
         title: "Income Updated",
         description: "Income transaction has been updated successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  const deleteIncomeMutation = useMutation({
-    mutationFn: async (id: number) => {
+  const deleteIncome = async (id: number) => {
+    try {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+      await res.json();
+      await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       toast({
         title: "Income Deleted",
         description: "Income transaction has been removed successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   // Filter only income transactions
   const incomeTransactions = transactions.filter((transaction: Transaction) => transaction.type === "income");
@@ -307,7 +301,7 @@ export default function Income() {
     if (!newIncome.amount || !newIncome.description) return;
 
     if (editingTransaction) {
-      updateIncomeMutation.mutate({ id: editingTransaction.id, ...newIncome });
+      updateIncome({ id: editingTransaction.id, ...newIncome });
     } else {
       await createIncome(newIncome);
     }
