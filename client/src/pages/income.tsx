@@ -75,12 +75,12 @@ export default function Income() {
   });
 
   const { data: transactions = [], isLoading } = useQuery({
-    queryKey: ["/api/transactions", user?.id],
+    queryKey: ["transactions", user?.id],
     enabled: isReady,
   });
 
   const { data: categories = [] } = useQuery({
-    queryKey: ["/api/categories"],
+    queryKey: ["categories"],
     enabled: isReady,
   });
 
