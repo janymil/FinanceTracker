@@ -219,8 +219,18 @@ export default function Dashboard() {
       return await res.json();
     },
     onSuccess: () => {
+      // Invalidate all transaction-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === '/api/financial-summary' 
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      
+      // Also refetch the current financial summary immediately
+      queryClient.refetchQueries({ 
+        queryKey: ['/api/financial-summary', selectedMonth, startDate?.toISOString(), endDate?.toISOString()]
+      });
+      
       setIsDialogOpen(false);
       setNewTransaction({
         amount: "",
