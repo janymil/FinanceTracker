@@ -7,12 +7,15 @@ export function useTransactions() {
 
   return useQuery({
     queryKey: ["transactions", user?.id],
-    enabled: isReady,
+    enabled: isReady && !!user,
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/transactions");
       return response.json();
     },
     staleTime: 0, // Always fresh
+    gcTime: 0, // Don't cache results
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
     retry: (failureCount, error: any) => {
       // Don't retry if authentication failed due to timing
       if (error?.status === 401 && !isReady) return false;
