@@ -368,4 +368,83 @@ export function registerAIRoutes(app: Express) {
       res.status(500).json({ message: "Failed to generate financial health score" });
     }
   });
+
+  // Get user's mascot data
+  app.get('/api/mascot', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const mascot = await storage.getMascot(userId);
+      res.json(mascot);
+    } catch (error) {
+      console.error("Error getting mascot:", error);
+      res.status(500).json({ message: "Failed to get mascot" });
+    }
+  });
+
+  // Generate new mascot
+  app.post('/api/mascot/generate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || !['standard', 'premium'].includes(user.plan || '')) {
+        return res.status(403).json({ message: "Mascot generation requires standard or premium plan" });
+      }
+
+      // Get financial health data
+      const transactions = await storage.getUserTransactions(userId, 100);
+      const totalIncome = transactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      const totalExpenses = transactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      
+      const healthScore = Math.max(0, Math.min(100, 
+        50 + (totalIncome - totalExpenses) / Math.max(totalIncome, 1) * 50
+      ));
+
+      // Generate mascot with DALL-E
+      const { generateMascotImage } = await import('../openai');
+      const imageUrl = await generateMascotImage(userId, healthScore);
+
+      // Create or update mascot
+      const mascot = await storage.createOrUpdateMascot(userId, {
+        imageUrl,
+        healthScore,
+        mood: healthScore >= 70 ? 'happy' : healthScore >= 40 ? 'neutral' : 'concerned',
+        lastGenerated: new Date().toISOString(),
+        isEnabled: true
+      });
+
+      res.json(mascot);
+    } catch (error) {
+      console.error("Error generating mascot:", error);
+      res.status(500).json({ message: "Failed to generate mascot" });
+    }
+  });
+
+  // Toggle mascot visibility
+  app.post('/api/mascot/toggle', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { enabled } = req.body;
+      const mascot = await storage.toggleMascot(userId, enabled);
+      res.json(mascot);
+    } catch (error) {
+      console.error("Error toggling mascot:", error);
+      res.status(500).json({ message: "Failed to toggle mascot" });
+    }
+  });
 }
