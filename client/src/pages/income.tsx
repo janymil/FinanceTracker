@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -93,13 +93,47 @@ export default function Income() {
       });
       return await res.json();
     },
-    onSuccess: async (newTransaction) => {
-      console.log("New transaction created:", newTransaction);
+    onMutate: async (newIncomeData) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["/api/transactions"] });
       
-      // Clear cache and force immediate refetch
-      queryClient.removeQueries({ queryKey: ["/api/transactions"] });
-      const refetchResult = await queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
-      console.log("Refetch result:", refetchResult);
+      // Snapshot the previous value
+      const previousTransactions = queryClient.getQueryData(["/api/transactions"]);
+      
+      // Optimistically update to the new value
+      const optimisticTransaction = {
+        id: Date.now(), // Temporary ID
+        ...newIncomeData,
+        amount: newIncomeData.amount,
+        type: "income",
+        date: new Date(newIncomeData.date).toISOString(),
+        userId: user?.id,
+        categoryName: categories.find((cat: any) => cat.id.toString() === newIncomeData.categoryId)?.name || null
+      };
+      
+      queryClient.setQueryData(["/api/transactions"], (old: any) => {
+        return old ? [optimisticTransaction, ...old] : [optimisticTransaction];
+      });
+      
+      // Return a context object with the snapshotted value
+      return { previousTransactions };
+    },
+    onError: (err, newIncomeData, context) => {
+      // If the mutation fails, use the context to roll back
+      queryClient.setQueryData(["/api/transactions"], context?.previousTransactions);
+      toast({
+        title: "Error",
+        description: "Failed to add income. Please try again.",
+        variant: "destructive",
+      });
+    },
+    onSuccess: (newTransaction) => {
+      // Update with real data from server
+      queryClient.setQueryData(["/api/transactions"], (old: any) => {
+        if (!old) return [newTransaction];
+        // Replace the optimistic update with real data
+        return [newTransaction, ...old.filter((t: any) => t.id !== Date.now())];
+      });
       
       queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       queryClient.invalidateQueries({ queryKey: ["/api/expense-breakdown"] });

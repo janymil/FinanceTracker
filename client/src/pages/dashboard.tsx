@@ -153,10 +153,11 @@ export default function Dashboard() {
   const startDate = new Date(`${selectedMonth}-01`);
   const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
 
-  // Core data loads immediately
+  // Core data loads immediately with better error handling
   const { data: transactions, isLoading: transactionsLoading, error: transactionsError } = useQuery({
     queryKey: ['/api/transactions'],
     enabled: isAuthenticated,
+    staleTime: 30 * 1000, // 30 seconds for transactions
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/transactions");
       return response.json();
@@ -166,13 +167,14 @@ export default function Dashboard() {
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
     enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000, // 5 minutes for categories (they change less often)
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/categories");
       return response.json();
     },
   });
 
-  // Secondary data loads after a delay for better perceived performance
+  // Load financial summary immediately alongside transactions
   const { data: financialSummary, isLoading: summaryLoading } = useQuery({
     queryKey: ['/api/financial-summary', startDate.toISOString(), endDate.toISOString()],
     queryFn: async () => {
@@ -183,7 +185,8 @@ export default function Dashboard() {
       const response = await apiRequest("GET", `/api/financial-summary?${params}`);
       return response.json();
     },
-    enabled: isAuthenticated && !!transactions, // Wait for transactions first
+    enabled: isAuthenticated, // Load immediately when authenticated
+    staleTime: 60 * 1000, // 1 minute for financial summary
   });
 
   const { data: budgets, error: budgetsError } = useQuery({
