@@ -86,18 +86,16 @@ export default function Expenses() {
     retryDelay: 1000,
   });
 
-  const createExpenseMutation = useMutation({
-    mutationFn: async (expenseData: typeof newExpense) => {
+  const createExpense = async (expenseData: typeof newExpense) => {
+    try {
       const res = await apiRequest("POST", "/api/transactions", {
         ...expenseData,
         amount: parseFloat(expenseData.amount),
         type: "expense",
       });
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      
       setIsDialogOpen(false);
       setNewExpense({
         amount: "",
@@ -114,15 +112,14 @@ export default function Expenses() {
         title: "Expense Added",
         description: "Expense transaction has been created successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   const updateExpenseMutation = useMutation({
     mutationFn: async ({ id, ...data }: { id: number } & typeof newExpense) => {
@@ -309,13 +306,13 @@ export default function Expenses() {
     fill: `hsl(${index * 137.5 % 360}, 70%, 50%)`,
   }));
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!newExpense.amount || !newExpense.description) return;
 
     if (editingTransaction) {
       updateExpenseMutation.mutate({ id: editingTransaction.id, ...newExpense });
     } else {
-      createExpenseMutation.mutate(newExpense);
+      await createExpense(newExpense);
     }
   };
 

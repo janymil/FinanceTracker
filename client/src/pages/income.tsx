@@ -87,18 +87,16 @@ export default function Income() {
     retryDelay: 1000,
   });
 
-  const createIncomeMutation = useMutation({
-    mutationFn: async (incomeData: typeof newIncome) => {
+  const createIncome = async (incomeData: typeof newIncome) => {
+    try {
       const res = await apiRequest("POST", "/api/transactions", {
         ...incomeData,
         amount: parseFloat(incomeData.amount),
         type: "income",
       });
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      
       setIsDialogOpen(false);
       setNewIncome({
         amount: "",
@@ -115,15 +113,14 @@ export default function Income() {
         title: "Income Added",
         description: "Income transaction has been created successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   const updateIncomeMutation = useMutation({
     mutationFn: async ({ id, ...data }: { id: number } & typeof newIncome) => {
@@ -306,13 +303,13 @@ export default function Income() {
     fill: `hsl(${index * 137.5 % 360}, 70%, 50%)`,
   }));
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!newIncome.amount || !newIncome.description) return;
 
     if (editingTransaction) {
       updateIncomeMutation.mutate({ id: editingTransaction.id, ...newIncome });
     } else {
-      createIncomeMutation.mutate(newIncome);
+      await createIncome(newIncome);
     }
   };
 
