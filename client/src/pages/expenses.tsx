@@ -95,9 +95,9 @@ export default function Expenses() {
       });
       return await res.json();
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       setIsDialogOpen(false);
       setNewExpense({
         amount: "",
@@ -143,16 +143,15 @@ export default function Expenses() {
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
       return await res.json();
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
         title: "Expense Updated",
         description: "Expense transaction has been updated successfully",
       });
-
     },
     onError: (error: Error) => {
       toast({
@@ -168,9 +167,9 @@ export default function Expenses() {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
       return await res.json();
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       toast({
         title: "Expense Deleted",
         description: "Expense transaction has been removed successfully",
