@@ -46,9 +46,8 @@ import RequirePlan from "@/components/require-plan";
 import { Link } from "wouter";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { invalidateAllUserData } from "@/lib/queryClient";
 
 interface Category {
   id: number;
@@ -81,6 +80,7 @@ interface HeaderProps {
 export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { signOut } = useClerk();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -111,7 +111,8 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
       return await res.json();
     },
     onSuccess: () => {
-      invalidateAllUserData();
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       setIsDialogOpen(false);
       setNewTransaction({
         amount: "",

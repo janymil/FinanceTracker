@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState, useEffect, useMemo, startTransition, useDeferredValue, useTransition } from "react";
-import { apiRequest, invalidateAllUserData } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardSkeleton } from "@/components/dashboard-skeleton";
 
@@ -219,7 +219,18 @@ export default function Dashboard() {
       return await res.json();
     },
     onSuccess: () => {
-      invalidateAllUserData();
+      // Invalidate all transaction-related queries
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === '/api/financial-summary' 
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      
+      // Also refetch the current financial summary immediately
+      queryClient.refetchQueries({ 
+        queryKey: ['/api/financial-summary', selectedMonth, startDate?.toISOString(), endDate?.toISOString()]
+      });
+      
       setIsDialogOpen(false);
       setNewTransaction({
         amount: "",
