@@ -34,6 +34,7 @@ interface Transaction {
   description: string;
   date: string;
   type: "income" | "expense";
+  categoryId?: number;
   categoryName?: string;
   categoryIcon?: string;
   categoryColor?: string;
@@ -76,6 +77,8 @@ export default function Income() {
     isRecurring: false,
     recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
     recurringEndDate: "",
+    paymentUrl: "",
+    referenceNote: "",
   });
 
   // Fetch transactions directly
