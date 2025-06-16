@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useUser, UserProfile } from "@clerk/clerk-react";
+import { useUser, UserProfile, UserButton } from "@clerk/clerk-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -253,82 +253,39 @@ export default function ProfilePage() {
             <CardHeader>
               <CardTitle>Personal Information</CardTitle>
               <CardDescription>
-                Update your personal details and contact information
+                Manage your profile details, name, email addresses, and connected accounts through Clerk's secure interface
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleProfileSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input
-                      id="firstName"
-                      value={profileData.firstName}
-                      onChange={(e) => setProfileData({...profileData, firstName: e.target.value})}
-                      placeholder="Enter your first name"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input
-                      id="lastName"
-                      value={profileData.lastName}
-                      onChange={(e) => setProfileData({...profileData, lastName: e.target.value})}
-                      placeholder="Enter your last name"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="email"
-                      value={profileData.email}
-                      onChange={(e) => setProfileData({...profileData, email: e.target.value})}
-                      className="pl-10"
-                      placeholder="Enter your email"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={profileData.phone}
-                      onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
-                      className="pl-10"
-                      placeholder="Enter your phone number"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="website">Website</Label>
-                  <div className="relative">
-                    <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="website"
-                      type="url"
-                      value={profileData.website}
-                      onChange={(e) => setProfileData({...profileData, website: e.target.value})}
-                      className="pl-10"
-                      placeholder="https://yourwebsite.com"
-                    />
-                  </div>
-                </div>
-
-                <Button type="submit" disabled={updateProfileMutation.isPending}>
-                  <Save className="h-4 w-4 mr-2" />
-                  {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
-                </Button>
-              </form>
+              <div className="rounded-lg border overflow-hidden min-h-[600px]">
+                <UserProfile 
+                  routing="hash"
+                  path="/profile"
+                  appearance={{
+                    elements: {
+                      rootBox: "w-full min-h-[500px]",
+                      card: "border-0 shadow-none min-h-[500px]",
+                      navbar: "hidden", // Hide navbar to show only profile content
+                      pageScrollBox: "p-4 min-h-[400px]",
+                      profileSectionPrimaryButton: "bg-primary hover:bg-primary/90",
+                      formButtonPrimary: "bg-primary hover:bg-primary/90"
+                    }
+                  }}
+                />
+              </div>
+              
+              <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                <h4 className="font-medium mb-2">Profile Management</h4>
+                <p className="text-sm text-muted-foreground">
+                  Use the interface above to update your:
+                </p>
+                <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+                  <li>• Full name and profile picture</li>
+                  <li>• Email addresses and verification</li>
+                  <li>• Username and display preferences</li>
+                  <li>• Connected social accounts</li>
+                </ul>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -347,11 +304,12 @@ export default function ProfilePage() {
                 <div className="rounded-lg border overflow-hidden min-h-[600px]">
                   <UserProfile 
                     routing="hash"
+                    path="/security"
                     appearance={{
                       elements: {
                         rootBox: "w-full min-h-[500px]",
                         card: "border-0 shadow-none min-h-[500px]",
-                        navbar: "block",
+                        navbar: "hidden", // Hide navbar to show only security content
                         pageScrollBox: "p-4 min-h-[400px]",
                         profileSectionPrimaryButton: "bg-primary hover:bg-primary/90",
                         formButtonPrimary: "bg-primary hover:bg-primary/90"
@@ -361,15 +319,16 @@ export default function ProfilePage() {
                 </div>
                 
                 <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-                  <h4 className="font-medium mb-2">Password Management</h4>
+                  <h4 className="font-medium mb-2">Security Features</h4>
                   <p className="text-sm text-muted-foreground">
-                    To change your password, click on the "Security" section above. You can:
+                    Use the security interface above to manage:
                   </p>
                   <ul className="text-sm text-muted-foreground mt-2 space-y-1">
-                    <li>• Update your current password</li>
-                    <li>• Enable two-factor authentication</li>
-                    <li>• Manage connected accounts</li>
-                    <li>• View security activity</li>
+                    <li>• Change your account password</li>
+                    <li>• Enable two-factor authentication (2FA)</li>
+                    <li>• View active sessions and devices</li>
+                    <li>• Review security activity logs</li>
+                    <li>• Manage backup codes</li>
                   </ul>
                 </div>
               </CardContent>
