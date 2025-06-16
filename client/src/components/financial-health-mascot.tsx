@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -71,6 +72,7 @@ const mascotConfigs = {
 };
 
 export default function FinancialHealthMascot() {
+  const { isAuthenticated, user } = useClerkUserReady();
   const [mascotState, setMascotState] = useState<MascotState>({
     emotion: 'neutral',
     animation: 'idle',
@@ -81,7 +83,10 @@ export default function FinancialHealthMascot() {
 
   const { data: healthData, isLoading } = useQuery<FinancialHealthData>({
     queryKey: ["/api/financial-health"],
+    enabled: isAuthenticated && !!user?.id,
     refetchInterval: 30000, // Refresh every 30 seconds
+    staleTime: 0,
+    gcTime: 0,
   });
 
   useEffect(() => {
