@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Edit3, Trash2, TrendingUp, DollarSign } from "lucide-react";
 import { categoryIcons } from "@/lib/icons";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface Category {
@@ -46,8 +47,8 @@ export default function Categories() {
   });
 
   const { data: categories = [] } = useQuery({
-    queryKey: ["/api/categories"],
-    enabled: isAuthenticated,
+    queryKey: ["categories"],
+    enabled: isAuthenticated && !!user?.id,
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/categories");
       return response.json();
@@ -58,7 +59,7 @@ export default function Categories() {
     try {
       const res = await apiRequest("POST", "/api/categories", categoryData);
       await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      await queryClient.invalidateQueries({ queryKey: ["categories"] });
       setIsDialogOpen(false);
       setNewCategory({ name: "", icon: "dollar-sign", color: "#3B82F6", type: "expense" });
       toast({
@@ -78,7 +79,7 @@ export default function Categories() {
     try {
       const res = await apiRequest("PUT", `/api/categories/${id}`, data);
       await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      await queryClient.invalidateQueries({ queryKey: ["categories"] });
       setEditingCategory(null);
       setIsDialogOpen(false);
       toast({
@@ -98,7 +99,7 @@ export default function Categories() {
     try {
       const res = await apiRequest("DELETE", `/api/categories/${id}`);
       await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      await queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast({
         title: "Category Deleted",
         description: "Category has been removed successfully",
