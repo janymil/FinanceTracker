@@ -369,72 +369,145 @@ export function registerAIRoutes(app: Express) {
     }
   });
 
-  // Get user's mascot data
+  // Financial Mascot endpoints
   app.get('/api/mascot', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
-
       const mascot = await storage.getUserMascot(userId);
+      
+      if (!mascot) {
+        // Return default mascot state for new users
+        return res.json({
+          id: null,
+          userId,
+          imageUrl: null,
+          healthScore: 50,
+          mood: "neutral",
+          lastGenerated: null,
+          isEnabled: true
+        });
+      }
+      
       res.json(mascot);
     } catch (error) {
-      console.error("Error getting mascot:", error);
-      res.status(500).json({ message: "Failed to get mascot" });
+      console.error("Error fetching mascot:", error);
+      res.status(500).json({ message: "Failed to fetch mascot" });
     }
   });
 
-  // Generate new mascot
   app.post('/api/mascot/generate', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
-
       const user = await storage.getUser(userId);
-      if (!user || !['standard', 'premium'].includes(user.plan || '')) {
-        return res.status(403).json({ message: "Mascot generation requires standard or premium plan" });
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
-      // Get financial health data
-      const transactions = await storage.getUserTransactions(userId, 100);
-      const totalIncome = transactions
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
-      const totalExpenses = transactions
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      // Get user's current financial health
+      const financialSummary = await storage.getUserFinancialSummary(
+        userId,
+        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
+        new Date()
+      );
+
+      // Calculate financial health score
+      const totalIncome = financialSummary.totalIncome || 0;
+      const totalExpenses = financialSummary.totalExpenses || 0;
+      const netAmount = totalIncome - totalExpenses;
       
-      const healthScore = Math.max(0, Math.min(100, 
-        50 + (totalIncome - totalExpenses) / Math.max(totalIncome, 1) * 50
-      ));
+      // Simple health score calculation (0-100)
+      let healthScore = 50; // Default neutral
+      if (totalIncome > 0) {
+        const savingsRate = netAmount / totalIncome;
+        if (savingsRate > 0.3) healthScore = 90;
+        else if (savingsRate > 0.2) healthScore = 80;
+        else if (savingsRate > 0.1) healthScore = 70;
+        else if (savingsRate > 0) healthScore = 60;
+        else if (savingsRate > -0.1) healthScore = 40;
+        else if (savingsRate > -0.2) healthScore = 30;
+        else healthScore = 20;
+      }
 
-      // Generate mascot with DALL-E
-      const { generateMascotImage } = await import('../openai');
-      const imageUrl = await generateMascotImage(userId, healthScore);
+      // Determine mood based on health score
+      let mood = "neutral";
+      if (healthScore >= 80) mood = "excellent";
+      else if (healthScore >= 60) mood = "good";
+      else if (healthScore >= 40) mood = "neutral";
+      else if (healthScore >= 20) mood = "concerned";
+      else mood = "worried";
 
-      // Create or update mascot
+      // Generate DALL-E 3 prompt based on financial health
+      const personalityTraits = {
+        excellent: "confident, cheerful, glowing with success, wearing a small crown or gold accessories",
+        good: "happy, optimistic, well-dressed, with a slight smile and bright eyes",
+        neutral: "calm, balanced, thoughtful, with a gentle expression",
+        concerned: "slightly worried, furrowed brow, but still hopeful, looking determined",
+        worried: "anxious, stressed, but cute and sympathetic, needing encouragement"
+      };
+
+      // Create unique characteristics based on user ID for personalization
+      const userIdNumber = parseInt(userId.slice(-4), 10); // Use last 4 digits of user ID
+      const uniqueTraits = [
+        "wearing glasses", "with a bow tie", "holding a tiny calculator", "with a small hat",
+        "wearing a vest", "with a monocle", "holding coins", "with a briefcase",
+        "wearing suspenders", "with a pocket watch", "holding a chart", "with a cape"
+      ];
+      const colorSchemes = [
+        "blue and gold", "green and silver", "purple and white", "orange and blue",
+        "red and gold", "teal and cream", "pink and gray", "navy and yellow"
+      ];
+      
+      const uniqueTrait = uniqueTraits[userIdNumber % uniqueTraits.length];
+      const colorScheme = colorSchemes[userIdNumber % colorSchemes.length];
+      
+      const prompt = `A cute, friendly financial advisor mascot character that is ${personalityTraits[mood as keyof typeof personalityTraits]}. The character should be a small, adorable creature (like a mix between a piggy bank and a friendly animal) with expressive eyes, ${uniqueTrait}, in ${colorScheme} colors. The style should be modern, clean, and professional but approachable. The character represents someone's financial health and should look ${mood}. Background should be simple and clean. Digital art style, cartoon-like but polished.`;
+
+      // Generate image using DALL-E 3
+      const OpenAI = (await import('openai')).default;
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const response = await openai.images.generate({
+        model: "dall-e-3",
+        prompt: prompt,
+        n: 1,
+        size: "1024x1024",
+        quality: "standard",
+      });
+
+      const imageUrl = response.data?.[0]?.url;
+      if (!imageUrl) {
+        throw new Error("Failed to generate mascot image - no URL returned from DALL-E 3");
+      }
+
+      // Check if user already has a mascot
       const existingMascot = await storage.getUserMascot(userId);
-      let mascot;
       
+      let mascot;
       if (existingMascot) {
+        // Update existing mascot
         mascot = await storage.updateMascot(userId, {
           imageUrl,
           healthScore,
-          mood: healthScore >= 70 ? 'happy' : healthScore >= 40 ? 'neutral' : 'concerned',
-          lastGenerated: new Date().toISOString(),
-          isEnabled: true
+          mood,
+          generationPrompt: prompt,
+          lastGenerated: new Date(),
         });
       } else {
+        // Create new mascot
         mascot = await storage.createMascot({
           userId,
           imageUrl,
           healthScore,
-          mood: healthScore >= 70 ? 'happy' : healthScore >= 40 ? 'neutral' : 'concerned',
-          lastGenerated: new Date().toISOString(),
-          isEnabled: true
+          mood,
+          generationPrompt: prompt,
+          isEnabled: true,
         });
       }
 
@@ -445,16 +518,30 @@ export function registerAIRoutes(app: Express) {
     }
   });
 
-  // Toggle mascot visibility
   app.post('/api/mascot/toggle', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
-
       const { enabled } = req.body;
-      const mascot = await storage.toggleMascot(userId, enabled);
+
+      // Check if mascot exists, if not create a default one
+      let mascot = await storage.getUserMascot(userId);
+      
+      if (!mascot) {
+        mascot = await storage.createMascot({
+          userId,
+          imageUrl: '', // Will be generated when user first enables
+          healthScore: 50,
+          mood: 'neutral',
+          generationPrompt: 'Default mascot',
+          isEnabled: enabled,
+        });
+      } else {
+        mascot = await storage.toggleMascot(userId, enabled);
+      }
+
       res.json(mascot);
     } catch (error) {
       console.error("Error toggling mascot:", error);

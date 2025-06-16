@@ -49,8 +49,7 @@ export function FinancialMascot() {
     gcTime: 0,
   });
 
-  // Debug logging
-  console.log("Floating Mascot Debug:", { isReady, userId: user?.id, mascot, isLoading });
+
 
   // Generate new mascot
   const generateMascot = async () => {
