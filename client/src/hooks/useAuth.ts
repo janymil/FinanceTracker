@@ -58,14 +58,14 @@ export function useAuth() {
       }
       return failureCount < 3;
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
     refetchOnWindowFocus: true,
     refetchInterval: false,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
-  const isLoading = !userLoaded || !authLoaded || (isSignedIn && dbUserLoading);
-  const isAuthenticated = !!isSignedIn && !!clerkUser && !!user;
+  const isLoading = !userLoaded || !authLoaded;
+  const isAuthenticated = !!isSignedIn && !!clerkUser;
   const isUnauthenticated = authLoaded && !isSignedIn;
 
   return {
