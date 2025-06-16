@@ -109,8 +109,13 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: () => {
+      // Invalidate all transaction-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === '/api/financial-summary' 
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-health"] });
       setIsDialogOpen(false);
       setNewTransaction({
         amount: "",
@@ -206,8 +211,13 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: () => {
+      // Invalidate all transaction-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === '/api/financial-summary' 
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-health"] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -230,8 +240,13 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: () => {
+      // Invalidate all transaction-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === '/api/financial-summary' 
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-health"] });
       toast({
         title: "Transaction Deleted",
         description: "Transaction has been removed successfully",
