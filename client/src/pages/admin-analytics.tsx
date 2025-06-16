@@ -50,6 +50,9 @@ export default function AdminAnalytics() {
     lastName: "",
     plan: "free"
   });
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
+  const [isUpdatingUser, setIsUpdatingUser] = useState(false);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
   const { toast } = useToast();
 
   const { data: users = [], isLoading: usersLoading } = useQuery({
@@ -86,70 +89,70 @@ export default function AdminAnalytics() {
     }
   };
 
-  const createUserMutation = useMutation({
-    mutationFn: async (userData: any) => {
-      return await apiRequest('POST', '/api/admin/users', userData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+  const createUser = async (userData: any) => {
+    setIsCreatingUser(true);
+    try {
+      await apiRequest('POST', '/api/admin/users', userData);
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
       setNewUser({ email: "", firstName: "", lastName: "", plan: "free" });
       toast({
         title: "Success",
         description: "User created successfully",
       });
-    },
-    onError: (error) => {
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to create user",
         variant: "destructive",
       });
-    },
-  });
+    } finally {
+      setIsCreatingUser(false);
+    }
+  };
 
-  const updateUserMutation = useMutation({
-    mutationFn: async ({ id, userData }: { id: string; userData: any }) => {
-      return await apiRequest('PUT', `/api/admin/users/${id}`, userData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+  const updateUser = async ({ id, userData }: { id: string; userData: any }) => {
+    setIsUpdatingUser(true);
+    try {
+      await apiRequest('PUT', `/api/admin/users/${id}`, userData);
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
       setEditingUser(null);
       toast({
         title: "Success",
         description: "User updated successfully",
       });
-    },
-    onError: (error) => {
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to update user",
         variant: "destructive",
       });
-    },
-  });
+    } finally {
+      setIsUpdatingUser(false);
+    }
+  };
 
-  const deleteUserMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      return await apiRequest('DELETE', `/api/admin/users/${userId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+  const deleteUser = async (userId: string) => {
+    setIsDeletingUser(true);
+    try {
+      await apiRequest('DELETE', `/api/admin/users/${userId}`);
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
       toast({
         title: "Success",
         description: "User deleted successfully",
       });
-    },
-    onError: (error) => {
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to delete user",
         variant: "destructive",
       });
-    },
-  });
+    } finally {
+      setIsDeletingUser(false);
+    }
+  };
 
   const filteredUsers = users.filter((user: User) => {
     const matchesSearch = !searchTerm || 
@@ -423,11 +426,11 @@ export default function AdminAnalytics() {
                     </Select>
                   </div>
                   <Button 
-                    onClick={() => createUserMutation.mutate(newUser)}
-                    disabled={createUserMutation.isPending}
+                    onClick={() => createUser(newUser)}
+                    disabled={isCreatingUser}
                     className="w-full"
                   >
-                    {createUserMutation.isPending ? "Creating..." : "Create User"}
+                    {isCreatingUser ? "Creating..." : "Create User"}
                   </Button>
                 </div>
               </DialogContent>
