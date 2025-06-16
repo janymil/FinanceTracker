@@ -665,6 +665,40 @@ export default function Transactions() {
                           </div>
                         </div>
                       )}
+
+                      {/* Smart Bill Assistant - Expense only */}
+                      {newTransaction.type === "expense" && (
+                        <div className="space-y-4 border-t pt-4">
+                          <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Smart Bill Assistant
+                          </div>
+                          <div>
+                            <Label htmlFor="paymentUrl">Payment URL (Optional)</Label>
+                            <Input
+                              id="paymentUrl"
+                              type="url"
+                              value={newTransaction.paymentUrl}
+                              onChange={(e) => setNewTransaction({ ...newTransaction, paymentUrl: e.target.value })}
+                              placeholder="https://example.com/pay"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Link to where you can pay this bill
+                            </p>
+                          </div>
+                          <div>
+                            <Label htmlFor="referenceNote">Reference Note (Optional)</Label>
+                            <Input
+                              id="referenceNote"
+                              value={newTransaction.referenceNote}
+                              onChange={(e) => setNewTransaction({ ...newTransaction, referenceNote: e.target.value })}
+                              placeholder="Account #123456, Reference: ABC789"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Account number or other reference information
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </RequirePlan>
 

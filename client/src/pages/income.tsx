@@ -365,6 +365,8 @@ export default function Income() {
       isRecurring: Boolean(transaction.isRecurring),
       recurringFrequency: (transaction.recurringFrequency as "weekly" | "monthly" | "yearly") || "monthly",
       recurringEndDate: formattedRecurringEndDate,
+      paymentUrl: transaction.paymentUrl || "",
+      referenceNote: transaction.referenceNote || "",
     });
     setIsDialogOpen(true);
   };
