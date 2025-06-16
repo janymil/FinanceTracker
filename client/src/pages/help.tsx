@@ -562,12 +562,6 @@ export default function Help() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div>
-                      <h3 className="font-semibold mb-2">How do the subscription plans work?</h3>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        Standard and Premium plans are monthly or yearly subscriptions that give you immediate access to advanced features. You can upgrade or downgrade your plan at any time.
-                      </p>
-                    </div>
                     {faqItems.map((item) => (
                       <div key={item.id} className="border rounded-lg">
                         <button

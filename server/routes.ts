@@ -45,44 +45,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(404).json({ error: 'Callback endpoint no longer exists. Authentication handled by Clerk' });
   });
 
-  // Clear authentication endpoint for token mismatches
-  app.post("/api/clear-auth", async (req: Request, res: Response) => {
-    try {
-      // Clear all authentication cookies with various domain patterns
-      const cookiesToClear = ['__session', '__clerk_db_jwt', '__clerk_handshake', '__clerk_ssr_state'];
-      
-      cookiesToClear.forEach(cookieName => {
-        res.clearCookie(cookieName, { path: '/', domain: undefined });
-        res.clearCookie(cookieName, { path: '/', domain: '.replit.dev' });
-        res.clearCookie(cookieName, { path: '/', domain: 'localhost' });
-      });
-      
-      res.json({ success: true, message: 'Authentication cleared' });
-    } catch (error) {
-      console.error('Error clearing auth:', error);
-      res.status(500).json({ error: 'Failed to clear authentication' });
-    }
-  });
-
-  // Force auth reset endpoint to handle signing key mismatches
-  app.get("/api/auth/reset", async (req: Request, res: Response) => {
-    try {
-      // Clear all cookies and force redirect to clean auth state
-      const cookiesToClear = ['__session', '__clerk_db_jwt', '__clerk_handshake', '__clerk_ssr_state'];
-      
-      cookiesToClear.forEach(cookieName => {
-        res.clearCookie(cookieName, { path: '/', domain: undefined });
-        res.clearCookie(cookieName, { path: '/', domain: '.replit.dev' });
-        res.clearCookie(cookieName, { path: '/', domain: 'localhost' });
-      });
-      
-      res.redirect('/auth?reset=true');
-    } catch (error) {
-      console.error('Error resetting auth:', error);
-      res.status(500).json({ error: 'Failed to reset authentication' });
-    }
-  });
-
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {

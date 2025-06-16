@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, MapPin, Clock, TrendingUp } from "lucide-react";
+import { Mail, MapPin, Phone, Clock, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
@@ -19,7 +19,7 @@ export default function Contact() {
   const { toast } = useToast();
 
   useEffect(() => {
-    document.title = "Contact Us - FinanzerPro";
+    document.title = "Contact Us - FinanceFlow";
   }, []);
 
   const handleLogin = () => {
@@ -86,7 +86,7 @@ export default function Contact() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Have questions about FinanzerPro? We're here to help. Get in touch with our support team 
+            Have questions about FinanceFlow? We're here to help. Get in touch with our support team 
             and we'll respond as quickly as possible.
           </p>
         </div>
@@ -184,7 +184,15 @@ export default function Contact() {
                   <Mail className="h-5 w-5 text-primary" />
                   <div>
                     <p className="font-medium">Email</p>
-                    <p className="text-sm text-muted-foreground">info@finanzerpro.com</p>
+                    <p className="text-sm text-muted-foreground">support@financeflow.app</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  <Phone className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="font-medium">Phone</p>
+                    <p className="text-sm text-muted-foreground">+1 (555) 123-4567</p>
                   </div>
                 </div>
 
@@ -193,8 +201,8 @@ export default function Contact() {
                   <div>
                     <p className="font-medium">Address</p>
                     <p className="text-sm text-muted-foreground">
-                      2105 Vista Oeste NW<br />
-                      Albuquerque, NM 87120
+                      123 Finance Street<br />
+                      San Francisco, CA 94105
                     </p>
                   </div>
                 </div>

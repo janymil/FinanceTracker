@@ -546,7 +546,7 @@ export default function Landing() {
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
                   <td className="p-6 font-medium text-gray-900 dark:text-white">Transaction history</td>
-                  <td className="p-6 text-center text-gray-500">Last 100</td>
+                  <td className="p-6 text-center text-gray-500">Last 3</td>
                   <td className="p-6 text-center text-gray-500">Unlimited</td>
                   <td className="p-6 text-center text-gray-500">Unlimited</td>
                 </tr>
@@ -643,10 +643,10 @@ export default function Landing() {
             
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                What payment methods do you accept?
+                Is there a free trial for paid plans?
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                We accept all major credit cards including Visa, MasterCard, American Express, and Discover. All payments are processed securely through Stripe.
+                Yes, both Standard and Premium plans come with a 7-day free trial. No credit card required to start.
               </p>
             </div>
             
