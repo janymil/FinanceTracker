@@ -103,9 +103,9 @@ export default function Transactions() {
       });
       return await res.json();
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       setIsDialogOpen(false);
       toast({
         title: "Transaction Added",
@@ -134,9 +134,9 @@ export default function Transactions() {
       
       return await res.json();
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -176,9 +176,9 @@ export default function Transactions() {
       }
       return await res.json();
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -200,9 +200,9 @@ export default function Transactions() {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
       return { deletedId: id };
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       toast({
         title: "Transaction Deleted",
         description: "Transaction has been removed successfully",
