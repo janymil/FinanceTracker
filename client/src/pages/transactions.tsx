@@ -163,13 +163,17 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: () => {
-      // Invalidate all transaction-related queries
+      // Force immediate refetch by invalidating all related queries
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ predicate: (query) => 
         query.queryKey[0] === '/api/financial-summary' 
       });
       queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
       queryClient.invalidateQueries({ queryKey: ["/api/financial-health"] });
+      
+      // Also force refetch immediately
+      queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
+      
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
