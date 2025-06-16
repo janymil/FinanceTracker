@@ -158,30 +158,18 @@ export default function Dashboard() {
     queryKey: ['/api/transactions'],
     enabled: !!user,
     queryFn: async () => {
-      console.log('Making API call to /api/transactions');
-      try {
-        const response = await apiRequest("GET", "/api/transactions");
-        const data = await response.json();
-        console.log('Transaction API response:', data);
-        return data;
-      } catch (error) {
-        console.error('Transaction API error:', error);
-        throw error;
-      }
+      const response = await apiRequest("GET", "/api/transactions");
+      return response.json();
     },
   });
-
-  // Debug logging
-  useEffect(() => {
-    console.log('Dashboard - User:', user ? 'Authenticated' : 'Not authenticated');
-    console.log('Dashboard - Transactions loading:', transactionsLoading);
-    console.log('Dashboard - Transactions data:', transactions);
-    console.log('Dashboard - Transactions error:', transactionsError);
-  }, [user, transactionsLoading, transactions, transactionsError]);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
     enabled: !!user,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/categories");
+      return response.json();
+    },
   });
 
   // Secondary data loads after a delay for better perceived performance

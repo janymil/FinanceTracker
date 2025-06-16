@@ -238,6 +238,8 @@ Changelog:
 - June 16, 2025. Implemented session persistence system to maintain user login across server restarts using Clerk localStorage integration
 - June 16, 2025. Fixed Budget Status card authentication errors for free users and replaced custom password change with Clerk's secure UserProfile component
 - June 16, 2025. Resolved "createRoot is not defined" error by adding proper React 18 imports and fixing duplicate QueryClientProvider setup
+- June 16, 2025. Fixed critical transaction display issue caused by React Query configuration - transactions now load properly with custom queryFn implementation
+- June 16, 2025. Improved sidebar badge design with fully rounded styling, proper width constraints, and enhanced visual appearance
 ```
 
 ## User Preferences

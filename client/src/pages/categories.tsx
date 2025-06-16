@@ -49,6 +49,10 @@ export default function Categories() {
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
     enabled: !!user,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/categories");
+      return response.json();
+    },
   });
 
   const createCategoryMutation = useMutation({
