@@ -103,9 +103,16 @@ export default function Transactions() {
       });
       return await res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    onSuccess: (newTransaction) => {
+      // Immediately add the new transaction to cache
+      queryClient.setQueryData(["transactions", user?.id], (old: any[]) => {
+        if (!old) return [newTransaction];
+        return [newTransaction, ...old];
+      });
+      
+      // Invalidate financial summary to recalculate totals
       queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      
       setIsDialogOpen(false);
       setNewTransaction({
         amount: "",
@@ -200,9 +207,16 @@ export default function Transactions() {
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
       return await res.json();
     },
-    onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    onSuccess: async (updatedTransaction) => {
+      // Immediately update the cache with the new transaction data
+      queryClient.setQueryData(["transactions", user?.id], (old: any[]) => {
+        if (!old) return old;
+        return old.map(t => t.id === updatedTransaction.id ? updatedTransaction : t);
+      });
+      
+      // Also invalidate financial summary to recalculate totals
       queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -222,11 +236,18 @@ export default function Transactions() {
   const deleteTransactionMutation = useMutation({
     mutationFn: async (id: number) => {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
-      return await res.json();
+      return { deletedId: id };
     },
-    onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    onSuccess: async ({ deletedId }) => {
+      // Immediately remove the transaction from cache
+      queryClient.setQueryData(["transactions", user?.id], (old: any[]) => {
+        if (!old) return old;
+        return old.filter(t => t.id !== deletedId);
+      });
+      
+      // Invalidate financial summary to recalculate totals
       queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      
       toast({
         title: "Transaction Deleted",
         description: "Transaction has been removed successfully",
