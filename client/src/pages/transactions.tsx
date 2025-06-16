@@ -160,17 +160,23 @@ export default function Transactions() {
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
       return await res.json();
     },
-    onSuccess: () => {
-      // Force immediate refetch by invalidating all related queries
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+    onSuccess: (updatedTransaction) => {
+      console.log("Update mutation success, updated transaction:", updatedTransaction);
+      
+      // Update the cache directly with the new data
+      queryClient.setQueryData(["/api/transactions"], (oldData: any) => {
+        if (!oldData) return oldData;
+        return oldData.map((t: any) => 
+          t.id === updatedTransaction.id ? updatedTransaction : t
+        );
+      });
+      
+      // Also invalidate related queries
       queryClient.invalidateQueries({ predicate: (query) => 
         query.queryKey[0] === '/api/financial-summary' 
       });
       queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
       queryClient.invalidateQueries({ queryKey: ["/api/financial-health"] });
-      
-      // Also force refetch immediately
-      queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
       
       setEditingTransaction(null);
       setIsDialogOpen(false);
