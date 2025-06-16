@@ -104,8 +104,9 @@ export default function Transactions() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["financial-summary"] });
+      queryClient.refetchQueries({ predicate: (query) => 
+        query.queryKey[0] === "transactions" || query.queryKey[0] === "financial-summary" 
+      });
       setIsDialogOpen(false);
       toast({
         title: "Transaction Added",
