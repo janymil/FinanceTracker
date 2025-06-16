@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { useTransactions } from "@/hooks/useTransactions";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +22,7 @@ import {
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import MonthFilter from "@/components/month-filter";
@@ -65,6 +63,11 @@ export default function Income() {
   const [dateRange, setDateRange] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   
+  // Direct state management instead of React Query
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  
   const [newIncome, setNewIncome] = useState({
     amount: "",
     description: "",
@@ -75,17 +78,40 @@ export default function Income() {
     recurringEndDate: "",
   });
 
-  const { data: transactions = [], isLoading } = useTransactions();
+  // Fetch transactions directly
+  const fetchTransactions = async () => {
+    if (!isReady) return;
+    try {
+      setIsLoading(true);
+      const response = await apiRequest("GET", "/api/transactions");
+      const data = await response.json();
+      setTransactions(data || []);
+    } catch (error) {
+      console.error("Failed to fetch transactions:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ["categories"],
-    enabled: isReady,
-    retry: (failureCount, error: any) => {
-      if (error?.status === 401 && !isReady) return false;
-      return failureCount < 3;
-    },
-    retryDelay: 1000,
-  });
+  // Fetch categories directly  
+  const fetchCategories = async () => {
+    if (!isReady) return;
+    try {
+      const response = await apiRequest("GET", "/api/categories");
+      const data = await response.json();
+      setCategories(data || []);
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+    }
+  };
+
+  // Initial data loading
+  useEffect(() => {
+    if (isReady) {
+      fetchTransactions();
+      fetchCategories();
+    }
+  }, [isReady]);
 
   const createIncome = async (incomeData: typeof newIncome) => {
     try {
@@ -94,8 +120,10 @@ export default function Income() {
         amount: parseFloat(incomeData.amount),
         type: "income",
       });
-      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+      const newTransaction = await res.json();
+      
+      // Update local state immediately
+      setTransactions(prev => [newTransaction, ...prev]);
       
       setIsDialogOpen(false);
       setNewIncome({
@@ -139,9 +167,10 @@ export default function Income() {
       };
       
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
-      await res.json();
-      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+      const updatedTransaction = await res.json();
+      
+      // Update local state immediately
+      setTransactions(prev => prev.map(t => t.id === id ? updatedTransaction : t));
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
