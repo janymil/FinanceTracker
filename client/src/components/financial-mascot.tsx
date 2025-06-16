@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { X, Settings, Sparkles, RefreshCw } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
@@ -45,50 +45,36 @@ export function FinancialMascot() {
     enabled: !!user,
   });
 
-  // Generate new mascot mutation
-  const generateMascotMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch('/api/mascot/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (!response.ok) throw new Error('Failed to generate mascot');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/mascot"] });
+  // Generate new mascot
+  const generateMascot = async () => {
+    try {
+      const response = await apiRequest('POST', '/api/mascot/generate');
+      await queryClient.invalidateQueries({ queryKey: ["/api/mascot"] });
       toast({ title: "New mascot generated!" });
       setIsGenerating(false);
-    },
-    onError: () => {
+    } catch (error: any) {
       toast({ title: "Failed to generate mascot", variant: "destructive" });
       setIsGenerating(false);
     }
-  });
+  };
 
   // Toggle mascot visibility
-  const toggleMascotMutation = useMutation({
-    mutationFn: async (enabled: boolean) => {
-      const response = await fetch('/api/mascot/toggle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled })
-      });
-      if (!response.ok) throw new Error('Failed to toggle mascot');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/mascot"] });
+  const toggleMascot = async (enabled: boolean) => {
+    try {
+      const response = await apiRequest('POST', '/api/mascot/toggle', { enabled });
+      await queryClient.invalidateQueries({ queryKey: ["/api/mascot"] });
+    } catch (error: any) {
+      toast({ title: "Failed to toggle mascot", variant: "destructive" });
     }
-  });
+  };
 
   const handleGenerate = async () => {
     setIsGenerating(true);
-    generateMascotMutation.mutate();
+    generateMascot();
   };
 
   const handleToggle = (enabled: boolean) => {
-    toggleMascotMutation.mutate(enabled);
+    toggleMascot(enabled);
   };
 
   // Don't render if user is not authenticated or mascot is disabled

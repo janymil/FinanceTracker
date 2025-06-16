@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -85,57 +85,56 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
     enabled: !!user,
   });
 
-  const categorizeMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/auto-categorize");
-      return await res.json();
-    },
-    onSuccess: (data) => {
+  const autoCategorize = async () => {
+    try {
+      const data = await apiRequest("POST", "/api/auto-categorize");
       setSuggestions(data.suggestions || []);
       toast({
         title: "Auto-Categorization Complete",
         description: `Found ${data.suggestions?.length || 0} suggestions for uncategorized transactions`,
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Categorization Failed",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  const applySuggestionMutation = useMutation({
-    mutationFn: async ({ transactionId, categoryId }: { transactionId: string; categoryId: string }) => {
-      const res = await apiRequest("PATCH", `/api/transactions/${transactionId}`, { categoryId });
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+  const applySuggestion = async ({ transactionId, categoryId }: { transactionId: string; categoryId: string }) => {
+    try {
+      const data = await apiRequest("PATCH", `/api/transactions/${transactionId}`, { categoryId });
+      await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
       toast({
         title: "Category Applied",
         description: "Transaction has been categorized successfully",
       });
-    },
-  });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
-  const aiCategorizeMutation = useMutation({
-    mutationFn: async ({ description, amount }: { description: string; amount: number }) => {
-      const res = await apiRequest("POST", "/api/ai/categorize", { description, amount });
-      return await res.json();
-    },
-    onError: (error: Error) => {
+  const aiCategorize = async ({ description, amount }: { description: string; amount: number }) => {
+    try {
+      const data = await apiRequest("POST", "/api/ai/categorize", { description, amount });
+      return data;
+    } catch (error: any) {
       toast({
         title: "AI Categorization Error",
         description: error.message,
         variant: "destructive",
       });
+      throw error;
     }
-  });
+  };
 
   const handleApplySuggestion = (suggestion: CategorySuggestion) => {
-    applySuggestionMutation.mutate({
+    applySuggestion({
       transactionId: suggestion.id,
       categoryId: suggestion.suggestedCategory
     });
