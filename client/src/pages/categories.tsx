@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +11,6 @@ import { Plus, Edit3, Trash2, TrendingUp, DollarSign } from "lucide-react";
 import { categoryIcons } from "@/lib/icons";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useCategories } from "@/hooks/useCategories";
 
 interface Category {
   id: number;
@@ -34,8 +34,10 @@ const categoryColors = [
 ];
 
 export default function Categories() {
+  const { user } = useAuth();
   const { toast } = useToast();
-  const { categories, loading, addCategory, updateCategory, deleteCategory } = useCategories();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [newCategory, setNewCategory] = useState({
@@ -45,13 +47,33 @@ export default function Categories() {
     type: "expense" as "income" | "expense"
   });
 
+  const fetchCategories = async () => {
+    if (!user?.id) return;
+    
+    try {
+      setLoading(true);
+      const response = await apiRequest("GET", "/api/categories");
+      const data = await response.json();
+      setCategories(data);
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+      setCategories([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, [user?.id]);
+
   const createCategoryAction = async (categoryData: typeof newCategory) => {
     try {
       const res = await apiRequest("POST", "/api/categories", categoryData);
       const newCat = await res.json();
       
-      // Update shared state immediately
-      addCategory(newCat);
+      // Update local state immediately
+      setCategories(prev => [...prev, newCat]);
       setIsDialogOpen(false);
       setNewCategory({ name: "", icon: "dollar-sign", color: "#3B82F6", type: "expense" });
       
