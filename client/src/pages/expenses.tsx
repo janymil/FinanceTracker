@@ -76,19 +76,11 @@ export default function Expenses() {
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["/api/transactions"],
     enabled: !!user,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/transactions");
-      return response.json();
-    },
   });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
     enabled: !!user,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/categories");
-      return response.json();
-    },
   });
 
   const createExpenseMutation = useMutation({
@@ -190,13 +182,8 @@ export default function Expenses() {
       return await res.json();
     },
     onSuccess: () => {
-      // Invalidate all transaction-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] === '/api/financial-summary' 
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-health"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -219,13 +206,8 @@ export default function Expenses() {
       return await res.json();
     },
     onSuccess: () => {
-      // Invalidate all transaction-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] === '/api/financial-summary' 
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-health"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       toast({
         title: "Expense Deleted",
         description: "Expense transaction has been removed successfully",

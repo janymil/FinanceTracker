@@ -27,19 +27,6 @@ createRoot(document.getElementById("root")!).render(
   <ClerkProvider 
     publishableKey={PUBLISHABLE_KEY}
     afterSignOutUrl="/auth"
-    appearance={{
-      variables: {
-        colorPrimary: "#3B82F6",
-      },
-    }}
-    localization={{
-      signIn: {
-        start: {
-          title: "Welcome back to FinanzerPro",
-          subtitle: "Sign in to access your financial dashboard"
-        }
-      }
-    }}
   >
     <QueryClientProvider client={queryClient}>
       <Router>

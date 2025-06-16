@@ -77,19 +77,11 @@ export default function Income() {
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["/api/transactions"],
     enabled: !!user,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/transactions");
-      return response.json();
-    },
   });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
     enabled: !!user,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/categories");
-      return response.json();
-    },
   });
 
   const createIncomeMutation = useMutation({
@@ -181,13 +173,8 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: () => {
-      // Invalidate all transaction-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] === '/api/financial-summary' 
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-health"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -210,13 +197,8 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: () => {
-      // Invalidate all transaction-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] === '/api/financial-summary' 
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-health"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       toast({
         title: "Income Deleted",
         description: "Income transaction has been removed successfully",

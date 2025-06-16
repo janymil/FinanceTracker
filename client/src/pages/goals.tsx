@@ -57,10 +57,6 @@ export default function Goals() {
   const { data: goals = [], isLoading } = useQuery({
     queryKey: ["/api/goals"],
     enabled: !!user,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/goals");
-      return response.json();
-    },
   });
 
   const createGoalMutation = useMutation({
@@ -69,12 +65,7 @@ export default function Goals() {
       return await res.json();
     },
     onSuccess: () => {
-      // Invalidate all goal-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
-      queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] === '/api/financial-summary' 
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-health"] });
       setIsDialogOpen(false);
       setNewGoal({ name: "", targetAmount: "", targetDate: "", category: "", description: "" });
       toast({
@@ -97,12 +88,7 @@ export default function Goals() {
       return await res.json();
     },
     onSuccess: () => {
-      // Invalidate all goal-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
-      queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] === '/api/financial-summary' 
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-health"] });
       setIsEditDialogOpen(false);
       setEditingGoal(null);
       toast({
@@ -125,12 +111,7 @@ export default function Goals() {
       return await res.json();
     },
     onSuccess: () => {
-      // Invalidate all goal-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
-      queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] === '/api/financial-summary' 
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-health"] });
       toast({
         title: "Goal Deleted",
         description: "Your financial goal has been deleted successfully.",
@@ -158,12 +139,7 @@ export default function Goals() {
       return await res.json();
     },
     onSuccess: () => {
-      // Invalidate all goal-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
-      queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] === '/api/financial-summary' 
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-health"] });
       toast({
         title: "Goal Duplicated",
         description: "Your financial goal has been duplicated successfully.",

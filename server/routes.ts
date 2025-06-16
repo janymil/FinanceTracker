@@ -196,6 +196,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
+      const user = await storage.getUser(userId);
+
+      if (user?.plan === 'free') {
+        return res.status(403).json({ message: "Standard or Premium subscription required" });
+      }
 
       const transactionId = parseInt(req.params.id);
       
@@ -255,6 +260,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
+      }
+      const user = await storage.getUser(userId);
+
+      if (user?.plan === 'free') {
+        return res.status(403).json({ message: "Standard or Premium subscription required" });
       }
 
       const transactionId = parseInt(req.params.id);
@@ -575,18 +585,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { startDate, endDate } = req.query;
 
-      let summary;
       if (!startDate || !endDate) {
-        // No date range provided - get all transactions
-        summary = await storage.getUserFinancialSummary(userId);
-      } else {
-        // Date range provided - filter by dates
-        summary = await storage.getUserFinancialSummary(
-          userId,
-          new Date(startDate as string),
-          new Date(endDate as string)
-        );
+        return res.status(400).json({ message: "Start date and end date are required" });
       }
+
+      const summary = await storage.getUserFinancialSummary(
+        userId,
+        new Date(startDate as string),
+        new Date(endDate as string)
+      );
 
       res.json(summary);
     } catch (error) {

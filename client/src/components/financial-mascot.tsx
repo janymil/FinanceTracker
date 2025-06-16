@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { X, Settings, Sparkles, RefreshCw } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
@@ -37,20 +37,12 @@ export function FinancialMascot() {
     queryKey: ["/api/financial-health"],
     enabled: !!user,
     refetchInterval: 5 * 60 * 1000, // Check every 5 minutes
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/financial-health");
-      return response.json();
-    },
   });
 
   // Get mascot data
   const { data: mascot, isLoading } = useQuery<MascotData>({
     queryKey: ["/api/mascot"],
     enabled: !!user,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/mascot");
-      return response.json();
-    },
   });
 
   // Generate new mascot mutation

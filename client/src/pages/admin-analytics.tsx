@@ -55,19 +55,11 @@ export default function AdminAnalytics() {
   const { data: users = [], isLoading: usersLoading } = useQuery({
     queryKey: ['/api/admin/users'],
     enabled: isAuthenticated,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/admin/users");
-      return response.json();
-    },
   });
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['/api/admin/stats'],
     enabled: isAuthenticated,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/admin/stats");
-      return response.json();
-    },
   });
 
   const handleLogin = async (e: React.FormEvent) => {

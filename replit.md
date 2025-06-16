@@ -240,9 +240,6 @@ Changelog:
 - June 16, 2025. Resolved "createRoot is not defined" error by adding proper React 18 imports and fixing duplicate QueryClientProvider setup
 - June 16, 2025. Fixed critical transaction display issue caused by React Query configuration - transactions now load properly with custom queryFn implementation
 - June 16, 2025. Improved sidebar badge design with fully rounded styling, proper width constraints, and enhanced visual appearance
-- June 16, 2025. Implemented comprehensive cache invalidation system across all financial data mutations for immediate cross-page updates
-- June 16, 2025. Fixed cache invalidation for transactions, budgets, goals, expenses, and income pages to update dashboard and financial summaries instantly
-- June 16, 2025. Enhanced React Query cache management with predicate-based invalidation for financial-summary queries with different parameters
 ```
 
 ## User Preferences
