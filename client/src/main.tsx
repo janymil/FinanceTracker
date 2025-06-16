@@ -24,22 +24,14 @@ if (!PUBLISHABLE_KEY) {
 }
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <ClerkProvider 
-      publishableKey={PUBLISHABLE_KEY}
-      appearance={{
-        baseTheme: undefined,
-        variables: {
-          colorPrimary: "hsl(var(--primary))",
-        },
-      }}
-      afterSignOutUrl="/auth"
-    >
-      <QueryClientProvider client={queryClient}>
-        <Router>
-          <App />
-        </Router>
-      </QueryClientProvider>
-    </ClerkProvider>
-  </StrictMode>
+  <ClerkProvider 
+    publishableKey={PUBLISHABLE_KEY}
+    afterSignOutUrl="/auth"
+  >
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <App />
+      </Router>
+    </QueryClientProvider>
+  </ClerkProvider>
 );
