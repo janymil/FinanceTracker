@@ -47,8 +47,7 @@ import { Link } from "wouter";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { useCategories } from "@/hooks/useCategories";
-import { queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 
 interface Category {
   id: number;
@@ -58,20 +57,7 @@ interface Category {
   type: "income" | "expense";
 }
 
-async function apiRequest(method: string, url: string, data?: any) {
-  const response = await fetch(url, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: data ? JSON.stringify(data) : undefined,
-  });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error || "Network error");
-  }
-
-  return response;
-}
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -81,8 +67,8 @@ interface HeaderProps {
 export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const { signOut } = useClerk();
+  const { categories } = useCategories();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const [newTransaction, setNewTransaction] = useState({
@@ -96,11 +82,6 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
     recurringEndDate: "",
     paymentUrl: "",
     referenceNote: "",
-  });
-
-  const { data: categories = [] } = useQuery({
-    queryKey: ["categories"],
-    enabled: !!user,
   });
 
   const createTransaction = async (transactionData: typeof newTransaction) => {
