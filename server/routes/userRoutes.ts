@@ -18,6 +18,8 @@ export function registerUserRoutes(app: Express) {
 
       await storage.updateUserPlan(userId, plan);
 
+      // Add cache busting header
+      res.set('Cache-Control', 'no-cache');
       res.json({ success: true, message: `Plan updated to ${plan}` });
     } catch (error) {
       console.error("Error updating plan:", error);

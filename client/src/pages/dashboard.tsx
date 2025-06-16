@@ -223,7 +223,7 @@ export default function Dashboard() {
       });
       await queryClient.invalidateQueries({ queryKey: ["transactions"] });
       await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
-      
+
       setIsDialogOpen(false);
       setNewTransaction({
         amount: "",

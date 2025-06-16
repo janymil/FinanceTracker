@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -35,7 +36,28 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed }: SidebarProps) {
   const { user } = useAuth();
-  const [location, navigate] = useLocation();
+  const location = useLocation();
+  const [currentPath] = location;
+
+  // Get fresh user data including plan from database
+  const { data: databaseUser } = useQuery({
+    queryKey: ["auth-user", user?.id],
+    enabled: !!user?.id,
+    staleTime: 0, // Always fetch fresh data for plan info
+    queryFn: async () => {
+      const response = await fetch("/api/auth/user", {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch user');
+      return response.json();
+    },
+  });
+
+  const currentPlan = databaseUser?.plan || user?.plan || 'free';
+
+  if (!user) {
+    return null;
+  }
 
   const hasAccess = (requiredPlan: string) => {
     if (!user?.plan) return false;
@@ -250,13 +272,13 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
               <span>v1.0.0</span>
-              {user?.plan === 'premium' ? (
+              {currentPlan === 'premium' ? (
                 <Badge className="bg-premium text-white">
                   <Crown className="h-3 w-3 mr-1" />
                   Premium
                 </Badge>
               ) : (
-                <Badge variant="secondary">Free</Badge>
+                <Badge variant="secondary">{currentPlan}</Badge>
               )}
             </div>
           </div>
