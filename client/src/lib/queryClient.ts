@@ -68,21 +68,16 @@ export const getQueryFn: <T>(options: {
     return await res.json();
   };
 
-// Simple solution: force page reload for immediate updates
-export const refreshPage = () => {
-  window.location.reload();
-};
-
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
+      staleTime: 0, // Always fresh
+      gcTime: 5 * 60 * 1000,
       retry: 2,
-      retryDelay: 1000,
+      retryDelay: 500,
       networkMode: 'online',
     },
     mutations: {
@@ -91,3 +86,17 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// Optimistic update helper
+export const updateCacheOptimistically = (newData: any, type: 'transaction' | 'summary') => {
+  if (type === 'transaction') {
+    queryClient.setQueryData(['transactions'], (old: any[]) => {
+      if (!old) return [newData];
+      return [newData, ...old];
+    });
+  }
+  
+  if (type === 'summary') {
+    queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
+  }
+};

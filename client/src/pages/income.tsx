@@ -145,6 +145,8 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
+      queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -167,9 +169,8 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ predicate: (query) => 
-        query.queryKey[0] === "transactions" || query.queryKey[0] === "financial-summary" 
-      });
+      queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
+      queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
       toast({
         title: "Income Deleted",
         description: "Income transaction has been removed successfully",

@@ -144,8 +144,8 @@ export default function Expenses() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
+      queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -168,8 +168,8 @@ export default function Expenses() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
+      queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
       toast({
         title: "Expense Deleted",
         description: "Expense transaction has been removed successfully",

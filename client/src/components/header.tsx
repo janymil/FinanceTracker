@@ -110,8 +110,10 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
       });
       return await res.json();
     },
-    onSuccess: async () => {
-      await forceRefreshFinancialData();
+    onSuccess: () => {
+      // Immediately refetch all affected queries
+      queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
+      queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
       setIsDialogOpen(false);
       setNewTransaction({
         amount: "",

@@ -3,6 +3,7 @@ import express from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
+import { addSSEClient, notifyDataChange } from "./realtime";
 import { users, transactions, budgets, categories, goals, type Transaction, type Budget, type Goal } from "@shared/schema";
 import { setupClerkAuth, isAuthenticated, getUserId, requireUserId } from "./clerkAuth";
 import { setCookieConsent } from "./cookieMiddleware";
