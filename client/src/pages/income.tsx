@@ -75,16 +75,7 @@ export default function Income() {
     recurringEndDate: "",
   });
 
-  const { data: transactions = [], isLoading } = useQuery({
-    queryKey: ["transactions", user?.id],
-    enabled: isReady,
-    retry: (failureCount, error: any) => {
-      // Don't retry if authentication failed due to timing
-      if (error?.status === 401 && !isReady) return false;
-      return failureCount < 3;
-    },
-    retryDelay: 1000,
-  });
+  const { data: transactions = [], isLoading } = useTransactions();
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],

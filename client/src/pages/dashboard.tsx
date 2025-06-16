@@ -1,4 +1,5 @@
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { useTransactions } from "@/hooks/useTransactions";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState, useEffect, useMemo, startTransition, useDeferredValue, useTransition } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -153,22 +154,8 @@ export default function Dashboard() {
   const startDate = new Date(`${selectedMonth}-01`);
   const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
 
-  // Core data loads immediately with better error handling
-  const { data: transactions, isLoading: transactionsLoading, error: transactionsError } = useQuery({
-    queryKey: ['transactions', user?.id],
-    enabled: isReady,
-    staleTime: 30 * 1000, // 30 seconds for transactions
-    retry: (failureCount, error: any) => {
-      // Don't retry if authentication failed due to timing
-      if (error?.status === 401 && !isReady) return false;
-      return failureCount < 3;
-    },
-    retryDelay: 1000,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/transactions");
-      return response.json();
-    },
-  });
+  // Core data loads immediately with shared cache
+  const { data: transactions, isLoading: transactionsLoading, error: transactionsError } = useTransactions();
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],

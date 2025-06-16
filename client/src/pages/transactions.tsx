@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { useTransactions } from "@/hooks/useTransactions";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -80,16 +81,7 @@ export default function Transactions() {
     referenceNote: "",
   });
 
-  const { data: transactions = [], isLoading } = useQuery({
-    queryKey: ["transactions", user?.id],
-    enabled: isReady,
-    retry: (failureCount, error: any) => {
-      // Don't retry if authentication failed due to timing
-      if (error?.status === 401 && !isReady) return false;
-      return failureCount < 3;
-    },
-    retryDelay: 1000,
-  });
+  const { data: transactions = [], isLoading } = useTransactions();
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
