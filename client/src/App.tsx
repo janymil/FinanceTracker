@@ -1,6 +1,6 @@
 import { Switch, Route } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
-import { useSimpleAuth } from "@/hooks/useSimpleAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -101,8 +101,12 @@ function AuthenticatedApp({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSi
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
 }) {
-  // No additional loading - Clerk handles this through SignedIn/SignedOut
-  // This eliminates the authentication loading delay
+  const { user, isLoading } = useAuth();
+
+  // Show loading while user data is being fetched
+  if (isLoading || !user) {
+    return <AppLoader />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
