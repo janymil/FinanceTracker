@@ -223,15 +223,11 @@ export default function ProfilePage() {
         </Button>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="profile">
+      <Tabs defaultValue="account" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="account">
             <User className="h-4 w-4 mr-2" />
-            Profile
-          </TabsTrigger>
-          <TabsTrigger value="security">
-            <Lock className="h-4 w-4 mr-2" />
-            Security
+            Account Settings
           </TabsTrigger>
           <TabsTrigger value="notifications">
             <Bell className="h-4 w-4 mr-2" />
@@ -247,60 +243,16 @@ export default function ProfilePage() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Profile Tab */}
-        <TabsContent value="profile">
-          <Card>
-            <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
-              <CardDescription>
-                Manage your profile details, name, email addresses, and connected accounts through Clerk's secure interface
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-lg border overflow-hidden">
-                <UserProfile 
-                  routing="hash"
-                  appearance={{
-                    elements: {
-                      rootBox: "w-full max-w-none",
-                      card: "border-0 shadow-none",
-                      navbar: "hidden",
-                      pageScrollBox: "p-4",
-                      profileSection: "max-w-none",
-                      profileSectionContent: "max-w-none grid grid-cols-[1fr_auto] gap-4 items-center",
-                      profileSectionPrimaryButton: "bg-primary hover:bg-primary/90 ml-4",
-                      formButtonPrimary: "bg-primary hover:bg-primary/90",
-                      formFieldInput: "max-w-md",
-                      profileSectionItem: "grid grid-cols-[1fr_auto] gap-4 items-center"
-                    }
-                  }}
-                />
-              </div>
-              
-              <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-                <h4 className="font-medium mb-2">Profile Management</h4>
-                <p className="text-sm text-muted-foreground">
-                  Use the interface above to update your:
-                </p>
-                <ul className="text-sm text-muted-foreground mt-2 space-y-1">
-                  <li>• Full name and profile picture</li>
-                  <li>• Email addresses and verification</li>
-                  <li>• Username and display preferences</li>
-                  <li>• Connected social accounts</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
-        {/* Security Tab */}
-        <TabsContent value="security">
+
+        {/* Account Settings Tab */}
+        <TabsContent value="account">
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Account Security</CardTitle>
+                <CardTitle>Account Settings</CardTitle>
                 <CardDescription>
-                  Manage your password, two-factor authentication, and security settings through Clerk's secure interface
+                  Manage your profile information, password, security settings, and account preferences through Clerk's secure interface
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -326,16 +278,17 @@ export default function ProfilePage() {
                 </div>
                 
                 <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-                  <h4 className="font-medium mb-2">Security Features</h4>
+                  <h4 className="font-medium mb-2">Account Management</h4>
                   <p className="text-sm text-muted-foreground">
-                    Use the security interface above to manage:
+                    Use the interface above to manage:
                   </p>
                   <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+                    <li>• Profile information and display name</li>
+                    <li>• Email addresses and verification</li>
                     <li>• Change your account password</li>
                     <li>• Enable two-factor authentication (2FA)</li>
-                    <li>• View active sessions and devices</li>
-                    <li>• Review security activity logs</li>
-                    <li>• Manage backup codes</li>
+                    <li>• Connected social accounts</li>
+                    <li>• Session and device management</li>
                   </ul>
                 </div>
               </CardContent>
