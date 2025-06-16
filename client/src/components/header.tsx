@@ -112,8 +112,8 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
     },
     onSuccess: () => {
       // Immediately refetch all affected queries
-      queryClient.refetchQueries({ queryKey: ["/api/transactions", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["/api/financial-summary", user?.id] });
+      queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       setIsDialogOpen(false);
       setNewTransaction({
         amount: "",
