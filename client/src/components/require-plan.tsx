@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
-import { useClerkUserReady } from '@/hooks/useClerkUserReady';
+import { useUser } from '@clerk/clerk-react';
 import { apiRequest } from '@/lib/queryClient';
 import UpgradePrompt from './upgrade-prompt';
 import { Button } from '@/components/ui/button';
@@ -103,7 +103,8 @@ const featureConfigs = {
 };
 
 export default function RequirePlan({ plan, children, feature, description, benefits, compact }: RequirePlanProps) {
-  const { isReady, user } = useClerkUserReady();
+  const { isLoaded, isSignedIn, user } = useUser();
+  const isReady = isLoaded && isSignedIn && !!user?.id;
 
   // Get user's plan from database
   const { data: databaseUser, isLoading } = useQuery({
