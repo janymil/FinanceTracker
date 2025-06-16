@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,8 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Edit3, Trash2, TrendingUp, DollarSign } from "lucide-react";
 import { categoryIcons } from "@/lib/icons";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useCategories } from "@/hooks/useCategories";
 
 interface Category {
   id: number;
@@ -35,8 +34,8 @@ const categoryColors = [
 ];
 
 export default function Categories() {
-  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const { categories, loading, addCategory, updateCategory, deleteCategory } = useCategories();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [newCategory, setNewCategory] = useState({
@@ -46,22 +45,16 @@ export default function Categories() {
     type: "expense" as "income" | "expense"
   });
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ["categories"],
-    enabled: isAuthenticated && !!user?.id,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/categories");
-      return response.json();
-    },
-  });
-
-  const createCategory = async (categoryData: typeof newCategory) => {
+  const createCategoryAction = async (categoryData: typeof newCategory) => {
     try {
       const res = await apiRequest("POST", "/api/categories", categoryData);
-      await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["categories"] });
+      const newCat = await res.json();
+      
+      // Update shared state immediately
+      addCategory(newCat);
       setIsDialogOpen(false);
       setNewCategory({ name: "", icon: "dollar-sign", color: "#3B82F6", type: "expense" });
+      
       toast({
         title: "Category Created",
         description: "New category has been added successfully",
@@ -75,13 +68,16 @@ export default function Categories() {
     }
   };
 
-  const updateCategory = async ({ id, ...data }: { id: number } & typeof newCategory) => {
+  const updateCategoryAction = async ({ id, ...data }: { id: number } & typeof newCategory) => {
     try {
       const res = await apiRequest("PUT", `/api/categories/${id}`, data);
-      await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["categories"] });
+      const updatedCat = await res.json();
+      
+      // Update shared state immediately
+      updateCategory(updatedCat);
       setEditingCategory(null);
       setIsDialogOpen(false);
+      
       toast({
         title: "Category Updated",
         description: "Category has been updated successfully",
@@ -95,11 +91,14 @@ export default function Categories() {
     }
   };
 
-  const deleteCategory = async (id: number) => {
+  const deleteCategoryAction = async (id: number) => {
     try {
       const res = await apiRequest("DELETE", `/api/categories/${id}`);
       await res.json();
-      await queryClient.invalidateQueries({ queryKey: ["categories"] });
+      
+      // Update shared state immediately
+      deleteCategory(id);
+      
       toast({
         title: "Category Deleted",
         description: "Category has been removed successfully",
@@ -120,9 +119,9 @@ export default function Categories() {
     if (!newCategory.name.trim()) return;
 
     if (editingCategory) {
-      updateCategory({ id: editingCategory.id, ...newCategory });
+      updateCategoryAction({ id: editingCategory.id, ...newCategory });
     } else {
-      createCategory(newCategory);
+      createCategoryAction(newCategory);
     }
   };
 
