@@ -153,13 +153,6 @@ export default function Income() {
         description: "Income transaction has been created successfully",
       });
     },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
   });
 
   const updateIncomeMutation = useMutation({
