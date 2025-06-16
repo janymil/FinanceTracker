@@ -121,9 +121,8 @@ export default function Expenses() {
     }
   };
 
-  const updateExpenseMutation = useMutation({
-    mutationFn: async ({ id, ...data }: { id: number } & typeof newExpense) => {
-      // Always send complete transaction data
+  const updateExpense = async ({ id, ...data }: { id: number } & typeof newExpense) => {
+    try {
       const updateData = {
         amount: parseFloat(data.amount),
         description: data.description,
@@ -138,13 +137,8 @@ export default function Expenses() {
       };
       
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       
       setEditingTransaction(null);
       setIsDialogOpen(false);
@@ -152,39 +146,33 @@ export default function Expenses() {
         title: "Expense Updated",
         description: "Expense transaction has been updated successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  const deleteExpenseMutation = useMutation({
-    mutationFn: async (id: number) => {
+  const deleteExpense = async (id: number) => {
+    try {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
-      queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      
       toast({
         title: "Expense Deleted",
         description: "Expense transaction has been removed successfully",
       });
-    },
-    onError: (error: Error) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   // Filter only expense transactions
   const expenseTransactions = transactions.filter((transaction: Transaction) => transaction.type === "expense");
@@ -310,7 +298,7 @@ export default function Expenses() {
     if (!newExpense.amount || !newExpense.description) return;
 
     if (editingTransaction) {
-      updateExpenseMutation.mutate({ id: editingTransaction.id, ...newExpense });
+      await updateExpense({ id: editingTransaction.id, ...newExpense });
     } else {
       await createExpense(newExpense);
     }
