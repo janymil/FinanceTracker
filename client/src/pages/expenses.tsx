@@ -461,9 +461,14 @@ export default function Expenses() {
 
                   <div>
                     <Label htmlFor="category">Category</Label>
-                    <Select value={newExpense.categoryId} onValueChange={(value) => setNewExpense({ ...newExpense, categoryId: value })}>
+                    <Select 
+                      value={newExpense.categoryId || ""} 
+                      onValueChange={(value) => setNewExpense({ ...newExpense, categoryId: value })}
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select an expense category" />
+                        <SelectValue placeholder="Select an expense category">
+                          {newExpense.categoryId && expenseCategories.find(cat => cat.id.toString() === newExpense.categoryId)?.name}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {expenseCategories.map((category: Category) => (

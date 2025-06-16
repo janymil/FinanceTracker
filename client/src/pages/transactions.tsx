@@ -597,9 +597,14 @@ export default function Transactions() {
 
                   <div>
                     <Label htmlFor="category">Category</Label>
-                    <Select value={newTransaction.categoryId} onValueChange={(value) => setNewTransaction({ ...newTransaction, categoryId: value })}>
+                    <Select 
+                      value={newTransaction.categoryId || ""} 
+                      onValueChange={(value) => setNewTransaction({ ...newTransaction, categoryId: value })}
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
+                        <SelectValue placeholder="Select a category">
+                          {newTransaction.categoryId && (categories as Category[]).find(cat => cat.id.toString() === newTransaction.categoryId)?.name}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {(categories as Category[])

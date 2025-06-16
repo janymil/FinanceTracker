@@ -456,9 +456,14 @@ export default function Income() {
 
                   <div>
                     <Label htmlFor="category">Category</Label>
-                    <Select value={newIncome.categoryId} onValueChange={(value) => setNewIncome({ ...newIncome, categoryId: value })}>
+                    <Select 
+                      value={newIncome.categoryId || ""} 
+                      onValueChange={(value) => setNewIncome({ ...newIncome, categoryId: value })}
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select an income category" />
+                        <SelectValue placeholder="Select an income category">
+                          {newIncome.categoryId && incomeCategories.find(cat => cat.id.toString() === newIncome.categoryId)?.name}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {incomeCategories.map((category: Category) => (
