@@ -269,6 +269,9 @@ Changelog:
 - June 16, 2025. Standardized all API cache invalidation patterns across entire application - /api/transactions→["transactions"], /api/budgets→["budgets"], /api/goals→["goals"], /api/ai→["ai"]
 - June 16, 2025. Updated budget.tsx, goals.tsx, ai-financial-tips.tsx, and auto-categorization.tsx to follow consistent queryClient.invalidateQueries pattern after all mutations
 - June 16, 2025. Ensured every POST/PUT/DELETE operation to specified endpoints triggers immediate cache invalidation for real-time UI updates across all application features
+- June 16, 2025. Restored cloud backup functionality with Bunny.net integration using existing BunnyStorage infrastructure
+- June 16, 2025. Fixed admin panel to work with Clerk users - added user plan management endpoint for subscription tier control
+- June 16, 2025. Updated admin analytics to show Clerk users with plan distribution and system overview functionality
 ```
 
 ## User Preferences
