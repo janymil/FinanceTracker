@@ -72,7 +72,7 @@ const mascotConfigs = {
 };
 
 export default function FinancialHealthMascot() {
-  const { isAuthenticated, user } = useClerkUserReady();
+  const { isReady, user } = useClerkUserReady();
   const [mascotState, setMascotState] = useState<MascotState>({
     emotion: 'neutral',
     animation: 'idle',
@@ -83,7 +83,7 @@ export default function FinancialHealthMascot() {
 
   const { data: healthData, isLoading } = useQuery<FinancialHealthData>({
     queryKey: ["/api/financial-health"],
-    enabled: isAuthenticated && !!user?.id,
+    enabled: isReady && !!user?.id,
     refetchInterval: 30000, // Refresh every 30 seconds
     staleTime: 0,
     gcTime: 0,

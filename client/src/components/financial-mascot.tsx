@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { X, Settings, Sparkles, RefreshCw } from "lucide-react";
@@ -27,7 +27,7 @@ interface FinancialHealth {
 }
 
 export function FinancialMascot() {
-  const { user } = useAuth();
+  const { isReady, user } = useClerkUserReady();
   const { toast } = useToast();
   const [showSettings, setShowSettings] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -35,14 +35,18 @@ export function FinancialMascot() {
   // Get user's financial health data
   const { data: financialHealth } = useQuery<FinancialHealth>({
     queryKey: ["/api/financial-health"],
-    enabled: !!user,
+    enabled: isReady && !!user?.id,
     refetchInterval: 5 * 60 * 1000, // Check every 5 minutes
+    staleTime: 0,
+    gcTime: 0,
   });
 
   // Get mascot data
   const { data: mascot, isLoading } = useQuery<MascotData>({
     queryKey: ["/api/mascot"],
-    enabled: !!user,
+    enabled: isReady && !!user?.id,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   // Generate new mascot
@@ -78,7 +82,7 @@ export function FinancialMascot() {
   };
 
   // Don't render if user is not authenticated or mascot is disabled
-  if (!user || !mascot?.isEnabled || isLoading) {
+  if (!isReady || !user?.id || !mascot?.isEnabled || isLoading) {
     return null;
   }
 
