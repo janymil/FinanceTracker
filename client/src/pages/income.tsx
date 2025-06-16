@@ -208,10 +208,10 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: () => {
-      // Force immediate refetch of transactions
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
       queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
       queryClient.refetchQueries({ queryKey: ["/api/financial-summary"] });
-      queryClient.refetchQueries({ queryKey: ["/api/expense-breakdown"] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({

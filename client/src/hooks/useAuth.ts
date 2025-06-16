@@ -50,7 +50,7 @@ export function useAuth() {
         }
       }
     }),
-    enabled: !!clerkUser && isSignedIn,
+    enabled: userLoaded && authLoaded && !!clerkUser && isSignedIn,
     retry: (failureCount, error: any) => {
       // Don't retry on JWT/auth errors
       if (error?.message?.includes('jwt') || error?.message?.includes('token') || error?.status === 401) {
@@ -64,8 +64,8 @@ export function useAuth() {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
-  const isLoading = !userLoaded || !authLoaded;
-  const isAuthenticated = !!isSignedIn && !!clerkUser;
+  const isLoading = !userLoaded || !authLoaded || dbUserLoading;
+  const isAuthenticated = !!isSignedIn && !!clerkUser && !!user;
   const isUnauthenticated = authLoaded && !isSignedIn;
 
   return {
