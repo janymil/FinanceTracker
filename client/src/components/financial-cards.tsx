@@ -68,7 +68,18 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
   }, [summary]);
 
   const getBudgetStatus = () => {
-    if (!summary || !budgetsData) return { status: 'Loading...', percentage: 0, remaining: 0, bgColor: 'bg-gray-50', textColor: 'text-gray-600' };
+    if (!summary) return { status: 'Loading...', percentage: 0, remaining: 0, bgColor: 'bg-gray-50', textColor: 'text-gray-600' };
+    
+    // If budgetsData is undefined (e.g., 403 error for free users), treat as no budgets
+    if (!budgetsData) {
+      return {
+        status: 'No Budget Set',
+        percentage: 0,
+        remaining: 0,
+        bgColor: 'bg-gray-50 dark:bg-gray-900/20',
+        textColor: 'text-gray-600 dark:text-gray-400'
+      };
+    }
 
     // Filter budgets for the current selected month period
     const currentMonthBudgets = budgetsData.filter((budget: any) => {

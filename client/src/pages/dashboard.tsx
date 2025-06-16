@@ -151,9 +151,10 @@ export default function Dashboard() {
     enabled: !!user && !!transactions, // Wait for transactions first
   });
 
-  const { data: budgets } = useQuery({
+  const { data: budgets, error: budgetsError } = useQuery({
     queryKey: ['/api/budgets'],
     enabled: !!user && !!transactions, // Wait for transactions first
+    retry: false, // Don't retry on 403 errors for free users
   });
 
   const createTransactionMutation = useMutation({
