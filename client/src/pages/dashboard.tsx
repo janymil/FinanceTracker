@@ -158,6 +158,12 @@ export default function Dashboard() {
     queryKey: ['transactions', user?.id],
     enabled: isReady,
     staleTime: 30 * 1000, // 30 seconds for transactions
+    retry: (failureCount, error: any) => {
+      // Don't retry if authentication failed due to timing
+      if (error?.status === 401 && !isReady) return false;
+      return failureCount < 3;
+    },
+    retryDelay: 1000,
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/transactions");
       return response.json();
@@ -168,6 +174,11 @@ export default function Dashboard() {
     queryKey: ["categories"],
     enabled: isReady,
     staleTime: 5 * 60 * 1000, // 5 minutes for categories (they change less often)
+    retry: (failureCount, error: any) => {
+      if (error?.status === 401 && !isReady) return false;
+      return failureCount < 3;
+    },
+    retryDelay: 1000,
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/categories");
       return response.json();
@@ -187,12 +198,23 @@ export default function Dashboard() {
     },
     enabled: isReady, // Load immediately when authenticated
     staleTime: 60 * 1000, // 1 minute for financial summary
+    retry: (failureCount, error: any) => {
+      if (error?.status === 401 && !isReady) return false;
+      return failureCount < 3;
+    },
+    retryDelay: 1000,
   });
 
   const { data: budgets, error: budgetsError } = useQuery({
     queryKey: ['budgets', user?.id],
     enabled: isReady && !!transactions, // Wait for transactions first
-    retry: false, // Don't retry on 403 errors for free users
+    retry: (failureCount, error: any) => {
+      // Don't retry on 403 errors for free users or auth timing issues
+      if (error?.status === 403) return false;
+      if (error?.status === 401 && !isReady) return false;
+      return failureCount < 3;
+    },
+    retryDelay: 1000,
   });
 
   const createTransactionMutation = useMutation({
