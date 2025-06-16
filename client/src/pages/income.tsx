@@ -161,52 +161,19 @@ export default function Income() {
 
   const updateIncomeMutation = useMutation({
     mutationFn: async ({ id, ...data }: { id: number } & typeof newIncome) => {
-      // Only send fields that have actually changed from the original transaction
-      const updateData: any = {};
-      
-      if (editingTransaction) {
-        // Convert the original amount to string for comparison
-        const originalAmount = editingTransaction.amount.toString();
-        if (data.amount !== originalAmount) {
-          updateData.amount = parseFloat(data.amount);
-        }
-        
-        if (data.description !== editingTransaction.description) {
-          updateData.description = data.description;
-        }
-        
-        // Format original date for comparison
-        const originalDate = new Date(editingTransaction.date).toISOString().split('T')[0];
-        if (data.date !== originalDate) {
-          updateData.date = data.date;
-        }
-        
-        // Find original category ID
-        const originalCategory = categories.find((cat: Category) => cat.name === editingTransaction.categoryName);
-        const originalCategoryId = originalCategory ? originalCategory.id.toString() : "";
-        if (data.categoryId !== originalCategoryId) {
-          updateData.categoryId = data.categoryId ? parseInt(data.categoryId) : null;
-        }
-        
-        if (data.isRecurring !== Boolean(editingTransaction.isRecurring)) {
-          updateData.isRecurring = data.isRecurring;
-        }
-        
-        if (data.recurringFrequency !== (editingTransaction.recurringFrequency || "monthly")) {
-          updateData.recurringFrequency = data.recurringFrequency;
-        }
-        
-        // Format original recurring end date for comparison
-        const originalRecurringEndDate = editingTransaction.recurringEndDate 
-          ? new Date(editingTransaction.recurringEndDate).toISOString().split('T')[0]
-          : "";
-        if (data.recurringEndDate !== originalRecurringEndDate) {
-          updateData.recurringEndDate = data.recurringEndDate || null;
-        }
-        
-        // Always ensure type is income for this page
-        updateData.type = "income";
-      }
+      // Always send complete transaction data
+      const updateData = {
+        amount: parseFloat(data.amount),
+        description: data.description,
+        date: data.date,
+        type: "income" as const,
+        categoryId: data.categoryId ? parseInt(data.categoryId) : null,
+        isRecurring: data.isRecurring,
+        recurringFrequency: data.recurringFrequency,
+        recurringEndDate: data.recurringEndDate || null,
+        paymentUrl: "",
+        referenceNote: ""
+      };
       
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
       return await res.json();
@@ -849,70 +816,7 @@ export default function Income() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={async () => {
-                            console.log("DIRECT FETCH EDIT: Starting for transaction:", transaction.id);
-                            
-                            const newAmountStr = prompt(`Edit amount for "${transaction.description}":`, transaction.amount.toString());
-                            if (newAmountStr === null) return;
-                            
-                            const newAmount = parseFloat(newAmountStr);
-                            if (isNaN(newAmount) || newAmount <= 0) {
-                              toast({
-                                title: "Invalid Amount",
-                                description: "Please enter a valid positive number",
-                                variant: "destructive",
-                              });
-                              return;
-                            }
-                            
-                            const matchingCategory = (categories as any[]).find(
-                              cat => cat.name === transaction.categoryName
-                            );
-                            
-                            const updateData = {
-                              amount: newAmount,
-                              description: transaction.description,
-                              date: transaction.date instanceof Date 
-                                ? transaction.date.toISOString().split('T')[0]
-                                : new Date(transaction.date).toISOString().split('T')[0],
-                              type: transaction.type,
-                              categoryId: matchingCategory ? matchingCategory.id : null,
-                              isRecurring: Boolean(transaction.isRecurring),
-                              recurringFrequency: transaction.recurringFrequency || "monthly",
-                              recurringEndDate: transaction.recurringEndDate || null,
-                              paymentUrl: transaction.paymentUrl || "",
-                              referenceNote: transaction.referenceNote || ""
-                            };
-                            
-                            console.log("DIRECT FETCH EDIT: Sending data:", updateData);
-                            
-                            try {
-                              const response = await fetch(`/api/transactions/${transaction.id}`, {
-                                method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(updateData)
-                              });
-                              
-                              console.log("DIRECT FETCH EDIT: Response status:", response.status);
-                              
-                              if (response.ok) {
-                                console.log("DIRECT FETCH EDIT: Success - reloading page");
-                                window.location.reload();
-                              } else {
-                                toast({
-                                  title: "Edit Failed",
-                                  description: `Error: ${response.status}`,
-                                  variant: "destructive",
-                                });
-                              }
-                            } catch (error) {
-                              toast({
-                                title: "Edit Failed", 
-                                description: "Network error occurred",
-                                variant: "destructive",
-                              });
-                            }
-                          }}
+                          onClick={() => handleEdit(transaction)}
                         >
                           <Edit3 className="h-3 w-3" />
                         </Button>
