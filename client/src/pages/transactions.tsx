@@ -103,13 +103,14 @@ export default function Transactions() {
       });
       return await res.json();
     },
-    onSuccess: (newTransaction) => {
-      console.log("Create success callback triggered, reloading page...");
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       setIsDialogOpen(false);
-      // Refresh the page to show changes
-      setTimeout(() => {
-        window.location.reload();
-      }, 50);
+      toast({
+        title: "Transaction Added",
+        description: "Transaction has been created successfully",
+      });
     },
     onError: (error: Error) => {
       toast({
@@ -133,11 +134,15 @@ export default function Transactions() {
       
       return await res.json();
     },
-    onSuccess: () => {
-      console.log("DIRECT EDIT: Success - reloading page immediately");
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
-      window.location.reload();
+      toast({
+        title: "Transaction Updated",
+        description: "Transaction has been updated successfully",
+      });
     },
     onError: (error: Error) => {
       console.log("DIRECT EDIT: Error occurred:", error.message);
@@ -171,10 +176,15 @@ export default function Transactions() {
       }
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
-      window.location.reload();
+      toast({
+        title: "Transaction Updated",
+        description: "Transaction has been updated successfully",
+      });
     },
     onError: (error: Error) => {
       toast({
@@ -190,12 +200,13 @@ export default function Transactions() {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
       return { deletedId: id };
     },
-    onSuccess: async ({ deletedId }) => {
-      console.log("Delete success callback triggered, reloading page...");
-      // Refresh the page to show changes
-      setTimeout(() => {
-        window.location.reload();
-      }, 50);
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+      toast({
+        title: "Transaction Deleted",
+        description: "Transaction has been removed successfully",
+      });
     },
     onError: (error: Error) => {
       toast({
@@ -829,8 +840,12 @@ export default function Transactions() {
                               console.log("DIRECT FETCH EDIT: Response status:", response.status);
                               
                               if (response.ok) {
-                                console.log("DIRECT FETCH EDIT: Success - reloading page");
-                                window.location.reload();
+                                await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+                                await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
+                                toast({
+                                  title: "Transaction Updated",
+                                  description: "Transaction has been updated successfully",
+                                });
                               } else {
                                 console.error("DIRECT FETCH EDIT: Failed:", response.status);
                                 toast({

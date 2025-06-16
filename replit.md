@@ -261,8 +261,9 @@ Changelog:
 - June 16, 2025. Eliminated authentication timing issues that caused queries to run before user data was fully loaded
 - June 16, 2025. Fixed queryKey consistency for categories endpoint - removed unnecessary user?.id parameter for better cache management
 - June 16, 2025. Fixed transaction editing system - replaced change-detection mutations with complete data sending for accurate backend updates
-- June 16, 2025. Added automatic page reload after successful edits to ensure immediate visual feedback across all transaction pages
+- June 16, 2025. Replaced all visible page reloads with proper React Query cache invalidation for seamless user experience
 - June 16, 2025. Fixed dashboard "Add Transaction" button category field by correcting query key mismatch between header and other components
+- June 16, 2025. Implemented comprehensive React Query refetch system providing immediate visual feedback without page refreshes across all transaction operations
 ```
 
 ## User Preferences
