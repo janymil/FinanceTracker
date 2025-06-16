@@ -157,6 +157,18 @@ export default function Dashboard() {
   const { data: transactions, isLoading: transactionsLoading, error: transactionsError } = useQuery({
     queryKey: ['/api/transactions'],
     enabled: !!user,
+    queryFn: async () => {
+      console.log('Making API call to /api/transactions');
+      try {
+        const response = await apiRequest("GET", "/api/transactions");
+        const data = await response.json();
+        console.log('Transaction API response:', data);
+        return data;
+      } catch (error) {
+        console.error('Transaction API error:', error);
+        throw error;
+      }
+    },
   });
 
   // Debug logging
