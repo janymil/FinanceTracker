@@ -357,9 +357,9 @@ export default function ExportPage() {
     }
   };
 
-  // Export mutation
-  const exportMutation = useMutation({
-    mutationFn: async (options: ExportOptions) => {
+  const exportData = async (options: ExportOptions) => {
+    setIsExporting(true);
+    try {
       const data = {
         ...options,
         transactions: exportOptions.includeTransactions ? transactions : [],
@@ -385,43 +385,44 @@ export default function ExportPage() {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const filename = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || `export.${options.format}`;
-        return { downloadUrl: url, filename };
-      }
+        
+        toast({
+          title: "Export Successful",
+          description: "Your data has been exported successfully.",
+        });
 
-      return await response.json();
-    },
-    onSuccess: (data: any) => {
-      toast({
-        title: "Export Successful",
-        description: "Your data has been exported successfully.",
-      });
-
-      // Trigger download
-      if (data.downloadUrl) {
+        // Trigger download
         const link = document.createElement('a');
-        link.href = data.downloadUrl;
-        link.download = data.filename || 'financial-data.csv';
+        link.href = url;
+        link.download = filename || 'financial-data.csv';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+      } else {
+        const result = await response.json();
+        toast({
+          title: "Export Successful",
+          description: "Your data has been exported successfully.",
+        });
       }
-    },
-    onError: (error) => {
+    } catch (error) {
       toast({
         title: "Export Failed",
         description: "Failed to export data. Please try again.",
         variant: "destructive",
       });
-    },
-  });
-
-  const handleExport = () => {
-    exportMutation.mutate(exportOptions);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
-  // Manual backup mutation
-  const backupMutation = useMutation({
-    mutationFn: async () => {
+  const handleExport = () => {
+    exportData(exportOptions);
+  };
+
+  const createBackup = async () => {
+    setIsBackingUp(true);
+    try {
       const response = await fetch("/api/backup", {
         method: "POST",
         headers: {
@@ -434,27 +435,26 @@ export default function ExportPage() {
         throw new Error(errorData.message || 'Backup failed');
       }
 
-      return await response.json();
-    },
-    onSuccess: () => {
+      const result = await response.json();
       toast({
         title: "Backup Successful",
         description: "Your data has been backed up to the cloud.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/backup-status"] });
-    },
-    onError: (error) => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/backup-status"] });
+    } catch (error) {
       toast({
         title: "Backup Failed",
         description: "Failed to backup data. Please try again.",
         variant: "destructive",
       });
-    },
-  });
+    } finally {
+      setIsBackingUp(false);
+    }
+  };
 
-  // Backup settings mutation
-  const backupSettingsMutation = useMutation({
-    mutationFn: async (settings: typeof backupSettings) => {
+  const updateBackupSettings = async (settings: typeof backupSettings) => {
+    setIsUpdatingBackupSettings(true);
+    try {
       const response = await fetch("/api/backup-settings", {
         method: "PUT",
         headers: {
@@ -467,23 +467,22 @@ export default function ExportPage() {
         throw new Error('Failed to save backup settings');
       }
 
-      return await response.json();
-    },
-    onSuccess: () => {
+      const result = await response.json();
       toast({
         title: "Settings Saved",
         description: "Backup settings have been updated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/backup-status"] });
-    },
-    onError: (error) => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/backup-status"] });
+    } catch (error) {
       toast({
         title: "Save Failed",
         description: "Failed to save backup settings. Please try again.",
         variant: "destructive",
       });
-    },
-  });
+    } finally {
+      setIsUpdatingBackupSettings(false);
+    }
+  };
 
   const handleBackupNow = () => {
     setIsBackingUp(true);
