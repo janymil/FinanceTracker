@@ -153,20 +153,31 @@ export default function ProfilePage() {
 
   const updatePasswordMutation = useMutation({
     mutationFn: async (data: typeof passwordData) => {
-      const response = await fetch('/api/change-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) throw new Error('Failed to change password');
-      return response.json();
+      // Use Clerk's password update functionality
+      if (!clerkUser) {
+        throw new Error('User not found');
+      }
+      
+      try {
+        await clerkUser.updatePassword({
+          currentPassword: data.currentPassword,
+          newPassword: data.newPassword
+        });
+        return { success: true };
+      } catch (error: any) {
+        throw new Error(error.errors?.[0]?.message || 'Failed to change password');
+      }
     },
     onSuccess: () => {
       toast({ title: "Password changed successfully" });
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     },
-    onError: () => {
-      toast({ title: "Failed to change password", variant: "destructive" });
+    onError: (error: Error) => {
+      toast({ 
+        title: "Failed to change password", 
+        description: error.message,
+        variant: "destructive" 
+      });
     }
   });
 
@@ -195,6 +206,16 @@ export default function ProfilePage() {
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!clerkUser) {
+      toast({ title: "User not found", variant: "destructive" });
+      return;
+    }
+    
+    if (!passwordData.currentPassword) {
+      toast({ title: "Current password is required", variant: "destructive" });
+      return;
+    }
     
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast({ title: "Passwords don't match", variant: "destructive" });
@@ -381,7 +402,7 @@ export default function ProfilePage() {
               <CardHeader>
                 <CardTitle>Change Password</CardTitle>
                 <CardDescription>
-                  Update your password to keep your account secure
+                  Update your Clerk account password to keep your account secure
                 </CardDescription>
               </CardHeader>
               <CardContent>
