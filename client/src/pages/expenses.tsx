@@ -137,8 +137,8 @@ export default function Expenses() {
       };
       
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
-      await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       
       setEditingTransaction(null);
       setIsDialogOpen(false);
@@ -158,8 +158,8 @@ export default function Expenses() {
   const deleteExpense = async (id: number) => {
     try {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
-      await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
-      await queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
+      await queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       
       toast({
         title: "Expense Deleted",
