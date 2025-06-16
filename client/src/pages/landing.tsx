@@ -10,7 +10,7 @@ export default function Landing() {
   const [, setLocation] = useLocation();
   
   const handleLogin = () => {
-    setLocation('/auth');
+    setLocation('/auth#sign-in');
   };
 
   const handleGetStarted = (plan: string) => {
