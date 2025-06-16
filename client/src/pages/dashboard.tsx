@@ -73,7 +73,7 @@ interface Category {
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
   // Check for subscription success/error messages
@@ -156,7 +156,7 @@ export default function Dashboard() {
   // Core data loads immediately
   const { data: transactions, isLoading: transactionsLoading, error: transactionsError } = useQuery({
     queryKey: ['/api/transactions'],
-    enabled: !!user,
+    enabled: isAuthenticated,
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/transactions");
       return response.json();
@@ -165,7 +165,7 @@ export default function Dashboard() {
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
-    enabled: !!user,
+    enabled: isAuthenticated,
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/categories");
       return response.json();
@@ -183,12 +183,12 @@ export default function Dashboard() {
       const response = await apiRequest("GET", `/api/financial-summary?${params}`);
       return response.json();
     },
-    enabled: !!user && !!transactions, // Wait for transactions first
+    enabled: isAuthenticated && !!transactions, // Wait for transactions first
   });
 
   const { data: budgets, error: budgetsError } = useQuery({
     queryKey: ['/api/budgets'],
-    enabled: !!user && !!transactions, // Wait for transactions first
+    enabled: isAuthenticated && !!transactions, // Wait for transactions first
     retry: false, // Don't retry on 403 errors for free users
   });
 

@@ -2,14 +2,32 @@ import { useUser, useAuth as useClerkAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
 import { getQueryFn } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function useAuth() {
   const { user: clerkUser, isLoaded: userLoaded } = useUser();
-  const { isSignedIn, isLoaded: authLoaded, signOut } = useClerkAuth();
+  const { isSignedIn, isLoaded: authLoaded, signOut, getToken } = useClerkAuth();
+  const [sessionPersisted, setSessionPersisted] = useState(false);
+  const [sessionRecovered, setSessionRecovered] = useState(false);
   
-  // Don't proceed if Clerk isn't loaded yet
-  if (!userLoaded || !authLoaded) {
+  // Session recovery on page load
+  useEffect(() => {
+    if (authLoaded && !isSignedIn && !sessionRecovered) {
+      const storedToken = localStorage.getItem('clerk-session-token');
+      const storedUserId = localStorage.getItem('clerk-user-id');
+      
+      if (storedToken && storedUserId) {
+        console.log('Attempting session recovery from localStorage');
+        // Token exists, let Clerk handle the recovery
+        setSessionRecovered(true);
+      } else {
+        setSessionRecovered(true);
+      }
+    }
+  }, [authLoaded, isSignedIn, sessionRecovered]);
+  
+  // Don't proceed if Clerk isn't loaded yet or session recovery is in progress
+  if (!userLoaded || !authLoaded || !sessionRecovered) {
     return {
       user: null,
       clerkUser: null,
@@ -19,13 +37,29 @@ export function useAuth() {
     };
   }
   
+  // Session persistence: Store token when user is authenticated
+  useEffect(() => {
+    if (isSignedIn && clerkUser && !sessionPersisted) {
+      getToken().then(token => {
+        if (token) {
+          localStorage.setItem('clerk-session-token', token);
+          localStorage.setItem('clerk-user-id', clerkUser.id);
+          setSessionPersisted(true);
+        }
+      }).catch(console.warn);
+    }
+  }, [isSignedIn, clerkUser, getToken, sessionPersisted]);
+
   // Clear authentication state on JWT errors to force re-authentication
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'clerk-db-jwt-error') {
         console.log('JWT error detected, clearing authentication');
+        localStorage.removeItem('clerk-session-token');
+        localStorage.removeItem('clerk-user-id');
         signOut();
         localStorage.removeItem('clerk-db-jwt-error');
+        setSessionPersisted(false);
       }
     };
     
