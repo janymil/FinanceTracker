@@ -74,13 +74,31 @@ export default function AdminAnalytics() {
     checkAuthStatus();
   }, []);
 
+  // Custom fetcher for admin endpoints that uses session cookies instead of Clerk tokens
+  const adminFetch = async ({ queryKey }: { queryKey: string[] }) => {
+    const response = await fetch(queryKey[0], {
+      credentials: 'include', // Include session cookies
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`${response.status}: ${response.statusText}`);
+    }
+    
+    return response.json();
+  };
+
   const { data: users = [], isLoading: usersLoading } = useQuery({
     queryKey: ['/api/admin-analytics/users'],
+    queryFn: adminFetch,
     enabled: isAuthenticated,
   });
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['/api/admin-analytics/overview'],
+    queryFn: adminFetch,
     enabled: isAuthenticated,
   });
 
@@ -89,7 +107,18 @@ export default function AdminAnalytics() {
     setIsLoggingIn(true);
     
     try {
-      await apiRequest('POST', '/api/admin-analytics/login', { password });
+      const response = await fetch('/api/admin-analytics/login', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Invalid admin password');
+      }
       
       setIsAuthenticated(true);
       setPassword("");
@@ -116,9 +145,21 @@ export default function AdminAnalytics() {
   const createUser = async (userData: any) => {
     setIsCreatingUser(true);
     try {
-      await apiRequest('POST', '/api/admin/users', userData);
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      const response = await fetch('/api/admin-analytics/users', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create user');
+      }
+      
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/users'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/overview'] });
       setNewUser({ email: "", firstName: "", lastName: "", plan: "free" });
       toast({
         title: "Success",
@@ -138,7 +179,19 @@ export default function AdminAnalytics() {
   const updateUser = async ({ id, userData }: { id: string; userData: any }) => {
     setIsUpdatingUser(true);
     try {
-      await apiRequest('PUT', `/api/admin-analytics/users/${id}/plan`, userData);
+      const response = await fetch(`/api/admin-analytics/users/${id}/plan`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update user plan');
+      }
+      
       await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/users'] });
       await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/overview'] });
       setEditingUser(null);
@@ -160,7 +213,15 @@ export default function AdminAnalytics() {
   const deleteUser = async (userId: string) => {
     setIsDeletingUser(true);
     try {
-      await apiRequest('DELETE', `/api/admin-analytics/users/${userId}`);
+      const response = await fetch(`/api/admin-analytics/users/${userId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete user');
+      }
+      
       await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/users'] });
       await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/overview'] });
       toast({
