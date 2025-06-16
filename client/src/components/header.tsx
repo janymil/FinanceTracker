@@ -81,7 +81,6 @@ interface HeaderProps {
 export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const { signOut } = useClerk();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -112,8 +111,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      invalidateAllUserData();
       setIsDialogOpen(false);
       setNewTransaction({
         amount: "",

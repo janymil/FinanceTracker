@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, invalidateAllUserData } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import MonthFilter from "@/components/month-filter";
@@ -102,8 +102,7 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      invalidateAllUserData();
       setIsDialogOpen(false);
       setNewIncome({
         amount: "",
@@ -181,8 +180,7 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      invalidateAllUserData();
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
@@ -205,8 +203,7 @@ export default function Income() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      invalidateAllUserData();
       toast({
         title: "Income Deleted",
         description: "Income transaction has been removed successfully",
