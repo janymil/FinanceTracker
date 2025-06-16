@@ -111,7 +111,9 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
       return await res.json();
     },
     onSuccess: () => {
-      // Immediately refetch all affected queries
+      // Immediately invalidate and refetch all affected queries
+      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary", user?.id] });
       queryClient.refetchQueries({ queryKey: ["transactions", user?.id] });
       queryClient.refetchQueries({ queryKey: ["financial-summary", user?.id] });
       setIsDialogOpen(false);
