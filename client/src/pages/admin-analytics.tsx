@@ -633,14 +633,14 @@ export default function AdminAnalytics() {
                                     </Select>
                                   </div>
                                   <Button 
-                                    onClick={() => updateUserMutation.mutate({ 
+                                    onClick={() => updateUser({ 
                                       id: editingUser.id, 
                                       userData: editingUser 
                                     })}
-                                    disabled={updateUserMutation.isPending}
+                                    disabled={isUpdatingUser}
                                     className="w-full"
                                   >
-                                    {updateUserMutation.isPending ? "Updating..." : "Update User"}
+                                    {isUpdatingUser ? "Updating..." : "Update User"}
                                   </Button>
                                 </div>
                               )}
@@ -663,7 +663,7 @@ export default function AdminAnalytics() {
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction 
-                                  onClick={() => deleteUserMutation.mutate(user.id)}
+                                  onClick={() => deleteUser(user.id)}
                                   className="bg-red-600 hover:bg-red-700"
                                 >
                                   Delete User
