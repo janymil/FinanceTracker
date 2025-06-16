@@ -145,67 +145,19 @@ export default function Transactions() {
 
   const updateTransactionMutation = useMutation({
     mutationFn: async ({ id, ...data }: { id: number } & typeof newTransaction) => {
-      // Only send fields that have actually changed from the original transaction
-      const updateData: any = {};
-      
-      if (editingTransaction) {
-        // Convert the original amount to string for comparison
-        const originalAmount = editingTransaction.amount.toString();
-        if (data.amount !== originalAmount) {
-          updateData.amount = parseFloat(data.amount);
-        }
-        
-        if (data.description !== editingTransaction.description) {
-          updateData.description = data.description;
-        }
-        
-        // Format original date for comparison
-        const originalDate = editingTransaction.date instanceof Date 
-          ? editingTransaction.date.toISOString().split('T')[0]
-          : new Date(editingTransaction.date).toISOString().split('T')[0];
-        if (data.date !== originalDate) {
-          updateData.date = data.date;
-        }
-        
-        if (data.type !== editingTransaction.type) {
-          updateData.type = data.type;
-        }
-        
-        // Find original category ID
-        const originalCategory = (categories as Category[]).find(
-          cat => cat.name === editingTransaction.categoryName
-        );
-        const originalCategoryId = originalCategory ? originalCategory.id.toString() : "";
-        if (data.categoryId !== originalCategoryId) {
-          updateData.categoryId = data.categoryId ? parseInt(data.categoryId) : null;
-        }
-        
-        if (data.isRecurring !== Boolean(editingTransaction.isRecurring)) {
-          updateData.isRecurring = data.isRecurring;
-        }
-        
-        if (data.recurringFrequency !== (editingTransaction.recurringFrequency || "monthly")) {
-          updateData.recurringFrequency = data.recurringFrequency;
-        }
-        
-        // Format original recurring end date for comparison
-        const originalRecurringEndDate = editingTransaction.recurringEndDate 
-          ? (editingTransaction.recurringEndDate instanceof Date 
-              ? editingTransaction.recurringEndDate.toISOString().split('T')[0]
-              : new Date(editingTransaction.recurringEndDate).toISOString().split('T')[0])
-          : "";
-        if (data.recurringEndDate !== originalRecurringEndDate) {
-          updateData.recurringEndDate = data.recurringEndDate || null;
-        }
-        
-        if (data.paymentUrl !== (editingTransaction.paymentUrl || "")) {
-          updateData.paymentUrl = data.paymentUrl;
-        }
-        
-        if (data.referenceNote !== (editingTransaction.referenceNote || "")) {
-          updateData.referenceNote = data.referenceNote;
-        }
-      }
+      // Prepare complete update data - send all fields to ensure proper updates
+      const updateData = {
+        amount: parseFloat(data.amount),
+        description: data.description,
+        date: data.date,
+        type: data.type,
+        categoryId: data.categoryId ? parseInt(data.categoryId) : null,
+        isRecurring: data.isRecurring,
+        recurringFrequency: data.recurringFrequency,
+        recurringEndDate: data.recurringEndDate || null,
+        paymentUrl: data.paymentUrl,
+        referenceNote: data.referenceNote
+      };
       
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
       return await res.json();
