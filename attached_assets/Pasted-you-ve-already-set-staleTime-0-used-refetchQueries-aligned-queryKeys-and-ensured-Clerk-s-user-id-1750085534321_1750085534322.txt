@@ -1,0 +1,71 @@
+you've already set staleTime: 0, used refetchQueries, aligned queryKeys, and ensured Clerk's user.id is only used when fully loaded, yet the UI still doesn’t update immediately after edit/delete, that strongly suggests the issue is not in:
+
+React Query config,
+
+Mutation or fetch function logic,
+
+Nor Clerk auth timing.
+
+🧠 Most Likely Real Root Cause Now: ❗The React list components aren't re-rendering because they rely on outdated internal state or are memoized incorrectly
+Let’s step back and think logically:
+
+✅ VERIFY: You are not using stale internal component state
+❌ Problematic Pattern:
+tsx
+Copy
+Edit
+const [expenses, setExpenses] = useState([]); // initialized once
+
+const { data } = useQuery(["expenses", user?.id], fetchExpenses);
+
+useEffect(() => {
+  if (data) setExpenses(data); // this sets once and stays stuck
+}, [data]);
+This pattern freezes the list because updates to data may not trigger useEffect properly — and expenses becomes stale unless page is reloaded.
+
+✅ Recommended Pattern: Use data directly in render
+tsx
+Copy
+Edit
+const { data: expenses, isLoading } = useQuery(["expenses", user?.id], fetchExpenses, {
+  enabled: canFetch,
+});
+
+return (
+  <div>
+    {isLoading && <p>Loading...</p>}
+    {expenses?.map((item) => (
+      <TransactionItem key={item.id} item={item} />
+    ))}
+  </div>
+);
+Never assign fetched data to state unless you intentionally want a copy.
+
+✅ Additional Diagnostic Tips
+Are your mutation functions returning the latest state from the server?
+If not, use refetchQueries with await in onSuccess to ensure fresh data:
+
+tsx
+Copy
+Edit
+onSuccess: async () => {
+  await queryClient.refetchQueries(["expenses", user?.id]);
+}
+Temporarily disable memoization or virtualization (e.g., React.memo, react-window, etc.)
+They may be skipping re-render based on reference equality.
+
+Force re-rendering as a test
+Add a log in the component to see if it re-renders after mutation:
+
+tsx
+Copy
+Edit
+console.log("Expenses component rendered", expenses);
+✅ Checklist Recap (You likely did some of this — double-check):
+✅	Fix
+🔁	Ensure useQuery uses data directly, not copied into useState
+🔁	queryKey includes user?.id and is used exactly the same across query and refetch
+🔁	refetchQueries() used in mutation onSuccess, awaited if needed
+✅	enabled in useQuery tied to isLoaded && isSignedIn && !!user?.id
+❌	Avoid any stale useEffect(() => setState(data)) patterns
+❌	Avoid memoized TransactionList or TransactionItem that skips render on data change
