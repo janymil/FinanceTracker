@@ -44,10 +44,9 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
 import { Link } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { useHeaderCategories } from "@/hooks/useHeaderCategories";
 import { apiRequest } from "@/lib/queryClient";
 
 interface Category {
@@ -69,8 +68,8 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const { signOut } = useClerk();
-  const { categories } = useHeaderCategories();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const [newTransaction, setNewTransaction] = useState({
     amount: "",
@@ -84,6 +83,23 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
     paymentUrl: "",
     referenceNote: "",
   });
+
+  const fetchCategories = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const response = await apiRequest("GET", "/api/categories");
+      const data = await response.json();
+      setCategories(data);
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+      setCategories([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, [user?.id]);
 
   const createTransaction = async (transactionData: typeof newTransaction) => {
     try {
