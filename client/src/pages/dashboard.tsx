@@ -579,8 +579,8 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Basic/Premium User Content - Rendered with startTransition */}
-        {(deferredUser?.plan === 'standard' || deferredUser?.plan === 'premium') && !isPending && (
+        {/* Basic/Premium User Content */}
+        {(user?.plan === 'standard' || user?.plan === 'premium') && (
           <div className="space-y-8">
             {/* Advanced Analytics Row - AI-driven for Standard/Premium */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
