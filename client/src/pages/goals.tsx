@@ -13,6 +13,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import RequirePlan from "@/components/require-plan";
+import { apiRequest } from "@/lib/queryClient";
 
 interface Goal {
   id: number;
@@ -54,20 +55,7 @@ export default function Goals() {
     return null;
   }
 
-  // Get auth headers for Clerk authentication
-  const getAuthHeaders = async (): Promise<Record<string, string>> => {
-    try {
-      if (typeof window !== 'undefined' && window.Clerk?.session) {
-        const token = await window.Clerk.session.getToken();
-        if (token) {
-          return { Authorization: `Bearer ${token}` };
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to get Clerk token:', error);
-    }
-    return {};
-  };
+  
 
   // Fetch goals
   const fetchGoals = async () => {
@@ -75,15 +63,9 @@ export default function Goals() {
     
     setIsLoading(true);
     try {
-      const authHeaders = await getAuthHeaders();
-      const response = await fetch('/api/goals', {
-        headers: authHeaders,
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setGoals(data);
-      }
+      const response = await apiRequest("GET", "/api/goals");
+      const data = await response.json();
+      setGoals(data);
     } catch (error) {
       console.error('Error fetching goals:', error);
     } finally {
@@ -99,20 +81,7 @@ export default function Goals() {
 
   const createGoal = async (goalData: any) => {
     try {
-      const authHeaders = await getAuthHeaders();
-      const response = await fetch("/api/goals", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...authHeaders,
-        },
-        credentials: 'include',
-        body: JSON.stringify(goalData),
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to create goal");
-      }
+      const response = await apiRequest("POST", "/api/goals", goalData);
       
       await fetchGoals(); // Refresh goals
       setIsDialogOpen(false);
@@ -132,20 +101,7 @@ export default function Goals() {
 
   const updateGoal = async ({ id, data }: { id: number; data: any }) => {
     try {
-      const authHeaders = await getAuthHeaders();
-      const response = await fetch(`/api/goals/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          ...authHeaders,
-        },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to update goal");
-      }
+      const response = await apiRequest("PUT", `/api/goals/${id}`, data);
       
       await fetchGoals(); // Refresh goals
       setIsEditDialogOpen(false);
@@ -165,16 +121,7 @@ export default function Goals() {
 
   const deleteGoal = async (id: number) => {
     try {
-      const authHeaders = await getAuthHeaders();
-      const response = await fetch(`/api/goals/${id}`, {
-        method: "DELETE",
-        headers: authHeaders,
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to delete goal");
-      }
+      const response = await apiRequest("DELETE", `/api/goals/${id}`);
       
       await fetchGoals(); // Refresh goals
       toast({
@@ -199,20 +146,7 @@ export default function Goals() {
         category: goal.category,
         description: goal.description,
       };
-      const authHeaders = await getAuthHeaders();
-      const response = await fetch("/api/goals", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...authHeaders,
-        },
-        credentials: 'include',
-        body: JSON.stringify(duplicateData),
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to duplicate goal");
-      }
+      const response = await apiRequest("POST", "/api/goals", duplicateData);
       
       await fetchGoals(); // Refresh goals
       toast({
