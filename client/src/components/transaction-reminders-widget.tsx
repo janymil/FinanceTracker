@@ -271,20 +271,18 @@ export default function TransactionRemindersWidget() {
       <RequirePlan plan="standard">
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Bell className="h-5 w-5" />
-                  Upcoming Payments & Reminders
-                  <Badge className="bg-blue-600 text-white">
-                    <Crown className="h-3 w-3 mr-1" />
-                    Standard+
-                  </Badge>
-                </CardTitle>
-                <CardDescription>
-                  Automatic reminders from transactions and manual payment reminders
-                </CardDescription>
-              </div>
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Upcoming Payments & Reminders
+                <Badge className="bg-blue-600 text-white">
+                  <Crown className="h-3 w-3 mr-1" />
+                  Standard+
+                </Badge>
+              </CardTitle>
+              <CardDescription>
+                Automatic reminders from transactions and manual payment reminders
+              </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="p-6">
@@ -306,23 +304,23 @@ export default function TransactionRemindersWidget() {
     <RequirePlan plan="standard">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                Upcoming Payments & Reminders
-                <Badge className="bg-blue-600 text-white">
-                  <Crown className="h-3 w-3 mr-1" />
-                  Standard+
-                </Badge>
-              </CardTitle>
-              <CardDescription>
-                Automatic reminders from transactions and manual payment reminders
-              </CardDescription>
-            </div>
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              Upcoming Payments & Reminders
+              <Badge className="bg-blue-600 text-white">
+                <Crown className="h-3 w-3 mr-1" />
+                Standard+
+              </Badge>
+            </CardTitle>
+            <CardDescription>
+              Automatic reminders from transactions and manual payment reminders
+            </CardDescription>
+          </div>
+          <div className="mt-4">
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" onClick={resetForm}>
+                <Button size="sm" onClick={resetForm} className="w-full sm:w-auto">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Reminder
                 </Button>
