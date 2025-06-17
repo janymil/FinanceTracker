@@ -107,7 +107,8 @@ export default function TransactionRemindersWidget() {
     queryKey: ["/api/transaction-reminders", { days: 30 }],
     enabled: isReady && !!user?.id,
     retry: 1,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30000,
   });
 
   // Fetch manual expense reminders

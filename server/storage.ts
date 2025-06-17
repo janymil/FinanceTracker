@@ -832,7 +832,7 @@ export class DatabaseStorage implements IStorage {
           type: recurring.type as 'income' | 'expense',
           categoryName: recurring.categoryName || 'Uncategorized',
           isRecurring: true,
-          source: 'recurring_transaction'
+          source: 'recurring_transaction' as 'future_transaction' | 'recurring_transaction'
         };
         console.log(`Adding reminder: ${JSON.stringify(reminder)}`);
         reminders.push(reminder);
