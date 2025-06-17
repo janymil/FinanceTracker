@@ -166,6 +166,9 @@ export default function ExportPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [isUpdatingBackupSettings, setIsUpdatingBackupSettings] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
+  const [showBackupSelection, setShowBackupSelection] = useState(false);
+  const [availableBackups, setAvailableBackups] = useState<any[]>([]);
+  const [selectedBackup, setSelectedBackup] = useState<string | null>(null);
 
   // Export mutation
   const exportMutation = useMutation({
@@ -686,41 +689,57 @@ export default function ExportPage() {
     },
   });
 
-  const handleRestoreData = async () => {
-    console.log('RESTORE FRONTEND: User clicked restore button');
-    
-    // Get the latest backup filename
+  const fetchAvailableBackups = async () => {
     try {
       const headers = await getAuthHeaders();
       const response = await fetch('/api/available-backups', {
         headers
       });
+
       if (!response.ok) {
-        throw new Error('Failed to get available backups');
+        throw new Error('Failed to fetch backups');
       }
-      
+
       const data = await response.json();
-      console.log('RESTORE FRONTEND: Available backups:', data.backups);
-      
-      if (data.backups && data.backups.length > 0) {
-        const latestBackup = data.backups[0]; // Assuming sorted by date, latest first
-        console.log('RESTORE FRONTEND: Restoring latest backup:', latestBackup.filename);
-        restoreMutation.mutate(latestBackup.filename);
-      } else {
-        toast({
-          title: "No Backups Found",
-          description: "No backup files are available to restore from.",
-          variant: "destructive",
-        });
-      }
+      return data.backups || [];
     } catch (error) {
-      console.error('RESTORE FRONTEND: Error getting backups:', error);
       toast({
-        title: "Restore Failed",
-        description: "Could not retrieve backup files. Please try again.",
+        title: "Error",
+        description: "Failed to fetch available backups.",
         variant: "destructive",
       });
+      return [];
     }
+  };
+
+  const handleShowBackupSelection = async () => {
+    const backups = await fetchAvailableBackups();
+    if (backups.length === 0) {
+      toast({
+        title: "No Backups Found",
+        description: "No backup files available for restore.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setAvailableBackups(backups);
+    setShowBackupSelection(true);
+  };
+
+  const handleRestoreData = async () => {
+    if (!selectedBackup) {
+      toast({
+        title: "No Backup Selected",
+        description: "Please select a backup to restore from.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log('RESTORE FRONTEND: Starting restore with backup:', selectedBackup);
+    restoreMutation.mutate(selectedBackup);
+    setShowBackupSelection(false);
+    setSelectedBackup(null);
   };
 
   const getStatusIcon = (status: string) => {
@@ -1556,7 +1575,7 @@ export default function ExportPage() {
 
                   <Button 
                     variant="outline"
-                    onClick={handleRestoreData}
+                    onClick={handleShowBackupSelection}
                     disabled={restoreMutation.isPending}
                     className="w-full flex items-center gap-2"
                   >
@@ -1613,6 +1632,85 @@ export default function ExportPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Backup Selection Dialog */}
+      <Dialog open={showBackupSelection} onOpenChange={setShowBackupSelection}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Select Backup to Restore</DialogTitle>
+            <DialogDescription>
+              Choose which backup you'd like to restore from. This will replace your current data.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {availableBackups.map((backup: any, index: number) => (
+              <div
+                key={backup.filename}
+                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                  selectedBackup === backup.filename
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                }`}
+                onClick={() => setSelectedBackup(backup.filename)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      checked={selectedBackup === backup.filename}
+                      onChange={() => setSelectedBackup(backup.filename)}
+                      className="h-4 w-4 text-blue-600"
+                    />
+                    <div>
+                      <h4 className="font-medium">
+                        {format(new Date(backup.date), 'MMM d, yyyy - h:mm a')}
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {formatFileSize(backup.size)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {index === 0 ? 'Latest' : `${index + 1} backup${index > 0 ? 's' : ''} ago`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowBackupSelection(false);
+                setSelectedBackup(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRestoreData}
+              disabled={!selectedBackup || restoreMutation.isPending}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {restoreMutation.isPending ? (
+                <>
+                  <Download className="h-4 w-4 mr-2 animate-spin" />
+                  Restoring...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Restore Selected Backup
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </RequirePlan>
   );
 }
