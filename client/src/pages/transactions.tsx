@@ -45,6 +45,11 @@ interface Transaction {
   recurringEndDate?: string;
   paymentUrl?: string;
   referenceNote?: string;
+  imageUrl?: string;
+  ocrText?: string;
+  ocrVendor?: string;
+  ocrDetectedAmount?: string;
+  ocrDetectedDate?: string;
 }
 
 interface Category {

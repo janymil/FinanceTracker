@@ -6,11 +6,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Trash2, Filter, TrendingDown, TrendingUp, Image, ChevronDown, ChevronUp, Receipt } from "lucide-react";
+import { Trash2, Filter, TrendingDown, TrendingUp, ChevronDown, ChevronUp, Receipt } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useState, useMemo } from "react";
+import ReceiptModal from "@/components/receipt-modal";
 
 interface Transaction {
   id: number;
@@ -39,6 +39,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
   const [filterType, setFilterType] = useState("all");
   const [, setLocation] = useLocation();
   const [expandedTransactions, setExpandedTransactions] = useState<Set<number>>(new Set());
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   // Filter and search transactions
   const filteredTransactions = useMemo(() => {
@@ -198,35 +199,19 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                       {/* Receipt thumbnail for desktop */}
                       {transaction.imageUrl && (
                         <div className="hidden md:block">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <div className="relative cursor-pointer group">
-                                <img
-                                  src={transaction.imageUrl}
-                                  alt="Receipt thumbnail"
-                                  className="w-12 h-12 object-cover rounded border group-hover:opacity-80 transition-opacity"
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded">
-                                  <Image className="h-4 w-4 text-white opacity-0 group-hover:opacity-100" />
-                                </div>
-                              </div>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                              <DialogHeader>
-                                <DialogTitle>Receipt Image</DialogTitle>
-                                <DialogDescription>
-                                  Receipt for {transaction.description}
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="flex justify-center">
-                                <img
-                                  src={transaction.imageUrl}
-                                  alt="Receipt full size"
-                                  className="max-w-full max-h-96 object-contain"
-                                />
-                              </div>
-                            </DialogContent>
-                          </Dialog>
+                          <div 
+                            className="relative cursor-pointer group"
+                            onClick={() => setSelectedTransaction(transaction)}
+                          >
+                            <img
+                              src={transaction.imageUrl}
+                              alt="Receipt thumbnail"
+                              className="w-12 h-12 object-cover rounded border group-hover:opacity-80 transition-opacity"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded">
+                              <Receipt className="h-4 w-4 text-white opacity-0 group-hover:opacity-100" />
+                            </div>
+                          </div>
                         </div>
                       )}
                       
@@ -302,35 +287,19 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                       {/* Mobile receipt image */}
                       {transaction.imageUrl && (
                         <div className="md:hidden">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <div className="relative cursor-pointer group">
-                                <img
-                                  src={transaction.imageUrl}
-                                  alt="Receipt"
-                                  className="w-24 h-24 object-cover rounded border group-hover:opacity-80 transition-opacity"
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded">
-                                  <Image className="h-5 w-5 text-white opacity-0 group-hover:opacity-100" />
-                                </div>
-                              </div>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                              <DialogHeader>
-                                <DialogTitle>Receipt Image</DialogTitle>
-                                <DialogDescription>
-                                  Receipt for {transaction.description}
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="flex justify-center">
-                                <img
-                                  src={transaction.imageUrl}
-                                  alt="Receipt full size"
-                                  className="max-w-full max-h-96 object-contain"
-                                />
-                              </div>
-                            </DialogContent>
-                          </Dialog>
+                          <div 
+                            className="relative cursor-pointer group"
+                            onClick={() => setSelectedTransaction(transaction)}
+                          >
+                            <img
+                              src={transaction.imageUrl}
+                              alt="Receipt"
+                              className="w-24 h-24 object-cover rounded border group-hover:opacity-80 transition-opacity"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded">
+                              <Receipt className="h-5 w-5 text-white opacity-0 group-hover:opacity-100" />
+                            </div>
+                          </div>
                         </div>
                       )}
                       
@@ -403,6 +372,25 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
             View All Transactions
           </Button>
         </div>
+
+        {/* Receipt Modal */}
+        {selectedTransaction && (
+          <ReceiptModal
+            isOpen={!!selectedTransaction}
+            onOpenChange={(open) => !open && setSelectedTransaction(null)}
+            transaction={{
+              id: selectedTransaction.id,
+              description: selectedTransaction.description,
+              amount: selectedTransaction.amount,
+              date: selectedTransaction.date,
+              imageUrl: selectedTransaction.imageUrl,
+              ocrText: selectedTransaction.ocrText,
+              ocrVendor: selectedTransaction.ocrVendor,
+              ocrDetectedAmount: selectedTransaction.ocrDetectedAmount,
+              ocrDetectedDate: selectedTransaction.ocrDetectedDate,
+            }}
+          />
+        )}
       </CardContent>
     </Card>
   );
