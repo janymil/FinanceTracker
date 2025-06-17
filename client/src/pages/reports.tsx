@@ -1,5 +1,5 @@
-import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { useState, useMemo, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, FileText, Brain, Download, Zap, Crown } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from "date-fns";
-import { useState, useMemo } from "react";
 import RequirePlan from "@/components/require-plan";
 import MonthFilter from "@/components/month-filter";
 
@@ -18,17 +17,20 @@ import AIInsights from "@/components/ai-insights";
 import AutoCategorization from "@/components/auto-categorization";
 
 export default function Reports() {
-  const { user } = useAuth();
+  const { isReady, user } = useClerkUserReady();
   const [, setLocation] = useLocation();
   const [selectedPeriod, setSelectedPeriod] = useState("month");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [financialSummary, setFinancialSummary] = useState<any>(null);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [summaryLoading, setSummaryLoading] = useState(false);
 
   if (!user) {
     return null;
   }
 
-  const hasStandardOrBetter = user?.plan === 'standard' || user?.plan === 'premium';
-  const hasPremium = user?.plan === 'premium';
+  const hasStandardOrBetter = user?.publicMetadata?.plan === 'standard' || user?.publicMetadata?.plan === 'premium';
+  const hasPremium = user?.publicMetadata?.plan === 'premium';
 
   // Calculate date ranges based on selected period and month
   const getDateRange = () => {
@@ -72,26 +74,76 @@ export default function Reports() {
 
   const { startDate, endDate } = getDateRange();
 
+  // Get auth headers for Clerk authentication
+  const getAuthHeaders = async (): Promise<Record<string, string>> => {
+    try {
+      if (typeof window !== 'undefined' && window.Clerk?.session) {
+        const token = await window.Clerk.session.getToken();
+        if (token) {
+          return { Authorization: `Bearer ${token}` };
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to get Clerk token:', error);
+    }
+    return {};
+  };
+
   // Fetch financial summary data
-  const { data: financialSummary, isLoading: summaryLoading } = useQuery({
-    queryKey: ['/api/financial-summary', startDate.toISOString(), endDate.toISOString(), selectedMonth, selectedPeriod],
-    queryFn: async () => {
+  const fetchFinancialSummary = async () => {
+    if (!isReady) return;
+    
+    setSummaryLoading(true);
+    try {
+      const authHeaders = await getAuthHeaders();
       const params = new URLSearchParams({
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString()
       });
-      const response = await fetch(`/api/financial-summary?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch financial summary');
-      return response.json();
-    },
-    enabled: !!user,
-  });
+      const response = await fetch(`/api/financial-summary?${params}`, {
+        headers: authHeaders,
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setFinancialSummary(data);
+      } else {
+        console.error('Failed to fetch financial summary:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching financial summary:', error);
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
 
   // Fetch transactions for recent activity
-  const { data: transactions } = useQuery({
-    queryKey: ['transactions', user?.id, selectedMonth, selectedPeriod],
-    enabled: !!user,
-  });
+  const fetchTransactions = async () => {
+    if (!isReady) return;
+    
+    try {
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch('/api/transactions', {
+        headers: authHeaders,
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setTransactions(data);
+      } else {
+        console.error('Failed to fetch transactions:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isReady) {
+      fetchFinancialSummary();
+      fetchTransactions();
+    }
+  }, [isReady, startDate, endDate, selectedMonth, selectedPeriod]);
 
   // Filter transactions based on selected period and month
   const filteredTransactions = useMemo(() => {
