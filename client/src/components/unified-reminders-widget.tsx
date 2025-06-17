@@ -196,6 +196,10 @@ export default function UnifiedRemindersWidget() {
 
   const createReminder = async (reminderData: any) => {
     try {
+      console.log('Creating reminder with data:', reminderData);
+      console.log('User authenticated:', !!user?.id);
+      console.log('Clerk session available:', !!window.Clerk?.session);
+      
       await apiRequest('POST', '/api/expense-reminders', reminderData);
       // Invalidate the correct query keys that the widget actually uses
       await queryClient.invalidateQueries({ queryKey: ["/api/transaction-reminders"] });
@@ -207,6 +211,7 @@ export default function UnifiedRemindersWidget() {
         description: "Expense reminder has been set successfully",
       });
     } catch (error: any) {
+      console.error('Error creating reminder:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to create reminder",
@@ -272,6 +277,17 @@ export default function UnifiedRemindersWidget() {
 
   const handleSubmit = () => {
     if (!newReminder.title || !newReminder.dueDate) return;
+    
+    // Ensure user is authenticated before creating reminder
+    if (!isReady || !user?.id) {
+      toast({
+        title: "Authentication Error",
+        description: "Please wait for authentication to complete",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     createReminder(newReminder);
   };
 
@@ -304,7 +320,7 @@ export default function UnifiedRemindersWidget() {
                   Add Reminder
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md">
+              <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingReminder ? "Edit Reminder" : "Create Payment Reminder"}
@@ -313,7 +329,7 @@ export default function UnifiedRemindersWidget() {
                     Set up a reminder for an upcoming expense, payment, or income
                   </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto">
                   <div>
                     <Label htmlFor="title">Title *</Label>
                     <Input
@@ -368,8 +384,8 @@ export default function UnifiedRemindersWidget() {
                         <SelectTrigger>
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
-                        <SelectContent>
-                          {allCategories.map((category: Category) => (
+                        <SelectContent className="max-h-[200px] overflow-y-auto">
+                          {categories.map((category: Category) => (
                             <SelectItem key={category.id} value={category.id.toString()}>
                               {category.name} ({category.type})
                             </SelectItem>
