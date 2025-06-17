@@ -428,10 +428,11 @@ export default function ExportPage() {
                   </div>
                 </div>
 
-                <Button onClick={handleExport} className="w-full" size="lg">
-                  <Download className="mr-2 h-4 w-4" />
-                  Export Data
-                </Button>
+                <div className="text-center py-8 text-muted-foreground">
+                  <Download className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Export functionality coming soon</p>
+                  <p className="text-sm">Support for PDF, CSV, Excel, JSON, and more</p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
