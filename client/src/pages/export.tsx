@@ -1575,7 +1575,11 @@ export default function ExportPage() {
 
                   {backupStatus.status === 'synced' && !isBackingUp && (
                     <div className="text-center text-xs text-gray-600 dark:text-gray-400">
-                      Next backup scheduled for {format(new Date(backupStatus.nextBackup), 'MMM d, h:mm a')}
+                      {backupStatus.nextBackup === "Manual backup available" ? (
+                        "Manual backup available"
+                      ) : (
+                        `Next backup scheduled for ${format(new Date(backupStatus.nextBackup), 'MMM d, h:mm a')}`
+                      )}
                     </div>
                   )}
                 </div>
