@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -108,7 +109,6 @@ export default function UnifiedRemindersWidget() {
   // Fetch automatic transaction reminders
   const { data: transactionReminders = [], isLoading: transactionLoading } = useQuery<TransactionReminder[]>({
     queryKey: ["/api/transaction-reminders", { days: 30 }],
-    queryFn: () => fetch("/api/transaction-reminders?days=30").then(res => res.json()),
     enabled: true,
     retry: 1,
     refetchOnWindowFocus: false,
