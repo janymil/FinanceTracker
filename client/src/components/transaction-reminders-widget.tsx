@@ -111,6 +111,11 @@ export default function TransactionRemindersWidget() {
     refetchInterval: 30000,
   });
 
+  // Debug logging for reminders
+  console.log('Transaction reminders widget - User ready:', isReady, 'User ID:', user?.id);
+  console.log('Transaction reminders loading:', transactionLoading);
+  console.log('Transaction reminders data:', transactionReminders);
+
   // Fetch manual expense reminders
   const { data: expenseReminders = [], isLoading: expenseLoading } = useQuery<ExpenseReminder[]>({
     queryKey: ["/api/expense-reminders/upcoming"],
