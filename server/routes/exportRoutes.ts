@@ -766,8 +766,10 @@ export function registerExportRoutes(app: Express) {
       });
 
     } catch (error) {
-      console.error("Error restoring backup:", error);
-      res.status(500).json({ message: "Failed to restore backup" });
+      console.error("RESTORE ERROR: Error restoring backup:", error);
+      console.error("RESTORE ERROR: Error details:", error.message);
+      console.error("RESTORE ERROR: Error stack:", error.stack);
+      res.status(500).json({ message: "Failed to restore backup", error: error.message });
     }
   });
 }
