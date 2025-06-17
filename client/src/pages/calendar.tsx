@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,12 @@ export default function CalendarPage() {
   const { isReady, user, getAuthHeaders } = useClerkUserReady();
 
   useEffect(() => {
-    if (!isReady || !user?.id) return;
+    if (!isReady || !user?.id) {
+      setIsLoading(false);
+      return;
+    }
+
+    let isMounted = true;
 
     const fetchData = async () => {
       try {
@@ -58,6 +63,8 @@ export default function CalendarPage() {
           fetch('/api/categories', { headers })
         ]);
 
+        if (!isMounted) return;
+
         if (transactionsRes.ok) {
           const transactionsData = await transactionsRes.json();
           setTransactions(transactionsData);
@@ -68,14 +75,22 @@ export default function CalendarPage() {
           setCategories(categoriesData);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        if (isMounted) {
+          console.error('Error fetching data:', error);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchData();
-  }, [isReady, user?.id, getAuthHeaders]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isReady, user?.id]);
 
   // Process transactions for calendar view
   const processTransactionsForCalendar = (transactions: Transaction[], month: Date): DayData[] => {
