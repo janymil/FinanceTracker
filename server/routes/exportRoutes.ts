@@ -574,7 +574,8 @@ export function registerExportRoutes(app: Express) {
           total: `${Math.round(backups.reduce((sum, file) => sum + file.Length, 0) / 1024)} KB`
         },
         settings: {
-          autoBackup: false,
+          autoBackup: true,
+          frequency: 'daily',
           retentionDays: 30,
           includeTransactions: true,
           includeBudgets: true,
