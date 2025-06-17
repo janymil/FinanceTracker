@@ -13,10 +13,11 @@ export interface ExpenseCategorizationResult {
 export interface FinancialTip {
   title: string;
   description: string;
-  category: 'spending' | 'saving' | 'budgeting' | 'income';
+  category: 'spending' | 'saving' | 'budgeting' | 'income' | 'education';
   priority: 'high' | 'medium' | 'low';
   actionable: boolean;
   estimatedSaving?: number;
+  educational?: boolean;
 }
 
 export interface TrendPrediction {
@@ -157,31 +158,47 @@ export async function generateFinancialTips(financialData: {
       messages: [
         {
           role: "system",
-          content: `You are a professional financial advisor. Analyze the user's financial data and provide personalized, actionable financial tips.
+          content: `You are a professional financial advisor providing both personalized insights and educational guidance. Analyze the user's financial data and provide comprehensive financial advice.
 
-Focus on:
-- Spending patterns and potential areas for reduction
-- Budget optimization suggestions
-- Saving opportunities
-- Income improvement strategies
+Provide BOTH types of tips:
+1. PERSONALIZED TIPS (2-3 tips based on their actual spending data)
+2. EDUCATIONAL TIPS (1-2 general financial education tips applicable to their situation)
 
-Provide 3-5 specific, actionable tips. Each tip should include:
+Focus areas:
+- Spending pattern analysis from actual data
+- Budget optimization based on their categories  
+- Saving opportunities specific to their income/expenses
+- General financial literacy and best practices
+- Educational content about financial principles
+- Investment basics or debt management (when relevant)
+
+Each tip should include:
 - Clear, actionable title
 - Detailed description with specific steps
-- Category (spending/saving/budgeting/income)
+- Category (spending/saving/budgeting/income/education)
 - Priority level (high/medium/low)
 - Whether it's actionable (true/false)
 - Estimated potential savings (if applicable)
+- Educational value indicator (true for educational tips)
 
 Respond with JSON array in this format:
 [
   {
     "title": "Reduce dining out expenses",
-    "description": "You spent $X on dining out this month. Try meal planning and cooking at home 2-3 more times per week.",
-    "category": "spending",
+    "description": "You spent $X on dining out this month. Try meal planning and cooking at home 2-3 more times per week to save approximately $150 monthly.",
+    "category": "spending", 
     "priority": "high",
     "actionable": true,
-    "estimatedSaving": 150
+    "estimatedSaving": 150,
+    "educational": false
+  },
+  {
+    "title": "Emergency Fund Fundamentals",
+    "description": "Build an emergency fund covering 3-6 months of expenses ($X-$Y for you). Start by saving $50-100 monthly in a high-yield savings account. This protects against unexpected expenses and reduces financial stress.",
+    "category": "education",
+    "priority": "high", 
+    "actionable": true,
+    "educational": true
   }
 ]`
         },
@@ -217,10 +234,11 @@ Please provide personalized financial tips based on this data.`
     const processedTips = tips.map((tip: any) => ({
       title: tip.title || 'Financial Tip',
       description: tip.description || 'No description available',
-      category: ['spending', 'saving', 'budgeting', 'income'].includes(tip.category) ? tip.category : 'spending',
+      category: ['spending', 'saving', 'budgeting', 'income', 'education'].includes(tip.category) ? tip.category : 'spending',
       priority: ['high', 'medium', 'low'].includes(tip.priority) ? tip.priority : 'medium',
       actionable: Boolean(tip.actionable),
-      estimatedSaving: tip.estimatedSaving || undefined
+      estimatedSaving: tip.estimatedSaving || undefined,
+      educational: Boolean(tip.educational)
     }));
 
     // Only cache if not bypassing cache

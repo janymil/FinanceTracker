@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Lightbulb, Sparkles, RefreshCw, TrendingUp, Lock, Crown } from "lucide-react";
+import { Lightbulb, Sparkles, RefreshCw, TrendingUp, Lock, Crown, GraduationCap } from "lucide-react";
 import { Link } from "wouter";
 import { useUser } from '@clerk/clerk-react';
 
@@ -119,20 +119,47 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
 
             {/* Current Tip Display */}
             {currentTip && (
-              <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
-                    <Lightbulb className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <div className="space-y-3">
+                {/* Parse and display multiple tips if they exist */}
+                {currentTip.includes('|') ? (
+                  currentTip.split('|').map((tip, index) => (
+                    <div key={index} className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+                          {tip.toLowerCase().includes('education') || tip.toLowerCase().includes('fund') || tip.toLowerCase().includes('invest') ? (
+                            <GraduationCap className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          ) : (
+                            <Lightbulb className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                            {tip.toLowerCase().includes('education') || tip.toLowerCase().includes('fund') || tip.toLowerCase().includes('invest') ? 'Financial Education' : 'Personalized Insight'}
+                          </h4>
+                          <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">
+                            {tip.trim()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+                        <Lightbulb className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                          AI Recommendation
+                        </h4>
+                        <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">
+                          {currentTip}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
-                      AI Recommendation
-                    </h4>
-                    <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">
-                      {currentTip}
-                    </p>
-                  </div>
-                </div>
+                )}
               </div>
             )}
 
