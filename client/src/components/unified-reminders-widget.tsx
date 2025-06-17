@@ -197,7 +197,8 @@ export default function UnifiedRemindersWidget() {
   const createReminder = async (reminderData: any) => {
     try {
       await apiRequest('POST', '/api/expense-reminders', reminderData);
-      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
+      // Invalidate the correct query keys that the widget actually uses
+      await queryClient.invalidateQueries({ queryKey: ["/api/transaction-reminders"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
       setIsDialogOpen(false);
       resetForm();
@@ -217,7 +218,8 @@ export default function UnifiedRemindersWidget() {
   const completeReminder = async (id: number) => {
     try {
       await apiRequest('PUT', `/api/expense-reminders/${id}`, { isCompleted: true });
-      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
+      // Invalidate the correct query keys that the widget actually uses
+      await queryClient.invalidateQueries({ queryKey: ["/api/transaction-reminders"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
       toast({
         title: "Reminder Completed",
@@ -235,7 +237,8 @@ export default function UnifiedRemindersWidget() {
   const deleteReminder = async (id: number) => {
     try {
       await apiRequest('DELETE', `/api/expense-reminders/${id}`);
-      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
+      // Invalidate the correct query keys that the widget actually uses
+      await queryClient.invalidateQueries({ queryKey: ["/api/transaction-reminders"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
       toast({
         title: "Reminder Deleted",
