@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +24,6 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import { Link } from "wouter";
@@ -67,23 +65,72 @@ export default function Budget() {
     endDate: format(endOfMonth(currentDate), "yyyy-MM-dd"),
   });
 
-  const { data: budgets = [], isLoading } = useQuery<Budget[]>({
-    queryKey: ["budgets"],
-    enabled: !!user,
-  });
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
 
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
-    queryKey: ["categories"],
-    enabled: !!user,
-  });
+  // Fetch budgets
+  const fetchBudgets = async () => {
+    if (!user) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/budgets');
+      if (response.ok) {
+        const data = await response.json();
+        setBudgets(data);
+      }
+    } catch (error) {
+      console.error('Error fetching budgets:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch categories
+  const fetchCategories = async () => {
+    if (!user) return;
+    
+    setCategoriesLoading(true);
+    try {
+      const response = await fetch('/api/categories');
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchBudgets();
+      fetchCategories();
+    }
+  }, [user]);
 
   const createBudget = async (budgetData: typeof newBudget) => {
     try {
-      const res = await apiRequest("POST", "/api/budgets", {
-        ...budgetData,
-        amount: parseFloat(budgetData.amount),
+      const response = await fetch("/api/budgets", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...budgetData,
+          amount: parseFloat(budgetData.amount),
+        }),
       });
-      await queryClient.invalidateQueries({ queryKey: ["budgets"] });
+      
+      if (!response.ok) {
+        throw new Error("Failed to create budget");
+      }
+      
+      await fetchBudgets(); // Refresh budgets
       setIsDialogOpen(false);
       setNewBudget({
         amount: "",
