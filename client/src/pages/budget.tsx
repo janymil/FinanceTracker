@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { useQuery } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useUser } from "@clerk/clerk-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,7 +52,7 @@ interface Category {
 }
 
 export default function Budget() {
-  const { isReady, user } = useClerkUserReady();
+  const { isLoaded, isSignedIn, user } = useUser();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
@@ -74,7 +72,7 @@ export default function Budget() {
 
   // Fetch budgets
   const fetchBudgets = async () => {
-    if (!isReady) return;
+    if (!isLoaded || !isSignedIn) return;
     
     setIsLoading(true);
     try {
@@ -92,7 +90,7 @@ export default function Budget() {
 
   // Fetch categories
   const fetchCategories = async () => {
-    if (!isReady) return;
+    if (!isLoaded || !isSignedIn) return;
     
     setCategoriesLoading(true);
     try {
@@ -109,11 +107,11 @@ export default function Budget() {
   };
 
   useEffect(() => {
-    if (isReady) {
+    if (isLoaded && isSignedIn) {
       fetchBudgets();
       fetchCategories();
     }
-  }, [isReady]);
+  }, [isLoaded, isSignedIn]);
 
   const createBudget = async (budgetData: typeof newBudget) => {
     try {
@@ -122,7 +120,6 @@ export default function Budget() {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: 'include',
         body: JSON.stringify({
           ...budgetData,
           amount: parseFloat(budgetData.amount),
@@ -161,7 +158,6 @@ export default function Budget() {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: 'include',
         body: JSON.stringify({
           ...data,
           amount: parseFloat(data.amount),
@@ -192,7 +188,6 @@ export default function Budget() {
     try {
       const response = await fetch(`/api/budgets/${id}`, {
         method: "DELETE",
-        credentials: 'include',
       });
       
       if (!response.ok) {
