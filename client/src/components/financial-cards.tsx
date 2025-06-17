@@ -94,6 +94,16 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
       const monthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       const monthEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
       
+      console.log('Budget filtering debug:', {
+        selectedMonth,
+        budgetId: budget.id,
+        budgetStart: budget.startDate,
+        budgetEnd: budget.endDate,
+        monthStart: monthStart.toISOString(),
+        monthEnd: monthEnd.toISOString(),
+        overlaps: budgetStart <= monthEnd && budgetEnd >= monthStart
+      });
+      
       return budgetStart <= monthEnd && budgetEnd >= monthStart;
     });
 
