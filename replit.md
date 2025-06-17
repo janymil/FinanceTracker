@@ -277,6 +277,9 @@ Changelog:
 - June 17, 2025. Implemented widget-level upgrade banners instead of blocking tier-gated features completely - users now see actual widgets with semi-transparent overlays and upgrade prompts
 - June 17, 2025. Updated AI Expense Prediction, Daily Recommendations, and AI Financial Tips components to show their full UI with internal upgrade banners for non-premium users
 - June 17, 2025. Removed RequirePlan wrapper blocking from dashboard - all premium widgets now display with contextual upgrade prompts inside the widget containers
+- June 17, 2025. Successfully removed React Query from budget and goals pages - replaced with useState/useEffect pattern using proper Clerk authentication
+- June 17, 2025. Fixed Budget Overview dashboard widget to use same authentication pattern as budget page - budgets now sync between pages correctly
+- June 17, 2025. Resolved data synchronization issue where budgets created on budget page weren't appearing in dashboard Budget by Category widget
 ```
 
 ## User Preferences
