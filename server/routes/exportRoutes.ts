@@ -682,14 +682,87 @@ export function registerExportRoutes(app: Express) {
         return res.status(403).json({ message: "Unauthorized backup access" });
       }
 
+      // Actually restore the data to the database
+      const restoredData = {
+        transactions: 0,
+        budgets: 0,
+        goals: 0
+      };
+
+      // Clear existing user data first
+      const existingTransactions = await storage.getUserTransactions(userId);
+      for (const transaction of existingTransactions) {
+        await storage.deleteTransaction(transaction.id, userId);
+      }
+
+      const existingBudgets = await storage.getUserBudgets(userId);
+      for (const budget of existingBudgets) {
+        await storage.deleteBudget(budget.id, userId);
+      }
+
+      try {
+        const existingGoals = await storage.getUserGoals(userId);
+        for (const goal of existingGoals) {
+          await storage.deleteGoal(goal.id, userId);
+        }
+      } catch (error) {
+        console.log('Goals not available for deletion:', error);
+      }
+
+      // Restore transactions
+      if (parsedData.data.transactions) {
+        for (const transaction of parsedData.data.transactions) {
+          // Convert string dates back to Date objects
+          const transactionData = {
+            ...transaction,
+            date: new Date(transaction.date),
+            createdAt: new Date(transaction.createdAt),
+            updatedAt: new Date(transaction.updatedAt)
+          };
+          delete transactionData.id; // Let database generate new ID
+          await storage.createTransaction(transactionData);
+          restoredData.transactions++;
+        }
+      }
+
+      // Restore budgets
+      if (parsedData.data.budgets) {
+        for (const budget of parsedData.data.budgets) {
+          const budgetData = {
+            ...budget,
+            startDate: new Date(budget.startDate),
+            endDate: new Date(budget.endDate),
+            createdAt: new Date(budget.createdAt)
+          };
+          delete budgetData.id; // Let database generate new ID
+          await storage.createBudget(budgetData);
+          restoredData.budgets++;
+        }
+      }
+
+      // Restore goals
+      if (parsedData.data.goals) {
+        try {
+          for (const goal of parsedData.data.goals) {
+            const goalData = {
+              ...goal,
+              deadline: goal.deadline ? new Date(goal.deadline) : null,
+              createdAt: new Date(goal.createdAt),
+              updatedAt: new Date(goal.updatedAt)
+            };
+            delete goalData.id; // Let database generate new ID
+            await storage.createGoal(goalData);
+            restoredData.goals++;
+          }
+        } catch (error) {
+          console.log('Goals not available for restoration:', error);
+        }
+      }
+
       res.json({ 
         success: true, 
         message: "Backup restored successfully",
-        restoredItems: {
-          transactions: parsedData.data.transactions?.length || 0,
-          budgets: parsedData.data.budgets?.length || 0,
-          goals: parsedData.data.goals?.length || 0
-        }
+        restoredData
       });
 
     } catch (error) {
