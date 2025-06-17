@@ -37,6 +37,12 @@ export function registerTransactionRoutes(app: Express) {
         });
       }
 
+      // Prepare OCR data - limit OCR text for free users
+      let ocrText = req.body.rawText;
+      if (user?.plan === 'free' && ocrText && ocrText.length > 500) {
+        ocrText = ocrText.substring(0, 500) + '...'; // Truncate for free users
+      }
+
       const validatedData = insertTransactionSchema.parse({
         ...req.body,
         userId,
@@ -44,6 +50,12 @@ export function registerTransactionRoutes(app: Express) {
         amount: req.body.amount.toString(),
         date: new Date(req.body.date),
         recurringEndDate: req.body.recurringEndDate ? new Date(req.body.recurringEndDate) : null,
+        // OCR fields (optional)
+        imageUrl: req.body.imageUrl || null,
+        ocrText: user?.plan === 'free' ? null : ocrText || null, // Only store for Standard/Premium
+        ocrVendor: req.body.extracted?.vendor || null,
+        ocrDetectedAmount: req.body.extracted?.amount ? req.body.extracted.amount.toString() : null,
+        ocrDetectedDate: req.body.extracted?.date ? new Date(req.body.extracted.date) : null,
       });
 
       // Save transaction to database immediately

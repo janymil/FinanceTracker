@@ -69,6 +69,12 @@ export const transactions = pgTable("transactions", {
   // Smart Bill Assistant fields
   paymentUrl: text("payment_url"),
   referenceNote: text("reference_note"),
+  // OCR Receipt fields
+  imageUrl: text("image_url"),
+  ocrText: text("ocr_text"),
+  ocrVendor: varchar("ocr_vendor", { length: 255 }),
+  ocrDetectedAmount: decimal("ocr_detected_amount", { precision: 12, scale: 2 }),
+  ocrDetectedDate: timestamp("ocr_detected_date"),
 });
 
 // Recurring transactions table (separate for cleaner implementation)
@@ -304,6 +310,13 @@ export type FinancialMascot = typeof financialMascots.$inferSelect;
 export const insertTransactionSchema = createInsertSchema(transactions).omit({
   id: true,
   createdAt: true,
+}).extend({
+  // Make OCR fields optional in the schema
+  imageUrl: z.string().nullable().optional(),
+  ocrText: z.string().nullable().optional(),
+  ocrVendor: z.string().nullable().optional(),
+  ocrDetectedAmount: z.string().nullable().optional(),
+  ocrDetectedDate: z.date().nullable().optional(),
 });
 
 export const insertBudgetSchema = createInsertSchema(budgets).omit({
