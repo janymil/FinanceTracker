@@ -119,6 +119,7 @@ function formatFileSize(bytes: number): string {
 export default function ExportPage() {
   const { toast } = useToast();
   const { user } = useUser();
+  const isAuthenticated = useClerkUserReady();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
