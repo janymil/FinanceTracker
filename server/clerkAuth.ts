@@ -14,17 +14,12 @@ export const isAuthenticated = (req: any, res: Response, next: NextFunction) => 
   try {
     // Use req.auth() as a function (new Clerk API)
     const auth = req.auth();
-    console.log('AUTH DEBUG: auth object:', auth);
-    console.log('AUTH DEBUG: userId:', auth?.userId);
-    console.log('AUTH DEBUG: headers:', req.headers.authorization);
     
     // Check if user is authenticated via Clerk
     if (!auth || !auth.userId) {
-      console.log('AUTH DEBUG: Authentication failed - no userId');
       return res.status(401).json({ message: 'Authentication required' });
     }
     
-    console.log('AUTH DEBUG: Authentication successful for user:', auth.userId);
     next();
   } catch (error) {
     console.error('Authentication error:', error);
