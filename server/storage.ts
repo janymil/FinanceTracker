@@ -844,11 +844,18 @@ export class DatabaseStorage implements IStorage {
 
   private calculateNextOccurrence(lastDate: Date, frequency: string, endDate: Date | null): Date | null {
     const now = new Date();
+    now.setHours(0, 0, 0, 0); // Reset to start of day for accurate comparison
+    
     const next = new Date(lastDate);
+    next.setHours(0, 0, 0, 0); // Reset to start of day for accurate comparison
+
+    console.log(`Calculating next occurrence: lastDate=${lastDate.toISOString()}, frequency=${frequency}, now=${now.toISOString()}`);
 
     // If the transaction date is today or in the future, use it as-is for the first occurrence
     if (next >= now) {
+      console.log(`Transaction date is today or future, using: ${next.toISOString()}`);
       if (endDate && next > endDate) {
+        console.log(`Date exceeds end date, returning null`);
         return null;
       }
       return next;
@@ -856,25 +863,31 @@ export class DatabaseStorage implements IStorage {
 
     // Keep adding periods until we find a future date
     while (next <= now) {
-      switch (frequency) {
+      switch (frequency.toLowerCase()) {
         case 'weekly':
           next.setDate(next.getDate() + 7);
+          console.log(`Added 7 days: ${next.toISOString()}`);
           break;
         case 'monthly':
           next.setMonth(next.getMonth() + 1);
+          console.log(`Added 1 month: ${next.toISOString()}`);
           break;
         case 'yearly':
           next.setFullYear(next.getFullYear() + 1);
+          console.log(`Added 1 year: ${next.toISOString()}`);
           break;
         default:
+          console.log(`Unknown frequency: ${frequency}, returning null`);
           return null;
       }
     }
 
     if (endDate && next > endDate) {
+      console.log(`Final date ${next.toISOString()} exceeds end date ${endDate.toISOString()}, returning null`);
       return null;
     }
 
+    console.log(`Calculated next occurrence: ${next.toISOString()}`);
     return next;
   }
 
