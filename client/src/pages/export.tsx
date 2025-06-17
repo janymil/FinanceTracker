@@ -178,12 +178,31 @@ export default function ExportPage() {
     },
   });
 
+  // Get auth headers for Clerk authentication
+  const getAuthHeaders = async (): Promise<Record<string, string>> => {
+    try {
+      if (typeof window !== 'undefined' && window.Clerk?.session) {
+        const token = await window.Clerk.session.getToken();
+        if (token) {
+          return { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` 
+          };
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to get Clerk token:', error);
+    }
+    return { "Content-Type": "application/json" };
+  };
+
   // Backup mutation
   const backupMutation = useMutation({
     mutationFn: async () => {
+      const headers = await getAuthHeaders();
       const response = await fetch("/api/create-backup", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
       });
       if (!response.ok) throw new Error("Backup failed");
       return response.json();
@@ -193,9 +212,10 @@ export default function ExportPage() {
   // Backup settings mutation
   const backupSettingsMutation = useMutation({
     mutationFn: async (settings: any) => {
+      const headers = await getAuthHeaders();
       const response = await fetch("/api/backup-settings", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(settings),
       });
       if (!response.ok) throw new Error("Settings update failed");
@@ -545,11 +565,10 @@ export default function ExportPage() {
     mutationFn: async (backupFilename: string) => {
       console.log('RESTORE FRONTEND: Starting restore process with backup:', backupFilename);
       
+      const headers = await getAuthHeaders();
       const response = await fetch("/api/restore-backup", {
         method: "POST",
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({ backupFilename }),
       });
 
@@ -590,7 +609,10 @@ export default function ExportPage() {
     
     // Get the latest backup filename
     try {
-      const response = await fetch('/api/available-backups');
+      const headers = await getAuthHeaders();
+      const response = await fetch('/api/available-backups', {
+        headers
+      });
       if (!response.ok) {
         throw new Error('Failed to get available backups');
       }
