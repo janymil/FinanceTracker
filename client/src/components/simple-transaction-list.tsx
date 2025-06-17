@@ -2,22 +2,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Crown, TrendingDown, TrendingUp, Image, Receipt } from "lucide-react";
+import { Crown, TrendingDown, TrendingUp, Receipt } from "lucide-react";
 import { Link } from "wouter";
+import { useState } from "react";
+import ReceiptModal from "@/components/receipt-modal";
 
 interface Transaction {
   id: number;
   amount: string;
   description: string;
   date: string;
-  type: string;
+  type: 'income' | 'expense';
   categoryName?: string;
   categoryIcon?: string;
   categoryColor?: string;
   imageUrl?: string;
+  ocrText?: string;
   ocrVendor?: string;
   ocrDetectedAmount?: string;
+  ocrDetectedDate?: string;
 }
 
 interface SimpleTransactionListProps {
@@ -26,6 +29,8 @@ interface SimpleTransactionListProps {
 }
 
 export default function SimpleTransactionList({ transactions, isLoading }: SimpleTransactionListProps) {
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+
   const formatCurrency = (amount: string) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -106,35 +111,19 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                   {/* Receipt thumbnail */}
                   {transaction.imageUrl && (
                     <div className="hidden sm:block">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <div className="relative cursor-pointer group">
-                            <img
-                              src={transaction.imageUrl}
-                              alt="Receipt thumbnail"
-                              className="w-10 h-10 object-cover rounded border group-hover:opacity-80 transition-opacity"
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded">
-                              <Image className="h-3 w-3 text-white opacity-0 group-hover:opacity-100" />
-                            </div>
-                          </div>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                          <DialogHeader>
-                            <DialogTitle>Receipt Image</DialogTitle>
-                            <DialogDescription>
-                              Receipt for {transaction.description}
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="flex justify-center">
-                            <img
-                              src={transaction.imageUrl}
-                              alt="Receipt full size"
-                              className="max-w-full max-h-96 object-contain"
-                            />
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                      <div 
+                        className="relative cursor-pointer group"
+                        onClick={() => setSelectedTransaction(transaction)}
+                      >
+                        <img
+                          src={transaction.imageUrl}
+                          alt="Receipt thumbnail"
+                          className="w-10 h-10 object-cover rounded border group-hover:opacity-80 transition-opacity"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded">
+                          <Receipt className="h-3 w-3 text-white opacity-0 group-hover:opacity-100" />
+                        </div>
+                      </div>
                     </div>
                   )}
                   
@@ -195,6 +184,25 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
             </Button>
           </Link>
         </div>
+
+        {/* Receipt Modal */}
+        {selectedTransaction && (
+          <ReceiptModal
+            isOpen={!!selectedTransaction}
+            onOpenChange={(open) => !open && setSelectedTransaction(null)}
+            transaction={{
+              id: selectedTransaction.id,
+              description: selectedTransaction.description,
+              amount: selectedTransaction.amount,
+              date: selectedTransaction.date,
+              imageUrl: selectedTransaction.imageUrl,
+              ocrText: selectedTransaction.ocrText,
+              ocrVendor: selectedTransaction.ocrVendor,
+              ocrDetectedAmount: selectedTransaction.ocrDetectedAmount,
+              ocrDetectedDate: selectedTransaction.ocrDetectedDate,
+            }}
+          />
+        )}
       </CardContent>
     </Card>
   );
