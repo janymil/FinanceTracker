@@ -121,8 +121,8 @@ export default function UnifiedRemindersWidget() {
     enabled: isReady && !!user?.id,
   });
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ["/api/categories"],
+  const { data: categories = [] } = useQuery<Category[]>({
+    queryKey: ["categories"],
     enabled: isReady && !!user?.id,
   });
 
@@ -291,7 +291,7 @@ export default function UnifiedRemindersWidget() {
     createReminder(newReminder);
   };
 
-  const allCategories = Array.isArray(categories) ? (categories as Category[]) : [];
+  const allCategories = categories;
 
   const isLoading = transactionLoading || expenseLoading;
 
