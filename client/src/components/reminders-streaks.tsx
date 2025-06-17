@@ -520,10 +520,14 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
                           </Badge>
                           <div className="flex items-center gap-1">
                             {usesBrowserNotifications(reminder.notificationMethod) && (
-                              <Monitor className="h-3 w-3 text-blue-600" title="Browser notifications" />
+                              <div title="Browser notifications">
+                                <Monitor className="h-3 w-3 text-blue-600" />
+                              </div>
                             )}
                             {usesInAppNotifications(reminder.notificationMethod) && (
-                              <Bell className="h-3 w-3 text-green-600" title="In-app notifications" />
+                              <div title="In-app notifications">
+                                <Bell className="h-3 w-3 text-green-600" />
+                              </div>
                             )}
                             {reminder.soundEnabled && (
                               <span className="text-xs text-orange-600" title="Sound enabled">🔊</span>
@@ -532,10 +536,22 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
                         </div>
                       </div>
                     </div>
-                    <Switch
-                      checked={reminder.isActive}
-                      onCheckedChange={() => toggleReminder(reminder.id)}
-                    />
+                    <div className="flex items-center gap-2">
+                      {reminder.isActive && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => showNotification(reminder)}
+                          title="Test notification"
+                        >
+                          <Bell className="h-3 w-3" />
+                        </Button>
+                      )}
+                      <Switch
+                        checked={reminder.isActive}
+                        onCheckedChange={() => toggleReminder(reminder.id)}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
