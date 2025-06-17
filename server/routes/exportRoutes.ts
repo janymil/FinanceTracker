@@ -496,6 +496,7 @@ export function registerExportRoutes(app: Express) {
       let goals: any[] = [];
       try {
         goals = await storage.getUserGoals(userId);
+        console.log(`Backup: Found ${goals.length} goals for user ${userId}`);
       } catch (error) {
         console.log('Goals not available for user:', userId);
       }
