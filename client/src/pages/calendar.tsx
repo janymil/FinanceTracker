@@ -44,12 +44,12 @@ export default function CalendarPage() {
   const { isReady, user } = useClerkUserReady();
 
   const { data: transactions = [], isLoading } = useQuery({
-    queryKey: ["transactions"],
+    queryKey: ["/api/transactions"],
     enabled: isReady,
   });
 
   const { data: categories = [] } = useQuery({
-    queryKey: ["categories"],
+    queryKey: ["/api/categories"],
     enabled: isReady,
   });
 
