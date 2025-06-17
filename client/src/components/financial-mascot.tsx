@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { useQuery } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
 import { X, Settings, Sparkles, RefreshCw } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
@@ -31,20 +29,15 @@ export function FinancialMascot() {
   const { toast } = useToast();
   const [showSettings, setShowSettings] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [mascot, setMascot] = useState<MascotData | null>(null);
+  const [financialHealth, setFinancialHealth] = useState<FinancialHealth | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Get user's financial health data
-  const { data: financialHealth } = useQuery<FinancialHealth>({
-    queryKey: ["/api/financial-health"],
-    enabled: isReady && !!user?.id,
-    refetchInterval: 5 * 60 * 1000, // Check every 5 minutes
-    staleTime: 0,
-    gcTime: 0,
-  });
-
-  // Get mascot data
-  const { data: mascot, isLoading, refetch } = useQuery<MascotData>({
-    queryKey: ["/api/mascot"],
-    queryFn: async () => {
+  // Fetch mascot data
+  const fetchMascot = async () => {
+    if (!isReady || !user?.id) return;
+    
+    try {
       const token = await window.Clerk?.session?.getToken();
       const response = await fetch("/api/mascot", {
         headers: {
@@ -53,26 +46,70 @@ export function FinancialMascot() {
         },
         credentials: "include"
       });
-      if (!response.ok) throw new Error('Failed to fetch mascot');
-      return response.json();
-    },
-    enabled: isReady && !!user?.id,
-    staleTime: 0, // Always fetch fresh data
-    gcTime: 0, // Don't cache
-  });
+      if (response.ok) {
+        const data = await response.json();
+        setMascot(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch mascot:', error);
+    }
+  };
+
+  // Fetch financial health data
+  const fetchFinancialHealth = async () => {
+    if (!isReady || !user?.id) return;
+    
+    try {
+      const token = await window.Clerk?.session?.getToken();
+      const response = await fetch("/api/financial-health", {
+        headers: {
+          ...(token && { "Authorization": `Bearer ${token}` }),
+          "Content-Type": "application/json"
+        },
+        credentials: "include"
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setFinancialHealth(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch financial health:', error);
+    }
+  };
+
+  // Fetch data on mount and when user is ready
+  useEffect(() => {
+    if (isReady && user?.id) {
+      fetchMascot();
+      fetchFinancialHealth();
+    }
+  }, [isReady, user?.id]);
 
 
 
   // Generate new mascot
   const generateMascot = async () => {
     try {
-      const response = await apiRequest('POST', '/api/mascot/generate');
-      // Force immediate refetch to show new image
-      await refetch();
-      toast({ title: "New mascot generated!" });
-      setIsGenerating(false);
+      const token = await window.Clerk?.session?.getToken();
+      const response = await fetch("/api/mascot/generate", {
+        method: "POST",
+        headers: {
+          ...(token && { "Authorization": `Bearer ${token}` }),
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({})
+      });
+      
+      if (response.ok) {
+        toast({ title: "New mascot generated!" });
+        await fetchMascot(); // Refresh mascot data
+      } else {
+        throw new Error("Failed to generate mascot");
+      }
     } catch (error: any) {
       toast({ title: "Failed to generate mascot", variant: "destructive" });
+    } finally {
       setIsGenerating(false);
     }
   };
@@ -80,8 +117,20 @@ export function FinancialMascot() {
   // Toggle mascot visibility
   const toggleMascot = async (enabled: boolean) => {
     try {
-      const response = await apiRequest('POST', '/api/mascot/toggle', { enabled });
-      await queryClient.invalidateQueries({ queryKey: ["/api/mascot"] });
+      const token = await window.Clerk?.session?.getToken();
+      const response = await fetch("/api/mascot/toggle", {
+        method: "POST",
+        headers: {
+          ...(token && { "Authorization": `Bearer ${token}` }),
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({ enabled })
+      });
+      
+      if (response.ok) {
+        await fetchMascot(); // Refresh mascot data
+      }
     } catch (error: any) {
       toast({ title: "Failed to toggle mascot", variant: "destructive" });
     }
@@ -89,7 +138,7 @@ export function FinancialMascot() {
 
   const handleGenerate = async () => {
     setIsGenerating(true);
-    generateMascot();
+    await generateMascot();
   };
 
   const handleToggle = (enabled: boolean) => {
