@@ -3,7 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Lightbulb, Sparkles, RefreshCw, TrendingUp } from "lucide-react";
+import { Lightbulb, Sparkles, RefreshCw, TrendingUp, Lock, Crown } from "lucide-react";
+import { Link } from "wouter";
+import { useUser } from '@clerk/clerk-react';
 
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -23,6 +25,20 @@ interface AIFinancialTipsProps {
 export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const { toast } = useToast();
   const [currentTip, setCurrentTip] = useState<string | null>(null);
+  const { user } = useUser();
+
+  // Get user's plan from database
+  const { data: databaseUser } = useQuery({
+    queryKey: ["auth-user", user?.id],
+    enabled: !!user?.id,
+    staleTime: 0,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/auth/user");
+      return response.json();
+    },
+  });
+
+  const isPremiumUser = databaseUser?.plan === 'premium';
 
   const generateTip = async () => {
     if (!summary) return;
@@ -62,22 +78,23 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5" />
-            AI Financial Tips
-          </div>
-          <Badge variant="secondary" className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-            <Sparkles className="h-3 w-3 mr-1" />
-            Premium AI
-          </Badge>
-        </CardTitle>
-        <CardDescription>
-          Get personalized financial advice based on your spending patterns
-        </CardDescription>
-      </CardHeader>
+    <div className="relative">
+      <Card className={!isPremiumUser ? "opacity-50" : ""}>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Lightbulb className="h-5 w-5" />
+              AI Financial Tips
+            </div>
+            <Badge variant="secondary" className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+              <Sparkles className="h-3 w-3 mr-1" />
+              Premium AI
+            </Badge>
+          </CardTitle>
+          <CardDescription>
+            Get personalized financial advice based on your spending patterns
+          </CardDescription>
+        </CardHeader>
       <CardContent>
         <div className="space-y-4">
           {/* Generate Tip Button */}

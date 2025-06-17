@@ -57,6 +57,20 @@ export default function DailyRecommendations({ summary, transactions = [], budge
   const [, setLocation] = useLocation();
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
   const [currentDate, setCurrentDate] = useState(new Date());
+  const { user } = useUser();
+
+  // Get user's plan from database
+  const { data: databaseUser } = useQuery({
+    queryKey: ["auth-user", user?.id],
+    enabled: !!user?.id,
+    staleTime: 0,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/auth/user");
+      return response.json();
+    },
+  });
+
+  const isPremiumUser = databaseUser?.plan === 'premium';
 
   // Generate AI-powered daily recommendations
   const generateDailyRecommendations = (): Recommendation[] => {
@@ -275,22 +289,23 @@ export default function DailyRecommendations({ summary, transactions = [], budge
   const insights = generatePersonalizationInsights();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Lightbulb className="h-5 w-5" />
-          Daily Recommendations
-          <Badge className="bg-premium text-white">Premium</Badge>
-        </CardTitle>
-        <CardDescription>
-          AI-powered personalized recommendations for {currentDate.toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}
-        </CardDescription>
-      </CardHeader>
+    <div className="relative">
+      <Card className={!isPremiumUser ? "opacity-50" : ""}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lightbulb className="h-5 w-5" />
+            Daily Recommendations
+            <Badge className="bg-premium text-white">Premium</Badge>
+          </CardTitle>
+          <CardDescription>
+            AI-powered personalized recommendations for {currentDate.toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          </CardDescription>
+        </CardHeader>
       <CardContent>
         <Tabs defaultValue="recommendations" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
@@ -434,5 +449,29 @@ export default function DailyRecommendations({ summary, transactions = [], budge
         </Tabs>
       </CardContent>
     </Card>
+    
+    {/* Upgrade Banner Overlay for Non-Premium Users */}
+    {!isPremiumUser && (
+      <div className="absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg flex items-center justify-center">
+        <div className="text-center p-6 max-w-sm">
+          <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Lock className="h-8 w-8 text-purple-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            Premium Feature
+          </h3>
+          <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
+            Get personalized daily recommendations and AI-powered financial insights
+          </p>
+          <Link href="/subscribe">
+            <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+              <Crown className="h-4 w-4 mr-2" />
+              Upgrade to Premium
+            </Button>
+          </Link>
+        </div>
+      </div>
+    )}
+    </div>
   );
 }
