@@ -106,7 +106,7 @@ export default function ExportPage() {
 
   // Function to refetch backup status
   const refetchBackupStatus = async () => {
-    if (!isAuthenticated || !user?.id) return;
+    if (!isReady || !user?.id) return;
 
     setIsLoadingBackupStatus(true);
     try {
@@ -129,7 +129,7 @@ export default function ExportPage() {
   const hasBackupData = backupStatusData !== null;
 
   const handleExport = async () => {
-    if (!isAuthenticated || !user?.id) return;
+    if (!isReady || !user?.id) return;
 
     try {
       const token = await window.Clerk?.session?.getToken();
@@ -197,7 +197,7 @@ export default function ExportPage() {
   };
 
   const handleCreateBackup = async () => {
-    if (!isAuthenticated || !user?.id) return;
+    if (!isReady || !user?.id) return;
 
     setIsCreatingBackup(true);
     try {
@@ -239,7 +239,7 @@ export default function ExportPage() {
   };
 
   const handleRestore = async (backupFilename?: string) => {
-    if (!isAuthenticated || !user?.id) return;
+    if (!isReady || !user?.id) return;
 
     setIsRestoring(true);
     try {
@@ -281,7 +281,7 @@ export default function ExportPage() {
   };
 
   return (
-    <RequirePlan requiredPlan="premium" feature="Data Management">
+    <RequirePlan plan="premium" feature="Data Management">
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Data Management</h1>
