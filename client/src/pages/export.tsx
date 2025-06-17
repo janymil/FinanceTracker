@@ -574,7 +574,7 @@ export default function ExportPage() {
                   
                   <Button 
                     variant="outline" 
-                    onClick={() => setShowBackupSelection(true)}
+                    onClick={() => handleRestore()}
                     disabled={isRestoring}
                   >
                     {isRestoring ? (
