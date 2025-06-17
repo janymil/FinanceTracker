@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,7 +52,7 @@ interface Category {
 }
 
 export default function Budget() {
-  const { isLoaded, isSignedIn, user } = useUser();
+  const { isReady, user } = useClerkUserReady();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
@@ -70,13 +70,32 @@ export default function Budget() {
   const [isLoading, setIsLoading] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
 
+  // Get auth headers for Clerk authentication
+  const getAuthHeaders = async (): Promise<Record<string, string>> => {
+    try {
+      if (typeof window !== 'undefined' && window.Clerk?.session) {
+        const token = await window.Clerk.session.getToken();
+        if (token) {
+          return { Authorization: `Bearer ${token}` };
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to get Clerk token:', error);
+    }
+    return {};
+  };
+
   // Fetch budgets
   const fetchBudgets = async () => {
-    if (!isLoaded || !isSignedIn) return;
+    if (!isReady) return;
     
     setIsLoading(true);
     try {
-      const response = await fetch('/api/budgets');
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch('/api/budgets', {
+        headers: authHeaders,
+        credentials: 'include',
+      });
       if (response.ok) {
         const data = await response.json();
         setBudgets(data);
@@ -90,11 +109,15 @@ export default function Budget() {
 
   // Fetch categories
   const fetchCategories = async () => {
-    if (!isLoaded || !isSignedIn) return;
+    if (!isReady) return;
     
     setCategoriesLoading(true);
     try {
-      const response = await fetch('/api/categories');
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch('/api/categories', {
+        headers: authHeaders,
+        credentials: 'include',
+      });
       if (response.ok) {
         const data = await response.json();
         setCategories(data);
@@ -107,19 +130,22 @@ export default function Budget() {
   };
 
   useEffect(() => {
-    if (isLoaded && isSignedIn) {
+    if (isReady) {
       fetchBudgets();
       fetchCategories();
     }
-  }, [isLoaded, isSignedIn]);
+  }, [isReady]);
 
   const createBudget = async (budgetData: typeof newBudget) => {
     try {
+      const authHeaders = await getAuthHeaders();
       const response = await fetch("/api/budgets", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...authHeaders,
         },
+        credentials: 'include',
         body: JSON.stringify({
           ...budgetData,
           amount: parseFloat(budgetData.amount),
@@ -153,11 +179,14 @@ export default function Budget() {
 
   const updateBudget = async ({ id, ...data }: { id: number } & typeof newBudget) => {
     try {
+      const authHeaders = await getAuthHeaders();
       const response = await fetch(`/api/budgets/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          ...authHeaders,
         },
+        credentials: 'include',
         body: JSON.stringify({
           ...data,
           amount: parseFloat(data.amount),
@@ -186,8 +215,11 @@ export default function Budget() {
 
   const deleteBudget = async (id: number) => {
     try {
+      const authHeaders = await getAuthHeaders();
       const response = await fetch(`/api/budgets/${id}`, {
         method: "DELETE",
+        headers: authHeaders,
+        credentials: 'include',
       });
       
       if (!response.ok) {
