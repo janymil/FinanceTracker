@@ -24,9 +24,8 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const { toast } = useToast();
   const [currentTip, setCurrentTip] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const { user } = useUser();
-
   const [userPlan, setUserPlan] = useState<string>('free');
+  const { user } = useUser();
 
   // Debug state changes
   console.log('AIFinancialTips render - currentTip:', currentTip);
@@ -66,7 +65,6 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
       
-      const token = await user.getToken();
       const response = await fetch('/api/ai/tip', {
         method: 'POST',
         body: JSON.stringify({
@@ -79,8 +77,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
           }
         }),
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         }
       });
 
@@ -137,7 +134,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Lightbulb className="h-5 w-5 text-blue-600" />
+          <Sparkles className="h-5 w-5 text-purple-600" />
           AI Financial Tips
         </CardTitle>
         <CardDescription>
