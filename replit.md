@@ -313,6 +313,9 @@ Changelog:
 - June 17, 2025. Updated UploadReceipt component language from Slovak to English across all interface text while preserving full OCR and AI categorization functionality
 - June 17, 2025. Enhanced UploadReceipt component with image preview and direct form editing - users can now see uploaded receipt images and edit extracted data inline instead of using query parameters
 - June 17, 2025. Implemented comprehensive transaction form with auto-population from OCR data, category selection, and direct save functionality within receipt processing workflow
+- June 17, 2025. Successfully repositioned Upload Image buttons next to action buttons (Add Transaction, Add Income, Add Expense) on all three pages as requested
+- June 17, 2025. Fixed authentication issues in UploadReceiptModal component by adding proper Clerk Bearer token headers to both upload and categories API requests
+- June 17, 2025. Completed modal-based upload system replacing embedded widgets - upload functionality now working correctly with proper authentication
 ```
 
 ## User Preferences

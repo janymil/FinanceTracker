@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Camera, Upload, FileText, AlertCircle, CheckCircle, Save, Edit, ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@clerk/clerk-react";
 
 interface UploadReceiptModalProps {
   onReceiptProcessed?: (receiptData: any) => void;
@@ -38,6 +39,7 @@ interface FormData {
 
 export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "Upload Image" }: UploadReceiptModalProps) {
   const { toast } = useToast();
+  const { getToken } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   
@@ -57,7 +59,12 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('/api/categories');
+        const token = await getToken();
+        const response = await fetch('/api/categories', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
         const data = await response.json();
         setCategories(data);
       } catch (error) {
@@ -65,7 +72,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
       }
     };
     fetchCategories();
-  }, []);
+  }, [getToken]);
 
   const handleFileSelect = async (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -83,8 +90,12 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
       const formDataObj = new FormData();
       formDataObj.append('receipt', file);
 
+      const token = await getToken();
       const response = await fetch('/api/upload-receipt', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
         body: formDataObj,
       });
 
