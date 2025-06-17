@@ -7,6 +7,7 @@ import { db } from './db';
 import { users } from '../shared/schema';
 import { eq } from 'drizzle-orm';
 import fetch from 'node-fetch';
+import { openai } from './openaiClient';
 
 // Configure multer for file upload
 const upload = multer({
@@ -100,6 +101,45 @@ async function performOCR(imageBuffer: Buffer): Promise<string> {
   }
 }
 
+// Extract structured data from OCR text using OpenAI
+async function extractStructuredData(ocrText: string): Promise<{
+  amount?: number;
+  date?: string;
+  vendor?: string;
+  error?: string;
+}> {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "Sme finančná aplikácia. Na základe tohto OCR textu z účtenky, extrahuj: - sumu (ako číslo) - dátum nákupu (vo formáte YYYY-MM-DD) - názov obchodu (vendor). Vráť odpoveď vo formáte JSON."
+        },
+        {
+          role: "user",
+          content: ocrText
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.1
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    
+    return {
+      amount: typeof result.amount === 'number' ? result.amount : undefined,
+      date: typeof result.date === 'string' ? result.date : undefined,
+      vendor: typeof result.vendor === 'string' ? result.vendor : undefined
+    };
+  } catch (error) {
+    console.error('OpenAI extraction error:', error);
+    return {
+      error: 'Failed to extract structured data'
+    };
+  }
+}
+
 // Main upload handler
 export const uploadReceiptHandler = [
   upload.single('receipt'),
@@ -121,6 +161,9 @@ export const uploadReceiptHandler = [
       // Perform OCR
       const recognizedText = await performOCR(req.file.buffer);
 
+      // Extract structured data using OpenAI
+      const extractedData = await extractStructuredData(recognizedText);
+
       let imageUrl: string | undefined;
 
       // Upload to Bunny.net if user has appropriate plan
@@ -138,13 +181,8 @@ export const uploadReceiptHandler = [
 
       // Prepare response
       const response: any = {
-        recognizedText,
-        extractedData: {
-          // You can add more sophisticated parsing logic here
-          amount: extractAmount(recognizedText),
-          merchant: extractMerchant(recognizedText),
-          date: extractDate(recognizedText),
-        }
+        text: recognizedText,
+        extracted: extractedData
       };
 
       if (imageUrl) {
