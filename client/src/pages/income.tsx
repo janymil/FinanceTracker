@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import UploadReceipt from "@/components/UploadReceipt";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -377,6 +378,10 @@ export default function Income() {
 
   return (
     <div>
+      <section className="mb-6">
+        <h2 className="text-xl font-bold mb-4">Quick Upload from Receipt</h2>
+        <UploadReceipt />
+      </section>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
