@@ -1,6 +1,14 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Bell, 
   Clock, 
@@ -9,10 +17,17 @@ import {
   TrendingUp,
   TrendingDown,
   Repeat,
-  Crown
+  Crown,
+  Plus,
+  CheckCircle,
+  Trash2,
+  User,
+  Zap
 } from "lucide-react";
 import { format, isToday, isTomorrow, isWithinInterval, addDays } from "date-fns";
 import RequirePlan from "@/components/require-plan";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface TransactionReminder {
   id: string;
@@ -26,23 +41,203 @@ interface TransactionReminder {
   source: 'future_transaction' | 'recurring_transaction';
 }
 
+interface ExpenseReminder {
+  id: number;
+  title: string;
+  description?: string;
+  amount?: string;
+  dueDate: string;
+  isRecurring: boolean;
+  recurringFrequency?: string;
+  recurringEndDate?: string;
+  reminderDaysBefore: number;
+  isActive: boolean;
+  isCompleted: boolean;
+  categoryId?: number;
+  paymentUrl?: string;
+  referenceNote?: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  icon: string;
+  color: string;
+  type: "income" | "expense";
+}
+
+interface UnifiedReminder {
+  id: string;
+  title: string;
+  description: string;
+  amount?: string;
+  dueDate: Date;
+  type: 'income' | 'expense';
+  categoryName?: string;
+  isRecurring: boolean;
+  source: 'automatic' | 'manual';
+  priority: 'high' | 'medium' | 'low' | 'normal';
+  canEdit?: boolean;
+  canComplete?: boolean;
+  paymentUrl?: string;
+  referenceNote?: string;
+}
+
 export default function TransactionRemindersWidget() {
-  const { data: reminders = [], isLoading, error } = useQuery<TransactionReminder[]>({
+  const { toast } = useToast();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newReminder, setNewReminder] = useState({
+    title: "",
+    description: "",
+    amount: "",
+    dueDate: new Date().toISOString().split('T')[0],
+    isRecurring: false,
+    recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
+    recurringEndDate: "",
+    reminderDaysBefore: 1,
+    categoryId: "",
+    paymentUrl: "",
+    referenceNote: "",
+  });
+
+  // Fetch automatic transaction reminders
+  const { data: transactionReminders = [], isLoading: transactionLoading } = useQuery<TransactionReminder[]>({
     queryKey: ["/api/transaction-reminders", { days: 30 }],
-    queryFn: () => fetch("/api/transaction-reminders?days=30").then(res => res.json()),
     enabled: true,
     retry: 1,
     refetchOnWindowFocus: false,
   });
 
-  const getReminderPriority = (reminder: TransactionReminder) => {
-    const dueDate = new Date(reminder.dueDate);
+  // Fetch manual expense reminders
+  const { data: expenseReminders = [], isLoading: expenseLoading } = useQuery<ExpenseReminder[]>({
+    queryKey: ["/api/expense-reminders/upcoming"],
+    enabled: true,
+  });
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["/api/categories"],
+  });
+
+  const getReminderPriority = (dueDate: Date): 'high' | 'medium' | 'low' | 'normal' => {
     const today = new Date();
 
     if (isToday(dueDate)) return "high";
     if (isTomorrow(dueDate)) return "medium";
     if (isWithinInterval(dueDate, { start: today, end: addDays(today, 7) })) return "low";
     return "normal";
+  };
+
+  // Combine both reminder types into unified list
+  const unifiedReminders: UnifiedReminder[] = [
+    // Automatic transaction reminders
+    ...(Array.isArray(transactionReminders) ? transactionReminders.map(reminder => ({
+      id: `auto_${reminder.id}`,
+      title: reminder.title,
+      description: reminder.description,
+      amount: reminder.amount,
+      dueDate: new Date(reminder.dueDate),
+      type: reminder.type,
+      categoryName: reminder.categoryName,
+      isRecurring: reminder.isRecurring,
+      source: 'automatic' as const,
+      priority: getReminderPriority(new Date(reminder.dueDate)),
+      canEdit: false,
+      canComplete: false,
+    })) : []),
+    // Manual expense reminders
+    ...(Array.isArray(expenseReminders) ? expenseReminders.map(reminder => ({
+      id: `manual_${reminder.id}`,
+      title: reminder.title,
+      description: reminder.description || '',
+      amount: reminder.amount,
+      dueDate: new Date(reminder.dueDate),
+      type: 'expense' as const,
+      categoryName: 'Custom Reminder',
+      isRecurring: reminder.isRecurring,
+      source: 'manual' as const,
+      priority: getReminderPriority(new Date(reminder.dueDate)),
+      canEdit: true,
+      canComplete: true,
+      paymentUrl: reminder.paymentUrl,
+      referenceNote: reminder.referenceNote,
+    })) : [])
+  ].sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+
+  const createReminder = async (reminderData: any) => {
+    try {
+      await apiRequest('POST', '/api/expense-reminders', reminderData);
+      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
+      setIsDialogOpen(false);
+      resetForm();
+      toast({
+        title: "Reminder Created",
+        description: "Payment reminder has been set successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create reminder",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const completeReminder = async (id: number) => {
+    try {
+      await apiRequest('PUT', `/api/expense-reminders/${id}`, { isCompleted: true });
+      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
+      toast({
+        title: "Reminder Completed",
+        description: "Reminder marked as completed",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to complete reminder",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteReminder = async (id: number) => {
+    try {
+      await apiRequest('DELETE', `/api/expense-reminders/${id}`);
+      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
+      toast({
+        title: "Reminder Deleted",
+        description: "Reminder has been removed",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete reminder",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const resetForm = () => {
+    setNewReminder({
+      title: "",
+      description: "",
+      amount: "",
+      dueDate: new Date().toISOString().split('T')[0],
+      isRecurring: false,
+      recurringFrequency: "monthly",
+      recurringEndDate: "",
+      reminderDaysBefore: 1,
+      categoryId: "",
+      paymentUrl: "",
+      referenceNote: "",
+    });
+  };
+
+  const handleSubmit = () => {
+    if (!newReminder.title || !newReminder.dueDate) return;
+    createReminder(newReminder);
   };
 
   const getPriorityColor = (priority: string) => {

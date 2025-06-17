@@ -28,7 +28,7 @@ import {
   LazyDailyRecommendations,
   LazyAutoCategorization,
   LazyAIFinancialTips,
-  LazyUnifiedRemindersWidget
+  LazyTransactionRemindersWidget
 } from "@/components/dashboard/lazy-components";
 import { 
   TrendingUp,
@@ -630,7 +630,7 @@ export default function Dashboard() {
 
             {/* Advanced Features */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <LazyUnifiedRemindersWidget />
+              <LazyTransactionRemindersWidget />
 
               <RequirePlan plan="standard">
                 <LazyRemindersStreaks />

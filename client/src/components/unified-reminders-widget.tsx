@@ -89,6 +89,7 @@ interface UnifiedReminder {
 
 export default function UnifiedRemindersWidget() {
   const { toast } = useToast();
+  const { isReady, user } = useClerkUserReady();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReminder, setEditingReminder] = useState<ExpenseReminder | null>(null);
   
@@ -109,7 +110,7 @@ export default function UnifiedRemindersWidget() {
   // Fetch automatic transaction reminders
   const { data: transactionReminders = [], isLoading: transactionLoading } = useQuery<TransactionReminder[]>({
     queryKey: ["/api/transaction-reminders", { days: 30 }],
-    enabled: true,
+    enabled: isReady && !!user?.id,
     retry: 1,
     refetchOnWindowFocus: false,
   });
@@ -117,11 +118,12 @@ export default function UnifiedRemindersWidget() {
   // Fetch manual expense reminders
   const { data: expenseReminders = [], isLoading: expenseLoading } = useQuery<ExpenseReminder[]>({
     queryKey: ["/api/expense-reminders/upcoming"],
-    enabled: true,
+    enabled: isReady && !!user?.id,
   });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
+    enabled: isReady && !!user?.id,
   });
 
   const getReminderPriority = (dueDate: Date): 'high' | 'medium' | 'low' | 'normal' => {
@@ -156,10 +158,10 @@ export default function UnifiedRemindersWidget() {
     return source === 'automatic' ? Zap : User;
   };
 
-  // Combine and sort all reminders
+  // Safely combine and sort all reminders
   const unifiedReminders: UnifiedReminder[] = [
-    // Transform transaction reminders
-    ...transactionReminders.map(reminder => ({
+    // Transform transaction reminders (only if it's an array)
+    ...(Array.isArray(transactionReminders) ? transactionReminders.map(reminder => ({
       id: `auto_${reminder.id}`,
       title: reminder.title,
       description: reminder.description,
@@ -169,12 +171,12 @@ export default function UnifiedRemindersWidget() {
       categoryName: reminder.categoryName,
       isRecurring: reminder.isRecurring,
       source: 'automatic' as const,
-      priority: getReminderPriority(new Date(reminder.dueDate)) as 'high' | 'medium' | 'low' | 'normal',
+      priority: getReminderPriority(new Date(reminder.dueDate)),
       canEdit: false,
       canComplete: false,
-    })),
-    // Transform expense reminders
-    ...expenseReminders.map(reminder => ({
+    })) : []),
+    // Transform expense reminders (only if it's an array)
+    ...(Array.isArray(expenseReminders) ? expenseReminders.map(reminder => ({
       id: `manual_${reminder.id}`,
       title: reminder.title,
       description: reminder.description || '',
@@ -184,12 +186,12 @@ export default function UnifiedRemindersWidget() {
       categoryName: 'Custom Reminder',
       isRecurring: reminder.isRecurring,
       source: 'manual' as const,
-      priority: getReminderPriority(new Date(reminder.dueDate)) as 'high' | 'medium' | 'low' | 'normal',
+      priority: getReminderPriority(new Date(reminder.dueDate)),
       canEdit: true,
       canComplete: true,
       paymentUrl: reminder.paymentUrl,
       referenceNote: reminder.referenceNote,
-    }))
+    })) : [])
   ].sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
 
   const createReminder = async (reminderData: any) => {
