@@ -310,6 +310,7 @@ Changelog:
 - June 17, 2025. Successfully added UploadReceipt component to all three transaction entry pages (expenses, income, transactions) with proper Slovak localization preserved
 - June 17, 2025. Fixed Clerk authentication issues in TransactionRemindersWidget and confirmed recurring transaction reminders working correctly
 - June 17, 2025. Restored original UploadReceipt component from git history while fixing syntax errors, maintaining Slovak text "Nahrať ďalšiu účtenku" and all original functionality
+- June 17, 2025. Updated UploadReceipt component language from Slovak to English across all interface text while preserving full OCR and AI categorization functionality
 ```
 
 ## User Preferences
