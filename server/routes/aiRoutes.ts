@@ -161,14 +161,19 @@ export function registerAIRoutes(app: Express) {
   // AI Spending Insights endpoint
   app.get('/api/ai/insights', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(getUserId(req));
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
 
       // Require premium plan for AI insights
       if (!user || user.plan !== 'premium') {
         return res.status(403).json({ message: "AI spending insights require premium plan" });
       }
 
-      const transactions = await storage.getUserTransactions(getUserId(req), 100);
+      const transactions = await storage.getUserTransactions(userId, 100);
 
       const insights = await generateSpendingInsights(transactions.map(t => ({
         description: t.description,
@@ -188,9 +193,14 @@ export function registerAIRoutes(app: Express) {
   // AI Financial Health Score
   app.post('/api/ai/financial-health-score', isAuthenticated, async (req: any, res) => {
     try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
       const { summary, budgets, useAdvancedFactors } = req.body;
 
-      const transactions = await storage.getUserTransactions(getUserId(req), 100);
+      const transactions = await storage.getUserTransactions(userId, 100);
 
       const aiScore = await generateAIFinancialHealthScore({
         summary,

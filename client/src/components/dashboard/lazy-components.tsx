@@ -159,13 +159,13 @@ export function LazyUnifiedRemindersWidget(props: any) {
 }
 
 // State management wrapper for React 18 concurrent features
-export function withConcurrentState<T>(
+export function withConcurrentState<T extends Record<string, any>>(
   Component: React.ComponentType<T>
 ): React.ComponentType<T> {
   return function ConcurrentComponent(props: T) {
     return (
       <LazyComponentWrapper>
-        <Component {...props} />
+        <Component {...(props as any)} />
       </LazyComponentWrapper>
     );
   };
