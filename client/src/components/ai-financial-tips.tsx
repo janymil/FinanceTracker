@@ -150,11 +150,27 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                     { title: "🎯 Context-Aware Financial Advice", keywords: ["implement", "achieve", "strategic", "future", "investment", "opportunities", "timeline"], icon: Sparkles }
                   ];
                   
-                  // Try to intelligently split the content
+                  // Create grouped sections by collecting all content for each type
+                  const groupedSections = {};
                   const sentences = analysisContent.split(/\.\s+/);
-                  let currentSection = { title: analysisTitle, content: "", icon: Lightbulb };
                   
-                  sentences.forEach((sentence, index) => {
+                  // Initialize sections
+                  patterns.forEach(pattern => {
+                    groupedSections[pattern.title] = {
+                      title: pattern.title,
+                      content: [],
+                      icon: pattern.icon
+                    };
+                  });
+                  
+                  // Add a default section for unmatched content
+                  groupedSections[analysisTitle] = {
+                    title: analysisTitle,
+                    content: [],
+                    icon: Lightbulb
+                  };
+                  
+                  sentences.forEach((sentence) => {
                     if (sentence.trim()) {
                       const lowerSentence = sentence.toLowerCase();
                       
@@ -163,28 +179,25 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                         pattern.keywords.some(keyword => lowerSentence.includes(keyword))
                       );
                       
-                      if (matchedPattern && index > 0) {
-                        // Save current section if it has content
-                        if (currentSection.content.trim()) {
-                          sections.push({ ...currentSection });
-                        }
-                        // Start new section
-                        currentSection = {
-                          title: matchedPattern.title,
-                          content: sentence + ".",
-                          icon: matchedPattern.icon
-                        };
+                      if (matchedPattern) {
+                        groupedSections[matchedPattern.title].content.push(sentence + ".");
                       } else {
-                        // Add to current section
-                        currentSection.content += (currentSection.content ? " " : "") + sentence + ".";
+                        // Add to default section
+                        groupedSections[analysisTitle].content.push(sentence + ".");
                       }
                     }
                   });
                   
-                  // Add the last section
-                  if (currentSection.content.trim()) {
-                    sections.push(currentSection);
-                  }
+                  // Convert to sections array, only including sections with content
+                  Object.values(groupedSections).forEach(section => {
+                    if (section.content.length > 0) {
+                      sections.push({
+                        title: section.title,
+                        content: section.content.join(" "),
+                        icon: section.icon
+                      });
+                    }
+                  });
                   
                   // If no sections were created, create a single comprehensive section
                   if (sections.length === 0) {
