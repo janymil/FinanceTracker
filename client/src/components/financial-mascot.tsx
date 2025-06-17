@@ -96,8 +96,13 @@ export function FinancialMascot() {
     toggleMascot(enabled);
   };
 
-  // Don't render if user is not authenticated or mascot is disabled
-  if (!isReady || !user?.id || !mascot?.isEnabled || isLoading) {
+  // Don't render if user is not authenticated or loading
+  if (!isReady || !user?.id || isLoading) {
+    return null;
+  }
+
+  // Don't render if mascot exists but is disabled
+  if (mascot && mascot.isEnabled === false) {
     return null;
   }
 
@@ -221,13 +226,23 @@ export function FinancialMascot() {
                   animationDirection: 'alternate'
                 }}
                 onClick={() => setShowSettings(!showSettings)}
+                onError={(e) => {
+                  console.error('Mascot image failed to load:', mascot.imageUrl);
+                  // Hide the broken image
+                  e.currentTarget.style.display = 'none';
+                }}
               />
             ) : (
               <div 
-                className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 shadow-lg border-2 border-white dark:border-gray-700 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
+                className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 shadow-lg border-2 border-white dark:border-gray-700 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform group"
                 onClick={() => setShowSettings(!showSettings)}
+                title="Click to generate your financial mascot"
               >
-                <Sparkles className="h-8 w-8 text-white" />
+                {isGenerating ? (
+                  <RefreshCw className="h-8 w-8 text-white animate-spin" />
+                ) : (
+                  <Sparkles className="h-8 w-8 text-white group-hover:animate-pulse" />
+                )}
               </div>
             )}
 
