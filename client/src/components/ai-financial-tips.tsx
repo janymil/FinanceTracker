@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,16 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const [currentTip, setCurrentTip] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const { user } = useUser();
+
+  // Load saved tip from localStorage on component mount
+  useEffect(() => {
+    if (user?.id) {
+      const savedTip = localStorage.getItem(`ai-tip-${user.id}`);
+      if (savedTip) {
+        setCurrentTip(savedTip);
+      }
+    }
+  }, [user?.id]);
 
   // Get user's plan from database
   const { data: databaseUser } = useQuery({
@@ -67,6 +77,10 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
         const data = await response.json();
         if (data.tip && data.tip.trim()) {
           setCurrentTip(data.tip);
+          // Save to localStorage for persistence
+          if (user?.id) {
+            localStorage.setItem(`ai-tip-${user.id}`, data.tip);
+          }
           toast({
             title: "AI Tip Generated",
             description: "New financial advice based on your spending data",
