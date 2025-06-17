@@ -6,7 +6,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Filter, TrendingDown, TrendingUp } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Trash2, Filter, TrendingDown, TrendingUp, Image, ChevronDown, ChevronUp, Receipt } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useState, useMemo } from "react";
 
@@ -19,6 +21,11 @@ interface Transaction {
   categoryName?: string;
   categoryIcon?: string;
   categoryColor?: string;
+  imageUrl?: string;
+  ocrText?: string;
+  ocrVendor?: string;
+  ocrDetectedAmount?: string;
+  ocrDetectedDate?: string;
 }
 
 interface TransactionListProps {
@@ -31,6 +38,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [, setLocation] = useLocation();
+  const [expandedTransactions, setExpandedTransactions] = useState<Set<number>>(new Set());
 
   // Filter and search transactions
   const filteredTransactions = useMemo(() => {
@@ -80,6 +88,22 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
       'trending-up': '📈',
     };
     return iconMap[icon || ''] || '💰';
+  };
+
+  const toggleTransactionExpansion = (transactionId: number) => {
+    setExpandedTransactions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(transactionId)) {
+        newSet.delete(transactionId);
+      } else {
+        newSet.add(transactionId);
+      }
+      return newSet;
+    });
+  };
+
+  const hasOcrData = (transaction: Transaction) => {
+    return transaction.ocrVendor || transaction.ocrDetectedAmount || transaction.ocrDetectedDate || transaction.ocrText;
   };
 
   if (isLoading) {
@@ -151,48 +175,222 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
               <p className="text-sm">Start by adding your first transaction</p>
             </div>
           ) : (
-            filteredTransactions.map((transaction) => (
-              <div
-                key={transaction.id}
-                className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-lg text-lg ${
-                    transaction.type === 'income' 
-                      ? 'bg-green-100 dark:bg-green-900' 
-                      : 'bg-red-100 dark:bg-red-900'
-                  }`}>
-                    {transaction.type === 'income' ? (
-                      <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
-                    ) : (
-                      <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {transaction.description}
-                    </p>
-                    <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-                      <span>{transaction.categoryName || 'Uncategorized'}</span>
-                      <span>•</span>
-                      <span>{formatDate(transaction.date)}</span>
+            filteredTransactions.map((transaction) => {
+              const isExpanded = expandedTransactions.has(transaction.id);
+              const showOcrData = hasOcrData(transaction);
+              
+              return (
+                <div key={transaction.id} className="border rounded-lg overflow-hidden">
+                  <div className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <div className="flex items-center space-x-3 flex-1">
+                      <div className={`p-2 rounded-lg text-lg ${
+                        transaction.type === 'income' 
+                          ? 'bg-green-100 dark:bg-green-900' 
+                          : 'bg-red-100 dark:bg-red-900'
+                      }`}>
+                        {transaction.type === 'income' ? (
+                          <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        ) : (
+                          <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+                        )}
+                      </div>
+                      
+                      {/* Receipt thumbnail for desktop */}
+                      {transaction.imageUrl && (
+                        <div className="hidden md:block">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <div className="relative cursor-pointer group">
+                                <img
+                                  src={transaction.imageUrl}
+                                  alt="Receipt thumbnail"
+                                  className="w-12 h-12 object-cover rounded border group-hover:opacity-80 transition-opacity"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded">
+                                  <Image className="h-4 w-4 text-white opacity-0 group-hover:opacity-100" />
+                                </div>
+                              </div>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Receipt Image</DialogTitle>
+                                <DialogDescription>
+                                  Receipt for {transaction.description}
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="flex justify-center">
+                                <img
+                                  src={transaction.imageUrl}
+                                  alt="Receipt full size"
+                                  className="max-w-full max-h-96 object-contain"
+                                />
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      )}
+                      
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            {transaction.description}
+                          </p>
+                          {transaction.imageUrl && (
+                            <Badge variant="secondary" className="text-xs">
+                              <Receipt className="h-3 w-3 mr-1" />
+                              Receipt
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                          <span>{transaction.categoryName || 'Uncategorized'}</span>
+                          <span>•</span>
+                          <span>{formatDate(transaction.date)}</span>
+                          {transaction.ocrVendor && transaction.ocrVendor !== transaction.description && (
+                            <>
+                              <span>•</span>
+                              <span className="text-blue-600 dark:text-blue-400">
+                                OCR: {transaction.ocrVendor}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <div className="text-right">
+                        <span className={`font-semibold ${
+                          transaction.type === 'expense' ? 'text-destructive' : 'text-success'
+                        }`}>
+                          {transaction.type === 'expense' ? '-' : '+'}{formatCurrency(transaction.amount)}
+                        </span>
+                        {transaction.ocrDetectedAmount && 
+                         transaction.ocrDetectedAmount !== transaction.amount && (
+                          <div className="text-xs text-gray-500">
+                            OCR: ${transaction.ocrDetectedAmount}
+                          </div>
+                        )}
+                      </div>
+                      
+                      {(showOcrData || transaction.imageUrl) && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => toggleTransactionExpansion(transaction.id)}
+                          className="h-8 w-8 p-0"
+                        >
+                          {isExpanded ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </Button>
+                      )}
+                      
+                      {isPremium && (
+                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-gray-400 hover:text-destructive">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className={`font-semibold ${
-                    transaction.type === 'expense' ? 'text-destructive' : 'text-success'
-                  }`}>
-                    {transaction.type === 'expense' ? '-' : '+'}{formatCurrency(transaction.amount)}
-                  </span>
-                  {isPremium && (
-                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-gray-400 hover:text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  
+                  {/* Expanded OCR details */}
+                  {isExpanded && (showOcrData || transaction.imageUrl) && (
+                    <div className="border-t bg-gray-50 dark:bg-gray-800 p-4 space-y-3">
+                      {/* Mobile receipt image */}
+                      {transaction.imageUrl && (
+                        <div className="md:hidden">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <div className="relative cursor-pointer group">
+                                <img
+                                  src={transaction.imageUrl}
+                                  alt="Receipt"
+                                  className="w-24 h-24 object-cover rounded border group-hover:opacity-80 transition-opacity"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded">
+                                  <Image className="h-5 w-5 text-white opacity-0 group-hover:opacity-100" />
+                                </div>
+                              </div>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Receipt Image</DialogTitle>
+                                <DialogDescription>
+                                  Receipt for {transaction.description}
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="flex justify-center">
+                                <img
+                                  src={transaction.imageUrl}
+                                  alt="Receipt full size"
+                                  className="max-w-full max-h-96 object-contain"
+                                />
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      )}
+                      
+                      {/* OCR Data */}
+                      {showOcrData && (
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Receipt Information (OCR)
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+                            {transaction.ocrVendor && (
+                              <div>
+                                <span className="font-medium">Vendor:</span>
+                                <span className="ml-1 text-gray-600 dark:text-gray-400">
+                                  {transaction.ocrVendor}
+                                </span>
+                              </div>
+                            )}
+                            {transaction.ocrDetectedAmount && (
+                              <div>
+                                <span className="font-medium">Original Amount:</span>
+                                <span className="ml-1 text-gray-600 dark:text-gray-400">
+                                  ${transaction.ocrDetectedAmount}
+                                </span>
+                              </div>
+                            )}
+                            {transaction.ocrDetectedDate && (
+                              <div>
+                                <span className="font-medium">Receipt Date:</span>
+                                <span className="ml-1 text-gray-600 dark:text-gray-400">
+                                  {formatDate(transaction.ocrDetectedDate)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Full OCR text - collapsed by default */}
+                          {transaction.ocrText && (
+                            <Collapsible>
+                              <CollapsibleTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-6 text-xs">
+                                  <Receipt className="h-3 w-3 mr-1" />
+                                  View Full Receipt Text
+                                  <ChevronDown className="h-3 w-3 ml-1" />
+                                </Button>
+                              </CollapsibleTrigger>
+                              <CollapsibleContent className="mt-2">
+                                <div className="bg-white dark:bg-gray-900 p-3 rounded border text-xs font-mono max-h-40 overflow-y-auto">
+                                  {transaction.ocrText}
+                                </div>
+                              </CollapsibleContent>
+                            </Collapsible>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 

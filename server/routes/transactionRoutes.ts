@@ -116,7 +116,7 @@ export function registerTransactionRoutes(app: Express) {
       let limit = undefined; // Show all transactions user has stored
 
       const transactions = await storage.getUserTransactions(userId, limit);
-      
+
       res.json(transactions);
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -133,13 +133,13 @@ export function registerTransactionRoutes(app: Express) {
       const user = await storage.getUser(userId);
 
       const transactionId = parseInt(req.params.id);
-      
+
       console.log('=== TRANSACTION UPDATE DEBUG ===');
       console.log('Request body received:', JSON.stringify(req.body, null, 2));
-      
+
       // Only update fields that are actually provided in the request
       const updateData: any = { userId }; // Always include userId for security
-      
+
       if (req.body.amount !== undefined) {
         updateData.amount = req.body.amount.toString();
       }
@@ -174,10 +174,10 @@ export function registerTransactionRoutes(app: Express) {
       console.log('Final updateData being sent to storage:', JSON.stringify(updateData, null, 2));
 
       const transaction = await storage.updateTransaction(transactionId, updateData);
-      
+
       console.log('Transaction returned from storage:', JSON.stringify(transaction, null, 2));
       console.log('=== END TRANSACTION UPDATE DEBUG ===');
-      
+
       res.json(transaction);
     } catch (error) {
       console.error("Error updating transaction:", error);
@@ -230,7 +230,7 @@ export function registerTransactionRoutes(app: Express) {
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      
+
       const { startDate, endDate } = req.query;
 
       if (!startDate || !endDate) {
@@ -257,14 +257,14 @@ export function registerTransactionRoutes(app: Express) {
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      
+
       // Get current month date range
       const now = new Date();
       const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
       const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
       const summary = await storage.getUserFinancialSummary(userId, startDate, endDate);
-      
+
       // Filter for expense categories only and format for chart
       const expensesByCategory = summary.transactionsByCategory
         .filter((cat: any) => cat.type === 'expense')
@@ -291,7 +291,7 @@ export function registerTransactionRoutes(app: Express) {
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      
+
       if (!userId) {
         return res.status(401).json({ message: "No user ID found" });
       }
