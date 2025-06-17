@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -998,9 +998,7 @@ export default function ExportPage() {
                   <Upload className="h-5 w-5" />
                   Import Financial Data
                 </CardTitle>
-                <CardDescription>
-                  Import transactions from CSV, Excel, or popular financial apps
-                </CardDescription>
+
               </CardHeader>
               <CardContent>
                 {importStep === 'upload' && (
