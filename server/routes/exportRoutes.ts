@@ -539,16 +539,20 @@ export function registerExportRoutes(app: Express) {
   });
 
   // Backup status endpoint
-  app.get('/api/backup-status', isAuthenticated, async (req: any, res) => {
+  app.get('/api/backup/status', isAuthenticated, async (req: any, res) => {
+    console.log('BACKUP STATUS DEBUG: Endpoint called');
     try {
       const userId = getUserId(req);
+      console.log('BACKUP STATUS DEBUG: UserId extracted:', userId);
       if (!userId) {
+        console.log('BACKUP STATUS DEBUG: No userId, returning 401');
         return res.status(401).json({ message: "Authentication required" });
       }
 
       const user = await storage.getUser(userId);
+      console.log('BACKUP STATUS DEBUG: User plan:', user?.plan, 'userId:', userId);
       if (!user || user.plan !== 'premium') {
-        return res.status(403).json({ message: "Cloud backup requires Premium subscription" });
+        return res.status(403).json({ message: "Cloud backup requires Premium subscription", userPlan: user?.plan });
       }
 
       if (!bunnyStorage) {
