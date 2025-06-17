@@ -104,7 +104,24 @@ export class BunnyStorage {
   }
 
   async downloadFile(filePath: string): Promise<string> {
-    return await this.makeRequest('GET', `/${filePath}`);
+    try {
+      const response = await fetch(`${this.baseUrl}/${filePath}`, {
+        method: 'GET',
+        headers: {
+          'AccessKey': this.accessKey,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // For backup files, we want the raw text content, not parsed JSON
+      return await response.text();
+    } catch (error) {
+      console.error(`Download failed for ${filePath}:`, error);
+      throw error;
+    }
   }
 
   async deleteFile(filePath: string): Promise<void> {
