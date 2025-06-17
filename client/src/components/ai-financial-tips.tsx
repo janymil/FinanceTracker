@@ -28,6 +28,10 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const { user } = useUser();
 
+  // Debug state changes
+  console.log('AIFinancialTips render - currentTip:', currentTip);
+  console.log('AIFinancialTips render - isGenerating:', isGenerating);
+
   // Get user's plan from database
   const { data: databaseUser } = useQuery({
     queryKey: ["auth-user", user?.id],
@@ -44,8 +48,12 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const generateTip = async () => {
     if (!summary) return;
     
+    console.log('Starting tip generation...');
+    
     try {
       setIsGenerating(true);
+      console.log('Loading state set to true');
+      
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
       
@@ -64,16 +72,44 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
         }
       });
 
+      console.log('API response received:', response.ok, response.status);
+
       if (response.ok) {
         const data = await response.json();
-        setCurrentTip(data.tip);
+        console.log('AI Tip Response data:', data);
+        console.log('Tip content:', data.tip);
+        console.log('Tip type:', typeof data.tip);
+        console.log('Tip length:', data.tip?.length);
+        
+        if (data.tip && data.tip.trim()) {
+          setCurrentTip(data.tip);
+          console.log('Tip set successfully');
+          
+          toast({
+            title: "AI Tip Generated",
+            description: "New financial advice based on your spending data",
+          });
+        } else {
+          console.error('Empty or invalid tip received');
+          toast({
+            title: "Error",
+            description: "Received empty tip from AI service",
+            variant: "destructive",
+          });
+        }
+      } else {
+        console.error('AI Tip API Error:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
         
         toast({
-          title: "AI Tip Generated",
-          description: "New financial advice based on your spending data",
+          title: "Error",
+          description: "Failed to generate AI tip. Please try again.",
+          variant: "destructive",
         });
       }
     } catch (error) {
+      console.error('Generate tip error:', error);
       toast({
         title: "Error",
         description: "Failed to generate AI tip. Please try again.",
@@ -81,6 +117,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       });
     } finally {
       setIsGenerating(false);
+      console.log('Loading state set to false');
     }
   };
 
