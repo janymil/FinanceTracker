@@ -6,10 +6,11 @@ import { registerUserRoutes } from "./userRoutes";
 import { registerTransactionRoutes } from "./transactionRoutes";
 import { registerBudgetRoutes } from "./budgetRoutes";
 import { registerGoalRoutes } from "./goalRoutes";
-import { registerAIRoutes } from "./aiRoutes";
-import { registerExportRoutes } from "./exportRoutes";
-import { registerAdminRoutes } from "./adminRoutes";
 import { registerRealtimeRoutes } from "./realtimeRoutes";
+import { registerExportRoutes } from "./exportRoutes";
+import { uploadReceiptHandler } from '../uploadReceipt';
+import { registerAIRoutes } from "./aiRoutes";
+import { registerAdminRoutes } from "./adminRoutes";
 import { setCookieConsent } from "../cookieMiddleware";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -22,10 +23,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerTransactionRoutes(app);
   registerBudgetRoutes(app);
   registerGoalRoutes(app);
-  registerAIRoutes(app);
-  registerExportRoutes(app);
-  registerAdminRoutes(app);
   registerRealtimeRoutes(app);
+  registerExportRoutes(app);
+
+  // Receipt upload endpoint
+  app.post('/api/upload-receipt', uploadReceiptHandler);
+  registerAIRoutes(app);
+  registerAdminRoutes(app);
 
   const server = createServer(app);
   return server;
