@@ -481,9 +481,42 @@ export function registerAIRoutes(app: Express) {
         quality: "standard",
       });
 
-      const imageUrl = response.data?.[0]?.url;
-      if (!imageUrl) {
+      const tempImageUrl = response.data?.[0]?.url;
+      if (!tempImageUrl) {
         throw new Error("Failed to generate mascot image - no URL returned from DALL-E 3");
+      }
+
+      // Download the image from DALL-E and store it permanently
+      const fetch = (await import('node-fetch')).default;
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      
+      const imageResponse = await fetch(tempImageUrl);
+      if (!imageResponse.ok) {
+        throw new Error("Failed to download generated image");
+      }
+      
+      const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+      const filename = `mascot-${userId}-${Date.now()}.png`;
+      
+      let permanentImageUrl: string;
+      
+      try {
+        // Create uploads directory if it doesn't exist
+        const uploadsDir = path.join(process.cwd(), 'uploads', 'mascots');
+        await fs.mkdir(uploadsDir, { recursive: true });
+        
+        // Store image permanently in local file system
+        const filePath = path.join(uploadsDir, filename);
+        await fs.writeFile(filePath, imageBuffer);
+        
+        // Create permanent URL for the stored image
+        permanentImageUrl = `/uploads/mascots/${filename}`;
+        console.log(`Mascot image stored permanently at: ${permanentImageUrl}`);
+      } catch (storageError) {
+        console.error("Failed to store image locally, using temporary URL:", storageError);
+        // Fallback to temporary URL if local storage fails
+        permanentImageUrl = tempImageUrl;
       }
 
       // Check if user already has a mascot
@@ -491,9 +524,19 @@ export function registerAIRoutes(app: Express) {
       
       let mascot;
       if (existingMascot) {
+        // Delete old image if it exists and is stored locally
+        if (existingMascot.imageUrl && existingMascot.imageUrl.startsWith('/uploads/mascots/')) {
+          try {
+            const oldFilePath = path.join(process.cwd(), existingMascot.imageUrl);
+            await fs.unlink(oldFilePath);
+          } catch (error) {
+            console.warn("Failed to delete old mascot image:", error);
+          }
+        }
+        
         // Update existing mascot
         mascot = await storage.updateMascot(userId, {
-          imageUrl,
+          imageUrl: permanentImageUrl,
           healthScore,
           mood,
           generationPrompt: prompt,
@@ -503,7 +546,7 @@ export function registerAIRoutes(app: Express) {
         // Create new mascot
         mascot = await storage.createMascot({
           userId,
-          imageUrl,
+          imageUrl: permanentImageUrl,
           healthScore,
           mood,
           generationPrompt: prompt,

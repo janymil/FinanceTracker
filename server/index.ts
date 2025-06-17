@@ -25,6 +25,9 @@ app.use(session({
 
 app.use(cookieConsentMiddleware);
 
+// Serve static mascot images
+app.use('/uploads', express.static('uploads'));
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
