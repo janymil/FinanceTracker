@@ -626,17 +626,19 @@ export default function Dashboard() {
         {(databaseUser?.plan === 'standard' || databaseUser?.plan === 'premium') && (
           <div className="space-y-8">
             {/* Advanced Analytics Row - AI-driven for Standard/Premium */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <FinancialHealthMascot />
-              <LazyQuickFinancialSnapshot 
-                summary={financialSummary}
-                transactions={transactions as any}
-              />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <LazyContextualFinancialTips
                 summary={financialSummary}
                 transactions={transactions as any}
                 budgets={budgets as any}
               />
+              <div className="grid grid-cols-1 gap-6">
+                <FinancialHealthMascot />
+                <LazyQuickFinancialSnapshot 
+                  summary={financialSummary}
+                  transactions={transactions as any}
+                />
+              </div>
             </div>
 
             {/* Interactive Charts */}
