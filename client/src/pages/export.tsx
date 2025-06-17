@@ -235,7 +235,7 @@ export default function ExportPage() {
         title: "Settings Updated",
         description: "Backup settings have been updated successfully.",
       });
-      fetchBackupStatus();
+      await fetchBackupStatus();
       return result;
     } catch (error: any) {
       toast({
@@ -305,13 +305,15 @@ export default function ExportPage() {
     };
   }, [isAuthenticated, user?.id, user?.publicMetadata?.plan]);
 
-  // Function to refetch backup status
-  const refetchBackupStatus = async () => {
+  // Function to fetch backup status
+  const fetchBackupStatus = async () => {
     if (!isAuthenticated || !user?.id) return;
     
     setIsLoadingBackupStatus(true);
     try {
-      const token = await window.Clerk.session.getToken();
+      const token = await window.Clerk?.session?.getToken();
+      if (!token) return;
+      
       const response = await fetch('/api/backup/status', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -320,7 +322,7 @@ export default function ExportPage() {
         setBackupStatusData(data);
       }
     } catch (error) {
-      console.error('Error refetching backup status:', error);
+      console.error('Error fetching backup status:', error);
     } finally {
       setIsLoadingBackupStatus(false);
     }
@@ -453,20 +455,29 @@ export default function ExportPage() {
         categoryId: (categories as any[]).find((cat: any) => cat.name.toLowerCase() === item.category.toLowerCase())?.id || 1,
       }));
 
-      const response = await apiRequest('POST', '/api/import/transactions', {
-        transactions: transactionsToImport,
-        mergeStrategy: importOptions.mergeStrategy
+      const headers = await getAuthHeaders();
+      const response = await fetch('/api/import/transactions', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          transactions: transactionsToImport,
+          mergeStrategy: importOptions.mergeStrategy
+        })
       });
+
+      if (!response.ok) throw new Error('Import failed');
+      const result = await response.json();
 
       setImportResult(prev => prev ? { 
         ...prev, 
-        imported: response.imported || 0,
-        skipped: response.skipped || 0,
-        errors: response.errors || []
+        imported: result.imported || 0,
+        skipped: result.skipped || 0,
+        errors: result.errors || []
       } : null);
       setImportStep('complete');
-      await queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
-      await queryClient.invalidateQueries({ queryKey: ['/api/financial-summary'] });
+      
+      // Refresh data after import
+      await fetchAllData();
 
       toast({
         title: "Import completed",
@@ -580,7 +591,7 @@ export default function ExportPage() {
         title: "Backup Successful",
         description: "Your data has been backed up to the cloud.",
       });
-      await queryClient.invalidateQueries({ queryKey: ["/api/backup-status"] });
+      await fetchBackupStatus();
     } catch (error) {
       toast({
         title: "Backup Failed",
