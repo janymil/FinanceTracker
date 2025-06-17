@@ -1,6 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useUser } from "@clerk/clerk-react";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +18,6 @@ import { Textarea } from "@/components/ui/textarea";
 import RequirePlan from "@/components/require-plan";
 import { ExportTools } from "@/components/export-tools";
 import { useToast } from "@/hooks/use-toast";
-import { useUser } from "@clerk/clerk-react";
 import {
   Download,
   Upload,
@@ -262,16 +263,67 @@ export default function ExportPage() {
     queryKey: ["/api/financial-summary"],
   });
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ["/api/categories"],
-  });
+  // State for categories and backup status
+  const [categories, setCategories] = useState([]);
+  const [backupStatusData, setBackupStatusData] = useState(null);
+  const [isLoadingBackupStatus, setIsLoadingBackupStatus] = useState(false);
 
-  // Fetch real backup status from API
-  const { data: backupStatusData, refetch: refetchBackupStatus } = useQuery({
-    queryKey: ["/api/backup/status"],
-    staleTime: 0, // Always fetch fresh data
-    gcTime: 0,  // Don't cache the results
-  });
+  // Fetch categories and backup status
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id) return;
+
+    const fetchData = async () => {
+      try {
+        const token = await window.Clerk.session.getToken();
+        
+        // Fetch categories
+        const categoriesResponse = await fetch('/api/categories', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (categoriesResponse.ok) {
+          const categoriesData = await categoriesResponse.json();
+          setCategories(categoriesData);
+        }
+
+        // Fetch backup status
+        setIsLoadingBackupStatus(true);
+        const backupResponse = await fetch('/api/backup/status', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (backupResponse.ok) {
+          const backupData = await backupResponse.json();
+          setBackupStatusData(backupData);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setIsLoadingBackupStatus(false);
+      }
+    };
+
+    fetchData();
+  }, [isAuthenticated, user?.id]);
+
+  // Function to refetch backup status
+  const refetchBackupStatus = async () => {
+    if (!isAuthenticated || !user?.id) return;
+    
+    setIsLoadingBackupStatus(true);
+    try {
+      const token = await window.Clerk.session.getToken();
+      const response = await fetch('/api/backup/status', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setBackupStatusData(data);
+      }
+    } catch (error) {
+      console.error('Error refetching backup status:', error);
+    } finally {
+      setIsLoadingBackupStatus(false);
+    }
+  };
 
   // Create backup status object from API data
   const backupStatus: BackupStatus = {
