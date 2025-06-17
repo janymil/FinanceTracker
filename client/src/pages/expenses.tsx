@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import UploadReceipt from "@/components/UploadReceipt";
+import UploadReceiptModal from "@/components/UploadReceiptModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -393,29 +393,37 @@ export default function Expenses() {
                 Track and manage all your expenses and spending
               </p>
             </div>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  className="bg-red-600 hover:bg-red-700"
-                  onClick={() => {
-                    setEditingTransaction(null);
-                    setNewExpense({
-                      amount: "",
-                      description: "",
-                      date: new Date().toISOString().split('T')[0],
-                      categoryId: "",
-                      isRecurring: false,
-                      recurringFrequency: "monthly",
-                      recurringEndDate: "",
-                      paymentUrl: "",
-                      referenceNote: "",
-                    });
-                  }}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Expense
-                </Button>
-              </DialogTrigger>
+            <div className="flex gap-2">
+              <UploadReceiptModal 
+                onReceiptProcessed={(data) => {
+                  // Refresh expenses after receipt processing
+                  fetchTransactions();
+                }}
+                buttonText="Upload Image"
+              />
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    className="bg-red-600 hover:bg-red-700"
+                    onClick={() => {
+                      setEditingTransaction(null);
+                      setNewExpense({
+                        amount: "",
+                        description: "",
+                        date: new Date().toISOString().split('T')[0],
+                        categoryId: "",
+                        isRecurring: false,
+                        recurringFrequency: "monthly",
+                        recurringEndDate: "",
+                        paymentUrl: "",
+                        referenceNote: "",
+                      });
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Expense
+                  </Button>
+                </DialogTrigger>
               <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
@@ -640,13 +648,7 @@ export default function Expenses() {
           </Card>
         </div>
 
-        {/* Quick Upload from Receipt */}
-        <section className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            Quick Upload from Receipt
-          </h2>
-          <UploadReceipt />
-        </section>
+
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -891,6 +893,7 @@ export default function Expenses() {
           </CardContent>
         </Card>
       </div>
+    </div>
     </div>
   );
 }
