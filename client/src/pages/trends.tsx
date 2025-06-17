@@ -38,6 +38,16 @@ export default function Trends() {
     enabled: isReady && !!user?.id
   });
 
+  // Debug logging
+  console.log("Trends Debug:", {
+    isReady,
+    userId: user?.id,
+    transactionsLoading,
+    transactionsData: transactions,
+    transactionsType: typeof transactions,
+    transactionsLength: Array.isArray(transactions) ? transactions.length : 'not array'
+  });
+
   // Generate trend data based on period selection
   const generateTrendData = useMemo(() => {
     if (!transactions || !Array.isArray(transactions)) return [];
