@@ -29,8 +29,7 @@ export default function Reports() {
     return null;
   }
 
-  const hasStandardOrBetter = user?.publicMetadata?.plan === 'standard' || user?.publicMetadata?.plan === 'premium';
-  const hasPremium = user?.publicMetadata?.plan === 'premium';
+  // User tier checking is handled by RequirePlan components
 
   // Calculate date ranges based on selected period and month
   const getDateRange = () => {
