@@ -145,15 +145,12 @@ export default function ExportPage() {
   const [availableBackups, setAvailableBackups] = useState<any[]>([]);
   const [selectedBackup, setSelectedBackup] = useState<string | null>(null);
 
-  // State for export data
-  const [transactions, setTransactions] = useState([]);
-  const [budgets, setBudgets] = useState([]);
-  const [goals, setGoals] = useState([]);
-  const [summary, setSummary] = useState(null);
+  // Basic state only for UI
+  const [hasDataLoaded, setHasDataLoaded] = useState(false);
 
   // State for categories and backup status
   const [categories, setCategories] = useState([]);
-  const [backupStatusData, setBackupStatusData] = useState(null);
+  const [backupStatusData, setBackupStatusData] = useState<any>(null);
   const [isLoadingBackupStatus, setIsLoadingBackupStatus] = useState(false);
 
   // Get auth headers for Clerk authentication
@@ -270,8 +267,8 @@ export default function ExportPage() {
         description: `Restored ${result.restoredData.transactions} transactions and ${result.restoredData.budgets} budgets from backup.`,
       });
       
-      // Refresh data by re-fetching
-      fetchAllData();
+      // Just refresh backup status after restore
+      refetchBackupStatus();
     } catch (error: any) {
       console.error('RESTORE FRONTEND: Restore failed', error);
       toast({
@@ -282,55 +279,27 @@ export default function ExportPage() {
     }
   };
 
-  // Fetch all data function
-  const fetchAllData = async () => {
-    if (!isAuthenticated || !user?.id) return;
-
+  // Load backup status only when backup tab is accessed
+  const loadBackupStatus = async () => {
+    if (!isAuthenticated || !user?.id || isLoadingBackupStatus) return;
+    
+    setIsLoadingBackupStatus(true);
     try {
       const token = await window.Clerk?.session?.getToken();
-      if (!token) return;
-      
-      const headers = { 'Authorization': `Bearer ${token}` };
-      
-      // Fetch all data in parallel
-      const [categoriesRes, backupRes, transactionsRes, budgetsRes, goalsRes, summaryRes] = await Promise.all([
-        fetch('/api/categories', { headers }),
-        fetch('/api/backup/status', { headers }),
-        fetch('/api/transactions', { headers }),
-        fetch('/api/budgets', { headers }),
-        fetch('/api/goals', { headers }),
-        fetch('/api/financial-summary', { headers })
-      ]);
-
-      if (categoriesRes.ok) {
-        setCategories(await categoriesRes.json());
-      }
-      if (backupRes.ok) {
-        setBackupStatusData(await backupRes.json());
-      }
-      if (transactionsRes.ok) {
-        setTransactions(await transactionsRes.json());
-      }
-      if (budgetsRes.ok) {
-        setBudgets(await budgetsRes.json());
-      }
-      if (goalsRes.ok) {
-        setGoals(await goalsRes.json());
-      }
-      if (summaryRes.ok) {
-        setSummary(await summaryRes.json());
+      if (token) {
+        const response = await fetch('/api/backup/status', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          setBackupStatusData(await response.json());
+        }
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching backup status:', error);
     } finally {
       setIsLoadingBackupStatus(false);
     }
   };
-
-  // Fetch all data on mount
-  useEffect(() => {
-    fetchAllData();
-  }, [isAuthenticated, user?.id]);
 
   // Function to refetch backup status
   const refetchBackupStatus = async () => {
@@ -551,14 +520,28 @@ export default function ExportPage() {
                     <div className="p-4 border rounded-lg">
                       <div className="text-sm text-muted-foreground">Last Backup</div>
                       <div className="text-lg font-semibold">
-                        {backupStatusData.lastBackup ? 
-                          format(new Date(backupStatusData.lastBackup.date), 'MMM dd, yyyy') : 
+                        {backupStatusData.lastBackup && backupStatusData.lastBackup.date ? 
+                          (() => {
+                            try {
+                              const date = new Date(backupStatusData.lastBackup.date);
+                              return isNaN(date.getTime()) ? 'Never' : format(date, 'MMM dd, yyyy');
+                            } catch {
+                              return 'Never';
+                            }
+                          })() : 
                           'Never'
                         }
                       </div>
                       <div className="text-sm text-muted-foreground">
                         Next: {backupStatusData.nextBackup ? 
-                          format(new Date(backupStatusData.nextBackup), 'MMM dd') : 
+                          (() => {
+                            try {
+                              const date = new Date(backupStatusData.nextBackup);
+                              return isNaN(date.getTime()) ? 'Manual only' : format(date, 'MMM dd');
+                            } catch {
+                              return 'Manual only';
+                            }
+                          })() : 
                           'Manual only'
                         }
                       </div>
@@ -575,8 +558,17 @@ export default function ExportPage() {
                         className="mt-2" 
                       />
                       <div className="text-sm text-muted-foreground mt-1">
-                        {backupStatusData.lastBackup ? 
-                          `${Math.round((new Date().getTime() - new Date(backupStatusData.lastBackup.date).getTime()) / (1000 * 60 * 60 * 24))} days old` :
+                        {backupStatusData.lastBackup && backupStatusData.lastBackup.date ? 
+                          (() => {
+                            try {
+                              const lastBackupDate = new Date(backupStatusData.lastBackup.date);
+                              if (isNaN(lastBackupDate.getTime())) return 'No backups';
+                              const daysDiff = Math.round((new Date().getTime() - lastBackupDate.getTime()) / (1000 * 60 * 60 * 24));
+                              return `${daysDiff} days old`;
+                            } catch {
+                              return 'No backups';
+                            }
+                          })() :
                           'No backups'
                         }
                       </div>
