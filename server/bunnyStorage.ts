@@ -197,17 +197,21 @@ export class BunnyStorage {
   }
 
   async getUserBackups(userId: string | number): Promise<StorageFileInfo[]> {
-    // Try multiple folder path formats
+    // Try multiple folder path formats including the actual format used
     const folderVariations = [
       `backups/user-${userId}`,
       `backups/user-${userId}/`,
       `user-${userId}`,
       `${userId}`,
-      `backups/${userId}`
+      `backups/${userId}`,
+      `backups/user-user_${userId}`,
+      `backups/user-user_${userId}/`
     ];
     
     for (const userFolder of folderVariations) {
+      console.log(`Checking backup folder: ${userFolder}`);
       const files = await this.listFiles(userFolder);
+      console.log(`Found ${files.length} files in ${userFolder}`);
       
       if (files.length > 0) {
         // Filter out directories and only return actual backup files
@@ -216,7 +220,10 @@ export class BunnyStorage {
           (file.ObjectName.includes('backup') || file.ObjectName.includes('.json') || file.ObjectName.endsWith('.json'))
         );
         
+        console.log(`Filtered to ${backupFiles.length} backup files in ${userFolder}`);
+        
         if (backupFiles.length > 0) {
+          console.log(`Returning ${backupFiles.length} backup files from ${userFolder}`);
           return backupFiles.sort((a, b) => new Date(b.DateCreated).getTime() - new Date(a.DateCreated).getTime());
         }
       }
