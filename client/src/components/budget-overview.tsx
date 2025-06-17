@@ -140,16 +140,10 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold">Budget by Category</CardTitle>
-          <div className="flex items-center space-x-2">
-            <Button size="sm" variant="outline" onClick={() => setLocation('/budget')}>
-              <Edit3 className="h-4 w-4 mr-1" />
-              Edit Budgets
-            </Button>
-            <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => setLocation('/categories')}>
-              <Plus className="h-4 w-4 mr-1" />
-              Add Category
-            </Button>
-          </div>
+          <Button size="sm" variant="outline" onClick={() => setLocation('/budget')}>
+            <Edit3 className="h-4 w-4 mr-1" />
+            Edit Budgets
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
