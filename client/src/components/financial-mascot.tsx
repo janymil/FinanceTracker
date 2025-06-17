@@ -57,8 +57,8 @@ export function FinancialMascot() {
       return response.json();
     },
     enabled: isReady && !!user?.id,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    gcTime: 1000 * 60 * 10, // Keep in garbage collection for 10 minutes
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache
   });
 
 
@@ -228,16 +228,21 @@ export function FinancialMascot() {
                 onClick={() => setShowSettings(!showSettings)}
                 onError={(e) => {
                   console.error('Mascot image failed to load:', mascot.imageUrl);
-                  // Hide the broken image and show fallback
-                  e.currentTarget.style.display = 'none';
-                  // Trigger regeneration automatically if image failed to load
-                  if (!isGenerating) {
-                    toast({
-                      title: "Mascot image expired",
-                      description: "Click the mascot to generate a new one",
-                      variant: "default"
-                    });
+                  console.log('Image src attribute:', e.currentTarget.src);
+                  // Don't hide permanently stored images, only expired DALL-E URLs
+                  if (!mascot.imageUrl?.startsWith('/uploads/')) {
+                    e.currentTarget.style.display = 'none';
+                    if (!isGenerating) {
+                      toast({
+                        title: "Mascot image expired",
+                        description: "Click the mascot to generate a new one",
+                        variant: "default"
+                      });
+                    }
                   }
+                }}
+                onLoad={() => {
+                  console.log('Mascot image loaded successfully:', mascot.imageUrl);
                 }}
               />
             ) : (
