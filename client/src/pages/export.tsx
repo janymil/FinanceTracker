@@ -297,10 +297,10 @@ export default function ExportPage() {
             loadBackupStatus(); // Always refresh backup status when tab is accessed
           }
         }} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="export">Export Data</TabsTrigger>
-            <TabsTrigger value="import">Import Data</TabsTrigger>
-            <TabsTrigger value="backup">Cloud Backup</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-1 md:grid-cols-3">
+            <TabsTrigger value="export" className="text-xs md:text-sm">Export Data</TabsTrigger>
+            <TabsTrigger value="import" className="text-xs md:text-sm">Import Data</TabsTrigger>
+            <TabsTrigger value="backup" className="text-xs md:text-sm">Cloud Backup</TabsTrigger>
           </TabsList>
 
           {/* Export Tab */}

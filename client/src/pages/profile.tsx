@@ -45,22 +45,26 @@ export default function ProfilePage() {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="profile">
-            <User className="h-4 w-4 mr-2" />
-            Profile
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+          <TabsTrigger value="profile" className="flex items-center gap-1 text-xs md:text-sm">
+            <User className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">Profile</span>
+            <span className="sm:hidden">Prof</span>
           </TabsTrigger>
-          <TabsTrigger value="notifications">
-            <Bell className="h-4 w-4 mr-2" />
-            Notifications
+          <TabsTrigger value="notifications" className="flex items-center gap-1 text-xs md:text-sm">
+            <Bell className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">Notifications</span>
+            <span className="sm:hidden">Not</span>
           </TabsTrigger>
-          <TabsTrigger value="preferences">
-            <Palette className="h-4 w-4 mr-2" />
-            Preferences
+          <TabsTrigger value="preferences" className="flex items-center gap-1 text-xs md:text-sm">
+            <Palette className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">Preferences</span>
+            <span className="sm:hidden">Pref</span>
           </TabsTrigger>
-          <TabsTrigger value="subscription">
-            <CreditCard className="h-4 w-4 mr-2" />
-            Subscription
+          <TabsTrigger value="subscription" className="flex items-center gap-1 text-xs md:text-sm">
+            <CreditCard className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">Subscription</span>
+            <span className="sm:hidden">Sub</span>
           </TabsTrigger>
         </TabsList>
 

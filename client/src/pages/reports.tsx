@@ -228,22 +228,26 @@ export default function Reports() {
 
         {/* Reports Tabs - Summary for all, Analytics/Auto-Tag for standard+, AI Insights for premium */}
         <Tabs defaultValue="summary" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="summary" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Summary
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+            <TabsTrigger value="summary" className="flex items-center gap-1 text-xs md:text-sm">
+              <FileText className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">Summary</span>
+              <span className="sm:hidden">Sum</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Analytics
+            <TabsTrigger value="analytics" className="flex items-center gap-1 text-xs md:text-sm">
+              <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">Analytics</span>
+              <span className="sm:hidden">Ana</span>
             </TabsTrigger>
-            <TabsTrigger value="categorization" className="flex items-center gap-2">
-              <Zap className="h-4 w-4" />
-              Auto-Tag
+            <TabsTrigger value="categorization" className="flex items-center gap-1 text-xs md:text-sm">
+              <Zap className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">Auto-Tag</span>
+              <span className="sm:hidden">Tag</span>
             </TabsTrigger>
-            <TabsTrigger value="insights" className="flex items-center gap-2">
-              <Brain className="h-4 w-4" />
-              AI Insights
+            <TabsTrigger value="insights" className="flex items-center gap-1 text-xs md:text-sm">
+              <Brain className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">AI Insights</span>
+              <span className="sm:hidden">AI</span>
             </TabsTrigger>
           </TabsList>
 
