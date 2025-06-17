@@ -10,11 +10,19 @@ interface UploadReceiptProps {
   onReceiptProcessed?: (receiptData: any) => void;
 }
 
+interface ExtractedData {
+  amount?: number;
+  date?: string;
+  vendor?: string;
+  error?: string;
+}
+
 interface UploadState {
   status: 'idle' | 'processing' | 'success' | 'error';
   message?: string;
   recognizedText?: string;
   imageUrl?: string;
+  extracted?: ExtractedData;
 }
 
 export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps) {
@@ -80,7 +88,8 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
           status: 'success',
           message: 'Úspešne spracované',
           recognizedText: result.recognizedText || result.text,
-          imageUrl: result.imageUrl
+          imageUrl: result.imageUrl,
+          extracted: result.extracted
         });
 
         // Call callback if provided
@@ -241,6 +250,49 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
                 alt="Stored receipt"
                 className="max-w-full h-auto max-h-64 object-contain border rounded-lg"
               />
+            </div>
+          </div>
+        )}
+
+        {/* Extracted Structured Data Display */}
+        {uploadState.extracted && uploadState.status === 'success' && (
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Extrahované údaje:
+            </label>
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+              {uploadState.extracted.error ? (
+                <p className="text-red-600 dark:text-red-400 text-sm">
+                  Nepodarilo sa extrahovať štruktúrované údaje z tejto účtenky.
+                </p>
+              ) : (
+                <div className="space-y-2 text-sm">
+                  {uploadState.extracted.amount !== undefined && (
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-700 dark:text-gray-300">Suma:</span>
+                      <span className="text-blue-600 dark:text-blue-400 font-semibold">
+                        ${uploadState.extracted.amount.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                  {uploadState.extracted.date && (
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-700 dark:text-gray-300">Dátum:</span>
+                      <span className="text-blue-600 dark:text-blue-400 font-semibold">
+                        {uploadState.extracted.date}
+                      </span>
+                    </div>
+                  )}
+                  {uploadState.extracted.vendor && (
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-700 dark:text-gray-300">Obchod:</span>
+                      <span className="text-blue-600 dark:text-blue-400 font-semibold">
+                        {uploadState.extracted.vendor}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
