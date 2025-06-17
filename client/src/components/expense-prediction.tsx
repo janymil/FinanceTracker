@@ -14,10 +14,14 @@ import {
   Info,
   Target,
   BarChart3,
-  Clock
+  Clock,
+  Lock
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
+import { useUser } from '@clerk/clerk-react';
+import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 
 interface ExpensePredictionProps {
   transactions?: any[];
@@ -44,6 +48,20 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
   const [, setLocation] = useLocation();
   const [predictionPeriod, setPredictionPeriod] = useState<'1m' | '3m' | '6m'>('1m');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const { user } = useUser();
+
+  // Get user's plan from database
+  const { data: databaseUser } = useQuery({
+    queryKey: ["auth-user", user?.id],
+    enabled: !!user?.id,
+    staleTime: 0,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/auth/user");
+      return response.json();
+    },
+  });
+
+  const isPremiumUser = databaseUser?.plan === 'premium';
 
   // Machine learning prediction algorithm
   const generatePredictions = (): Prediction[] => {
@@ -150,18 +168,19 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
   const totalPredicted = predictions.reduce((sum, p) => sum + p.predictedNext, 0);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Brain className="h-5 w-5" />
-          AI Expense Prediction
-          <Badge className="bg-premium text-white">Premium</Badge>
-        </CardTitle>
-        <CardDescription>
-          Machine learning predictions based on your spending patterns
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <div className="relative">
+      <Card className={!isPremiumUser ? "opacity-50" : ""}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="h-5 w-5" />
+            AI Expense Prediction
+            <Badge className="bg-premium text-white">Premium</Badge>
+          </CardTitle>
+          <CardDescription>
+            Machine learning predictions based on your spending patterns
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -353,5 +372,29 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
         </Tabs>
       </CardContent>
     </Card>
+    
+    {/* Upgrade Banner Overlay for Non-Premium Users */}
+    {!isPremiumUser && (
+      <div className="absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg flex items-center justify-center">
+        <div className="text-center p-6 max-w-sm">
+          <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Lock className="h-8 w-8 text-purple-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            Premium Feature
+          </h3>
+          <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
+            AI-powered expense predictions help you plan your budget with machine learning insights
+          </p>
+          <Link href="/subscribe">
+            <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+              <Crown className="h-4 w-4 mr-2" />
+              Upgrade to Premium
+            </Button>
+          </Link>
+        </div>
+      </div>
+    )}
+    </div>
   );
 }

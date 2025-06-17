@@ -641,27 +641,23 @@ export default function Dashboard() {
               </RequirePlan>
             </div>
 
-            {/* Premium Features */}
-            <RequirePlan plan="premium">
+            {/* Premium Features - Show widgets with internal upgrade prompts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <LazyExpensePrediction 
                 transactions={transactions as any}
                 summary={financialSummary}
               />
-            </RequirePlan>
-
-            <RequirePlan plan="premium">
+              
               <LazyDailyRecommendations 
                 summary={financialSummary}
                 transactions={transactions as any}
                 budgets={budgets as any}
               />
-            </RequirePlan>
+            </div>
 
-            <RequirePlan plan="premium">
-              <LazyAIFinancialTips 
-                summary={financialSummary}
-              />
-            </RequirePlan>
+            <LazyAIFinancialTips 
+              summary={financialSummary}
+            />
 
 
           </div>

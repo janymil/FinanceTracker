@@ -17,9 +17,13 @@ import {
   Car,
   Home,
   Heart,
-  Briefcase
+  Briefcase,
+  Lock
 } from 'lucide-react';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
+import { useUser } from '@clerk/clerk-react';
+import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 
 interface DailyRecommendationsProps {
   summary?: any;
