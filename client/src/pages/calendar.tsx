@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,17 +40,42 @@ interface DayData {
 export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const { isReady, user } = useClerkUserReady();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { isReady, user, getAuthHeaders } = useClerkUserReady();
 
-  const { data: transactions = [], isLoading } = useQuery({
-    queryKey: ["/api/transactions"],
-    enabled: isReady,
-  });
+  useEffect(() => {
+    if (!isReady || !user?.id) return;
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ["/api/categories"],
-    enabled: isReady,
-  });
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const headers = await getAuthHeaders();
+        
+        const [transactionsRes, categoriesRes] = await Promise.all([
+          fetch('/api/transactions', { headers }),
+          fetch('/api/categories', { headers })
+        ]);
+
+        if (transactionsRes.ok) {
+          const transactionsData = await transactionsRes.json();
+          setTransactions(transactionsData);
+        }
+
+        if (categoriesRes.ok) {
+          const categoriesData = await categoriesRes.json();
+          setCategories(categoriesData);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [isReady, user?.id, getAuthHeaders]);
 
   // Process transactions for calendar view
   const processTransactionsForCalendar = (transactions: Transaction[], month: Date): DayData[] => {
