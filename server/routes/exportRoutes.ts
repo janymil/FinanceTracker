@@ -584,6 +584,7 @@ export function registerExportRoutes(app: Express) {
           includeGoals: true
         },
         info: {
+          totalBackups: backups.length,
           provider: "Bunny.net CDN",
           region: "Global",
           encryption: "AES-256"

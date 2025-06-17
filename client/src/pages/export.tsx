@@ -336,7 +336,7 @@ export default function ExportPage() {
     encrypted: backupStatusData?.settings?.encryptBackups ?? backupSettings.encryptBackups,
     status: (backupStatusData?.lastBackup?.date) ? 'synced' : 'pending',
     info: {
-      totalBackups: backupStatusData?.lastBackup ? 1 : 0,
+      totalBackups: backupStatusData?.info?.totalBackups || 0,
       ...backupStatusData?.info
     },
     realUsage: {
