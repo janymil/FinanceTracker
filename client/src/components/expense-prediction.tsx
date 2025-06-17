@@ -196,70 +196,70 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                     <Calendar className="h-4 w-4 text-blue-600" />
                     <span className="text-sm font-medium">Next Month</span>
                   </div>
-                <div className="text-2xl font-bold text-blue-600">
-                  ${totalPredicted.toLocaleString()}
-                </div>
-                <p className="text-xs text-gray-600 dark:text-gray-300">
-                  Predicted total expenses
-                </p>
-              </Card>
+                  <div className="text-2xl font-bold text-blue-600">
+                    ${totalPredicted.toLocaleString()}
+                  </div>
+                  <p className="text-xs text-gray-600 dark:text-gray-300">
+                    Predicted total expenses
+                  </p>
+                </Card>
 
+                <Card className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-4 w-4 text-green-600" />
+                    <span className="text-sm font-medium">Confidence</span>
+                  </div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {(predictions.reduce((sum, p) => sum + p.confidence, 0) / predictions.length * 100).toFixed(0)}%
+                  </div>
+                  <p className="text-xs text-gray-600 dark:text-gray-300">
+                    Average prediction accuracy
+                  </p>
+                </Card>
+
+                <Card className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                    <span className="text-sm font-medium">Trend</span>
+                  </div>
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {predictions.filter(p => p.trend === 'increasing').length > predictions.filter(p => p.trend === 'decreasing').length ? '+' : '-'}
+                    {Math.abs(((totalPredicted - Math.abs(summary?.totalExpenses || 0)) / Math.abs(summary?.totalExpenses || 1)) * 100).toFixed(0)}%
+                  </div>
+                  <p className="text-xs text-gray-600 dark:text-gray-300">
+                    vs current month
+                  </p>
+                </Card>
+              </div>
+
+              {/* Monthly Trend Chart */}
               <Card className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-4 w-4 text-green-600" />
-                  <span className="text-sm font-medium">Confidence</span>
-                </div>
-                <div className="text-2xl font-bold text-green-600">
-                  {(predictions.reduce((sum, p) => sum + p.confidence, 0) / predictions.length * 100).toFixed(0)}%
-                </div>
-                <p className="text-xs text-gray-600 dark:text-gray-300">
-                  Average prediction accuracy
-                </p>
+                <h4 className="font-medium mb-4 flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  6-Month Expense Forecast
+                </h4>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={monthlyPredictions}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip 
+                      formatter={(value: any, name) => [
+                        `$${value.toLocaleString()}`,
+                        name === 'predicted' ? 'Predicted' : 'Confidence'
+                      ]}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="predicted" 
+                      stroke="#8884d8" 
+                      strokeWidth={2}
+                      dot={{ fill: '#8884d8' }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </Card>
-
-              <Card className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                  <span className="text-sm font-medium">Trend</span>
-                </div>
-                <div className="text-2xl font-bold text-yellow-600">
-                  {predictions.filter(p => p.trend === 'increasing').length > predictions.filter(p => p.trend === 'decreasing').length ? '+' : '-'}
-                  {Math.abs(((totalPredicted - Math.abs(summary?.totalExpenses || 0)) / Math.abs(summary?.totalExpenses || 1)) * 100).toFixed(0)}%
-                </div>
-                <p className="text-xs text-gray-600 dark:text-gray-300">
-                  vs current month
-                </p>
-              </Card>
-            </div>
-
-            {/* Monthly Trend Chart */}
-            <Card className="p-4">
-              <h4 className="font-medium mb-4 flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                6-Month Expense Forecast
-              </h4>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={monthlyPredictions}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip 
-                    formatter={(value: any, name) => [
-                      `$${value.toLocaleString()}`,
-                      name === 'predicted' ? 'Predicted' : 'Confidence'
-                    ]}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="predicted" 
-                    stroke="#8884d8" 
-                    strokeWidth={2}
-                    dot={{ fill: '#8884d8' }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </Card>
-          </TabsContent>
+            </TabsContent>
 
           <TabsContent value="categories" className="space-y-4">
             <div className="flex items-center justify-between">
