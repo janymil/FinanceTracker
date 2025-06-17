@@ -1,6 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useUser } from "@clerk/clerk-react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -202,9 +200,10 @@ export default function ExportPage() {
     return { "Content-Type": "application/json" };
   };
 
-  // Backup mutation
-  const backupMutation = useMutation({
-    mutationFn: async () => {
+  // Backup function
+  const handleBackup = async () => {
+    try {
+      setIsBackingUp(true);
       const headers = await getAuthHeaders();
       const response = await fetch("/api/backup", {
         method: "POST",
@@ -214,9 +213,7 @@ export default function ExportPage() {
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
         throw new Error(errorData.message || "Backup failed");
       }
-      return response.json();
-    },
-    onSuccess: (result) => {
+      const result = await response.json();
       console.log('BACKUP FRONTEND: Backup completed successfully', result);
       toast({
         title: "Backup Successful",
@@ -225,8 +222,7 @@ export default function ExportPage() {
       // Refresh backup status to show the new backup
       refetchBackupStatus();
       setIsBackingUp(false);
-    },
-    onError: (error) => {
+    } catch (error: any) {
       console.error('BACKUP FRONTEND: Backup failed', error);
       toast({
         title: "Backup Failed",
@@ -234,12 +230,12 @@ export default function ExportPage() {
         variant: "destructive",
       });
       setIsBackingUp(false);
-    },
-  });
+    }
+  };
 
-  // Backup settings mutation
-  const backupSettingsMutation = useMutation({
-    mutationFn: async (settings: any) => {
+  // Backup settings function
+  const handleBackupSettings = async (settings: any) => {
+    try {
       const headers = await getAuthHeaders();
       const response = await fetch("/api/backup-settings", {
         method: "POST",
@@ -248,56 +244,61 @@ export default function ExportPage() {
       });
       if (!response.ok) throw new Error("Settings update failed");
       return response.json();
-    },
-  });
+    } catch (error) {
+      console.error('Settings update failed:', error);
+      throw error;
+    }
+  };
 
-  // Fetch data for export
-  const { data: transactions = [] } = useQuery({
-    queryKey: ["transactions", user?.id],
-  });
-
-  const { data: budgets = [] } = useQuery({
-    queryKey: ["/api/budgets"],
-  });
-
-  const { data: goals = [] } = useQuery({
-    queryKey: ["/api/goals"],
-  });
-
-  const { data: summary } = useQuery({
-    queryKey: ["/api/financial-summary"],
-  });
+  // State for export data
+  const [transactions, setTransactions] = useState([]);
+  const [budgets, setBudgets] = useState([]);
+  const [goals, setGoals] = useState([]);
+  const [summary, setSummary] = useState(null);
 
   // State for categories and backup status
   const [categories, setCategories] = useState([]);
   const [backupStatusData, setBackupStatusData] = useState(null);
   const [isLoadingBackupStatus, setIsLoadingBackupStatus] = useState(false);
 
-  // Fetch categories and backup status
+  // Fetch all data
   useEffect(() => {
     if (!isAuthenticated || !user?.id) return;
 
     const fetchData = async () => {
       try {
-        const token = await window.Clerk.session.getToken();
+        const token = await window.Clerk?.session?.getToken();
+        if (!token) return;
         
-        // Fetch categories
-        const categoriesResponse = await fetch('/api/categories', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (categoriesResponse.ok) {
-          const categoriesData = await categoriesResponse.json();
-          setCategories(categoriesData);
-        }
+        const headers = { 'Authorization': `Bearer ${token}` };
+        
+        // Fetch all data in parallel
+        const [categoriesRes, backupRes, transactionsRes, budgetsRes, goalsRes, summaryRes] = await Promise.all([
+          fetch('/api/categories', { headers }),
+          fetch('/api/backup/status', { headers }),
+          fetch('/api/transactions', { headers }),
+          fetch('/api/budgets', { headers }),
+          fetch('/api/goals', { headers }),
+          fetch('/api/financial-summary', { headers })
+        ]);
 
-        // Fetch backup status
-        setIsLoadingBackupStatus(true);
-        const backupResponse = await fetch('/api/backup/status', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (backupResponse.ok) {
-          const backupData = await backupResponse.json();
-          setBackupStatusData(backupData);
+        if (categoriesRes.ok) {
+          setCategories(await categoriesRes.json());
+        }
+        if (backupRes.ok) {
+          setBackupStatusData(await backupRes.json());
+        }
+        if (transactionsRes.ok) {
+          setTransactions(await transactionsRes.json());
+        }
+        if (budgetsRes.ok) {
+          setBudgets(await budgetsRes.json());
+        }
+        if (goalsRes.ok) {
+          setGoals(await goalsRes.json());
+        }
+        if (summaryRes.ok) {
+          setSummary(await summaryRes.json());
         }
       } catch (error) {
         console.error('Error fetching data:', error);
