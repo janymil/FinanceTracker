@@ -1621,8 +1621,8 @@ export default function ExportPage() {
                       className="h-2" 
                     />
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {backupStatus.realUsage?.size && backupStatus.realUsage.size > 0 
-                        ? `${backupStatus.info?.totalBackups || 0} backup${(backupStatus.info?.totalBackups || 0) !== 1 ? 's' : ''} stored`
+                      {(backupStatus.info?.totalBackups && backupStatus.info.totalBackups > 0)
+                        ? `${backupStatus.info.totalBackups} backup${backupStatus.info.totalBackups !== 1 ? 's' : ''} stored`
                         : 'No backups created yet'
                       }
                     </p>
