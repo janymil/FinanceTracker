@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -35,7 +35,7 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const location = useLocation();
+  const [location] = useLocation();
 
   // Form state for transaction data
   const [formData, setFormData] = useState({
@@ -162,7 +162,8 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
     setFormData({
       amount: '',
       date: new Date().toISOString().split('T')[0],
-      description: ''
+      description: '',
+      category: ''
     });
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);

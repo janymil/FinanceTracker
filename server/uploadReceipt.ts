@@ -128,11 +128,40 @@ async function extractStructuredData(ocrText: string): Promise<{
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
     
-    return {
-      amount: typeof result.amount === 'number' ? result.amount : undefined,
-      date: typeof result.date === 'string' ? result.date : undefined,
-      vendor: typeof result.vendor === 'string' ? result.vendor : undefined
-    };
+    // Normalize extracted data
+    const extractedData: any = {};
+    
+    // Normalize amount to number
+    if (result.amount !== undefined) {
+      const numAmount = Number(result.amount);
+      if (!isNaN(numAmount) && numAmount > 0) {
+        extractedData.amount = numAmount;
+      }
+    }
+    
+    // Normalize date to YYYY-MM-DD format
+    if (result.date) {
+      const dateStr = String(result.date).trim();
+      if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        extractedData.date = dateStr;
+      } else {
+        // Try to parse and reformat common date formats
+        const date = new Date(dateStr);
+        if (!isNaN(date.getTime())) {
+          extractedData.date = date.toISOString().split('T')[0];
+        }
+      }
+    }
+    
+    // Normalize vendor string
+    if (result.vendor) {
+      const vendor = String(result.vendor).trim();
+      if (vendor.length > 0 && vendor.length <= 100) {
+        extractedData.vendor = vendor;
+      }
+    }
+    
+    return extractedData;
   } catch (error) {
     console.error('OpenAI extraction error:', error);
     return {
@@ -175,7 +204,6 @@ export const uploadReceiptHandler = [
           
           const categorization = await categorizeExpense(descriptionForCategorization, amountForCategorization);
           predictedCategory = categorization.category;
-          console.log(`AI categorized receipt as: ${predictedCategory} (confidence: ${categorization.confidence})`);
         } catch (categoryError) {
           console.error('AI categorization failed:', categoryError);
           // Continue without categorization
