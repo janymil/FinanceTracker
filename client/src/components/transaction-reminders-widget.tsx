@@ -255,9 +255,16 @@ export default function TransactionRemindersWidget() {
 
   const getTypeColor = (type: 'income' | 'expense') => {
     return type === 'income' 
-      ? "text-green-600 bg-green-100 dark:bg-green-900/20" 
-      : "text-red-600 bg-red-100 dark:bg-red-900/20";
+      ? "text-green-600 dark:text-green-400" 
+      : "text-red-600 dark:text-red-400";
   };
+
+  const getSourceIcon = (source: 'automatic' | 'manual') => {
+    return source === 'automatic' ? Zap : User;
+  };
+
+  const allCategories = Array.isArray(categories) ? (categories as Category[]) : [];
+  const isLoading = transactionLoading || expenseLoading;
 
   if (isLoading) {
     return (
@@ -268,14 +275,14 @@ export default function TransactionRemindersWidget() {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Bell className="h-5 w-5" />
-                  Upcoming Transactions
+                  Upcoming Payments & Reminders
                   <Badge className="bg-blue-600 text-white">
                     <Crown className="h-3 w-3 mr-1" />
                     Standard+
                   </Badge>
                 </CardTitle>
                 <CardDescription>
-                  Automatic reminders from your future and recurring transactions
+                  Automatic reminders from transactions and manual payment reminders
                 </CardDescription>
               </div>
             </div>
@@ -295,39 +302,6 @@ export default function TransactionRemindersWidget() {
     );
   }
 
-  // Handle API not implemented yet
-  if (error) {
-    return (
-      <RequirePlan plan="standard">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Bell className="h-5 w-5" />
-                  Upcoming Transactions
-                  <Badge className="bg-blue-600 text-white">
-                    <Crown className="h-3 w-3 mr-1" />
-                    Standard+
-                  </Badge>
-                </CardTitle>
-                <CardDescription>
-                  Automatic reminders from your future and recurring transactions
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="text-center py-8">
-              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-600 dark:text-gray-300">Error loading transactions</p>
-            </div>
-          </CardContent>
-        </Card>
-      </RequirePlan>
-    );
-  }
-
   return (
     <RequirePlan plan="standard">
       <Card>
@@ -336,81 +310,267 @@ export default function TransactionRemindersWidget() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5" />
-                Upcoming Transactions
+                Upcoming Payments & Reminders
                 <Badge className="bg-blue-600 text-white">
                   <Crown className="h-3 w-3 mr-1" />
                   Standard+
                 </Badge>
               </CardTitle>
               <CardDescription>
-                Automatic reminders from your future and recurring transactions
+                Automatic reminders from transactions and manual payment reminders
               </CardDescription>
             </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" onClick={resetForm}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Reminder
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Create Payment Reminder</DialogTitle>
+                  <DialogDescription>
+                    Set up a reminder for an upcoming expense, payment, or income
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="title">Title *</Label>
+                    <Input
+                      id="title"
+                      value={newReminder.title}
+                      onChange={(e) => setNewReminder({ ...newReminder, title: e.target.value })}
+                      placeholder="e.g., Rent payment, Insurance bill"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={newReminder.description}
+                      onChange={(e) => setNewReminder({ ...newReminder, description: e.target.value })}
+                      placeholder="Additional notes about this payment"
+                      rows={2}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="amount">Amount</Label>
+                      <Input
+                        id="amount"
+                        type="number"
+                        step="0.01"
+                        value={newReminder.amount}
+                        onChange={(e) => setNewReminder({ ...newReminder, amount: e.target.value })}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="dueDate">Due Date *</Label>
+                      <Input
+                        id="dueDate"
+                        type="date"
+                        value={newReminder.dueDate}
+                        onChange={(e) => setNewReminder({ ...newReminder, dueDate: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="category">Category</Label>
+                      <Select 
+                        value={newReminder.categoryId} 
+                        onValueChange={(value) => setNewReminder({ ...newReminder, categoryId: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {allCategories.map((category: Category) => (
+                            <SelectItem key={category.id} value={category.id.toString()}>
+                              {category.name} ({category.type})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="reminderDays">Remind me</Label>
+                      <Select 
+                        value={newReminder.reminderDaysBefore.toString()} 
+                        onValueChange={(value) => setNewReminder({ ...newReminder, reminderDaysBefore: parseInt(value) })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">On due date</SelectItem>
+                          <SelectItem value="1">1 day before</SelectItem>
+                          <SelectItem value="3">3 days before</SelectItem>
+                          <SelectItem value="7">1 week before</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 border-t pt-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="recurring"
+                        checked={newReminder.isRecurring}
+                        onCheckedChange={(checked) => 
+                          setNewReminder({ ...newReminder, isRecurring: checked as boolean })
+                        }
+                      />
+                      <label htmlFor="recurring" className="text-sm font-medium">
+                        Recurring reminder
+                      </label>
+                    </div>
+
+                    {newReminder.isRecurring && (
+                      <div className="grid grid-cols-2 gap-4 pl-6">
+                        <div>
+                          <Label htmlFor="frequency">Frequency</Label>
+                          <Select
+                            value={newReminder.recurringFrequency}
+                            onValueChange={(value) => setNewReminder({ 
+                              ...newReminder, 
+                              recurringFrequency: value as "weekly" | "monthly" | "yearly" 
+                            })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="weekly">Weekly</SelectItem>
+                              <SelectItem value="monthly">Monthly</SelectItem>
+                              <SelectItem value="yearly">Yearly</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="endDate">End Date</Label>
+                          <Input
+                            id="endDate"
+                            type="date"
+                            value={newReminder.recurringEndDate}
+                            onChange={(e) => setNewReminder({ 
+                              ...newReminder,
+                              recurringEndDate: e.target.value 
+                            })}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 pt-4">
+                    <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="flex-1">
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleSubmit}
+                      disabled={!newReminder.title || !newReminder.dueDate}
+                      className="flex-1"
+                    >
+                      Create Reminder
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardHeader>
         <CardContent>
-          {reminders.length > 0 ? (
+          {unifiedReminders.length > 0 ? (
             <div className="space-y-3">
-              {reminders.slice(0, 6).map((reminder) => {
-                const priority = getReminderPriority(reminder);
-                const priorityColor = getPriorityColor(priority);
+              {unifiedReminders.slice(0, 8).map((reminder) => {
+                const priorityColor = getPriorityColor(reminder.priority);
                 const TypeIcon = getTypeIcon(reminder.type);
                 const typeColor = getTypeColor(reminder.type);
-
+                const SourceIcon = getSourceIcon(reminder.source);
+                
                 return (
                   <div key={reminder.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${priorityColor}`}>
-                        {priority === "high" ? (
-                          <AlertTriangle className="h-4 w-4" />
-                        ) : (
-                          <Clock className="h-4 w-4" />
-                        )}
+                      <div className="flex items-center gap-1">
+                        <TypeIcon className={`h-4 w-4 ${typeColor}`} />
+                        <SourceIcon className={`h-3 w-3 ${reminder.source === 'automatic' ? 'text-blue-600' : 'text-purple-600'}`} />
                       </div>
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h5 className="font-medium text-sm">{reminder.title}</h5>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-sm">{reminder.title}</p>
                           {reminder.isRecurring && (
-                            <Badge variant="outline" className="text-xs">
-                              <Repeat className="h-3 w-3 mr-1" />
-                              Recurring
-                            </Badge>
+                            <Repeat className="h-3 w-3 text-gray-500" />
                           )}
+                          <Badge className={`text-xs px-1 py-0.5 ${priorityColor}`}>
+                            {reminder.priority}
+                          </Badge>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
-                          <span>Due: {format(new Date(reminder.dueDate), "MMM dd, yyyy")}</span>
+                        <p className="text-xs text-gray-600 dark:text-gray-300">{reminder.description}</p>
+                        <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                          <Calendar className="h-3 w-3" />
+                          {format(reminder.dueDate, 'MMM dd, yyyy')}
+                          {reminder.categoryName && (
+                            <>
+                              <span>•</span>
+                              <span>{reminder.categoryName}</span>
+                            </>
+                          )}
                           <span>•</span>
-                          <span>{reminder.categoryName}</span>
+                          <span className={reminder.source === 'automatic' ? 'text-blue-600' : 'text-purple-600'}>
+                            {reminder.source === 'automatic' ? 'Auto' : 'Manual'}
+                          </span>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">{reminder.description}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className={`p-1 rounded ${typeColor}`}>
-                        <TypeIcon className="h-3 w-3" />
-                      </div>
                       {reminder.amount && (
-                        <Badge variant="outline" className="text-xs">
-                          ${reminder.amount}
-                        </Badge>
+                        <span className="text-sm font-medium">${reminder.amount}</span>
+                      )}
+                      {reminder.source === 'manual' && (
+                        <div className="flex gap-1">
+                          {reminder.canComplete && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => completeReminder(parseInt(reminder.id.split('_')[1]))}
+                            >
+                              <CheckCircle className="h-3 w-3" />
+                            </Button>
+                          )}
+                          {reminder.canEdit && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => deleteReminder(parseInt(reminder.id.split('_')[1]))}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
                 );
               })}
-
-              {reminders.length > 6 && (
+              
+              {unifiedReminders.length > 8 && (
                 <p className="text-xs text-gray-500 text-center">
-                  +{reminders.length - 6} more upcoming transactions
+                  +{unifiedReminders.length - 8} more reminders
                 </p>
               )}
             </div>
           ) : (
             <div className="text-center py-8">
-              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-600 dark:text-gray-300">No upcoming transactions</p>
+              <Bell className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+              <p className="text-gray-600 dark:text-gray-300">No upcoming reminders</p>
               <p className="text-sm text-gray-500 mt-1">
-                Create future-dated or recurring transactions to see reminders here
+                Create future-dated transactions or add manual reminders to see them here
               </p>
             </div>
           )}
