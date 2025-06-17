@@ -210,27 +210,49 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-purple-500" />
+            <Brain className="h-5 w-5 text-blue-500" />
             AI Financial Tips
           </CardTitle>
           <CardDescription>
-            Get personalized financial advice powered by AI
+            Get personalized financial advice based on your spending patterns
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-            </div>
-          ) : !tips ? (
-            <div className="text-center py-8">
-              <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground mb-4">
-                No financial tips available yet. Generate personalized insights.
-              </p>
+          {!tips ? (
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-sm font-medium mb-3">Personalized AI Analysis</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Generate insights based on your monthly spending data
+                </p>
+              </div>
+              
+              <div>
+                <h5 className="text-sm font-medium mb-2">AI Analysis Features:</h5>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    Spending pattern analysis
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    Personalized saving recommendations
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    Budget optimization suggestions
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    Context-aware financial advice
+                  </div>
+                </div>
+              </div>
+              
               <Button 
                 onClick={generateNewTips} 
                 disabled={isGenerating || !summary}
+                className="w-full bg-blue-500 hover:bg-blue-600"
               >
                 {isGenerating ? (
                   <>
@@ -240,7 +262,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                 ) : (
                   <>
                     <Brain className="h-4 w-4 mr-2" />
-                    Generate AI Tips
+                    Get AI Tip
                   </>
                 )}
               </Button>
@@ -269,12 +291,12 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                 {isGenerating ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                    Generating...
+                    Generating New Tips...
                   </>
                 ) : (
                   <>
                     <Brain className="h-4 w-4 mr-2" />
-                    Generate New Tips
+                    Get New AI Tip
                   </>
                 )}
               </Button>
