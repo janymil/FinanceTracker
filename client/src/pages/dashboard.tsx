@@ -204,17 +204,54 @@ export default function Dashboard() {
     retryDelay: 1000,
   });
 
-  const { data: budgets, error: budgetsError } = useQuery({
-    queryKey: ['budgets', user?.id],
-    enabled: isReady && !!transactions, // Wait for transactions first
-    retry: (failureCount, error: any) => {
-      // Don't retry on 403 errors for free users or auth timing issues
-      if (error?.status === 403) return false;
-      if (error?.status === 401 && !isReady) return false;
-      return failureCount < 3;
-    },
-    retryDelay: 1000,
-  });
+  const [budgets, setBudgets] = useState<any[]>([]);
+  const [budgetsLoading, setBudgetsLoading] = useState(false);
+
+  // Get auth headers for Clerk authentication
+  const getAuthHeaders = async (): Promise<Record<string, string>> => {
+    try {
+      if (typeof window !== 'undefined' && window.Clerk?.session) {
+        const token = await window.Clerk.session.getToken();
+        if (token) {
+          return { Authorization: `Bearer ${token}` };
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to get Clerk token:', error);
+    }
+    return {};
+  };
+
+  // Fetch budgets with proper authentication
+  const fetchBudgets = async () => {
+    if (!isReady) return;
+    
+    setBudgetsLoading(true);
+    try {
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch('/api/budgets', {
+        headers: authHeaders,
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setBudgets(data);
+        console.log('Dashboard budgets fetched:', data);
+      } else {
+        console.log('Dashboard budgets fetch failed:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching budgets:', error);
+    } finally {
+      setBudgetsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isReady && transactions) {
+      fetchBudgets();
+    }
+  }, [isReady, transactions]);
 
   const createTransaction = async (transactionData: typeof newTransaction) => {
     try {
