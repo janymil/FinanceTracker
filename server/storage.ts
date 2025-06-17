@@ -851,9 +851,28 @@ export class DatabaseStorage implements IStorage {
 
     console.log(`Calculating next occurrence: lastDate=${lastDate.toISOString()}, frequency=${frequency}, now=${now.toISOString()}`);
 
-    // If the transaction date is today or in the future, use it as-is for the first occurrence
-    if (next >= now) {
-      console.log(`Transaction date is today or future, using: ${next.toISOString()}`);
+    // For recurring transactions, we always need the NEXT occurrence, not today
+    // If the transaction date is today, we need to calculate the next recurring date
+    if (next.getTime() === now.getTime()) {
+      console.log(`Transaction date is today, calculating next occurrence for frequency: ${frequency}`);
+      // Move to next occurrence immediately
+      switch (frequency.toLowerCase()) {
+        case 'weekly':
+          next.setDate(next.getDate() + 7);
+          break;
+        case 'monthly':
+          next.setMonth(next.getMonth() + 1);
+          break;
+        case 'yearly':
+          next.setFullYear(next.getFullYear() + 1);
+          break;
+        default:
+          console.log(`Unknown frequency: ${frequency}, returning null`);
+          return null;
+      }
+      console.log(`Next occurrence for today's transaction: ${next.toISOString()}`);
+    } else if (next > now) {
+      console.log(`Transaction date is in future, using: ${next.toISOString()}`);
       if (endDate && next > endDate) {
         console.log(`Date exceeds end date, returning null`);
         return null;

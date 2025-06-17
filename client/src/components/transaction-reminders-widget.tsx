@@ -86,7 +86,8 @@ interface UnifiedReminder {
 
 export default function TransactionRemindersWidget() {
   const { toast } = useToast();
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isLoaded, isSignedIn } = useUser();
+  const { getToken } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newReminder, setNewReminder] = useState({
     title: "",
@@ -102,29 +103,55 @@ export default function TransactionRemindersWidget() {
     referenceNote: "",
   });
 
-  // Fetch automatic transaction reminders
+  // Check if user is ready for API calls
+  const isUserReady = isLoaded && isSignedIn && !!user?.id;
+
+  // Fetch automatic transaction reminders with proper Clerk authentication
   const { data: transactionReminders = [], isLoading: transactionLoading } = useQuery<TransactionReminder[]>({
     queryKey: ["/api/transaction-reminders", { days: 30 }],
-    enabled: isAuthenticated && !!user?.id,
+    enabled: isUserReady,
     retry: 1,
     refetchOnWindowFocus: true,
     refetchInterval: 30000,
+    queryFn: async () => {
+      console.log('Fetching transaction reminders with Clerk auth...');
+      const token = await getToken();
+      console.log('Clerk token available:', !!token);
+      
+      const response = await fetch('/api/transaction-reminders?days=30', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        console.error('Transaction reminders API failed:', response.status, response.statusText);
+        throw new Error(`API failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Transaction reminders data:', data);
+      return data || [];
+    }
   });
 
   // Debug logging for reminders
-  console.log('Transaction reminders widget - User authenticated:', isAuthenticated, 'User ID:', user?.id);
+  console.log('Transaction reminders widget - User ready:', isUserReady, 'User ID:', user?.id);
   console.log('Transaction reminders loading:', transactionLoading);
   console.log('Transaction reminders data:', transactionReminders);
 
   // Fetch manual expense reminders
   const { data: expenseReminders = [], isLoading: expenseLoading } = useQuery<ExpenseReminder[]>({
     queryKey: ["/api/expense-reminders/upcoming"],
-    enabled: isAuthenticated && !!user?.id,
+    enabled: isUserReady,
+    retry: 1,
   });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
-    enabled: isAuthenticated && !!user?.id,
+    enabled: isUserReady,
   });
 
   const getReminderPriority = (dueDate: Date): 'high' | 'medium' | 'low' | 'normal' => {
