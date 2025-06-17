@@ -146,6 +146,10 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
     }
   }, []);
 
+  // Helper functions for notification method checking
+  const usesBrowserNotifications = (method: string) => method === 'browser' || method === 'both';
+  const usesInAppNotifications = (method: string) => method === 'inapp' || method === 'both';
+
   // Notification utility functions
   const requestNotificationPermission = async () => {
     if (!('Notification' in window)) {
@@ -191,7 +195,7 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
 
   const showNotification = (reminder: Reminder) => {
     // Browser notification
-    if (reminder.notificationMethod === 'browser' || reminder.notificationMethod === 'both') {
+    if (usesBrowserNotifications(reminder.notificationMethod)) {
       if (Notification.permission === 'granted') {
         const notification = new Notification(reminder.title, {
           body: reminder.description,
@@ -213,7 +217,7 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
     }
 
     // In-app notification
-    if (reminder.notificationMethod === 'inapp' || reminder.notificationMethod === 'both') {
+    if (usesInAppNotifications(reminder.notificationMethod)) {
       toast({
         title: `Reminder: ${reminder.title}`,
         description: reminder.description,
@@ -263,7 +267,7 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
     if (!reminder) return;
 
     // If turning on and needs browser notifications, request permission
-    if (!reminder.isActive && (reminder.notificationMethod === 'browser' || reminder.notificationMethod === 'both')) {
+    if (!reminder.isActive && usesBrowserNotifications(reminder.notificationMethod)) {
       const hasPermission = await requestNotificationPermission();
       if (!hasPermission && reminder.notificationMethod === 'browser') {
         // Don't activate if browser notifications are required but denied
@@ -290,9 +294,9 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
 
   const createReminder = async () => {
     // Check permissions if browser notifications are selected
-    if ((newReminder.notificationMethod === 'browser' || newReminder.notificationMethod === 'both')) {
+    if (usesBrowserNotifications(newReminder.notificationMethod)) {
       const hasPermission = await requestNotificationPermission();
-      if (!hasPermission && newReminder.notificationMethod === 'browser') {
+      if (!hasPermission && (newReminder.notificationMethod as string) === 'browser') {
         return; // Don't create if browser notifications required but denied
       }
     }
@@ -448,6 +452,47 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
                           </SelectContent>
                         </Select>
                       </div>
+                      
+                      <div className="space-y-4 border-t pt-4">
+                        <Label className="text-sm font-medium">Notification Settings</Label>
+                        <div>
+                          <Label htmlFor="notificationMethod">Notification Method</Label>
+                          <Select 
+                            value={newReminder.notificationMethod} 
+                            onValueChange={(value: any) => setNewReminder(prev => ({ ...prev, notificationMethod: value }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="inapp">In-App Only</SelectItem>
+                              <SelectItem value="browser">Browser Only</SelectItem>
+                              <SelectItem value="both">Both Methods</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="soundEnabled"
+                            checked={newReminder.soundEnabled}
+                            onCheckedChange={(checked) => setNewReminder(prev => ({ ...prev, soundEnabled: checked }))}
+                          />
+                          <Label htmlFor="soundEnabled" className="text-sm">
+                            Enable notification sound
+                          </Label>
+                        </div>
+                        
+                        {notificationPermission !== 'granted' && usesBrowserNotifications(newReminder.notificationMethod) && (
+                          <div className="flex items-center gap-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded text-sm">
+                            <Bell className="h-4 w-4 text-yellow-600" />
+                            <span className="text-yellow-700 dark:text-yellow-300">
+                              Browser notifications require permission
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      
                       <Button onClick={createReminder} className="w-full">
                         Create Reminder
                       </Button>
@@ -473,6 +518,17 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
                           <Badge variant="outline" className="text-xs capitalize">
                             {reminder.type}
                           </Badge>
+                          <div className="flex items-center gap-1">
+                            {usesBrowserNotifications(reminder.notificationMethod) && (
+                              <Monitor className="h-3 w-3 text-blue-600" title="Browser notifications" />
+                            )}
+                            {usesInAppNotifications(reminder.notificationMethod) && (
+                              <Bell className="h-3 w-3 text-green-600" title="In-app notifications" />
+                            )}
+                            {reminder.soundEnabled && (
+                              <span className="text-xs text-orange-600" title="Sound enabled">🔊</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
