@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/useAuth";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,29 +13,29 @@ import RequirePlan from "@/components/require-plan";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, Area, AreaChart } from "recharts";
 
 export default function Trends() {
-  const { user } = useAuth();
+  const { isReady, user } = useClerkUserReady();
   const [selectedPeriod, setSelectedPeriod] = useState("6months");
   const [viewType, setViewType] = useState("overview");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const { data: transactions, isLoading: transactionsLoading } = useQuery({
-    queryKey: ["transactions", user?.id],
-    enabled: !!user
+    queryKey: ["/api/transactions", user?.id],
+    enabled: isReady && !!user?.id
   });
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["/api/categories"],
-    enabled: !!user
+    enabled: isReady && !!user?.id
   });
 
   const { data: financialSummary, isLoading: summaryLoading } = useQuery({
-    queryKey: ["/api/financial-summary"],
-    enabled: !!user
+    queryKey: ["/api/financial-summary", user?.id],
+    enabled: isReady && !!user?.id
   });
 
   const { data: aiPredictions, isLoading: predictionsLoading } = useQuery({
-    queryKey: ["/api/trend-predictions"],
-    enabled: !!user && user?.plan === 'premium'
+    queryKey: ["/api/trend-predictions", user?.id],
+    enabled: isReady && !!user?.id
   });
 
   // Generate trend data based on period selection
