@@ -604,6 +604,14 @@ export default function Income() {
           </Card>
         </div>
 
+        {/* Quick Upload from Receipt */}
+        <section className="mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            Quick Upload from Receipt
+          </h2>
+          <UploadReceipt />
+        </section>
+
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <Card>
