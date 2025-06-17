@@ -101,10 +101,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       const authHeaders = await getAuthHeaders();
       const response = await fetch('/api/ai/tip', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authHeaders
-        },
+        headers: authHeaders,
         body: JSON.stringify({
           totalIncome: summary.totalIncome,
           totalExpenses: summary.totalExpenses,
