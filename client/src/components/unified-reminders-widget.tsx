@@ -121,8 +121,8 @@ export default function UnifiedRemindersWidget() {
     enabled: isReady && !!user?.id,
   });
 
-  const { data: categories = [] } = useQuery<Category[]>({
-    queryKey: ["categories"],
+  const { data: categories = [] } = useQuery({
+    queryKey: ["/api/categories"],
     enabled: isReady && !!user?.id,
   });
 
@@ -196,10 +196,6 @@ export default function UnifiedRemindersWidget() {
 
   const createReminder = async (reminderData: any) => {
     try {
-      console.log('Creating reminder with data:', reminderData);
-      console.log('User authenticated:', !!user?.id);
-      console.log('Clerk session available:', !!window.Clerk?.session);
-      
       await apiRequest('POST', '/api/expense-reminders', reminderData);
       // Invalidate the correct query keys that the widget actually uses
       await queryClient.invalidateQueries({ queryKey: ["/api/transaction-reminders"] });
@@ -211,7 +207,6 @@ export default function UnifiedRemindersWidget() {
         description: "Expense reminder has been set successfully",
       });
     } catch (error: any) {
-      console.error('Error creating reminder:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to create reminder",
@@ -277,21 +272,10 @@ export default function UnifiedRemindersWidget() {
 
   const handleSubmit = () => {
     if (!newReminder.title || !newReminder.dueDate) return;
-    
-    // Ensure user is authenticated before creating reminder
-    if (!isReady || !user?.id) {
-      toast({
-        title: "Authentication Error",
-        description: "Please wait for authentication to complete",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     createReminder(newReminder);
   };
 
-  const allCategories = categories;
+  const allCategories = Array.isArray(categories) ? (categories as Category[]) : [];
 
   const isLoading = transactionLoading || expenseLoading;
 
@@ -320,7 +304,7 @@ export default function UnifiedRemindersWidget() {
                   Add Reminder
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-md">
                 <DialogHeader>
                   <DialogTitle>
                     {editingReminder ? "Edit Reminder" : "Create Payment Reminder"}
@@ -329,7 +313,7 @@ export default function UnifiedRemindersWidget() {
                     Set up a reminder for an upcoming expense, payment, or income
                   </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+                <div className="space-y-4">
                   <div>
                     <Label htmlFor="title">Title *</Label>
                     <Input
@@ -384,8 +368,8 @@ export default function UnifiedRemindersWidget() {
                         <SelectTrigger>
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
-                        <SelectContent className="max-h-[200px] overflow-y-auto">
-                          {categories.map((category: Category) => (
+                        <SelectContent>
+                          {allCategories.map((category: Category) => (
                             <SelectItem key={category.id} value={category.id.toString()}>
                               {category.name} ({category.type})
                             </SelectItem>
