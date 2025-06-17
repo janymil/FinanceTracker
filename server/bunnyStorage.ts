@@ -117,8 +117,6 @@ export class BunnyStorage {
 
   async listFiles(path = ''): Promise<StorageFileInfo[]> {
     try {
-      console.log(`Attempting to list files at path: ${path}`);
-      
       // Try multiple path variations to handle different Bunny.net behaviors
       const pathVariations = [
         `/${path}/`,
@@ -130,7 +128,6 @@ export class BunnyStorage {
       for (const tryPath of pathVariations) {
         try {
           const result = await this.makeRequest('GET', tryPath);
-          console.log(`Bunny.net response for ${tryPath}:`, result);
           
           if (Array.isArray(result)) {
             return result;

@@ -70,16 +70,11 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
   const getBudgetStatus = () => {
     if (!summary) return { status: 'Loading...', percentage: 0, remaining: 0, bgColor: 'bg-gray-50', textColor: 'text-gray-600' };
     
-    console.log('Budget Status Debug:', {
-      budgetsData,
-      selectedMonth,
-      budgetsDataType: typeof budgetsData,
-      budgetsDataLength: budgetsData?.length
-    });
+
     
     // If budgetsData is undefined (e.g., 403 error for free users), treat as no budgets
     if (!budgetsData) {
-      console.log('No budgets data available');
+
       return {
         status: 'No Budget Set',
         percentage: 0,
@@ -102,15 +97,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
       const monthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       const monthEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
       
-      console.log('Budget filtering debug:', {
-        selectedMonth,
-        budgetId: budget.id,
-        budgetStart: budget.startDate,
-        budgetEnd: budget.endDate,
-        monthStart: monthStart.toISOString(),
-        monthEnd: monthEnd.toISOString(),
-        overlaps: budgetStart <= monthEnd && budgetEnd >= monthStart
-      });
+
       
       return budgetStart <= monthEnd && budgetEnd >= monthStart;
     });
