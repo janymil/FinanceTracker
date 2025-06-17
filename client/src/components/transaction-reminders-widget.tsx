@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -85,6 +86,7 @@ interface UnifiedReminder {
 
 export default function TransactionRemindersWidget() {
   const { toast } = useToast();
+  const { isReady, user } = useClerkUserReady();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newReminder, setNewReminder] = useState({
     title: "",
@@ -103,7 +105,7 @@ export default function TransactionRemindersWidget() {
   // Fetch automatic transaction reminders
   const { data: transactionReminders = [], isLoading: transactionLoading } = useQuery<TransactionReminder[]>({
     queryKey: ["/api/transaction-reminders", { days: 30 }],
-    enabled: true,
+    enabled: isReady && !!user?.id,
     retry: 1,
     refetchOnWindowFocus: false,
   });
@@ -111,11 +113,12 @@ export default function TransactionRemindersWidget() {
   // Fetch manual expense reminders
   const { data: expenseReminders = [], isLoading: expenseLoading } = useQuery<ExpenseReminder[]>({
     queryKey: ["/api/expense-reminders/upcoming"],
-    enabled: true,
+    enabled: isReady && !!user?.id,
   });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
+    enabled: isReady && !!user?.id,
   });
 
   const getReminderPriority = (dueDate: Date): 'high' | 'medium' | 'low' | 'normal' => {

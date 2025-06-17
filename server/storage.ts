@@ -810,15 +810,20 @@ export class DatabaseStorage implements IStorage {
       );
 
     // Calculate next occurrences for recurring transactions
+    console.log(`Found ${activeRecurringTransactions.length} active recurring transactions for user ${userId}`);
     activeRecurringTransactions.forEach(recurring => {
+      console.log(`Processing recurring transaction: ${recurring.id}, date: ${recurring.date}, frequency: ${recurring.recurringFrequency}`);
+      
       const nextOccurrence = this.calculateNextOccurrence(
         recurring.date,
         recurring.recurringFrequency || 'monthly',
         recurring.recurringEndDate
       );
 
+      console.log(`Next occurrence calculated: ${nextOccurrence}, within window: ${nextOccurrence && nextOccurrence <= futureDate && nextOccurrence >= now}`);
+
       if (nextOccurrence && nextOccurrence <= futureDate && nextOccurrence >= now) {
-        reminders.push({
+        const reminder = {
           id: `recurring_${recurring.id}`,
           title: recurring.description,
           description: `Recurring ${recurring.type} (${recurring.recurringFrequency})`,
@@ -828,7 +833,9 @@ export class DatabaseStorage implements IStorage {
           categoryName: recurring.categoryName || 'Uncategorized',
           isRecurring: true,
           source: 'recurring_transaction'
-        });
+        };
+        console.log(`Adding reminder: ${JSON.stringify(reminder)}`);
+        reminders.push(reminder);
       }
     });
 
