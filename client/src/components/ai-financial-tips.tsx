@@ -54,7 +54,8 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             totalExpenses: summary.totalExpenses,
             categories: summary.transactionsByCategory || [],
             month: monthName,
-            year: currentDate.getFullYear()
+            year: currentDate.getFullYear(),
+            timestamp: Date.now() // Force fresh generation
           }
         }),
         headers: {
