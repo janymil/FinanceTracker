@@ -68,8 +68,11 @@ export default function Trends() {
           console.error('Failed to fetch categories:', categoriesRes.status);
         }
 
-        // Fetch financial summary
-        const summaryRes = await fetch('/api/financial-summary', { headers });
+        // Fetch financial summary with date range
+        const now = new Date();
+        const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
+        const summaryUrl = `/api/financial-summary?startDate=${sixMonthsAgo.toISOString().split('T')[0]}&endDate=${now.toISOString().split('T')[0]}`;
+        const summaryRes = await fetch(summaryUrl, { headers });
         if (summaryRes.ok) {
           const summaryData = await summaryRes.json();
           setFinancialSummary(summaryData);
