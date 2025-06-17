@@ -1,8 +1,6 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Crown, TrendingDown, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 
@@ -38,21 +36,6 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
     });
   };
 
-  const getCategoryIcon = (icon?: string) => {
-    const iconMap: { [key: string]: string } = {
-      'utensils': '🍽️',
-      'film': '🎬',
-      'home': '🏠',
-      'car': '🚗',
-      'heart': '❤️',
-      'shopping-bag': '🛍️',
-      'dollar-sign': '💰',
-      'laptop': '💻',
-      'trending-up': '📈',
-    };
-    return iconMap[icon || ''] || '💰';
-  };
-
   if (isLoading) {
     return (
       <Card className="bg-white dark:bg-gray-800">
@@ -77,54 +60,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
     );
   }
 
-  const displayTransactions = transactions || [];
-  const expenseTransactions = displayTransactions
-    .filter(t => t.type === 'expense')
-    .slice(0, 5);
-  const incomeTransactions = displayTransactions
-    .filter(t => t.type === 'income')
-    .slice(0, 5);
-
-  const renderTransactionList = (transactionList: Transaction[], type: string) => (
-    <div className="space-y-3">
-      {transactionList.length === 0 ? (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-          <p>No {type} found</p>
-          <p className="text-sm">Start by adding your first transaction</p>
-        </div>
-      ) : (
-        transactionList.map((transaction) => (
-          <div
-            key={transaction.id}
-            className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
-          >
-            <div className="flex items-center space-x-3">
-              <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg text-lg">
-                {getCategoryIcon(transaction.categoryIcon)}
-              </div>
-              <div>
-                <p className="font-medium text-gray-900 dark:text-white">
-                  {transaction.description}
-                </p>
-                <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-                  <span>{transaction.categoryName || 'Uncategorized'}</span>
-                  <span>•</span>
-                  <span>{formatDate(transaction.date)}</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className={`font-semibold ${
-                transaction.type === 'expense' ? 'text-destructive' : 'text-success'
-              }`}>
-                {transaction.type === 'expense' ? '-' : '+'}{formatCurrency(transaction.amount)}
-              </span>
-            </div>
-          </div>
-        ))
-      )}
-    </div>
-  );
+  const displayTransactions = (transactions || []).slice(0, 5);
 
   return (
     <Card className="bg-white dark:bg-gray-800">
@@ -137,26 +73,52 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
         </div>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="expenses" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="expenses" className="flex items-center gap-2">
-              <TrendingDown className="h-4 w-4" />
-              Expenses
-            </TabsTrigger>
-            <TabsTrigger value="income" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Income
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="expenses" className="mt-4">
-            {renderTransactionList(expenseTransactions, 'expenses')}
-          </TabsContent>
-
-          <TabsContent value="income" className="mt-4">
-            {renderTransactionList(incomeTransactions, 'income')}
-          </TabsContent>
-        </Tabs>
+        <div className="space-y-3">
+          {displayTransactions.length === 0 ? (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              <p>No transactions found</p>
+              <p className="text-sm">Start by adding your first transaction</p>
+            </div>
+          ) : (
+            displayTransactions.map((transaction) => (
+              <div
+                key={transaction.id}
+                className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-lg text-lg ${
+                    transaction.type === 'income' 
+                      ? 'bg-green-100 dark:bg-green-900' 
+                      : 'bg-red-100 dark:bg-red-900'
+                  }`}>
+                    {transaction.type === 'income' ? (
+                      <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    ) : (
+                      <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {transaction.description}
+                    </p>
+                    <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                      <span>{transaction.categoryName || 'Uncategorized'}</span>
+                      <span>•</span>
+                      <span>{formatDate(transaction.date)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className={`font-semibold ${
+                    transaction.type === 'expense' ? 'text-destructive' : 'text-success'
+                  }`}>
+                    {transaction.type === 'expense' ? '-' : '+'}{formatCurrency(transaction.amount)}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
 
         <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
           <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-2">
