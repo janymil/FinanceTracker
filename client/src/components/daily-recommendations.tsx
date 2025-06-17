@@ -289,24 +289,23 @@ export default function DailyRecommendations({ summary, transactions = [], budge
   const insights = generatePersonalizationInsights();
 
   return (
-    <div className="relative">
-      <Card className={!isPremiumUser ? "opacity-50" : ""}>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5" />
-            Daily Recommendations
-            <Badge className="bg-premium text-white">Premium</Badge>
-          </CardTitle>
-          <CardDescription>
-            AI-powered personalized recommendations for {currentDate.toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}
-          </CardDescription>
-        </CardHeader>
+    <Card className="h-full">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Lightbulb className="h-5 w-5 text-yellow-600" />
+          Daily Recommendations
+        </CardTitle>
+        <CardDescription>
+          AI-powered personalized recommendations for {currentDate.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })}
+        </CardDescription>
+      </CardHeader>
       <CardContent>
+        {isPremiumUser ? (
         <Tabs defaultValue="recommendations" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="recommendations">Today's Tasks</TabsTrigger>
