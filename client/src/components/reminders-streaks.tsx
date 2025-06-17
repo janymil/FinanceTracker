@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,9 +19,12 @@ import {
   CheckCircle,
   Crown,
   TrendingUp,
-  Zap
+  Zap,
+  Monitor,
+  Smartphone
 } from 'lucide-react';
 import { useLocation } from 'wouter';
+import { useToast } from '@/hooks/use-toast';
 
 interface RemindersStreaksProps {}
 
@@ -33,6 +36,8 @@ interface Reminder {
   time: string;
   isActive: boolean;
   type: 'budget' | 'transaction' | 'goal' | 'review';
+  notificationMethod: 'browser' | 'inapp' | 'both';
+  soundEnabled: boolean;
 }
 
 interface Streak {
@@ -48,14 +53,18 @@ interface Streak {
 
 export default function RemindersStreaks({}: RemindersStreaksProps) {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'reminders' | 'streaks'>('reminders');
   const [isReminderDialogOpen, setIsReminderDialogOpen] = useState(false);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
   const [newReminder, setNewReminder] = useState({
     title: '',
     description: '',
     frequency: 'daily' as const,
     time: '09:00',
-    type: 'transaction' as const
+    type: 'transaction' as const,
+    notificationMethod: 'both' as const,
+    soundEnabled: true
   });
 
   // Sample data - in real app this would come from API
@@ -67,7 +76,9 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
       frequency: 'daily',
       time: '20:00',
       isActive: true,
-      type: 'transaction'
+      type: 'transaction',
+      notificationMethod: 'both',
+      soundEnabled: true
     },
     {
       id: '2',
@@ -76,7 +87,9 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
       frequency: 'weekly',
       time: '10:00',
       isActive: true,
-      type: 'budget'
+      type: 'budget',
+      notificationMethod: 'both',
+      soundEnabled: true
     },
     {
       id: '3',
@@ -85,7 +98,9 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
       frequency: 'monthly',
       time: '09:00',
       isActive: false,
-      type: 'goal'
+      type: 'goal',
+      notificationMethod: 'browser',
+      soundEnabled: false
     }
   ]);
 
@@ -124,25 +139,181 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
 
 
 
-  const toggleReminder = (id: string) => {
-    setReminders(prev => prev.map(reminder => 
-      reminder.id === id ? { ...reminder, isActive: !reminder.isActive } : reminder
-    ));
+  // Request notification permission on component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setNotificationPermission(Notification.permission);
+    }
+  }, []);
+
+  // Notification utility functions
+  const requestNotificationPermission = async () => {
+    if (!('Notification' in window)) {
+      toast({
+        title: "Notifications not supported",
+        description: "Your browser doesn't support notifications",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    if (Notification.permission === 'granted') {
+      return true;
+    }
+
+    if (Notification.permission === 'denied') {
+      toast({
+        title: "Notifications blocked",
+        description: "Please enable notifications in your browser settings",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    const permission = await Notification.requestPermission();
+    setNotificationPermission(permission);
+    
+    if (permission === 'granted') {
+      toast({
+        title: "Notifications enabled",
+        description: "You'll now receive reminder notifications"
+      });
+      return true;
+    } else {
+      toast({
+        title: "Notifications denied",
+        description: "You won't receive browser notifications",
+        variant: "destructive"
+      });
+      return false;
+    }
   };
 
-  const createReminder = () => {
+  const showNotification = (reminder: Reminder) => {
+    // Browser notification
+    if (reminder.notificationMethod === 'browser' || reminder.notificationMethod === 'both') {
+      if (Notification.permission === 'granted') {
+        const notification = new Notification(reminder.title, {
+          body: reminder.description,
+          icon: '/favicon.ico',
+          badge: '/favicon.ico',
+          tag: `reminder-${reminder.id}`,
+          silent: !reminder.soundEnabled,
+          requireInteraction: true
+        });
+
+        notification.onclick = () => {
+          window.focus();
+          notification.close();
+        };
+
+        // Auto-close after 10 seconds
+        setTimeout(() => notification.close(), 10000);
+      }
+    }
+
+    // In-app notification
+    if (reminder.notificationMethod === 'inapp' || reminder.notificationMethod === 'both') {
+      toast({
+        title: `Reminder: ${reminder.title}`,
+        description: reminder.description,
+        duration: 8000,
+      });
+    }
+  };
+
+  const scheduleReminder = (reminder: Reminder) => {
+    if (!reminder.isActive) return;
+
+    const now = new Date();
+    const [hours, minutes] = reminder.time.split(':').map(Number);
+    
+    let nextReminder = new Date(now);
+    nextReminder.setHours(hours, minutes, 0, 0);
+
+    // If time has passed today, schedule for next occurrence
+    if (nextReminder <= now) {
+      switch (reminder.frequency) {
+        case 'daily':
+          nextReminder.setDate(nextReminder.getDate() + 1);
+          break;
+        case 'weekly':
+          nextReminder.setDate(nextReminder.getDate() + 7);
+          break;
+        case 'monthly':
+          nextReminder.setMonth(nextReminder.getMonth() + 1);
+          break;
+      }
+    }
+
+    const msUntilReminder = nextReminder.getTime() - now.getTime();
+    
+    // Only schedule if it's within the next 24 hours (for performance)
+    if (msUntilReminder <= 24 * 60 * 60 * 1000) {
+      setTimeout(() => {
+        showNotification(reminder);
+        // Reschedule for next occurrence
+        scheduleReminder(reminder);
+      }, msUntilReminder);
+    }
+  };
+
+  const toggleReminder = async (id: string) => {
+    const reminder = reminders.find(r => r.id === id);
+    if (!reminder) return;
+
+    // If turning on and needs browser notifications, request permission
+    if (!reminder.isActive && (reminder.notificationMethod === 'browser' || reminder.notificationMethod === 'both')) {
+      const hasPermission = await requestNotificationPermission();
+      if (!hasPermission && reminder.notificationMethod === 'browser') {
+        // Don't activate if browser notifications are required but denied
+        return;
+      }
+    }
+
+    setReminders(prev => prev.map(r => {
+      if (r.id === id) {
+        const updated = { ...r, isActive: !r.isActive };
+        if (updated.isActive) {
+          scheduleReminder(updated);
+        }
+        return updated;
+      }
+      return r;
+    }));
+  };
+
+  // Schedule all active reminders on mount
+  useEffect(() => {
+    reminders.filter(r => r.isActive).forEach(scheduleReminder);
+  }, []);
+
+  const createReminder = async () => {
+    // Check permissions if browser notifications are selected
+    if ((newReminder.notificationMethod === 'browser' || newReminder.notificationMethod === 'both')) {
+      const hasPermission = await requestNotificationPermission();
+      if (!hasPermission && newReminder.notificationMethod === 'browser') {
+        return; // Don't create if browser notifications required but denied
+      }
+    }
+
     const reminder: Reminder = {
       id: Date.now().toString(),
       ...newReminder,
       isActive: true
     };
+    
     setReminders(prev => [...prev, reminder]);
+    scheduleReminder(reminder);
+    
     setNewReminder({
       title: '',
       description: '',
       frequency: 'daily',
       time: '09:00',
-      type: 'transaction'
+      type: 'transaction',
+      notificationMethod: 'both',
+      soundEnabled: true
     });
     setIsReminderDialogOpen(false);
   };
