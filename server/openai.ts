@@ -158,49 +158,39 @@ export async function generateFinancialTips(financialData: {
       messages: [
         {
           role: "system",
-          content: `You are a professional financial advisor providing both personalized insights and educational guidance. Analyze the user's financial data and provide comprehensive financial advice.
+          content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
 
-Provide BOTH types of tips:
-1. PERSONALIZED TIPS (2-3 tips based on their actual spending data)
-2. EDUCATIONAL TIPS (1-2 general financial education tips applicable to their situation)
+1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
+2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
+3. BUDGET OPTIMIZATION SUGGESTIONS: Recommend category rebalancing with precise dollar amounts
+4. CONTEXT-AWARE FINANCIAL ADVICE: Consider their financial position, goals, and risk tolerance
 
-Focus areas:
-- Spending pattern analysis from actual data
-- Budget optimization based on their categories  
-- Saving opportunities specific to their income/expenses
-- General financial literacy and best practices
-- Educational content about financial principles
-- Investment basics or debt management (when relevant)
+ANALYSIS REQUIREMENTS:
+- Use their EXACT transaction amounts and categories 
+- Calculate precise percentages and ratios from their data
+- Identify the highest-impact optimization opportunities
+- Provide specific dollar amounts for recommendations
+- Include mathematical analysis (savings rate, expense ratios, etc.)
+- Compare their spending to optimal financial benchmarks
 
-Each tip should include:
-- Clear, actionable title
-- Detailed description with specific steps
-- Category (spending/saving/budgeting/income/education)
-- Priority level (high/medium/low)
-- Whether it's actionable (true/false)
-- Estimated potential savings (if applicable)
-- Educational value indicator (true for educational tips)
+GENERATE VARIED RESPONSES by focusing on different analytical angles:
+- Detailed category spending analysis with optimization targets
+- Income-to-expense ratio analysis with improvement strategies  
+- Cash flow optimization with timing recommendations
+- Risk assessment with protection strategies
+- Wealth building analysis with investment allocation suggestions
+- Efficiency analysis identifying wasteful spending patterns
 
-Respond with JSON array in this format:
-[
-  {
-    "title": "Reduce dining out expenses",
-    "description": "You spent $X on dining out this month. Try meal planning and cooking at home 2-3 more times per week to save approximately $150 monthly.",
-    "category": "spending", 
-    "priority": "high",
-    "actionable": true,
-    "estimatedSaving": 150,
-    "educational": false
-  },
-  {
-    "title": "Emergency Fund Fundamentals",
-    "description": "Build an emergency fund covering 3-6 months of expenses ($X-$Y for you). Start by saving $50-100 monthly in a high-yield savings account. This protects against unexpected expenses and reduces financial stress.",
-    "category": "education",
-    "priority": "high", 
-    "actionable": true,
-    "educational": true
-  }
-]`
+Return comprehensive analysis in JSON:
+{
+  "title": "Advanced Financial Analysis: [Specific Focus Area]",
+  "description": "DETAILED multi-paragraph analysis including: 1) Mathematical breakdown of their spending patterns with percentages, 2) Specific optimization recommendations with exact dollar targets, 3) Implementation timeline with measurable milestones, 4) Risk assessment and protection strategies. Use their exact financial numbers throughout.",
+  "category": "spending|saving|budgeting|income|education", 
+  "priority": "high|medium|low",
+  "actionable": true,
+  "estimatedSaving": [realistic_amount],
+  "educational": false
+}`
         },
         {
           role: "user",
@@ -223,13 +213,13 @@ Please provide personalized financial tips based on this data.`
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.3
+      temperature: 0.9
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{"tips": []}');
+    const result = JSON.parse(response.choices[0].message.content || '{}');
 
-    // Handle both array response and object with tips array
-    const tips = Array.isArray(result) ? result : (result.tips || []);
+    // Handle single tip response (new format)
+    const tips = result.title ? [result] : [];
 
     const processedTips = tips.map((tip: any) => ({
       title: tip.title || 'Financial Tip',
