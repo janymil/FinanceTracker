@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,7 +54,7 @@ interface Category {
 }
 
 export default function Budget() {
-  const { user } = useAuth();
+  const { isReady, user } = useClerkUserReady();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
@@ -72,13 +74,11 @@ export default function Budget() {
 
   // Fetch budgets
   const fetchBudgets = async () => {
-    if (!user) return;
+    if (!isReady) return;
     
     setIsLoading(true);
     try {
-      const response = await fetch('/api/budgets', {
-        credentials: 'include'
-      });
+      const response = await fetch('/api/budgets');
       if (response.ok) {
         const data = await response.json();
         setBudgets(data);
@@ -92,13 +92,11 @@ export default function Budget() {
 
   // Fetch categories
   const fetchCategories = async () => {
-    if (!user) return;
+    if (!isReady) return;
     
     setCategoriesLoading(true);
     try {
-      const response = await fetch('/api/categories', {
-        credentials: 'include'
-      });
+      const response = await fetch('/api/categories');
       if (response.ok) {
         const data = await response.json();
         setCategories(data);
@@ -111,11 +109,11 @@ export default function Budget() {
   };
 
   useEffect(() => {
-    if (user) {
+    if (isReady) {
       fetchBudgets();
       fetchCategories();
     }
-  }, [user]);
+  }, [isReady]);
 
   const createBudget = async (budgetData: typeof newBudget) => {
     try {
