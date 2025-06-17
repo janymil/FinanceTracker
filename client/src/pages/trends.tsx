@@ -1,5 +1,4 @@
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, TrendingDown, BarChart3, LineChart as LineChartIcon, Calendar, Crown, Download, Filter, RefreshCw } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears, subDays, subWeeks } from "date-fns";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import RequirePlan from "@/components/require-plan";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, Area, AreaChart } from "recharts";
 
@@ -18,34 +17,95 @@ export default function Trends() {
   const [viewType, setViewType] = useState("overview");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  const { data: transactions, isLoading: transactionsLoading } = useQuery({
-    queryKey: ["/api/transactions", user?.id],
-    enabled: isReady && !!user?.id
-  });
+  // State for data
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [financialSummary, setFinancialSummary] = useState<any>(null);
+  const [aiPredictions, setAiPredictions] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
-    queryKey: ["/api/categories"],
-    enabled: isReady && !!user?.id
-  });
+  // Get auth headers for Clerk authentication
+  const getAuthHeaders = async (): Promise<Record<string, string>> => {
+    try {
+      if (typeof window !== 'undefined' && window.Clerk?.session) {
+        const token = await window.Clerk.session.getToken();
+        if (token) {
+          return { Authorization: `Bearer ${token}` };
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to get Clerk token:', error);
+    }
+    return {};
+  };
 
-  const { data: financialSummary, isLoading: summaryLoading } = useQuery({
-    queryKey: ["/api/financial-summary", user?.id],
-    enabled: isReady && !!user?.id
-  });
+  // Fetch all data
+  useEffect(() => {
+    if (!isReady || !user?.id) return;
 
-  const { data: aiPredictions, isLoading: predictionsLoading } = useQuery({
-    queryKey: ["/api/trend-predictions", user?.id],
-    enabled: isReady && !!user?.id
-  });
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const headers = await getAuthHeaders();
+        
+        // Fetch transactions
+        const transactionsRes = await fetch('/api/transactions', { headers });
+        if (transactionsRes.ok) {
+          const transactionsData = await transactionsRes.json();
+          setTransactions(Array.isArray(transactionsData) ? transactionsData : []);
+          console.log('Transactions loaded:', transactionsData.length);
+        } else {
+          console.error('Failed to fetch transactions:', transactionsRes.status);
+        }
+
+        // Fetch categories
+        const categoriesRes = await fetch('/api/categories', { headers });
+        if (categoriesRes.ok) {
+          const categoriesData = await categoriesRes.json();
+          setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+          console.log('Categories loaded:', categoriesData.length);
+        } else {
+          console.error('Failed to fetch categories:', categoriesRes.status);
+        }
+
+        // Fetch financial summary
+        const summaryRes = await fetch('/api/financial-summary', { headers });
+        if (summaryRes.ok) {
+          const summaryData = await summaryRes.json();
+          setFinancialSummary(summaryData);
+          console.log('Financial summary loaded');
+        } else {
+          console.error('Failed to fetch financial summary:', summaryRes.status);
+        }
+
+        // Fetch AI predictions for premium users
+        const predictionsRes = await fetch('/api/trend-predictions', { headers });
+        if (predictionsRes.ok) {
+          const predictionsData = await predictionsRes.json();
+          setAiPredictions(predictionsData);
+          console.log('AI predictions loaded');
+        } else {
+          console.error('Failed to fetch AI predictions:', predictionsRes.status);
+        }
+      } catch (error) {
+        console.error('Error fetching trends data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [isReady, user?.id]);
 
   // Debug logging
   console.log("Trends Debug:", {
     isReady,
     userId: user?.id,
-    transactionsLoading,
-    transactionsData: transactions,
-    transactionsType: typeof transactions,
-    transactionsLength: Array.isArray(transactions) ? transactions.length : 'not array'
+    loading,
+    transactionsLength: transactions.length,
+    categoriesLength: categories.length,
+    hasFinancialSummary: !!financialSummary,
+    hasAiPredictions: !!aiPredictions
   });
 
   // Generate trend data based on period selection
@@ -605,7 +665,7 @@ export default function Trends() {
 
           {/* Forecasts */}
           <TabsContent value="forecasts" className="space-y-6">
-            {predictionsLoading ? (
+            {loading ? (
               <div className="space-y-4">
                 <Skeleton className="h-8 w-64" />
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
