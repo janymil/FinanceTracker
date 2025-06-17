@@ -335,7 +335,12 @@ export default function ExportPage() {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(value) => {
+          setActiveTab(value);
+          if (value === "backup" && !backupStatusData) {
+            loadBackupStatus();
+          }
+        }} className="space-y-4">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="export">Export Data</TabsTrigger>
             <TabsTrigger value="import">Import Data</TabsTrigger>

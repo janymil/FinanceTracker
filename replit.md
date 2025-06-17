@@ -288,6 +288,9 @@ Changelog:
 - June 17, 2025. Fixed cloud backup system completely - resolved API endpoint mismatch, added proper Clerk authentication, and verified Bunny.net connectivity
 - June 17, 2025. Cloud backup now working with proper success/error notifications, backup status refresh, and confirmed file uploads to Bunny.net storage
 - June 17, 2025. Verified Bunny.net API functionality with 201 success responses and proper file storage in user-specific directories
+- June 17, 2025. Successfully fixed export page API loops by completely removing React Query dependencies and implementing useState/useEffect pattern with proper Clerk authentication
+- June 17, 2025. Export page now loads backup status only when backup tab is accessed, preventing infinite API calls while maintaining all cloud backup functionality
+- June 17, 2025. Fixed date formatting issues causing "Invalid time value" errors in backup status display with proper error handling for invalid dates
 ```
 
 ## User Preferences
