@@ -13,6 +13,7 @@ const DailyRecommendations = lazy(() => import("@/components/daily-recommendatio
 const AutoCategorization = lazy(() => import("@/components/auto-categorization"));
 const AIFinancialTips = lazy(() => import("@/components/ai-financial-tips"));
 const TransactionRemindersWidget = lazy(() => import("@/components/transaction-reminders-widget"));
+const UnifiedRemindersWidget = lazy(() => import("@/components/unified-reminders-widget"));
 
 // Error fallback component
 function ErrorFallback({ error, resetErrorBoundary }: any) {
@@ -145,6 +146,14 @@ export function LazyTransactionRemindersWidget(props: any) {
   return (
     <LazyComponentWrapper>
       <TransactionRemindersWidget {...props} />
+    </LazyComponentWrapper>
+  );
+}
+
+export function LazyUnifiedRemindersWidget(props: any) {
+  return (
+    <LazyComponentWrapper>
+      <UnifiedRemindersWidget {...props} />
     </LazyComponentWrapper>
   );
 }
