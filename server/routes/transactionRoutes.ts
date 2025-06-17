@@ -285,15 +285,27 @@ export function registerTransactionRoutes(app: Express) {
   });
 
   // Automatic transaction reminders (Standard/Premium only)
-  app.get('/api/transaction-reminders', isAuthenticated, async (req: any, res) => {
+  app.get('/api/transaction-reminders', async (req: any, res) => {
     try {
-      const userId = getUserId(req);
-      console.log(`Transaction reminders API called for user: ${userId}`);
+      console.log('Transaction reminders endpoint hit - checking authentication...');
+      
+      // Check authentication first
+      let userId: string | null = null;
+      try {
+        const auth = req.auth();
+        userId = auth?.userId || null;
+        console.log(`Auth check result: userId=${userId}, auth=${!!auth}`);
+      } catch (authError) {
+        console.error('Authentication error:', authError);
+        return res.status(401).json({ message: "Authentication required" });
+      }
       
       if (!userId) {
+        console.log('No user ID found, returning 401');
         return res.status(401).json({ message: "Authentication required" });
       }
 
+      console.log(`Transaction reminders API called for user: ${userId}`);
       const user = await storage.getUser(userId);
       console.log(`Transaction reminders check - User: ${userId}, User plan: ${user?.plan}`);
 
