@@ -389,6 +389,15 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
                       </span>
                     </div>
                   )}
+                  {uploadState.category && (
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-700 dark:text-gray-300">AI Kategória:</span>
+                      <span className="text-purple-600 dark:text-purple-400 font-semibold">
+                        {uploadState.category}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">(môžete upraviť)</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
