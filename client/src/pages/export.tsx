@@ -655,7 +655,7 @@ export default function ExportPage() {
       const response = await fetch("/api/restore-backup", {
         method: "POST",
         headers,
-        body: JSON.stringify({ backupFilename }),
+        body: JSON.stringify({ filename: backupFilename }),
       });
 
       if (!response.ok) {
