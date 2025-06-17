@@ -76,7 +76,9 @@ export default function Budget() {
     
     setIsLoading(true);
     try {
-      const response = await fetch('/api/budgets');
+      const response = await fetch('/api/budgets', {
+        credentials: 'include'
+      });
       if (response.ok) {
         const data = await response.json();
         setBudgets(data);
@@ -94,7 +96,9 @@ export default function Budget() {
     
     setCategoriesLoading(true);
     try {
-      const response = await fetch('/api/categories');
+      const response = await fetch('/api/categories', {
+        credentials: 'include'
+      });
       if (response.ok) {
         const data = await response.json();
         setCategories(data);
@@ -120,6 +124,7 @@ export default function Budget() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: 'include',
         body: JSON.stringify({
           ...budgetData,
           amount: parseFloat(budgetData.amount),
@@ -153,11 +158,23 @@ export default function Budget() {
 
   const updateBudget = async ({ id, ...data }: { id: number } & typeof newBudget) => {
     try {
-      const res = await apiRequest("PUT", `/api/budgets/${id}`, {
-        ...data,
-        amount: parseFloat(data.amount),
+      const response = await fetch(`/api/budgets/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          ...data,
+          amount: parseFloat(data.amount),
+        }),
       });
-      await queryClient.invalidateQueries({ queryKey: ["budgets"] });
+      
+      if (!response.ok) {
+        throw new Error("Failed to update budget");
+      }
+      
+      await fetchBudgets(); // Refresh budgets
       setEditingBudget(null);
       setIsDialogOpen(false);
       toast({
@@ -175,8 +192,16 @@ export default function Budget() {
 
   const deleteBudget = async (id: number) => {
     try {
-      const res = await apiRequest("DELETE", `/api/budgets/${id}`);
-      await queryClient.invalidateQueries({ queryKey: ["budgets"] });
+      const response = await fetch(`/api/budgets/${id}`, {
+        method: "DELETE",
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to delete budget");
+      }
+      
+      await fetchBudgets(); // Refresh budgets
       toast({
         title: "Budget Deleted",
         description: "Budget has been removed successfully",
