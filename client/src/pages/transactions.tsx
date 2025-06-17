@@ -541,17 +541,17 @@ export default function Transactions() {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingTransaction ? "Edit Transaction" : "Add New Transaction"}
-                  </DialogTitle>
-                  <DialogDescription>
-                    {editingTransaction ? "Update the transaction details" : 
-                     user?.plan === 'free' ? 
-                     `Record a new transaction (${transactions?.length || 0}/100 entries used)` :
-                     "Record a new income or expense transaction"}
-                  </DialogDescription>
-                </DialogHeader>
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingTransaction ? "Edit Transaction" : "Add New Transaction"}
+                    </DialogTitle>
+                    <DialogDescription>
+                      {editingTransaction ? "Update the transaction details" : 
+                       user?.plan === 'free' ? 
+                       `Record a new transaction (${transactions?.length || 0}/100 entries used)` :
+                       "Record a new income or expense transaction"}
+                    </DialogDescription>
+                  </DialogHeader>
 
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
@@ -1019,6 +1019,7 @@ export default function Transactions() {
           </CardContent>
         </Card>
       </div>
+    </div>
     </div>
   );
 }
