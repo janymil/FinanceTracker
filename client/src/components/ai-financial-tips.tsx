@@ -1,13 +1,23 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lightbulb, Sparkles, TrendingUp, GraduationCap } from "lucide-react";
-import { useUser } from '@clerk/clerk-react';
-
+import { Lightbulb, Sparkles, TrendingUp, GraduationCap, Brain, AlertTriangle, Target, DollarSign, PiggyBank, BarChart3 } from "lucide-react";
+import { useClerkUserReady } from '@/hooks/useClerkUserReady';
+import { getAuthHeaders } from '@/lib/auth';
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 import RequirePlan from "./require-plan";
+
+interface FinancialTip {
+  id: string;
+  type: 'warning' | 'suggestion' | 'achievement' | 'trend';
+  title: string;
+  description: string;
+  impact: 'low' | 'medium' | 'high';
+  category?: string;
+  amount?: number;
+  recommendation?: string;
+  actionable: boolean;
+}
 
 interface AIFinancialTipsProps {
   summary?: {
@@ -23,254 +33,287 @@ interface AIFinancialTipsProps {
 
 export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const { toast } = useToast();
-  const [currentTip, setCurrentTip] = useState<string | null>(null);
+  const { isLoaded, isSignedIn, user } = useClerkUserReady();
+  const [tips, setTips] = useState<FinancialTip[] | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const { user } = useUser();
+  const [isLoading, setIsLoading] = useState(true);
+  const [userPlan, setUserPlan] = useState<string>('free');
+  const [generatedAt, setGeneratedAt] = useState<string | null>(null);
 
-  // Get user's plan from database
-  const { data: databaseUser } = useQuery({
-    queryKey: ["auth-user", user?.id],
-    enabled: !!user?.id,
-    staleTime: 0,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/auth/user");
-      return response.json();
-    },
-  });
+  // Fetch user plan
+  useEffect(() => {
+    const fetchUserPlan = async () => {
+      if (!isLoaded || !isSignedIn || !user?.id) return;
+      
+      try {
+        const response = await fetch('/api/auth/user', {
+          headers: getAuthHeaders()
+        });
+        if (response.ok) {
+          const userData = await response.json();
+          setUserPlan(userData.plan || 'free');
+        }
+      } catch (error) {
+        console.error('Error fetching user plan:', error);
+      }
+    };
 
-  const generateTip = async () => {
-    if (!summary) return;
+    fetchUserPlan();
+  }, [isLoaded, isSignedIn, user?.id]);
+
+  // Load stored tips on component mount
+  useEffect(() => {
+    const loadStoredTips = async () => {
+      if (!isLoaded || !isSignedIn || !user?.id || userPlan !== 'premium') {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/ai/tips/stored', {
+          headers: getAuthHeaders()
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.tips) {
+            setTips(data.tips);
+            setGeneratedAt(data.generatedAt);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading stored tips:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadStoredTips();
+  }, [isLoaded, isSignedIn, user?.id, userPlan]);
+
+  const generateNewTips = async () => {
+    if (!summary || !isLoaded || !isSignedIn || !user?.id) return;
     
     try {
       setIsGenerating(true);
       
-      const currentDate = new Date();
-      const monthName = currentDate.toLocaleString('default', { month: 'long' });
-      
-      const response = await apiRequest("POST", "/api/ai/tip", {
-        body: JSON.stringify({
-          financialData: {
-            totalIncome: summary.totalIncome,
-            totalExpenses: summary.totalExpenses,
-            categories: summary.transactionsByCategory || [],
-            month: monthName,
-            year: currentDate.getFullYear(),
-            timestamp: Date.now() // Force fresh generation
-          }
-        }),
+      const response = await fetch('/api/ai/tip', {
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify({
+          totalIncome: summary.totalIncome,
+          totalExpenses: summary.totalExpenses,
+          transactionsByCategory: summary.transactionsByCategory
+        })
       });
 
       if (response.ok) {
         const data = await response.json();
-        if (data.tip && data.tip.trim()) {
-          setCurrentTip(data.tip);
+        if (data.tips) {
+          setTips(data.tips);
+          setGeneratedAt(new Date().toISOString());
           toast({
-            title: "AI Tip Generated",
-            description: "New financial advice based on your spending data",
+            title: "AI Tips Generated",
+            description: "Your personalized financial insights have been updated!",
           });
         }
       } else {
+        const errorData = await response.json();
         toast({
           title: "Error",
-          description: "Failed to generate AI tip. Please try again.",
-          variant: "destructive",
+          description: errorData.message || "Failed to generate AI tips",
+          variant: "destructive"
         });
       }
     } catch (error) {
+      console.error('Error generating tips:', error);
       toast({
         title: "Error",
-        description: "Failed to generate AI tip. Please try again.",
-        variant: "destructive",
+        description: "Failed to generate AI tips. Please try again.",
+        variant: "destructive"
       });
     } finally {
       setIsGenerating(false);
     }
   };
 
+  const getIconForType = (type: string) => {
+    const iconMap: Record<string, any> = {
+      'warning': AlertTriangle,
+      'suggestion': Lightbulb,
+      'achievement': Target,
+      'trend': TrendingUp,
+      'spending': DollarSign,
+      'saving': PiggyBank,
+      'analysis': BarChart3
+    };
+    return iconMap[type] || Brain;
+  };
+
+  const getColorForType = (type: string) => {
+    const colorMap: Record<string, string> = {
+      'warning': 'text-red-500',
+      'suggestion': 'text-blue-500',
+      'achievement': 'text-green-500',
+      'trend': 'text-purple-500',
+      'spending': 'text-orange-500',
+      'saving': 'text-teal-500',
+      'analysis': 'text-indigo-500'
+    };
+    return colorMap[type] || 'text-gray-500';
+  };
+
+  const parseAndGroupTips = (tips: FinancialTip[]) => {
+    const sections: Record<string, any[]> = {
+      'Spending Pattern Analysis': [],
+      'Personalized Saving Recommendations': [],
+      'Budget Optimization Suggestions': [],
+      'Context-Aware Financial Advice': []
+    };
+
+    tips.forEach(tip => {
+      const content = tip.description;
+      
+      // Group content by type and keywords
+      if (content.includes('spending') || content.includes('expense') || tip.type === 'warning') {
+        sections['Spending Pattern Analysis'].push(tip);
+      } else if (content.includes('saving') || content.includes('save') || tip.type === 'achievement') {
+        sections['Personalized Saving Recommendations'].push(tip);
+      } else if (content.includes('budget') || content.includes('optimization') || tip.type === 'suggestion') {
+        sections['Budget Optimization Suggestions'].push(tip);
+      } else {
+        sections['Context-Aware Financial Advice'].push(tip);
+      }
+    });
+
+    return sections;
+  };
+
+  if (!isLoaded || !isSignedIn) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="h-5 w-5 text-purple-500" />
+            AI Financial Tips
+          </CardTitle>
+          <CardDescription>Sign in to access AI-powered financial insights</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-purple-600" />
-          AI Financial Tips
-        </CardTitle>
-        <CardDescription>
-          Get personalized financial advice based on your spending patterns
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <RequirePlan plan="premium">
-          <div className="space-y-4">
-            {/* Generate Tip Button */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                  Personalized AI Analysis
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Generate insights based on your monthly spending data
-                </p>
+    <RequirePlan requiredPlan="premium" feature="AI Financial Tips">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="h-5 w-5 text-purple-500" />
+            AI Financial Tips
+            <Sparkles className="h-4 w-4 text-yellow-500" />
+          </CardTitle>
+          <CardDescription>
+            Sophisticated AI-powered financial analysis with personalized recommendations
+            {generatedAt && (
+              <div className="text-xs text-muted-foreground mt-1">
+                Last updated: {new Date(generatedAt).toLocaleDateString()}
               </div>
+            )}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+            </div>
+          ) : !tips ? (
+            <div className="text-center py-8">
+              <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground mb-4">
+                No AI analysis available yet. Generate personalized insights based on your financial data.
+              </p>
               <Button 
-                onClick={generateTip}
-                disabled={!summary || isGenerating}
-                className="flex items-center gap-2"
+                onClick={generateNewTips} 
+                disabled={isGenerating || !summary}
+                className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
               >
                 {isGenerating ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Generating...
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Analyzing...
                   </>
                 ) : (
                   <>
-                    <TrendingUp className="h-4 w-4" />
-                    Get AI Tip
+                    <Brain className="h-4 w-4 mr-2" />
+                    Generate AI Insights
                   </>
                 )}
               </Button>
             </div>
-
-            {/* Current Tip Display */}
-            {currentTip && (
-              <div className="space-y-4">
-                {/* Parse the AI analysis into sections */}
-                {(() => {
-                  const analysisTitle = currentTip.match(/^([^:]+):/)?.[1] || "AI Financial Analysis";
-                  const analysisContent = currentTip.replace(/^[^:]+:\s*/, '');
-                  
-                  // Split content into logical sections based on keywords
-                  const sections = [];
-                  const patterns = [
-                    { title: "📊 Spending Pattern Analysis", keywords: ["spending pattern", "analysis", "breakdown", "percentage", "category", "expenses"], icon: TrendingUp },
-                    { title: "💰 Personalized Saving Recommendations", keywords: ["saving", "recommend", "target", "reduction", "optimize", "monthly"], icon: Lightbulb },
-                    { title: "📋 Budget Optimization Suggestions", keywords: ["budget", "allocation", "rebalancing", "guidelines", "financial", "benchmarks"], icon: GraduationCap },
-                    { title: "🎯 Context-Aware Financial Advice", keywords: ["implement", "achieve", "strategic", "future", "investment", "opportunities", "timeline"], icon: Sparkles }
-                  ];
-                  
-                  // Create grouped sections by collecting all content for each type
-                  const groupedSections = {};
-                  const sentences = analysisContent.split(/\.\s+/);
-                  
-                  // Initialize sections
-                  patterns.forEach(pattern => {
-                    groupedSections[pattern.title] = {
-                      title: pattern.title,
-                      content: [],
-                      icon: pattern.icon
-                    };
-                  });
-                  
-                  // Add a default section for unmatched content
-                  groupedSections[analysisTitle] = {
-                    title: analysisTitle,
-                    content: [],
-                    icon: Lightbulb
-                  };
-                  
-                  sentences.forEach((sentence) => {
-                    if (sentence.trim()) {
-                      const lowerSentence = sentence.toLowerCase();
-                      
-                      // Check if this sentence belongs to a specific analysis type
-                      const matchedPattern = patterns.find(pattern => 
-                        pattern.keywords.some(keyword => lowerSentence.includes(keyword))
-                      );
-                      
-                      if (matchedPattern) {
-                        groupedSections[matchedPattern.title].content.push(sentence + ".");
-                      } else {
-                        // Add to default section
-                        groupedSections[analysisTitle].content.push(sentence + ".");
-                      }
-                    }
-                  });
-                  
-                  // Convert to sections array, only including sections with content
-                  Object.values(groupedSections).forEach(section => {
-                    if (section.content.length > 0) {
-                      sections.push({
-                        title: section.title,
-                        content: section.content.join(" "),
-                        icon: section.icon
-                      });
-                    }
-                  });
-                  
-                  // If no sections were created, create a single comprehensive section
-                  if (sections.length === 0) {
-                    sections.push({
-                      title: analysisTitle,
-                      content: analysisContent,
-                      icon: Lightbulb
-                    });
-                  }
-                  
-                  return sections.map((section, index) => {
-                    const IconComponent = section.icon;
-                    return (
-                      <div key={index} className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <div className="flex items-start gap-3">
-                          <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
-                            <IconComponent className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                              {section.title}
-                            </h4>
-                            <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">
-                              {section.content}
-                            </p>
-                          </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Display organized sections */}
+              {Object.entries(parseAndGroupTips(tips)).map(([sectionTitle, sectionTips]) => {
+                if (sectionTips.length === 0) return null;
+                
+                const Icon = getIconForType(sectionTitle.toLowerCase().includes('spending') ? 'spending' : 
+                                         sectionTitle.toLowerCase().includes('saving') ? 'saving' :
+                                         sectionTitle.toLowerCase().includes('budget') ? 'suggestion' : 'analysis');
+                
+                return (
+                  <div key={sectionTitle} className="space-y-3">
+                    <h4 className="flex items-center gap-2 font-semibold text-sm">
+                      <Icon className={`h-4 w-4 ${getColorForType(sectionTitle.toLowerCase().includes('spending') ? 'spending' : 
+                                                                  sectionTitle.toLowerCase().includes('saving') ? 'saving' :
+                                                                  sectionTitle.toLowerCase().includes('budget') ? 'suggestion' : 'analysis')}`} />
+                      {sectionTitle}
+                    </h4>
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-2">
+                      {sectionTips.map((tip, index) => (
+                        <div key={`${sectionTitle}-${index}`} className="text-sm leading-relaxed">
+                          <strong className="text-foreground">{tip.title}:</strong>{' '}
+                          <span className="text-muted-foreground">{tip.description}</span>
+                          {tip.recommendation && (
+                            <div className="mt-1 text-xs text-blue-600 dark:text-blue-400">
+                              💡 {tip.recommendation}
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    );
-                  });
-                })()}
-              </div>
-            )}
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
 
-            {/* No Data Message */}
-            {!summary && (
-              <div className="text-center py-6">
-                <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                  No Financial Data
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Add some transactions to get personalized AI tips
-                </p>
-              </div>
-            )}
-
-            {/* Features List */}
-            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
-                AI Analysis Features:
-              </h4>
-              <div className="grid grid-cols-1 gap-2 text-xs text-gray-600 dark:text-gray-300">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-3 w-3 text-purple-600" />
-                  Spending pattern analysis
-                </div>
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-3 w-3 text-purple-600" />
-                  Personalized saving recommendations
-                </div>
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-3 w-3 text-purple-600" />
-                  Budget optimization suggestions
-                </div>
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-3 w-3 text-purple-600" />
-                  Context-aware financial advice
-                </div>
+              {/* Generate new tips button */}
+              <div className="pt-4 border-t">
+                <Button 
+                  onClick={generateNewTips} 
+                  disabled={isGenerating || !summary}
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                >
+                  {isGenerating ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                      Generating Fresh Insights...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Generate New Insights
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
-          </div>
-        </RequirePlan>
-      </CardContent>
-    </Card>
+          )}
+        </CardContent>
+      </Card>
+    </RequirePlan>
   );
 }

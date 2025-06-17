@@ -133,13 +133,24 @@ export function registerAIRoutes(app: Express) {
         timestamp: Date.now()
       };
 
+      // Generate comprehensive financial data hash to check if data has changed
+      const dataHash = require('crypto').createHash('md5').update(JSON.stringify({
+        totalIncome: financialData.totalIncome,
+        totalExpenses: financialData.totalExpenses,
+        transactionCount: transactions.length,
+        lastTransactionDate: transactions[0]?.date
+      })).digest('hex');
+
       console.log(`Generating fresh AI tip for user ${getUserId(req)} with ${transactions.length} transactions`);
       
       const tips = await generateFinancialTips(financialData);
-      const tip = tips.length > 0 ? tips[0] : null;
-
-      if (tip) {
-        res.json({ tip: `${tip.title}: ${tip.description}` });
+      
+      if (tips.length > 0) {
+        // Save the comprehensive AI analysis to database
+        const tipContent = JSON.stringify(tips);
+        await storage.saveAiFinancialTip(userId, tipContent, dataHash);
+        
+        res.json({ tips });
       } else {
         // Provide specific fallback based on actual data
         if (transactions.length === 0) {
@@ -155,6 +166,33 @@ export function registerAIRoutes(app: Express) {
     } catch (error) {
       console.error("Error generating financial tip:", error);
       res.status(500).json({ message: "Failed to generate financial tip" });
+    }
+  });
+
+  // Get stored AI Financial Tips
+  app.get('/api/ai/tips/stored', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "AI financial tips require premium plan" });
+      }
+
+      const storedTip = await storage.getLatestAiFinancialTip(userId);
+      
+      if (storedTip) {
+        const tips = JSON.parse(storedTip.tipContent);
+        res.json({ tips, generatedAt: storedTip.generatedAt });
+      } else {
+        res.json({ tips: null });
+      }
+    } catch (error) {
+      console.error("Error retrieving stored AI tips:", error);
+      res.status(500).json({ message: "Failed to retrieve stored tips" });
     }
   });
 

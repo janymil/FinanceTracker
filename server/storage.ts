@@ -1763,6 +1763,30 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedMascot;
   }
+
+  // AI Financial Tips storage methods
+  async saveAiFinancialTip(userId: string, tipContent: string, financialDataHash?: string): Promise<AiFinancialTip> {
+    const [newTip] = await db
+      .insert(aiFinancialTips)
+      .values({
+        userId,
+        tipContent,
+        financialDataHash,
+        generatedAt: new Date()
+      })
+      .returning();
+    return newTip;
+  }
+
+  async getLatestAiFinancialTip(userId: string): Promise<AiFinancialTip | undefined> {
+    const [tip] = await db
+      .select()
+      .from(aiFinancialTips)
+      .where(eq(aiFinancialTips.userId, userId))
+      .orderBy(desc(aiFinancialTips.generatedAt))
+      .limit(1);
+    return tip;
+  }
 }
 
 export const storage = new DatabaseStorage();
