@@ -14,6 +14,7 @@ import {
   challengeActivities,
   milestoneAchievements,
   financialMascots,
+  aiFinancialTips,
   type User,
   type InsertUser,
   type Transaction,
@@ -41,6 +42,8 @@ import {
   type InsertMilestoneAchievement,
   type FinancialMascot,
   type InsertFinancialMascot,
+  type AiFinancialTip,
+  type InsertAiFinancialTip,
 } from "@shared/schema";
 import { db } from "./db";
 import { DataEncryption } from "./encryption";
@@ -151,6 +154,10 @@ export interface IStorage {
   // Milestone and achievement tracking
   checkAndCreateMilestones(goalId: number): Promise<MilestoneAchievement[]>;
   getUserAchievements(userId: string): Promise<MilestoneAchievement[]>;
+
+  // AI Financial Tips storage
+  saveAiFinancialTip(userId: string, tipContent: string, financialDataHash?: string): Promise<AiFinancialTip>;
+  getLatestAiFinancialTip(userId: string): Promise<AiFinancialTip | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
