@@ -1,41 +1,28 @@
-import { useState, useRef, useEffect } from "react";
-import { useUser } from "@clerk/clerk-react";
-import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import RequirePlan from "@/components/require-plan";
-import { ExportTools } from "@/components/export-tools";
-import { useToast } from "@/hooks/use-toast";
-import {
-  Download,
-  Upload,
-  FileText,
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import RequirePlan from '@/components/require-plan';
+import { useClerkUserReady } from '@/hooks/useClerkUserReady';
+import { 
+  Download, 
+  Upload, 
+  FileText, 
   Database,
   Cloud,
   Shield,
   Calendar,
-  Settings,
   Check,
-  AlertCircle,
-  Crown,
-  ChevronRight,
-  CheckCircle,
   Loader2,
-  File,
-  AlertTriangle,
-} from "lucide-react";
-import { format } from "date-fns";
+  AlertCircle
+} from 'lucide-react';
+import { format } from 'date-fns';
 
 interface ExportOptions {
   format: "pdf" | "csv" | "excel" | "json";
@@ -60,228 +47,44 @@ interface ImportOptions {
   validationLevel: "strict" | "flexible" | "permissive";
 }
 
-interface ImportProgress {
-  total: number;
-  processed: number;
-  imported: number;
-  skipped: number;
-  errors: string[];
-}
-
-interface ColumnMapping {
-  date: string;
-  description: string;
-  amount: string;
-  category?: string;
-  type?: string;
-  account?: string;
-}
-
-// Helper function to format file sizes
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 B';
-
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
 export default function ExportPage() {
+  const { isReady, user } = useClerkUserReady();
   const { toast } = useToast();
-  const { user } = useUser();
-  const isAuthenticated = useClerkUserReady();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
+  
+  const [activeTab, setActiveTab] = useState("export");
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
     format: "pdf",
-    dateRange: "month",
+    dateRange: "all",
     includeTransactions: true,
     includeBudgets: true,
     includeGoals: true,
     includeSummary: true,
-    includeCharts: false,
-  });
-
-  const [backupSettings, setBackupSettings] = useState({
-    autoBackup: true,
-    frequency: 'daily' as const,
-    retentionDays: 7,
-    includeAttachments: true,
-    encryptBackups: true,
+    includeCharts: true
   });
 
   const [importOptions, setImportOptions] = useState<ImportOptions>({
-    source: 'csv',
+    source: "csv",
     mapColumns: true,
     skipFirstRow: true,
-    dateFormat: 'MM/dd/yyyy',
-    mergeStrategy: 'append',
-    categoryMapping: 'auto',
-    duplicateHandling: 'skip',
-    validationLevel: 'flexible',
+    dateFormat: "YYYY-MM-DD",
+    mergeStrategy: "append",
+    categoryMapping: "auto",
+    duplicateHandling: "skip",
+    validationLevel: "flexible"
   });
 
-  const [activeTab, setActiveTab] = useState("export");
-  const [isExporting, setIsExporting] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
-  const [isBackingUp, setIsBackingUp] = useState(false);
-  const [isUpdatingBackupSettings, setIsUpdatingBackupSettings] = useState(false);
-  const [importProgress, setImportProgress] = useState<ImportProgress | null>(null);
-  const [backupProgress, setBackupProgress] = useState(0);
-  const [columnMapping, setColumnMapping] = useState<ColumnMapping>({
-    date: '',
-    description: '',
-    amount: '',
-    category: '',
-    type: '',
-    account: '',
-  });
-  const [showColumnMapping, setShowColumnMapping] = useState(false);
-  const [importFile, setImportFile] = useState<File | null>(null);
-  const [previewData, setPreviewData] = useState<any[]>([]);
+  // Backup status state
+  const [backupStatusData, setBackupStatusData] = useState<any>(null);
+  const [isLoadingBackupStatus, setIsLoadingBackupStatus] = useState(false);
+  const [isCreatingBackup, setIsCreatingBackup] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
   const [showBackupSelection, setShowBackupSelection] = useState(false);
   const [availableBackups, setAvailableBackups] = useState<any[]>([]);
   const [selectedBackup, setSelectedBackup] = useState<string | null>(null);
 
-  // Basic state only for UI
-  const [hasDataLoaded, setHasDataLoaded] = useState(false);
-
-  // State for categories and backup status
-  const [categories, setCategories] = useState([]);
-  const [backupStatusData, setBackupStatusData] = useState<any>(null);
-  const [isLoadingBackupStatus, setIsLoadingBackupStatus] = useState(false);
-
-  // Get auth headers for Clerk authentication
-  const getAuthHeaders = async (): Promise<Record<string, string>> => {
-    try {
-      if (typeof window !== 'undefined' && window.Clerk?.session) {
-        const token = await window.Clerk.session.getToken();
-        if (token) {
-          return {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          };
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to get Clerk token:', error);
-    }
-    return { "Content-Type": "application/json" };
-  };
-
-  // Export function
-  const handleExportData = async (options: any) => {
-    try {
-      setIsExporting(true);
-      const response = await fetch("/api/export", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(options),
-      });
-      if (!response.ok) throw new Error("Export failed");
-      return response;
-    } catch (error) {
-      console.error('Export failed:', error);
-      throw error;
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  // Backup function
-  const handleBackup = async () => {
-    try {
-      setIsBackingUp(true);
-      const headers = await getAuthHeaders();
-      const response = await fetch("/api/backup", {
-        method: "POST",
-        headers,
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-        throw new Error(errorData.message || "Backup failed");
-      }
-      const result = await response.json();
-      console.log('BACKUP FRONTEND: Backup completed successfully', result);
-      toast({
-        title: "Backup Successful",
-        description: `Your financial data has been backed up to the cloud.`,
-      });
-      // Refresh backup status to show the new backup
-      refetchBackupStatus();
-      setIsBackingUp(false);
-    } catch (error: any) {
-      console.error('BACKUP FRONTEND: Backup failed', error);
-      toast({
-        title: "Backup Failed",
-        description: error.message || "Failed to backup data. Please try again.",
-        variant: "destructive",
-      });
-      setIsBackingUp(false);
-    }
-  };
-
-  // Backup settings function
-  const handleBackupSettings = async (settings: any) => {
-    try {
-      const headers = await getAuthHeaders();
-      const response = await fetch("/api/backup-settings", {
-        method: "POST",
-        headers,
-        body: JSON.stringify(settings),
-      });
-      if (!response.ok) throw new Error("Settings update failed");
-      return response.json();
-    } catch (error) {
-      console.error('Settings update failed:', error);
-      throw error;
-    }
-  };
-
-  // Restore backup function
-  const handleRestore = async (backupFilename: string) => {
-    try {
-      console.log('RESTORE FRONTEND: Starting restore process with backup:', backupFilename);
-      
-      const headers = await getAuthHeaders();
-      const response = await fetch("/api/restore-backup", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ filename: backupFilename }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-        console.error('RESTORE FRONTEND ERROR:', errorData);
-        throw new Error(errorData.message || 'Restore failed');
-      }
-
-      const result = await response.json();
-      console.log('RESTORE FRONTEND SUCCESS:', result);
-      
-      console.log('RESTORE FRONTEND: Restore completed successfully', result);
-      toast({
-        title: "Restore Successful",
-        description: `Restored ${result.restoredData.transactions} transactions and ${result.restoredData.budgets} budgets from backup.`,
-      });
-      
-      // Just refresh backup status after restore
-      refetchBackupStatus();
-    } catch (error: any) {
-      console.error('RESTORE FRONTEND: Restore failed', error);
-      toast({
-        title: "Restore Failed",
-        description: error.message || "Failed to restore backup. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Load backup status only when backup tab is accessed
+  // Load backup status when backup tab is accessed
   const loadBackupStatus = async () => {
-    if (!isAuthenticated || !user?.id || isLoadingBackupStatus) return;
+    if (!isReady || !user?.id || isLoadingBackupStatus) return;
     
     setIsLoadingBackupStatus(true);
     try {
@@ -304,29 +107,181 @@ export default function ExportPage() {
   // Function to refetch backup status
   const refetchBackupStatus = async () => {
     if (!isAuthenticated || !user?.id) return;
-    
+
     setIsLoadingBackupStatus(true);
     try {
       const token = await window.Clerk?.session?.getToken();
-      const response = await fetch('/api/backup/status', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const backupData = await response.json();
-        setBackupStatusData(backupData);
+      if (token) {
+        const response = await fetch('/api/backup/status', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          setBackupStatusData(await response.json());
+        }
       }
     } catch (error) {
-      console.error('Error fetching backup status:', error);
+      console.error('Error refetching backup status:', error);
     } finally {
       setIsLoadingBackupStatus(false);
     }
   };
 
-  // Helper function to check if backup status data is available
-  const hasBackupData = backupStatusData && typeof backupStatusData === 'object';
+  const hasBackupData = backupStatusData !== null;
+
+  const handleExport = async () => {
+    if (!isAuthenticated || !user?.id) return;
+
+    try {
+      const token = await window.Clerk?.session?.getToken();
+      if (!token) return;
+
+      let url = '/api/export';
+      const params = new URLSearchParams({
+        format: exportOptions.format,
+        dateRange: exportOptions.dateRange,
+        includeTransactions: exportOptions.includeTransactions.toString(),
+        includeBudgets: exportOptions.includeBudgets.toString(),
+        includeGoals: exportOptions.includeGoals.toString(),
+        includeSummary: exportOptions.includeSummary.toString(),
+        includeCharts: exportOptions.includeCharts.toString()
+      });
+
+      if (exportOptions.startDate) params.append('startDate', exportOptions.startDate);
+      if (exportOptions.endDate) params.append('endDate', exportOptions.endDate);
+
+      url += '?' + params.toString();
+
+      const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        if (exportOptions.format === 'pdf') {
+          const blob = await response.blob();
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = `financial-export-${new Date().toISOString().split('T')[0]}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(downloadUrl);
+        } else {
+          const data = await response.json();
+          const dataStr = JSON.stringify(data, null, 2);
+          const dataBlob = new Blob([dataStr], { type: 'application/json' });
+          const downloadUrl = window.URL.createObjectURL(dataBlob);
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = `financial-export-${new Date().toISOString().split('T')[0]}.${exportOptions.format}`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(downloadUrl);
+        }
+
+        toast({
+          title: "Export Successful",
+          description: `Your financial data has been exported as ${exportOptions.format.toUpperCase()}.`,
+        });
+      } else {
+        throw new Error('Export failed');
+      }
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "There was an error exporting your data. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCreateBackup = async () => {
+    if (!isAuthenticated || !user?.id) return;
+
+    setIsCreatingBackup(true);
+    try {
+      const token = await window.Clerk?.session?.getToken();
+      if (!token) return;
+
+      const response = await fetch('/api/backup', {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('BACKUP FRONTEND: Backup completed successfully', result);
+        
+        toast({
+          title: "Backup Created",
+          description: "Your financial data has been backed up to cloud storage.",
+        });
+        
+        // Refresh backup status
+        refetchBackupStatus();
+      } else {
+        throw new Error('Backup failed');
+      }
+    } catch (error: any) {
+      console.error('BACKUP FRONTEND: Backup failed', error);
+      toast({
+        title: "Backup Failed",
+        description: "There was an error creating your backup. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingBackup(false);
+    }
+  };
+
+  const handleRestore = async (backupFilename?: string) => {
+    if (!isAuthenticated || !user?.id) return;
+
+    setIsRestoring(true);
+    try {
+      const token = await window.Clerk?.session?.getToken();
+      if (!token) return;
+
+      const response = await fetch('/api/restore', {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ backupFilename })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        
+        toast({
+          title: "Restore Successful",
+          description: `Restored ${result.restoredData.transactions} transactions and ${result.restoredData.budgets} budgets from backup.`,
+        });
+        
+        // Just refresh backup status after restore
+        refetchBackupStatus();
+      } else {
+        throw new Error('Restore failed');
+      }
+    } catch (error: any) {
+      console.error('RESTORE FRONTEND: Restore failed', error);
+      toast({
+        title: "Restore Failed",
+        description: "There was an error restoring your backup. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRestoring(false);
+    }
+  };
 
   return (
-    <RequirePlan plan="premium">
+    <RequirePlan requiredPlan="premium" feature="Data Management">
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Data Management</h1>
@@ -353,18 +308,19 @@ export default function ExportPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Download className="h-5 w-5" />
-                  Export Financial Data
+                  Export Your Financial Data
                 </CardTitle>
+                <CardDescription>
+                  Download your transactions, budgets, and goals in various formats
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="format">Export Format</Label>
-                      <Select 
-                        value={exportOptions.format} 
-                        onValueChange={(value: any) => setExportOptions(prev => ({ ...prev, format: value }))}
-                      >
+                      <label className="text-sm font-medium">Export Format</label>
+                      <Select value={exportOptions.format} onValueChange={(value: any) => 
+                        setExportOptions(prev => ({ ...prev, format: value }))}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -378,11 +334,9 @@ export default function ExportPage() {
                     </div>
 
                     <div>
-                      <Label htmlFor="dateRange">Date Range</Label>
-                      <Select 
-                        value={exportOptions.dateRange} 
-                        onValueChange={(value: any) => setExportOptions(prev => ({ ...prev, dateRange: value }))}
-                      >
+                      <label className="text-sm font-medium">Date Range</label>
+                      <Select value={exportOptions.dateRange} onValueChange={(value: any) => 
+                        setExportOptions(prev => ({ ...prev, dateRange: value }))}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -397,22 +351,22 @@ export default function ExportPage() {
                     </div>
 
                     {exportOptions.dateRange === "custom" && (
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <Label htmlFor="startDate">Start Date</Label>
-                          <Input
-                            id="startDate"
+                          <label className="text-sm font-medium">Start Date</label>
+                          <input
                             type="date"
-                            value={exportOptions.startDate || ""}
+                            className="w-full px-3 py-2 border rounded-md"
+                            value={exportOptions.startDate || ''}
                             onChange={(e) => setExportOptions(prev => ({ ...prev, startDate: e.target.value }))}
                           />
                         </div>
                         <div>
-                          <Label htmlFor="endDate">End Date</Label>
-                          <Input
-                            id="endDate"
+                          <label className="text-sm font-medium">End Date</label>
+                          <input
                             type="date"
-                            value={exportOptions.endDate || ""}
+                            className="w-full px-3 py-2 border rounded-md"
+                            value={exportOptions.endDate || ''}
                             onChange={(e) => setExportOptions(prev => ({ ...prev, endDate: e.target.value }))}
                           />
                         </div>
@@ -421,87 +375,87 @@ export default function ExportPage() {
                   </div>
 
                   <div className="space-y-4">
-                    <Label>Include in Export</Label>
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="includeTransactions"
-                          checked={exportOptions.includeTransactions}
-                          onCheckedChange={(checked) => 
-                            setExportOptions(prev => ({ ...prev, includeTransactions: !!checked }))
-                          }
-                        />
-                        <Label htmlFor="includeTransactions">Transactions</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="includeBudgets"
-                          checked={exportOptions.includeBudgets}
-                          onCheckedChange={(checked) => 
-                            setExportOptions(prev => ({ ...prev, includeBudgets: !!checked }))
-                          }
-                        />
-                        <Label htmlFor="includeBudgets">Budgets</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="includeGoals"
-                          checked={exportOptions.includeGoals}
-                          onCheckedChange={(checked) => 
-                            setExportOptions(prev => ({ ...prev, includeGoals: !!checked }))
-                          }
-                        />
-                        <Label htmlFor="includeGoals">Goals</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="includeSummary"
-                          checked={exportOptions.includeSummary}
-                          onCheckedChange={(checked) => 
-                            setExportOptions(prev => ({ ...prev, includeSummary: !!checked }))
-                          }
-                        />
-                        <Label htmlFor="includeSummary">Financial Summary</Label>
-                      </div>
-                      {exportOptions.format === "pdf" && (
+                    <div>
+                      <label className="text-sm font-medium mb-3 block">Include in Export</label>
+                      <div className="space-y-2">
                         <div className="flex items-center space-x-2">
                           <Checkbox
-                            id="includeCharts"
+                            id="transactions"
+                            checked={exportOptions.includeTransactions}
+                            onCheckedChange={(checked) => 
+                              setExportOptions(prev => ({ ...prev, includeTransactions: !!checked }))}
+                          />
+                          <label htmlFor="transactions" className="text-sm">Transactions</label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="budgets"
+                            checked={exportOptions.includeBudgets}
+                            onCheckedChange={(checked) => 
+                              setExportOptions(prev => ({ ...prev, includeBudgets: !!checked }))}
+                          />
+                          <label htmlFor="budgets" className="text-sm">Budgets</label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="goals"
+                            checked={exportOptions.includeGoals}
+                            onCheckedChange={(checked) => 
+                              setExportOptions(prev => ({ ...prev, includeGoals: !!checked }))}
+                          />
+                          <label htmlFor="goals" className="text-sm">Goals</label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="summary"
+                            checked={exportOptions.includeSummary}
+                            onCheckedChange={(checked) => 
+                              setExportOptions(prev => ({ ...prev, includeSummary: !!checked }))}
+                          />
+                          <label htmlFor="summary" className="text-sm">Financial Summary</label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="charts"
                             checked={exportOptions.includeCharts}
                             onCheckedChange={(checked) => 
-                              setExportOptions(prev => ({ ...prev, includeCharts: !!checked }))
-                            }
+                              setExportOptions(prev => ({ ...prev, includeCharts: !!checked }))}
                           />
-                          <Label htmlFor="includeCharts">Charts & Graphs</Label>
+                          <label htmlFor="charts" className="text-sm">Charts & Visualizations</label>
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t">
-                  <Button 
-                    onClick={() => handleExportData(exportOptions)}
-                    disabled={isExporting}
-                    className="w-full"
-                  >
-                    {isExporting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Exporting...
-                      </>
-                    ) : (
-                      <>
-                        <Download className="mr-2 h-4 w-4" />
-                        Export Data
-                      </>
-                    )}
-                  </Button>
+                <Button onClick={handleExport} className="w-full" size="lg">
+                  <Download className="mr-2 h-4 w-4" />
+                  Export Data
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Import Tab */}
+          <TabsContent value="import" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Upload className="h-5 w-5" />
+                  Import Financial Data
+                </CardTitle>
+                <CardDescription>
+                  Import transactions and data from other financial platforms
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-muted-foreground">
+                  <Database className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Import functionality coming soon</p>
+                  <p className="text-sm">Support for CSV, Excel, Mint, QuickBooks, and more</p>
                 </div>
               </CardContent>
             </Card>
-
-            <ExportTools />
           </TabsContent>
 
           {/* Cloud Backup Tab */}
@@ -598,13 +552,14 @@ export default function ExportPage() {
                   </div>
                 )}
 
+                {/* Backup Actions */}
                 <div className="flex gap-2">
                   <Button 
-                    onClick={handleBackup}
-                    disabled={isBackingUp}
+                    onClick={handleCreateBackup} 
+                    disabled={isCreatingBackup}
                     className="flex-1"
                   >
-                    {isBackingUp ? (
+                    {isCreatingBackup ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Creating Backup...
@@ -616,25 +571,25 @@ export default function ExportPage() {
                       </>
                     )}
                   </Button>
-
-                  <Button
-                    variant="outline"
+                  
+                  <Button 
+                    variant="outline" 
                     onClick={() => setShowBackupSelection(true)}
+                    disabled={isRestoring}
                   >
-                    <Download className="mr-2 h-4 w-4" />
-                    Restore
+                    {isRestoring ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Restoring...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="mr-2 h-4 w-4" />
+                        Restore
+                      </>
+                    )}
                   </Button>
                 </div>
-
-                {isBackingUp && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Backup Progress</span>
-                      <span>{backupProgress}%</span>
-                    </div>
-                    <Progress value={backupProgress} />
-                  </div>
-                )}
               </CardContent>
             </Card>
           </TabsContent>
