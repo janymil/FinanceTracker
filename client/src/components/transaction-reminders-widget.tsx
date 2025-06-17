@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -86,7 +86,7 @@ interface UnifiedReminder {
 
 export default function TransactionRemindersWidget() {
   const { toast } = useToast();
-  const { isReady, user } = useClerkUserReady();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newReminder, setNewReminder] = useState({
     title: "",
@@ -105,26 +105,26 @@ export default function TransactionRemindersWidget() {
   // Fetch automatic transaction reminders
   const { data: transactionReminders = [], isLoading: transactionLoading } = useQuery<TransactionReminder[]>({
     queryKey: ["/api/transaction-reminders", { days: 30 }],
-    enabled: isReady && !!user?.id,
+    enabled: isAuthenticated && !!user?.id,
     retry: 1,
     refetchOnWindowFocus: true,
     refetchInterval: 30000,
   });
 
   // Debug logging for reminders
-  console.log('Transaction reminders widget - User ready:', isReady, 'User ID:', user?.id);
+  console.log('Transaction reminders widget - User authenticated:', isAuthenticated, 'User ID:', user?.id);
   console.log('Transaction reminders loading:', transactionLoading);
   console.log('Transaction reminders data:', transactionReminders);
 
   // Fetch manual expense reminders
   const { data: expenseReminders = [], isLoading: expenseLoading } = useQuery<ExpenseReminder[]>({
     queryKey: ["/api/expense-reminders/upcoming"],
-    enabled: isReady && !!user?.id,
+    enabled: isAuthenticated && !!user?.id,
   });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
-    enabled: isReady && !!user?.id,
+    enabled: isAuthenticated && !!user?.id,
   });
 
   const getReminderPriority = (dueDate: Date): 'high' | 'medium' | 'low' | 'normal' => {
