@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Camera, Upload, FileText, AlertCircle, CheckCircle, Save } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Camera, Upload, FileText, AlertCircle, CheckCircle, Save, Edit } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -28,6 +29,13 @@ interface UploadState {
   category?: string;
 }
 
+interface FormData {
+  amount: string;
+  description: string;
+  date: string;
+  categoryId: string;
+}
+
 export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -36,6 +44,28 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
   const [uploadState, setUploadState] = useState<UploadState>({
     status: 'idle'
   });
+
+  const [categories, setCategories] = useState<any[]>([]);
+  const [formData, setFormData] = useState<FormData>({
+    amount: '',
+    description: '',
+    date: new Date().toISOString().split('T')[0],
+    categoryId: ''
+  });
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleFileSelect = async (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -63,6 +93,16 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
       }
 
       const result = await response.json();
+      
+      // Auto-populate form with extracted data
+      if (result.extracted) {
+        setFormData({
+          amount: result.extracted.amount?.toString() || '',
+          description: result.extracted.vendor || '',
+          date: result.extracted.date || new Date().toISOString().split('T')[0],
+          categoryId: result.category ? categories.find(cat => cat.name.toLowerCase() === result.category.toLowerCase())?.id?.toString() || '' : ''
+        });
+      }
       
       setUploadState({
         status: 'success',
@@ -99,8 +139,79 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
 
   const handleReset = () => {
     setUploadState({ status: 'idle' });
+    setFormData({
+      amount: '',
+      description: '',
+      date: new Date().toISOString().split('T')[0],
+      categoryId: ''
+    });
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  const handleFormChange = (field: keyof FormData, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSaveTransaction = async () => {
+    if (!formData.amount || !formData.description || !formData.categoryId) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const transactionData = {
+        amount: parseFloat(formData.amount),
+        description: formData.description,
+        date: formData.date,
+        categoryId: parseInt(formData.categoryId),
+        type: 'expense',
+        imageUrl: uploadState.imageUrl,
+        ocrText: uploadState.recognizedText,
+        ocrVendor: uploadState.extracted?.vendor,
+        ocrDetectedAmount: uploadState.extracted?.amount,
+        ocrDetectedDate: uploadState.extracted?.date
+      };
+
+      const response = await fetch('/api/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(transactionData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save transaction');
+      }
+
+      toast({
+        title: "Transaction saved",
+        description: "Receipt data has been saved as a transaction",
+      });
+
+      // Reset the component
+      handleReset();
+
+      if (onReceiptProcessed) {
+        onReceiptProcessed(transactionData);
+      }
+
+    } catch (error) {
+      console.error('Error saving transaction:', error);
+      toast({
+        title: "Save failed",
+        description: "Failed to save transaction. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
