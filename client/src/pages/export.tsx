@@ -169,9 +169,6 @@ export default function ExportPage() {
   const [availableBackups, setAvailableBackups] = useState<any[]>([]);
   const [selectedBackup, setSelectedBackup] = useState<string | null>(null);
 
-  // Loading states
-  const [isExporting, setIsExporting] = useState(false);
-
   // Get auth headers for Clerk authentication
   const getAuthHeaders = async (): Promise<Record<string, string>> => {
     try {
@@ -190,9 +187,10 @@ export default function ExportPage() {
     return { "Content-Type": "application/json" };
   };
 
-  // Backup mutation
-  const backupMutation = useMutation({
-    mutationFn: async () => {
+  // Backup function
+  const handleBackup = async () => {
+    setIsBackingUp(true);
+    try {
       const headers = await getAuthHeaders();
       const response = await fetch("/api/backup", {
         method: "POST",
@@ -202,32 +200,29 @@ export default function ExportPage() {
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
         throw new Error(errorData.message || "Backup failed");
       }
-      return response.json();
-    },
-    onSuccess: (result) => {
+      const result = await response.json();
       console.log('BACKUP FRONTEND: Backup completed successfully', result);
       toast({
         title: "Backup Successful",
         description: `Your financial data has been backed up to the cloud.`,
       });
       // Refresh backup status to show the new backup
-      refetchBackupStatus();
-      setIsBackingUp(false);
-    },
-    onError: (error) => {
+      fetchBackupStatus();
+    } catch (error: any) {
       console.error('BACKUP FRONTEND: Backup failed', error);
       toast({
         title: "Backup Failed",
         description: error.message || "Failed to backup data. Please try again.",
         variant: "destructive",
       });
-      setIsBackingUp(false);
-    },
-  });
+    }
+    setIsBackingUp(false);
+  };
 
-  // Backup settings mutation
-  const backupSettingsMutation = useMutation({
-    mutationFn: async (settings: any) => {
+  // Backup settings function
+  const updateBackupSettings = async (settings: any) => {
+    setIsUpdatingBackupSettings(true);
+    try {
       const headers = await getAuthHeaders();
       const response = await fetch("/api/backup-settings", {
         method: "POST",
@@ -235,9 +230,24 @@ export default function ExportPage() {
         body: JSON.stringify(settings),
       });
       if (!response.ok) throw new Error("Settings update failed");
-      return response.json();
-    },
-  });
+      const result = await response.json();
+      toast({
+        title: "Settings Updated",
+        description: "Backup settings have been updated successfully.",
+      });
+      fetchBackupStatus();
+      return result;
+    } catch (error: any) {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update settings.",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsUpdatingBackupSettings(false);
+    }
+  };
 
   // State for all data
   const [transactions, setTransactions] = useState([]);
@@ -582,14 +592,13 @@ export default function ExportPage() {
     }
   };
 
-  const updateBackupSettings = async (settings: typeof backupSettings) => {
+  const saveBackupSettings = async (settings: typeof backupSettings) => {
     setIsUpdatingBackupSettings(true);
     try {
+      const headers = await getAuthHeaders();
       const response = await fetch("/api/backup-settings", {
         method: "PUT",
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(settings),
       });
 
