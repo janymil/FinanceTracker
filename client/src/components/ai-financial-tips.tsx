@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Lightbulb, Sparkles, TrendingUp, GraduationCap, Brain, AlertTriangle, Target, DollarSign, PiggyBank, BarChart3 } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Brain } from 'lucide-react';
+import { RequirePlan } from './require-plan';
 import { useClerkUserReady } from '@/hooks/useClerkUserReady';
-import { useToast } from "@/hooks/use-toast";
-import RequirePlan from "./require-plan";
 
 interface FinancialTip {
   id: string;
@@ -30,56 +29,34 @@ interface AIFinancialTipsProps {
   };
 }
 
+function getAuthHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('clerk-token') || ''}`
+  };
+}
+
 export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
-  const { toast } = useToast();
-  const { isLoaded, isSignedIn, user, getAuthHeaders } = useClerkUserReady();
+  const { isReady: isUserReady, user } = useClerkUserReady();
   const [tips, setTips] = useState<FinancialTip[] | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [userPlan, setUserPlan] = useState<string>('free');
-  const [generatedAt, setGeneratedAt] = useState<string | null>(null);
-
-  // Fetch user plan
-  useEffect(() => {
-    const fetchUserPlan = async () => {
-      if (!isLoaded || !isSignedIn || !user?.id) return;
-      
-      try {
-        const authHeaders = await getAuthHeaders();
-        const response = await fetch('/api/auth/user', {
-          headers: authHeaders
-        });
-        if (response.ok) {
-          const userData = await response.json();
-          setUserPlan(userData.plan || 'free');
-        }
-      } catch (error) {
-        console.error('Error fetching user plan:', error);
-      }
-    };
-
-    fetchUserPlan();
-  }, [isLoaded, isSignedIn, user?.id, getAuthHeaders]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Load stored tips on component mount
   useEffect(() => {
-    const loadStoredTips = async () => {
-      if (!isLoaded || !isSignedIn || !user?.id || userPlan !== 'premium') {
-        setIsLoading(false);
-        return;
-      }
+    if (!isUserReady || !user?.id) return;
 
+    const loadStoredTips = async () => {
+      setIsLoading(true);
       try {
-        const authHeaders = await getAuthHeaders();
         const response = await fetch('/api/ai/tips/stored', {
-          headers: authHeaders
+          headers: getAuthHeaders()
         });
         
         if (response.ok) {
           const data = await response.json();
-          if (data.tips) {
+          if (data.tips && Array.isArray(data.tips) && data.tips.length > 0) {
             setTips(data.tips);
-            setGeneratedAt(data.generatedAt);
           }
         }
       } catch (error) {
@@ -90,18 +67,16 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     };
 
     loadStoredTips();
-  }, [isLoaded, isSignedIn, user?.id, userPlan]);
+  }, [isUserReady, user?.id]);
 
   const generateNewTips = async () => {
-    if (!summary || !isLoaded || !isSignedIn || !user?.id) return;
-    
+    if (!summary || !isUserReady || !user?.id) return;
+
+    setIsGenerating(true);
     try {
-      setIsGenerating(true);
-      
-      const authHeaders = await getAuthHeaders();
       const response = await fetch('/api/ai/tip', {
         method: 'POST',
-        headers: authHeaders,
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           totalIncome: summary.totalIncome,
           totalExpenses: summary.totalExpenses,
@@ -111,99 +86,18 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.tips) {
+        if (data.tips && Array.isArray(data.tips)) {
           setTips(data.tips);
-          setGeneratedAt(new Date().toISOString());
-          toast({
-            title: "AI Tips Generated",
-            description: "Your personalized financial insights have been updated!",
-          });
         }
       } else {
-        const errorData = await response.json();
-        toast({
-          title: "Error",
-          description: errorData.message || "Failed to generate AI tips",
-          variant: "destructive"
-        });
+        console.error('Failed to generate tips:', response.statusText);
       }
     } catch (error) {
       console.error('Error generating tips:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate AI tips. Please try again.",
-        variant: "destructive"
-      });
     } finally {
       setIsGenerating(false);
     }
   };
-
-  const getIconForType = (type: string) => {
-    const iconMap: Record<string, any> = {
-      'warning': AlertTriangle,
-      'suggestion': Lightbulb,
-      'achievement': Target,
-      'trend': TrendingUp,
-      'spending': DollarSign,
-      'saving': PiggyBank,
-      'analysis': BarChart3
-    };
-    return iconMap[type] || Brain;
-  };
-
-  const getColorForType = (type: string) => {
-    const colorMap: Record<string, string> = {
-      'warning': 'text-red-500',
-      'suggestion': 'text-blue-500',
-      'achievement': 'text-green-500',
-      'trend': 'text-purple-500',
-      'spending': 'text-orange-500',
-      'saving': 'text-teal-500',
-      'analysis': 'text-indigo-500'
-    };
-    return colorMap[type] || 'text-gray-500';
-  };
-
-  const parseAndGroupTips = (tips: FinancialTip[]) => {
-    const sections: Record<string, any[]> = {
-      'Spending Pattern Analysis': [],
-      'Personalized Saving Recommendations': [],
-      'Budget Optimization Suggestions': [],
-      'Context-Aware Financial Advice': []
-    };
-
-    tips.forEach(tip => {
-      const content = tip.description;
-      
-      // Group content by type and keywords
-      if (content.includes('spending') || content.includes('expense') || tip.type === 'warning') {
-        sections['Spending Pattern Analysis'].push(tip);
-      } else if (content.includes('saving') || content.includes('save') || tip.type === 'achievement') {
-        sections['Personalized Saving Recommendations'].push(tip);
-      } else if (content.includes('budget') || content.includes('optimization') || tip.type === 'suggestion') {
-        sections['Budget Optimization Suggestions'].push(tip);
-      } else {
-        sections['Context-Aware Financial Advice'].push(tip);
-      }
-    });
-
-    return sections;
-  };
-
-  if (!isLoaded || !isSignedIn) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-purple-500" />
-            AI Financial Tips
-          </CardTitle>
-          <CardDescription>Sign in to access AI-powered financial insights</CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
 
   return (
     <RequirePlan plan="premium" feature="AI Financial Tips">
@@ -249,27 +143,29 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                 </div>
               </div>
               
-              <Button 
-                onClick={generateNewTips} 
-                disabled={isGenerating || !summary}
-                className="w-full bg-blue-500 hover:bg-blue-600"
-              >
-                {isGenerating ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Brain className="h-4 w-4 mr-2" />
-                    Get AI Tip
-                  </>
-                )}
-              </Button>
+              <div className="flex justify-end">
+                <Button 
+                  onClick={generateNewTips} 
+                  disabled={isGenerating || !summary}
+                  className="bg-blue-500 hover:bg-blue-600"
+                >
+                  {isGenerating ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Brain className="h-4 w-4 mr-2" />
+                      Get AI Tip
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
-              {tips.map((tip, index) => (
+              {tips.map((tip: FinancialTip, index: number) => (
                 <div key={index} className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border">
                   <div className="flex items-start gap-3">
                     <Brain className="h-5 w-5 text-purple-500 mt-0.5 flex-shrink-0" />
@@ -281,25 +177,26 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                 </div>
               ))}
               
-              <Button 
-                onClick={generateNewTips} 
-                disabled={isGenerating || !summary}
-                variant="outline"
-                size="sm"
-                className="w-full mt-4"
-              >
-                {isGenerating ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                    Generating New Tips...
-                  </>
-                ) : (
-                  <>
-                    <Brain className="h-4 w-4 mr-2" />
-                    Get New AI Tip
-                  </>
-                )}
-              </Button>
+              <div className="flex justify-end mt-4">
+                <Button 
+                  onClick={generateNewTips} 
+                  disabled={isGenerating || !summary}
+                  variant="outline"
+                  size="sm"
+                >
+                  {isGenerating ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                      Generating New Tips...
+                    </>
+                  ) : (
+                    <>
+                      <Brain className="h-4 w-4 mr-2" />
+                      Get New AI Tip
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
