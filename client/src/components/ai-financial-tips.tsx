@@ -3,7 +3,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Lightbulb, Sparkles, TrendingUp, GraduationCap, Brain, AlertTriangle, Target, DollarSign, PiggyBank, BarChart3 } from "lucide-react";
 import { useClerkUserReady } from '@/hooks/useClerkUserReady';
-import { getAuthHeaders } from '@/lib/auth';
 import { useToast } from "@/hooks/use-toast";
 import RequirePlan from "./require-plan";
 
@@ -33,7 +32,7 @@ interface AIFinancialTipsProps {
 
 export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const { toast } = useToast();
-  const { isLoaded, isSignedIn, user } = useClerkUserReady();
+  const { isLoaded, isSignedIn, user, getAuthHeaders } = useClerkUserReady();
   const [tips, setTips] = useState<FinancialTip[] | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,8 +45,9 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       if (!isLoaded || !isSignedIn || !user?.id) return;
       
       try {
+        const authHeaders = await getAuthHeaders();
         const response = await fetch('/api/auth/user', {
-          headers: getAuthHeaders()
+          headers: authHeaders
         });
         if (response.ok) {
           const userData = await response.json();
@@ -59,7 +59,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     };
 
     fetchUserPlan();
-  }, [isLoaded, isSignedIn, user?.id]);
+  }, [isLoaded, isSignedIn, user?.id, getAuthHeaders]);
 
   // Load stored tips on component mount
   useEffect(() => {
@@ -70,8 +70,9 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       }
 
       try {
+        const authHeaders = await getAuthHeaders();
         const response = await fetch('/api/ai/tips/stored', {
-          headers: getAuthHeaders()
+          headers: authHeaders
         });
         
         if (response.ok) {
@@ -97,11 +98,12 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     try {
       setIsGenerating(true);
       
+      const authHeaders = await getAuthHeaders();
       const response = await fetch('/api/ai/tip', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...getAuthHeaders()
+          ...authHeaders
         },
         body: JSON.stringify({
           totalIncome: summary.totalIncome,
@@ -207,7 +209,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   }
 
   return (
-    <RequirePlan requiredPlan="premium" feature="AI Financial Tips">
+    <RequirePlan plan="premium" feature="AI Financial Tips">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
