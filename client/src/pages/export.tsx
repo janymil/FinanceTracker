@@ -252,7 +252,7 @@ export default function ExportPage() {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ backupFilename })
+        body: JSON.stringify({ filename: backupFilename })
       });
 
       if (response.ok) {
@@ -576,9 +576,11 @@ export default function ExportPage() {
                     variant="outline" 
                     onClick={() => {
                       // Get the latest backup filename from the status data
-                      const latestBackup = backupStatusData?.lastBackup?.filename;
-                      if (latestBackup) {
-                        handleRestore(latestBackup);
+                      const latestBackupPath = backupStatusData?.lastBackup?.filename;
+                      if (latestBackupPath) {
+                        // Extract just the filename from the full path
+                        const filename = latestBackupPath.split('/').pop();
+                        handleRestore(filename);
                       } else {
                         toast({
                           title: "No Backups Available",
