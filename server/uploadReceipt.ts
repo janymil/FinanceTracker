@@ -8,6 +8,7 @@ import { users } from '../shared/schema';
 import { eq } from 'drizzle-orm';
 import fetch from 'node-fetch';
 import { openai } from './openaiClient';
+import { categorizeExpense } from './openai';
 
 // Configure multer for file upload
 const upload = multer({
@@ -164,6 +165,23 @@ export const uploadReceiptHandler = [
       // Extract structured data using OpenAI
       const extractedData = await extractStructuredData(recognizedText);
 
+      // AI Categorization for standard+ users
+      let predictedCategory: string | undefined;
+      if (userPlan.plan === 'standard' || userPlan.plan === 'premium') {
+        try {
+          // Use the vendor name or fallback to the full OCR text for categorization
+          const descriptionForCategorization = extractedData.vendor || recognizedText;
+          const amountForCategorization = extractedData.amount || 0;
+          
+          const categorization = await categorizeExpense(descriptionForCategorization, amountForCategorization);
+          predictedCategory = categorization.category;
+          console.log(`AI categorized receipt as: ${predictedCategory} (confidence: ${categorization.confidence})`);
+        } catch (categoryError) {
+          console.error('AI categorization failed:', categoryError);
+          // Continue without categorization
+        }
+      }
+
       let imageUrl: string | undefined;
 
       // Upload to Bunny.net if user has appropriate plan
@@ -187,6 +205,10 @@ export const uploadReceiptHandler = [
 
       if (imageUrl) {
         response.imageUrl = imageUrl;
+      }
+
+      if (predictedCategory) {
+        response.category = predictedCategory;
       }
 
       res.json(response);

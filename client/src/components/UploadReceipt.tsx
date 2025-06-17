@@ -26,6 +26,7 @@ interface UploadState {
   recognizedText?: string;
   imageUrl?: string;
   extracted?: ExtractedData;
+  category?: string;
 }
 
 export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps) {
@@ -40,7 +41,8 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
   const [formData, setFormData] = useState({
     amount: '',
     date: new Date().toISOString().split('T')[0],
-    description: ''
+    description: '',
+    category: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -51,11 +53,12 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
       setFormData({
         amount: uploadState.extracted.amount?.toString() || '',
         date: uploadState.extracted.date || new Date().toISOString().split('T')[0],
-        description: uploadState.extracted.vendor || ''
+        description: uploadState.extracted.vendor || '',
+        category: uploadState.category || ''
       });
       setShowForm(true);
     }
-  }, [uploadState.extracted]);
+  }, [uploadState.extracted, uploadState.category]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -114,7 +117,8 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
           message: 'Úspešne spracované',
           recognizedText: result.recognizedText || result.text,
           imageUrl: result.imageUrl,
-          extracted: result.extracted
+          extracted: result.extracted,
+          category: result.category
         });
 
         // Call callback if provided
