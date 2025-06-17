@@ -95,7 +95,16 @@ export class BunnyStorage {
   }
 
   async uploadFile(filePath: string, data: string | Buffer, contentType = 'application/json'): Promise<void> {
-    await this.makeRequest('PUT', `/${filePath}`, data, contentType);
+    console.log(`BUNNY DEBUG: Uploading file to ${filePath}, size: ${data.length}`);
+    console.log(`BUNNY DEBUG: Using storage zone: ${this.config.storageZone}`);
+    console.log(`BUNNY DEBUG: Base URL: ${this.baseUrl}`);
+    try {
+      await this.makeRequest('PUT', `/${filePath}`, data, contentType);
+      console.log(`BUNNY DEBUG: Upload successful for ${filePath}`);
+    } catch (error) {
+      console.error(`BUNNY ERROR: Upload failed for ${filePath}:`, error);
+      throw error;
+    }
   }
 
   async downloadFile(filePath: string): Promise<string> {

@@ -204,8 +204,30 @@ export default function ExportPage() {
         method: "POST",
         headers,
       });
-      if (!response.ok) throw new Error("Backup failed");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        throw new Error(errorData.message || "Backup failed");
+      }
       return response.json();
+    },
+    onSuccess: (result) => {
+      console.log('BACKUP FRONTEND: Backup completed successfully', result);
+      toast({
+        title: "Backup Successful",
+        description: `Your financial data has been backed up to the cloud.`,
+      });
+      // Refresh backup status to show the new backup
+      refetchBackupStatus();
+      setIsBackingUp(false);
+    },
+    onError: (error) => {
+      console.error('BACKUP FRONTEND: Backup failed', error);
+      toast({
+        title: "Backup Failed",
+        description: error.message || "Failed to backup data. Please try again.",
+        variant: "destructive",
+      });
+      setIsBackingUp(false);
     },
   });
 
