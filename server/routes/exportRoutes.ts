@@ -518,7 +518,12 @@ export function registerExportRoutes(app: Express) {
       };
 
       // Use the existing createBackup method from BunnyStorage
+      console.log('BACKUP DEBUG: Starting backup creation for user:', userId);
+      console.log('BACKUP DEBUG: Backup data size:', JSON.stringify(backupData).length, 'characters');
+      
       const filename = await bunnyStorage.createBackup(userId, backupData);
+      
+      console.log('BACKUP DEBUG: Backup created successfully with filename:', filename);
 
       res.json({ 
         success: true, 
@@ -527,8 +532,9 @@ export function registerExportRoutes(app: Express) {
       });
 
     } catch (error) {
-      console.error("Error creating backup:", error);
-      res.status(500).json({ message: "Failed to create backup" });
+      console.error("BACKUP ERROR: Error creating backup:", error);
+      console.error("BACKUP ERROR: Error details:", error.message);
+      res.status(500).json({ message: "Failed to create backup", error: error.message });
     }
   });
 

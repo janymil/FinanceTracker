@@ -200,7 +200,7 @@ export default function ExportPage() {
   const backupMutation = useMutation({
     mutationFn: async () => {
       const headers = await getAuthHeaders();
-      const response = await fetch("/api/create-backup", {
+      const response = await fetch("/api/backup", {
         method: "POST",
         headers,
       });
