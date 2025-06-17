@@ -556,7 +556,9 @@ export function registerExportRoutes(app: Express) {
       }
 
       // Use the existing getUserBackups method
+      console.log('BACKUP STATUS DEBUG: Getting backups for user:', userId);
       const backups = await bunnyStorage.getUserBackups(userId);
+      console.log('BACKUP STATUS DEBUG: Found', backups.length, 'backup files');
       const lastBackup = backups.length > 0 ? backups[0] : null;
 
       res.json({
