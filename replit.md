@@ -274,6 +274,9 @@ Changelog:
 - June 16, 2025. Updated admin analytics to show Clerk users with plan distribution and system overview functionality
 - June 17, 2025. Removed confusing "Feature preview available after upgrade" text from RequirePlan component upgrade prompts
 - June 17, 2025. Identified premium dashboard widgets: AI Expense Prediction, Daily Recommendations, Advanced AI Financial Tips (premium-only), plus Reminders & Streaks, Auto Categorization, Budget Overview (standard+)
+- June 17, 2025. Implemented widget-level upgrade banners instead of blocking tier-gated features completely - users now see actual widgets with semi-transparent overlays and upgrade prompts
+- June 17, 2025. Updated AI Expense Prediction, Daily Recommendations, and AI Financial Tips components to show their full UI with internal upgrade banners for non-premium users
+- June 17, 2025. Removed RequirePlan wrapper blocking from dashboard - all premium widgets now display with contextual upgrade prompts inside the widget containers
 ```
 
 ## User Preferences

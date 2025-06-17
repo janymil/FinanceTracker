@@ -632,13 +632,9 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <LazyTransactionRemindersWidget />
 
-              <RequirePlan plan="standard">
-                <LazyRemindersStreaks />
-              </RequirePlan>
+              <LazyRemindersStreaks />
 
-              <RequirePlan plan="standard">
-                <LazyAutoCategorization transactions={transactions as any} />
-              </RequirePlan>
+              <LazyAutoCategorization transactions={transactions as any} />
             </div>
 
             {/* Premium Features - Show widgets with internal upgrade prompts */}
