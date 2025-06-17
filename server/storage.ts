@@ -14,7 +14,6 @@ import {
   challengeActivities,
   milestoneAchievements,
   financialMascots,
-  aiFinancialTips,
   type User,
   type InsertUser,
   type Transaction,
@@ -42,8 +41,6 @@ import {
   type InsertMilestoneAchievement,
   type FinancialMascot,
   type InsertFinancialMascot,
-  type AiFinancialTip,
-  type InsertAiFinancialTip,
 } from "@shared/schema";
 import { db } from "./db";
 import { DataEncryption } from "./encryption";
@@ -154,10 +151,6 @@ export interface IStorage {
   // Milestone and achievement tracking
   checkAndCreateMilestones(goalId: number): Promise<MilestoneAchievement[]>;
   getUserAchievements(userId: string): Promise<MilestoneAchievement[]>;
-
-  // AI Financial Tips storage
-  saveAiFinancialTip(userId: string, tipContent: string, financialDataHash?: string): Promise<AiFinancialTip>;
-  getLatestAiFinancialTip(userId: string): Promise<AiFinancialTip | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1762,30 +1755,6 @@ export class DatabaseStorage implements IStorage {
       .where(eq(financialMascots.userId, userId))
       .returning();
     return updatedMascot;
-  }
-
-  // AI Financial Tips storage methods
-  async saveAiFinancialTip(userId: string, tipContent: string, financialDataHash?: string): Promise<AiFinancialTip> {
-    const [newTip] = await db
-      .insert(aiFinancialTips)
-      .values({
-        userId,
-        tipContent,
-        financialDataHash,
-        generatedAt: new Date()
-      })
-      .returning();
-    return newTip;
-  }
-
-  async getLatestAiFinancialTip(userId: string): Promise<AiFinancialTip | undefined> {
-    const [tip] = await db
-      .select()
-      .from(aiFinancialTips)
-      .where(eq(aiFinancialTips.userId, userId))
-      .orderBy(desc(aiFinancialTips.generatedAt))
-      .limit(1);
-    return tip;
   }
 }
 

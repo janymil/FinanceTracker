@@ -239,15 +239,6 @@ export const milestoneAchievements = pgTable("milestone_achievements", {
   achievedAt: timestamp("achieved_at").defaultNow(),
 });
 
-// AI Financial Tips storage
-export const aiFinancialTips = pgTable("ai_financial_tips", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  tipContent: text("tip_content").notNull(),
-  generatedAt: timestamp("generated_at").defaultNow(),
-  financialDataHash: varchar("financial_data_hash", { length: 64 }), // To track when data changes
-});
-
 // Financial Health Mascots
 export const financialMascots = pgTable("financial_mascots", {
   id: serial("id").primaryKey(),
@@ -305,9 +296,6 @@ export type ChallengeActivity = typeof challengeActivities.$inferSelect;
 
 export type InsertMilestoneAchievement = typeof milestoneAchievements.$inferInsert;
 export type MilestoneAchievement = typeof milestoneAchievements.$inferSelect;
-
-export type InsertAiFinancialTip = typeof aiFinancialTips.$inferInsert;
-export type AiFinancialTip = typeof aiFinancialTips.$inferSelect;
 
 export type InsertFinancialMascot = typeof financialMascots.$inferInsert;
 export type FinancialMascot = typeof financialMascots.$inferSelect;
