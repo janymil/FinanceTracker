@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Lightbulb, Sparkles, RefreshCw, TrendingUp, Lock, Crown, GraduationCap } from "lucide-react";
-import { Link } from "wouter";
+import { Lightbulb, Sparkles, TrendingUp, GraduationCap } from "lucide-react";
 import { useUser } from '@clerk/clerk-react';
 
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import RequirePlan from "./require-plan";
 
 interface AIFinancialTipsProps {
   summary?: {
@@ -24,60 +25,29 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const { toast } = useToast();
   const [currentTip, setCurrentTip] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [userPlan, setUserPlan] = useState<string>('free');
   const { user } = useUser();
 
-  // Debug state changes
-  console.log('AIFinancialTips render - currentTip:', currentTip);
-  console.log('AIFinancialTips render - isGenerating:', isGenerating);
-  console.log('AIFinancialTips render - userPlan:', userPlan);
-  console.log('AIFinancialTips render - isPremiumUser:', isPremiumUser);
-
-  // Fetch user plan
-  useEffect(() => {
-    const fetchUserPlan = async () => {
-      if (!user?.id) return;
-      
-      try {
-        const response = await fetch('/api/auth/user', {
-          credentials: 'include'
-        });
-        
-        if (response.ok) {
-          const userData = await response.json();
-          console.log('User plan fetched:', userData.plan);
-          setUserPlan(userData.plan || 'free');
-        } else {
-          console.log('Failed to fetch user plan, status:', response.status);
-          // For debugging - let's assume premium for now since we know user has premium access
-          setUserPlan('premium');
-        }
-      } catch (error) {
-        console.error('Error fetching user plan:', error);
-        // For debugging - let's assume premium for now
-        setUserPlan('premium');
-      }
-    };
-
-    fetchUserPlan();
-  }, [user?.id]);
-
-  const isPremiumUser = userPlan === 'premium';
+  // Get user's plan from database
+  const { data: databaseUser } = useQuery({
+    queryKey: ["auth-user", user?.id],
+    enabled: !!user?.id,
+    staleTime: 0,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/auth/user");
+      return response.json();
+    },
+  });
 
   const generateTip = async () => {
     if (!summary) return;
     
-    console.log('Starting tip generation...');
-    
     try {
       setIsGenerating(true);
-      console.log('Loading state set to true');
       
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
       
-      const response = await fetch('/api/ai/tip', {
-        method: 'POST',
+      const response = await apiRequest("POST", "/api/ai/tip", {
         body: JSON.stringify({
           financialData: {
             totalIncome: summary.totalIncome,
@@ -92,36 +62,16 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
         }
       });
 
-      console.log('API response received:', response.ok, response.status);
-
       if (response.ok) {
         const data = await response.json();
-        console.log('AI Tip Response data:', data);
-        console.log('Tip content:', data.tip);
-        console.log('Tip type:', typeof data.tip);
-        console.log('Tip length:', data.tip?.length);
-        
         if (data.tip && data.tip.trim()) {
           setCurrentTip(data.tip);
-          console.log('Tip set successfully');
-          
           toast({
             title: "AI Tip Generated",
             description: "New financial advice based on your spending data",
           });
-        } else {
-          console.error('Empty or invalid tip received');
-          toast({
-            title: "Error",
-            description: "Received empty tip from AI service",
-            variant: "destructive",
-          });
         }
       } else {
-        console.error('AI Tip API Error:', response.status, response.statusText);
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-        
         toast({
           title: "Error",
           description: "Failed to generate AI tip. Please try again.",
@@ -129,7 +79,6 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
         });
       }
     } catch (error) {
-      console.error('Generate tip error:', error);
       toast({
         title: "Error",
         description: "Failed to generate AI tip. Please try again.",
@@ -137,7 +86,6 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       });
     } finally {
       setIsGenerating(false);
-      console.log('Loading state set to false');
     }
   };
 
@@ -153,7 +101,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {isPremiumUser ? (
+        <RequirePlan plan="premium">
           <div className="space-y-4">
             {/* Generate Tip Button */}
             <div className="flex items-center justify-between">
@@ -267,25 +215,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
               </div>
             </div>
           </div>
-        ) : (
-          <div className="text-center py-8 px-6">
-            <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Lock className="h-8 w-8 text-purple-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              Premium Feature
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-              Get AI-powered financial tips and personalized advice based on your spending patterns
-            </p>
-            <Link href="/subscribe">
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-                <Crown className="h-4 w-4 mr-2" />
-                Upgrade to Premium
-              </Button>
-            </Link>
-          </div>
-        )}
+        </RequirePlan>
       </CardContent>
     </Card>
   );
