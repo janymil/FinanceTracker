@@ -344,10 +344,10 @@ export default function AdminAnalytics() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="users">User Management</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-1 md:grid-cols-3">
+          <TabsTrigger value="overview" className="text-xs md:text-sm">Overview</TabsTrigger>
+          <TabsTrigger value="users" className="text-xs md:text-sm">User Management</TabsTrigger>
+          <TabsTrigger value="analytics" className="text-xs md:text-sm">Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
