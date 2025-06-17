@@ -3,6 +3,7 @@ import fetch from 'node-fetch';
 interface BunnyStorageConfig {
   storageZone: string;
   accessKey: string;
+  storagePassword: string;
 }
 
 interface BackupFile {
@@ -40,9 +41,10 @@ export class BunnyStorage {
     this.config = {
       storageZone: process.env.BUNNY_STORAGE_ZONE || '',
       accessKey: process.env.BUNNY_ACCESS_KEY || '',
+      storagePassword: process.env.BUNNY_STORAGE_PASSWORD || '',
     };
 
-    if (!this.config.storageZone || !this.config.accessKey) {
+    if (!this.config.storageZone || !this.config.accessKey || !this.config.storagePassword) {
       throw new Error('Bunny.net credentials not properly configured');
     }
 
@@ -58,7 +60,7 @@ export class BunnyStorage {
     const url = `${this.baseUrl}${path}`;
     
     const headers: Record<string, string> = {
-      'AccessKey': this.config.accessKey,
+      'AccessKey': this.config.storagePassword,
     };
 
     if (data) {
@@ -106,7 +108,7 @@ export class BunnyStorage {
       const response = await fetch(`${this.baseUrl}/${filePath}`, {
         method: 'GET',
         headers: {
-          'AccessKey': this.config.accessKey,
+          'AccessKey': this.config.storagePassword,
         },
       });
 
