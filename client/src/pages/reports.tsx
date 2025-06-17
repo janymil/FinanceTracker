@@ -24,6 +24,7 @@ export default function Reports() {
   const [financialSummary, setFinancialSummary] = useState<any>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [summaryLoading, setSummaryLoading] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   if (!user) {
     return null;
@@ -31,8 +32,8 @@ export default function Reports() {
 
   // User tier checking is handled by RequirePlan components
 
-  // Calculate date ranges based on selected period and month
-  const getDateRange = () => {
+  // Calculate date ranges based on selected period and month - memoized to prevent infinite loops
+  const { startDate, endDate } = useMemo(() => {
     const now = new Date();
     
     // If a specific month is selected, use that month's dates
@@ -69,80 +70,63 @@ export default function Reports() {
       default:
         return { startDate: startOfMonth(now), endDate: endOfMonth(now) };
     }
-  };
+  }, [selectedPeriod, selectedMonth]);
 
-  const { startDate, endDate } = getDateRange();
-
-  // Get auth headers for Clerk authentication
-  const getAuthHeaders = async (): Promise<Record<string, string>> => {
-    try {
-      if (typeof window !== 'undefined' && window.Clerk?.session) {
-        const token = await window.Clerk.session.getToken();
-        if (token) {
-          return { Authorization: `Bearer ${token}` };
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to get Clerk token:', error);
-    }
-    return {};
-  };
-
-  // Fetch financial summary data
-  const fetchFinancialSummary = async () => {
-    if (!isReady) return;
-    
-    setSummaryLoading(true);
-    try {
-      const authHeaders = await getAuthHeaders();
-      const params = new URLSearchParams({
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString()
-      });
-      const response = await fetch(`/api/financial-summary?${params}`, {
-        headers: authHeaders,
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setFinancialSummary(data);
-      } else {
-        console.error('Failed to fetch financial summary:', response.status);
-      }
-    } catch (error) {
-      console.error('Error fetching financial summary:', error);
-    } finally {
-      setSummaryLoading(false);
-    }
-  };
-
-  // Fetch transactions for recent activity
-  const fetchTransactions = async () => {
-    if (!isReady) return;
-    
-    try {
-      const authHeaders = await getAuthHeaders();
-      const response = await fetch('/api/transactions', {
-        headers: authHeaders,
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setTransactions(data);
-      } else {
-        console.error('Failed to fetch transactions:', response.status);
-      }
-    } catch (error) {
-      console.error('Error fetching transactions:', error);
-    }
-  };
-
+  // Load data once when component mounts and user is ready
   useEffect(() => {
-    if (isReady) {
-      fetchFinancialSummary();
-      fetchTransactions();
-    }
-  }, [isReady, startDate, endDate, selectedMonth, selectedPeriod]);
+    if (!isReady || dataLoaded) return;
+
+    const loadData = async () => {
+      setSummaryLoading(true);
+      try {
+        // Get auth headers
+        let authHeaders = {};
+        if (typeof window !== 'undefined' && window.Clerk?.session) {
+          const token = await window.Clerk.session.getToken();
+          if (token) {
+            authHeaders = { Authorization: `Bearer ${token}` };
+          }
+        }
+
+        // Fetch financial summary with current month dates
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        
+        const params = new URLSearchParams({
+          startDate: monthStart.toISOString(),
+          endDate: monthEnd.toISOString()
+        });
+        const summaryResponse = await fetch(`/api/financial-summary?${params}`, {
+          headers: authHeaders,
+          credentials: 'include',
+        });
+        
+        // Fetch transactions
+        const transactionsResponse = await fetch('/api/transactions', {
+          headers: authHeaders,
+          credentials: 'include',
+        });
+
+        if (summaryResponse.ok && transactionsResponse.ok) {
+          const summaryData = await summaryResponse.json();
+          const transactionsData = await transactionsResponse.json();
+          
+          setFinancialSummary(summaryData);
+          setTransactions(transactionsData);
+          setDataLoaded(true);
+        } else {
+          console.error('Failed to fetch data');
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setSummaryLoading(false);
+      }
+    };
+
+    loadData();
+  }, [isReady]);
 
   // Filter transactions based on selected period and month
   const filteredTransactions = useMemo(() => {
