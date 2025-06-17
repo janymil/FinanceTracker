@@ -279,49 +279,103 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
               <CheckCircle className="h-5 w-5" />
               <span className="font-medium">{uploadState.message}</span>
             </div>
-            
+
+            {/* Image Preview */}
+            {uploadState.imageUrl && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Receipt Image:
+                </label>
+                <div className="relative">
+                  <img 
+                    src={uploadState.imageUrl} 
+                    alt="Receipt" 
+                    className="w-full max-w-md h-auto rounded-lg border shadow-sm mx-auto"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Editable Transaction Form */}
             {uploadState.extracted && (
-              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg space-y-2">
-                <h4 className="font-medium text-green-800 dark:text-green-200">
-                  Extracted Information:
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <Edit className="h-4 w-4" />
+                  Edit Transaction Details
                 </h4>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  {uploadState.extracted.amount && (
-                    <div>
-                      <span className="font-medium">Amount:</span> ${uploadState.extracted.amount}
-                    </div>
-                  )}
-                  {uploadState.extracted.vendor && (
-                    <div>
-                      <span className="font-medium">Vendor:</span> {uploadState.extracted.vendor}
-                    </div>
-                  )}
-                  {uploadState.extracted.date && (
-                    <div>
-                      <span className="font-medium">Date:</span> {uploadState.extracted.date}
-                    </div>
-                  )}
+                
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="amount">Amount *</Label>
+                    <Input
+                      id="amount"
+                      type="number"
+                      step="0.01"
+                      value={formData.amount}
+                      onChange={(e) => handleFormChange('amount', e.target.value)}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="description">Description *</Label>
+                    <Input
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => handleFormChange('description', e.target.value)}
+                      placeholder="Transaction description"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="date">Date *</Label>
+                    <Input
+                      id="date"
+                      type="date"
+                      value={formData.date}
+                      onChange={(e) => handleFormChange('date', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="category">Category *</Label>
+                    <Select value={formData.categoryId} onValueChange={(value) => handleFormChange('categoryId', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id.toString()}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   {uploadState.category && (
-                    <div>
-                      <span className="font-medium">Category:</span> {uploadState.category}
+                    <div className="text-sm text-blue-600 bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
+                      💡 AI suggested category: {uploadState.category}
                     </div>
                   )}
                 </div>
+                
                 <Button
-                  onClick={handleSaveAsTransaction}
-                  className="w-full mt-3"
-                  size="sm"
+                  onClick={handleSaveTransaction}
+                  className="w-full"
+                  disabled={!formData.amount || !formData.description || !formData.categoryId}
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  Save as transaction
+                  Save Transaction
                 </Button>
               </div>
             )}
 
+            {/* OCR Text (Collapsible) */}
             {uploadState.recognizedText && (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Recognized text:
+                  Recognized Text:
                 </label>
                 <pre className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-sm overflow-x-auto whitespace-pre-wrap border max-h-64 overflow-y-auto">
 {uploadState.recognizedText}
