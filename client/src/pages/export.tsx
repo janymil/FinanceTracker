@@ -328,15 +328,22 @@ export default function ExportPage() {
 
   // Create backup status object from API data
   const backupStatus: BackupStatus = {
-    lastBackup: backupStatusData?.lastBackup || (backupStatusData?.info?.newestBackup) || new Date(Date.now() - 86400000).toISOString(),
+    lastBackup: backupStatusData?.lastBackup?.date || new Date(Date.now() - 86400000).toISOString(),
     nextBackup: backupStatusData?.nextBackup || new Date(Date.now() + 86400000).toISOString(),
-    totalSize: backupStatusData?.realUsage?.formattedSize || "0 B",
+    totalSize: `${Math.round((backupStatusData?.realUsage?.used || 0) / 1024)} KB`,
     frequency: backupStatusData?.settings?.frequency || backupSettings.frequency,
     autoBackup: backupStatusData?.settings?.autoBackup ?? backupSettings.autoBackup,
     encrypted: backupStatusData?.settings?.encryptBackups ?? backupSettings.encryptBackups,
-    status: backupStatusData?.info?.totalBackups > 0 ? 'synced' : 'pending',
-    info: backupStatusData?.info,
-    realUsage: backupStatusData?.realUsage,
+    status: (backupStatusData?.lastBackup?.date) ? 'synced' : 'pending',
+    info: {
+      totalBackups: backupStatusData?.lastBackup ? 1 : 0,
+      ...backupStatusData?.info
+    },
+    realUsage: {
+      used: backupStatusData?.realUsage?.used || 0,
+      formattedSize: `${Math.round((backupStatusData?.realUsage?.used || 0) / 1024)} KB`,
+      ...backupStatusData?.realUsage
+    },
   };
 
   // Import handlers
