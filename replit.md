@@ -280,6 +280,8 @@ Changelog:
 - June 17, 2025. Successfully removed React Query from budget and goals pages - replaced with useState/useEffect pattern using proper Clerk authentication
 - June 17, 2025. Fixed Budget Overview dashboard widget to use same authentication pattern as budget page - budgets now sync between pages correctly
 - June 17, 2025. Resolved data synchronization issue where budgets created on budget page weren't appearing in dashboard Budget by Category widget
+- June 17, 2025. Implemented localStorage persistence for AI Financial Tips - tips now remain visible across page refreshes, navigation, and app sessions until new tips are generated
+- June 17, 2025. Reordered dashboard widget layout for better visual balance - moved content-heavy AI tips to left column, stacked smaller widgets on right to eliminate uneven spacing
 ```
 
 ## User Preferences
