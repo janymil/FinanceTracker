@@ -18,6 +18,7 @@ import {
   Cloud,
   Shield,
   Calendar,
+  RefreshCw,
   Check,
   Loader2,
   AlertCircle
@@ -292,8 +293,8 @@ export default function ExportPage() {
 
         <Tabs value={activeTab} onValueChange={(value) => {
           setActiveTab(value);
-          if (value === "backup" && !backupStatusData) {
-            loadBackupStatus();
+          if (value === "backup") {
+            loadBackupStatus(); // Always refresh backup status when tab is accessed
           }
         }} className="space-y-4">
           <TabsList className="grid w-full grid-cols-3">
@@ -464,12 +465,39 @@ export default function ExportPage() {
             {/* Cloud Backup Status */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Cloud className="h-5 w-5" />
-                  Cloud Backup Status
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Cloud className="h-5 w-5" />
+                    Cloud Backup Status
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={loadBackupStatus}
+                    disabled={isLoadingBackupStatus}
+                  >
+                    {isLoadingBackupStatus ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Automatic Backup Schedule Notification */}
+                <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                  <div className="flex items-center gap-2">
+                    <Check className="h-5 w-5 text-green-600" />
+                    <div>
+                      <h4 className="font-medium text-green-800 dark:text-green-200">Automatic Backup Enabled</h4>
+                      <p className="text-sm text-green-700 dark:text-green-300">
+                        Your data is automatically backed up daily at 2:00 AM
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {isLoadingBackupStatus ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin" />
