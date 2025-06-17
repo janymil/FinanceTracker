@@ -314,6 +314,110 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
             }}
           />
         )}
+
+        {/* Edit Transaction Modal */}
+        {editingTransaction && (
+          <Dialog open={!!editingTransaction} onOpenChange={(open) => !open && setEditingTransaction(null)}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Edit Transaction</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Amount</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    step="0.01"
+                    value={editingTransaction.amount}
+                    onChange={(e) => setEditingTransaction({
+                      ...editingTransaction,
+                      amount: e.target.value
+                    })}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Input
+                    id="description"
+                    value={editingTransaction.description}
+                    onChange={(e) => setEditingTransaction({
+                      ...editingTransaction,
+                      description: e.target.value
+                    })}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="date">Date</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={editingTransaction.date.split('T')[0]}
+                    onChange={(e) => setEditingTransaction({
+                      ...editingTransaction,
+                      date: e.target.value
+                    })}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="type">Type</Label>
+                  <Select 
+                    value={editingTransaction.type} 
+                    onValueChange={(value: 'income' | 'expense') => setEditingTransaction({
+                      ...editingTransaction,
+                      type: value
+                    })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="expense">Expense</SelectItem>
+                      <SelectItem value="income">Income</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="category">Category</Label>
+                  <Select 
+                    value={editingTransaction.categoryName || ''} 
+                    onValueChange={(value) => setEditingTransaction({
+                      ...editingTransaction,
+                      categoryName: value
+                    })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.name}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setEditingTransaction(null)}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={() => handleEdit(editingTransaction)}>
+                  Save Changes
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </CardContent>
     </Card>
   );
