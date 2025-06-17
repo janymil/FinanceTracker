@@ -76,9 +76,6 @@ export default function Reports() {
   const loadData = async () => {
     if (!isReady) return;
 
-    console.log('Reports: Loading data for period:', selectedPeriod, 'month:', selectedMonth);
-    console.log('Reports: Date range:', startDate.toISOString(), 'to', endDate.toISOString());
-
     setSummaryLoading(true);
     try {
       // Get auth headers
@@ -109,9 +106,6 @@ export default function Reports() {
       if (summaryResponse.ok && transactionsResponse.ok) {
         const summaryData = await summaryResponse.json();
         const transactionsData = await transactionsResponse.json();
-        
-        console.log('Reports: Fetched summary:', summaryData);
-        console.log('Reports: Fetched transactions count:', transactionsData.length);
         
         setFinancialSummary(summaryData);
         setTransactions(transactionsData);
