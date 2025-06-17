@@ -25,6 +25,7 @@ interface AIFinancialTipsProps {
 export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const { toast } = useToast();
   const [currentTip, setCurrentTip] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
   const { user } = useUser();
 
   // Get user's plan from database
@@ -44,6 +45,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     if (!summary) return;
     
     try {
+      setIsGenerating(true);
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
       
@@ -66,9 +68,6 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
         const data = await response.json();
         setCurrentTip(data.tip);
         
-        // Invalidate the AI cache to fetch fresh data
-        await queryClient.invalidateQueries({ queryKey: ["ai"] });
-        
         toast({
           title: "AI Tip Generated",
           description: "New financial advice based on your spending data",
@@ -80,6 +79,8 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
         description: "Failed to generate AI tip. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -109,11 +110,20 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
               </div>
               <Button 
                 onClick={generateTip}
-                disabled={!summary}
+                disabled={!summary || isGenerating}
                 className="flex items-center gap-2"
               >
-                <TrendingUp className="h-4 w-4" />
-                Get AI Tip
+                {isGenerating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <TrendingUp className="h-4 w-4" />
+                    Get AI Tip
+                  </>
+                )}
               </Button>
             </div>
 
