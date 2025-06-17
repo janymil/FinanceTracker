@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +7,6 @@ import { Link } from "wouter";
 import { useUser } from '@clerk/clerk-react';
 
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface AIFinancialTipsProps {
   summary?: {
@@ -28,22 +26,33 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const { user } = useUser();
 
+  const [userPlan, setUserPlan] = useState<string>('free');
+
   // Debug state changes
   console.log('AIFinancialTips render - currentTip:', currentTip);
   console.log('AIFinancialTips render - isGenerating:', isGenerating);
 
-  // Get user's plan from database
-  const { data: databaseUser } = useQuery({
-    queryKey: ["auth-user", user?.id],
-    enabled: !!user?.id,
-    staleTime: 0,
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/auth/user");
-      return response.json();
-    },
-  });
+  // Fetch user plan
+  useEffect(() => {
+    const fetchUserPlan = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const response = await fetch('/api/auth/user');
+        
+        if (response.ok) {
+          const userData = await response.json();
+          setUserPlan(userData.plan || 'free');
+        }
+      } catch (error) {
+        console.error('Error fetching user plan:', error);
+      }
+    };
 
-  const isPremiumUser = databaseUser?.plan === 'premium';
+    fetchUserPlan();
+  }, [user?.id]);
+
+  const isPremiumUser = userPlan === 'premium';
 
   const generateTip = async () => {
     if (!summary) return;
@@ -57,7 +66,9 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
       
-      const response = await apiRequest("POST", "/api/ai/tip", {
+      const token = await user.getToken();
+      const response = await fetch('/api/ai/tip', {
+        method: 'POST',
         body: JSON.stringify({
           financialData: {
             totalIncome: summary.totalIncome,
@@ -68,7 +79,8 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
           }
         }),
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         }
       });
 
