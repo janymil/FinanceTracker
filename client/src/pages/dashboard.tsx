@@ -10,6 +10,7 @@ import { DashboardSkeleton } from "@/components/dashboard-skeleton";
 // Core components for immediate display
 import FinancialCards from "@/components/financial-cards";
 import TransactionList from "@/components/transaction-list";
+import SimpleTransactionList from "@/components/simple-transaction-list";
 import BudgetOverview from "@/components/budget-overview";
 import RequirePlan from "@/components/require-plan";
 import UpgradeBanner from "@/components/upgrade-banner";
@@ -574,10 +575,9 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <TransactionList
+              <SimpleTransactionList
                 transactions={transactions as any}
                 isLoading={transactionsLoading}
-                isPremium={false}
               />
 
               <BudgetOverview isLimited={true} />
@@ -606,11 +606,13 @@ export default function Dashboard() {
             <LazyTrendsChart />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <TransactionList
-                transactions={transactions as any}
-                isLoading={transactionsLoading}
-                isPremium={databaseUser?.plan === 'premium'}
-              />
+              <RequirePlan plan="standard">
+                <TransactionList
+                  transactions={transactions as any}
+                  isLoading={transactionsLoading}
+                  isPremium={databaseUser?.plan === 'premium'}
+                />
+              </RequirePlan>
 
               <LazyExpenseChart summary={{
                 totalExpenses: Math.abs(financialSummary?.totalExpenses || 0),

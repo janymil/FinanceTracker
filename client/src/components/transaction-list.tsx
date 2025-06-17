@@ -112,8 +112,6 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
     .filter(t => t.type === 'income')
     .slice(0, 5);
 
-  const limitForFree = !isPremium ? 100 : 5;
-
   const renderTransactionList = (transactionList: Transaction[], type: string) => (
     <div className="space-y-3">
       {transactionList.length === 0 ? (
@@ -122,7 +120,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
           <p className="text-sm">Start by adding your first transaction</p>
         </div>
       ) : (
-        transactionList.slice(0, limitForFree).map((transaction) => (
+        transactionList.map((transaction) => (
           <div
             key={transaction.id}
             className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -165,42 +163,36 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold">Recent Transactions</CardTitle>
-          {isPremium ? (
-            <div className="flex items-center space-x-2">
-              <Input 
-                placeholder="Search transactions..." 
-                className="w-48 h-8 text-sm"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button size="sm" variant="outline">
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-48" align="end">
-                  <div className="space-y-2">
-                    <h4 className="font-medium leading-none">Filter by type</h4>
-                    <Select value={filterType} onValueChange={setFilterType}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="All transactions" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All transactions</SelectItem>
-                        <SelectItem value="expense">Expenses only</SelectItem>
-                        <SelectItem value="income">Income only</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-          ) : (
-            <span className="text-sm text-gray-500 dark:text-gray-400">
-              Last {limitForFree} transactions
-            </span>
-          )}
+          <div className="flex items-center space-x-2">
+            <Input 
+              placeholder="Search transactions..." 
+              className="w-48 h-8 text-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button size="sm" variant="outline">
+                  <Filter className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48" align="end">
+                <div className="space-y-2">
+                  <h4 className="font-medium leading-none">Filter by type</h4>
+                  <Select value={filterType} onValueChange={setFilterType}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="All transactions" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All transactions</SelectItem>
+                      <SelectItem value="expense">Expenses only</SelectItem>
+                      <SelectItem value="income">Income only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -225,31 +217,15 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
           </TabsContent>
         </Tabs>
 
-        {!isPremium && (
-          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-            <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-2">
-              Free plan: {transactions?.length || 0}/100 transaction entries used
-            </div>
-            <Link href="/subscribe">
-              <Button variant="ghost" className="w-full text-premium hover:text-premium/80">
-                <Crown className="h-4 w-4 mr-2" />
-                Upgrade for unlimited transaction storage
-              </Button>
-            </Link>
-          </div>
-        )}
-
-        {isPremium && (
-          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-            <Button 
-              variant="ghost" 
-              className="w-full text-primary hover:text-primary/80"
-              onClick={() => setLocation('/transactions')}
-            >
-              View All Transactions
-            </Button>
-          </div>
-        )}
+        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+          <Button 
+            variant="ghost" 
+            className="w-full text-primary hover:text-primary/80"
+            onClick={() => setLocation('/transactions')}
+          >
+            View All Transactions
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
