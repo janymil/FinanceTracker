@@ -569,7 +569,9 @@ export function registerExportRoutes(app: Express) {
         nextBackup: "Manual backup available",
         realUsage: {
           used: backups.reduce((sum, file) => sum + file.Length, 0),
-          limit: 100 * 1024 * 1024 // 100MB limit
+          limit: 100 * 1024 * 1024, // 100MB limit
+          files: backups.length,
+          total: `${Math.round(backups.reduce((sum, file) => sum + file.Length, 0) / 1024)} KB`
         },
         settings: {
           autoBackup: false,
