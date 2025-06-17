@@ -134,7 +134,8 @@ export function registerAIRoutes(app: Express) {
       };
 
       // Generate comprehensive financial data hash to check if data has changed
-      const dataHash = require('crypto').createHash('md5').update(JSON.stringify({
+      const crypto = await import('crypto');
+      const dataHash = crypto.createHash('md5').update(JSON.stringify({
         totalIncome: financialData.totalIncome,
         totalExpenses: financialData.totalExpenses,
         transactionCount: transactions.length,

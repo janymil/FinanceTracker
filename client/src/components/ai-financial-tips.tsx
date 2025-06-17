@@ -212,15 +212,9 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
           <CardTitle className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-purple-500" />
             AI Financial Tips
-            <Sparkles className="h-4 w-4 text-yellow-500" />
           </CardTitle>
           <CardDescription>
-            Sophisticated AI-powered financial analysis with personalized recommendations
-            {generatedAt && (
-              <div className="text-xs text-muted-foreground mt-1">
-                Last updated: {new Date(generatedAt).toLocaleDateString()}
-              </div>
-            )}
+            Get personalized financial advice powered by AI
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -232,83 +226,58 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             <div className="text-center py-8">
               <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground mb-4">
-                No AI analysis available yet. Generate personalized insights based on your financial data.
+                No financial tips available yet. Generate personalized insights.
               </p>
               <Button 
                 onClick={generateNewTips} 
                 disabled={isGenerating || !summary}
-                className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
               >
                 {isGenerating ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Analyzing...
+                    Generating...
                   </>
                 ) : (
                   <>
                     <Brain className="h-4 w-4 mr-2" />
-                    Generate AI Insights
+                    Generate AI Tips
                   </>
                 )}
               </Button>
             </div>
           ) : (
-            <div className="space-y-6">
-              {/* Display organized sections */}
-              {Object.entries(parseAndGroupTips(tips)).map(([sectionTitle, sectionTips]) => {
-                if (sectionTips.length === 0) return null;
-                
-                const Icon = getIconForType(sectionTitle.toLowerCase().includes('spending') ? 'spending' : 
-                                         sectionTitle.toLowerCase().includes('saving') ? 'saving' :
-                                         sectionTitle.toLowerCase().includes('budget') ? 'suggestion' : 'analysis');
-                
-                return (
-                  <div key={sectionTitle} className="space-y-3">
-                    <h4 className="flex items-center gap-2 font-semibold text-sm">
-                      <Icon className={`h-4 w-4 ${getColorForType(sectionTitle.toLowerCase().includes('spending') ? 'spending' : 
-                                                                  sectionTitle.toLowerCase().includes('saving') ? 'saving' :
-                                                                  sectionTitle.toLowerCase().includes('budget') ? 'suggestion' : 'analysis')}`} />
-                      {sectionTitle}
-                    </h4>
-                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-2">
-                      {sectionTips.map((tip, index) => (
-                        <div key={`${sectionTitle}-${index}`} className="text-sm leading-relaxed">
-                          <strong className="text-foreground">{tip.title}:</strong>{' '}
-                          <span className="text-muted-foreground">{tip.description}</span>
-                          {tip.recommendation && (
-                            <div className="mt-1 text-xs text-blue-600 dark:text-blue-400">
-                              💡 {tip.recommendation}
-                            </div>
-                          )}
-                        </div>
-                      ))}
+            <div className="space-y-4">
+              {tips.map((tip, index) => (
+                <div key={index} className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border">
+                  <div className="flex items-start gap-3">
+                    <Brain className="h-5 w-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-sm mb-1">{tip.title}</h4>
+                      <p className="text-sm text-muted-foreground">{tip.description}</p>
                     </div>
                   </div>
-                );
-              })}
-
-              {/* Generate new tips button */}
-              <div className="pt-4 border-t">
-                <Button 
-                  onClick={generateNewTips} 
-                  disabled={isGenerating || !summary}
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                >
-                  {isGenerating ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                      Generating Fresh Insights...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Generate New Insights
-                    </>
-                  )}
-                </Button>
-              </div>
+                </div>
+              ))}
+              
+              <Button 
+                onClick={generateNewTips} 
+                disabled={isGenerating || !summary}
+                variant="outline"
+                size="sm"
+                className="w-full mt-4"
+              >
+                {isGenerating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Brain className="h-4 w-4 mr-2" />
+                    Generate New Tips
+                  </>
+                )}
+              </Button>
             </div>
           )}
         </CardContent>
