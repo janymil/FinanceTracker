@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import UploadReceipt from "@/components/UploadReceipt";
+import UploadReceiptModal from "@/components/UploadReceiptModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -378,10 +378,6 @@ export default function Income() {
 
   return (
     <div>
-      <section className="mb-6">
-        <h2 className="text-xl font-bold mb-4">Quick Upload from Receipt</h2>
-        <UploadReceipt />
-      </section>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -394,27 +390,35 @@ export default function Income() {
                 Track and manage all your income sources
               </p>
             </div>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  className="bg-green-600 hover:bg-green-700"
-                  onClick={() => {
-                    setEditingTransaction(null);
-                    setNewIncome({
-                      amount: "",
-                      description: "",
-                      date: new Date().toISOString().split('T')[0],
-                      categoryId: "",
-                      isRecurring: false,
-                      recurringFrequency: "monthly",
-                      recurringEndDate: "",
-                    });
-                  }}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Income
-                </Button>
-              </DialogTrigger>
+            <div className="flex gap-2">
+              <UploadReceiptModal 
+                onReceiptProcessed={(data) => {
+                  // Refresh income transactions after receipt processing
+                  loadTransactions();
+                }}
+                buttonText="Upload Image"
+              />
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    className="bg-green-600 hover:bg-green-700"
+                    onClick={() => {
+                      setEditingTransaction(null);
+                      setNewIncome({
+                        amount: "",
+                        description: "",
+                        date: new Date().toISOString().split('T')[0],
+                        categoryId: "",
+                        isRecurring: false,
+                        recurringFrequency: "monthly",
+                        recurringEndDate: "",
+                      });
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Income
+                  </Button>
+                </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>
@@ -604,13 +608,7 @@ export default function Income() {
           </Card>
         </div>
 
-        {/* Quick Upload from Receipt */}
-        <section className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            Quick Upload from Receipt
-          </h2>
-          <UploadReceipt />
-        </section>
+
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -855,6 +853,7 @@ export default function Income() {
           </CardContent>
         </Card>
       </div>
+    </div>
     </div>
   );
 }
