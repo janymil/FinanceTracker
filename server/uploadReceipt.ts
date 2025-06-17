@@ -32,10 +32,11 @@ const visionClient = new ImageAnnotatorClient({
 
 // Bunny.net configuration
 const bunnyConfig = {
-  apiKey: process.env.BUNNY_API_KEY,
+  apiKey: process.env.BUNNY_ACCESS_KEY,
+  storagePassword: process.env.BUNNY_STORAGE_PASSWORD,
   storageZone: process.env.BUNNY_STORAGE_ZONE,
-  storageHost: process.env.BUNNY_STORAGE_HOST,
-  pullzoneUrl: process.env.BUNNY_PULLZONE_URL,
+  storageHost: 'la.storage.bunnycdn.com',
+  pullzoneUrl: 'https://finanzerpro.b-cdn.net',
 };
 
 interface UserPlan {
@@ -58,7 +59,7 @@ async function getUserPlan(userId: string): Promise<UserPlan> {
 
 // Upload file to Bunny.net
 async function uploadToBunny(fileName: string, fileBuffer: Buffer, mimeType: string): Promise<string> {
-  if (!bunnyConfig.apiKey || !bunnyConfig.storageZone || !bunnyConfig.storageHost) {
+  if (!bunnyConfig.storagePassword || !bunnyConfig.storageZone || !bunnyConfig.storageHost) {
     throw new Error('Bunny.net configuration is incomplete');
   }
 
@@ -67,7 +68,7 @@ async function uploadToBunny(fileName: string, fileBuffer: Buffer, mimeType: str
   const response = await fetch(url, {
     method: 'PUT',
     headers: {
-      'AccessKey': bunnyConfig.apiKey,
+      'AccessKey': bunnyConfig.storagePassword,
       'Content-Type': mimeType,
     },
     body: fileBuffer,
