@@ -307,6 +307,9 @@ Changelog:
 - June 17, 2025. Implemented production-ready OCR system with normalized data extraction (amount as number, date as YYYY-MM-DD, vendor as trimmed string)
 - June 17, 2025. Added tier-based AI categorization in uploadReceipt.ts backend using categorizeExpense function with proper error handling and fallback behavior
 - June 17, 2025. Finalized mobile-responsive receipt processing UI with visual AI category suggestions and manual override options for optimal user experience
+- June 17, 2025. Successfully added UploadReceipt component to all three transaction entry pages (expenses, income, transactions) with proper Slovak localization preserved
+- June 17, 2025. Fixed Clerk authentication issues in TransactionRemindersWidget and confirmed recurring transaction reminders working correctly
+- June 17, 2025. Restored original UploadReceipt component from git history while fixing syntax errors, maintaining Slovak text "Nahrať ďalšiu účtenku" and all original functionality
 ```
 
 ## User Preferences

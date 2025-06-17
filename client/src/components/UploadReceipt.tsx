@@ -40,14 +40,14 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
   const handleFileSelect = async (file: File) => {
     if (!file.type.startsWith('image/')) {
       toast({
-        title: "Invalid file type",
-        description: "Please select an image file",
+        title: "Neplatný typ súboru",
+        description: "Prosím vyberte obrázok",
         variant: "destructive"
       });
       return;
     }
 
-    setUploadState({ status: 'processing', message: 'Processing receipt...' });
+    setUploadState({ status: 'processing', message: 'Spracovávam účtenku...' });
 
     try {
       const formData = new FormData();
@@ -66,7 +66,7 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
       
       setUploadState({
         status: 'success',
-        message: 'Receipt processed successfully!',
+        message: 'Účtenka úspešne spracovaná!',
         recognizedText: result.recognizedText,
         imageUrl: result.imageUrl,
         extracted: result.extracted,
@@ -80,11 +80,11 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
     } catch (error) {
       setUploadState({
         status: 'error',
-        message: 'Failed to process receipt'
+        message: 'Nepodarilo sa spracovať účtenku'
       });
       toast({
-        title: "Upload failed",
-        description: "Please try again",
+        title: "Nahrávanie zlyhalo",
+        description: "Prosím skúste znovu",
         variant: "destructive"
       });
     }
@@ -121,10 +121,10 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Camera className="h-5 w-5" />
-          Upload Receipt
+          Nahrať účtenku
         </CardTitle>
         <CardDescription>
-          Upload a receipt image to automatically extract transaction details
+          Nahrajte fotografiu účtenky na automatické extrahovanie údajov o transakcii
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -140,16 +140,16 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
             <div className="space-y-4">
               <Upload className="h-12 w-12 text-gray-400 mx-auto" />
               <div>
-                <p className="text-lg font-medium">Upload receipt image</p>
+                <p className="text-lg font-medium">Nahrať obrázok účtenky</p>
                 <p className="text-sm text-gray-500">
-                  JPG, PNG, or other image formats
+                  JPG, PNG alebo iné obrazové formáty
                 </p>
               </div>
               <Button
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full"
               >
-                Choose File
+                Vybrať súbor
               </Button>
             </div>
           </div>
@@ -172,27 +172,27 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
             {uploadState.extracted && (
               <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg space-y-2">
                 <h4 className="font-medium text-green-800 dark:text-green-200">
-                  Extracted Information:
+                  Extrahované informácie:
                 </h4>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   {uploadState.extracted.amount && (
                     <div>
-                      <span className="font-medium">Amount:</span> ${uploadState.extracted.amount}
+                      <span className="font-medium">Suma:</span> ${uploadState.extracted.amount}
                     </div>
                   )}
                   {uploadState.extracted.vendor && (
                     <div>
-                      <span className="font-medium">Vendor:</span> {uploadState.extracted.vendor}
+                      <span className="font-medium">Predajca:</span> {uploadState.extracted.vendor}
                     </div>
                   )}
                   {uploadState.extracted.date && (
                     <div>
-                      <span className="font-medium">Date:</span> {uploadState.extracted.date}
+                      <span className="font-medium">Dátum:</span> {uploadState.extracted.date}
                     </div>
                   )}
                   {uploadState.category && (
                     <div>
-                      <span className="font-medium">Category:</span> {uploadState.category}
+                      <span className="font-medium">Kategória:</span> {uploadState.category}
                     </div>
                   )}
                 </div>
@@ -202,7 +202,7 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
                   size="sm"
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  Save as Transaction
+                  Uložiť ako transakciu
                 </Button>
               </div>
             )}
@@ -210,7 +210,7 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
             {uploadState.recognizedText && (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Recognized Text:
+                  Rozpoznaný text:
                 </label>
                 <pre className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-sm overflow-x-auto whitespace-pre-wrap border max-h-64 overflow-y-auto">
 {uploadState.recognizedText}
@@ -233,7 +233,7 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
             variant="outline"
             className="w-full"
           >
-            Upload Another Receipt
+            Nahrať ďalšiu účtenku
           </Button>
         )}
       </CardContent>
