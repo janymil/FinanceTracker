@@ -1,8 +1,11 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Camera, Upload, FileText, AlertCircle, CheckCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Camera, Upload, FileText, AlertCircle, CheckCircle, Save } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -31,6 +34,28 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const location = useLocation();
+
+  // Form state for transaction data
+  const [formData, setFormData] = useState({
+    amount: '',
+    date: new Date().toISOString().split('T')[0],
+    description: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+
+  // Update form data when extracted data changes
+  useEffect(() => {
+    if (uploadState.extracted && !uploadState.extracted.error) {
+      setFormData({
+        amount: uploadState.extracted.amount?.toString() || '',
+        date: uploadState.extracted.date || new Date().toISOString().split('T')[0],
+        description: uploadState.extracted.vendor || ''
+      });
+      setShowForm(true);
+    }
+  }, [uploadState.extracted]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -129,12 +154,81 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
   const handleReset = () => {
     setUploadState({ status: 'idle' });
     setSelectedFile(null);
+    setShowForm(false);
+    setFormData({
+      amount: '',
+      date: new Date().toISOString().split('T')[0],
+      description: ''
+    });
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
       setPreviewUrl(null);
     }
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  // Determine transaction type from current route
+  const getTransactionType = () => {
+    const path = location.pathname;
+    if (path.includes('/income')) return 'income';
+    if (path.includes('/expense')) return 'expense';
+    return 'expense'; // default to expense
+  };
+
+  const handleFormSubmit = async () => {
+    if (!formData.amount || !formData.description) {
+      toast({
+        title: "Chyba",
+        description: "Prosím vyplňte sumu a popis",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const transactionType = getTransactionType();
+      const payload = {
+        amount: parseFloat(formData.amount),
+        date: formData.date,
+        description: formData.description,
+        type: transactionType,
+        categoryId: null // Let the system auto-categorize or use default
+      };
+
+      const response = await apiRequest("POST", "/api/transactions", payload);
+
+      if (response.ok) {
+        const newTransaction = await response.json();
+        
+        toast({
+          title: "Transakcia uložená",
+          description: `${transactionType === 'income' ? 'Príjem' : 'Výdavok'} bol úspešne vytvorený`,
+        });
+
+        // Call callback if provided
+        if (onReceiptProcessed) {
+          onReceiptProcessed(newTransaction);
+        }
+
+        // Reset form
+        handleReset();
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Chyba pri ukladaní transakcie');
+      }
+    } catch (error: any) {
+      console.error("Transaction save error:", error);
+      toast({
+        title: "Chyba",
+        description: error.message || "Nepodarilo sa uložiť transakciu",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -297,6 +391,80 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
           </div>
         )}
 
+        {/* Transaction Form */}
+        {showForm && uploadState.status === 'success' && (
+          <Card className="border-green-200 dark:border-green-800">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg text-green-700 dark:text-green-300">
+                Vytvoriť transakciu
+              </CardTitle>
+              <CardDescription>
+                Skontrolujte a upravte údaje pred uložením
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="amount">Suma</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    step="0.01"
+                    value={formData.amount}
+                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                    placeholder="0.00"
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="date">Dátum</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    disabled={isSubmitting}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="description">Popis</Label>
+                <Input
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Popis transakcie"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <Button
+                  onClick={handleFormSubmit}
+                  disabled={isSubmitting || !formData.amount || !formData.description}
+                  className="flex items-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                  {isSubmitting ? 'Ukladá sa...' : 'Uložiť transakciu'}
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => setShowForm(false)}
+                  disabled={isSubmitting}
+                >
+                  Zrušiť
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Recognized Text Display */}
         {uploadState.recognizedText && uploadState.status === 'success' && (
           <div className="space-y-2">
@@ -307,7 +475,7 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
 {uploadState.recognizedText}
             </pre>
           </div>
-        )}
+        )}</pre>
 
         {/* Reset Button */}
         {uploadState.status !== 'idle' && uploadState.status !== 'processing' && (
