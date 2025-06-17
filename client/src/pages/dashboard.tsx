@@ -606,13 +606,11 @@ export default function Dashboard() {
             <LazyTrendsChart />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <RequirePlan plan="standard">
-                <TransactionList
-                  transactions={transactions as any}
-                  isLoading={transactionsLoading}
-                  isPremium={databaseUser?.plan === 'premium'}
-                />
-              </RequirePlan>
+              <TransactionList
+                transactions={transactions as any}
+                isLoading={transactionsLoading}
+                isPremium={databaseUser?.plan === 'premium'}
+              />
 
               <LazyExpenseChart summary={{
                 totalExpenses: Math.abs(financialSummary?.totalExpenses || 0),
