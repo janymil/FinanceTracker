@@ -176,9 +176,8 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
 
   // Determine transaction type from current route
   const getTransactionType = () => {
-    const path = location.pathname;
-    if (path.includes('/income')) return 'income';
-    if (path.includes('/expense')) return 'expense';
+    if (location.includes('/income')) return 'income';
+    if (location.includes('/expense')) return 'expense';
     return 'expense'; // default to expense
   };
 
