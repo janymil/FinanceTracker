@@ -169,18 +169,8 @@ export default function ExportPage() {
   const [availableBackups, setAvailableBackups] = useState<any[]>([]);
   const [selectedBackup, setSelectedBackup] = useState<string | null>(null);
 
-  // Export mutation
-  const exportMutation = useMutation({
-    mutationFn: async (options: any) => {
-      const response = await fetch("/api/export", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(options),
-      });
-      if (!response.ok) throw new Error("Export failed");
-      return response;
-    },
-  });
+  // Loading states
+  const [isExporting, setIsExporting] = useState(false);
 
   // Get auth headers for Clerk authentication
   const getAuthHeaders = async (): Promise<Record<string, string>> => {
