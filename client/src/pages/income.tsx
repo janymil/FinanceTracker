@@ -394,7 +394,7 @@ export default function Income() {
               <UploadReceiptModal 
                 onReceiptProcessed={(data) => {
                   // Refresh income transactions after receipt processing
-                  loadTransactions();
+                  fetchTransactions();
                 }}
                 buttonText="Upload Image"
               />
