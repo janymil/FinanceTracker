@@ -2,10 +2,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Crown, TrendingDown, TrendingUp, Receipt } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Crown, TrendingDown, TrendingUp, Receipt, Edit, Trash2, MoreHorizontal } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ReceiptModal from "@/components/receipt-modal";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@clerk/clerk-react";
 
 interface Transaction {
   id: number;
@@ -30,6 +39,26 @@ interface SimpleTransactionListProps {
 
 export default function SimpleTransactionList({ transactions, isLoading }: SimpleTransactionListProps) {
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [isDeleting, setIsDeleting] = useState<number | null>(null);
+  const { user } = useUser();
+  const { toast } = useToast();
+
+  // Fetch categories for edit form
+  useEffect(() => {
+    const fetchCategories = async () => {
+      if (!user?.id) return;
+      try {
+        const response = await apiRequest("GET", "/api/categories");
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    };
+    fetchCategories();
+  }, [user?.id]);
 
   const formatCurrency = (amount: string) => {
     return new Intl.NumberFormat('en-US', {
@@ -44,6 +73,62 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
       month: '2-digit',
       year: 'numeric',
     });
+  };
+
+  const handleDelete = async (transactionId: number) => {
+    setIsDeleting(transactionId);
+    try {
+      await apiRequest("DELETE", `/api/transactions/${transactionId}`);
+      await queryClient.invalidateQueries({ queryKey: ["/api/transactions", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/financial-summary", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/budgets", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/financial-health", user?.id] });
+      toast({
+        title: "Transaction Deleted",
+        description: "Transaction has been successfully deleted",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete transaction",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
+  const handleEdit = async (transaction: Transaction) => {
+    if (!editingTransaction) return;
+    
+    try {
+      const updateData = {
+        amount: parseFloat(editingTransaction.amount),
+        description: editingTransaction.description,
+        date: editingTransaction.date,
+        type: editingTransaction.type,
+        categoryId: editingTransaction.categoryName ? 
+          categories.find(c => c.name === editingTransaction.categoryName)?.id : null
+      };
+
+      await apiRequest("PUT", `/api/transactions/${editingTransaction.id}`, updateData);
+      await queryClient.invalidateQueries({ queryKey: ["/api/transactions", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/financial-summary", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/budgets", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/financial-health", user?.id] });
+      
+      setEditingTransaction(null);
+      toast({
+        title: "Transaction Updated",
+        description: "Transaction has been successfully updated",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update transaction",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {
@@ -167,6 +252,32 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                       </div>
                     )}
                   </div>
+                  
+                  {/* Action buttons */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem 
+                        onClick={() => setEditingTransaction(transaction)}
+                        className="cursor-pointer"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => handleDelete(transaction.id)}
+                        disabled={isDeleting === transaction.id}
+                        className="cursor-pointer text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        {isDeleting === transaction.id ? "Deleting..." : "Delete"}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             ))

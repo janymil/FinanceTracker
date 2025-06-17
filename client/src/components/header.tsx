@@ -107,8 +107,10 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
         ...transactionData,
         amount: parseFloat(transactionData.amount),
       });
-      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/transactions", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/financial-summary", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/budgets", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/financial-health", user?.id] });
       
       setIsDialogOpen(false);
       setNewTransaction({
