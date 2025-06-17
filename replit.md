@@ -272,6 +272,8 @@ Changelog:
 - June 16, 2025. Restored cloud backup functionality with Bunny.net integration using existing BunnyStorage infrastructure
 - June 16, 2025. Fixed admin panel to work with Clerk users - added user plan management endpoint for subscription tier control
 - June 16, 2025. Updated admin analytics to show Clerk users with plan distribution and system overview functionality
+- June 17, 2025. Removed confusing "Feature preview available after upgrade" text from RequirePlan component upgrade prompts
+- June 17, 2025. Identified premium dashboard widgets: AI Expense Prediction, Daily Recommendations, Advanced AI Financial Tips (premium-only), plus Reminders & Streaks, Auto Categorization, Budget Overview (standard+)
 ```
 
 ## User Preferences

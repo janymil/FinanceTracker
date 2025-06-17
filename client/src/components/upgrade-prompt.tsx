@@ -88,28 +88,7 @@ export default function UpgradePrompt({
         </CardContent>
       </Card>
 
-      {/* Feature Preview */}
-      <Card className="opacity-60 pointer-events-none">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Icon className="h-5 w-5" />
-              {feature} Preview
-            </CardTitle>
-            <Badge className={`${colors.badge} text-white`}>
-              <Crown className="h-3 w-3 mr-1" />
-              {requiredPlan.charAt(0).toUpperCase() + requiredPlan.slice(1)} Only
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="h-32 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-              <p className="text-gray-500 dark:text-gray-400">Feature preview available after upgrade</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+
     </div>
   );
 }
