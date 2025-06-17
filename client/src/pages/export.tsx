@@ -1,6 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useUser } from "@clerk/clerk-react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -251,63 +249,61 @@ export default function ExportPage() {
     },
   });
 
-  // Fetch data for export
-  const { data: transactions = [] } = useQuery({
-    queryKey: ["transactions", user?.id],
-  });
-
-  const { data: budgets = [] } = useQuery({
-    queryKey: ["/api/budgets"],
-  });
-
-  const { data: goals = [] } = useQuery({
-    queryKey: ["/api/goals"],
-  });
-
-  const { data: summary } = useQuery({
-    queryKey: ["/api/financial-summary"],
-  });
+  // State for all data
+  const [transactions, setTransactions] = useState([]);
+  const [budgets, setBudgets] = useState([]);
+  const [goals, setGoals] = useState([]);
+  const [summary, setSummary] = useState(null);
 
   // State for categories and backup status
   const [categories, setCategories] = useState([]);
   const [backupStatusData, setBackupStatusData] = useState(null);
   const [isLoadingBackupStatus, setIsLoadingBackupStatus] = useState(false);
 
-  // Fetch categories and backup status
+  // Fetch ALL data once when component mounts
   useEffect(() => {
     if (!isAuthenticated || !user?.id) return;
 
-    const fetchData = async () => {
+    let mounted = true;
+    
+    const fetchAllData = async () => {
       try {
-        const token = await window.Clerk.session.getToken();
+        const token = await window.Clerk?.session?.getToken();
+        if (!token || !mounted) return;
         
-        // Fetch categories
-        const categoriesResponse = await fetch('/api/categories', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (categoriesResponse.ok) {
-          const categoriesData = await categoriesResponse.json();
-          setCategories(categoriesData);
-        }
+        // Fetch all data in parallel
+        const [categoriesRes, transactionsRes, budgetsRes, goalsRes, summaryRes, backupRes] = await Promise.all([
+          fetch('/api/categories', { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch('/api/transactions', { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch('/api/budgets', { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch('/api/goals', { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch('/api/financial-summary', { headers: { 'Authorization': `Bearer ${token}` } }),
+          user?.publicMetadata?.plan === 'premium' 
+            ? fetch('/api/backup/status', { headers: { 'Authorization': `Bearer ${token}` } })
+            : Promise.resolve({ ok: false })
+        ]);
 
-        // Fetch backup status
-        setIsLoadingBackupStatus(true);
-        const backupResponse = await fetch('/api/backup/status', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (backupResponse.ok) {
-          const backupData = await backupResponse.json();
-          setBackupStatusData(backupData);
+        if (mounted) {
+          if (categoriesRes.ok) setCategories(await categoriesRes.json());
+          if (transactionsRes.ok) setTransactions(await transactionsRes.json());
+          if (budgetsRes.ok) setBudgets(await budgetsRes.json());
+          if (goalsRes.ok) setGoals(await goalsRes.json());
+          if (summaryRes.ok) setSummary(await summaryRes.json());
+          if (backupRes.ok) setBackupStatusData(await backupRes.json());
         }
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
-        setIsLoadingBackupStatus(false);
+        if (mounted) setIsLoadingBackupStatus(false);
       }
     };
 
-    fetchData();
-  }, [isAuthenticated, user?.id]);
+    fetchAllData();
+    
+    return () => {
+      mounted = false;
+    };
+  }, [isAuthenticated, user?.id, user?.publicMetadata?.plan]);
 
   // Function to refetch backup status
   const refetchBackupStatus = async () => {
