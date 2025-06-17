@@ -55,7 +55,20 @@ export default function Goals() {
     return null;
   }
 
-  
+  // Get auth headers for Clerk authentication
+  const getAuthHeaders = async (): Promise<Record<string, string>> => {
+    try {
+      if (typeof window !== 'undefined' && window.Clerk?.session) {
+        const token = await window.Clerk.session.getToken();
+        if (token) {
+          return { Authorization: `Bearer ${token}` };
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to get Clerk token:', error);
+    }
+    return {};
+  };
 
   // Fetch goals
   const fetchGoals = async () => {
@@ -63,9 +76,17 @@ export default function Goals() {
     
     setIsLoading(true);
     try {
-      const response = await apiRequest("GET", "/api/goals");
-      const data = await response.json();
-      setGoals(data);
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch('/api/goals', {
+        headers: authHeaders,
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setGoals(data);
+      } else {
+        console.error('Failed to fetch goals:', response.status);
+      }
     } catch (error) {
       console.error('Error fetching goals:', error);
     } finally {
@@ -81,7 +102,35 @@ export default function Goals() {
 
   const createGoal = async (goalData: any) => {
     try {
-      const response = await apiRequest("POST", "/api/goals", goalData);
+      // Validate date before sending
+      if (!goalData.targetDate || goalData.targetDate === '') {
+        throw new Error('Please select a target date');
+      }
+      
+      // Ensure date is in proper format
+      const targetDate = new Date(goalData.targetDate);
+      if (isNaN(targetDate.getTime())) {
+        throw new Error('Please enter a valid target date');
+      }
+      
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch('/api/goals', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          ...goalData,
+          targetDate: targetDate.toISOString()
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create goal');
+      }
       
       await fetchGoals(); // Refresh goals
       setIsDialogOpen(false);
@@ -101,7 +150,30 @@ export default function Goals() {
 
   const updateGoal = async ({ id, data }: { id: number; data: any }) => {
     try {
-      const response = await apiRequest("PUT", `/api/goals/${id}`, data);
+      // Validate date if provided
+      if (data.targetDate) {
+        const targetDate = new Date(data.targetDate);
+        if (isNaN(targetDate.getTime())) {
+          throw new Error('Please enter a valid target date');
+        }
+        data.targetDate = targetDate.toISOString();
+      }
+      
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch(`/api/goals/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update goal');
+      }
       
       await fetchGoals(); // Refresh goals
       setIsEditDialogOpen(false);
@@ -121,7 +193,17 @@ export default function Goals() {
 
   const deleteGoal = async (id: number) => {
     try {
-      const response = await apiRequest("DELETE", `/api/goals/${id}`);
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch(`/api/goals/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete goal');
+      }
       
       await fetchGoals(); // Refresh goals
       toast({
@@ -146,7 +228,22 @@ export default function Goals() {
         category: goal.category,
         description: goal.description,
       };
-      const response = await apiRequest("POST", "/api/goals", duplicateData);
+      
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch('/api/goals', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+        credentials: 'include',
+        body: JSON.stringify(duplicateData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to duplicate goal');
+      }
       
       await fetchGoals(); // Refresh goals
       toast({
