@@ -566,7 +566,19 @@ export function registerExportRoutes(app: Express) {
           size: lastBackup.Length,
           filename: lastBackup.ObjectName
         } : null,
-        nextBackup: "Manual backup available",
+        nextBackup: (() => {
+          // Calculate next 2AM backup time
+          const now = new Date();
+          const next2AM = new Date();
+          next2AM.setHours(2, 0, 0, 0);
+          
+          // If it's past 2AM today, schedule for tomorrow
+          if (now.getHours() >= 2) {
+            next2AM.setDate(next2AM.getDate() + 1);
+          }
+          
+          return `Next: ${next2AM.toLocaleDateString()} at 2:00 AM`;
+        })(),
         realUsage: {
           used: backups.reduce((sum, file) => sum + file.Length, 0),
           limit: 100 * 1024 * 1024, // 100MB limit

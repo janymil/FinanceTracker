@@ -291,6 +291,8 @@ Changelog:
 - June 17, 2025. Successfully fixed export page API loops by completely removing React Query dependencies and implementing useState/useEffect pattern with proper Clerk authentication
 - June 17, 2025. Export page now loads backup status only when backup tab is accessed, preventing infinite API calls while maintaining all cloud backup functionality
 - June 17, 2025. Fixed date formatting issues causing "Invalid time value" errors in backup status display with proper error handling for invalid dates
+- June 17, 2025. Enabled automatic daily backups at 2:00 AM for premium users with proper scheduling display and backup system integration
+- June 17, 2025. Added "Coming Soon" placeholder for export functionality matching import tab style for consistent user experience
 ```
 
 ## User Preferences
