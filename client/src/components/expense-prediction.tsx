@@ -168,34 +168,34 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
   const totalPredicted = predictions.reduce((sum, p) => sum + p.predictedNext, 0);
 
   return (
-    <div className="relative">
-      <Card className={!isPremiumUser ? "opacity-50" : ""}>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5" />
-            AI Expense Prediction
-            <Badge className="bg-premium text-white">Premium</Badge>
-          </CardTitle>
-          <CardDescription>
-            Machine learning predictions based on your spending patterns
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="categories">By Category</TabsTrigger>
-            <TabsTrigger value="timeline">Timeline</TabsTrigger>
-          </TabsList>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Brain className="h-5 w-5" />
+          AI Expense Prediction
+          <Badge className="bg-premium text-white">Premium</Badge>
+        </CardTitle>
+        <CardDescription>
+          Machine learning predictions based on your spending patterns
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isPremiumUser ? (
+          <Tabs defaultValue="overview" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="categories">By Category</TabsTrigger>
+              <TabsTrigger value="timeline">Timeline</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm font-medium">Next Month</span>
-                </div>
+            <TabsContent value="overview" className="space-y-6">
+              {/* Summary Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calendar className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium">Next Month</span>
+                  </div>
                 <div className="text-2xl font-bold text-blue-600">
                   ${totalPredicted.toLocaleString()}
                 </div>
@@ -370,31 +370,26 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
             </div>
           </TabsContent>
         </Tabs>
+        ) : (
+          <div className="text-center py-8 px-6">
+            <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Lock className="h-8 w-8 text-purple-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              Premium Feature
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
+              AI-powered expense predictions help you plan your budget with machine learning insights
+            </p>
+            <Link href="/subscribe">
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                <Crown className="h-4 w-4 mr-2" />
+                Upgrade to Premium
+              </Button>
+            </Link>
+          </div>
+        )}
       </CardContent>
     </Card>
-    
-    {/* Upgrade Banner Overlay for Non-Premium Users */}
-    {!isPremiumUser && (
-      <div className="absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg flex items-center justify-center">
-        <div className="text-center p-6 max-w-sm">
-          <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Lock className="h-8 w-8 text-purple-600" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            Premium Feature
-          </h3>
-          <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-            AI-powered expense predictions help you plan your budget with machine learning insights
-          </p>
-          <Link href="/subscribe">
-            <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-              <Crown className="h-4 w-4 mr-2" />
-              Upgrade to Premium
-            </Button>
-          </Link>
-        </div>
-      </div>
-    )}
-    </div>
   );
 }
