@@ -7,6 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { Calendar, TrendingUp, AlertTriangle, BarChart3, Clock, Lock, Crown, Brain } from 'lucide-react';
 import { Link } from 'wouter';
+import { useUser } from '@clerk/clerk-react';
+import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 
 interface ExpensePredictionProps {
   transactions?: any[];
@@ -31,9 +34,44 @@ interface MonthlyPrediction {
 
 export default function ExpensePrediction({ transactions = [], summary }: ExpensePredictionProps) {
   const [predictionPeriod, setPredictionPeriod] = useState('3m');
-  
+  const { isLoaded, isSignedIn, user } = useUser();
+  const isReady = isLoaded && isSignedIn && !!user?.id;
+
+  // Get user's plan from database
+  const { data: databaseUser, isLoading } = useQuery({
+    queryKey: ["auth-user", user?.id],
+    enabled: isReady && !!user?.id,
+    staleTime: 0,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/auth/user");
+      return response.json();
+    },
+  });
+
   // Check if user has premium plan
-  const isPremiumUser = false; // This will be replaced with actual plan check
+  const userPlan = databaseUser?.plan || 'free';
+  const isPremiumUser = userPlan === 'premium';
+
+  if (isLoading || !isReady) {
+    return (
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="h-5 w-5 text-purple-600" />
+            AI Expense Prediction
+          </CardTitle>
+          <CardDescription>
+            Machine learning predictions based on your spending patterns
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center p-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Mock data for demonstration (will be replaced with real AI predictions)
   const predictions: Prediction[] = [
