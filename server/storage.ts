@@ -839,6 +839,14 @@ export class DatabaseStorage implements IStorage {
     const now = new Date();
     const next = new Date(lastDate);
 
+    // If the transaction date is today or in the future, use it as-is for the first occurrence
+    if (next >= now) {
+      if (endDate && next > endDate) {
+        return null;
+      }
+      return next;
+    }
+
     // Keep adding periods until we find a future date
     while (next <= now) {
       switch (frequency) {
