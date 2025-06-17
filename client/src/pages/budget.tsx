@@ -144,6 +144,8 @@ export default function Budget() {
   };
 
   const expenseCategories = categories.filter((cat: Category) => cat.type === "expense");
+  console.log("Categories:", categories);
+  console.log("Expense categories:", expenseCategories);
   const totalBudget = budgets.reduce((sum: number, budget: Budget) => sum + parseFloat(budget.amount.toString() || '0'), 0);
   const totalSpent = budgets.reduce((sum: number, budget: Budget) => sum + (budget.spent || 0), 0);
   const totalRemaining = totalBudget - totalSpent;
