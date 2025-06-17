@@ -237,29 +237,23 @@ export default function Reports() {
 
         {/* Reports Tabs - Summary for all, Analytics/Auto-Tag for standard+, AI Insights for premium */}
         <Tabs defaultValue="summary" className="space-y-6">
-          <TabsList className={`grid w-full ${hasPremium ? 'grid-cols-4' : hasStandardOrBetter ? 'grid-cols-3' : 'grid-cols-1'}`}>
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="summary" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Summary
             </TabsTrigger>
-            {hasStandardOrBetter && (
-              <TabsTrigger value="analytics" className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                Analytics
-              </TabsTrigger>
-            )}
-            {hasStandardOrBetter && (
-              <TabsTrigger value="categorization" className="flex items-center gap-2">
-                <Zap className="h-4 w-4" />
-                Auto-Tag
-              </TabsTrigger>
-            )}
-            {hasPremium && (
-              <TabsTrigger value="insights" className="flex items-center gap-2">
-                <Brain className="h-4 w-4" />
-                AI Insights
-              </TabsTrigger>
-            )}
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="categorization" className="flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              Auto-Tag
+            </TabsTrigger>
+            <TabsTrigger value="insights" className="flex items-center gap-2">
+              <Brain className="h-4 w-4" />
+              AI Insights
+            </TabsTrigger>
           </TabsList>
 
           {/* Interactive Analytics */}
@@ -487,7 +481,7 @@ export default function Reports() {
               <CardHeader>
                 <CardTitle>Category Breakdown</CardTitle>
                 <CardDescription>
-                  {hasStandardOrBetter ? "Detailed spending analysis by category" : "Standard category overview (upgrade for detailed analysis)"}
+                  Detailed spending analysis by category
                 </CardDescription>
               </CardHeader>
               <CardContent>
