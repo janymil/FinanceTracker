@@ -45,10 +45,10 @@ export function FinancialMascot() {
   const { data: mascot, isLoading, refetch } = useQuery<MascotData>({
     queryKey: ["/api/mascot"],
     queryFn: async () => {
-      const token = await window.Clerk.session?.getToken();
+      const token = await window.Clerk?.session?.getToken();
       const response = await fetch("/api/mascot", {
         headers: {
-          "Authorization": `Bearer ${token}`,
+          ...(token && { "Authorization": `Bearer ${token}` }),
           "Content-Type": "application/json"
         },
         credentials: "include"
@@ -228,8 +228,16 @@ export function FinancialMascot() {
                 onClick={() => setShowSettings(!showSettings)}
                 onError={(e) => {
                   console.error('Mascot image failed to load:', mascot.imageUrl);
-                  // Hide the broken image
+                  // Hide the broken image and show fallback
                   e.currentTarget.style.display = 'none';
+                  // Trigger regeneration automatically if image failed to load
+                  if (!isGenerating) {
+                    toast({
+                      title: "Mascot image expired",
+                      description: "Click the mascot to generate a new one",
+                      variant: "default"
+                    });
+                  }
                 }}
               />
             ) : (
