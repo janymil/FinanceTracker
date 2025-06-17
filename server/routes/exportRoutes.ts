@@ -591,6 +591,45 @@ export function registerExportRoutes(app: Express) {
     }
   });
 
+  // Available backups endpoint
+  app.get('/api/available-backups', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "Cloud backup requires Premium subscription" });
+      }
+
+      if (!bunnyStorage) {
+        return res.status(503).json({ message: "Cloud backup service unavailable" });
+      }
+
+      // Get user backups using the existing method
+      const backups = await bunnyStorage.getUserBackups(userId);
+      
+      // Format backup data for frontend
+      const formattedBackups = backups.map(backup => ({
+        filename: backup.ObjectName,
+        date: backup.DateCreated,
+        size: backup.Length,
+        formattedDate: new Date(backup.DateCreated).toLocaleString(),
+        formattedSize: `${(backup.Length / 1024).toFixed(1)} KB`
+      }));
+
+      res.json({
+        backups: formattedBackups
+      });
+
+    } catch (error) {
+      console.error("Error getting available backups:", error);
+      res.status(500).json({ message: "Failed to get available backups" });
+    }
+  });
+
   // Backup settings endpoint
   app.put('/api/backup-settings', isAuthenticated, async (req: any, res) => {
     try {

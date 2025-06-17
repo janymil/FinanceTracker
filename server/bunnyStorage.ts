@@ -95,14 +95,10 @@ export class BunnyStorage {
   }
 
   async uploadFile(filePath: string, data: string | Buffer, contentType = 'application/json'): Promise<void> {
-    console.log(`BUNNY DEBUG: Uploading file to ${filePath}, size: ${data.length}`);
-    console.log(`BUNNY DEBUG: Using storage zone: ${this.config.storageZone}`);
-    console.log(`BUNNY DEBUG: Base URL: ${this.baseUrl}`);
     try {
       await this.makeRequest('PUT', `/${filePath}`, data, contentType);
-      console.log(`BUNNY DEBUG: Upload successful for ${filePath}`);
     } catch (error) {
-      console.error(`BUNNY ERROR: Upload failed for ${filePath}:`, error);
+      console.error(`Upload failed for ${filePath}:`, error);
       throw error;
     }
   }
@@ -209,15 +205,7 @@ export class BunnyStorage {
       }
     }
     
-    // Also try listing root directory to see what's there
-    console.log(`Listing root directory to debug structure`);
-    const rootFiles = await this.listFiles('');
-    console.log(`Root directory contains:`, rootFiles.map(f => ({ 
-      name: f.ObjectName, 
-      isDirectory: f.IsDirectory 
-    })));
-    
-    console.log(`No backup files found for user ${userId} in any folder variation`);
+    // No backup files found in any folder variation
     return [];
   }
 
