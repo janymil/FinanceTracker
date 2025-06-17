@@ -521,25 +521,17 @@ export default function ExportPage() {
                         }
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {backupStatusData.settings?.autoBackup ? (
-                          <div>
-                            <span className="text-green-600 font-medium">Auto backup enabled</span>
-                            <br />
-                            Next: {backupStatusData.nextBackup ? 
-                              (() => {
-                                try {
-                                  const date = new Date(backupStatusData.nextBackup);
-                                  return isNaN(date.getTime()) ? 'Manual only' : `${format(date, 'MMM dd')} at 2:00 AM`;
-                                } catch {
-                                  return 'Manual only';
-                                }
-                              })() : 
-                              'Manual only'
+                        Next scheduled: {backupStatusData.nextBackup ? 
+                          (() => {
+                            try {
+                              const date = new Date(backupStatusData.nextBackup);
+                              return isNaN(date.getTime()) ? 'Tonight at 2:00 AM' : `${format(date, 'MMM dd')} at 2:00 AM`;
+                            } catch {
+                              return 'Tonight at 2:00 AM';
                             }
-                          </div>
-                        ) : (
-                          'Next: Manual only'
-                        )}
+                          })() : 
+                          'Tonight at 2:00 AM'
+                        }
                       </div>
                     </div>
                     <div className="p-4 border rounded-lg">

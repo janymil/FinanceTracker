@@ -293,6 +293,8 @@ Changelog:
 - June 17, 2025. Fixed date formatting issues causing "Invalid time value" errors in backup status display with proper error handling for invalid dates
 - June 17, 2025. Enabled automatic daily backups at 2:00 AM for premium users with proper scheduling display and backup system integration
 - June 17, 2025. Added "Coming Soon" placeholder for export functionality matching import tab style for consistent user experience
+- June 17, 2025. Fixed contradictory backup information - removed confusing "Manual only" text and added clear "Automatic Backup Enabled" notification
+- June 17, 2025. Updated backup status display to show "Next scheduled: Tonight at 2:00 AM" for consistent automatic backup messaging
 ```
 
 ## User Preferences
