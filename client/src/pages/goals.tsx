@@ -418,80 +418,82 @@ export default function Goals() {
 
             {/* Edit Goal Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-              <DialogContent className="sm:max-w-[500px]">
+              <DialogContent className="sm:max-w-[500px] max-h-[80vh] flex flex-col">
                 <DialogHeader>
                   <DialogTitle>Edit Goal</DialogTitle>
                   <DialogDescription>
                     Update your financial goal details and track your progress.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="edit-name">Goal Name</Label>
-                    <Input
-                      id="edit-name"
-                      placeholder="Emergency Fund"
-                      value={editGoal.name}
-                      onChange={(e) => setEditGoal({ ...editGoal, name: e.target.value })}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="edit-amount">Target Amount ($)</Label>
-                    <Input
-                      id="edit-amount"
-                      type="number"
-                      placeholder="10000"
-                      value={editGoal.targetAmount}
-                      onChange={(e) => setEditGoal({ ...editGoal, targetAmount: e.target.value })}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="edit-current">Current Amount ($)</Label>
-                    <Input
-                      id="edit-current"
-                      type="number"
-                      placeholder="5000"
-                      value={editGoal.currentAmount}
-                      onChange={(e) => setEditGoal({ ...editGoal, currentAmount: e.target.value })}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="edit-date">Target Date</Label>
-                    <Input
-                      id="edit-date"
-                      type="date"
-                      value={editGoal.targetDate}
-                      onChange={(e) => setEditGoal({ ...editGoal, targetDate: e.target.value })}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="edit-category">Category</Label>
-                    <Select value={editGoal.category} onValueChange={(value) => setEditGoal({ ...editGoal, category: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="emergency">Emergency Fund</SelectItem>
-                        <SelectItem value="vacation">Vacation</SelectItem>
-                        <SelectItem value="house">House Down Payment</SelectItem>
-                        <SelectItem value="car">Car Purchase</SelectItem>
-                        <SelectItem value="debt">Debt Payoff</SelectItem>
-                        <SelectItem value="retirement">Retirement</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="edit-description">Description (Optional)</Label>
-                    <Input
-                      id="edit-description"
-                      placeholder="Save for 6 months of expenses"
-                      value={editGoal.description}
-                      onChange={(e) => setEditGoal({ ...editGoal, description: e.target.value })}
-                    />
+                <div className="flex-1 overflow-y-auto px-1">
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-name">Goal Name</Label>
+                      <Input
+                        id="edit-name"
+                        placeholder="Emergency Fund"
+                        value={editGoal.name}
+                        onChange={(e) => setEditGoal({ ...editGoal, name: e.target.value })}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-amount">Target Amount ($)</Label>
+                      <Input
+                        id="edit-amount"
+                        type="number"
+                        placeholder="10000"
+                        value={editGoal.targetAmount}
+                        onChange={(e) => setEditGoal({ ...editGoal, targetAmount: e.target.value })}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-current">Current Amount ($)</Label>
+                      <Input
+                        id="edit-current"
+                        type="number"
+                        placeholder="5000"
+                        value={editGoal.currentAmount}
+                        onChange={(e) => setEditGoal({ ...editGoal, currentAmount: e.target.value })}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-date">Target Date</Label>
+                      <Input
+                        id="edit-date"
+                        type="date"
+                        value={editGoal.targetDate}
+                        onChange={(e) => setEditGoal({ ...editGoal, targetDate: e.target.value })}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-category">Category</Label>
+                      <Select value={editGoal.category} onValueChange={(value) => setEditGoal({ ...editGoal, category: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="emergency">Emergency Fund</SelectItem>
+                          <SelectItem value="vacation">Vacation</SelectItem>
+                          <SelectItem value="house">House Down Payment</SelectItem>
+                          <SelectItem value="car">Car Purchase</SelectItem>
+                          <SelectItem value="debt">Debt Payoff</SelectItem>
+                          <SelectItem value="retirement">Retirement</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-description">Description (Optional)</Label>
+                      <Input
+                        id="edit-description"
+                        placeholder="Save for 6 months of expenses"
+                        value={editGoal.description}
+                        onChange={(e) => setEditGoal({ ...editGoal, description: e.target.value })}
+                      />
+                    </div>
                   </div>
                 </div>
-                <div className="flex justify-end space-x-2">
+                <div className="flex justify-end space-x-2 pt-4 border-t">
                   <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                     Cancel
                   </Button>
