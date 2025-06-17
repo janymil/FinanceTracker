@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/useAuth";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,12 +26,14 @@ interface Goal {
 }
 
 export default function Goals() {
-  const { user } = useAuth();
+  const { isReady, user } = useClerkUserReady();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [newGoal, setNewGoal] = useState({
     name: "",
     targetAmount: "",
@@ -52,15 +54,67 @@ export default function Goals() {
     return null;
   }
 
-  const { data: goals = [], isLoading } = useQuery({
-    queryKey: ["/api/goals"],
-    enabled: !!user,
-  });
+  // Get auth headers for Clerk authentication
+  const getAuthHeaders = async (): Promise<Record<string, string>> => {
+    try {
+      if (typeof window !== 'undefined' && window.Clerk?.session) {
+        const token = await window.Clerk.session.getToken();
+        if (token) {
+          return { Authorization: `Bearer ${token}` };
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to get Clerk token:', error);
+    }
+    return {};
+  };
+
+  // Fetch goals
+  const fetchGoals = async () => {
+    if (!isReady) return;
+    
+    setIsLoading(true);
+    try {
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch('/api/goals', {
+        headers: authHeaders,
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setGoals(data);
+      }
+    } catch (error) {
+      console.error('Error fetching goals:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isReady) {
+      fetchGoals();
+    }
+  }, [isReady]);
 
   const createGoal = async (goalData: any) => {
     try {
-      const res = await apiRequest("POST", "/api/goals", goalData);
-      await queryClient.invalidateQueries({ queryKey: ["goals"] });
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch("/api/goals", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders,
+        },
+        credentials: 'include',
+        body: JSON.stringify(goalData),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to create goal");
+      }
+      
+      await fetchGoals(); // Refresh goals
       setIsDialogOpen(false);
       setNewGoal({ name: "", targetAmount: "", targetDate: "", category: "", description: "" });
       toast({
@@ -78,8 +132,22 @@ export default function Goals() {
 
   const updateGoal = async ({ id, data }: { id: number; data: any }) => {
     try {
-      const res = await apiRequest("PUT", `/api/goals/${id}`, data);
-      await queryClient.invalidateQueries({ queryKey: ["goals"] });
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch(`/api/goals/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders,
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to update goal");
+      }
+      
+      await fetchGoals(); // Refresh goals
       setIsEditDialogOpen(false);
       setEditingGoal(null);
       toast({
@@ -97,8 +165,18 @@ export default function Goals() {
 
   const deleteGoal = async (id: number) => {
     try {
-      const res = await apiRequest("DELETE", `/api/goals/${id}`);
-      await queryClient.invalidateQueries({ queryKey: ["goals"] });
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch(`/api/goals/${id}`, {
+        method: "DELETE",
+        headers: authHeaders,
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to delete goal");
+      }
+      
+      await fetchGoals(); // Refresh goals
       toast({
         title: "Goal Deleted",
         description: "Your financial goal has been deleted successfully.",
@@ -121,8 +199,22 @@ export default function Goals() {
         category: goal.category,
         description: goal.description,
       };
-      const res = await apiRequest("POST", "/api/goals", duplicateData);
-      await queryClient.invalidateQueries({ queryKey: ["goals"] });
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch("/api/goals", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders,
+        },
+        credentials: 'include',
+        body: JSON.stringify(duplicateData),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to duplicate goal");
+      }
+      
+      await fetchGoals(); // Refresh goals
       toast({
         title: "Goal Duplicated",
         description: "Your financial goal has been duplicated successfully.",
