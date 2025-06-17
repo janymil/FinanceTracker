@@ -577,7 +577,7 @@ export function registerExportRoutes(app: Express) {
             next2AM.setDate(next2AM.getDate() + 1);
           }
           
-          return `Next: ${next2AM.toLocaleDateString()} at 2:00 AM`;
+          return next2AM.toISOString();
         })(),
         realUsage: {
           used: backups.reduce((sum, file) => sum + file.Length, 0),

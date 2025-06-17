@@ -493,17 +493,25 @@ export default function ExportPage() {
                         }
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        Next: {backupStatusData.nextBackup ? 
-                          (() => {
-                            try {
-                              const date = new Date(backupStatusData.nextBackup);
-                              return isNaN(date.getTime()) ? 'Manual only' : format(date, 'MMM dd');
-                            } catch {
-                              return 'Manual only';
+                        {backupStatusData.settings?.autoBackup ? (
+                          <div>
+                            <span className="text-green-600 font-medium">Auto backup enabled</span>
+                            <br />
+                            Next: {backupStatusData.nextBackup ? 
+                              (() => {
+                                try {
+                                  const date = new Date(backupStatusData.nextBackup);
+                                  return isNaN(date.getTime()) ? 'Manual only' : `${format(date, 'MMM dd')} at 2:00 AM`;
+                                } catch {
+                                  return 'Manual only';
+                                }
+                              })() : 
+                              'Manual only'
                             }
-                          })() : 
-                          'Manual only'
-                        }
+                          </div>
+                        ) : (
+                          'Next: Manual only'
+                        )}
                       </div>
                     </div>
                     <div className="p-4 border rounded-lg">
