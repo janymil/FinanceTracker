@@ -246,7 +246,7 @@ export default function ExportPage() {
       const token = await window.Clerk?.session?.getToken();
       if (!token) return;
 
-      const response = await fetch('/api/restore', {
+      const response = await fetch('/api/restore-backup', {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -574,7 +574,19 @@ export default function ExportPage() {
                   
                   <Button 
                     variant="outline" 
-                    onClick={() => handleRestore()}
+                    onClick={() => {
+                      // Get the latest backup filename from the status data
+                      const latestBackup = backupStatusData?.lastBackup?.filename;
+                      if (latestBackup) {
+                        handleRestore(latestBackup);
+                      } else {
+                        toast({
+                          title: "No Backups Available",
+                          description: "No backups found to restore.",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
                     disabled={isRestoring}
                   >
                     {isRestoring ? (
