@@ -260,7 +260,7 @@ export default function ExportPage() {
         
         toast({
           title: "Restore Successful",
-          description: `Restored ${result.restoredData.transactions} transactions and ${result.restoredData.budgets} budgets from backup.`,
+          description: `Restored ${result.restoredData.transactions} transactions and ${result.restoredData.budgets} budgets from backup file: ${result.filename}`,
         });
         
         // Just refresh backup status after restore

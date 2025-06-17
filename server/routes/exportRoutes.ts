@@ -676,6 +676,8 @@ export function registerExportRoutes(app: Express) {
         return res.status(400).json({ message: "Backup filename required" });
       }
 
+      console.log(`RESTORE DEBUG: Restoring backup file: ${filename} for user: ${userId}`);
+
       // Use the existing downloadFile method with proper path
       const filePath = `backups/user-${userId}/${filename}`;
       const backupContent = await bunnyStorage.downloadFile(filePath);
@@ -762,10 +764,14 @@ export function registerExportRoutes(app: Express) {
         }
       }
 
+      console.log(`RESTORE DEBUG: Successfully restored backup: ${filename} with data:`, restoredData);
+
       res.json({ 
         success: true, 
         message: "Backup restored successfully",
-        restoredData
+        restoredData,
+        filename: filename,
+        backupDate: parsedData.timestamp
       });
 
     } catch (error) {
