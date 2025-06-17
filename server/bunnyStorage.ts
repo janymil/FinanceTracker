@@ -108,7 +108,7 @@ export class BunnyStorage {
       const response = await fetch(`${this.baseUrl}/${filePath}`, {
         method: 'GET',
         headers: {
-          'AccessKey': this.accessKey,
+          'AccessKey': this.config.storagePassword,
         },
       });
 
@@ -116,7 +116,7 @@ export class BunnyStorage {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // For backup files, we want the raw text content, not parsed JSON
+      // Return raw text content for backup files
       return await response.text();
     } catch (error) {
       console.error(`Download failed for ${filePath}:`, error);
