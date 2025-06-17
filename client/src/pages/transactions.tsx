@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import UploadReceipt from "@/components/UploadReceipt";
+import UploadReceiptModal from "@/components/UploadReceiptModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -509,30 +509,38 @@ export default function Transactions() {
                 Manage all your income and expense transactions
               </p>
             </div>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  onClick={() => {
-                    setEditingTransaction(null);
-                    setNewTransaction({
-                      amount: "",
-                      description: "",
-                      date: new Date().toISOString().split('T')[0],
-                      type: "expense",
-                      categoryId: "",
-                      isRecurring: false,
-                      recurringFrequency: "monthly",
-                      recurringEndDate: "",
-                      paymentUrl: "",
-                      referenceNote: "",
-                    });
-                  }}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Transaction
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex gap-2">
+              <UploadReceiptModal 
+                onReceiptProcessed={(data) => {
+                  // Refresh transactions after receipt processing
+                  loadTransactions();
+                }}
+                buttonText="Upload Image"
+              />
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    onClick={() => {
+                      setEditingTransaction(null);
+                      setNewTransaction({
+                        amount: "",
+                        description: "",
+                        date: new Date().toISOString().split('T')[0],
+                        type: "expense",
+                        categoryId: "",
+                        isRecurring: false,
+                        recurringFrequency: "monthly",
+                        recurringEndDate: "",
+                        paymentUrl: "",
+                        referenceNote: "",
+                      });
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Transaction
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingTransaction ? "Edit Transaction" : "Add New Transaction"}
@@ -781,13 +789,7 @@ export default function Transactions() {
           </Card>
         </div>
 
-        {/* Quick Upload from Receipt */}
-        <section className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            Quick Upload from Receipt
-          </h2>
-          <UploadReceipt />
-        </section>
+
 
         {/* Month Navigation Filter */}
         <MonthFilter 
