@@ -354,6 +354,9 @@ Changelog:
 - June 18, 2025. Added .gitignore protection against accidental service account file commits for enhanced security posture
 - June 18, 2025. Improved auth page layout from 3-column to 2-column design with wider, shorter Clerk forms and better mobile responsiveness
 - June 18, 2025. Fixed authentication button redirects - "Get Started Free" and new user buttons direct to sign-up tab, "Sign In" buttons direct to sign-in tab
+- June 18, 2025. SECURITY FIX: Fixed critical data isolation bug where users could see categories from other users
+- June 18, 2025. Implemented proper category system - predefined categories (userId=NULL) visible to all users, custom categories (userId=specific) only visible to creator
+- June 18, 2025. Added userId field to categories table with proper database migration preserving existing data integrity
 ```
 
 ## User Preferences

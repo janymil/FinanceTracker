@@ -524,7 +524,13 @@ export class DatabaseStorage implements IStorage {
   // Category operations
   async getCategories(userId?: string): Promise<Category[]> {
     if (userId) {
-      return await db.select().from(categories).where(eq(categories.userId, userId));
+      // Return both predefined categories (userId is NULL) and user-specific categories
+      return await db.select().from(categories).where(
+        or(
+          isNull(categories.userId),
+          eq(categories.userId, userId)
+        )
+      );
     }
     return await db.select().from(categories);
   }
