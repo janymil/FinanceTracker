@@ -65,7 +65,13 @@ export function registerMobileUploadRoutes(app: Express) {
       }
 
       // Process receipt using existing OCR system
-      const ocrResult = await processReceiptOCR(file.buffer, file.originalname);
+      const recognizedText = await performOCR(file.buffer);
+      const extractedData = await extractStructuredData(recognizedText);
+      
+      const ocrResult = {
+        text: recognizedText,
+        extracted: extractedData
+      };
 
       // Store the upload result in session
       const sessionData = {

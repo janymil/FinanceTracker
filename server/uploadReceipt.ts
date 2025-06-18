@@ -95,7 +95,7 @@ async function uploadToBunny(fileName: string, fileBuffer: Buffer, mimeType: str
 }
 
 // Perform OCR using Google Cloud Vision
-async function performOCR(imageBuffer: Buffer): Promise<string> {
+export async function performOCR(imageBuffer: Buffer): Promise<string> {
   try {
     const [result] = await visionClient.textDetection({
       image: { content: imageBuffer },
@@ -116,7 +116,7 @@ async function performOCR(imageBuffer: Buffer): Promise<string> {
 }
 
 // Extract structured data from OCR text using OpenAI
-async function extractStructuredData(ocrText: string): Promise<{
+export async function extractStructuredData(ocrText: string): Promise<{
   amount?: number;
   date?: string;
   vendor?: string;
