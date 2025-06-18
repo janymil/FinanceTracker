@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useClerk } from "@clerk/clerk-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -112,15 +113,21 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
     fetchCategories();
   }, [user?.id]);
 
-  const createTransaction = async (transactionData: typeof newTransaction) => {
-    try {
-      const res = await apiRequest("POST", "/api/transactions", {
+  const queryClient = useQueryClient();
+
+  const createTransactionMutation = useMutation({
+    mutationFn: async (transactionData: typeof newTransaction) => {
+      const response = await apiRequest("POST", "/api/transactions", {
         ...transactionData,
         amount: parseFloat(transactionData.amount),
       });
-      await queryClient.refetchQueries({ 
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalidate all relevant queries to force refresh
+      queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
+      queryClient.invalidateQueries({ 
         predicate: (query) => 
-          query.queryKey[0] === "transactions" || 
           query.queryKey[0] === "financial-summary" ||
           query.queryKey[0] === "budgets" ||
           query.queryKey[0] === "financial-health" ||
@@ -144,14 +151,15 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
         title: "Transaction Added",
         description: "Transaction has been created successfully",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     }
-  };
+  });
 
   const handleSubmit = async () => {
     if (!newTransaction.amount || !newTransaction.description) {
@@ -162,7 +170,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
       });
       return;
     }
-    await createTransaction(newTransaction);
+    createTransactionMutation.mutate(newTransaction);
   };
 
 
