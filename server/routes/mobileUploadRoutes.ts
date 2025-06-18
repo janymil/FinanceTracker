@@ -5,7 +5,7 @@ import { isAuthenticated, getUserId } from "../clerkAuth";
 import { performOCR, extractStructuredData } from "../uploadReceipt";
 
 // In-memory storage for mobile upload sessions
-const mobileUploadSessions = new Map();
+const mobileUploadSessions = new Map<string, any>();
 
 // Configure multer for memory storage
 const upload = multer({ 

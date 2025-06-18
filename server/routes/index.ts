@@ -12,7 +12,7 @@ import { uploadReceiptHandler } from '../uploadReceipt';
 import { registerAIRoutes } from "./aiRoutes";
 import { registerAdminRoutes } from "./adminRoutes";
 import { setCookieConsent } from "../cookieMiddleware";
-import { registerMobileUploadRoutes } from "./mobileUploadRoutes.js";
+import { registerMobileUploadRoutes } from "./mobileUploadRoutes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Cookie consent middleware
