@@ -1,8 +1,8 @@
 import { Express } from "express";
 import multer from "multer";
 import crypto from "crypto";
+import fetch from "node-fetch";
 import { isAuthenticated, getUserId } from "../clerkAuth";
-import { performOCR, extractStructuredData } from "../uploadReceipt";
 
 // In-memory storage for mobile upload sessions
 const mobileUploadSessions = new Map<string, any>();
@@ -82,55 +82,38 @@ export function registerMobileUploadRoutes(app) {
         return res.status(400).json({ error: 'No valid image data received' });
       }
 
-      // Call the standard OCR handler to ensure complete consistency
+      // Connect to the standard OCR endpoint via HTTP request
       let ocrResult;
       try {
-        console.log('Calling standard OCR handler...');
+        console.log('Connecting to standard OCR endpoint...');
         
-        // Import the standard uploadReceiptHandler
-        const { uploadReceiptHandler } = await import('../uploadReceipt');
-        
-        // Create a proper request object that matches the standard upload format
-        const mockReq = {
-          file: {
-            buffer: file.buffer,
-            mimetype: file.mimetype,
-            originalname: file.originalname || 'mobile-upload.jpg'
+        // Create FormData for the standard upload endpoint
+        const FormData = require('form-data');
+        const formData = new FormData();
+        formData.append('receipt', file.buffer, {
+          filename: file.originalname || 'mobile-upload.jpg',
+          contentType: file.mimetype
+        });
+
+        // Make HTTP request to the standard upload endpoint
+        const response = await fetch('http://localhost:5000/api/upload-receipt', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${userId}`, // Use user ID as auth token
+            ...formData.getHeaders()
           },
-          auth: () => ({ userId })
-        };
-        
-        // Create a response object that captures the result
-        let capturedResult: any = null;
-        const mockRes = {
-          json: (data: any) => {
-            capturedResult = data;
-          },
-          status: (code: number) => ({
-            json: (data: any) => {
-              if (code !== 200) {
-                throw new Error(`Upload failed with status ${code}: ${JSON.stringify(data)}`);
-              }
-              capturedResult = data;
-            }
-          })
-        };
-        
-        // Get the actual handler function (it's an array with middleware and handler)
-        const actualHandler = uploadReceiptHandler[uploadReceiptHandler.length - 1];
-        
-        // Process through the exact same pipeline as desktop
-        await actualHandler(mockReq as any, mockRes as any);
-        
-        if (!capturedResult) {
-          throw new Error('No result captured from standard OCR processing');
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error(`Standard OCR endpoint failed: ${response.status}`);
         }
-        
-        ocrResult = capturedResult;
-        console.log('Standard OCR processing completed via standard handler');
+
+        ocrResult = await response.json();
+        console.log('Standard OCR endpoint processing completed');
         
       } catch (error) {
-        console.error('Standard OCR processing failed:', error);
+        console.error('Standard OCR endpoint failed:', error);
         mobileUploadSessions.set(sessionId, {
           userId: userId,
           status: 'error',
