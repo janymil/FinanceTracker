@@ -110,6 +110,10 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
     try {
       // First create a backend session
       const token = await getToken();
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+      
       const response = await fetch('/api/mobile-upload/create-session', {
         method: 'POST',
         headers: {
