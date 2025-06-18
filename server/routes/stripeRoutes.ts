@@ -27,8 +27,8 @@ export function registerStripeRoutes(app: Express) {
       }
       
       // Get email from Clerk token
-      const clerkUser = req.auth?.user;
-      const userEmail = clerkUser?.emailAddresses?.[0]?.emailAddress;
+      const auth = req.auth();
+      const userEmail = auth?.sessionClaims?.email;
       
       const baseUrl = `${req.headers.origin || 'http://localhost:5000'}`;
       const successUrl = `${baseUrl}/dashboard?success=true&plan=${plan}&session_id={CHECKOUT_SESSION_ID}`;
