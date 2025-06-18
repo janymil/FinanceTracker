@@ -42,7 +42,9 @@ export default function Goals() {
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [newGoal, setNewGoal] = useState({
     name: "",
     targetAmount: "",
@@ -102,9 +104,36 @@ export default function Goals() {
     }
   };
 
+  // Fetch categories
+  const fetchCategories = async () => {
+    if (!isReady) return;
+    
+    setCategoriesLoading(true);
+    try {
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch('/api/categories', {
+        headers: authHeaders,
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        // Filter only goal categories
+        const goalCategories = data.filter((cat: Category) => cat.type === 'goal');
+        setCategories(goalCategories);
+      } else {
+        console.error('Failed to fetch categories:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (isReady) {
       fetchGoals();
+      fetchCategories();
     }
   }, [isReady]);
 
@@ -393,13 +422,11 @@ export default function Goals() {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="emergency">Emergency Fund</SelectItem>
-                        <SelectItem value="vacation">Vacation</SelectItem>
-                        <SelectItem value="house">House Down Payment</SelectItem>
-                        <SelectItem value="car">Car Purchase</SelectItem>
-                        <SelectItem value="debt">Debt Payoff</SelectItem>
-                        <SelectItem value="retirement">Retirement</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.name.toLowerCase().replace(/\s+/g, '_')}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -480,13 +507,11 @@ export default function Goals() {
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="emergency">Emergency Fund</SelectItem>
-                          <SelectItem value="vacation">Vacation</SelectItem>
-                          <SelectItem value="house">House Down Payment</SelectItem>
-                          <SelectItem value="car">Car Purchase</SelectItem>
-                          <SelectItem value="debt">Debt Payoff</SelectItem>
-                          <SelectItem value="retirement">Retirement</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
+                          {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.name.toLowerCase().replace(/\s+/g, '_')}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
