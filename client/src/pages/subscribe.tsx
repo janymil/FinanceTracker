@@ -39,16 +39,9 @@ export default function Subscribe() {
         console.log('Stripe checkout URL received:', url);
         if (url) {
           console.log('Redirecting to Stripe checkout...');
-          // Add a small delay to ensure DOM is ready
-          setTimeout(() => {
-            try {
-              window.location.href = url;
-            } catch (error) {
-              console.error('Redirect error:', error);
-              // Try alternative method
-              window.open(url, '_self');
-            }
-          }, 100);
+          
+          // Use top-level navigation to avoid popup blockers
+          window.top!.location.href = url;
         } else {
           console.error('No URL received from checkout session');
           setLoading(false);
