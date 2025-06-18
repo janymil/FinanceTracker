@@ -146,16 +146,69 @@
 .clerk-profile-mobile .cl-userProfile-root {
   max-width: 100% !important;
   overflow-x: hidden !important;
+  width: 100% !important;
 }
 
 .clerk-profile-mobile .cl-navbar {
   overflow-x: auto !important;
   white-space: nowrap !important;
+  flex-wrap: nowrap !important;
 }
 
 .clerk-profile-mobile .cl-navbarButton {
   flex-shrink: 0 !important;
   min-width: auto !important;
+  font-size: 0.875rem !important;
+  padding: 0.5rem 0.75rem !important;
+}
+
+/* Force mobile-friendly layout for Clerk forms */
+@media (max-width: 768px) {
+  .clerk-profile-mobile .cl-userProfile-root {
+    display: block !important;
+    width: 100% !important;
+  }
+  
+  .clerk-profile-mobile .cl-userProfile-navbar {
+    width: 100% !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .clerk-profile-mobile .cl-userProfile-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+  
+  /* Ensure form buttons are visible on mobile */
+  .clerk-profile-mobile .cl-formButtonPrimary,
+  .clerk-profile-mobile .cl-formButtonSecondary,
+  .clerk-profile-mobile .cl-button {
+    width: 100% !important;
+    margin: 0.5rem 0 !important;
+    position: relative !important;
+    right: auto !important;
+    bottom: auto !important;
+  }
+  
+  /* Fix form layout on mobile */
+  .clerk-profile-mobile .cl-card,
+  .clerk-profile-mobile .cl-form {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Ensure input fields are properly sized */
+  .clerk-profile-mobile .cl-formField {
+    width: 100% !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .clerk-profile-mobile .cl-input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
 }
 
 /* Improve Clerk mobile hamburger menu visibility */

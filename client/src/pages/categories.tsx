@@ -247,15 +247,17 @@ export default function Categories() {
 
         {/* Tabs for Expense and Income Categories */}
         <Tabs defaultValue="expenses" className="space-y-6">
-          <div className="flex items-center justify-between">
-            <TabsList>
-              <TabsTrigger value="expenses" className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <TabsList className="w-full sm:w-auto">
+              <TabsTrigger value="expenses" className="flex items-center gap-2 text-xs sm:text-sm">
                 <TrendingUp className="h-4 w-4" />
-                Expense Categories
+                <span className="hidden sm:inline">Expense Categories</span>
+                <span className="sm:hidden">Expenses</span>
               </TabsTrigger>
-              <TabsTrigger value="income" className="flex items-center gap-2">
+              <TabsTrigger value="income" className="flex items-center gap-2 text-xs sm:text-sm">
                 <DollarSign className="h-4 w-4" />
-                Income Categories
+                <span className="hidden sm:inline">Income Categories</span>
+                <span className="sm:hidden">Income</span>
               </TabsTrigger>
             </TabsList>
 
