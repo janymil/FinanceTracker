@@ -18,7 +18,7 @@ export default function Landing() {
     if (plan !== 'free') {
       localStorage.setItem('selectedPlan', plan);
     }
-    setLocation('/auth');
+    setLocation('/auth#sign-up');
   };
 
   return (

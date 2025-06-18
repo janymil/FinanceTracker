@@ -352,6 +352,8 @@ Changelog:
 - June 18, 2025. SECURITY: Migrated Google Cloud Vision OCR from hardcoded service-account.json to secure environment variables
 - June 18, 2025. Removed insecure JSON credential file and implemented proper validation for Google Cloud environment variables
 - June 18, 2025. Added .gitignore protection against accidental service account file commits for enhanced security posture
+- June 18, 2025. Improved auth page layout from 3-column to 2-column design with wider, shorter Clerk forms and better mobile responsiveness
+- June 18, 2025. Fixed authentication button redirects - "Get Started Free" and new user buttons direct to sign-up tab, "Sign In" buttons direct to sign-in tab
 ```
 
 ## User Preferences
