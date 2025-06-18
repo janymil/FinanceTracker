@@ -27,7 +27,7 @@ const upload = multer({
 
 // Initialize Google Cloud Vision client
 const visionClient = new ImageAnnotatorClient({
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+  keyFilename: './service-account.json',
 });
 
 // Bunny.net configuration
