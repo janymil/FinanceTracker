@@ -215,14 +215,14 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
   // Process QR upload result using the same logic as desktop OCR
   const processQRUploadResult = (result: any) => {
     // Auto-populate form with extracted data from mobile upload
-    if (result.ocrData && result.ocrData.extracted) {
-      console.log('QR Extracted data:', result.ocrData.extracted);
+    if (result.data && result.data.extracted) {
+      console.log('QR Extracted data:', result.data.extracted);
       
       // Find best matching category using the same logic as desktop OCR
       let matchedCategoryId = '';
-      if (result.ocrData.category && categories.length > 0) {
-        const suggestedCategory = result.ocrData.category.toLowerCase();
-        console.log('QR AI suggested category:', result.ocrData.category);
+      if (result.data.category && categories.length > 0) {
+        const suggestedCategory = result.data.category.toLowerCase();
+        console.log('QR AI suggested category:', result.data.category);
         
         // Try exact match first
         let matchedCategory = categories.find(cat => 
@@ -263,28 +263,28 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
           matchedCategoryId = matchedCategory.id.toString();
           console.log('QR Matched to existing category:', matchedCategory.name);
         } else {
-          console.log('QR No matching category found for:', result.ocrData.category);
+          console.log('QR No matching category found for:', result.data.category);
         }
       }
 
       const newFormData = {
-        amount: result.ocrData.extracted.amount?.toString() || '',
-        description: result.ocrData.extracted.vendor || '',
-        date: result.ocrData.extracted.date || new Date().toISOString().split('T')[0],
+        amount: result.data.extracted.amount?.toString() || '',
+        description: result.data.extracted.vendor || '',
+        date: result.data.extracted.date || new Date().toISOString().split('T')[0],
         categoryId: matchedCategoryId
       };
       console.log('QR Setting form data:', newFormData);
       setFormData(newFormData);
     }
     
-    // Set upload state with the same structure as desktop OCR
+    // Set upload state with the mobile upload data structure
     setUploadState({
       status: 'success',
       message: 'Receipt processed successfully via mobile!',
-      recognizedText: result.ocrData.text,
-      imageUrl: result.imageUrl,
-      extracted: result.ocrData.extracted,
-      category: result.ocrData.category
+      recognizedText: result.data.text,
+      imageUrl: result.imageUrl || '',
+      extracted: result.data.extracted,
+      category: result.data.category
     });
 
     if (onReceiptProcessed) {
