@@ -82,22 +82,70 @@ export function registerMobileUploadRoutes(app) {
         return res.status(400).json({ error: 'No valid image data received' });
       }
 
-      // Process the receipt using the existing OCR functions
+      // Use the exact same OCR functions as desktop upload
       let ocrResult;
       try {
-        console.log('Starting OCR processing...');
+        console.log('Starting standard OCR processing...');
+        
+        // Import the OCR functions from uploadReceipt
+        const { performOCR, extractStructuredData, getUserPlan, uploadToBunny, categorizeExpense } = await import('../uploadReceipt');
+        
+        // Get user plan (same as desktop)
+        const userPlan = await getUserPlan(userId);
+        const canStore = userPlan.plan === 'standard' || userPlan.plan === 'premium';
+
+        // Perform OCR (same as desktop)
         const recognizedText = await performOCR(file.buffer);
-        console.log('OCR completed, text length:', recognizedText.length);
-        
+
+        // Extract structured data using OpenAI (same as desktop)
         const extractedData = await extractStructuredData(recognizedText);
-        console.log('Data extraction completed:', extractedData);
-        
+
+        // AI Categorization for standard+ users (same as desktop)
+        let predictedCategory: string | undefined;
+        if (userPlan.plan === 'standard' || userPlan.plan === 'premium') {
+          try {
+            const descriptionForCategorization = extractedData.vendor || recognizedText;
+            const amountForCategorization = extractedData.amount || 0;
+            
+            const categorization = await categorizeExpense(descriptionForCategorization, amountForCategorization);
+            predictedCategory = categorization.category;
+          } catch (categoryError) {
+            console.error('AI categorization failed:', categoryError);
+          }
+        }
+
+        let imageUrl: string | undefined;
+
+        // Upload to Bunny.net if user has appropriate plan (same as desktop)
+        if (canStore) {
+          const timestamp = Date.now();
+          const fileName = `receipt-${userId}-${timestamp}.${file.mimetype.split('/')[1]}`;
+          
+          try {
+            imageUrl = await uploadToBunny(fileName, file.buffer, file.mimetype);
+          } catch (uploadError) {
+            console.error('Upload to Bunny.net failed:', uploadError);
+          }
+        }
+
+        // Prepare response (same structure as desktop)
         ocrResult = {
           text: recognizedText,
           extracted: extractedData
         };
+
+        if (imageUrl) {
+          ocrResult.imageUrl = imageUrl;
+        }
+
+        if (predictedCategory) {
+          ocrResult.category = predictedCategory;
+        }
+        
+        console.log('Standard OCR processing completed');
+        
       } catch (error) {
-        console.error('Mobile OCR processing failed:', error);
+        console.error('Standard OCR processing failed:', error);
         mobileUploadSessions.set(sessionId, {
           userId: userId,
           status: 'error',
