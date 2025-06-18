@@ -39,9 +39,9 @@ export default function Subscribe() {
         console.log('Stripe checkout URL received:', url);
         if (url) {
           console.log('Redirecting to Stripe checkout...');
-          
-          // Use top-level navigation to avoid popup blockers
-          window.top!.location.href = url;
+          // Don't set loading to false here since we're redirecting
+          window.location.href = url;
+          return; // Exit the function after redirect
         } else {
           console.error('No URL received from checkout session');
           setLoading(false);
