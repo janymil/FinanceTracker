@@ -141,3 +141,41 @@
 }
 
 /* Clerk UserProfile Layout Improvements - Clean Default Styling */
+
+/* Mobile Clerk UserProfile styling improvements */
+.clerk-profile-mobile .cl-userProfile-root {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+.clerk-profile-mobile .cl-navbar {
+  overflow-x: auto !important;
+  white-space: nowrap !important;
+}
+
+.clerk-profile-mobile .cl-navbarButton {
+  flex-shrink: 0 !important;
+  min-width: auto !important;
+}
+
+/* Improve Clerk mobile hamburger menu visibility */
+@media (max-width: 768px) {
+  .clerk-profile-mobile .cl-navbar-hamburgerButton {
+    background-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+    border-radius: 0.5rem !important;
+    padding: 0.5rem !important;
+    margin-right: 0.5rem !important;
+  }
+  
+  .clerk-profile-mobile .cl-navbar-hamburgerButtonIcon {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+  }
+  
+  /* Ensure mobile navigation is properly visible */
+  .clerk-profile-mobile .cl-navbar-mobileMenuButton {
+    display: block !important;
+    visibility: visible !important;
+  }
+}

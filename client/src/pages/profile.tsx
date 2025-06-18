@@ -118,7 +118,17 @@ export default function ProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <UserProfile />
+              {/* Mobile Navigation Hint */}
+              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg md:hidden">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  💡 <strong>Tip:</strong> Use the menu button (☰) in the top-left corner below to access Account Settings and Security options.
+                </p>
+              </div>
+              
+              {/* Clerk UserProfile with improved mobile styling */}
+              <div className="clerk-profile-mobile">
+                <UserProfile />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
