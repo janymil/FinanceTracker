@@ -360,6 +360,8 @@ Changelog:
 - June 18, 2025. COMPLETED: Added 7 predefined goal categories (Emergency Fund, Vacation, House Down Payment, Car Purchase, Debt Payoff, Retirement, Other) to support goals page
 - June 18, 2025. Enhanced database schema to support 'goal' type categories alongside existing 'income' and 'expense' types
 - June 18, 2025. Updated goals page to fetch categories dynamically from database instead of hardcoded values - proper category isolation confirmed working
+- June 18, 2025. RESOLVED: Fixed critical authentication timing bug in category fetching - added retry logic to handle Clerk token availability delays
+- June 18, 2025. Verified category isolation security working correctly - users see predefined categories (userId=NULL) plus their own custom categories only
 ```
 
 ## User Preferences
