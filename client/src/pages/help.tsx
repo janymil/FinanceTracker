@@ -132,6 +132,11 @@ export default function Help() {
       answer: "Upload photos of receipts using the 'Upload Image' button on any transaction page. Our OCR technology automatically extracts merchant name, amount, and date. Standard+ users get AI-powered category suggestions. Works with mobile camera or gallery photos."
     },
     {
+      id: "mobile-qr-upload",
+      question: "How does mobile QR code upload work?",
+      answer: "Click 'Upload Image' on your computer and select 'Scan with Phone'. A QR code appears on your screen. Scan it with your phone's camera to open the mobile upload page. Take a photo of your receipt on your phone, and the extracted data automatically appears in your computer's transaction form. Perfect for seamless cross-device receipt scanning."
+    },
+    {
       id: "ocr-accuracy",
       question: "What if OCR doesn't read my receipt correctly?",
       answer: "You can edit any extracted information before saving. The system shows extracted data in editable fields, allowing you to correct merchant names, amounts, or dates. Clear, well-lit photos produce the best results."
@@ -333,6 +338,8 @@ export default function Help() {
                   <CardContent>
                     <ul className="space-y-2 text-sm">
                       <li>• Add income and expense transactions</li>
+                      <li>• Receipt OCR scanning (Standard+)</li>
+                      <li>• Mobile QR code upload</li>
                       <li>• AI-powered automatic categorization</li>
                       <li>• Smart search and filtering</li>
                       <li>• Monthly view with dynamic navigation</li>
@@ -591,28 +598,58 @@ export default function Help() {
 
                       <div>
                         <h4 className="font-medium mb-2">How to Scan Receipts</h4>
-                        <ol className="text-sm text-gray-600 dark:text-gray-300 space-y-2 ml-4">
-                          <li className="flex gap-2">
-                            <span className="font-medium text-primary">1.</span>
-                            Navigate to Expenses, Income, or Transactions page
-                          </li>
-                          <li className="flex gap-2">
-                            <span className="font-medium text-primary">2.</span>
-                            Click the "Upload Image" button next to "Add Transaction"
-                          </li>
-                          <li className="flex gap-2">
-                            <span className="font-medium text-primary">3.</span>
-                            Choose "Take Photo" (mobile camera) or "Choose from Gallery"
-                          </li>
-                          <li className="flex gap-2">
-                            <span className="font-medium text-primary">4.</span>
-                            Select or capture a clear image of your receipt
-                          </li>
-                          <li className="flex gap-2">
-                            <span className="font-medium text-primary">5.</span>
-                            Wait for OCR processing - extracted data will appear automatically
-                          </li>
-                        </ol>
+                        
+                        <div className="mb-4">
+                          <h5 className="font-medium text-sm mb-2 text-blue-600 dark:text-blue-400">Desktop/Web Upload:</h5>
+                          <ol className="text-sm text-gray-600 dark:text-gray-300 space-y-2 ml-4">
+                            <li className="flex gap-2">
+                              <span className="font-medium text-primary">1.</span>
+                              Navigate to Expenses, Income, or Transactions page
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="font-medium text-primary">2.</span>
+                              Click the "Upload Image" button next to "Add Transaction"
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="font-medium text-primary">3.</span>
+                              Choose "Take Photo" (mobile camera) or "Choose from Gallery"
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="font-medium text-primary">4.</span>
+                              Select or capture a clear image of your receipt
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="font-medium text-primary">5.</span>
+                              Wait for OCR processing - extracted data will appear automatically
+                            </li>
+                          </ol>
+                        </div>
+
+                        <div>
+                          <h5 className="font-medium text-sm mb-2 text-green-600 dark:text-green-400">Mobile QR Code Upload:</h5>
+                          <ol className="text-sm text-gray-600 dark:text-gray-300 space-y-2 ml-4">
+                            <li className="flex gap-2">
+                              <span className="font-medium text-primary">1.</span>
+                              From your computer, click "Upload Image" and select "Scan with Phone"
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="font-medium text-primary">2.</span>
+                              A QR code will appear on your screen
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="font-medium text-primary">3.</span>
+                              Use your phone's camera to scan the QR code
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="font-medium text-primary">4.</span>
+                              Take a photo of your receipt using your phone
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="font-medium text-primary">5.</span>
+                              Data automatically appears in your computer's transaction form
+                            </li>
+                          </ol>
+                        </div>
                       </div>
 
                       <div>

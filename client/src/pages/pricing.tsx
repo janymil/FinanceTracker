@@ -166,6 +166,14 @@ export default function Pricing() {
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
+                    <span>Receipt OCR scanning</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="h-5 w-5 text-success mr-3" />
+                    <span>Mobile QR code upload</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="h-5 w-5 text-success mr-3" />
                     <span>Calendar view and reminders</span>
                   </div>
                   <div className="flex items-center">
@@ -223,6 +231,10 @@ export default function Pricing() {
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
                     <span>Daily personalized recommendations</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="h-5 w-5 text-success mr-3" />
+                    <span>Cloud receipt storage</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />

@@ -419,6 +419,10 @@ Changelog:
 - June 18, 2025. COLLABORATIVE GOALS API ROUTES FIXED: Created missing collaborativeGoalRoutes.ts with complete API endpoints for collaborative goals, friend management, contributions, and achievements - collaborative goals now visible in frontend
 - June 18, 2025. PROFILE PAGE MOBILE FIXES: Fixed Clerk Account Management component cutoff on mobile with responsive CSS and horizontal scrolling wrapper
 - June 18, 2025. SUBSCRIPTION REDIRECT FIX: Changed "View Pricing Plans" button in Profile page to redirect to /subscribe instead of /pricing for proper upgrade flow
+- June 18, 2025. DOCUMENTATION ENHANCEMENT: Added receipt OCR scanning and mobile QR code upload features to subscription plans (Standard+ plans)
+- June 18, 2025. PRICING PAGE UPDATES: Enhanced Standard plan to include "Receipt OCR scanning" and "Mobile QR code upload" features, added "Cloud receipt storage" to Premium plan
+- June 18, 2025. HELP DOCUMENTATION EXPANSION: Added comprehensive mobile QR upload workflow documentation with step-by-step instructions for both desktop and mobile scanning methods
+- June 18, 2025. FAQ ENHANCEMENT: Added detailed mobile QR code upload FAQ explaining cross-device receipt scanning functionality and workflow integration
 ```
 
 ## User Preferences
