@@ -740,7 +740,7 @@ export default function Transactions() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6 mb-4 sm:mb-8">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
