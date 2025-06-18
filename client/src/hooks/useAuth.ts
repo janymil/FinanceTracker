@@ -1,6 +1,6 @@
 import { useUser, useAuth as useClerkAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
-import { getQueryFn } from "@/lib/queryClient";
+import { getQueryFn, clearUserSession, clearCacheOnUserChange } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
 import { useEffect } from "react";
 
@@ -33,24 +33,23 @@ export function useAuth() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [signOut]);
   
+  // Security: Clear cache when user changes to prevent data leakage
+  useEffect(() => {
+    if (clerkUser?.id) {
+      clearCacheOnUserChange(clerkUser.id);
+    } else if (isUnauthenticated) {
+      // User logged out - clear all session data
+      clearUserSession();
+    }
+  }, [clerkUser?.id, isUnauthenticated]);
+  
   // Get our database user record that syncs with Clerk
   const canFetchUser = userLoaded && authLoaded && isSignedIn && !!clerkUser?.id;
   
   const { data: user, isLoading: dbUserLoading } = useQuery<User>({
     queryKey: ["/api/auth/user"],
     queryFn: getQueryFn({ 
-      on401: "returnNull",
-      onError: (error: any) => {
-        // Handle JWT token errors by triggering sign out
-        if (error?.message?.includes('jwt') || error?.message?.includes('token')) {
-          console.log('JWT/Token error, triggering sign out');
-          localStorage.setItem('clerk-db-jwt-error', 'true');
-          window.dispatchEvent(new StorageEvent('storage', {
-            key: 'clerk-db-jwt-error',
-            newValue: 'true'
-          }));
-        }
-      }
+      on401: "returnNull"
     }),
     enabled: canFetchUser,
     retry: (failureCount, error: any) => {

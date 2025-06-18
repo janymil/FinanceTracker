@@ -89,6 +89,35 @@ export const queryClient = new QueryClient({
   },
 });
 
+// Security function to clear all user data on logout
+export function clearUserSession() {
+  // Clear all React Query cache
+  queryClient.clear();
+  
+  // Clear localStorage completely
+  if (typeof window !== 'undefined') {
+    localStorage.clear();
+    sessionStorage.clear();
+  }
+  
+  // Force page reload to ensure clean state
+  window.location.reload();
+}
+
+// Security function to clear cache when user changes
+export function clearCacheOnUserChange(newUserId: string) {
+  const currentUserId = localStorage.getItem('currentUserId');
+  
+  if (currentUserId && currentUserId !== newUserId) {
+    // Different user detected - clear everything
+    queryClient.clear();
+    localStorage.clear();
+  }
+  
+  // Store new user ID
+  localStorage.setItem('currentUserId', newUserId);
+}
+
 // Optimistic update helper
 export const updateCacheOptimistically = (newData: any, type: 'transaction' | 'summary') => {
   if (type === 'transaction') {
