@@ -26,6 +26,10 @@ export function registerStripeRoutes(app: Express) {
         return res.status(404).json({ error: "User not found" });
       }
       
+      // Get email from Clerk token
+      const clerkUser = req.auth?.user;
+      const userEmail = clerkUser?.emailAddresses?.[0]?.emailAddress;
+      
       const baseUrl = `${req.headers.origin || 'http://localhost:5000'}`;
       const successUrl = `${baseUrl}/dashboard?success=true&plan=${plan}&session_id={CHECKOUT_SESSION_ID}`;
       const cancelUrl = `${baseUrl}/subscribe`;
@@ -108,7 +112,7 @@ export function registerStripeRoutes(app: Express) {
           }],
           success_url: successUrl,
           cancel_url: cancelUrl,
-          customer_email: user.email || undefined,
+          customer_email: userEmail || user.email || undefined,
           metadata: {
             plan: plan,
             userId: userId
