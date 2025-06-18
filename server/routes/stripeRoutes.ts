@@ -108,6 +108,7 @@ export function registerStripeRoutes(app: Express) {
           }],
           success_url: successUrl,
           cancel_url: cancelUrl,
+          customer_email: user.email,
           metadata: {
             plan: plan,
             userId: userId
