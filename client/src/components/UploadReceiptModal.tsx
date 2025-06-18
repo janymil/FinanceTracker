@@ -391,7 +391,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
       setUploadState({
         status: 'success',
         message: 'Receipt processed successfully!',
-        recognizedText: result.recognizedText,
+        recognizedText: result.text,
         imageUrl: result.imageUrl,
         extracted: result.extracted,
         category: result.category
