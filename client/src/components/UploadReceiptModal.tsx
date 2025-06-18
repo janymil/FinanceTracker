@@ -191,14 +191,14 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
 
   // Process QR upload result
   const processQRUploadResult = (result: any) => {
-    // Auto-populate form with extracted data (same logic as direct upload)
-    if (result.extracted) {
-      console.log('QR Extracted data:', result.extracted);
+    // Auto-populate form with extracted data from mobile upload
+    if (result.ocrData && result.ocrData.extracted) {
+      console.log('QR Extracted data:', result.ocrData.extracted);
       // Find best matching category
       let matchedCategoryId = '';
-      if (result.category && categories.length > 0) {
-        const suggestedCategory = result.category.toLowerCase();
-        console.log('QR AI suggested category:', result.category);
+      if (result.ocrData.category && categories.length > 0) {
+        const suggestedCategory = result.ocrData.category.toLowerCase();
+        console.log('QR AI suggested category:', result.ocrData.category);
         
         // Try exact match first
         let matchedCategory = categories.find(cat => 
@@ -238,14 +238,14 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
           matchedCategoryId = matchedCategory.id.toString();
           console.log('QR Matched to existing category:', matchedCategory.name);
         } else {
-          console.log('QR No matching category found for:', result.category);
+          console.log('QR No matching category found for:', result.ocrData.category);
         }
       }
 
       const newFormData = {
-        amount: result.extracted.amount?.toString() || '',
-        description: result.extracted.vendor || '',
-        date: result.extracted.date || new Date().toISOString().split('T')[0],
+        amount: result.ocrData.extracted.amount?.toString() || '',
+        description: result.ocrData.extracted.vendor || '',
+        date: result.ocrData.extracted.date || new Date().toISOString().split('T')[0],
         categoryId: matchedCategoryId
       };
       console.log('QR Setting form data:', newFormData);
@@ -255,10 +255,10 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
     setUploadState({
       status: 'success',
       message: 'Receipt processed successfully via mobile!',
-      recognizedText: result.recognizedText,
+      recognizedText: result.ocrData.recognizedText,
       imageUrl: result.imageUrl,
-      extracted: result.extracted,
-      category: result.category
+      extracted: result.ocrData.extracted,
+      category: result.ocrData.category
     });
 
     if (onReceiptProcessed) {
