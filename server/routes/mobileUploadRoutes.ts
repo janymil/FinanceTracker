@@ -61,6 +61,17 @@ export function registerMobileUploadRoutes(app) {
 
       console.log('Processing mobile upload for user:', userId, 'file size:', file.buffer.length);
 
+      // Validate file buffer
+      if (!file.buffer || file.buffer.length === 0) {
+        mobileUploadSessions.set(sessionId, {
+          userId: userId,
+          status: 'error',
+          error: 'No valid image data received',
+          createdAt: new Date()
+        });
+        return res.status(400).json({ error: 'No valid image data received' });
+      }
+
       // Process the receipt using the existing OCR functions
       let ocrResult;
       try {
@@ -80,7 +91,7 @@ export function registerMobileUploadRoutes(app) {
         mobileUploadSessions.set(sessionId, {
           userId: userId,
           status: 'error',
-          error: 'OCR processing failed: ' + error.message,
+          error: 'OCR processing failed: ' + (error as Error).message,
           createdAt: new Date()
         });
         return res.status(500).json({ error: 'OCR processing failed' });
