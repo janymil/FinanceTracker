@@ -88,7 +88,7 @@ export function registerMobileUploadRoutes(app) {
         console.log('Making internal request to standard OCR endpoint...');
         
         // Create form data for the internal request
-        const FormData = require('form-data');
+        const FormData = (await import('form-data')).default;
         const formData = new FormData();
         formData.append('receipt', file.buffer, {
           filename: file.originalname || 'mobile-receipt.jpg',
