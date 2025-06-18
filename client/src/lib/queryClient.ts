@@ -99,11 +99,20 @@ export function clearUserSession() {
     // Backup important data that should persist across sessions
     const cookieConsent = localStorage.getItem('cookie-consent');
     
-    // Backup all AI-generated content (tips, recommendations, predictions)
-    const aiDataToPreserve: { [key: string]: string } = {};
+    // Backup data that should persist across sessions
+    const dataToPreserve: { [key: string]: string } = {};
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && (
+        // App preferences (theme, language, user experience)
+        key.startsWith('theme-') ||
+        key.startsWith('language-') ||
+        key.startsWith('app-preference-') ||
+        key.includes('user-settings') ||
+        // Non-sensitive cached data
+        key.includes('app-cache') ||
+        key.includes('non-sensitive-cache') ||
+        // AI-generated content
         key.startsWith('ai-tip-') ||
         key.startsWith('daily-rec-') ||
         key.startsWith('expense-pred-') ||
@@ -115,7 +124,7 @@ export function clearUserSession() {
       )) {
         const value = localStorage.getItem(key);
         if (value) {
-          aiDataToPreserve[key] = value;
+          dataToPreserve[key] = value;
         }
       }
     }
@@ -129,8 +138,8 @@ export function clearUserSession() {
       localStorage.setItem('cookie-consent', cookieConsent);
     }
     
-    // Restore AI-generated content
-    Object.entries(aiDataToPreserve).forEach(([key, value]) => {
+    // Restore preserved data
+    Object.entries(dataToPreserve).forEach(([key, value]) => {
       localStorage.setItem(key, value);
     });
   }
