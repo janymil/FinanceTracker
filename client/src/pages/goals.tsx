@@ -26,6 +26,14 @@ interface Goal {
   createdAt: string;
 }
 
+interface Category {
+  id: number;
+  name: string;
+  icon: string;
+  color: string;
+  type: string;
+}
+
 export default function Goals() {
   const { isReady, user } = useClerkUserReady();
   const [, setLocation] = useLocation();

@@ -42,14 +42,14 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Categories for transactions and budgets
+// Categories for transactions, budgets, and goals
 export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").references(() => users.id),
   name: varchar("name", { length: 100 }).notNull(),
   icon: varchar("icon", { length: 50 }).notNull(),
   color: varchar("color", { length: 20 }).notNull(),
-  type: varchar("type", { length: 20 }).notNull(), // 'income' or 'expense'
+  type: varchar("type", { length: 20 }).notNull(), // 'income', 'expense', or 'goal'
 });
 
 // Financial transactions
