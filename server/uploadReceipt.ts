@@ -116,7 +116,7 @@ async function extractStructuredData(ocrText: string): Promise<{
       messages: [
         {
           role: "system",
-          content: "Sme finančná aplikácia. Na základe tohto OCR textu z účtenky, extrahuj: - sumu (ako číslo) - dátum nákupu (vo formáte YYYY-MM-DD) - názov obchodu (vendor). Vráť odpoveď vo formáte JSON."
+          content: "You are a financial application. Based on this OCR text from a receipt, extract: - amount (as a number) - purchase date (in YYYY-MM-DD format) - store/vendor name. Return the response in JSON format with keys: amount, date, vendor."
         },
         {
           role: "user",
@@ -194,6 +194,8 @@ export const uploadReceiptHandler = [
 
       // Extract structured data using OpenAI
       const extractedData = await extractStructuredData(recognizedText);
+      console.log('OCR Text:', recognizedText);
+      console.log('Extracted Data:', JSON.stringify(extractedData, null, 2));
 
       // AI Categorization for standard+ users
       let predictedCategory: string | undefined;

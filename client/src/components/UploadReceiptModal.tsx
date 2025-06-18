@@ -104,15 +104,21 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
       }
 
       const result = await response.json();
+      console.log('Upload response:', result);
       
       // Auto-populate form with extracted data
       if (result.extracted) {
-        setFormData({
+        console.log('Extracted data:', result.extracted);
+        const newFormData = {
           amount: result.extracted.amount?.toString() || '',
           description: result.extracted.vendor || '',
           date: result.extracted.date || new Date().toISOString().split('T')[0],
           categoryId: result.category ? categories.find(cat => cat.name.toLowerCase() === result.category.toLowerCase())?.id?.toString() || '' : ''
-        });
+        };
+        console.log('Setting form data:', newFormData);
+        setFormData(newFormData);
+      } else {
+        console.log('No extracted data found in response');
       }
       
       setUploadState({
