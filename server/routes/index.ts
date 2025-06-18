@@ -35,6 +35,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerAIRoutes(app);
   registerAdminRoutes(app);
 
+  // Production fix: Handle mobile upload client-side routing
+  // This ensures mobile-upload/:sessionId routes serve the React app in production
+  if (app.get("env") === "production") {
+    const path = await import('path');
+    app.get('/mobile-upload/:sessionId', (req, res) => {
+      const distPath = path.resolve(process.cwd(), "dist/public");
+      res.sendFile(path.resolve(distPath, "index.html"));
+    });
+  }
+
   const server = createServer(app);
   return server;
 }

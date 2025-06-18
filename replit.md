@@ -398,6 +398,7 @@ Changelog:
 - June 18, 2025. MOBILE QR UPLOAD FULLY FUNCTIONAL: System now returns complete data structure including imageUrl, category, extracted data identical to desktop uploads
 - June 18, 2025. VERIFIED: Mobile QR code scanning provides complete feature parity - receipt image display, AI categorization, form auto-population all working correctly
 - June 18, 2025. CONFIRMED: Mobile QR upload system working correctly after security audit - QR code scanning, OCR processing, AI categorization, and transaction creation all functional
+- June 18, 2025. PRODUCTION FIX: Fixed mobile QR upload 404 issue in deployed website by adding production-specific route handler for `/mobile-upload/:sessionId` client-side routing
 - June 18, 2025. SECURITY AUDIT COMPLETED: Comprehensive security verification across all major user data operations following minimal-touch approach
 - June 18, 2025. SECURED: Category operations - added ownership verification to update/delete routes using existing getCategories method for cross-user data access prevention
 - June 18, 2025. SECURED: Expense reminder operations - added ownership verification to update route while existing delete operations already properly secured with userId parameters
