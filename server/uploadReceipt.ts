@@ -70,7 +70,7 @@ async function getUserPlan(userId: string): Promise<UserPlan> {
 }
 
 // Upload file to Bunny.net
-async function uploadToBunny(fileName: string, fileBuffer: Buffer, mimeType: string): Promise<string> {
+export async function uploadToBunny(fileName: string, fileBuffer: Buffer, mimeType: string): Promise<string> {
   if (!bunnyConfig.storagePassword || !bunnyConfig.storageZone || !bunnyConfig.storageHost) {
     throw new Error('Bunny.net configuration is incomplete');
   }

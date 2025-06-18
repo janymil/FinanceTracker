@@ -2,7 +2,7 @@ import { Express } from "express";
 import multer from "multer";
 import crypto from "crypto";
 import { isAuthenticated, getUserId } from "../clerkAuth";
-import { performOCR, extractStructuredData } from "../uploadReceipt";
+import { uploadReceiptHandler } from "../uploadReceipt";
 
 // In-memory storage for mobile upload sessions
 const mobileUploadSessions = new Map<string, any>();
@@ -72,11 +72,6 @@ export function registerMobileUploadRoutes(app: Express) {
       const userId = existingSession.userId;
 
       // Process receipt using the complete standard OCR pipeline
-      const { db } = require('../db');
-      const { users } = require('../../shared/schema');
-      const { eq } = require('drizzle-orm');
-      const { categorizeExpense } = require('../openai');
-      const { uploadToBunny } = require('../uploadReceipt');
       
       // Get user plan to determine features available
       const userResult = await db.select().from(users).where(eq(users.id, userId));
