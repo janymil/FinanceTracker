@@ -231,4 +231,46 @@
     display: block !important;
     visibility: visible !important;
   }
+  
+  /* Fix content overflow on mobile */
+  .clerk-profile-mobile .cl-rootBox {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  
+  .clerk-profile-mobile .cl-main {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0.5rem !important;
+  }
+  
+  /* Responsive form fields */
+  .clerk-profile-mobile .cl-formField {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .clerk-profile-mobile .cl-form {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Responsive buttons */
+  .clerk-profile-mobile .cl-formButtonPrimary,
+  .clerk-profile-mobile .cl-formButtonSecondary {
+    width: 100% !important;
+    margin-bottom: 0.5rem !important;
+  }
+}
+
+/* Fix horizontal scrolling issues */
+.clerk-profile-mobile {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+.clerk-profile-mobile * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }

@@ -126,8 +126,10 @@ export default function ProfilePage() {
               </div>
               
               {/* Clerk UserProfile with improved mobile styling */}
-              <div className="clerk-profile-mobile">
-                <UserProfile />
+              <div className="clerk-profile-mobile w-full overflow-x-auto">
+                <div className="min-w-[600px] md:min-w-0">
+                  <UserProfile />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -256,7 +258,7 @@ export default function ProfilePage() {
                   <h4 className="font-medium">Upgrade Your Plan</h4>
                   <div className="grid gap-3">
                     <Button
-                      onClick={() => window.location.href = '/pricing'}
+                      onClick={() => window.location.href = '/subscribe'}
                       className="flex items-center gap-2"
                     >
                       <CreditCard className="h-4 w-4" />
