@@ -2,6 +2,7 @@ import { Express } from "express";
 import multer from "multer";
 import crypto from "crypto";
 import fetch from "node-fetch";
+import FormData from "form-data";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 
 // In-memory storage for mobile upload sessions
@@ -88,7 +89,6 @@ export function registerMobileUploadRoutes(app) {
         console.log('Connecting to standard OCR endpoint...');
         
         // Create FormData for the standard upload endpoint
-        const FormData = require('form-data');
         const formData = new FormData();
         formData.append('receipt', file.buffer, {
           filename: file.originalname || 'mobile-upload.jpg',
