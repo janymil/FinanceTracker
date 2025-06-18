@@ -1,6 +1,5 @@
 import { useParams, useLocation } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -9,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { ArrowLeft, Users, Target, Calendar, Plus, DollarSign, Activity, Trophy, Mail } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
@@ -21,61 +20,111 @@ export default function CollaborativeGoalDetailPage() {
   const [contributionAmount, setContributionAmount] = useState("");
   const [contributionNote, setContributionNote] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
+  const [goal, setGoal] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isContributionPending, setIsContributionPending] = useState(false);
+  const [isInvitePending, setIsInvitePending] = useState(false);
 
-  const { data: goal, isLoading } = useQuery({
-    queryKey: [`/api/collaborative-goals/${id}`],
-    enabled: !!id,
-  });
+  const { isReady } = useClerkUserReady();
 
-  const addContributionMutation = useMutation({
-    mutationFn: async (data: { amount: string; note: string }) => {
-      return apiRequest('POST', `/api/collaborative-goals/${id}/contributions`, data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/collaborative-goals/${id}`] });
-      setContributionAmount("");
-      setContributionNote("");
-      toast({
-        title: "Contribution Added",
-        description: "Your contribution has been recorded successfully.",
+  const getAuthHeaders = async () => {
+    const { useAuth } = await import('@clerk/clerk-react');
+    const { getToken } = useAuth();
+    const token = await getToken();
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+  };
+
+  const fetchGoal = async () => {
+    if (!isReady || !id) return;
+    
+    try {
+      setIsLoading(true);
+      const headers = await getAuthHeaders();
+      const response = await fetch(`/api/collaborative-goals/${id}`, { headers });
+      if (response.ok) {
+        const data = await response.json();
+        setGoal(data);
+      }
+    } catch (error) {
+      console.error('Error fetching goal:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGoal();
+  }, [isReady, id]);
+
+  const addContribution = async (data: { amount: string; note: string }) => {
+    try {
+      setIsContributionPending(true);
+      const headers = await getAuthHeaders();
+      const response = await fetch(`/api/collaborative-goals/${id}/contributions`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(data),
       });
-    },
-    onError: () => {
+      
+      if (response.ok) {
+        fetchGoal(); // Refresh goal data
+        setContributionAmount("");
+        setContributionNote("");
+        toast({
+          title: "Contribution Added",
+          description: "Your contribution has been recorded successfully.",
+        });
+      }
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to add contribution. Please try again.",
         variant: "destructive",
       });
-    },
-  });
+    } finally {
+      setIsContributionPending(false);
+    }
+  };
 
-  const inviteFriendMutation = useMutation({
-    mutationFn: async (email: string) => {
-      return apiRequest('POST', `/api/collaborative-goals/${id}/invite`, { email });
-    },
-    onSuccess: (response) => {
-      setInviteEmail("");
-      if (response.existingUser) {
-        toast({
-          title: "Friend Added",
-          description: `${response.email} has been added to the goal.`,
-        });
-      } else {
-        toast({
-          title: "Invitation Sent",
-          description: `An invitation email has been sent to ${response.email}.`,
-        });
+  const inviteFriend = async (email: string) => {
+    try {
+      setIsInvitePending(true);
+      const headers = await getAuthHeaders();
+      const response = await fetch(`/api/collaborative-goals/${id}/invite`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email }),
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        setInviteEmail("");
+        if (result.existingUser) {
+          toast({
+            title: "Friend Added",
+            description: `${result.email} has been added to the goal.`,
+          });
+        } else {
+          toast({
+            title: "Invitation Sent",
+            description: `An invitation email has been sent to ${result.email}.`,
+          });
+        }
+        fetchGoal(); // Refresh goal data
       }
-      queryClient.invalidateQueries({ queryKey: [`/api/collaborative-goals/${id}`] });
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to send invitation. Please try again.",
         variant: "destructive",
       });
-    },
-  });
+    } finally {
+      setIsInvitePending(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -117,7 +166,7 @@ export default function CollaborativeGoalDetailPage() {
       });
       return;
     }
-    addContributionMutation.mutate({
+    addContribution({
       amount: contributionAmount,
       note: contributionNote,
     });
@@ -237,10 +286,10 @@ export default function CollaborativeGoalDetailPage() {
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={false}
+                disabled={isContributionPending}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add Contribution
+                {isContributionPending ? 'Adding...' : 'Add Contribution'}
               </Button>
             </form>
           </CardContent>
@@ -268,10 +317,10 @@ export default function CollaborativeGoalDetailPage() {
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={inviteFriendMutation.isPending}
+                disabled={isInvitePending}
               >
                 <Mail className="h-4 w-4 mr-2" />
-                {inviteFriendMutation.isPending ? 'Sending...' : 'Send Invitation'}
+                {isInvitePending ? 'Sending...' : 'Send Invitation'}
               </Button>
             </form>
             <p className="text-xs text-muted-foreground mt-2">
