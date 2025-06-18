@@ -107,10 +107,24 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
 
   // Generate QR code when QR method is selected
   const generateQRCode = async () => {
-    const sessionId = generateUUID();
-    const qrUrl = `https://finanzerpro.com/mobile-upload/${sessionId}`;
-    
     try {
+      // First create a backend session
+      const token = await getToken();
+      const response = await fetch('/api/mobile-upload/create-session', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create upload session');
+      }
+      
+      const { sessionId } = await response.json();
+      const qrUrl = `${window.location.origin}/mobile-upload/${sessionId}`;
+      
       const qrCodeDataUrl = await QRCode.toDataURL(qrUrl, {
         width: 256,
         margin: 2,
