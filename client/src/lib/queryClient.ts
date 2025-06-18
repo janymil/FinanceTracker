@@ -100,8 +100,10 @@ export function clearUserSession() {
     sessionStorage.clear();
   }
   
-  // Force page reload to ensure clean state
-  window.location.reload();
+  // Clear query cache without forcing reload on auth page
+  if (window.location.pathname !== '/auth' && !window.location.pathname.startsWith('/auth')) {
+    window.location.reload();
+  }
 }
 
 // Security function to clear cache when user changes
