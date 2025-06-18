@@ -109,11 +109,60 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
       // Auto-populate form with extracted data
       if (result.extracted) {
         console.log('Extracted data:', result.extracted);
+        // Find best matching category
+        let matchedCategoryId = '';
+        if (result.category && categories.length > 0) {
+          const suggestedCategory = result.category.toLowerCase();
+          console.log('AI suggested category:', result.category);
+          
+          // Try exact match first
+          let matchedCategory = categories.find(cat => 
+            cat.name.toLowerCase() === suggestedCategory
+          );
+          
+          // If no exact match, try partial matching
+          if (!matchedCategory) {
+            // Check if suggested category contains any existing category name
+            matchedCategory = categories.find(cat => 
+              suggestedCategory.includes(cat.name.toLowerCase()) || 
+              cat.name.toLowerCase().includes(suggestedCategory.split(' ')[0])
+            );
+          }
+          
+          // If still no match, try common category mappings
+          if (!matchedCategory) {
+            const categoryMappings = {
+              'food': ['food', 'groceries', 'dining', 'restaurant'],
+              'transportation': ['transport', 'travel', 'fuel', 'gas', 'car'],
+              'entertainment': ['entertainment', 'leisure', 'fun', 'movie'],
+              'healthcare': ['health', 'medical', 'doctor', 'pharmacy'],
+              'shopping': ['shopping', 'retail', 'clothes', 'clothing'],
+              'utilities': ['utilities', 'electric', 'water', 'internet']
+            };
+            
+            for (const [key, keywords] of Object.entries(categoryMappings)) {
+              if (keywords.some(keyword => suggestedCategory.includes(keyword))) {
+                matchedCategory = categories.find(cat => 
+                  cat.name.toLowerCase().includes(key)
+                );
+                if (matchedCategory) break;
+              }
+            }
+          }
+          
+          if (matchedCategory) {
+            matchedCategoryId = matchedCategory.id.toString();
+            console.log('Matched to existing category:', matchedCategory.name);
+          } else {
+            console.log('No matching category found for:', result.category);
+          }
+        }
+
         const newFormData = {
           amount: result.extracted.amount?.toString() || '',
           description: result.extracted.vendor || '',
           date: result.extracted.date || new Date().toISOString().split('T')[0],
-          categoryId: result.category ? categories.find(cat => cat.name.toLowerCase() === result.category.toLowerCase())?.id?.toString() || '' : ''
+          categoryId: matchedCategoryId
         };
         console.log('Setting form data:', newFormData);
         setFormData(newFormData);

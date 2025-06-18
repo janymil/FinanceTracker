@@ -194,8 +194,6 @@ export const uploadReceiptHandler = [
 
       // Extract structured data using OpenAI
       const extractedData = await extractStructuredData(recognizedText);
-      console.log('OCR Text:', recognizedText);
-      console.log('Extracted Data:', JSON.stringify(extractedData, null, 2));
 
       // AI Categorization for standard+ users
       let predictedCategory: string | undefined;
