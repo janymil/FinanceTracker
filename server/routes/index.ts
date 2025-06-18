@@ -12,6 +12,7 @@ import { registerExportRoutes } from "./exportRoutes";
 import { uploadReceiptHandler } from '../uploadReceipt';
 import { registerAIRoutes } from "./aiRoutes";
 import { registerAdminRoutes } from "./adminRoutes";
+import { registerStripeRoutes } from "./stripeRoutes";
 import { setCookieConsent } from "../cookieMiddleware";
 import { registerMobileUploadRoutes } from "./mobileUploadRoutes";
 
