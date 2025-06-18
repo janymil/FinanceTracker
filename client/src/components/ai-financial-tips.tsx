@@ -27,12 +27,29 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const { user } = useUser();
 
+  // Function to clean AI-generated text
+  const cleanAIText = (text: string): string => {
+    return text
+      // Remove asterisks used for emphasis
+      .replace(/\*\*/g, '')
+      .replace(/\*/g, '')
+      // Remove AI generation notes and system messages
+      .replace(/Note:|Important:|Remember:|Disclaimer:|Please note:|Keep in mind:/gi, '')
+      // Remove markdown-style formatting
+      .replace(/#{1,6}\s*/g, '')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      // Remove extra whitespace and clean up
+      .replace(/\s+/g, ' ')
+      .replace(/\n\s*\n/g, '\n')
+      .trim();
+  };
+
   // Load saved tip from localStorage on component mount
   useEffect(() => {
     if (user?.id) {
       const savedTip = localStorage.getItem(`ai-tip-${user.id}`);
       if (savedTip) {
-        setCurrentTip(savedTip);
+        setCurrentTip(cleanAIText(savedTip));
       }
     }
   }, [user?.id]);

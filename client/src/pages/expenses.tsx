@@ -875,39 +875,33 @@ export default function Expenses() {
                 {filteredExpenses.map((transaction: Transaction) => (
                   <div
                     key={transaction.id}
-                    className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors gap-3"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg shrink-0">
                         <ArrowDownLeft className="h-4 w-4 text-red-600 dark:text-red-400" />
                       </div>
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-gray-900 dark:text-white truncate">
                           {transaction.description}
                         </p>
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                          <span>{format(new Date(transaction.date), "MMM dd, yyyy")}</span>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 flex-wrap">
+                          <span className="shrink-0">{format(new Date(transaction.date), "MMM dd, yyyy")}</span>
                           {transaction.categoryName && (
-                            <>
-                              <span>•</span>
-                              <Badge variant="outline" className="text-red-600 border-red-600">
-                                {transaction.categoryName}
-                              </Badge>
-                            </>
+                            <Badge variant="outline" className="text-red-600 border-red-600 text-xs">
+                              {transaction.categoryName}
+                            </Badge>
                           )}
                           {transaction.isRecurring && (
-                            <>
-                              <span>•</span>
-                              <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                🔄 {transaction.recurringFrequency}
-                              </Badge>
-                            </>
+                            <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs">
+                              🔄 {transaction.recurringFrequency}
+                            </Badge>
                           )}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <p className="font-semibold text-red-600 dark:text-red-400">
+                    <div className="flex items-center justify-between sm:justify-end sm:gap-4 shrink-0">
+                      <p className="font-semibold text-red-600 dark:text-red-400 text-lg">
                         -${parseFloat(transaction.amount).toFixed(2)}
                       </p>
                       <div className="flex items-center gap-1">
@@ -915,15 +909,17 @@ export default function Expenses() {
                           size="sm"
                           variant="ghost"
                           onClick={() => handleEdit(transaction)}
+                          className="h-8 w-8 p-0"
                         >
-                          <Edit3 className="h-3 w-3" />
+                          <Edit3 className="h-4 w-4" />
                         </Button>
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => deleteExpense(transaction.id)}
+                          className="h-8 w-8 p-0"
                         >
-                          <Trash2 className="h-3 w-3" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>

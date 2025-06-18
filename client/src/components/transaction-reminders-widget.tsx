@@ -529,42 +529,42 @@ export default function TransactionRemindersWidget() {
                 const SourceIcon = getSourceIcon(reminder.source);
                 
                 return (
-                  <div key={reminder.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1">
+                  <div key={reminder.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 border rounded-lg gap-3">
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                      <div className="flex items-center gap-1 shrink-0">
                         <TypeIcon className={`h-4 w-4 ${typeColor}`} />
                         <SourceIcon className={`h-3 w-3 ${reminder.source === 'automatic' ? 'text-blue-600' : 'text-purple-600'}`} />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-sm">{reminder.title}</p>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-medium text-sm truncate">{reminder.title}</p>
                           {reminder.isRecurring && (
-                            <Repeat className="h-3 w-3 text-gray-500" />
+                            <Repeat className="h-3 w-3 text-gray-500 shrink-0" />
                           )}
-                          <Badge className={`text-xs px-1 py-0.5 ${priorityColor}`}>
+                          <Badge className={`text-xs px-1 py-0.5 ${priorityColor} shrink-0`}>
                             {reminder.priority}
                           </Badge>
                         </div>
-                        <p className="text-xs text-gray-600 dark:text-gray-300">{reminder.description}</p>
-                        <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                          <Calendar className="h-3 w-3" />
-                          {format(reminder.dueDate, 'MMM dd, yyyy')}
+                        <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">{reminder.description}</p>
+                        <div className="flex items-center gap-2 text-xs text-gray-500 mt-1 flex-wrap">
+                          <Calendar className="h-3 w-3 shrink-0" />
+                          <span className="shrink-0">{format(reminder.dueDate, 'MMM dd, yyyy')}</span>
                           {reminder.categoryName && (
                             <>
-                              <span>•</span>
-                              <span>{reminder.categoryName}</span>
+                              <span className="hidden sm:inline">•</span>
+                              <span className="text-xs">{reminder.categoryName}</span>
                             </>
                           )}
-                          <span>•</span>
-                          <span className={reminder.source === 'automatic' ? 'text-blue-600' : 'text-purple-600'}>
+                          <span className="hidden sm:inline">•</span>
+                          <span className={`${reminder.source === 'automatic' ? 'text-blue-600' : 'text-purple-600'} text-xs`}>
                             {reminder.source === 'automatic' ? 'Auto' : 'Manual'}
                           </span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
                       {reminder.amount && (
-                        <span className="text-sm font-medium">${reminder.amount}</span>
+                        <span className="text-sm font-medium">${parseFloat(reminder.amount).toFixed(2)}</span>
                       )}
                       {reminder.source === 'manual' && (
                         <div className="flex gap-1">
@@ -573,8 +573,9 @@ export default function TransactionRemindersWidget() {
                               size="sm"
                               variant="outline"
                               onClick={() => completeReminder(parseInt(reminder.id.split('_')[1]))}
+                              className="h-8 w-8 p-0"
                             >
-                              <CheckCircle className="h-3 w-3" />
+                              <CheckCircle className="h-4 w-4" />
                             </Button>
                           )}
                           {reminder.canEdit && (
@@ -582,8 +583,9 @@ export default function TransactionRemindersWidget() {
                               size="sm"
                               variant="outline"
                               onClick={() => deleteReminder(parseInt(reminder.id.split('_')[1]))}
+                              className="h-8 w-8 p-0"
                             >
-                              <Trash2 className="h-3 w-3" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           )}
                         </div>
