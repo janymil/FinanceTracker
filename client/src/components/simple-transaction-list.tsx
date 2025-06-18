@@ -160,6 +160,18 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
 
   const displayTransactions = (transactions || []).slice(0, 5);
 
+  // Debug: Check if isRecurring data is present
+  useEffect(() => {
+    if (transactions && transactions.length > 0) {
+      console.log("Recent Transactions Data:", transactions.slice(0, 3).map(t => ({
+        id: t.id,
+        description: t.description,
+        isRecurring: t.isRecurring,
+        recurringFrequency: t.recurringFrequency
+      })));
+    }
+  }, [transactions]);
+
   return (
     <Card className="bg-white dark:bg-gray-800">
       <CardHeader>
