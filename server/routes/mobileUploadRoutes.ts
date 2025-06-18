@@ -25,9 +25,10 @@ export function registerMobileUploadRoutes(app) {
       }
       
       const token = authHeader.split(' ')[1];
-      // For now, extract user ID from token or use a placeholder
-      // In production, this would properly validate the Clerk token
-      const userId = 'user_2ygQ0tvWtthWzXxFfmTrdWjdzAP'; // Use authenticated user ID
+      // Use the actual user ID from the Bearer token
+      const userId = token;
+      
+      console.log('Creating session for user:', userId);
       
       const sessionId = crypto.randomUUID();
       
@@ -38,9 +39,9 @@ export function registerMobileUploadRoutes(app) {
         createdAt: new Date()
       });
       
-      // Clean up old sessions (older than 1 hour)
+      // Clean up old sessions (older than 1 hour) and sessions from different users
       for (const [id, session] of mobileUploadSessions.entries()) {
-        if (Date.now() - session.createdAt.getTime() > 60 * 60 * 1000) {
+        if (Date.now() - session.createdAt.getTime() > 60 * 60 * 1000 || session.userId !== userId) {
           mobileUploadSessions.delete(id);
         }
       }
