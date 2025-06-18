@@ -1,12 +1,11 @@
 import { clerkMiddleware, requireAuth } from '@clerk/express';
 import type { Request, Response, NextFunction } from 'express';
-import { clerkApiKey, clerkPublishableKey } from './clerkEnv';
 
 export const setupClerkAuth = (app: any) => {
   // Add Clerk middleware to handle authentication
   app.use(clerkMiddleware({
-    publishableKey: clerkPublishableKey,
-    secretKey: clerkApiKey,
+    publishableKey: process.env.VITE_CLERK_PUBLISHABLE_KEY,
+    secretKey: process.env.CLERK_SECRET_KEY,
   }));
 };
 

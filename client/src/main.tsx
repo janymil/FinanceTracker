@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Router } from "wouter";
 import App from "./App";
 import "./index.css";
-import { clerkFrontendApi } from "./lib/clerkEnv";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,7 +17,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const PUBLISHABLE_KEY = clerkFrontendApi;
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key");
