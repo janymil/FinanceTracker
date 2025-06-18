@@ -75,9 +75,35 @@ export function registerMobileUploadRoutes(app: Express) {
       const recognizedText = await performOCR(file.buffer);
       const extractedData = await extractStructuredData(recognizedText);
       
+      // Get user plan for AI categorization
+      const { db } = require('../db');
+      const { users } = require('../../shared/schema');
+      const { eq } = require('drizzle-orm');
+      const { categorizeExpense } = require('../openai');
+      
+      const userResult = await db.select().from(users).where(eq(users.id, userId));
+      const userPlan = userResult[0]?.plan || 'free';
+      
+      // AI Categorization for standard+ users
+      let predictedCategory: string | undefined;
+      if (userPlan === 'standard' || userPlan === 'premium') {
+        try {
+          // Use the vendor name or fallback to the full OCR text for categorization
+          const descriptionForCategorization = extractedData.vendor || recognizedText;
+          const amountForCategorization = extractedData.amount || 0;
+          
+          const categorization = await categorizeExpense(descriptionForCategorization, amountForCategorization);
+          predictedCategory = categorization.category;
+        } catch (categoryError) {
+          console.error('AI categorization failed:', categoryError);
+          // Continue without categorization
+        }
+      }
+      
       const ocrResult = {
         text: recognizedText,
-        extracted: extractedData
+        extracted: extractedData,
+        ...(predictedCategory && { category: predictedCategory })
       };
 
       // Store the upload result in session

@@ -208,12 +208,13 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
     }, 300000); // 5 minutes timeout
   };
 
-  // Process QR upload result
+  // Process QR upload result using the same logic as desktop OCR
   const processQRUploadResult = (result: any) => {
     // Auto-populate form with extracted data from mobile upload
     if (result.ocrData && result.ocrData.extracted) {
       console.log('QR Extracted data:', result.ocrData.extracted);
-      // Find best matching category
+      
+      // Find best matching category using the same logic as desktop OCR
       let matchedCategoryId = '';
       if (result.ocrData.category && categories.length > 0) {
         const suggestedCategory = result.ocrData.category.toLowerCase();
@@ -226,6 +227,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
         
         // If no exact match, try partial matching
         if (!matchedCategory) {
+          // Check if suggested category contains any existing category name
           matchedCategory = categories.find(cat => 
             suggestedCategory.includes(cat.name.toLowerCase()) || 
             cat.name.toLowerCase().includes(suggestedCategory.split(' ')[0])
@@ -271,10 +273,11 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
       setFormData(newFormData);
     }
     
+    // Set upload state with the same structure as desktop OCR
     setUploadState({
       status: 'success',
       message: 'Receipt processed successfully via mobile!',
-      recognizedText: result.ocrData.recognizedText,
+      recognizedText: result.ocrData.text,
       imageUrl: result.imageUrl,
       extracted: result.ocrData.extracted,
       category: result.ocrData.category
