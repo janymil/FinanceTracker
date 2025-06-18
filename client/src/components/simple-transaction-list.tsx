@@ -116,6 +116,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
       await queryClient.invalidateQueries({ queryKey: ["/api/financial-summary", user?.id] });
       await queryClient.invalidateQueries({ queryKey: ["/api/budgets", user?.id] });
       await queryClient.invalidateQueries({ queryKey: ["/api/financial-health", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/transaction-reminders"] });
       
       setEditingTransaction(null);
       toast({

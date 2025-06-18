@@ -108,12 +108,10 @@ export default function TransactionRemindersWidget() {
 
   // Fetch automatic transaction reminders with proper Clerk authentication
   const { data: transactionReminders = [], isLoading: transactionLoading } = useQuery<TransactionReminder[]>({
-    queryKey: ["transaction-reminders"],
+    queryKey: ["/api/transaction-reminders"],
     enabled: isUserReady,
     retry: 1,
     refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
     queryFn: async () => {
       const token = await getToken();
       
