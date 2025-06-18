@@ -41,9 +41,9 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
+      <div className="w-full max-w-6xl grid lg:grid-cols-5 gap-8 items-center">
         {/* Hero Section */}
-        <div className="space-y-6 text-center lg:text-left">
+        <div className="lg:col-span-2 space-y-6 text-center lg:text-left">
           <div className="space-y-4">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
               Take Control of Your Finances
@@ -87,7 +87,7 @@ export default function AuthPage() {
         </div>
 
         {/* Authentication Section */}
-        <div className="w-full max-w-md mx-auto">
+        <div className="lg:col-span-3 w-full max-w-lg mx-auto">
 
           <Tabs value={activeTab} onValueChange={(value) => {
             setActiveTab(value);
