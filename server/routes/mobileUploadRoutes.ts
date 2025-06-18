@@ -71,18 +71,23 @@ export function registerMobileUploadRoutes(app: Express) {
 
       const userId = existingSession.userId;
 
-      // Process receipt using existing OCR system
-      const recognizedText = await performOCR(file.buffer);
-      const extractedData = await extractStructuredData(recognizedText);
-      
-      // Get user plan for AI categorization
+      // Process receipt using the complete standard OCR pipeline
       const { db } = require('../db');
       const { users } = require('../../shared/schema');
       const { eq } = require('drizzle-orm');
       const { categorizeExpense } = require('../openai');
+      const { uploadToBunny } = require('../uploadReceipt');
       
+      // Get user plan to determine features available
       const userResult = await db.select().from(users).where(eq(users.id, userId));
       const userPlan = userResult[0]?.plan || 'free';
+      const canStore = userPlan === 'standard' || userPlan === 'premium';
+      
+      // Perform OCR
+      const recognizedText = await performOCR(file.buffer);
+      
+      // Extract structured data using OpenAI
+      const extractedData = await extractStructuredData(recognizedText);
       
       // AI Categorization for standard+ users
       let predictedCategory: string | undefined;
@@ -100,9 +105,26 @@ export function registerMobileUploadRoutes(app: Express) {
         }
       }
       
+      let imageUrl: string | undefined;
+      
+      // Upload to Bunny.net if user has appropriate plan (standard+ users)
+      if (canStore) {
+        const timestamp = Date.now();
+        const fileName = `receipt-mobile-${userId}-${timestamp}.${file.mimetype.split('/')[1]}`;
+        
+        try {
+          imageUrl = await uploadToBunny(fileName, file.buffer, file.mimetype);
+        } catch (uploadError) {
+          console.error('Upload to Bunny.net failed:', uploadError);
+          // Continue without storing the image, but still return OCR results
+        }
+      }
+      
+      // Prepare OCR result with same structure as desktop version
       const ocrResult = {
         text: recognizedText,
         extracted: extractedData,
+        ...(imageUrl && { imageUrl }),
         ...(predictedCategory && { category: predictedCategory })
       };
 

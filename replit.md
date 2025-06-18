@@ -383,6 +383,9 @@ Changelog:
 - June 18, 2025. FIXED: AI chat assistant in help page - implemented proper GPT-3.5-turbo integration with /api/help-chat endpoint
 - June 18, 2025. Updated subscription plan features to include receipt OCR scanning for Standard+ users in help documentation
 - June 18, 2025. Added comprehensive FAQ section covering OCR accuracy, supported receipt types, and editing extracted data
+- June 18, 2025. COMPLETED: Fixed QR code mobile upload system to follow complete standard OCR pipeline including user plan checking, AI categorization for standard+ users, and Bunny.net storage for premium users
+- June 18, 2025. Mobile upload now provides identical functionality to desktop OCR with proper polling detection, cache-busting, and form auto-population from mobile-captured receipt data
+- June 18, 2025. QR code system fully operational with backend session creation, anonymous mobile access, and authenticated result processing for seamless cross-device receipt scanning workflow
 ```
 
 ## User Preferences
