@@ -40,6 +40,7 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   
   const [uploadState, setUploadState] = useState<UploadState>({
     status: 'idle'
@@ -241,14 +242,23 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
       <CardContent className="space-y-4">
         {uploadState.status === 'idle' && (
           <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
+            {/* Hidden file inputs for different sources */}
             <input
               ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <input
+              ref={cameraInputRef}
               type="file"
               accept="image/*"
               capture="environment"
               onChange={handleFileChange}
               className="hidden"
             />
+            
             <div className="space-y-4">
               <Upload className="h-12 w-12 text-gray-400 mx-auto" />
               <div>
@@ -257,9 +267,30 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
                   JPG, PNG or other image formats
                 </p>
               </div>
+              
+              {/* Mobile: Show both camera and gallery options */}
+              <div className="block md:hidden space-y-2">
+                <Button
+                  onClick={() => cameraInputRef.current?.click()}
+                  className="w-full flex items-center gap-2"
+                >
+                  <Camera className="h-4 w-4" />
+                  Take Photo
+                </Button>
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  variant="outline"
+                  className="w-full flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  Choose from Gallery
+                </Button>
+              </div>
+              
+              {/* Desktop: Single select file button */}
               <Button
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full"
+                className="w-full hidden md:block"
               >
                 Select file
               </Button>
