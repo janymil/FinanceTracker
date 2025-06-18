@@ -422,23 +422,19 @@ export default function Trends() {
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
             <TabsTrigger value="overview" className="flex items-center gap-1 text-xs md:text-sm">
               <LineChart className="h-3 w-3 md:h-4 md:w-4" />
-              <span className="hidden sm:inline">Overview</span>
-              <span className="sm:hidden">Over</span>
+              <span>Overview</span>
             </TabsTrigger>
             <TabsTrigger value="categories" className="flex items-center gap-1 text-xs md:text-sm">
               <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
-              <span className="hidden sm:inline">By Category</span>
-              <span className="sm:hidden">Cat</span>
+              <span>By Category</span>
             </TabsTrigger>
             <TabsTrigger value="patterns" className="flex items-center gap-1 text-xs md:text-sm">
               <TrendingUp className="h-3 w-3 md:h-4 md:w-4" />
-              <span className="hidden sm:inline">Patterns</span>
-              <span className="sm:hidden">Pat</span>
+              <span>Patterns</span>
             </TabsTrigger>
             <TabsTrigger value="forecasts" className="flex items-center gap-1 text-xs md:text-sm">
               <RefreshCw className="h-3 w-3 md:h-4 md:w-4" />
-              <span className="hidden sm:inline">Forecasts</span>
-              <span className="sm:hidden">For</span>
+              <span>Forecasts</span>
             </TabsTrigger>
           </TabsList>
 

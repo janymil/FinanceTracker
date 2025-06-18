@@ -170,6 +170,40 @@ export function registerExportRoutes(app: Express) {
     }
   });
 
+  // Stripe Customer Portal
+  app.post('/api/create-customer-portal-session', isAuthenticated, async (req: any, res) => {
+    if (!stripe) {
+      return res.status(503).json({ message: "Payment processing unavailable. Please contact support." });
+    }
+
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (!user.stripeCustomerId) {
+        return res.status(400).json({ message: "No active subscription found. Please subscribe first." });
+      }
+
+      // Create customer portal session
+      const session = await stripe.billingPortal.sessions.create({
+        customer: user.stripeCustomerId,
+        return_url: `${process.env.REPLIT_DOMAINS || 'http://localhost:5000'}/profile?tab=subscription`,
+      });
+
+      res.json({ url: session.url });
+    } catch (error: any) {
+      console.error("Error creating customer portal session:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
+
   // Data Import/Export endpoints (Premium only)
   app.post('/api/import/transactions', isAuthenticated, async (req: any, res) => {
     try {

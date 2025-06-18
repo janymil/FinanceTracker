@@ -6,15 +6,47 @@ import { Button } from "../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Badge } from "../components/ui/badge";
-import { User, Bell, Palette, CreditCard } from "lucide-react";
+import { useToast } from "../hooks/use-toast";
+import { User, Bell, Palette, CreditCard, ExternalLink, Settings, Trash2 } from "lucide-react";
 
 export default function ProfilePage() {
   const { user } = useUser();
   const { user: authUser } = useAuth();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   if (!user || !authUser) {
     return <div>Loading...</div>;
   }
+
+  const handleManageSubscription = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/create-customer-portal-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create customer portal session');
+      }
+
+      const { url } = await response.json();
+      window.location.href = url;
+    } catch (error) {
+      console.error('Error creating customer portal session:', error);
+      toast({
+        title: "Error",
+        description: "Failed to open subscription management. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-4xl">
@@ -48,23 +80,19 @@ export default function ProfilePage() {
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
           <TabsTrigger value="profile" className="flex items-center gap-1 text-xs md:text-sm">
             <User className="h-3 w-3 md:h-4 md:w-4" />
-            <span className="hidden sm:inline">Profile</span>
-            <span className="sm:hidden">Prof</span>
+            <span>Profile</span>
           </TabsTrigger>
           <TabsTrigger value="notifications" className="flex items-center gap-1 text-xs md:text-sm">
             <Bell className="h-3 w-3 md:h-4 md:w-4" />
-            <span className="hidden sm:inline">Notifications</span>
-            <span className="sm:hidden">Not</span>
+            <span>Notifications</span>
           </TabsTrigger>
           <TabsTrigger value="preferences" className="flex items-center gap-1 text-xs md:text-sm">
             <Palette className="h-3 w-3 md:h-4 md:w-4" />
-            <span className="hidden sm:inline">Preferences</span>
-            <span className="sm:hidden">Pref</span>
+            <span>Preferences</span>
           </TabsTrigger>
           <TabsTrigger value="subscription" className="flex items-center gap-1 text-xs md:text-sm">
             <CreditCard className="h-3 w-3 md:h-4 md:w-4" />
-            <span className="hidden sm:inline">Subscription</span>
-            <span className="sm:hidden">Sub</span>
+            <span>Subscription</span>
           </TabsTrigger>
         </TabsList>
 
@@ -117,13 +145,102 @@ export default function ProfilePage() {
         <TabsContent value="subscription">
           <Card>
             <CardHeader>
-              <CardTitle>Subscription</CardTitle>
+              <CardTitle>Subscription Management</CardTitle>
               <CardDescription>
-                Manage your subscription plan
+                Manage your subscription plan, billing, and payment methods
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p>Current Plan: {authUser.plan || 'Free'}</p>
+            <CardContent className="space-y-6">
+              {/* Current Plan Status */}
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <h3 className="font-semibold text-lg">Current Plan</h3>
+                  <p className="text-muted-foreground">
+                    You are currently on the {authUser.plan || 'Free'} plan
+                  </p>
+                </div>
+                <Badge variant="secondary" className="bg-premium text-premium-foreground">
+                  {authUser.plan || 'Free'}
+                </Badge>
+              </div>
+
+              {/* Plan Features */}
+              <div className="grid gap-4">
+                <h4 className="font-medium">Plan Features</h4>
+                {authUser.plan === 'free' && (
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <p>• Up to 100 transactions</p>
+                    <p>• Basic expense tracking</p>
+                    <p>• Simple financial summaries</p>
+                  </div>
+                )}
+                {authUser.plan === 'standard' && (
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <p>• Up to 100 transactions</p>
+                    <p>• Budget management</p>
+                    <p>• Goal tracking</p>
+                    <p>• Transaction reminders</p>
+                    <p>• AI expense categorization</p>
+                  </div>
+                )}
+                {authUser.plan === 'premium' && (
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <p>• Unlimited transactions</p>
+                    <p>• Advanced analytics</p>
+                    <p>• AI financial insights</p>
+                    <p>• Data export & cloud backup</p>
+                    <p>• AI predictions & recommendations</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Subscription Management Actions */}
+              {authUser.plan !== 'free' && (
+                <div className="space-y-4">
+                  <h4 className="font-medium">Subscription Management</h4>
+                  <div className="grid gap-3">
+                    <Button
+                      onClick={handleManageSubscription}
+                      disabled={isLoading}
+                      className="flex items-center gap-2"
+                    >
+                      <Settings className="h-4 w-4" />
+                      {isLoading ? 'Opening...' : 'Manage Subscription'}
+                      <ExternalLink className="h-3 w-3" />
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                      This will open Stripe's secure customer portal where you can:
+                    </p>
+                    <ul className="text-xs text-muted-foreground space-y-1 ml-4">
+                      <li>• Update payment methods</li>
+                      <li>• Change subscription plan</li>
+                      <li>• View billing history</li>
+                      <li>• Download invoices</li>
+                      <li>• Cancel subscription</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* Upgrade Options for Free Users */}
+              {authUser.plan === 'free' && (
+                <div className="space-y-4">
+                  <h4 className="font-medium">Upgrade Your Plan</h4>
+                  <div className="grid gap-3">
+                    <Button
+                      onClick={() => window.location.href = '/pricing'}
+                      className="flex items-center gap-2"
+                    >
+                      <CreditCard className="h-4 w-4" />
+                      View Pricing Plans
+                      <ExternalLink className="h-3 w-3" />
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                      Upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features
+                    </p>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
