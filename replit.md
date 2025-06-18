@@ -338,6 +338,10 @@ Changelog:
 - June 18, 2025. Mobile users can now take photos directly with camera or select from gallery for receipt processing
 - June 18, 2025. Enhanced mobile receipt upload with dual options - separate "Take Photo" and "Choose from Gallery" buttons for optimal user experience
 - June 18, 2025. Fixed mobile upload interface to provide both camera access and gallery selection instead of forcing camera-only mode
+- June 18, 2025. Created Clerk environment configuration system with dynamic API key selection based on CLERK_ENV variable
+- June 18, 2025. Added client-side clerkEnv.ts and server-side clerkEnv.ts for seamless development/production environment switching
+- June 18, 2025. Integrated environment configuration into existing Clerk authentication setup with proper client/server compatibility
+- June 18, 2025. Updated main.tsx and clerkAuth.ts to use dynamic environment-based API key selection for production deployments
 - June 18, 2025. Fixed mobile tab truncation issues across all pages - removed abbreviated tab names (e.g., "Not" → "Notifications", "Ana" → "Analytics")
 - June 18, 2025. Updated Profile, Trends, and Reports pages to show full tab names on mobile devices for better user experience
 - June 18, 2025. Implemented comprehensive Stripe customer portal integration for subscription management in Profile page
