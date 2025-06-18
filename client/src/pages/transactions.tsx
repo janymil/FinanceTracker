@@ -232,6 +232,9 @@ export default function Transactions() {
       // Update local state immediately
       setTransactions(prev => prev.filter(t => t.id !== id));
       
+      // Invalidate transaction reminders cache
+      await queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
+      
       toast({
         title: "Transaction Deleted",
         description: "Transaction has been removed successfully",

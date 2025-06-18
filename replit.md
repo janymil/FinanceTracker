@@ -324,6 +324,10 @@ Changelog:
 - June 18, 2025. Added AI text cleaning functionality to remove asterisks and AI generation artifacts from financial tips display
 - June 18, 2025. Applied global mobile CSS constraints (max-width: 100vw, overflow-x: hidden) to prevent horizontal scrolling issues
 - June 18, 2025. Enhanced simple-transaction-list component with shrink-0 classes and proper mobile spacing for Recent Transactions widget
+- June 18, 2025. Optimized transaction reminders API calls - removed excessive 30-second refresh interval and replaced with intelligent cache invalidation
+- June 18, 2025. Implemented efficient refresh strategy for transaction reminders - now refreshes only when transactions are created, edited, or deleted
+- June 18, 2025. Added cache invalidation for transaction-reminders queryKey across all transaction operations (dashboard, header, transactions page)
+- June 18, 2025. Configured transaction reminders with 5-minute staleTime and proper cache management to prevent unnecessary server requests
 ```
 
 ## User Preferences
