@@ -362,6 +362,7 @@ Changelog:
 - June 18, 2025. Updated goals page to fetch categories dynamically from database instead of hardcoded values - proper category isolation confirmed working
 - June 18, 2025. RESOLVED: Fixed critical authentication timing bug in category fetching - added retry logic to handle Clerk token availability delays
 - June 18, 2025. Verified category isolation security working correctly - users see predefined categories (userId=NULL) plus their own custom categories only
+- June 18, 2025. FIXED: Migrated "test" category from old user ID (user_2ygQ0tvWtthWzXxFfmTrdWjdzAP) to current Jan Milata account (user_2yYgmUlJG1EBLQqYEg7d64Ex2Zc)
 ```
 
 ## User Preferences
