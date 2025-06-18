@@ -100,6 +100,11 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
     fetchCategories();
   }, [getToken]);
 
+  // Handle QR upload button click
+  const handleQRUpload = () => {
+    generateQRCode();
+  };
+
   // Generate QR code when QR method is selected
   const generateQRCode = async () => {
     const sessionId = generateUUID();
@@ -559,14 +564,64 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                   </Button>
                 </div>
                 
-                {/* Desktop: Single select file button */}
-                <Button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full hidden md:block"
-                >
-                  Select file
-                </Button>
+                {/* Desktop: Show both options */}
+                <div className="hidden md:flex md:space-x-2">
+                  <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex-1 flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Select file
+                  </Button>
+                  <Button
+                    onClick={handleQRUpload}
+                    variant="outline"
+                    className="flex-1 flex items-center gap-2"
+                  >
+                    <QrCode className="h-4 w-4" />
+                    Scan with Phone
+                  </Button>
+                </div>
               </div>
+            </div>
+          )}
+
+          {/* QR Code Upload Interface */}
+          {qrUploadState.status === 'waiting' && qrUploadState.qrCodeUrl && (
+            <div className="text-center space-y-4 py-6">
+              <div className="flex items-center gap-2 justify-center text-blue-600">
+                <Smartphone className="h-5 w-5" />
+                <span className="font-medium">Scan QR Code with Your Phone</span>
+              </div>
+              
+              <div className="bg-white p-4 rounded-lg border shadow-sm mx-auto w-fit">
+                <img 
+                  src={qrUploadState.qrCodeUrl} 
+                  alt="QR Code for mobile upload" 
+                  className="w-64 h-64 mx-auto"
+                />
+              </div>
+              
+              <div className="text-sm text-gray-600 space-y-1">
+                <p>1. Scan this QR code with your phone camera</p>
+                <p>2. Take a photo of your receipt</p>
+                <p>3. The data will appear here automatically</p>
+              </div>
+              
+              {qrUploadState.isPolling && (
+                <div className="flex items-center gap-2 justify-center text-gray-500">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
+                  <span className="text-sm">Waiting for mobile upload...</span>
+                </div>
+              )}
+              
+              <Button 
+                onClick={() => setQrUploadState({ sessionId: '', qrCodeUrl: '', isPolling: false, status: 'idle' })}
+                variant="outline"
+                className="text-sm"
+              >
+                Cancel QR Scan
+              </Button>
             </div>
           )}
 
