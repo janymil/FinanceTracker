@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Crown, TrendingDown, TrendingUp, Receipt, Edit, Trash2, MoreHorizontal } from "lucide-react";
+import { Crown, TrendingDown, TrendingUp, Receipt, Edit, Trash2, MoreHorizontal, Repeat } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from "wouter";
 import { useState, useEffect } from "react";
@@ -30,6 +30,8 @@ interface Transaction {
   ocrVendor?: string;
   ocrDetectedAmount?: string;
   ocrDetectedDate?: string;
+  isRecurring?: boolean;
+  recurringFrequency?: string;
 }
 
 interface SimpleTransactionListProps {
@@ -218,6 +220,12 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                       <p className="font-medium text-gray-900 dark:text-white truncate">
                         {transaction.description}
                       </p>
+                      {transaction.isRecurring && (
+                        <Badge variant="outline" className="text-xs shrink-0 border-blue-200 text-blue-700 dark:border-blue-700 dark:text-blue-300">
+                          <Repeat className="h-3 w-3 mr-1" />
+                          {transaction.recurringFrequency || 'Recurring'}
+                        </Badge>
+                      )}
                       {transaction.imageUrl && (
                         <Badge variant="secondary" className="text-xs sm:hidden shrink-0">
                           <Receipt className="h-3 w-3" />
