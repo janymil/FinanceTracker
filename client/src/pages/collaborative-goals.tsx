@@ -1,7 +1,6 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useUser, useAuth } from "@clerk/clerk-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -90,6 +89,8 @@ interface FriendRequest {
 
 export default function CollaborativeGoalsPage() {
   const { toast } = useToast();
+  const { user, isLoaded } = useUser();
+  const { getToken } = useAuth();
   const [createGoalOpen, setCreateGoalOpen] = useState(false);
   const [addFriendOpen, setAddFriendOpen] = useState(false);
   const [newGoal, setNewGoal] = useState({
@@ -101,25 +102,83 @@ export default function CollaborativeGoalsPage() {
     challengeType: "collaborative",
   });
   const [friendEmail, setFriendEmail] = useState("");
+  
+  // State for data
+  const [goals, setGoals] = useState<CollaborativeGoal[]>([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+  const [goalsLoading, setGoalsLoading] = useState(true);
 
-  // Fetch collaborative goals
-  const { data: goals = [], isLoading: goalsLoading } = useQuery({
-    queryKey: ["/api/collaborative-goals"],
-  });
+  // Fetch data when user is loaded
+  useEffect(() => {
+    if (isLoaded && user?.id) {
+      fetchGoals();
+      fetchFriends();
+      fetchFriendRequests();
+    }
+  }, [isLoaded, user?.id]);
 
-  // Fetch friends
-  const { data: friends = [] } = useQuery({
-    queryKey: ["/api/friends"],
-  });
+  const fetchGoals = async () => {
+    try {
+      const token = await getToken();
+      const response = await fetch('/api/collaborative-goals', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setGoals(data);
+      }
+    } catch (error) {
+      console.error('Error fetching goals:', error);
+    } finally {
+      setGoalsLoading(false);
+    }
+  };
 
-  // Fetch friend requests
-  const { data: friendRequests = [] } = useQuery({
-    queryKey: ["/api/friends/requests"],
-  });
+  const fetchFriends = async () => {
+    try {
+      const token = await getToken();
+      const response = await fetch('/api/friends', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setFriends(data);
+      }
+    } catch (error) {
+      console.error('Error fetching friends:', error);
+    }
+  };
+
+  const fetchFriendRequests = async () => {
+    try {
+      const token = await getToken();
+      const response = await fetch('/api/friends/requests', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setFriendRequests(data);
+      }
+    } catch (error) {
+      console.error('Error fetching friend requests:', error);
+    }
+  };
 
   // Create goal function
   const createGoal = async (goalData: any) => {
     try {
+      const token = await user?.getToken();
+      
       // Debug logging to see what format we're getting
       console.log("Goal data before processing:", goalData);
       
@@ -150,21 +209,32 @@ export default function CollaborativeGoalsPage() {
       };
       
       console.log("Goal data after processing:", processedData);
-      const data = await apiRequest("POST", "/api/collaborative-goals", processedData);
-      await queryClient.invalidateQueries({ queryKey: ["/api/collaborative-goals"] });
-      setCreateGoalOpen(false);
-      setNewGoal({
-        name: "",
-        description: "",
-        targetAmount: "",
-        targetDate: "",
-        category: "",
-        challengeType: "collaborative",
+      
+      const response = await fetch("/api/collaborative-goals", {
+        method: "POST",
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(processedData),
       });
-      toast({
-        title: "Success!",
-        description: "Collaborative goal created successfully",
-      });
+
+      if (response.ok) {
+        fetchGoals();
+        setCreateGoalOpen(false);
+        setNewGoal({
+          name: "",
+          description: "",
+          targetAmount: "",
+          targetDate: "",
+          category: "",
+          challengeType: "collaborative",
+        });
+        toast({
+          title: "Success!",
+          description: "Collaborative goal created successfully",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -175,16 +245,28 @@ export default function CollaborativeGoalsPage() {
   };
 
   // Send friend request function
-  const sendFriendRequest = async (email: string) => {
+  const sendFriendRequestAction = async () => {
     try {
-      const data = await apiRequest("POST", "/api/friends/request", { recipientEmail: email });
-      await queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
-      setAddFriendOpen(false);
-      setFriendEmail("");
-      toast({
-        title: "Success!",
-        description: "Friend request sent successfully",
+      const token = await user?.getToken();
+      const response = await fetch("/api/friends/request", {
+        method: "POST",
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ recipientEmail: friendEmail }),
       });
+
+      if (response.ok) {
+        fetchFriends();
+        fetchFriendRequests();
+        setAddFriendOpen(false);
+        setFriendEmail("");
+        toast({
+          title: "Success!",
+          description: "Friend request sent successfully",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Error",
