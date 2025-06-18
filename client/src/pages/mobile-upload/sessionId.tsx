@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "wouter";
+import { useAuth } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Camera, Upload, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
@@ -12,6 +13,7 @@ interface UploadStatus {
 
 export default function MobileUpload() {
   const { sessionId } = useParams();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
   const { toast } = useToast();
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({ status: 'idle' });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -24,7 +26,14 @@ export default function MobileUpload() {
         message: 'Invalid session ID'
       });
     }
-  }, [sessionId]);
+    
+    if (isLoaded && !isSignedIn) {
+      setUploadStatus({
+        status: 'error',
+        message: 'Authentication required'
+      });
+    }
+  }, [sessionId, isLoaded, isSignedIn]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -56,14 +65,27 @@ export default function MobileUpload() {
       return;
     }
 
+    if (!isSignedIn) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to upload receipts",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setUploadStatus({ status: 'uploading', message: 'Uploading receipt...' });
 
     try {
+      const token = await getToken();
       const formData = new FormData();
       formData.append('receipt', selectedFile);
 
       const response = await fetch(`/api/mobile-upload/upload/${sessionId}`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formData,
       });
 
