@@ -39,7 +39,7 @@ import Help from "@/pages/help";
 import NotFoundPage from "./pages/not-found";
 import ProfilePage from "./pages/profile";
 import AdminAnalytics from "@/pages/admin-analytics";
-import MobileUpload from "@/pages/mobile-upload/[sessionId]";
+import MobileUpload from "@/pages/mobile-upload/sessionId";
 
 // Optimized loading state
 const AppLoader = () => (

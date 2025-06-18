@@ -365,6 +365,11 @@ Changelog:
 - June 18, 2025. FIXED: Migrated "test" category from old user ID (user_2ygQ0tvWtthWzXxFfmTrdWjdzAP) to current Jan Milata account (user_2yYgmUlJG1EBLQqYEg7d64Ex2Zc)
 - June 18, 2025. COMPLETED: Fixed custom categories not appearing in transactions page "Add New Transaction" modal by adding authentication retry logic to all category loading functions
 - June 18, 2025. Applied consistent authentication timing fixes across expenses page, transactions page, and header component for reliable custom category visibility
+- June 18, 2025. COMPLETED: Implemented comprehensive QR code mobile receipt upload system with sessionId-based routing
+- June 18, 2025. Created mobile upload page at /mobile-upload/[sessionId] with camera capture and gallery selection functionality
+- June 18, 2025. Added QR code generation to UploadReceiptModal with "Scan with Phone" option alongside traditional file upload
+- June 18, 2025. Implemented real-time polling system for mobile uploads with 5-second intervals and automatic timeout handling
+- June 18, 2025. Enhanced mobile upload workflow with OCR processing, AI categorization, and automatic form population from mobile-captured receipt data
 - June 18, 2025. MASCOT ENHANCEMENT: Implemented comprehensive mascot restoration system - users can now restore hidden mascots via floating restore button
 - June 18, 2025. Added full drag-and-drop functionality to financial mascot - users can reposition mascot anywhere on screen with mouse drag
 - June 18, 2025. Enhanced mascot positioning system with screen boundary constraints and persistent position state across user interactions
