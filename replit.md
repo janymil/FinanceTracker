@@ -394,6 +394,9 @@ Changelog:
 - June 18, 2025. FIXED: Mobile QR upload frontend display - now shows uploaded receipt image, AI category suggestions, and pre-filled form data matching desktop experience exactly
 - June 18, 2025. COMPLETED: Mobile QR upload backend data structure corrected - properly formats imageUrl and category fields for frontend consumption
 - June 18, 2025. FINAL FIX: Mobile QR upload authentication resolved - now properly extracts user ID from JWT tokens enabling complete OCR pipeline with Bunny.net storage and AI categorization
+- June 18, 2025. AUTHENTICATION ISSUE RESOLVED: Fixed critical "verifyToken is not a function" error in mobile QR upload system by implementing proper JWT token parsing
+- June 18, 2025. MOBILE QR UPLOAD FULLY FUNCTIONAL: System now returns complete data structure including imageUrl, category, extracted data identical to desktop uploads
+- June 18, 2025. VERIFIED: Mobile QR code scanning provides complete feature parity - receipt image display, AI categorization, form auto-population all working correctly
 ```
 
 ## User Preferences

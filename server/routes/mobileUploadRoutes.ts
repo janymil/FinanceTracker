@@ -74,13 +74,11 @@ export function registerMobileUploadRoutes(app) {
       // Extract user ID from JWT token stored in session
       let userId: string;
       try {
-        console.log('JWT token to parse:', userToken.substring(0, 50) + '...');
         // Parse JWT token to extract user ID
         const tokenParts = userToken.split('.');
         if (tokenParts.length === 3) {
           const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
           userId = payload.sub;
-          console.log('Extracted user ID:', userId);
         } else {
           throw new Error('Invalid JWT format');
         }
