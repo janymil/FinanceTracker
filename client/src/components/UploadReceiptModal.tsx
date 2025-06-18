@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Camera, Upload, FileText, AlertCircle, CheckCircle, Save, Edit, ImageIcon } from "lucide-react";
+import { Camera, Upload, FileText, AlertCircle, CheckCircle, Save, Edit, ImageIcon, QrCode, Smartphone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@clerk/clerk-react";
+import QRCode from "qrcode";
 
 interface UploadReceiptModalProps {
   onReceiptProcessed?: (receiptData: any) => void;
@@ -30,11 +31,27 @@ interface UploadState {
   category?: string;
 }
 
+interface QRUploadState {
+  sessionId: string | null;
+  qrCodeUrl: string | null;
+  isPolling: boolean;
+  status: 'idle' | 'waiting' | 'success' | 'error';
+}
+
 interface FormData {
   amount: string;
   description: string;
   date: string;
   categoryId: string;
+}
+
+// UUID generator function
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 }
 
 export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "Upload Image" }: UploadReceiptModalProps) {
@@ -43,8 +60,16 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [uploadMethod, setUploadMethod] = useState<'direct' | 'qr'>('direct');
   
   const [uploadState, setUploadState] = useState<UploadState>({
+    status: 'idle'
+  });
+
+  const [qrUploadState, setQrUploadState] = useState<QRUploadState>({
+    sessionId: null,
+    qrCodeUrl: null,
+    isPolling: false,
     status: 'idle'
   });
 
@@ -74,6 +99,167 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
     };
     fetchCategories();
   }, [getToken]);
+
+  // Generate QR code when QR method is selected
+  const generateQRCode = async () => {
+    const sessionId = generateUUID();
+    const qrUrl = `https://finanzerpro.com/mobile-upload/${sessionId}`;
+    
+    try {
+      const qrCodeDataUrl = await QRCode.toDataURL(qrUrl, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+      
+      setQrUploadState({
+        sessionId,
+        qrCodeUrl: qrCodeDataUrl,
+        isPolling: true,
+        status: 'waiting'
+      });
+      
+      // Start polling for upload status
+      startPolling(sessionId);
+    } catch (error) {
+      console.error('Failed to generate QR code:', error);
+      toast({
+        title: "QR Code Error",
+        description: "Failed to generate QR code",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Polling function to check upload status
+  const startPolling = (sessionId: string) => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const token = await getToken();
+        const response = await fetch(`/api/mobile-upload/status/${sessionId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          
+          if (result.status === 'completed' && result.data) {
+            // Clear polling
+            clearInterval(pollInterval);
+            setQrUploadState(prev => ({ ...prev, isPolling: false, status: 'success' }));
+            
+            // Process the uploaded receipt data
+            processQRUploadResult(result.data);
+          } else if (result.status === 'error') {
+            clearInterval(pollInterval);
+            setQrUploadState(prev => ({ ...prev, isPolling: false, status: 'error' }));
+            toast({
+              title: "Upload Error",
+              description: "Failed to process mobile upload",
+              variant: "destructive"
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
+      }
+    }, 5000); // Poll every 5 seconds
+
+    // Clean up polling after 5 minutes
+    setTimeout(() => {
+      clearInterval(pollInterval);
+      if (qrUploadState.isPolling) {
+        setQrUploadState(prev => ({ ...prev, isPolling: false, status: 'error' }));
+        toast({
+          title: "Timeout",
+          description: "QR scan session expired. Please try again.",
+          variant: "destructive"
+        });
+      }
+    }, 300000); // 5 minutes timeout
+  };
+
+  // Process QR upload result
+  const processQRUploadResult = (result: any) => {
+    // Auto-populate form with extracted data (same logic as direct upload)
+    if (result.extracted) {
+      console.log('QR Extracted data:', result.extracted);
+      // Find best matching category
+      let matchedCategoryId = '';
+      if (result.category && categories.length > 0) {
+        const suggestedCategory = result.category.toLowerCase();
+        console.log('QR AI suggested category:', result.category);
+        
+        // Try exact match first
+        let matchedCategory = categories.find(cat => 
+          cat.name.toLowerCase() === suggestedCategory
+        );
+        
+        // If no exact match, try partial matching
+        if (!matchedCategory) {
+          matchedCategory = categories.find(cat => 
+            suggestedCategory.includes(cat.name.toLowerCase()) || 
+            cat.name.toLowerCase().includes(suggestedCategory.split(' ')[0])
+          );
+        }
+        
+        // If still no match, try common category mappings
+        if (!matchedCategory) {
+          const categoryMappings = {
+            'food': ['food', 'groceries', 'dining', 'restaurant'],
+            'transportation': ['transport', 'travel', 'fuel', 'gas', 'car'],
+            'entertainment': ['entertainment', 'leisure', 'fun', 'movie'],
+            'healthcare': ['health', 'medical', 'doctor', 'pharmacy'],
+            'shopping': ['shopping', 'retail', 'clothes', 'clothing'],
+            'utilities': ['utilities', 'electric', 'water', 'internet']
+          };
+          
+          for (const [key, keywords] of Object.entries(categoryMappings)) {
+            if (keywords.some(keyword => suggestedCategory.includes(keyword))) {
+              matchedCategory = categories.find(cat => 
+                cat.name.toLowerCase().includes(key)
+              );
+              if (matchedCategory) break;
+            }
+          }
+        }
+        
+        if (matchedCategory) {
+          matchedCategoryId = matchedCategory.id.toString();
+          console.log('QR Matched to existing category:', matchedCategory.name);
+        } else {
+          console.log('QR No matching category found for:', result.category);
+        }
+      }
+
+      const newFormData = {
+        amount: result.extracted.amount?.toString() || '',
+        description: result.extracted.vendor || '',
+        date: result.extracted.date || new Date().toISOString().split('T')[0],
+        categoryId: matchedCategoryId
+      };
+      console.log('QR Setting form data:', newFormData);
+      setFormData(newFormData);
+    }
+    
+    setUploadState({
+      status: 'success',
+      message: 'Receipt processed successfully via mobile!',
+      recognizedText: result.recognizedText,
+      imageUrl: result.imageUrl,
+      extracted: result.extracted,
+      category: result.category
+    });
+
+    if (onReceiptProcessed) {
+      onReceiptProcessed(result);
+    }
+  };
 
   const handleFileSelect = async (file: File) => {
     if (!file.type.startsWith('image/')) {
