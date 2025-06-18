@@ -77,6 +77,7 @@ function AppContent() {
           <Route path="/contact" component={Contact} />
           <Route path="/help" component={Help} />
           <Route path="/auth" component={AuthPage} />
+          <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
           <Route component={Landing} />
         </Switch>
         <Footer />

@@ -34,7 +34,7 @@ export function registerMobileUploadRoutes(app: Express) {
       const sessionData = mobileUploadSessions.get(sessionId);
       
       if (!sessionData) {
-        return res.status(404).json({ error: 'Session not found', status: 'not_found' });
+        return res.json({ status: 'pending', message: 'Session not found yet, continuing to poll...' });
       }
 
       // Verify session belongs to authenticated user
