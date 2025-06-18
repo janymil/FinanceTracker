@@ -83,37 +83,100 @@ export function registerMobileUploadRoutes(app) {
         return res.status(400).json({ error: 'No valid image data received' });
       }
 
-      // Connect to the standard OCR endpoint via HTTP request
+      // Call standard OCR processing functions directly with user context
       let ocrResult;
       try {
-        console.log('Connecting to standard OCR endpoint...');
+        console.log('Calling standard OCR processing functions...');
         
-        // Create FormData for the standard upload endpoint
-        const formData = new FormData();
-        formData.append('receipt', file.buffer, {
-          filename: file.originalname || 'mobile-upload.jpg',
-          contentType: file.mimetype
-        });
+        // Import the standard OCR functions
+        const { performOCR, extractStructuredData, uploadToBunny } = await import('../uploadReceipt');
+        const { getStorage } = await import('../storage');
+        
+        // Import additional functions needed for complete OCR processing
+        const getUserPlan = async (userId: string) => {
+          const storage = getStorage();
+          const user = await storage.getUserById(userId);
+          return { plan: user?.plan || 'free' };
+        };
+        
+        const categorizeExpense = async (description: string, amount: number) => {
+          // Import OpenAI for AI categorization (same logic as standard endpoint)
+          const OpenAI = (await import('openai')).default;
+          const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY
+          });
+          
+          const response = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [
+              {
+                role: "system",
+                content: "You are a financial assistant. Categorize expenses into one of these categories: Food, Transportation, Shopping, Entertainment, Healthcare, Education, Bills, Housing, Travel, Other. Respond with only the category name."
+              },
+              {
+                role: "user",
+                content: `Categorize this expense: ${description} (Amount: ${amount})`
+              }
+            ],
+            max_tokens: 10,
+            temperature: 0.1
+          });
+          
+          return { category: response.choices[0]?.message?.content?.trim() || 'Other' };
+        };
+        
+        // Get user plan for feature access
+        const userPlan = await getUserPlan(userId);
+        const canStore = userPlan.plan === 'standard' || userPlan.plan === 'premium';
 
-        // Make HTTP request to the standard upload endpoint
-        const response = await fetch('http://localhost:5000/api/upload-receipt', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${userId}`, // Use user ID as auth token
-            ...formData.getHeaders()
-          },
-          body: formData
-        });
+        // Perform OCR using the standard function
+        const recognizedText = await performOCR(file.buffer);
 
-        if (!response.ok) {
-          throw new Error(`Standard OCR endpoint failed: ${response.status}`);
+        // Extract structured data using the standard function
+        const extractedData = await extractStructuredData(recognizedText);
+
+        // AI Categorization for standard+ users (same logic as standard endpoint)
+        let predictedCategory: string | undefined;
+        if (userPlan.plan === 'standard' || userPlan.plan === 'premium') {
+          try {
+            const descriptionForCategorization = extractedData.vendor || recognizedText;
+            const amountForCategorization = extractedData.amount || 0;
+            
+            const categorization = await categorizeExpense(descriptionForCategorization, amountForCategorization);
+            predictedCategory = categorization.category;
+          } catch (categoryError) {
+            console.warn('AI categorization failed:', categoryError);
+          }
         }
 
-        ocrResult = await response.json();
-        console.log('Standard OCR endpoint processing completed');
+        // Store receipt image for premium users (same logic as standard endpoint)
+        let receiptImageUrl: string | undefined;
+        if (canStore) {
+          try {
+            const timestamp = Date.now();
+            const fileName = `receipt-${userId}-${timestamp}.jpeg`;
+            receiptImageUrl = await uploadToBunny(fileName, file.buffer, file.mimetype);
+          } catch (uploadError) {
+            console.warn('Receipt storage failed:', uploadError);
+          }
+        }
+
+        // Create the result in the same format as standard endpoint
+        ocrResult = {
+          text: recognizedText,
+          extracted: {
+            amount: extractedData.amount,
+            date: extractedData.date,
+            vendor: extractedData.vendor
+          },
+          imageUrl: receiptImageUrl,
+          category: predictedCategory
+        };
+        
+        console.log('Standard OCR processing completed via function calls');
         
       } catch (error) {
-        console.error('Standard OCR endpoint failed:', error);
+        console.error('Standard OCR processing failed:', error);
         mobileUploadSessions.set(sessionId, {
           userId: userId,
           status: 'error',
