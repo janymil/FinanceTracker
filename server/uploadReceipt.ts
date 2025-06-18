@@ -25,9 +25,21 @@ const upload = multer({
   },
 });
 
-// Initialize Google Cloud Vision client
+// Validate Google Cloud environment variables
+if (!process.env.GOOGLE_CLOUD_PROJECT_ID || !process.env.GOOGLE_CLOUD_PRIVATE_KEY || !process.env.GOOGLE_CLOUD_CLIENT_EMAIL) {
+  console.error('Missing required Google Cloud environment variables');
+  throw new Error('Google Cloud Vision configuration is incomplete');
+}
+
+// Initialize Google Cloud Vision client with environment variables
 const visionClient = new ImageAnnotatorClient({
-  keyFilename: './service-account.json',
+  credentials: {
+    type: 'service_account',
+    project_id: process.env.GOOGLE_CLOUD_PROJECT_ID,
+    private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
+  },
+  projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
 });
 
 // Bunny.net configuration

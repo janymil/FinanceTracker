@@ -4,3 +4,9 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Security - Never commit service account files
+service-account.json
+*-service-account.json
+google-cloud-credentials.json
+gcp-*.json

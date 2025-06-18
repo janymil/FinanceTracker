@@ -349,6 +349,9 @@ Changelog:
 - June 18, 2025. Fixed Stripe customer portal authentication issues and added proper error handling for users without Stripe subscriptions
 - June 18, 2025. Added informational notice for users with admin-granted premium access who don't have Stripe billing setup
 - June 18, 2025. Implemented graceful handling of premium users without stripeCustomerId through improved error messaging and UI guidance
+- June 18, 2025. SECURITY: Migrated Google Cloud Vision OCR from hardcoded service-account.json to secure environment variables
+- June 18, 2025. Removed insecure JSON credential file and implemented proper validation for Google Cloud environment variables
+- June 18, 2025. Added .gitignore protection against accidental service account file commits for enhanced security posture
 ```
 
 ## User Preferences
