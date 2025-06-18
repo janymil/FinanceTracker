@@ -316,6 +316,14 @@ Changelog:
 - June 17, 2025. Successfully repositioned Upload Image buttons next to action buttons (Add Transaction, Add Income, Add Expense) on all three pages as requested
 - June 17, 2025. Fixed authentication issues in UploadReceiptModal component by adding proper Clerk Bearer token headers to both upload and categories API requests
 - June 17, 2025. Completed modal-based upload system replacing embedded widgets - upload functionality now working correctly with proper authentication
+- June 18, 2025. Implemented comprehensive mobile responsiveness fixes across entire application
+- June 18, 2025. Added collapsible filter functionality to income and expenses pages with toggle buttons and active filter badges
+- June 18, 2025. Fixed transaction list layouts in income/expenses pages with proper mobile-first flex layouts and button positioning
+- June 18, 2025. Enhanced MonthFilter component with responsive design - abbreviated month names on mobile, proper overflow handling
+- June 18, 2025. Fixed TransactionRemindersWidget mobile layout with proper flex containers and button sizing (h-8 w-8 p-0)
+- June 18, 2025. Added AI text cleaning functionality to remove asterisks and AI generation artifacts from financial tips display
+- June 18, 2025. Applied global mobile CSS constraints (max-width: 100vw, overflow-x: hidden) to prevent horizontal scrolling issues
+- June 18, 2025. Enhanced simple-transaction-list component with shrink-0 classes and proper mobile spacing for Recent Transactions widget
 ```
 
 ## User Preferences

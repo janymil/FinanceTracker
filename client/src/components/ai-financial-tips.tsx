@@ -93,10 +93,11 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       if (response.ok) {
         const data = await response.json();
         if (data.tip && data.tip.trim()) {
-          setCurrentTip(data.tip);
+          const cleanedTip = cleanAIText(data.tip);
+          setCurrentTip(cleanedTip);
           // Save to localStorage for persistence
           if (user?.id) {
-            localStorage.setItem(`ai-tip-${user.id}`, data.tip);
+            localStorage.setItem(`ai-tip-${user.id}`, cleanedTip);
           }
           toast({
             title: "AI Tip Generated",
@@ -181,53 +182,14 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                     { title: "🎯 Context-Aware Financial Advice", keywords: ["implement", "achieve", "strategic", "future", "investment", "opportunities", "timeline"], icon: Sparkles }
                   ];
                   
-                  // Create grouped sections by collecting all content for each type
-                  const groupedSections = {};
-                  const sentences = analysisContent.split(/\.\s+/);
+                  // Clean the content and create a simple display
+                  const cleanedContent = cleanAIText(analysisContent);
                   
-                  // Initialize sections
-                  patterns.forEach(pattern => {
-                    groupedSections[pattern.title] = {
-                      title: pattern.title,
-                      content: [],
-                      icon: pattern.icon
-                    };
-                  });
-                  
-                  // Add a default section for unmatched content
-                  groupedSections[analysisTitle] = {
+                  // Create a single section with cleaned content
+                  sections.push({
                     title: analysisTitle,
-                    content: [],
+                    content: cleanedContent,
                     icon: Lightbulb
-                  };
-                  
-                  sentences.forEach((sentence) => {
-                    if (sentence.trim()) {
-                      const lowerSentence = sentence.toLowerCase();
-                      
-                      // Check if this sentence belongs to a specific analysis type
-                      const matchedPattern = patterns.find(pattern => 
-                        pattern.keywords.some(keyword => lowerSentence.includes(keyword))
-                      );
-                      
-                      if (matchedPattern) {
-                        groupedSections[matchedPattern.title].content.push(sentence + ".");
-                      } else {
-                        // Add to default section
-                        groupedSections[analysisTitle].content.push(sentence + ".");
-                      }
-                    }
-                  });
-                  
-                  // Convert to sections array, only including sections with content
-                  Object.values(groupedSections).forEach(section => {
-                    if (section.content.length > 0) {
-                      sections.push({
-                        title: section.title,
-                        content: section.content.join(" "),
-                        icon: section.icon
-                      });
-                    }
                   });
                   
                   // If no sections were created, create a single comprehensive section
