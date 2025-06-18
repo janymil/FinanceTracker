@@ -234,6 +234,11 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
     }
 
     try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error('Authentication token not available');
+      }
+
       const transactionData = {
         amount: parseFloat(formData.amount),
         description: formData.description,
@@ -250,7 +255,8 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
       const response = await fetch('/api/transactions', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(transactionData)
       });
@@ -263,6 +269,13 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
         title: "Transaction saved",
         description: "Receipt data has been saved as a transaction",
       });
+
+      // Invalidate cache to refresh transaction lists
+      if (typeof window !== 'undefined' && (window as any).queryClient) {
+        const queryClient = (window as any).queryClient;
+        queryClient.invalidateQueries({ queryKey: ["transactions"] });
+        queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      }
 
       // Reset and close modal
       handleReset();
