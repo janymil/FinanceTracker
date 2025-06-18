@@ -170,50 +170,139 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
               <div className="space-y-4">
                 {/* Parse the AI analysis into sections */}
                 {(() => {
-                  const analysisTitle = currentTip.match(/^([^:]+):/)?.[1] || "AI Financial Analysis";
-                  const analysisContent = currentTip.replace(/^[^:]+:\s*/, '');
+                  // Clean the content but preserve structure
+                  const cleanedContent = currentTip;
                   
-                  // Split content into logical sections based on keywords
-                  const sections = [];
-                  const patterns = [
-                    { title: "📊 Spending Pattern Analysis", keywords: ["spending pattern", "analysis", "breakdown", "percentage", "category", "expenses"], icon: TrendingUp },
-                    { title: "💰 Personalized Saving Recommendations", keywords: ["saving", "recommend", "target", "reduction", "optimize", "monthly"], icon: Lightbulb },
-                    { title: "📋 Budget Optimization Suggestions", keywords: ["budget", "allocation", "rebalancing", "guidelines", "financial", "benchmarks"], icon: GraduationCap },
-                    { title: "🎯 Context-Aware Financial Advice", keywords: ["implement", "achieve", "strategic", "future", "investment", "opportunities", "timeline"], icon: Sparkles }
+                  // Define the 4 thematic sections with their patterns
+                  const sectionPatterns = [
+                    {
+                      title: "📊 Spending Pattern Analysis",
+                      icon: TrendingUp,
+                      keywords: ["spending", "pattern", "analysis", "breakdown", "category", "expenses", "mathematical", "reveals", "bulk"],
+                      color: "blue"
+                    },
+                    {
+                      title: "💡 Personalized Saving Recommendations", 
+                      icon: Lightbulb,
+                      keywords: ["saving", "recommend", "rebalancing", "budget", "limiting", "redirect", "sustainable", "implementation"],
+                      color: "green"
+                    },
+                    {
+                      title: "📋 Budget Optimization Suggestions",
+                      icon: GraduationCap, 
+                      keywords: ["budget", "optimization", "income-to-expense", "ratio", "financial", "strategies", "protection", "realigning"],
+                      color: "purple"
+                    },
+                    {
+                      title: "🎯 Advanced Financial Analysis",
+                      icon: Sparkles,
+                      keywords: ["advanced", "analysis", "necessitates", "action", "focus", "balanced", "cash flow", "immediate"],
+                      color: "orange"
+                    }
                   ];
-                  
-                  // Clean the content and create a simple display
-                  const cleanedContent = cleanAIText(analysisContent);
-                  
-                  // Create a single section with cleaned content
-                  sections.push({
-                    title: analysisTitle,
-                    content: cleanedContent,
-                    icon: Lightbulb
+
+                  // Split content into sentences and paragraphs
+                  const sentences = cleanedContent.split(/[.!?]+/).filter(s => s.trim().length > 10);
+                  const sections = [];
+
+                  // Try to match sentences to sections based on keywords
+                  sectionPatterns.forEach(pattern => {
+                    const matchedSentences = sentences.filter(sentence => {
+                      const lowerSentence = sentence.toLowerCase();
+                      return pattern.keywords.some(keyword => lowerSentence.includes(keyword.toLowerCase()));
+                    });
+
+                    if (matchedSentences.length > 0) {
+                      sections.push({
+                        ...pattern,
+                        content: cleanAIText(matchedSentences.join('. ').trim() + '.')
+                      });
+                      
+                      // Remove matched sentences from the pool
+                      matchedSentences.forEach(matched => {
+                        const index = sentences.indexOf(matched);
+                        if (index > -1) sentences.splice(index, 1);
+                      });
+                    }
                   });
-                  
-                  // If no sections were created, create a single comprehensive section
+
+                  // If we have remaining sentences or didn't get 4 sections, distribute them
+                  if (sentences.length > 0 || sections.length < 4) {
+                    const remainingText = sentences.join('. ').trim();
+                    
+                    // If we have less than 4 sections, add the remaining patterns with remaining content
+                    const missingSections = sectionPatterns.filter(pattern => 
+                      !sections.some(section => section.title === pattern.title)
+                    );
+
+                    if (remainingText && missingSections.length > 0) {
+                      // Split remaining text evenly among missing sections
+                      const chunks = remainingText.split(/(?:[.!?]+\s+)/).filter(chunk => chunk.trim());
+                      missingSections.forEach((pattern, index) => {
+                        const chunkStart = Math.floor((chunks.length / missingSections.length) * index);
+                        const chunkEnd = Math.floor((chunks.length / missingSections.length) * (index + 1));
+                        const content = chunks.slice(chunkStart, chunkEnd).join('. ').trim();
+                        
+                        if (content) {
+                          sections.push({
+                            ...pattern,
+                            content: cleanAIText(content + '.')
+                          });
+                        }
+                      });
+                    }
+                  }
+
+                  // Ensure we have at least one section
                   if (sections.length === 0) {
                     sections.push({
-                      title: analysisTitle,
-                      content: analysisContent,
-                      icon: Lightbulb
+                      title: "📊 AI Financial Analysis",
+                      icon: TrendingUp,
+                      content: cleanAIText(cleanedContent),
+                      color: "blue"
                     });
                   }
-                  
+
                   return sections.map((section, index) => {
                     const IconComponent = section.icon;
+                    const colorClasses = {
+                      blue: "from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700",
+                      green: "from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700", 
+                      purple: "from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700",
+                      orange: "from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700"
+                    };
+
                     return (
-                      <div key={index} className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div key={index} className={`p-4 bg-gradient-to-r ${colorClasses[section.color] || colorClasses.blue} rounded-lg border`}>
                         <div className="flex items-start gap-3">
-                          <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
-                            <IconComponent className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          <div className={`p-2 rounded-full ${
+                            section.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900' :
+                            section.color === 'green' ? 'bg-green-100 dark:bg-green-900' :
+                            section.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900' :
+                            'bg-orange-100 dark:bg-orange-900'
+                          }`}>
+                            <IconComponent className={`h-4 w-4 ${
+                              section.color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
+                              section.color === 'green' ? 'text-green-600 dark:text-green-400' :
+                              section.color === 'purple' ? 'text-purple-600 dark:text-purple-400' :
+                              'text-orange-600 dark:text-orange-400'
+                            }`} />
                           </div>
                           <div className="flex-1">
-                            <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                            <h4 className={`font-medium mb-2 ${
+                              section.color === 'blue' ? 'text-blue-900 dark:text-blue-100' :
+                              section.color === 'green' ? 'text-green-900 dark:text-green-100' :
+                              section.color === 'purple' ? 'text-purple-900 dark:text-purple-100' :
+                              'text-orange-900 dark:text-orange-100'
+                            }`}>
                               {section.title}
                             </h4>
-                            <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">
+                            <p className={`text-sm leading-relaxed ${
+                              section.color === 'blue' ? 'text-blue-800 dark:text-blue-200' :
+                              section.color === 'green' ? 'text-green-800 dark:text-green-200' :
+                              section.color === 'purple' ? 'text-purple-800 dark:text-purple-200' :
+                              'text-orange-800 dark:text-orange-200'
+                            }`}>
                               {section.content}
                             </p>
                           </div>
