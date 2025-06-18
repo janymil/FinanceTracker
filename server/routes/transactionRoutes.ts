@@ -75,7 +75,7 @@ export function registerTransactionRoutes(app: Express) {
               const categorization = await categorizeExpense(transaction.description, parseFloat(transaction.amount));
               if (categorization.confidence > 0.7) { // Only auto-apply if confidence is high
                 // Update transaction with suggested category
-                const categories = await storage.getCategories();
+                const categories = await storage.getCategories(userId);
                 const matchingCategory = categories.find(cat => cat.name === categorization.category);
                 if (matchingCategory) {
                   await storage.updateTransaction(transaction.id, { categoryId: matchingCategory.id });

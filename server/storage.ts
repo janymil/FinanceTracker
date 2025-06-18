@@ -84,8 +84,8 @@ export interface IStorage {
   deleteGoal(id: number, userId: string): Promise<void>;
 
   // Category operations
-  getCategories(): Promise<Category[]>;
-  createCategory(category: { name: string; icon: string; color: string; type: string }): Promise<Category>;
+  getCategories(userId?: string): Promise<Category[]>;
+  createCategory(category: { userId: string; name: string; icon: string; color: string; type: string }): Promise<Category>;
   updateCategory(categoryId: number, category: { name: string; icon: string; color: string; type: string }): Promise<Category>;
   deleteCategory(categoryId: number): Promise<Category>;
 

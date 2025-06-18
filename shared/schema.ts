@@ -45,7 +45,7 @@ export const users = pgTable("users", {
 // Categories for transactions and budgets
 export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: varchar("user_id").references(() => users.id),
   name: varchar("name", { length: 100 }).notNull(),
   icon: varchar("icon", { length: 50 }).notNull(),
   color: varchar("color", { length: 20 }).notNull(),
