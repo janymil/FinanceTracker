@@ -33,16 +33,6 @@ export function useAuth() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [signOut]);
   
-  // Security: Clear cache when user changes to prevent data leakage
-  useEffect(() => {
-    if (clerkUser?.id) {
-      clearCacheOnUserChange(clerkUser.id);
-    } else if (isUnauthenticated) {
-      // User logged out - clear all session data
-      clearUserSession();
-    }
-  }, [clerkUser?.id, isUnauthenticated]);
-  
   // Get our database user record that syncs with Clerk
   const canFetchUser = userLoaded && authLoaded && isSignedIn && !!clerkUser?.id;
   
@@ -68,6 +58,16 @@ export function useAuth() {
   const isLoading = !userLoaded || !authLoaded || dbUserLoading;
   const isAuthenticated = canFetchUser && !!user?.id;
   const isUnauthenticated = authLoaded && !isSignedIn;
+  
+  // Security: Clear cache when user changes to prevent data leakage
+  useEffect(() => {
+    if (clerkUser?.id) {
+      clearCacheOnUserChange(clerkUser.id);
+    } else if (authLoaded && !isSignedIn) {
+      // User logged out - clear all session data
+      clearUserSession();
+    }
+  }, [clerkUser?.id, authLoaded, isSignedIn]);
 
   return {
     user,
