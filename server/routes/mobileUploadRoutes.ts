@@ -1,7 +1,90 @@
 import { Express } from "express";
 import multer from "multer";
-import { authenticateToken } from "../auth";
-import { processReceiptOCR } from "../uploadReceipt";
+import crypto from "crypto";
+import { isAuthenticated, getUserId } from "../clerkAuth";
+import { ImageAnnotatorClient } from '@google-cloud/vision';
+import { openai } from '../openaiClient';
+
+// Initialize Google Cloud Vision client
+const visionClient = new ImageAnnotatorClient({
+  credentials: {
+    type: 'service_account',
+    project_id: process.env.GOOGLE_CLOUD_PROJECT_ID,
+    private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
+  },
+  projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+});
+
+// Process receipt OCR
+async function processReceiptOCR(imageBuffer: Buffer, filename: string) {
+  try {
+    // Perform OCR using Google Cloud Vision
+    const [result] = await visionClient.textDetection({
+      image: { content: imageBuffer },
+    });
+
+    const detections = result.textAnnotations;
+    let recognizedText = '';
+    
+    if (detections && detections.length > 0) {
+      recognizedText = detections[0].description || '';
+    } else {
+      const fullTextAnnotation = result.fullTextAnnotation;
+      recognizedText = fullTextAnnotation?.text || '';
+    }
+
+    // Extract structured data using OpenAI
+    let extractedData = {};
+    if (recognizedText.trim()) {
+      try {
+        const response = await openai.chat.completions.create({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content: "Extract from this receipt OCR text: amount (as number), purchase date (YYYY-MM-DD format), store/vendor name. Return JSON with keys: amount, date, vendor."
+            },
+            {
+              role: "user",
+              content: recognizedText
+            }
+          ],
+          response_format: { type: "json_object" },
+          temperature: 0.1
+        });
+
+        const result = JSON.parse(response.choices[0].message.content || '{}');
+        
+        // Normalize extracted data
+        if (result.amount !== undefined) {
+          const numAmount = Number(result.amount);
+          if (!isNaN(numAmount) && numAmount > 0) {
+            extractedData.amount = numAmount;
+          }
+        }
+        
+        if (result.date) {
+          extractedData.date = result.date;
+        }
+        
+        if (result.vendor) {
+          extractedData.vendor = result.vendor;
+        }
+      } catch (error) {
+        console.error('OpenAI extraction error:', error);
+      }
+    }
+
+    return {
+      text: recognizedText,
+      extracted: extractedData
+    };
+  } catch (error) {
+    console.error('OCR processing error:', error);
+    throw new Error('Failed to process receipt');
+  }
+}
 
 // In-memory storage for mobile upload sessions
 const mobileUploadSessions = new Map<string, any>();
@@ -21,10 +104,10 @@ const mobileUpload = multer({
 
 export function registerMobileUploadRoutes(app: Express) {
   // Get upload status for mobile session
-  app.get('/api/mobile-upload/status/:sessionId', authenticateToken, async (req, res) => {
+  app.get('/api/mobile-upload/status/:sessionId', isAuthenticated, async (req: any, res) => {
     try {
       const { sessionId } = req.params;
-      const userId = req.user?.claims?.sub;
+      const userId = getUserId(req);
 
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
@@ -49,10 +132,10 @@ export function registerMobileUploadRoutes(app: Express) {
   });
 
   // Handle mobile file upload
-  app.post('/api/mobile-upload/upload/:sessionId', authenticateToken, mobileUpload.single('receipt'), async (req, res) => {
+  app.post('/api/mobile-upload/upload/:sessionId', isAuthenticated, mobileUpload.single('receipt'), async (req: any, res) => {
     try {
       const { sessionId } = req.params;
-      const userId = req.user?.claims?.sub;
+      const userId = getUserId(req);
       const file = req.file;
 
       if (!userId) {
@@ -63,7 +146,7 @@ export function registerMobileUploadRoutes(app: Express) {
         return res.status(400).json({ error: 'No file uploaded' });
       }
 
-      // Process the receipt with OCR
+      // Process receipt using existing OCR system
       const ocrResult = await processReceiptOCR(file.buffer, file.originalname);
 
       // Store the upload result in session
@@ -92,7 +175,7 @@ export function registerMobileUploadRoutes(app: Express) {
       
       // Store error in session
       const sessionData = {
-        userId: req.user?.claims?.sub,
+        userId: getUserId(req),
         status: 'error',
         error: 'Failed to process receipt',
         uploadedAt: new Date()
@@ -105,9 +188,9 @@ export function registerMobileUploadRoutes(app: Express) {
   });
 
   // Create new mobile upload session
-  app.post('/api/mobile-upload/create-session', authenticateToken, async (req, res) => {
+  app.post('/api/mobile-upload/create-session', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = getUserId(req);
 
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
