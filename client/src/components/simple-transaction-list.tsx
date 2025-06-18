@@ -241,6 +241,11 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                     <div className="flex items-center space-x-2">
                       <p className="font-medium text-gray-900 dark:text-white truncate">
                         {transaction.description}
+                        {transaction.description === 'test111' && (
+                          <span className="text-xs text-red-500 ml-2">
+                            [isRecurring: {String(transaction.isRecurring)}, type: {typeof transaction.isRecurring}]
+                          </span>
+                        )}
                       </p>
                       {transaction.isRecurring && (
                         <Badge variant="outline" className="text-xs shrink-0 border-blue-200 text-blue-700 dark:border-blue-700 dark:text-blue-300 flex items-center">
