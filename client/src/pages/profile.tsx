@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useUser, UserProfile, UserButton } from "@clerk/clerk-react";
+import { useUser, UserProfile, UserButton, useAuth as useClerkAuth } from "@clerk/clerk-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
@@ -22,10 +22,12 @@ export default function ProfilePage() {
   const handleManageSubscription = async () => {
     setIsLoading(true);
     try {
+      const token = await user.getToken();
       const response = await fetch('/api/create-customer-portal-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         credentials: 'include',
       });

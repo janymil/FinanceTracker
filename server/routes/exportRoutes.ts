@@ -178,29 +178,37 @@ export function registerExportRoutes(app: Express) {
 
     try {
       const userId = getUserId(req);
+      console.log("Customer portal: User ID from request:", userId);
+      
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
 
       const user = await storage.getUser(userId);
+      console.log("Customer portal: User found:", user ? "yes" : "no", user ? `plan: ${user.plan}` : "");
+      
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
       if (!user.stripeCustomerId) {
+        console.log("Customer portal: No Stripe customer ID found for user");
         return res.status(400).json({ message: "No active subscription found. Please subscribe first." });
       }
 
+      console.log("Customer portal: Creating session for Stripe customer:", user.stripeCustomerId);
+      
       // Create customer portal session
       const session = await stripe.billingPortal.sessions.create({
         customer: user.stripeCustomerId,
         return_url: `${process.env.REPLIT_DOMAINS || 'http://localhost:5000'}/profile?tab=subscription`,
       });
 
+      console.log("Customer portal: Session created successfully");
       res.json({ url: session.url });
     } catch (error: any) {
       console.error("Error creating customer portal session:", error);
-      res.status(400).json({ message: error.message });
+      res.status(500).json({ message: error.message || "Failed to create customer portal session" });
     }
   });
 
