@@ -238,8 +238,8 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                   )}
                   
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2">
-                      <p className="font-medium text-gray-900 dark:text-white truncate">
+                    <div className="flex items-center space-x-2 overflow-visible">
+                      <p className="font-medium text-gray-900 dark:text-white flex-shrink">
                         {transaction.description}
                         {transaction.description === 'test111' && (
                           <span className="text-xs text-red-500 ml-2">
@@ -248,7 +248,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                         )}
                       </p>
                       {transaction.isRecurring && (
-                        <Badge variant="outline" className="text-xs shrink-0 border-blue-200 text-blue-700 dark:border-blue-700 dark:text-blue-300 flex items-center">
+                        <Badge variant="outline" className="text-xs shrink-0 border-blue-200 text-blue-700 dark:border-blue-700 dark:text-blue-300 flex items-center ml-2">
                           <Repeat className="h-3 w-3 mr-1" />
                           {transaction.recurringFrequency ? transaction.recurringFrequency.charAt(0).toUpperCase() + transaction.recurringFrequency.slice(1) : 'Recurring'}
                         </Badge>
