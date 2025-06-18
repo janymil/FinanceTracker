@@ -319,34 +319,4 @@ function extractDate(text: string): string | null {
   return null;
 }
 
-// Process receipt image for mobile uploads (using file path instead of buffer)
-export async function processReceiptImage(filePath: string): Promise<{
-  recognizedText: string;
-  extracted: {
-    amount?: number;
-    date?: string;
-    vendor?: string;
-    error?: string;
-  };
-}> {
-  const fs = await import('fs');
-  
-  try {
-    // Read the file
-    const imageBuffer = fs.readFileSync(filePath);
-    
-    // Perform OCR
-    const recognizedText = await performOCR(imageBuffer);
-    
-    // Extract structured data using OpenAI
-    const extractedData = await extractStructuredData(recognizedText);
-    
-    return {
-      recognizedText,
-      extracted: extractedData
-    };
-  } catch (error) {
-    console.error('Mobile receipt processing error:', error);
-    throw error;
-  }
-}
+

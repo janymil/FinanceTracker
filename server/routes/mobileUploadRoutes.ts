@@ -2,7 +2,7 @@ import { Express } from "express";
 import multer from "multer";
 import crypto from "crypto";
 import { isAuthenticated, getUserId } from "../clerkAuth";
-import { uploadReceiptHandler } from "../uploadReceipt";
+import { performOCR, extractStructuredData } from "../uploadReceipt";
 
 // In-memory storage for mobile upload sessions
 const mobileUploadSessions = new Map<string, any>();
@@ -71,57 +71,25 @@ export function registerMobileUploadRoutes(app: Express) {
 
       const userId = existingSession.userId;
 
-      // Process receipt using the complete standard OCR pipeline
-      
-      // Get user plan to determine features available
-      const userResult = await db.select().from(users).where(eq(users.id, userId));
-      const userPlan = userResult[0]?.plan || 'free';
-      const canStore = userPlan === 'standard' || userPlan === 'premium';
-      
-      // Perform OCR
-      const recognizedText = await performOCR(file.buffer);
-      
-      // Extract structured data using OpenAI
-      const extractedData = await extractStructuredData(recognizedText);
-      
-      // AI Categorization for standard+ users
-      let predictedCategory: string | undefined;
-      if (userPlan === 'standard' || userPlan === 'premium') {
-        try {
-          // Use the vendor name or fallback to the full OCR text for categorization
-          const descriptionForCategorization = extractedData.vendor || recognizedText;
-          const amountForCategorization = extractedData.amount || 0;
-          
-          const categorization = await categorizeExpense(descriptionForCategorization, amountForCategorization);
-          predictedCategory = categorization.category;
-        } catch (categoryError) {
-          console.error('AI categorization failed:', categoryError);
-          // Continue without categorization
-        }
-      }
-      
-      let imageUrl: string | undefined;
-      
-      // Upload to Bunny.net if user has appropriate plan (standard+ users)
-      if (canStore) {
-        const timestamp = Date.now();
-        const fileName = `receipt-mobile-${userId}-${timestamp}.${file.mimetype.split('/')[1]}`;
+      // Process the receipt using the existing OCR functions
+      try {
+        const recognizedText = await performOCR(file.buffer);
+        const extractedData = await extractStructuredData(recognizedText);
         
-        try {
-          imageUrl = await uploadToBunny(fileName, file.buffer, file.mimetype);
-        } catch (uploadError) {
-          console.error('Upload to Bunny.net failed:', uploadError);
-          // Continue without storing the image, but still return OCR results
-        }
+        var ocrResult = {
+          text: recognizedText,
+          extracted: extractedData
+        };
+      } catch (error) {
+        console.error('Mobile OCR processing failed:', error);
+        mobileUploadSessions.set(sessionId, {
+          userId: userId,
+          status: 'error',
+          error: 'OCR processing failed',
+          createdAt: new Date()
+        });
+        return res.status(500).json({ error: 'OCR processing failed' });
       }
-      
-      // Prepare OCR result with same structure as desktop version
-      const ocrResult = {
-        text: recognizedText,
-        extracted: extractedData,
-        ...(imageUrl && { imageUrl }),
-        ...(predictedCategory && { category: predictedCategory })
-      };
 
       // Store the upload result in session
       const sessionData = {
