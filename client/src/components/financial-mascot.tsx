@@ -32,6 +32,9 @@ export function FinancialMascot() {
   const [mascot, setMascot] = useState<MascotData | null>(null);
   const [financialHealth, setFinancialHealth] = useState<FinancialHealth | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [position, setPosition] = useState({ x: 16, y: 16 }); // Default: bottom-4 right-4
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   // Fetch mascot data
   const fetchMascot = async () => {
@@ -145,13 +148,53 @@ export function FinancialMascot() {
     toggleMascot(enabled);
   };
 
+  // Drag functionality
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget || (e.target as HTMLElement).closest('.mascot-image')) {
+      setIsDragging(true);
+      const rect = e.currentTarget.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+      e.preventDefault();
+    }
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return;
+    
+    const newX = window.innerWidth - (e.clientX - dragOffset.x) - 96; // 96px for mascot width
+    const newY = window.innerHeight - (e.clientY - dragOffset.y) - 96; // 96px for mascot height
+    
+    // Keep mascot within screen bounds
+    const boundedX = Math.max(16, Math.min(newX, window.innerWidth - 112));
+    const boundedY = Math.max(16, Math.min(newY, window.innerHeight - 112));
+    
+    setPosition({ x: boundedX, y: boundedY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Add global mouse event listeners for dragging
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'grabbing';
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        document.body.style.cursor = '';
+      };
+    }
+  }, [isDragging, dragOffset]);
+
   // Don't render if user is not authenticated or loading
   if (!isReady || !user?.id || isLoading) {
-    return null;
-  }
-
-  // Don't render if mascot exists but is disabled
-  if (mascot && mascot.isEnabled === false) {
     return null;
   }
 
@@ -167,10 +210,41 @@ export function FinancialMascot() {
   const currentMood = financialHealth ? getMascotMood(financialHealth.score) : "neutral";
   const shouldRegenerateMascot = mascot && Math.abs(mascot.healthScore - (financialHealth?.score || 0)) > 20;
 
+  // If mascot is disabled, show a small restore button
+  if (mascot && mascot.isEnabled === false) {
+    return (
+      <div 
+        className="fixed z-50"
+        style={{ 
+          bottom: `${position.y}px`, 
+          right: `${position.x}px` 
+        }}
+      >
+        <Button
+          size="sm"
+          variant="outline"
+          className="bg-white dark:bg-gray-800 shadow-lg border-2 border-blue-200 dark:border-blue-700 hover:border-blue-400 dark:hover:border-blue-500"
+          onClick={() => handleToggle(true)}
+          title="Show Financial Mascot"
+        >
+          <Sparkles className="h-4 w-4 text-blue-500" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Floating Mascot */}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end space-y-2">
+      <div 
+        className="fixed z-50 flex flex-col items-end space-y-2"
+        style={{ 
+          bottom: `${position.y}px`, 
+          right: `${position.x}px`,
+          cursor: isDragging ? 'grabbing' : 'grab'
+        }}
+        onMouseDown={handleMouseDown}
+      >
         {/* Settings Panel */}
         {showSettings && (
           <Card className="w-64 shadow-lg border border-gray-200 dark:border-gray-700">
@@ -268,7 +342,7 @@ export function FinancialMascot() {
               <img
                 src={mascot.imageUrl}
                 alt={`Financial mascot showing ${currentMood} mood`}
-                className="w-20 h-20 rounded-full shadow-lg border-2 border-white dark:border-gray-700 cursor-pointer hover:scale-105 transition-transform animate-bounce"
+                className="mascot-image w-20 h-20 rounded-full shadow-lg border-2 border-white dark:border-gray-700 cursor-pointer hover:scale-105 transition-transform animate-bounce"
                 style={{ 
                   animationDuration: '3s',
                   animationIterationCount: 'infinite',
@@ -296,7 +370,7 @@ export function FinancialMascot() {
               />
             ) : (
               <div 
-                className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 shadow-lg border-2 border-white dark:border-gray-700 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform group"
+                className="mascot-image w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 shadow-lg border-2 border-white dark:border-gray-700 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform group"
                 onClick={() => setShowSettings(!showSettings)}
                 title="Click to generate your financial mascot"
               >
