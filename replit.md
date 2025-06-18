@@ -365,6 +365,11 @@ Changelog:
 - June 18, 2025. FIXED: Migrated "test" category from old user ID (user_2ygQ0tvWtthWzXxFfmTrdWjdzAP) to current Jan Milata account (user_2yYgmUlJG1EBLQqYEg7d64Ex2Zc)
 - June 18, 2025. COMPLETED: Fixed custom categories not appearing in transactions page "Add New Transaction" modal by adding authentication retry logic to all category loading functions
 - June 18, 2025. Applied consistent authentication timing fixes across expenses page, transactions page, and header component for reliable custom category visibility
+- June 18, 2025. MASCOT ENHANCEMENT: Implemented comprehensive mascot restoration system - users can now restore hidden mascots via floating restore button
+- June 18, 2025. Added full drag-and-drop functionality to financial mascot - users can reposition mascot anywhere on screen with mouse drag
+- June 18, 2025. Enhanced mascot positioning system with screen boundary constraints and persistent position state across user interactions
+- June 18, 2025. Fixed mobile responsiveness for categories page "Add New Category" button with responsive flex layout and abbreviated tab names
+- June 18, 2025. Enhanced Profile page Clerk components with comprehensive mobile CSS fixes for form buttons, input fields, and layout constraints
 ```
 
 ## User Preferences
