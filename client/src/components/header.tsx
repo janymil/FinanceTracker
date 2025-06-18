@@ -118,11 +118,14 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
         ...transactionData,
         amount: parseFloat(transactionData.amount),
       });
-      await queryClient.invalidateQueries({ queryKey: ["/api/transactions", user?.id] });
-      await queryClient.invalidateQueries({ queryKey: ["/api/financial-summary", user?.id] });
-      await queryClient.invalidateQueries({ queryKey: ["/api/budgets", user?.id] });
-      await queryClient.invalidateQueries({ queryKey: ["/api/financial-health", user?.id] });
-      await queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
+      await queryClient.invalidateQueries({ 
+        predicate: (query) => 
+          query.queryKey[0] === "transactions" || 
+          query.queryKey[0] === "financial-summary" ||
+          query.queryKey[0] === "budgets" ||
+          query.queryKey[0] === "financial-health" ||
+          query.queryKey[0] === "transaction-reminders"
+      });
       
       setIsDialogOpen(false);
       setNewTransaction({
