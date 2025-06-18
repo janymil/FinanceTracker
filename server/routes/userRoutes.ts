@@ -127,7 +127,11 @@ export function registerUserRoutes(app: Express) {
   // Initialize default categories if none exist
   app.post('/api/init-categories', isAuthenticated, async (req, res) => {
     try {
-      const existingCategories = await storage.getCategories();
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const existingCategories = await storage.getCategories(userId);
 
       if (existingCategories.length === 0) {
         // Initialize default categories
