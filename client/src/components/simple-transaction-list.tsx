@@ -163,12 +163,22 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
   // Debug: Check if isRecurring data is present
   useEffect(() => {
     if (transactions && transactions.length > 0) {
-      console.log("Recent Transactions Data:", transactions.slice(0, 3).map(t => ({
+      const debugData = transactions.slice(0, 3).map(t => ({
         id: t.id,
         description: t.description,
         isRecurring: t.isRecurring,
-        recurringFrequency: t.recurringFrequency
-      })));
+        recurringFrequency: t.recurringFrequency,
+        hasRecurringIcon: t.isRecurring ? 'YES' : 'NO'
+      }));
+      console.log("🔄 Recent Transactions Debug:", debugData);
+      console.log("🔄 Full transaction objects:", transactions.slice(0, 2));
+      
+      // Additional check for test111 specifically
+      const test111 = transactions.find(t => t.description === 'test111');
+      if (test111) {
+        console.log("🔍 test111 transaction data:", test111);
+        console.log("🔍 test111 isRecurring type:", typeof test111.isRecurring, test111.isRecurring);
+      }
     }
   }, [transactions]);
 
