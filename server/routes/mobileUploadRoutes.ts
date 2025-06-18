@@ -71,16 +71,8 @@ export function registerMobileUploadRoutes(app) {
 
       const userToken = existingSession.userId;
       
-      // Extract clean user ID from JWT token for mobile uploads
-      let userId: string;
-      try {
-        const { verifyToken } = await import('../clerkAuth.js');
-        const payload = await verifyToken(userToken);
-        userId = payload.sub;
-      } catch (error) {
-        console.error('Failed to verify mobile upload token:', error);
-        return res.status(401).json({ error: 'Invalid authentication token' });
-      }
+      // Use the stored user token directly (it's already the user ID from session creation)
+      const userId = userToken;
 
       console.log('Processing mobile upload for user:', userId, 'file size:', file.buffer.length);
 
