@@ -370,6 +370,11 @@ Changelog:
 - June 18, 2025. Enhanced mascot positioning system with screen boundary constraints and persistent position state across user interactions
 - June 18, 2025. Fixed mobile responsiveness for categories page "Add New Category" button with responsive flex layout and abbreviated tab names
 - June 18, 2025. Enhanced Profile page Clerk components with comprehensive mobile CSS fixes for form buttons, input fields, and layout constraints
+- June 18, 2025. DOCUMENTATION UPDATE: Added comprehensive receipt OCR functionality documentation to help page with step-by-step scanning instructions
+- June 18, 2025. Enhanced help page with detailed OCR user guide including best practices, troubleshooting, AI categorization, and data extraction features
+- June 18, 2025. FIXED: AI chat assistant in help page - implemented proper GPT-3.5-turbo integration with /api/help-chat endpoint
+- June 18, 2025. Updated subscription plan features to include receipt OCR scanning for Standard+ users in help documentation
+- June 18, 2025. Added comprehensive FAQ section covering OCR accuracy, supported receipt types, and editing extracted data
 ```
 
 ## User Preferences

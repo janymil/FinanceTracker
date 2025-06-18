@@ -26,7 +26,8 @@ import {
   Users,
   Lock,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Camera
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -60,13 +61,26 @@ export default function Help() {
   const sendChatMessage = async (message: string) => {
     setIsLoading(true);
     try {
-      const data = await apiRequest('POST', '/api/help-chat', { message });
+      const response = await fetch('/api/help-chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to get response');
+      }
+      
+      const data = await response.json();
       setChatMessages(prev => [...prev, {
         role: "assistant",
-        content: data.response,
+        content: data.response || "I'm sorry, I couldn't generate a response. Please try again.",
         timestamp: new Date()
       }]);
     } catch (error) {
+      console.error('Help chat error:', error);
       setChatMessages(prev => [...prev, {
         role: "assistant",
         content: "Sorry, I'm having trouble right now. Please try again later.",
@@ -557,6 +571,104 @@ export default function Help() {
                           Access Reports from the sidebar to see spending breakdowns, income vs. expenses, 
                           and category analysis. Use the month filter to view different time periods.
                         </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                      <Camera className="h-5 w-5" />
+                      Receipt OCR Scanning (Standard+)
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                          Available for Standard and Premium subscribers
+                        </p>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2">How to Scan Receipts</h4>
+                        <ol className="text-sm text-gray-600 dark:text-gray-300 space-y-2 ml-4">
+                          <li className="flex gap-2">
+                            <span className="font-medium text-primary">1.</span>
+                            Navigate to Expenses, Income, or Transactions page
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="font-medium text-primary">2.</span>
+                            Click the "Upload Image" button next to "Add Transaction"
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="font-medium text-primary">3.</span>
+                            Choose "Take Photo" (mobile camera) or "Choose from Gallery"
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="font-medium text-primary">4.</span>
+                            Select or capture a clear image of your receipt
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="font-medium text-primary">5.</span>
+                            Wait for OCR processing - extracted data will appear automatically
+                          </li>
+                        </ol>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2">What Gets Extracted</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          <div className="p-3 border rounded-lg">
+                            <h5 className="font-medium text-sm">Merchant Name</h5>
+                            <p className="text-xs text-gray-600 dark:text-gray-300">Store or restaurant name</p>
+                          </div>
+                          <div className="p-3 border rounded-lg">
+                            <h5 className="font-medium text-sm">Total Amount</h5>
+                            <p className="text-xs text-gray-600 dark:text-gray-300">Final transaction amount</p>
+                          </div>
+                          <div className="p-3 border rounded-lg">
+                            <h5 className="font-medium text-sm">Date</h5>
+                            <p className="text-xs text-gray-600 dark:text-gray-300">Transaction date</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2">AI Category Suggestions</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          For Standard+ users, our AI analyzes the merchant name and suggests the most 
+                          appropriate expense category. You can accept the suggestion or choose a different category.
+                        </p>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2">Best Practices for Scanning</h4>
+                        <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 ml-4">
+                          <li>• Ensure good lighting when taking photos</li>
+                          <li>• Keep the receipt flat and avoid shadows</li>
+                          <li>• Capture the entire receipt including headers and totals</li>
+                          <li>• Use clear, uncrumpled receipts for best results</li>
+                          <li>• Check extracted data before saving the transaction</li>
+                        </ul>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2">Editing Extracted Data</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          All extracted information appears in editable form fields. You can modify any 
+                          details before saving the transaction. The original receipt image is stored and 
+                          can be viewed later by clicking on receipt thumbnails in transaction lists.
+                        </p>
+                      </div>
+
+                      <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                        <h4 className="font-medium mb-2 text-yellow-800 dark:text-yellow-200">Troubleshooting</h4>
+                        <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
+                          <li>• If OCR fails, manually enter transaction details</li>
+                          <li>• Poor image quality may affect extraction accuracy</li>
+                          <li>• Handwritten receipts work better when text is clear</li>
+                          <li>• Multiple items on one receipt create one transaction for the total</li>
+                        </ul>
                       </div>
                     </div>
                   </div>
