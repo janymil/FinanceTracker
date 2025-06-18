@@ -201,6 +201,14 @@ export function registerGoalRoutes(app: Express) {
       }
 
       const id = parseInt(req.params.id);
+
+      // Security: Verify reminder ownership before update
+      const userReminders = await storage.getUserExpenseReminders(userId);
+      const existingReminder = userReminders.find(reminder => reminder.id === id);
+      if (!existingReminder) {
+        return res.status(403).json({ message: "Expense reminder not found or access denied" });
+      }
+
       const updateData = {
         ...req.body,
         categoryId: req.body.categoryId ? parseInt(req.body.categoryId) : null,

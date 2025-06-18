@@ -86,7 +86,8 @@ export function registerUserRoutes(app: Express) {
       }
 
       // Security: Verify category ownership before update
-      const existingCategory = await storage.getCategory(categoryId);
+      const userCategories = await storage.getCategories(userId);
+      const existingCategory = userCategories.find(cat => cat.id === categoryId);
       if (!existingCategory || (existingCategory.userId !== userId && existingCategory.userId !== null)) {
         return res.status(403).json({ message: "Category not found or access denied" });
       }
@@ -109,7 +110,8 @@ export function registerUserRoutes(app: Express) {
       const categoryId = parseInt(req.params.id);
 
       // Security: Verify category ownership before delete
-      const existingCategory = await storage.getCategory(categoryId);
+      const userCategories = await storage.getCategories(userId);
+      const existingCategory = userCategories.find(cat => cat.id === categoryId);
       if (!existingCategory || (existingCategory.userId !== userId && existingCategory.userId !== null)) {
         return res.status(403).json({ message: "Category not found or access denied" });
       }
