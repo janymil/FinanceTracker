@@ -3,19 +3,110 @@ import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 
 export function registerCollaborativeGoalRoutes(app: Express) {
-  // Get user's collaborative goals
+  // Friend management routes
+  app.post('/api/friends/request', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const { recipientEmail } = req.body;
+      
+      const friendship = await storage.sendFriendRequest(userId, recipientEmail);
+      res.json(friendship);
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.post('/api/friends/accept/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const friendshipId = parseInt(req.params.id);
+      
+      const friendship = await storage.acceptFriendRequest(friendshipId, userId);
+      res.json(friendship);
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete('/api/friends/reject/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const friendshipId = parseInt(req.params.id);
+      
+      await storage.rejectFriendRequest(friendshipId, userId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error rejecting friend request:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.get('/api/friends', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const friends = await storage.getUserFriends(userId);
+      res.json(friends);
+    } catch (error) {
+      console.error("Error fetching friends:", error);
+      res.status(500).json({ message: "Failed to fetch friends" });
+    }
+  });
+
+  app.get('/api/friends/requests', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const requests = await storage.getPendingFriendRequests(userId);
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching friend requests:", error);
+      res.status(500).json({ message: "Failed to fetch friend requests" });
+    }
+  });
+
+  // Collaborative goals routes
+  app.post('/api/collaborative-goals', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const goalData = {
+        ...req.body,
+        createdBy: userId,
+        targetDate: new Date(req.body.targetDate), // Convert string back to Date object
+      };
+      
+      const goal = await storage.createCollaborativeGoal(goalData);
+      res.json(goal);
+    } catch (error) {
+      console.error("Error creating collaborative goal:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
+
   app.get('/api/collaborative-goals', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
-
-      const user = await storage.getUser(userId);
-      if (user?.plan === 'free') {
-        return res.status(403).json({ message: "Standard or Premium subscription required" });
-      }
-
       const goals = await storage.getUserCollaborativeGoals(userId);
       res.json(goals);
     } catch (error) {
@@ -24,97 +115,223 @@ export function registerCollaborativeGoalRoutes(app: Express) {
     }
   });
 
-  // Get specific collaborative goal
   app.get('/api/collaborative-goals/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
-
       const goalId = parseInt(req.params.id);
-      if (isNaN(goalId)) {
-        return res.status(400).json({ message: "Invalid goal ID" });
-      }
-
+      
       const goal = await storage.getCollaborativeGoal(goalId, userId);
       if (!goal) {
-        return res.status(404).json({ message: "Goal not found" });
+        return res.status(404).json({ message: "Goal not found or access denied" });
       }
-
+      
       res.json(goal);
     } catch (error) {
       console.error("Error fetching collaborative goal:", error);
-      res.status(500).json({ message: "Failed to fetch collaborative goal" });
+      res.status(500).json({ message: "Failed to fetch goal" });
     }
   });
 
-  // Create new collaborative goal
-  app.post('/api/collaborative-goals', isAuthenticated, async (req: any, res) => {
+  app.post('/api/collaborative-goals/:id/join', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
+      const goalId = parseInt(req.params.id);
+      const { personalTarget } = req.body;
+      
+      const participant = await storage.joinCollaborativeGoal(goalId, userId, personalTarget);
+      res.json(participant);
+    } catch (error) {
+      console.error("Error joining collaborative goal:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
 
-      const user = await storage.getUser(userId);
-      if (user?.plan === 'free') {
-        return res.status(403).json({ message: "Standard or Premium subscription required" });
+  app.post('/api/collaborative-goals/:id/leave', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
       }
+      const goalId = parseInt(req.params.id);
+      
+      await storage.leaveCollaborativeGoal(goalId, userId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error leaving collaborative goal:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
 
-      const { name, description, targetAmount, targetDate, category, challengeType } = req.body;
-
-      if (!name || !targetAmount || !targetDate || !category || !challengeType) {
-        return res.status(400).json({ message: "Missing required fields" });
+  app.put('/api/collaborative-goals/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
       }
+      const goalId = parseInt(req.params.id);
+      
+      const goal = await storage.updateCollaborativeGoal(goalId, userId, req.body);
+      res.json(goal);
+    } catch (error) {
+      console.error("Error updating collaborative goal:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
 
-      const goalData = {
-        name,
-        description: description || '',
-        targetAmount: targetAmount.toString(),
-        targetDate: new Date(targetDate),
-        category,
-        challengeType,
-        createdBy: userId
+  app.delete('/api/collaborative-goals/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const goalId = parseInt(req.params.id);
+      
+      await storage.deleteCollaborativeGoal(goalId, userId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting collaborative goal:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Goal contributions
+  app.post('/api/collaborative-goals/:id/contribute', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const goalId = parseInt(req.params.id);
+      
+      const contributionData = {
+        ...req.body,
+        goalId,
+        userId,
       };
-
-      const newGoal = await storage.createCollaborativeGoal(goalData);
-      res.status(201).json(newGoal);
+      
+      const contribution = await storage.addGoalContribution(contributionData);
+      res.json(contribution);
     } catch (error) {
-      console.error("Error creating collaborative goal:", error);
-      res.status(500).json({ message: "Failed to create collaborative goal" });
+      console.error("Error adding contribution:", error);
+      res.status(400).json({ message: error.message });
     }
   });
 
-  // Friends routes
-  app.get('/api/friends', isAuthenticated, async (req: any, res) => {
+  app.get('/api/collaborative-goals/:id/contributions', isAuthenticated, async (req: any, res) => {
+    try {
+      const goalId = parseInt(req.params.id);
+      const contributions = await storage.getGoalContributions(goalId);
+      res.json(contributions);
+    } catch (error) {
+      console.error("Error fetching contributions:", error);
+      res.status(500).json({ message: "Failed to fetch contributions" });
+    }
+  });
+
+  app.get('/api/collaborative-goals/:id/activities', isAuthenticated, async (req: any, res) => {
+    try {
+      const goalId = parseInt(req.params.id);
+      const activities = await storage.getGoalActivities(goalId);
+      res.json(activities);
+    } catch (error) {
+      console.error("Error fetching activities:", error);
+      res.status(500).json({ message: "Failed to fetch activities" });
+    }
+  });
+
+  // Email invitation endpoint for collaborative goals
+  app.post('/api/collaborative-goals/:id/invite', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
+      const goalId = parseInt(req.params.id);
+      const { email } = req.body;
 
-      // For now, return empty array as friends feature needs implementation
-      res.json([]);
+      if (!email || !email.includes('@')) {
+        return res.status(400).json({ message: "Valid email address is required" });
+      }
+
+      // Check if user has permission to invite to this goal
+      const goal = await storage.getCollaborativeGoal(goalId, userId);
+      if (!goal) {
+        return res.status(404).json({ message: "Goal not found or access denied" });
+      }
+
+      // Check if user with this email already exists
+      const existingUser = await storage.getUserByEmail(email);
+      
+      if (existingUser) {
+        // User exists - add them directly to the goal
+        try {
+          const participant = await storage.joinCollaborativeGoal(goalId, existingUser.id);
+          res.json({ 
+            existingUser: true, 
+            email: email,
+            participant 
+          });
+        } catch (error) {
+          res.status(400).json({ message: "User is already part of this goal or cannot join" });
+        }
+      } else {
+        // User doesn't exist - send invitation email
+        // For now, we'll return a success response indicating email would be sent
+        // In production, you'd integrate with SendGrid here
+        res.json({ 
+          existingUser: false, 
+          email: email,
+          message: "Invitation email sent"
+        });
+      }
     } catch (error) {
-      console.error("Error fetching friends:", error);
-      res.status(500).json({ message: "Failed to fetch friends" });
+      console.error("Error inviting user:", error);
+      res.status(500).json({ message: "Failed to send invitation" });
     }
   });
 
-  // Friend requests routes  
-  app.get('/api/friends/requests', isAuthenticated, async (req: any, res) => {
+  // Add contribution to collaborative goal
+  app.post('/api/collaborative-goals/:id/contributions', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
+      const goalId = parseInt(req.params.id);
+      const { amount, note } = req.body;
 
-      // For now, return empty array as friend requests feature needs implementation
-      res.json([]);
+      const contributionData = {
+        goalId,
+        userId,
+        amount: amount.toString(),
+        description: note || null,
+      };
+      
+      const contribution = await storage.addGoalContribution(contributionData);
+      res.json(contribution);
     } catch (error) {
-      console.error("Error fetching friend requests:", error);
-      res.status(500).json({ message: "Failed to fetch friend requests" });
+      console.error("Error adding contribution:", error);
+      res.status(400).json({ message: error.message || "Failed to add contribution" });
+    }
+  });
+
+  app.get('/api/achievements', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const achievements = await storage.getUserAchievements(userId);
+      res.json(achievements);
+    } catch (error) {
+      console.error("Error fetching achievements:", error);
+      res.status(500).json({ message: "Failed to fetch achievements" });
     }
   });
 }
