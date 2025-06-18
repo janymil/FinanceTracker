@@ -221,9 +221,9 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                         {transaction.description}
                       </p>
                       {transaction.isRecurring && (
-                        <Badge variant="outline" className="text-xs shrink-0 border-blue-200 text-blue-700 dark:border-blue-700 dark:text-blue-300">
+                        <Badge variant="outline" className="text-xs shrink-0 border-blue-200 text-blue-700 dark:border-blue-700 dark:text-blue-300 flex items-center">
                           <Repeat className="h-3 w-3 mr-1" />
-                          {transaction.recurringFrequency || 'Recurring'}
+                          {transaction.recurringFrequency ? transaction.recurringFrequency.charAt(0).toUpperCase() + transaction.recurringFrequency.slice(1) : 'Recurring'}
                         </Badge>
                       )}
                       {transaction.imageUrl && (
