@@ -328,6 +328,8 @@ Changelog:
 - June 18, 2025. Implemented efficient refresh strategy for transaction reminders - now refreshes only when transactions are created, edited, or deleted
 - June 18, 2025. Added cache invalidation for transaction-reminders queryKey across all transaction operations (dashboard, header, transactions page)
 - June 18, 2025. Configured transaction reminders with 5-minute staleTime and proper cache management to prevent unnecessary server requests
+- June 18, 2025. Fixed excessive re-rendering in TransactionRemindersWidget with React.useCallback and useMemo optimization
+- June 18, 2025. Removed debug console logs and implemented proper memoization to eliminate performance issues and console spam
 ```
 
 ## User Preferences

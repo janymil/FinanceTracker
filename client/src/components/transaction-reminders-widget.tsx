@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -134,10 +134,7 @@ export default function TransactionRemindersWidget() {
     }
   });
 
-  // Debug logging for reminders
-  console.log('Transaction reminders widget - User ready:', isUserReady, 'User ID:', user?.id);
-  console.log('Transaction reminders loading:', transactionLoading);
-  console.log('Transaction reminders data:', transactionReminders);
+
 
   // Fetch manual expense reminders
   const { data: expenseReminders = [], isLoading: expenseLoading } = useQuery<ExpenseReminder[]>({
@@ -151,19 +148,18 @@ export default function TransactionRemindersWidget() {
     enabled: isUserReady,
   });
 
-  const getReminderPriority = (dueDate: Date): 'high' | 'medium' | 'low' | 'normal' => {
+  const getReminderPriority = useCallback((dueDate: Date): 'high' | 'medium' | 'low' | 'normal' => {
     const today = new Date();
 
     if (isToday(dueDate)) return "high";
     if (isTomorrow(dueDate)) return "medium";
     if (isWithinInterval(dueDate, { start: today, end: addDays(today, 7) })) return "low";
     return "normal";
-  };
+  }, []);
 
-  // Combine both reminder types into unified list
-  const unifiedReminders: UnifiedReminder[] = [
-    // Automatic transaction reminders
-    ...(Array.isArray(transactionReminders) ? transactionReminders.map(reminder => ({
+  // Combine both reminder types into unified list with memoization
+  const unifiedReminders: UnifiedReminder[] = useMemo(() => {
+    const automaticReminders = Array.isArray(transactionReminders) ? transactionReminders.map(reminder => ({
       id: `auto_${reminder.id}`,
       title: reminder.title,
       description: reminder.description,
@@ -176,9 +172,9 @@ export default function TransactionRemindersWidget() {
       priority: getReminderPriority(new Date(reminder.dueDate)),
       canEdit: false,
       canComplete: false,
-    })) : []),
-    // Manual expense reminders
-    ...(Array.isArray(expenseReminders) ? expenseReminders.map(reminder => ({
+    })) : [];
+
+    const manualReminders = Array.isArray(expenseReminders) ? expenseReminders.map(reminder => ({
       id: `manual_${reminder.id}`,
       title: reminder.title,
       description: reminder.description || '',
@@ -193,8 +189,10 @@ export default function TransactionRemindersWidget() {
       canComplete: true,
       paymentUrl: reminder.paymentUrl,
       referenceNote: reminder.referenceNote,
-    })) : [])
-  ].sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+    })) : [];
+
+    return [...automaticReminders, ...manualReminders].sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+  }, [transactionReminders, expenseReminders, getReminderPriority]);
 
   const createReminder = async (reminderData: any) => {
     try {
