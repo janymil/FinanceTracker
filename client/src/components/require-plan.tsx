@@ -1,6 +1,6 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUser } from '@clerk/clerk-react';
 import { apiRequest } from '@/lib/queryClient';
 import UpgradePrompt from './upgrade-prompt';
@@ -105,6 +105,21 @@ const featureConfigs = {
 export default function RequirePlan({ plan, children, feature, description, benefits, compact }: RequirePlanProps) {
   const { isLoaded, isSignedIn, user } = useUser();
   const isReady = isLoaded && isSignedIn && !!user?.id;
+  const queryClient = useQueryClient();
+
+  // Check for successful upgrade in URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const upgradeSuccess = urlParams.get('upgrade');
+    
+    if (upgradeSuccess === 'success' && user?.id) {
+      // Force refresh user data after successful upgrade
+      queryClient.invalidateQueries({ queryKey: ["auth-user", user.id] });
+      
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [user?.id, queryClient]);
 
   // Get user's plan from database
   const { data: databaseUser, isLoading } = useQuery({

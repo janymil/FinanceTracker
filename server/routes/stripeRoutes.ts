@@ -192,8 +192,8 @@ export function registerStripeRoutes(app: Express) {
         
         console.log(`Successfully upgraded user ${userId} to ${dbPlan} plan`);
         
-        // Redirect to success page
-        return res.redirect(`/?upgrade=success&plan=${dbPlan}`);
+        // Redirect to dashboard with success message
+        return res.redirect(`/dashboard?upgrade=success&plan=${dbPlan}`);
         
       } catch (dbError) {
         console.error('Error updating user plan in database:', dbError);
