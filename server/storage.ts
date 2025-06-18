@@ -533,6 +533,7 @@ export class DatabaseStorage implements IStorage {
     const [newCategory] = await db
       .insert(categories)
       .values({
+        userId: category.userId,
         name: category.name,
         icon: category.icon,
         color: category.color,

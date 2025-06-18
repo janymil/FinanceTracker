@@ -28,9 +28,13 @@ export function registerUserRoutes(app: Express) {
   });
 
   // Categories
-  app.get('/api/categories', isAuthenticated, async (req, res) => {
+  app.get('/api/categories', isAuthenticated, async (req: any, res) => {
     try {
-      const categories = await storage.getCategories();
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const categories = await storage.getCategories(userId);
       res.json(categories);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -40,6 +44,11 @@ export function registerUserRoutes(app: Express) {
 
   app.post('/api/categories', isAuthenticated, async (req: any, res) => {
     try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
       const { name, icon, color, type } = req.body;
 
       if (!name || !icon || !color || !type) {
@@ -50,7 +59,7 @@ export function registerUserRoutes(app: Express) {
         return res.status(400).json({ message: "Type must be 'income' or 'expense'" });
       }
 
-      const category = await storage.createCategory({ name, icon, color, type });
+      const category = await storage.createCategory({ userId, name, icon, color, type });
       res.json(category);
     } catch (error) {
       console.error("Error creating category:", error);
