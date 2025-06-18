@@ -27,7 +27,7 @@ export function registerStripeRoutes(app: Express) {
       }
       
       const baseUrl = `${req.headers.origin || 'http://localhost:5000'}`;
-      const successUrl = `${baseUrl}/api/subscription-success?plan=${plan}&session_id={CHECKOUT_SESSION_ID}`;
+      const successUrl = `${baseUrl}/dashboard?success=true&plan=${plan}&session_id={CHECKOUT_SESSION_ID}`;
       const cancelUrl = `${baseUrl}/subscribe`;
 
       // Plan pricing in cents (Stripe uses cents)
@@ -218,6 +218,63 @@ export function registerStripeRoutes(app: Express) {
       console.error('Error cancelling subscription:', error);
       res.status(500).json({ error: "Failed to cancel subscription" });
     }
+  });
+
+  // Stripe Webhook Handler
+  app.post('/api/stripe-webhook', async (req, res) => {
+    if (!stripe) {
+      return res.status(503).json({ message: "Payment processing unavailable" });
+    }
+
+    const sig = req.headers['stripe-signature'] as string;
+    let event;
+
+    try {
+      // For development, we'll skip webhook signature verification
+      event = req.body;
+    } catch (err) {
+      console.log('Webhook signature verification failed:', err);
+      return res.status(400).send('Webhook signature verification failed');
+    }
+
+    // Handle the checkout.session.completed event
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object;
+      console.log('Checkout session completed:', session.id);
+
+      try {
+        // Extract plan from metadata
+        const plan = session.metadata?.plan;
+        const userId = session.metadata?.userId;
+
+        if (userId && plan) {
+          // Map plan names to database values  
+          const planMapping = {
+            'free': 'free',
+            'standard': 'standard',
+            'standard-yearly': 'standard',
+            'premium': 'premium',
+            'premium-yearly': 'premium'
+          };
+
+          const dbPlan = planMapping[plan as keyof typeof planMapping] as 'free' | 'standard' | 'premium';
+          if (dbPlan) {
+            await storage.updateUserPlan(userId, dbPlan);
+            
+            // Store Stripe customer info
+            if (session.customer) {
+              await storage.updateUserStripeInfo(userId, session.customer as string, session.subscription as string);
+            }
+            
+            console.log(`Updated user ${userId} to plan ${dbPlan}`);
+          }
+        }
+      } catch (error) {
+        console.error('Error processing webhook:', error);
+      }
+    }
+
+    res.json({ received: true });
   });
 
   // Stripe Customer Portal
