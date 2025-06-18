@@ -108,7 +108,7 @@ export function registerStripeRoutes(app: Express) {
           }],
           success_url: successUrl,
           cancel_url: cancelUrl,
-          customer_email: user.email,
+          customer_email: user.email || undefined,
           metadata: {
             plan: plan,
             userId: userId
