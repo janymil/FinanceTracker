@@ -90,12 +90,11 @@ export function registerMobileUploadRoutes(app) {
         
         // Import the standard OCR functions
         const { performOCR, extractStructuredData, uploadToBunny } = await import('../uploadReceipt');
-        const { getStorage } = await import('../storage');
+        const storageModule = await import('../storage');
         
         // Import additional functions needed for complete OCR processing
         const getUserPlan = async (userId: string) => {
-          const storage = getStorage();
-          const user = await storage.getUserById(userId);
+          const user = await storageModule.storage.getUserById(userId);
           return { plan: user?.plan || 'free' };
         };
         
