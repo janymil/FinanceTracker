@@ -357,6 +357,9 @@ Changelog:
 - June 18, 2025. SECURITY FIX: Fixed critical data isolation bug where users could see categories from other users
 - June 18, 2025. Implemented proper category system - predefined categories (userId=NULL) visible to all users, custom categories (userId=specific) only visible to creator
 - June 18, 2025. Added userId field to categories table with proper database migration preserving existing data integrity
+- June 18, 2025. COMPLETED: Added 7 predefined goal categories (Emergency Fund, Vacation, House Down Payment, Car Purchase, Debt Payoff, Retirement, Other) to support goals page
+- June 18, 2025. Enhanced database schema to support 'goal' type categories alongside existing 'income' and 'expense' types
+- June 18, 2025. Updated goals page to fetch categories dynamically from database instead of hardcoded values - proper category isolation confirmed working
 ```
 
 ## User Preferences
