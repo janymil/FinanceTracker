@@ -326,6 +326,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                capture="environment"
                 onChange={handleFileChange}
                 className="hidden"
               />

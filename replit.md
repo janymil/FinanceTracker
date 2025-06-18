@@ -334,6 +334,8 @@ Changelog:
 - June 18, 2025. Restored real-time reminder updates by removing caching that prevented immediate refresh after transaction modifications
 - June 18, 2025. Completely removed React Query from TransactionRemindersWidget and converted to useState/useEffect pattern for immediate data updates
 - June 18, 2025. Transaction reminders widget now shows immediate changes when recurring transactions are edited without cache-related delays
+- June 18, 2025. Added mobile camera capture functionality to receipt OCR upload components with capture="environment" attribute
+- June 18, 2025. Mobile users can now take photos directly with camera or select from gallery for receipt processing
 ```
 
 ## User Preferences
