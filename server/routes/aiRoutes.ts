@@ -601,4 +601,59 @@ export function registerAIRoutes(app: Express) {
       res.status(500).json({ message: "Failed to toggle mascot" });
     }
   });
+
+  // Help Chat Assistant endpoint
+  app.post('/api/help-chat', async (req: any, res) => {
+    try {
+      const { message } = req.body;
+
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      const { openai } = await import('../openaiClient');
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: `You are a helpful assistant for FinanzerPro, a personal finance management application. 
+
+FinanzerPro offers three subscription tiers:
+- Free Plan: Basic transaction tracking (up to 100 transactions)
+- Standard Plan ($4.99/month or $49.90/year): Enhanced features including budgeting, goals, transaction reminders, AI categorization, receipt OCR processing
+- Premium Plan ($9.99/month or $99.90/year): Unlimited transactions, advanced analytics, AI insights, data export/import, cloud backup, predictions, recommendations
+
+Key features include:
+- Transaction tracking (manual entry and receipt OCR scanning)
+- Budget management and goal setting  
+- AI-powered expense categorization
+- Receipt OCR with Google Cloud Vision
+- Financial health analysis and AI insights
+- Cloud backup and data export/import
+- Collaborative financial planning
+- Mobile-responsive design
+
+Authentication is handled through Clerk. Payment processing uses Stripe.
+
+Answer questions about features, subscription plans, how to use the app, troubleshooting, and general financial management tips. Be helpful, friendly, and concise.`
+          },
+          {
+            role: "user",
+            content: message
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 500
+      });
+
+      const assistantResponse = response.choices[0].message.content || "I'm sorry, I couldn't generate a response. Please try again.";
+
+      res.json({ response: assistantResponse });
+    } catch (error) {
+      console.error("Error in help chat:", error);
+      res.status(500).json({ message: "Failed to get help response" });
+    }
+  });
 }

@@ -113,6 +113,21 @@ export default function Help() {
       answer: "Our AI analyzes your transaction descriptions and amounts to automatically suggest the most appropriate category. It learns from your patterns and becomes more accurate over time. Available for Standard and Premium plans."
     },
     {
+      id: "receipt-ocr",
+      question: "How does receipt scanning work?",
+      answer: "Upload photos of receipts using the 'Upload Image' button on any transaction page. Our OCR technology automatically extracts merchant name, amount, and date. Standard+ users get AI-powered category suggestions. Works with mobile camera or gallery photos."
+    },
+    {
+      id: "ocr-accuracy",
+      question: "What if OCR doesn't read my receipt correctly?",
+      answer: "You can edit any extracted information before saving. The system shows extracted data in editable fields, allowing you to correct merchant names, amounts, or dates. Clear, well-lit photos produce the best results."
+    },
+    {
+      id: "supported-receipts",
+      question: "What types of receipts are supported?",
+      answer: "All standard receipts including restaurant bills, grocery stores, gas stations, retail purchases, and service receipts. The system works best with printed receipts that have clear text and are photographed in good lighting conditions."
+    },
+    {
       id: "budgets-goals",
       question: "How do I set up budgets and goals?",
       answer: "Navigate to the Budgets or Goals section from the sidebar. Set monthly spending limits by category for budgets, or create savings targets with deadlines for goals. The app will track your progress automatically."
@@ -143,6 +158,7 @@ export default function Help() {
     ],
     standard: [
       "Up to 100 transactions",
+      "Receipt OCR scanning",
       "AI expense categorization",
       "Budget management",
       "Financial goals",
