@@ -42,6 +42,10 @@ export function registerMobileUploadRoutes(app: Express) {
         return res.status(403).json({ error: 'Access denied' });
       }
 
+      // Prevent caching for dynamic status updates
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
       res.json(sessionData);
     } catch (error) {
       console.error('Mobile upload status error:', error);

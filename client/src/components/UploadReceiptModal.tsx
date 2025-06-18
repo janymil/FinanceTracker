@@ -158,32 +158,32 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
     const pollInterval = setInterval(async () => {
       try {
         const token = await getToken();
-        const response = await fetch(`/api/mobile-upload/status/${sessionId}`, {
+        const response = await fetch(`/api/mobile-upload/status/${sessionId}?t=${Date.now()}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
+            'Cache-Control': 'no-cache',
           },
         });
         
         if (response.ok) {
           const result = await response.json();
+          console.log('Polling result:', result);
           
-          if (result.success && result.data) {
-            if (result.data.status === 'completed') {
-              // Clear polling
-              clearInterval(pollInterval);
-              setQrUploadState(prev => ({ ...prev, isPolling: false, status: 'success' }));
-              
-              // Process the uploaded receipt data
-              processQRUploadResult(result.data);
-            } else if (result.data.status === 'error') {
-              clearInterval(pollInterval);
-              setQrUploadState(prev => ({ ...prev, isPolling: false, status: 'error' }));
-              toast({
-                title: "Upload Error",
-                description: result.data.error || "Failed to process mobile upload",
-                variant: "destructive"
-              });
-            }
+          if (result.status === 'completed') {
+            // Clear polling
+            clearInterval(pollInterval);
+            setQrUploadState(prev => ({ ...prev, isPolling: false, status: 'success' }));
+            
+            // Process the uploaded receipt data
+            processQRUploadResult(result);
+          } else if (result.status === 'error') {
+            clearInterval(pollInterval);
+            setQrUploadState(prev => ({ ...prev, isPolling: false, status: 'error' }));
+            toast({
+              title: "Upload Error",
+              description: result.error || "Failed to process mobile upload",
+              variant: "destructive"
+            });
           }
         } else if (response.status === 404) {
           // Session not found yet, continue polling
