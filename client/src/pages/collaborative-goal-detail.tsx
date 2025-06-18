@@ -25,20 +25,10 @@ export default function CollaborativeGoalDetailPage() {
   const [isContributionPending, setIsContributionPending] = useState(false);
   const [isInvitePending, setIsInvitePending] = useState(false);
 
-  const { isReady } = useClerkUserReady();
-
-  const getAuthHeaders = async () => {
-    const { useAuth } = await import('@clerk/clerk-react');
-    const { getToken } = useAuth();
-    const token = await getToken();
-    return {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    };
-  };
+  const { user, isReady, getAuthHeaders } = useClerkUserReady();
 
   const fetchGoal = async () => {
-    if (!isReady || !id) return;
+    if (!isReady || !user?.id || !id) return;
     
     try {
       setIsLoading(true);
@@ -56,8 +46,10 @@ export default function CollaborativeGoalDetailPage() {
   };
 
   useEffect(() => {
-    fetchGoal();
-  }, [isReady, id]);
+    if (isReady && user?.id) {
+      fetchGoal();
+    }
+  }, [isReady, user?.id, id]);
 
   const addContribution = async (data: { amount: string; note: string }) => {
     try {
