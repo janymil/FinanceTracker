@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { useUser, useAuth } from "@clerk/clerk-react";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -89,8 +89,7 @@ interface FriendRequest {
 
 export default function CollaborativeGoalsPage() {
   const { toast } = useToast();
-  const { user, isLoaded } = useUser();
-  const { getToken } = useAuth();
+  const { user, isReady, getAuthHeaders } = useClerkUserReady();
   const [createGoalOpen, setCreateGoalOpen] = useState(false);
   const [addFriendOpen, setAddFriendOpen] = useState(false);
   const [newGoal, setNewGoal] = useState({
@@ -109,24 +108,19 @@ export default function CollaborativeGoalsPage() {
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [goalsLoading, setGoalsLoading] = useState(true);
 
-  // Fetch data when user is loaded
+  // Fetch data when user is ready
   useEffect(() => {
-    if (isLoaded && user?.id) {
+    if (isReady && user?.id) {
       fetchGoals();
       fetchFriends();
       fetchFriendRequests();
     }
-  }, [isLoaded, user?.id]);
+  }, [isReady, user?.id]);
 
   const fetchGoals = async () => {
     try {
-      const token = await getToken();
-      const response = await fetch('/api/collaborative-goals', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const headers = await getAuthHeaders();
+      const response = await fetch('/api/collaborative-goals', { headers });
       if (response.ok) {
         const data = await response.json();
         setGoals(data);
@@ -140,13 +134,8 @@ export default function CollaborativeGoalsPage() {
 
   const fetchFriends = async () => {
     try {
-      const token = await getToken();
-      const response = await fetch('/api/friends', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const headers = await getAuthHeaders();
+      const response = await fetch('/api/friends', { headers });
       if (response.ok) {
         const data = await response.json();
         setFriends(data);
@@ -158,13 +147,8 @@ export default function CollaborativeGoalsPage() {
 
   const fetchFriendRequests = async () => {
     try {
-      const token = await getToken();
-      const response = await fetch('/api/friends/requests', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const headers = await getAuthHeaders();
+      const response = await fetch('/api/friends/requests', { headers });
       if (response.ok) {
         const data = await response.json();
         setFriendRequests(data);
