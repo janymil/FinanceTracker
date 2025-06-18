@@ -30,6 +30,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerCollaborativeGoalRoutes(app);
   registerRealtimeRoutes(app);
   registerExportRoutes(app);
+  registerStripeRoutes(app);
 
   // Receipt upload endpoint
   app.post('/api/upload-receipt', uploadReceiptHandler);
