@@ -116,6 +116,7 @@ export function registerMobileUploadRoutes(app) {
         
         ocrResult = await response.json();
         console.log('Standard OCR endpoint completed successfully');
+        console.log('OCR Result received:', JSON.stringify(ocrResult, null, 2));
         
       } catch (error) {
         console.error('Standard OCR endpoint failed:', error);
