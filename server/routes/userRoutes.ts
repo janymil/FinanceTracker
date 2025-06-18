@@ -69,6 +69,11 @@ export function registerUserRoutes(app: Express) {
 
   app.put('/api/categories/:id', isAuthenticated, async (req: any, res) => {
     try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
       const categoryId = parseInt(req.params.id);
       const { name, icon, color, type } = req.body;
 
@@ -78,6 +83,12 @@ export function registerUserRoutes(app: Express) {
 
       if (!['income', 'expense'].includes(type)) {
         return res.status(400).json({ message: "Type must be 'income' or 'expense'" });
+      }
+
+      // Security: Verify category ownership before update
+      const existingCategory = await storage.getCategory(categoryId);
+      if (!existingCategory || (existingCategory.userId !== userId && existingCategory.userId !== null)) {
+        return res.status(403).json({ message: "Category not found or access denied" });
       }
 
       const category = await storage.updateCategory(categoryId, { name, icon, color, type });
@@ -90,7 +101,19 @@ export function registerUserRoutes(app: Express) {
 
   app.delete('/api/categories/:id', isAuthenticated, async (req: any, res) => {
     try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
       const categoryId = parseInt(req.params.id);
+
+      // Security: Verify category ownership before delete
+      const existingCategory = await storage.getCategory(categoryId);
+      if (!existingCategory || (existingCategory.userId !== userId && existingCategory.userId !== null)) {
+        return res.status(403).json({ message: "Category not found or access denied" });
+      }
+
       await storage.deleteCategory(categoryId);
       res.json({ success: true });
     } catch (error) {
