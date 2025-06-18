@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useUser, UserProfile, UserButton, useAuth as useClerkAuth } from "@clerk/clerk-react";
+import { useUser, UserProfile, UserButton } from "@clerk/clerk-react";
+import { useClerkUserReady } from "../hooks/useClerkUserReady";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
@@ -12,6 +13,7 @@ import { User, Bell, Palette, CreditCard, ExternalLink, Settings, Trash2 } from 
 export default function ProfilePage() {
   const { user } = useUser();
   const { user: authUser } = useAuth();
+  const { getAuthHeaders } = useClerkUserReady();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -22,13 +24,10 @@ export default function ProfilePage() {
   const handleManageSubscription = async () => {
     setIsLoading(true);
     try {
-      const token = await user.getToken();
+      const headers = await getAuthHeaders();
       const response = await fetch('/api/create-customer-portal-session', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers,
         credentials: 'include',
       });
 
