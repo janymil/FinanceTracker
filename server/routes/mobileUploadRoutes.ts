@@ -100,43 +100,78 @@ export function registerMobileUploadRoutes(app) {
         return res.status(400).json({ error: 'No valid image data received' });
       }
 
-      // Call the standard OCR endpoint directly
+      // Process OCR directly without HTTP calls to avoid timeout issues in production
       let ocrResult;
       try {
-        console.log('Calling standard OCR endpoint...');
+        console.log('Processing OCR directly...');
         
-        // Import required modules
-        const FormData = (await import('form-data')).default;
-        const fetch = (await import('node-fetch')).default;
+        // Import OCR processing functions
+        const { performOCR, extractStructuredData, uploadToBunny } = await import('../uploadReceipt');
+        const { categorizeExpense } = await import('../openai');
+        const { db } = await import('../db');
+        const { users } = await import('../../shared/schema');
+        const { eq } = await import('drizzle-orm');
         
-        // Create form data with the uploaded file
-        const formData = new FormData();
-        formData.append('receipt', file.buffer, {
-          filename: file.originalname || 'mobile-receipt.jpeg',
-          contentType: file.mimetype || 'image/jpeg'
-        });
-        
-        // Call the standard upload-receipt endpoint with proper internal authentication
-        const response = await fetch('http://localhost:5000/api/upload-receipt', {
-          method: 'POST',
-          headers: {
-            'x-internal-auth': userId, // Internal authentication for mobile uploads
-            ...formData.getHeaders()
-          },
-          body: formData
-        });
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Standard OCR endpoint failed: ${response.status} - ${errorText}`);
+        // Get user plan
+        const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+        const userPlan = user.length > 0 ? (user[0].plan as 'free' | 'standard' | 'premium') || 'free' : 'free';
+        const canStore = userPlan === 'standard' || userPlan === 'premium';
+
+        // Perform OCR
+        const recognizedText = await performOCR(file.buffer);
+        console.log('OCR completed successfully');
+
+        // Extract structured data using OpenAI
+        const extractedData = await extractStructuredData(recognizedText);
+        console.log('Data extraction completed');
+
+        // AI Categorization for standard+ users
+        let predictedCategory: string | undefined;
+        if (userPlan === 'standard' || userPlan === 'premium') {
+          try {
+            const descriptionForCategorization = extractedData.vendor || recognizedText;
+            const amountForCategorization = extractedData.amount || 0;
+            const categorization = await categorizeExpense(descriptionForCategorization, amountForCategorization);
+            predictedCategory = categorization.category;
+            console.log('AI categorization completed');
+          } catch (categoryError) {
+            console.error('AI categorization failed:', categoryError);
+          }
         }
-        
-        ocrResult = await response.json();
-        console.log('Standard OCR endpoint completed successfully');
-        console.log('OCR Result received:', JSON.stringify(ocrResult, null, 2));
+
+        let imageUrl: string | undefined;
+
+        // Upload to Bunny.net if user has appropriate plan
+        if (canStore) {
+          const timestamp = Date.now();
+          const fileName = `receipt-${userId}-${timestamp}.${file.mimetype.split('/')[1]}`;
+          
+          try {
+            imageUrl = await uploadToBunny(fileName, file.buffer, file.mimetype);
+            console.log('Image upload to Bunny.net completed');
+          } catch (uploadError) {
+            console.error('Upload to Bunny.net failed:', uploadError);
+          }
+        }
+
+        // Prepare response
+        ocrResult = {
+          text: recognizedText,
+          extracted: extractedData
+        };
+
+        if (imageUrl) {
+          ocrResult.imageUrl = imageUrl;
+        }
+
+        if (predictedCategory) {
+          ocrResult.category = predictedCategory;
+        }
+
+        console.log('Direct OCR processing completed successfully');
         
       } catch (error) {
-        console.error('Standard OCR endpoint failed:', error);
+        console.error('Direct OCR processing failed:', error);
         mobileUploadSessions.set(sessionId, {
           userId: userId,
           status: 'error',
