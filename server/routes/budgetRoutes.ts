@@ -51,6 +51,12 @@ export function registerBudgetRoutes(app: Express) {
       const id = parseInt(req.params.id);
       const { categoryId, amount, startDate, endDate, period } = req.body;
 
+      // Security: Verify budget ownership before update
+      const existingBudget = await storage.getBudget(id);
+      if (!existingBudget || existingBudget.userId !== userId) {
+        return res.status(403).json({ message: "Budget not found or access denied" });
+      }
+
       const updateData: any = {};
       if (categoryId !== undefined) updateData.categoryId = parseInt(categoryId);
       if (amount !== undefined) updateData.amount = String(amount);

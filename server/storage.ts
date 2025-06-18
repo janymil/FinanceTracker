@@ -477,6 +477,16 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(budgets.id, id), eq(budgets.userId, userId)));
   }
 
+  async getBudget(id: number): Promise<Budget | undefined> {
+    const result = await db
+      .select()
+      .from(budgets)
+      .where(eq(budgets.id, id))
+      .limit(1);
+    
+    return result[0];
+  }
+
   async clearUserBudgets(userId: string): Promise<void> {
     await db
       .delete(budgets)
