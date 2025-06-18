@@ -71,8 +71,23 @@ export function registerMobileUploadRoutes(app) {
 
       const userToken = existingSession.userId;
       
-      // Use the stored user token directly (it's already the user ID from session creation)
-      const userId = userToken;
+      // Extract user ID from JWT token stored in session
+      let userId: string;
+      try {
+        console.log('JWT token to parse:', userToken.substring(0, 50) + '...');
+        // Parse JWT token to extract user ID
+        const tokenParts = userToken.split('.');
+        if (tokenParts.length === 3) {
+          const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+          userId = payload.sub;
+          console.log('Extracted user ID:', userId);
+        } else {
+          throw new Error('Invalid JWT format');
+        }
+      } catch (error) {
+        console.error('Failed to extract user ID from JWT:', error);
+        return res.status(401).json({ error: 'Invalid session token' });
+      }
 
       console.log('Processing mobile upload for user:', userId, 'file size:', file.buffer.length);
 
