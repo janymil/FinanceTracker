@@ -72,6 +72,7 @@ export default function Transactions() {
   const [filterRecurring, setFilterRecurring] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   const [newTransaction, setNewTransaction] = useState({
     amount: "",
@@ -496,20 +497,20 @@ export default function Transactions() {
   }
 
   return (
-    <div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="mb-4 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                 All Transactions
               </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
+              <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm sm:text-base">
                 Manage all your income and expense transactions
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap sm:flex-nowrap">
               <UploadReceiptModal 
                 onReceiptProcessed={(data) => {
                   // Refresh transactions after receipt processing
@@ -798,13 +799,14 @@ export default function Transactions() {
           onDateRangeReset={() => setDateRange("all")}
         />
 
-        {/* Filters and Search */}
+        {/* Search and Filter Toggle */}
         <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              <div>
-                <Label htmlFor="search">Search</Label>
-                <div className="relative">
+          <CardContent className="p-4 sm:p-6">
+            {/* Always visible search bar and filter toggle */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+              <div className="flex-1 min-w-0">
+                <Label htmlFor="search" className="text-sm font-medium">Search</Label>
+                <div className="relative mt-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     id="search"
@@ -815,80 +817,120 @@ export default function Transactions() {
                   />
                 </div>
               </div>
-
-              <div>
-                <Label>Type</Label>
-                <Select value={filterType} onValueChange={(value: any) => setFilterType(value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="income">Income</SelectItem>
-                    <SelectItem value="expense">Expense</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Category</Label>
-                <Select value={filterCategory} onValueChange={setFilterCategory}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {availableCategories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Recurring</Label>
-                <Select value={filterRecurring} onValueChange={setFilterRecurring}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Transactions</SelectItem>
-                    <SelectItem value="recurring">Recurring Only</SelectItem>
-                    <SelectItem value="one-time">One-time Only</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Date Range</Label>
-                <Select value={dateRange} onValueChange={setDateRange}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Time</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="week">Last Week</SelectItem>
-                    <SelectItem value="month">Last Month</SelectItem>
-                    <SelectItem value="current-month">This Month</SelectItem>
-                    <SelectItem value="jan">January</SelectItem>
-                    <SelectItem value="feb">February</SelectItem>
-                    <SelectItem value="mar">March</SelectItem>
-                    <SelectItem value="apr">April</SelectItem>
-                    <SelectItem value="may">May</SelectItem>
-                    <SelectItem value="jun">June</SelectItem>
-                    <SelectItem value="jul">July</SelectItem>
-                    <SelectItem value="aug">August</SelectItem>
-                    <SelectItem value="sep">September</SelectItem>
-                    <SelectItem value="oct">October</SelectItem>
-                    <SelectItem value="nov">November</SelectItem>
-                    <SelectItem value="dec">December</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="shrink-0"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Filters
+                {(filterType !== "all" || filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all") && (
+                  <Badge variant="secondary" className="ml-2 px-1 py-0 text-xs">
+                    Active
+                  </Badge>
+                )}
+              </Button>
             </div>
+
+            {/* Collapsible filters */}
+            {showFilters && (
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Type</Label>
+                    <Select value={filterType} onValueChange={(value: any) => setFilterType(value)}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="income">Income</SelectItem>
+                        <SelectItem value="expense">Expense</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Category</Label>
+                    <Select value={filterCategory} onValueChange={setFilterCategory}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {availableCategories.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Recurring</Label>
+                    <Select value={filterRecurring} onValueChange={setFilterRecurring}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Transactions</SelectItem>
+                        <SelectItem value="recurring">Recurring Only</SelectItem>
+                        <SelectItem value="one-time">One-time Only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Date Range</Label>
+                    <Select value={dateRange} onValueChange={setDateRange}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Time</SelectItem>
+                        <SelectItem value="today">Today</SelectItem>
+                        <SelectItem value="week">Last Week</SelectItem>
+                        <SelectItem value="month">Last Month</SelectItem>
+                        <SelectItem value="current-month">This Month</SelectItem>
+                        <SelectItem value="jan">January</SelectItem>
+                        <SelectItem value="feb">February</SelectItem>
+                        <SelectItem value="mar">March</SelectItem>
+                        <SelectItem value="apr">April</SelectItem>
+                        <SelectItem value="may">May</SelectItem>
+                        <SelectItem value="jun">June</SelectItem>
+                        <SelectItem value="jul">July</SelectItem>
+                        <SelectItem value="aug">August</SelectItem>
+                        <SelectItem value="sep">September</SelectItem>
+                        <SelectItem value="oct">October</SelectItem>
+                        <SelectItem value="nov">November</SelectItem>
+                        <SelectItem value="dec">December</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                {/* Clear filters button */}
+                {(filterType !== "all" || filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all") && (
+                  <div className="mt-4 flex justify-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setFilterType("all");
+                        setFilterCategory("all");
+                        setFilterRecurring("all");
+                        setDateRange("all");
+                      }}
+                    >
+                      Clear all filters
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -929,32 +971,32 @@ export default function Transactions() {
                 {filteredTransactions.map((transaction: Transaction) => (
                   <div
                     key={transaction.id}
-                    className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors gap-3"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className={`p-2 rounded-lg ${transaction.type === "income" ? "bg-green-100 dark:bg-green-900" : "bg-red-100 dark:bg-red-900"}`}>
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className={`p-2 rounded-lg shrink-0 ${transaction.type === "income" ? "bg-green-100 dark:bg-green-900" : "bg-red-100 dark:bg-red-900"}`}>
                         {transaction.type === "income" ? (
                           <ArrowUpRight className="h-4 w-4 text-green-600 dark:text-green-400" />
                         ) : (
                           <ArrowDownLeft className="h-4 w-4 text-red-600 dark:text-red-400" />
                         )}
                       </div>
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-gray-900 dark:text-white truncate">
                           {transaction.description}
                         </p>
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                          <span>{format(new Date(transaction.date), "MMM dd, yyyy")}</span>
+                        <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-sm text-gray-600 dark:text-gray-300 mt-1">
+                          <span className="shrink-0">{format(new Date(transaction.date), "MMM dd, yyyy")}</span>
                           {transaction.categoryName && (
                             <>
-                              <span>•</span>
-                              <Badge variant="outline">{transaction.categoryName}</Badge>
+                              <span className="hidden sm:inline">•</span>
+                              <Badge variant="outline" className="text-xs">{transaction.categoryName}</Badge>
                             </>
                           )}
                           {transaction.isRecurring && (
                             <>
-                              <span>•</span>
-                              <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                              <span className="hidden sm:inline">•</span>
+                              <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs">
                                 🔄 {transaction.recurringFrequency}
                               </Badge>
                             </>
@@ -962,8 +1004,8 @@ export default function Transactions() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <p className={`font-semibold ${transaction.type === "income" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                    <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 shrink-0">
+                      <p className={`font-semibold text-lg ${transaction.type === "income" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
                         {transaction.type === "income" ? "+" : "-"}${parseFloat(transaction.amount).toFixed(2)}
                       </p>
                       <div className="flex items-center gap-1">
