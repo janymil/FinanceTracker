@@ -73,6 +73,7 @@ export interface IStorage {
   // Budget operations
   createBudget(budget: InsertBudget): Promise<Budget>;
   getUserBudgets(userId: string): Promise<Budget[]>;
+  getBudget(id: number): Promise<Budget | undefined>;
   updateBudget(id: number, budget: Partial<InsertBudget>): Promise<Budget>;
   deleteBudget(id: number, userId: string): Promise<void>;
   clearUserBudgets(userId: string): Promise<void>;
@@ -80,6 +81,7 @@ export interface IStorage {
   // Goal operations
   createGoal(goal: InsertGoal): Promise<Goal>;
   getUserGoals(userId: string): Promise<Goal[]>;
+  getGoal(id: number): Promise<Goal | undefined>;
   updateGoal(id: number, goal: Partial<InsertGoal>): Promise<Goal>;
   deleteGoal(id: number, userId: string): Promise<void>;
 
@@ -508,6 +510,16 @@ export class DatabaseStorage implements IStorage {
       .from(goals)
       .where(eq(goals.userId, userId))
       .orderBy(desc(goals.createdAt));
+  }
+
+  async getGoal(id: number): Promise<Goal | undefined> {
+    const result = await db
+      .select()
+      .from(goals)
+      .where(eq(goals.id, id))
+      .limit(1);
+    
+    return result[0];
   }
 
   async updateGoal(id: number, goal: Partial<InsertGoal>): Promise<Goal> {
