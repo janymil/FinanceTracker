@@ -32,16 +32,27 @@ export default function ProfilePage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create customer portal session');
+        const errorData = await response.json();
+        if (response.status === 400 && errorData.message?.includes('No active subscription')) {
+          // User doesn't have Stripe subscription - redirect to pricing page
+          toast({
+            title: "No Stripe Subscription",
+            description: "You currently have premium access but no Stripe subscription. Contact support or visit the pricing page to set up billing.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw new Error(errorData.message || 'Failed to create customer portal session');
       }
 
       const { url } = await response.json();
       window.location.href = url;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating customer portal session:', error);
+      const errorMessage = error?.message || 'Unknown error occurred';
       toast({
         title: "Error",
-        description: "Failed to open subscription management. Please try again.",
+        description: `Failed to open subscription management: ${errorMessage}`,
         variant: "destructive",
       });
     } finally {
@@ -209,6 +220,12 @@ export default function ProfilePage() {
                       {isLoading ? 'Opening...' : 'Manage Subscription'}
                       <ExternalLink className="h-3 w-3" />
                     </Button>
+                    <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg">
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                        <strong>Note:</strong> If you received premium access through admin upgrade or special promotion, 
+                        you may not have a Stripe subscription to manage. Contact support if you need billing assistance.
+                      </p>
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       This will open Stripe's secure customer portal where you can:
                     </p>

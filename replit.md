@@ -341,6 +341,9 @@ Changelog:
 - June 18, 2025. Implemented comprehensive Stripe customer portal integration for subscription management in Profile page
 - June 18, 2025. Added backend API endpoint for Stripe customer portal sessions with proper authentication and error handling
 - June 18, 2025. Enhanced subscription tab with detailed plan features, management actions, and upgrade options for different user tiers
+- June 18, 2025. Fixed Stripe customer portal authentication issues and added proper error handling for users without Stripe subscriptions
+- June 18, 2025. Added informational notice for users with admin-granted premium access who don't have Stripe billing setup
+- June 18, 2025. Implemented graceful handling of premium users without stripeCustomerId through improved error messaging and UI guidance
 ```
 
 ## User Preferences
