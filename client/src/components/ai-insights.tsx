@@ -43,6 +43,26 @@ export default function AIInsights({ data }: AIInsightsProps) {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
 
+  const handleTakeAction = (insight: SpendingInsight) => {
+    // Navigate based on insight type and recommendation
+    if (insight.type === 'warning' && insight.title?.toLowerCase().includes('spending')) {
+      // High spending alerts -> go to expenses page
+      setLocation('/expenses');
+    } else if (insight.recommendation?.toLowerCase().includes('budget')) {
+      // Budget-related recommendations -> go to budgets page
+      setLocation('/budgets');
+    } else if (insight.category) {
+      // Category-specific insights -> go to transactions filtered by category
+      setLocation('/transactions');
+    } else if (insight.type === 'suggestion') {
+      // General suggestions -> go to reports for analysis
+      setLocation('/reports');
+    } else {
+      // Default action -> go to dashboard
+      setLocation('/dashboard');
+    }
+  };
+
   // Generate AI insights based on user's financial data
   const generateInsights = (financialData: any): SpendingInsight[] => {
     if (!financialData || !financialData.transactions || !Array.isArray(financialData.transactions) || financialData.transactions.length === 0) return [];
@@ -277,7 +297,12 @@ export default function AIInsights({ data }: AIInsightsProps) {
                             {insight.recommendation}
                           </p>
                           {insight.actionable && (
-                            <Button size="sm" variant="outline" className="mt-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="mt-2"
+                              onClick={() => handleTakeAction(insight)}
+                            >
                               Take Action
                               <ArrowRight className="h-3 w-3 ml-1" />
                             </Button>
