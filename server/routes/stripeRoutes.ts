@@ -31,7 +31,7 @@ export function registerStripeRoutes(app: Express) {
       const userEmail = auth?.sessionClaims?.email;
       
       const baseUrl = `${req.headers.origin || 'http://localhost:5000'}`;
-      const successUrl = `${baseUrl}/dashboard?success=true&plan=${plan}&session_id={CHECKOUT_SESSION_ID}`;
+      const successUrl = `${baseUrl}/api/subscription-success?plan=${plan}&session_id={CHECKOUT_SESSION_ID}`;
       const cancelUrl = `${baseUrl}/subscribe`;
 
       // Plan pricing in cents (Stripe uses cents)
