@@ -64,6 +64,7 @@ export default function Income() {
   const [filterRecurring, setFilterRecurring] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
   
   // Direct state management instead of React Query
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -674,13 +675,14 @@ export default function Income() {
           onDateRangeReset={() => setDateRange("all")}
         />
 
-        {/* Filters and Search */}
+        {/* Search and Filter Toggle */}
         <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="search">Search</Label>
-                <div className="relative">
+          <CardContent className="p-4 sm:p-6">
+            {/* Always visible search bar and filter toggle */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+              <div className="flex-1 min-w-0">
+                <Label htmlFor="search" className="text-sm font-medium">Search</Label>
+                <div className="relative mt-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     id="search"
@@ -691,66 +693,105 @@ export default function Income() {
                   />
                 </div>
               </div>
-
-              <div>
-                <Label>Category</Label>
-                <Select value={filterCategory} onValueChange={setFilterCategory}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {availableCategories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Recurring</Label>
-                <Select value={filterRecurring} onValueChange={setFilterRecurring}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Income</SelectItem>
-                    <SelectItem value="recurring">Recurring Only</SelectItem>
-                    <SelectItem value="one-time">One-time Only</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Date Range</Label>
-                <Select value={dateRange} onValueChange={setDateRange}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Time</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="week">Last Week</SelectItem>
-                    <SelectItem value="month">Last Month</SelectItem>
-                    <SelectItem value="current-month">This Month</SelectItem>
-                    <SelectItem value="jan">January</SelectItem>
-                    <SelectItem value="feb">February</SelectItem>
-                    <SelectItem value="mar">March</SelectItem>
-                    <SelectItem value="apr">April</SelectItem>
-                    <SelectItem value="may">May</SelectItem>
-                    <SelectItem value="jun">June</SelectItem>
-                    <SelectItem value="jul">July</SelectItem>
-                    <SelectItem value="aug">August</SelectItem>
-                    <SelectItem value="sep">September</SelectItem>
-                    <SelectItem value="oct">October</SelectItem>
-                    <SelectItem value="nov">November</SelectItem>
-                    <SelectItem value="dec">December</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="shrink-0"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Filters
+                {(filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all") && (
+                  <Badge variant="secondary" className="ml-2 px-1 py-0 text-xs">
+                    Active
+                  </Badge>
+                )}
+              </Button>
             </div>
+
+            {/* Collapsible filters */}
+            {showFilters && (
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Category</Label>
+                    <Select value={filterCategory} onValueChange={setFilterCategory}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {availableCategories.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Recurring</Label>
+                    <Select value={filterRecurring} onValueChange={setFilterRecurring}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Income</SelectItem>
+                        <SelectItem value="recurring">Recurring Only</SelectItem>
+                        <SelectItem value="one-time">One-time Only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Date Range</Label>
+                    <Select value={dateRange} onValueChange={setDateRange}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Time</SelectItem>
+                        <SelectItem value="today">Today</SelectItem>
+                        <SelectItem value="week">Last Week</SelectItem>
+                        <SelectItem value="month">Last Month</SelectItem>
+                        <SelectItem value="current-month">This Month</SelectItem>
+                        <SelectItem value="jan">January</SelectItem>
+                        <SelectItem value="feb">February</SelectItem>
+                        <SelectItem value="mar">March</SelectItem>
+                        <SelectItem value="apr">April</SelectItem>
+                        <SelectItem value="may">May</SelectItem>
+                        <SelectItem value="jun">June</SelectItem>
+                        <SelectItem value="jul">July</SelectItem>
+                        <SelectItem value="aug">August</SelectItem>
+                        <SelectItem value="sep">September</SelectItem>
+                        <SelectItem value="oct">October</SelectItem>
+                        <SelectItem value="nov">November</SelectItem>
+                        <SelectItem value="dec">December</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                {/* Clear filters button */}
+                {(filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all") && (
+                  <div className="mt-4 flex justify-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setFilterCategory("all");
+                        setFilterRecurring("all");
+                        setDateRange("all");
+                      }}
+                    >
+                      Clear all filters
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
