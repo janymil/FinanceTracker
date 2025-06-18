@@ -161,7 +161,7 @@ export default function CollaborativeGoalsPage() {
   // Create goal function
   const createGoal = async (goalData: any) => {
     try {
-      const token = await user?.getToken();
+      const headers = await getAuthHeaders();
       
       // Debug logging to see what format we're getting
       console.log("Goal data before processing:", goalData);
@@ -196,10 +196,7 @@ export default function CollaborativeGoalsPage() {
       
       const response = await fetch("/api/collaborative-goals", {
         method: "POST",
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(processedData),
       });
 
@@ -231,13 +228,10 @@ export default function CollaborativeGoalsPage() {
   // Send friend request function
   const sendFriendRequestAction = async () => {
     try {
-      const token = await user?.getToken();
+      const headers = await getAuthHeaders();
       const response = await fetch("/api/friends/request", {
         method: "POST",
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({ recipientEmail: friendEmail }),
       });
 
@@ -263,13 +257,20 @@ export default function CollaborativeGoalsPage() {
   // Accept friend request function
   const acceptFriendRequest = async (requestId: number) => {
     try {
-      const data = await apiRequest("POST", `/api/friends/accept/${requestId}`);
-      await queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
-      await queryClient.invalidateQueries({ queryKey: ["/api/friends/requests"] });
-      toast({
-        title: "Success!",
-        description: "Friend request accepted",
+      const headers = await getAuthHeaders();
+      const response = await fetch(`/api/friends/accept/${requestId}`, {
+        method: "POST",
+        headers,
       });
+      
+      if (response.ok) {
+        fetchFriends();
+        fetchFriendRequests();
+        toast({
+          title: "Success!",
+          description: "Friend request accepted",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -282,11 +283,18 @@ export default function CollaborativeGoalsPage() {
   // Reject friend request function
   const rejectFriendRequest = async (requestId: number) => {
     try {
-      const data = await apiRequest("DELETE", `/api/friends/reject/${requestId}`);
-      await queryClient.invalidateQueries({ queryKey: ["/api/friends/requests"] });
-      toast({
-        title: "Friend request rejected",
+      const headers = await getAuthHeaders();
+      const response = await fetch(`/api/friends/reject/${requestId}`, {
+        method: "DELETE",
+        headers,
       });
+      
+      if (response.ok) {
+        fetchFriendRequests();
+        toast({
+          title: "Friend request rejected",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -319,7 +327,7 @@ export default function CollaborativeGoalsPage() {
       return;
     }
 
-    sendFriendRequest(friendEmail);
+    sendFriendRequestAction();
   };
 
   const getProgressPercentage = (current: string, target: string) => {
