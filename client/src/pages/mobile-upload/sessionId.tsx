@@ -26,14 +26,7 @@ export default function MobileUpload() {
         message: 'Invalid session ID'
       });
     }
-    
-    if (isLoaded && !isSignedIn) {
-      setUploadStatus({
-        status: 'error',
-        message: 'Authentication required'
-      });
-    }
-  }, [sessionId, isLoaded, isSignedIn]);
+  }, [sessionId]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -65,27 +58,14 @@ export default function MobileUpload() {
       return;
     }
 
-    if (!isSignedIn) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to upload receipts",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setUploadStatus({ status: 'uploading', message: 'Uploading receipt...' });
 
     try {
-      const token = await getToken();
       const formData = new FormData();
       formData.append('receipt', selectedFile);
 
       const response = await fetch(`/api/mobile-upload/upload/${sessionId}`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
         body: formData,
       });
 

@@ -49,20 +49,23 @@ export function registerMobileUploadRoutes(app: Express) {
     }
   });
 
-  // Handle mobile file upload
-  app.post('/api/mobile-upload/upload/:sessionId', isAuthenticated, mobileUpload.single('receipt'), async (req: any, res) => {
+  // Handle mobile file upload (no auth required - session contains user info)
+  app.post('/api/mobile-upload/upload/:sessionId', mobileUpload.single('receipt'), async (req: any, res) => {
     try {
       const { sessionId } = req.params;
-      const userId = getUserId(req);
       const file = req.file;
-
-      if (!userId) {
-        return res.status(401).json({ error: 'Authentication required' });
-      }
 
       if (!file) {
         return res.status(400).json({ error: 'No file uploaded' });
       }
+
+      // Get user ID from existing session data
+      const existingSession = mobileUploadSessions.get(sessionId);
+      if (!existingSession || !existingSession.userId) {
+        return res.status(400).json({ error: 'Invalid or expired session' });
+      }
+
+      const userId = existingSession.userId;
 
       // Process receipt using existing OCR system
       const recognizedText = await performOCR(file.buffer);
@@ -75,7 +78,7 @@ export function registerMobileUploadRoutes(app: Express) {
 
       // Store the upload result in session
       const sessionData = {
-        userId,
+        userId: userId,
         status: 'completed',
         uploadedAt: new Date(),
         filename: file.originalname,
