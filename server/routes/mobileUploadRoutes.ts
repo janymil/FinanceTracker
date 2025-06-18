@@ -130,11 +130,16 @@ export function registerMobileUploadRoutes(app) {
         return res.status(500).json({ error: 'OCR processing failed' });
       }
 
-      // Store the upload result in session
+      // Store the upload result in session with proper structure for frontend
       const sessionData = {
         userId: userId,
         status: 'completed',
-        data: ocrResult,
+        data: {
+          text: ocrResult.text,
+          extracted: ocrResult.extracted,
+          imageUrl: ocrResult.imageUrl,
+          category: ocrResult.category
+        },
         createdAt: new Date()
       };
 

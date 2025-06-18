@@ -391,6 +391,8 @@ Changelog:
 - June 18, 2025. COMPLETED: Mobile QR upload now calls actual standard OCR endpoint (/api/upload-receipt) instead of independent processing - uses internal authentication and identical processing pipeline as desktop
 - June 18, 2025. COMPLETED: Fixed mobile QR upload user authentication issue - mobile upload now correctly uses current logged-in user ID instead of hardcoded value
 - June 18, 2025. VERIFIED: Mobile QR upload provides complete feature parity with desktop OCR - includes image storage to Bunny.net, AI categorization, and standard processing pipeline
+- June 18, 2025. FIXED: Mobile QR upload frontend display - now shows uploaded receipt image, AI category suggestions, and pre-filled form data matching desktop experience exactly
+- June 18, 2025. COMPLETED: Mobile QR upload backend data structure corrected - properly formats imageUrl and category fields for frontend consumption
 ```
 
 ## User Preferences

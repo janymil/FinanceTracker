@@ -282,7 +282,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
       status: 'success',
       message: 'Receipt processed successfully via mobile!',
       recognizedText: result.data.text,
-      imageUrl: result.imageUrl || '',
+      imageUrl: result.data.imageUrl || '',
       extracted: result.data.extracted,
       category: result.data.category
     });
