@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SignIn, SignUp } from "@clerk/clerk-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
@@ -9,6 +9,29 @@ export default function AuthPage() {
   const [, setLocation] = useLocation();
   const { user, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState("sign-up");
+
+  // Check URL hash to determine which tab to show
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash === "#sign-in") {
+      setActiveTab("sign-in");
+    } else if (hash === "#sign-up") {
+      setActiveTab("sign-up");
+    }
+
+    // Listen for hash changes
+    const handleHashChange = () => {
+      const newHash = window.location.hash;
+      if (newHash === "#sign-in") {
+        setActiveTab("sign-in");
+      } else if (newHash === "#sign-up") {
+        setActiveTab("sign-up");
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // Redirect if already logged in
   if (isAuthenticated && user) {
@@ -66,7 +89,11 @@ export default function AuthPage() {
         {/* Authentication Section */}
         <div className="w-full max-w-md mx-auto">
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs value={activeTab} onValueChange={(value) => {
+            setActiveTab(value);
+            // Update URL hash when tab changes
+            window.location.hash = value;
+          }} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="sign-up">Sign Up</TabsTrigger>
               <TabsTrigger value="sign-in">Sign In</TabsTrigger>
