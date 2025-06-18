@@ -6,6 +6,7 @@ import { registerUserRoutes } from "./userRoutes";
 import { registerTransactionRoutes } from "./transactionRoutes";
 import { registerBudgetRoutes } from "./budgetRoutes";
 import { registerGoalRoutes } from "./goalRoutes";
+import { registerCollaborativeGoalRoutes } from "./collaborativeGoalRoutes";
 import { registerRealtimeRoutes } from "./realtimeRoutes";
 import { registerExportRoutes } from "./exportRoutes";
 import { uploadReceiptHandler } from '../uploadReceipt';
@@ -25,6 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerTransactionRoutes(app);
   registerBudgetRoutes(app);
   registerGoalRoutes(app);
+  registerCollaborativeGoalRoutes(app);
   registerRealtimeRoutes(app);
   registerExportRoutes(app);
 
