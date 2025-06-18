@@ -54,7 +54,7 @@ export default function Help() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = () => {
-    setLocation('/auth');
+    setLocation('/auth#sign-in');
   };
 
   const sendChatMessage = async (message: string) => {
