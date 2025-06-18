@@ -152,7 +152,6 @@ function AuthenticatedApp({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSi
               <Route path="/help" component={Help} />
               <Route path="/profile" component={ProfilePage} />
               <Route path="/admin-analytics" component={AdminAnalytics} />
-              <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
               <Route component={NotFoundPage} />
             </Switch>
           </div>

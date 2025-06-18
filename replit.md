@@ -370,6 +370,9 @@ Changelog:
 - June 18, 2025. Added QR code generation to UploadReceiptModal with "Scan with Phone" option alongside traditional file upload
 - June 18, 2025. Implemented real-time polling system for mobile uploads with 5-second intervals and automatic timeout handling
 - June 18, 2025. Enhanced mobile upload workflow with OCR processing, AI categorization, and automatic form population from mobile-captured receipt data
+- June 18, 2025. FIXED: Mobile upload QR code 404 errors by removing duplicate route and ensuring proper SignedOut routing configuration
+- June 18, 2025. Removed authentication requirements from mobile upload components while maintaining security through session-based user identification
+- June 18, 2025. QR code mobile upload system now fully operational - anonymous users can scan codes and upload photos for authenticated users
 - June 18, 2025. MASCOT ENHANCEMENT: Implemented comprehensive mascot restoration system - users can now restore hidden mascots via floating restore button
 - June 18, 2025. Added full drag-and-drop functionality to financial mascot - users can reposition mascot anywhere on screen with mouse drag
 - June 18, 2025. Enhanced mascot positioning system with screen boundary constraints and persistent position state across user interactions
