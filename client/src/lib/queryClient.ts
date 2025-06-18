@@ -94,10 +94,15 @@ export function clearUserSession() {
   // Clear all React Query cache
   queryClient.clear();
   
-  // Clear localStorage completely
+  // Clear localStorage but preserve cookie consent preferences
   if (typeof window !== 'undefined') {
+    const cookieConsent = localStorage.getItem('cookie-consent');
     localStorage.clear();
     sessionStorage.clear();
+    // Restore cookie consent after clearing
+    if (cookieConsent) {
+      localStorage.setItem('cookie-consent', cookieConsent);
+    }
   }
   
   // Clear query cache without forcing reload on auth page

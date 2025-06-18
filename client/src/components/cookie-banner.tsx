@@ -24,6 +24,8 @@ export function CookieBanner() {
     const cookieConsent = localStorage.getItem('cookie-consent');
     if (!cookieConsent) {
       setIsVisible(true);
+    } else {
+      setIsVisible(false);
     }
   }, []);
 
