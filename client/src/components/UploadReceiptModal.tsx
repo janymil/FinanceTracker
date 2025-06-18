@@ -148,22 +148,27 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
         if (response.ok) {
           const result = await response.json();
           
-          if (result.status === 'completed' && result.data) {
-            // Clear polling
-            clearInterval(pollInterval);
-            setQrUploadState(prev => ({ ...prev, isPolling: false, status: 'success' }));
-            
-            // Process the uploaded receipt data
-            processQRUploadResult(result.data);
-          } else if (result.status === 'error') {
-            clearInterval(pollInterval);
-            setQrUploadState(prev => ({ ...prev, isPolling: false, status: 'error' }));
-            toast({
-              title: "Upload Error",
-              description: "Failed to process mobile upload",
-              variant: "destructive"
-            });
+          if (result.success && result.data) {
+            if (result.data.status === 'completed') {
+              // Clear polling
+              clearInterval(pollInterval);
+              setQrUploadState(prev => ({ ...prev, isPolling: false, status: 'success' }));
+              
+              // Process the uploaded receipt data
+              processQRUploadResult(result.data);
+            } else if (result.data.status === 'error') {
+              clearInterval(pollInterval);
+              setQrUploadState(prev => ({ ...prev, isPolling: false, status: 'error' }));
+              toast({
+                title: "Upload Error",
+                description: result.data.error || "Failed to process mobile upload",
+                variant: "destructive"
+              });
+            }
           }
+        } else if (response.status === 404) {
+          // Session not found yet, continue polling
+          console.log(`Session ${sessionId} not found yet, continuing to poll...`);
         }
       } catch (error) {
         console.error('Polling error:', error);

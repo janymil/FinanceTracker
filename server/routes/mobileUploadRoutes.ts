@@ -197,7 +197,7 @@ export function registerMobileUploadRoutes(app: Express) {
     const now = new Date();
     const maxAge = 24 * 60 * 60 * 1000; // 24 hours
 
-    for (const [sessionId, data] of mobileUploadSessions.entries()) {
+    mobileUploadSessions.forEach((data, sessionId) => {
       if (data.timestamp) {
         const sessionTime = new Date(data.timestamp);
         if (now.getTime() - sessionTime.getTime() > maxAge) {
@@ -212,7 +212,7 @@ export function registerMobileUploadRoutes(app: Express) {
           console.log(`Cleaned up expired session: ${sessionId}`);
         }
       }
-    }
+    });
   }, 60 * 60 * 1000); // Run cleanup every hour
 }
 
