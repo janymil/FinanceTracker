@@ -212,25 +212,25 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                     </div>
                   )}
                   
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2">
-                      <p className="font-medium text-gray-900 dark:text-white">
+                      <p className="font-medium text-gray-900 dark:text-white truncate">
                         {transaction.description}
                       </p>
                       {transaction.imageUrl && (
-                        <Badge variant="secondary" className="text-xs sm:hidden">
+                        <Badge variant="secondary" className="text-xs sm:hidden shrink-0">
                           <Receipt className="h-3 w-3" />
                         </Badge>
                       )}
                     </div>
-                    <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-                      <span>{transaction.categoryName || 'Uncategorized'}</span>
-                      <span>•</span>
-                      <span>{formatDate(transaction.date)}</span>
+                    <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
+                      <span className="truncate">{transaction.categoryName || 'Uncategorized'}</span>
+                      <span className="shrink-0">•</span>
+                      <span className="shrink-0">{formatDate(transaction.date)}</span>
                       {transaction.ocrVendor && transaction.ocrVendor !== transaction.description && (
                         <>
-                          <span className="hidden md:inline">•</span>
-                          <span className="hidden md:inline text-blue-600 dark:text-blue-400 text-xs">
+                          <span className="hidden md:inline shrink-0">•</span>
+                          <span className="hidden md:inline text-blue-600 dark:text-blue-400 text-xs truncate">
                             OCR: {transaction.ocrVendor}
                           </span>
                         </>
@@ -238,9 +238,9 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <div className="text-right">
-                    <span className={`font-semibold ${
+                    <span className={`font-semibold text-sm ${
                       transaction.type === 'expense' ? 'text-destructive' : 'text-success'
                     }`}>
                       {transaction.type === 'expense' ? '-' : '+'}{formatCurrency(transaction.amount)}
@@ -256,7 +256,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                   {/* Action buttons */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>

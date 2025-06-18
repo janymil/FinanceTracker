@@ -122,10 +122,10 @@ function AuthenticatedApp({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSi
           setIsCollapsed={setSidebarCollapsed}
         />
         <main className={cn(
-          "flex-1 transition-all duration-300 pt-16",
+          "flex-1 transition-all duration-300 pt-16 min-w-0",
           sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
         )}>
-          <div className="p-6">
+          <div className="p-3 sm:p-6 max-w-full overflow-x-hidden">
             <Switch>
               <Route path="/" component={Dashboard} />
               <Route path="/dashboard" component={Dashboard} />
