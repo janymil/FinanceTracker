@@ -94,15 +94,45 @@ export function clearUserSession() {
   // Clear all React Query cache
   queryClient.clear();
   
-  // Clear localStorage but preserve cookie consent preferences
+  // Clear localStorage but preserve cookie consent and AI-generated content
   if (typeof window !== 'undefined') {
+    // Backup important data that should persist across sessions
     const cookieConsent = localStorage.getItem('cookie-consent');
+    
+    // Backup all AI-generated content (tips, recommendations, predictions)
+    const aiDataToPreserve: { [key: string]: string } = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (
+        key.startsWith('ai-tip-') ||
+        key.startsWith('daily-rec-') ||
+        key.startsWith('expense-pred-') ||
+        key.startsWith('ai-insights-') ||
+        key.startsWith('financial-health-') ||
+        key.startsWith('trend-pred-') ||
+        key.includes('ai-generated') ||
+        key.includes('openai-cache')
+      )) {
+        const value = localStorage.getItem(key);
+        if (value) {
+          aiDataToPreserve[key] = value;
+        }
+      }
+    }
+    
+    // Clear all localStorage
     localStorage.clear();
     sessionStorage.clear();
-    // Restore cookie consent after clearing
+    
+    // Restore preserved data
     if (cookieConsent) {
       localStorage.setItem('cookie-consent', cookieConsent);
     }
+    
+    // Restore AI-generated content
+    Object.entries(aiDataToPreserve).forEach(([key, value]) => {
+      localStorage.setItem(key, value);
+    });
   }
   
   // Clear query cache without forcing reload on auth page
