@@ -33,11 +33,12 @@ export default function AuthPage() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // Redirect if already logged in
-  if (isAuthenticated && user) {
-    setLocation("/");
-    return null;
-  }
+  // Redirect if already logged in - use useEffect to prevent render loop
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setLocation("/");
+    }
+  }, [isAuthenticated, user, setLocation]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
