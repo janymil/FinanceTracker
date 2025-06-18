@@ -111,7 +111,7 @@ export function registerAIRoutes(app: Express) {
       
       const financialSummary = await storage.getUserFinancialSummary(userId, startOfYear, currentDate);
       const transactions = await storage.getUserTransactions(userId, 100);
-      const categories = await storage.getCategories();
+      const categories = await storage.getCategories(userId);
 
       // Create category name mapping
       const categoryMap = new Map();
@@ -237,7 +237,7 @@ export function registerAIRoutes(app: Express) {
       }
 
       const transactions = await storage.getUserTransactions(userId, 200);
-      const categories = await storage.getCategories();
+      const categories = await storage.getCategories(userId);
       const budgets = await storage.getUserBudgets(userId);
 
       const categoryMap = new Map();
@@ -281,7 +281,7 @@ export function registerAIRoutes(app: Express) {
       // Get user's financial data
       const transactions = await storage.getUserTransactions(userId, 100);
       const budgets = await storage.getUserBudgets(userId);
-      const categories = await storage.getCategories();
+      const categories = await storage.getCategories(userId);
       
       // Calculate summary from transactions
       const totalIncome = transactions
