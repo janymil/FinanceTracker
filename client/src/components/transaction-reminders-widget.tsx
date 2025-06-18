@@ -1,5 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -103,48 +102,108 @@ export default function TransactionRemindersWidget() {
     referenceNote: "",
   });
 
+  // State management
+  const [transactionReminders, setTransactionReminders] = useState<TransactionReminder[]>([]);
+  const [expenseReminders, setExpenseReminders] = useState<ExpenseReminder[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [transactionLoading, setTransactionLoading] = useState(true);
+  const [expenseLoading, setExpenseLoading] = useState(true);
+
   // Check if user is ready for API calls
   const isUserReady = isLoaded && isSignedIn && !!user?.id;
 
-  // Fetch automatic transaction reminders with proper Clerk authentication
-  const { data: transactionReminders = [], isLoading: transactionLoading } = useQuery<TransactionReminder[]>({
-    queryKey: ["/api/transaction-reminders"],
-    enabled: isUserReady,
-    retry: 1,
-    refetchOnWindowFocus: false,
-    queryFn: async () => {
-      const token = await getToken();
-      
-      const response = await fetch('/api/transaction-reminders?days=30', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
+  // Fetch transaction reminders
+  useEffect(() => {
+    const fetchTransactionReminders = async () => {
+      if (!isUserReady) return;
 
-      if (!response.ok) {
-        throw new Error(`API failed: ${response.status}`);
+      try {
+        setTransactionLoading(true);
+        const token = await getToken();
+        
+        const response = await fetch('/api/transaction-reminders?days=30', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setTransactionReminders(data || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch transaction reminders:', error);
+        setTransactionReminders([]);
+      } finally {
+        setTransactionLoading(false);
       }
+    };
 
-      const data = await response.json();
-      return data || [];
-    }
-  });
+    fetchTransactionReminders();
+  }, [isUserReady, getToken]);
 
+  // Fetch expense reminders
+  useEffect(() => {
+    const fetchExpenseReminders = async () => {
+      if (!isUserReady) return;
 
+      try {
+        setExpenseLoading(true);
+        const token = await getToken();
+        
+        const response = await fetch('/api/expense-reminders/upcoming', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
 
-  // Fetch manual expense reminders
-  const { data: expenseReminders = [], isLoading: expenseLoading } = useQuery<ExpenseReminder[]>({
-    queryKey: ["/api/expense-reminders/upcoming"],
-    enabled: isUserReady,
-    retry: 1,
-  });
+        if (response.ok) {
+          const data = await response.json();
+          setExpenseReminders(data || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch expense reminders:', error);
+        setExpenseReminders([]);
+      } finally {
+        setExpenseLoading(false);
+      }
+    };
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ["/api/categories"],
-    enabled: isUserReady,
-  });
+    fetchExpenseReminders();
+  }, [isUserReady, getToken]);
+
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      if (!isUserReady) return;
+
+      try {
+        const token = await getToken();
+        
+        const response = await fetch('/api/categories', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+        setCategories([]);
+      }
+    };
+
+    fetchCategories();
+  }, [isUserReady, getToken]);
 
   const getReminderPriority = useCallback((dueDate: Date): 'high' | 'medium' | 'low' | 'normal' => {
     const today = new Date();

@@ -332,6 +332,8 @@ Changelog:
 - June 18, 2025. Removed debug console logs and implemented proper memoization to eliminate performance issues and console spam
 - June 18, 2025. Fixed transaction reminders cache invalidation issue - removed staleTime to allow immediate updates when recurring transactions are edited
 - June 18, 2025. Restored real-time reminder updates by removing caching that prevented immediate refresh after transaction modifications
+- June 18, 2025. Completely removed React Query from TransactionRemindersWidget and converted to useState/useEffect pattern for immediate data updates
+- June 18, 2025. Transaction reminders widget now shows immediate changes when recurring transactions are edited without cache-related delays
 ```
 
 ## User Preferences
