@@ -261,6 +261,7 @@ export default function Dashboard() {
       });
       await queryClient.invalidateQueries({ queryKey: ["transactions"] });
       await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      await queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
 
       setIsDialogOpen(false);
       setNewTransaction({

@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import MonthFilter from "@/components/month-filter";
 import { format } from "date-fns";
@@ -135,6 +135,9 @@ export default function Transactions() {
       // Update local state immediately
       setTransactions(prev => [newTransaction, ...prev]);
       
+      // Invalidate transaction reminders cache
+      await queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
+      
       setIsDialogOpen(false);
       toast({
         title: "Transaction Added",
@@ -202,6 +205,10 @@ export default function Transactions() {
       
       // Update local state immediately
       setTransactions(prev => prev.map(t => t.id === id ? updatedTransaction : t));
+      
+      // Invalidate transaction reminders cache
+      await queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
+      
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({

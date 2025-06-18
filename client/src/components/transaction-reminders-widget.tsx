@@ -108,15 +108,14 @@ export default function TransactionRemindersWidget() {
 
   // Fetch automatic transaction reminders with proper Clerk authentication
   const { data: transactionReminders = [], isLoading: transactionLoading } = useQuery<TransactionReminder[]>({
-    queryKey: ["/api/transaction-reminders", { days: 30 }],
+    queryKey: ["transaction-reminders"],
     enabled: isUserReady,
     retry: 1,
-    refetchOnWindowFocus: true,
-    refetchInterval: 30000,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
     queryFn: async () => {
-      console.log('Fetching transaction reminders with Clerk auth...');
       const token = await getToken();
-      console.log('Clerk token available:', !!token);
       
       const response = await fetch('/api/transaction-reminders?days=30', {
         headers: {
@@ -127,12 +126,10 @@ export default function TransactionRemindersWidget() {
       });
 
       if (!response.ok) {
-        console.error('Transaction reminders API failed:', response.status, response.statusText);
         throw new Error(`API failed: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('Transaction reminders data:', data);
       return data || [];
     }
   });

@@ -47,7 +47,7 @@ import { Link } from "wouter";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface Category {
   id: number;
@@ -111,6 +111,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
       await queryClient.invalidateQueries({ queryKey: ["/api/financial-summary", user?.id] });
       await queryClient.invalidateQueries({ queryKey: ["/api/budgets", user?.id] });
       await queryClient.invalidateQueries({ queryKey: ["/api/financial-health", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
       
       setIsDialogOpen(false);
       setNewTransaction({
