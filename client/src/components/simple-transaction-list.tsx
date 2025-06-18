@@ -160,27 +160,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
 
   const displayTransactions = (transactions || []).slice(0, 5);
 
-  // Debug: Check if isRecurring data is present
-  useEffect(() => {
-    if (transactions && transactions.length > 0) {
-      const debugData = transactions.slice(0, 3).map(t => ({
-        id: t.id,
-        description: t.description,
-        isRecurring: t.isRecurring,
-        recurringFrequency: t.recurringFrequency,
-        hasRecurringIcon: t.isRecurring ? 'YES' : 'NO'
-      }));
-      console.log("🔄 Recent Transactions Debug:", debugData);
-      console.log("🔄 Full transaction objects:", transactions.slice(0, 2));
-      
-      // Additional check for test111 specifically
-      const test111 = transactions.find(t => t.description === 'test111');
-      if (test111) {
-        console.log("🔍 test111 transaction data:", test111);
-        console.log("🔍 test111 isRecurring type:", typeof test111.isRecurring, test111.isRecurring);
-      }
-    }
-  }, [transactions]);
+
 
   return (
     <Card className="bg-white dark:bg-gray-800">
@@ -241,11 +221,6 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                     <div className="flex items-center space-x-2 overflow-visible">
                       <p className="font-medium text-gray-900 dark:text-white flex-shrink">
                         {transaction.description}
-                        {transaction.description === 'test111' && (
-                          <span className="text-xs text-red-500 ml-2">
-                            [isRecurring: {String(transaction.isRecurring)}, type: {typeof transaction.isRecurring}]
-                          </span>
-                        )}
                       </p>
                       {transaction.isRecurring && (
                         <Badge variant="outline" className="text-xs shrink-0 border-blue-200 text-blue-700 dark:border-blue-700 dark:text-blue-300 flex items-center ml-2">

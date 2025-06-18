@@ -328,26 +328,12 @@ export class DatabaseStorage implements IStorage {
     const userTransactions = await query;
 
     // Decrypt sensitive fields
-    const result = userTransactions.map(transaction => ({
+    return userTransactions.map(transaction => ({
       ...transaction,
       amount: DataEncryption.decryptAmount(transaction.amount),
       description: DataEncryption.decryptDescription(transaction.description),
       referenceNote: transaction.referenceNote ? DataEncryption.decrypt(transaction.referenceNote) : null
     }));
-    
-    // Debug: Check test111 transaction
-    const test111 = result.find(t => t.description === 'test111');
-    if (test111) {
-      console.log('🔍 Backend test111 data:', {
-        id: test111.id,
-        description: test111.description,
-        isRecurring: test111.isRecurring,
-        recurringFrequency: test111.recurringFrequency,
-        isRecurringType: typeof test111.isRecurring
-      });
-    }
-    
-    return result;
   }
 
   async updateTransaction(id: number, transaction: Partial<InsertTransaction>): Promise<Transaction> {
