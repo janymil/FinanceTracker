@@ -12,6 +12,7 @@ import { uploadReceiptHandler } from '../uploadReceipt';
 import { registerAIRoutes } from "./aiRoutes";
 import { registerAdminRoutes } from "./adminRoutes";
 import { setCookieConsent } from "../cookieMiddleware";
+import { registerMobileUploadRoutes } from "./mobileUploadRoutes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Cookie consent middleware
@@ -30,6 +31,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/upload-receipt', uploadReceiptHandler);
   registerAIRoutes(app);
   registerAdminRoutes(app);
+  registerMobileUploadRoutes(app);
 
   const server = createServer(app);
   return server;

@@ -39,6 +39,7 @@ import Help from "@/pages/help";
 import NotFoundPage from "./pages/not-found";
 import ProfilePage from "./pages/profile";
 import AdminAnalytics from "@/pages/admin-analytics";
+import MobileUpload from "@/pages/mobile-upload/[sessionId]";
 
 // Optimized loading state
 const AppLoader = () => (
@@ -76,6 +77,7 @@ function AppContent() {
           <Route path="/contact" component={Contact} />
           <Route path="/help" component={Help} />
           <Route path="/auth" component={AuthPage} />
+          <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
           <Route component={Landing} />
         </Switch>
         <Footer />
