@@ -88,12 +88,23 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
     if (!user?.id) return;
     
     try {
+      // Add small delay to ensure token is available
+      await new Promise(resolve => setTimeout(resolve, 100));
       const response = await apiRequest("GET", "/api/categories");
       const data = await response.json();
       setCategories(data);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
-      setCategories([]);
+      // Retry once after a longer delay
+      try {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const retryResponse = await apiRequest("GET", "/api/categories");
+        const retryData = await retryResponse.json();
+        setCategories(retryData);
+      } catch (retryError) {
+        console.error("Failed to fetch categories on retry:", retryError);
+        setCategories([]);
+      }
     }
   };
 

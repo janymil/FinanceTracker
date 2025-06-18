@@ -114,11 +114,22 @@ export default function Transactions() {
 
   const loadCategories = async () => {
     try {
+      // Add small delay to ensure token is available
+      await new Promise(resolve => setTimeout(resolve, 100));
       const res = await apiRequest("GET", "/api/categories");
       const data = await res.json();
       setCategories(data);
     } catch (error) {
       console.error("Failed to load categories:", error);
+      // Retry once after a longer delay
+      try {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const retryRes = await apiRequest("GET", "/api/categories");
+        const retryData = await retryRes.json();
+        setCategories(retryData);
+      } catch (retryError) {
+        console.error("Failed to load categories on retry:", retryError);
+      }
     }
   };
 
