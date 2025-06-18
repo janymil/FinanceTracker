@@ -522,11 +522,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Category operations
-  async getCategories(): Promise<Category[]> {
+  async getCategories(userId?: string): Promise<Category[]> {
+    if (userId) {
+      return await db.select().from(categories).where(eq(categories.userId, userId));
+    }
     return await db.select().from(categories);
   }
 
-  async createCategory(category: { name: string; icon: string; color: string; type: string }): Promise<Category> {
+  async createCategory(category: { userId: string; name: string; icon: string; color: string; type: string }): Promise<Category> {
     const [newCategory] = await db
       .insert(categories)
       .values({
