@@ -118,7 +118,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
         ...transactionData,
         amount: parseFloat(transactionData.amount),
       });
-      await queryClient.invalidateQueries({ 
+      await queryClient.refetchQueries({ 
         predicate: (query) => 
           query.queryKey[0] === "transactions" || 
           query.queryKey[0] === "financial-summary" ||
