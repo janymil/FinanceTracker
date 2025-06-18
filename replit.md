@@ -341,6 +341,9 @@ Changelog:
 - June 18, 2025. Fixed authentication routing issue where sign-in button incorrectly redirected to sign-up form
 - June 18, 2025. Updated auth page to properly handle hash routing for distinguishing between sign-in and sign-up flows
 - June 18, 2025. Improved auth page layout to give more space to Clerk forms - promotional section now takes 2/5 columns, auth form takes 3/5 columns
+- June 18, 2025. Implemented comprehensive security headers including HSTS (HTTP Strict Transport Security) with 2-year max-age, includeSubDomains, and preload directives
+- June 18, 2025. Added additional security headers: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, and Permissions-Policy for enhanced protection
+- June 18, 2025. Enhanced session cookie security with production-aware secure flag and strict SameSite policy
 - June 18, 2025. Fixed mobile tab truncation issues across all pages - removed abbreviated tab names (e.g., "Not" → "Notifications", "Ana" → "Analytics")
 - June 18, 2025. Updated Profile, Trends, and Reports pages to show full tab names on mobile devices for better user experience
 - June 18, 2025. Implemented comprehensive Stripe customer portal integration for subscription management in Profile page
