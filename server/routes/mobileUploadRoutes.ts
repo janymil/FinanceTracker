@@ -42,7 +42,7 @@ export function registerMobileUploadRoutes(app) {
   });
 
   // Upload receipt from mobile
-  app.post('/api/mobile-upload/:sessionId', upload.single('receipt'), async (req, res) => {
+  app.post('/api/mobile-upload/upload/:sessionId', upload.single('receipt'), async (req, res) => {
     try {
       const { sessionId } = req.params;
       const file = req.file;
@@ -59,12 +59,19 @@ export function registerMobileUploadRoutes(app) {
 
       const userId = existingSession.userId;
 
+      console.log('Processing mobile upload for user:', userId, 'file size:', file.buffer.length);
+
       // Process the receipt using the existing OCR functions
+      let ocrResult;
       try {
+        console.log('Starting OCR processing...');
         const recognizedText = await performOCR(file.buffer);
-        const extractedData = await extractStructuredData(recognizedText);
+        console.log('OCR completed, text length:', recognizedText.length);
         
-        var ocrResult = {
+        const extractedData = await extractStructuredData(recognizedText);
+        console.log('Data extraction completed:', extractedData);
+        
+        ocrResult = {
           text: recognizedText,
           extracted: extractedData
         };
@@ -73,7 +80,7 @@ export function registerMobileUploadRoutes(app) {
         mobileUploadSessions.set(sessionId, {
           userId: userId,
           status: 'error',
-          error: 'OCR processing failed',
+          error: 'OCR processing failed: ' + error.message,
           createdAt: new Date()
         });
         return res.status(500).json({ error: 'OCR processing failed' });

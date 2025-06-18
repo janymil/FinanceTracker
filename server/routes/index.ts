@@ -19,6 +19,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/cookie-consent', setCookieConsent);
 
   // Register all route modules
+  registerMobileUploadRoutes(app);
   registerAuthRoutes(app);
   registerUserRoutes(app);
   registerTransactionRoutes(app);
@@ -31,7 +32,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/upload-receipt', uploadReceiptHandler);
   registerAIRoutes(app);
   registerAdminRoutes(app);
-  registerMobileUploadRoutes(app);
 
   const server = createServer(app);
   return server;
