@@ -36,7 +36,14 @@ export default function Subscribe() {
 
       if (response.ok) {
         const { url } = await response.json();
-        window.location.href = url;
+        console.log('Stripe checkout URL received:', url);
+        if (url) {
+          console.log('Redirecting to Stripe checkout...');
+          window.location.href = url;
+        } else {
+          console.error('No URL received from checkout session');
+          setLoading(false);
+        }
       } else {
         const error = await response.json();
         console.error('Failed to create checkout session:', error);
