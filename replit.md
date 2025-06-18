@@ -386,6 +386,8 @@ Changelog:
 - June 18, 2025. COMPLETED: Fixed QR code mobile upload system to follow complete standard OCR pipeline including user plan checking, AI categorization for standard+ users, and Bunny.net storage for premium users
 - June 18, 2025. Mobile upload now provides identical functionality to desktop OCR with proper polling detection, cache-busting, and form auto-population from mobile-captured receipt data
 - June 18, 2025. QR code system fully operational with backend session creation, anonymous mobile access, and authenticated result processing for seamless cross-device receipt scanning workflow
+- June 18, 2025. FIXED: Mobile QR upload system now properly connects to standard OCR pipeline instead of independent processing - corrected storage method from getUserById to getUser
+- June 18, 2025. Mobile upload integration complete - QR code scanning connects to Google Cloud Vision API, AI categorization, and Bunny.net storage following identical workflow as desktop upload
 ```
 
 ## User Preferences

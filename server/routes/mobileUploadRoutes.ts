@@ -94,7 +94,7 @@ export function registerMobileUploadRoutes(app) {
         
         // Import additional functions needed for complete OCR processing
         const getUserPlan = async (userId: string) => {
-          const user = await storageModule.storage.getUserById(userId);
+          const user = await storageModule.storage.getUser(userId);
           return { plan: user?.plan || 'free' };
         };
         
