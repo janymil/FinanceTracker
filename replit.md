@@ -388,6 +388,7 @@ Changelog:
 - June 18, 2025. QR code system fully operational with backend session creation, anonymous mobile access, and authenticated result processing for seamless cross-device receipt scanning workflow
 - June 18, 2025. FIXED: Mobile QR upload system now properly connects to standard OCR pipeline instead of independent processing - corrected storage method from getUserById to getUser
 - June 18, 2025. Mobile upload integration complete - QR code scanning connects to Google Cloud Vision API, AI categorization, and Bunny.net storage following identical workflow as desktop upload
+- June 18, 2025. COMPLETED: Mobile QR upload now calls actual standard OCR endpoint (/api/upload-receipt) instead of independent processing - uses internal authentication and identical processing pipeline as desktop
 ```
 
 ## User Preferences
