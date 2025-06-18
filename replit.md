@@ -393,6 +393,7 @@ Changelog:
 - June 18, 2025. VERIFIED: Mobile QR upload provides complete feature parity with desktop OCR - includes image storage to Bunny.net, AI categorization, and standard processing pipeline
 - June 18, 2025. FIXED: Mobile QR upload frontend display - now shows uploaded receipt image, AI category suggestions, and pre-filled form data matching desktop experience exactly
 - June 18, 2025. COMPLETED: Mobile QR upload backend data structure corrected - properly formats imageUrl and category fields for frontend consumption
+- June 18, 2025. FINAL FIX: Mobile QR upload authentication resolved - now properly extracts user ID from JWT tokens enabling complete OCR pipeline with Bunny.net storage and AI categorization
 ```
 
 ## User Preferences
