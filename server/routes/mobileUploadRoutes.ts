@@ -82,65 +82,55 @@ export function registerMobileUploadRoutes(app) {
         return res.status(400).json({ error: 'No valid image data received' });
       }
 
-      // Use the same OCR functions as standard upload
+      // Call the standard OCR handler to ensure complete consistency
       let ocrResult;
       try {
-        console.log('Processing mobile upload with standard OCR functions...');
+        console.log('Calling standard OCR handler...');
         
-        // Import standard OCR functions
-        const { performOCR, extractStructuredData, uploadToBunny, categorizeExpense, getUserPlan } = await import('../uploadReceipt');
+        // Import the standard uploadReceiptHandler
+        const { uploadReceiptHandler } = await import('../uploadReceipt');
         
-        // Get user plan for feature gating
-        const userPlan = await getUserPlan(userId);
-        const canStore = userPlan.plan === 'standard' || userPlan.plan === 'premium';
-        
-        // Perform OCR processing
-        const recognizedText = await performOCR(file.buffer);
-        const extractedData = await extractStructuredData(recognizedText);
-        
-        // AI Categorization for standard+ users
-        let predictedCategory: string | undefined;
-        if (userPlan.plan === 'standard' || userPlan.plan === 'premium') {
-          try {
-            const descriptionForCategorization = extractedData.vendor || recognizedText;
-            const amountForCategorization = extractedData.amount || 0;
-            const categorization = await categorizeExpense(descriptionForCategorization, amountForCategorization);
-            predictedCategory = categorization.category;
-          } catch (categoryError) {
-            console.error('AI categorization failed:', categoryError);
-          }
-        }
-        
-        // Image storage for standard+ users
-        let imageUrl: string | undefined;
-        if (canStore) {
-          const timestamp = Date.now();
-          const fileName = `receipt-${userId}-${timestamp}.${file.mimetype.split('/')[1]}`;
-          try {
-            imageUrl = await uploadToBunny(fileName, file.buffer, file.mimetype);
-          } catch (uploadError) {
-            console.error('Upload to Bunny.net failed:', uploadError);
-          }
-        }
-        
-        // Prepare response in same format as standard OCR
-        ocrResult = {
-          text: recognizedText,
-          extracted: extractedData
+        // Create a proper request object that matches the standard upload format
+        const mockReq = {
+          file: {
+            buffer: file.buffer,
+            mimetype: file.mimetype,
+            originalname: file.originalname || 'mobile-upload.jpg'
+          },
+          auth: () => ({ userId })
         };
         
-        if (imageUrl) {
-          ocrResult.imageUrl = imageUrl;
+        // Create a response object that captures the result
+        let capturedResult: any = null;
+        const mockRes = {
+          json: (data: any) => {
+            capturedResult = data;
+          },
+          status: (code: number) => ({
+            json: (data: any) => {
+              if (code !== 200) {
+                throw new Error(`Upload failed with status ${code}: ${JSON.stringify(data)}`);
+              }
+              capturedResult = data;
+            }
+          })
+        };
+        
+        // Get the actual handler function (it's an array with middleware and handler)
+        const actualHandler = uploadReceiptHandler[uploadReceiptHandler.length - 1];
+        
+        // Process through the exact same pipeline as desktop
+        await actualHandler(mockReq as any, mockRes as any);
+        
+        if (!capturedResult) {
+          throw new Error('No result captured from standard OCR processing');
         }
         
-        if (predictedCategory) {
-          ocrResult.category = predictedCategory;
-        }
-        
-        console.log('Mobile OCR processing completed successfully');
+        ocrResult = capturedResult;
+        console.log('Standard OCR processing completed via standard handler');
         
       } catch (error) {
-        console.error('Mobile OCR processing failed:', error);
+        console.error('Standard OCR processing failed:', error);
         mobileUploadSessions.set(sessionId, {
           userId: userId,
           status: 'error',
