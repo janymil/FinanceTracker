@@ -389,7 +389,7 @@ export default function Income() {
                   Add Income
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Add New Income</DialogTitle>
                   <DialogDescription>
@@ -440,8 +440,10 @@ export default function Income() {
                       <SelectContent>
                         {incomeCategories.map((category: Category) => (
                           <SelectItem key={category.id} value={category.id.toString()}>
-                            <span className="mr-2">{category.icon}</span>
-                            {category.name}
+                            <div className="flex items-center">
+                              <span className="mr-2">{category.icon}</span>
+                              <span>{category.name}</span>
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -758,7 +760,7 @@ export default function Income() {
       {/* Edit Dialog */}
       {editingTransaction && (
         <Dialog open={!!editingTransaction} onOpenChange={() => setEditingTransaction(null)}>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Edit Income</DialogTitle>
               <DialogDescription>
@@ -819,8 +821,10 @@ export default function Income() {
                   <SelectContent>
                     {incomeCategories.map((category: Category) => (
                       <SelectItem key={category.id} value={category.id.toString()}>
-                        <span className="mr-2">{category.icon}</span>
-                        {category.name}
+                        <div className="flex items-center">
+                          <span className="mr-2">{category.icon}</span>
+                          <span>{category.name}</span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
