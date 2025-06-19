@@ -65,13 +65,13 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
 
   const topExpense = summary?.transactionsByCategory && Array.isArray(summary.transactionsByCategory)
     ? summary.transactionsByCategory
-        .filter((cat: any) => cat.type === 'expense' && cat.amount < 0)
+        .filter((cat: any) => cat.type === 'expense')
         .sort((a: any, b: any) => Math.abs(b.amount) - Math.abs(a.amount))[0]
     : null;
 
   const topIncome = summary?.transactionsByCategory && Array.isArray(summary.transactionsByCategory)
     ? summary.transactionsByCategory
-        .filter((cat: any) => cat.type === 'income' && cat.amount > 0)
+        .filter((cat: any) => cat.type === 'income')
         .sort((a: any, b: any) => Math.abs(b.amount) - Math.abs(a.amount))[0]
     : null;
 
