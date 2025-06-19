@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { useTransactions } from "@/hooks/useTransactions";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import UploadReceiptModal from "@/components/UploadReceiptModal";
 import { Button } from "@/components/ui/button";
@@ -19,11 +22,12 @@ import {
   DollarSign,
   TrendingUp,
   BarChart3,
-  Repeat
+  Repeat,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import MonthFilter from "@/components/month-filter";
@@ -44,6 +48,11 @@ interface Transaction {
   recurringEndDate?: string;
   paymentUrl?: string;
   referenceNote?: string;
+  imageUrl?: string;
+  ocrText?: string;
+  ocrVendor?: string;
+  ocrDetectedAmount?: string;
+  ocrDetectedDate?: string;
 }
 
 interface Category {
@@ -65,16 +74,122 @@ export default function Income() {
   const [dateRange, setDateRange] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  
-  // Direct state management instead of React Query
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+
+  // React Query hooks for data fetching using the same pattern as transactions page
+  const { data: allTransactions = [], isLoading: transactionsLoading, refetch: refetchTransactions } = useTransactions();
+  const queryClient = useQueryClient();
+
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/categories");
+      return response.json();
+    },
+    enabled: isReady && !!user?.id
+  });
+
+  const isLoading = transactionsLoading || categoriesLoading;
+
+  // React Query mutation for creating income transactions
+  const createIncomeMutation = useMutation({
+    mutationFn: async (incomeData: typeof newIncome) => {
+      const res = await apiRequest("POST", "/api/transactions", {
+        ...incomeData,
+        amount: parseFloat(incomeData.amount),
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      setIsDialogOpen(false);
+      setNewIncome({
+        amount: "",
+        description: "",
+        date: new Date().toISOString().split('T')[0],
+        type: "income" as "income" | "expense",
+        categoryId: "",
+        isRecurring: false,
+        recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
+        recurringEndDate: "",
+        paymentUrl: "",
+        referenceNote: "",
+      });
+      toast({
+        title: "Income Added",
+        description: "Income has been created successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // React Query mutation for editing income transactions
+  const editIncomeMutation = useMutation({
+    mutationFn: async (incomeData: any) => {
+      const res = await apiRequest("PUT", `/api/transactions/${incomeData.id}`, incomeData);
+      if (!res.ok) {
+        throw new Error(`Edit failed: ${res.status}`);
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      setEditingTransaction(null);
+      toast({
+        title: "Income Updated",
+        description: "Income has been updated successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // React Query mutation for deleting income transactions
+  const deleteIncomeMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiRequest("DELETE", `/api/transactions/${id}`);
+      if (!res.ok) {
+        throw new Error(`Delete failed: ${res.status}`);
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
+      toast({
+        title: "Income Deleted",
+        description: "Income has been deleted successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
   
   const [newIncome, setNewIncome] = useState({
     amount: "",
     description: "",
     date: new Date().toISOString().split('T')[0],
+    type: "income" as "income" | "expense",
     categoryId: "",
     isRecurring: false,
     recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
@@ -83,137 +198,8 @@ export default function Income() {
     referenceNote: "",
   });
 
-  // Fetch transactions directly
-  const fetchTransactions = async () => {
-    if (!isReady) return;
-    try {
-      setIsLoading(true);
-      const response = await apiRequest("GET", "/api/transactions");
-      const data = await response.json();
-      setTransactions(data || []);
-    } catch (error) {
-      console.error("Failed to fetch transactions:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fetch categories directly  
-  const fetchCategories = async () => {
-    if (!isReady) return;
-    try {
-      const response = await apiRequest("GET", "/api/categories");
-      const data = await response.json();
-      setCategories(data || []);
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
-    }
-  };
-
-  // Initial data loading
-  useEffect(() => {
-    if (isReady) {
-      fetchTransactions();
-      fetchCategories();
-    }
-  }, [isReady]);
-
-  const createIncome = async (incomeData: typeof newIncome) => {
-    try {
-      const res = await apiRequest("POST", "/api/transactions", {
-        ...incomeData,
-        amount: parseFloat(incomeData.amount),
-        type: "income",
-      });
-      const newTransaction = await res.json();
-      
-      // Update local state immediately
-      setTransactions(prev => [newTransaction, ...prev]);
-      
-      setIsDialogOpen(false);
-      setNewIncome({
-        amount: "",
-        description: "",
-        date: new Date().toISOString().split('T')[0],
-        categoryId: "",
-        isRecurring: false,
-        recurringFrequency: "monthly",
-        recurringEndDate: "",
-        paymentUrl: "",
-        referenceNote: "",
-      });
-      toast({
-        title: "Income Added",
-        description: "Income transaction has been created successfully",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const updateIncome = async ({ id, ...data }: { id: number } & typeof newIncome) => {
-    try {
-      // Always send complete transaction data
-      const updateData = {
-        amount: parseFloat(data.amount),
-        description: data.description,
-        date: data.date,
-        type: "income" as const,
-        categoryId: data.categoryId ? parseInt(data.categoryId) : null,
-        isRecurring: data.isRecurring,
-        recurringFrequency: data.recurringFrequency,
-        recurringEndDate: data.recurringEndDate || null,
-        paymentUrl: "",
-        referenceNote: ""
-      };
-      
-      const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
-      const updatedTransaction = await res.json();
-      
-      // Update local state immediately
-      setTransactions(prev => prev.map(t => t.id === id ? updatedTransaction : t));
-      setEditingTransaction(null);
-      setIsDialogOpen(false);
-      toast({
-        title: "Income Updated",
-        description: "Income transaction has been updated successfully",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const deleteIncome = async (id: number) => {
-    try {
-      const res = await apiRequest("DELETE", `/api/transactions/${id}`);
-      await res.json();
-      
-      // Update local state immediately
-      setTransactions(prev => prev.filter(t => t.id !== id));
-      
-      toast({
-        title: "Income Deleted",
-        description: "Income transaction has been removed successfully",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Filter only income transactions
-  const incomeTransactions = transactions.filter((transaction: Transaction) => transaction.type === "income");
+  // Filter transactions for income only
+  const incomeTransactions = allTransactions.filter((transaction: Transaction) => transaction.type === "income");
   
   // Apply additional filters
   const filteredIncomes = incomeTransactions.filter((transaction: Transaction) => {
@@ -240,58 +226,25 @@ export default function Income() {
       const transactionDate = new Date(transaction.date);
       const today = new Date();
       const currentYear = today.getFullYear();
+      const currentMonth = today.getMonth();
       
       switch (dateRange) {
-        case "today":
-          matchesDate = transactionDate.toDateString() === today.toDateString();
+        case "this-month":
+          matchesDate = transactionDate.getFullYear() === currentYear && 
+                       transactionDate.getMonth() === currentMonth;
           break;
-        case "week":
-          const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-          matchesDate = transactionDate >= weekAgo;
+        case "last-month":
+          const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+          const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+          matchesDate = transactionDate.getFullYear() === lastMonthYear && 
+                       transactionDate.getMonth() === lastMonth;
           break;
-        case "month":
-          const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-          matchesDate = transactionDate >= monthAgo;
+        case "this-year":
+          matchesDate = transactionDate.getFullYear() === currentYear;
           break;
-        case "current-month":
-          const currentMonth = today.getMonth();
-          matchesDate = transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear;
-          break;
-        case "jan":
-          matchesDate = transactionDate.getMonth() === 0 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "feb":
-          matchesDate = transactionDate.getMonth() === 1 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "mar":
-          matchesDate = transactionDate.getMonth() === 2 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "apr":
-          matchesDate = transactionDate.getMonth() === 3 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "may":
-          matchesDate = transactionDate.getMonth() === 4 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "jun":
-          matchesDate = transactionDate.getMonth() === 5 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "jul":
-          matchesDate = transactionDate.getMonth() === 6 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "aug":
-          matchesDate = transactionDate.getMonth() === 7 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "sep":
-          matchesDate = transactionDate.getMonth() === 8 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "oct":
-          matchesDate = transactionDate.getMonth() === 9 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "nov":
-          matchesDate = transactionDate.getMonth() === 10 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "dec":
-          matchesDate = transactionDate.getMonth() === 11 && transactionDate.getFullYear() === currentYear;
+        case "last-30-days":
+          const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+          matchesDate = transactionDate >= thirtyDaysAgo;
           break;
       }
     }
@@ -303,594 +256,645 @@ export default function Income() {
   const availableCategories = Array.from(new Set(incomeTransactions.map((t: Transaction) => t.categoryName).filter(Boolean)));
 
   const totalIncome = filteredIncomes.reduce((sum: number, t: Transaction) => sum + parseFloat(t.amount), 0);
-  const averageIncome = filteredIncomes.length > 0 ? totalIncome / filteredIncomes.length : 0;
 
-  // Chart data preparation
+  // Calculate monthly income data for chart
   const monthlyIncomeData = incomeTransactions.reduce((acc: any, transaction: Transaction) => {
-    const month = format(new Date(transaction.date), "MMM yyyy");
-    acc[month] = (acc[month] || 0) + parseFloat(transaction.amount);
-    return acc;
-  }, {});
-
-  const chartData = Object.entries(monthlyIncomeData).map(([month, amount]) => ({
-    month,
-    amount: amount as number,
-  }));
-
-  const categoryData = incomeTransactions.reduce((acc: any, transaction: Transaction) => {
-    const category = transaction.categoryName || "Other";
-    acc[category] = (acc[category] || 0) + parseFloat(transaction.amount);
-    return acc;
-  }, {});
-
-  const pieData = Object.entries(categoryData).map(([name, value], index) => ({
-    name,
-    value: value as number,
-    fill: `hsl(${index * 137.5 % 360}, 70%, 50%)`,
-  }));
-
-  const handleSubmit = async () => {
-    if (!newIncome.amount || !newIncome.description) return;
-
-    if (editingTransaction) {
-      updateIncome({ id: editingTransaction.id, ...newIncome });
-    } else {
-      await createIncome(newIncome);
+    const date = new Date(transaction.date);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    
+    if (!acc[monthKey]) {
+      acc[monthKey] = 0;
     }
-  };
+    acc[monthKey] += parseFloat(transaction.amount);
+    
+    return acc;
+  }, {});
+
+  const chartData = Object.entries(monthlyIncomeData)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .slice(-6)
+    .map(([month, amount]) => ({
+      month: format(new Date(month + '-01'), 'MMM yyyy'),
+      amount: amount
+    }));
+
+  // Calculate category distribution
+  const categoryData = incomeTransactions.reduce((acc: any, transaction: Transaction) => {
+    const category = transaction.categoryName || 'Uncategorized';
+    if (!acc[category]) {
+      acc[category] = 0;
+    }
+    acc[category] += parseFloat(transaction.amount);
+    return acc;
+  }, {});
+
+  const pieData = Object.entries(categoryData).map(([name, value]) => ({
+    name,
+    value
+  }));
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   const handleEdit = (transaction: Transaction) => {
-    setEditingTransaction(transaction);
+    const category = categories.find((cat: Category) => cat.name === transaction.categoryName);
     
-    // Find the category ID - check both categoryId field and categoryName
-    let categoryId = "";
-    if (transaction.categoryId) {
-      categoryId = transaction.categoryId.toString();
-    } else if (transaction.categoryName) {
-      const category = categories.find((cat: Category) => cat.name === transaction.categoryName);
-      categoryId = category ? category.id.toString() : "";
-    }
-    
-    // Convert date to proper format for date input (YYYY-MM-DD)
-    const formattedDate = new Date(transaction.date).toISOString().split('T')[0];
-    
-    // Format recurring end date if it exists
-    const formattedRecurringEndDate = transaction.recurringEndDate 
-      ? new Date(transaction.recurringEndDate).toISOString().split('T')[0]
-      : "";
-    
-    setNewIncome({
-      amount: transaction.amount,
-      description: transaction.description,
-      date: formattedDate,
-      categoryId: categoryId,
-      isRecurring: Boolean(transaction.isRecurring),
-      recurringFrequency: (transaction.recurringFrequency as "weekly" | "monthly" | "yearly") || "monthly",
-      recurringEndDate: formattedRecurringEndDate,
-      paymentUrl: transaction.paymentUrl || "",
-      referenceNote: transaction.referenceNote || "",
+    setEditingTransaction({
+      ...transaction,
+      categoryId: category?.id || transaction.categoryId
     });
-    setIsDialogOpen(true);
   };
 
-  if (!user) {
-    return null;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newIncome.amount || !newIncome.description) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    createIncomeMutation.mutate(newIncome);
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTransaction) return;
+    
+    const updateData = {
+      id: editingTransaction.id,
+      amount: parseFloat(editingTransaction.amount),
+      description: editingTransaction.description,
+      date: editingTransaction.date,
+      type: "income" as const,
+      categoryId: editingTransaction.categoryId ? parseInt(editingTransaction.categoryId.toString()) : null,
+      isRecurring: editingTransaction.isRecurring,
+      recurringFrequency: editingTransaction.recurringFrequency,
+      recurringEndDate: editingTransaction.recurringEndDate || null,
+      paymentUrl: editingTransaction.paymentUrl || "",
+      referenceNote: editingTransaction.referenceNote || "",
+    };
+
+    editIncomeMutation.mutate(updateData);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (confirm("Are you sure you want to delete this income?")) {
+      deleteIncomeMutation.mutate(id);
+    }
+  };
+
+  const handleUploadComplete = (data: any) => {
+    setNewIncome({
+      amount: data.amount || "",
+      description: data.description || "",
+      date: data.date || new Date().toISOString().split('T')[0],
+      type: "income" as "income" | "expense",
+      categoryId: data.categoryId || "",
+      isRecurring: false,
+      recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
+      recurringEndDate: "",
+      paymentUrl: "",
+      referenceNote: "",
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">Loading income data...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Income Management
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
-                Track and manage all your income sources
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <UploadReceiptModal 
-                onReceiptProcessed={(data) => {
-                  // Refresh income transactions after receipt processing
-                  fetchTransactions();
-                }}
-                buttonText="Upload Image"
-              />
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button 
-                    className="bg-green-600 hover:bg-green-700"
-                    onClick={() => {
-                      setEditingTransaction(null);
-                      setNewIncome({
-                        amount: "",
-                        description: "",
-                        date: new Date().toISOString().split('T')[0],
-                        categoryId: "",
-                        isRecurring: false,
-                        recurringFrequency: "monthly",
-                        recurringEndDate: "",
-                      });
-                    }}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Income
-                  </Button>
-                </DialogTrigger>
-              <DialogContent>
+    <div className="container mx-auto p-4 md:p-6 space-y-6">
+      {/* Header Section */}
+      <div className="flex flex-col space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold">Income</h1>
+            <p className="text-muted-foreground">Track and manage your income streams</p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-2">
+            <UploadReceiptModal onUploadComplete={handleUploadComplete} />
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full sm:w-auto">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Income
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>
-                    {editingTransaction ? "Edit Income" : "Add New Income"}
-                  </DialogTitle>
+                  <DialogTitle>Add New Income</DialogTitle>
                   <DialogDescription>
-                    {editingTransaction ? "Update the income details" : "Record a new income transaction"}
+                    Record a new income transaction
                   </DialogDescription>
                 </DialogHeader>
-                
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="amount">Amount</Label>
-                      <Input
-                        id="amount"
-                        type="number"
-                        step="0.01"
-                        value={newIncome.amount}
-                        onChange={(e) => setNewIncome({ ...newIncome, amount: e.target.value })}
-                        placeholder="0.00"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="date">Date</Label>
-                      <Input
-                        id="date"
-                        type="date"
-                        value={newIncome.date}
-                        onChange={(e) => setNewIncome({ ...newIncome, date: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="description">Description</Label>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid w-full items-center gap-1.5">
+                    <Label htmlFor="amount">Amount *</Label>
                     <Input
-                      id="description"
-                      value={newIncome.description}
-                      onChange={(e) => setNewIncome({ ...newIncome, description: e.target.value })}
-                      placeholder="Income description"
+                      id="amount"
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={newIncome.amount}
+                      onChange={(e) => setNewIncome({...newIncome, amount: e.target.value})}
+                      required
                     />
                   </div>
-
-                  <div>
+                  <div className="grid w-full items-center gap-1.5">
+                    <Label htmlFor="description">Description *</Label>
+                    <Input
+                      id="description"
+                      placeholder="Enter description"
+                      value={newIncome.description}
+                      onChange={(e) => setNewIncome({...newIncome, description: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div className="grid w-full items-center gap-1.5">
+                    <Label htmlFor="date">Date</Label>
+                    <Input
+                      id="date"
+                      type="date"
+                      value={newIncome.date}
+                      onChange={(e) => setNewIncome({...newIncome, date: e.target.value})}
+                    />
+                  </div>
+                  <div className="grid w-full items-center gap-1.5">
                     <Label htmlFor="category">Category</Label>
                     <Select 
-                      value={newIncome.categoryId || ""} 
-                      onValueChange={(value) => setNewIncome({ ...newIncome, categoryId: value })}
+                      value={newIncome.categoryId} 
+                      onValueChange={(value) => setNewIncome({...newIncome, categoryId: value})}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select an income category">
-                          {newIncome.categoryId && incomeCategories.find(cat => cat.id.toString() === newIncome.categoryId)?.name}
-                        </SelectValue>
+                        <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
                         {incomeCategories.map((category: Category) => (
                           <SelectItem key={category.id} value={category.id.toString()}>
+                            <span className="mr-2">{category.icon}</span>
                             {category.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
-
-                  {/* Recurring transaction options - Standard/Premium only */}
-                  <RequirePlan plan="standard" compact={true}>
-                    <div className="space-y-4 border-t pt-4">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="recurring"
-                          checked={newIncome.isRecurring}
-                          onCheckedChange={(checked) => 
-                            setNewIncome({ ...newIncome, isRecurring: checked as boolean })
-                          }
-                        />
-                        <label htmlFor="recurring" className="flex items-center text-sm font-medium">
-                          <Repeat className="h-4 w-4 mr-2" />
-                          Make this a recurring income
-                        </label>
-                      </div>
-
-                      {newIncome.isRecurring && (
-                        <div className="grid grid-cols-2 gap-4 pl-6">
-                          <div>
-                            <Label htmlFor="frequency">Frequency</Label>
-                            <Select
-                              value={newIncome.recurringFrequency}
-                              onValueChange={(value) => setNewIncome({ 
-                                ...newIncome, 
-                                recurringFrequency: value as "weekly" | "monthly" | "yearly" 
-                              })}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select frequency" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="weekly">Weekly</SelectItem>
-                                <SelectItem value="monthly">Monthly</SelectItem>
-                                <SelectItem value="yearly">Yearly</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="endDate">End Date (Optional)</Label>
-                            <Input
-                              id="endDate"
-                              type="date"
-                              value={newIncome.recurringEndDate}
-                              onChange={(e) => setNewIncome({ 
-                                ...newIncome, 
-                                recurringEndDate: e.target.value 
-                              })}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </RequirePlan>
-
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                      Cancel
-                    </Button>
-                    <Button 
-                      onClick={handleSubmit}
-                      disabled={!newIncome.amount || !newIncome.description}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      {editingTransaction ? "Update" : "Add Income"}
-                    </Button>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="recurring"
+                      checked={newIncome.isRecurring}
+                      onCheckedChange={(checked) => setNewIncome({...newIncome, isRecurring: checked as boolean})}
+                    />
+                    <Label htmlFor="recurring">Recurring income</Label>
                   </div>
-                </div>
+                  {newIncome.isRecurring && (
+                    <>
+                      <div className="grid w-full items-center gap-1.5">
+                        <Label htmlFor="frequency">Frequency</Label>
+                        <Select 
+                          value={newIncome.recurringFrequency} 
+                          onValueChange={(value) => setNewIncome({...newIncome, recurringFrequency: value as any})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                            <SelectItem value="yearly">Yearly</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid w-full items-center gap-1.5">
+                        <Label htmlFor="endDate">End Date (optional)</Label>
+                        <Input
+                          id="endDate"
+                          type="date"
+                          value={newIncome.recurringEndDate}
+                          onChange={(e) => setNewIncome({...newIncome, recurringEndDate: e.target.value})}
+                        />
+                      </div>
+                    </>
+                  )}
+                  <div className="grid w-full items-center gap-1.5">
+                    <Label htmlFor="referenceNote">Reference Note</Label>
+                    <Input
+                      id="referenceNote"
+                      placeholder="Optional reference note"
+                      value={newIncome.referenceNote}
+                      onChange={(e) => setNewIncome({...newIncome, referenceNote: e.target.value})}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={createIncomeMutation.isPending}>
+                    {createIncomeMutation.isPending ? "Adding..." : "Add Income"}
+                  </Button>
+                </form>
               </DialogContent>
             </Dialog>
           </div>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
-                  <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Income</p>
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                    ${totalIncome.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                  <TrendingUp className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Average Income</p>
-                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                    ${averageIncome.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
-                  <BarChart3 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Income Count</p>
-                  <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                    {filteredIncomes.length}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-
-
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Income Trend</CardTitle>
-              <CardDescription>Monthly income over time</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => [`$${value}`, 'Income']} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="amount" 
-                      stroke="#10B981" 
-                      strokeWidth={2}
-                      dot={{ fill: '#10B981' }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Income by Category</CardTitle>
-              <CardDescription>Distribution of income sources</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => [`$${value}`, 'Amount']} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Month Navigation Filter */}
-        <MonthFilter 
-          selectedMonth={selectedMonth}
-          onMonthSelect={setSelectedMonth}
-          onDateRangeReset={() => setDateRange("all")}
-        />
-
-        {/* Search and Filter Toggle */}
-        <Card className="mb-6">
-          <CardContent className="p-4 sm:p-6">
-            {/* Always visible search bar and filter toggle */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-              <div className="flex-1 min-w-0">
-                <Label htmlFor="search" className="text-sm font-medium">Search</Label>
-                <div className="relative mt-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="search"
-                    className="pl-10"
-                    placeholder="Search income..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowFilters(!showFilters)}
-                className="shrink-0"
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                Filters
-                {(filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all") && (
-                  <Badge variant="secondary" className="ml-2 px-1 py-0 text-xs">
-                    Active
-                  </Badge>
-                )}
-              </Button>
+        {/* Filters */}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search income..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
+            <Button
+              variant="outline"
+              onClick={() => setShowFilters(!showFilters)}
+              className="sm:w-auto"
+            >
+              <Filter className="mr-2 h-4 w-4" />
+              Filters
+              {(filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all" || selectedMonth) && (
+                <Badge variant="secondary" className="ml-2 px-1 py-0 text-xs">
+                  {[
+                    filterCategory !== "all" ? "Category" : null,
+                    filterRecurring !== "all" ? "Recurring" : null,
+                    dateRange !== "all" ? "Date" : null,
+                    selectedMonth ? "Month" : null
+                  ].filter(Boolean).length}
+                </Badge>
+              )}
+            </Button>
+          </div>
 
-            {/* Collapsible filters */}
-            {showFilters && (
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
-                    <Label className="text-sm font-medium">Category</Label>
-                    <Select value={filterCategory} onValueChange={setFilterCategory}>
-                      <SelectTrigger className="mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
-                        {availableCategories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium">Recurring</Label>
-                    <Select value={filterRecurring} onValueChange={setFilterRecurring}>
-                      <SelectTrigger className="mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Income</SelectItem>
-                        <SelectItem value="recurring">Recurring Only</SelectItem>
-                        <SelectItem value="one-time">One-time Only</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium">Date Range</Label>
-                    <Select value={dateRange} onValueChange={setDateRange}>
-                      <SelectTrigger className="mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Time</SelectItem>
-                        <SelectItem value="today">Today</SelectItem>
-                        <SelectItem value="week">Last Week</SelectItem>
-                        <SelectItem value="month">Last Month</SelectItem>
-                        <SelectItem value="current-month">This Month</SelectItem>
-                        <SelectItem value="jan">January</SelectItem>
-                        <SelectItem value="feb">February</SelectItem>
-                        <SelectItem value="mar">March</SelectItem>
-                        <SelectItem value="apr">April</SelectItem>
-                        <SelectItem value="may">May</SelectItem>
-                        <SelectItem value="jun">June</SelectItem>
-                        <SelectItem value="jul">July</SelectItem>
-                        <SelectItem value="aug">August</SelectItem>
-                        <SelectItem value="sep">September</SelectItem>
-                        <SelectItem value="oct">October</SelectItem>
-                        <SelectItem value="nov">November</SelectItem>
-                        <SelectItem value="dec">December</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                {/* Clear filters button */}
-                {(filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all") && (
-                  <div className="mt-4 flex justify-end">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setFilterCategory("all");
-                        setFilterRecurring("all");
-                        setDateRange("all");
-                      }}
-                    >
-                      Clear all filters
-                    </Button>
-                  </div>
-                )}
+          {showFilters && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg">
+              <div>
+                <Label htmlFor="categoryFilter">Category</Label>
+                <Select value={filterCategory} onValueChange={setFilterCategory}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {availableCategories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            )}
+
+              <div>
+                <Label htmlFor="recurringFilter">Type</Label>
+                <Select value={filterRecurring} onValueChange={setFilterRecurring}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="recurring">Recurring</SelectItem>
+                    <SelectItem value="one-time">One-time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="dateFilter">Date Range</Label>
+                <Select value={dateRange} onValueChange={setDateRange}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="this-month">This Month</SelectItem>
+                    <SelectItem value="last-month">Last Month</SelectItem>
+                    <SelectItem value="this-year">This Year</SelectItem>
+                    <SelectItem value="last-30-days">Last 30 Days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Month Filter</Label>
+                <MonthFilter 
+                  selectedMonth={selectedMonth} 
+                  onMonthChange={setSelectedMonth}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Income</p>
+                <p className="text-2xl font-bold">${totalIncome.toFixed(2)}</p>
+              </div>
+              <DollarSign className="h-8 w-8 text-green-600" />
+            </div>
           </CardContent>
         </Card>
 
-        {/* Income List */}
         <Card>
-          <CardHeader>
-            <CardTitle>Income Transactions ({filteredIncomes.length})</CardTitle>
-            <CardDescription>
-              {searchTerm || filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all" 
-                ? "Filtered income transactions" 
-                : "All your income transactions"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">Loading income...</p>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Income Sources</p>
+                <p className="text-2xl font-bold">{availableCategories.length}</p>
               </div>
-            ) : filteredIncomes.length === 0 ? (
-              <div className="text-center py-8">
-                <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  No Income Found
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  {searchTerm || filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all"
-                    ? "Try adjusting your filters or search terms"
-                    : "Add your first income transaction to get started"}
-                </p>
-                <Button 
-                  onClick={() => setIsDialogOpen(true)}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Income
-                </Button>
+              <BarChart3 className="h-8 w-8 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Transactions</p>
+                <p className="text-2xl font-bold">{filteredIncomes.length}</p>
               </div>
-            ) : (
-              <div className="space-y-2">
-                {filteredIncomes.map((transaction: Transaction) => (
-                  <div
-                    key={transaction.id}
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors gap-3"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg shrink-0">
-                        <ArrowUpRight className="h-4 w-4 text-green-600 dark:text-green-400" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-gray-900 dark:text-white truncate">
-                          {transaction.description}
-                        </p>
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 flex-wrap">
-                          <span className="shrink-0">{format(new Date(transaction.date), "MMM dd, yyyy")}</span>
-                          {transaction.categoryName && (
-                            <Badge variant="outline" className="text-green-600 border-green-600 text-xs">
-                              {transaction.categoryName}
-                            </Badge>
-                          )}
-                          {transaction.isRecurring && (
-                            <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
-                              Recurring
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between sm:justify-end sm:gap-4 shrink-0">
-                      <p className="font-semibold text-green-600 dark:text-green-400 text-lg">
-                        +${parseFloat(transaction.amount).toFixed(2)}
-                      </p>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleEdit(transaction)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Edit3 className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => deleteIncome(transaction.id)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+              <TrendingUp className="h-8 w-8 text-green-600" />
+            </div>
           </CardContent>
         </Card>
       </div>
-    </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Income Trend</CardTitle>
+            <CardDescription>Monthly income over time</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="amount" stroke="#10b981" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Income by Category</CardTitle>
+            <CardDescription>Distribution of income sources</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Income List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Income Transactions</CardTitle>
+          <CardDescription>
+            {filteredIncomes.length} of {incomeTransactions.length} transactions
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {filteredIncomes.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No income transactions found</p>
+              </div>
+            ) : (
+              filteredIncomes.map((transaction: Transaction) => (
+                <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-shrink-0">
+                      <ArrowUpRight className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{transaction.description}</p>
+                      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                        <span>{format(new Date(transaction.date), 'MMM dd, yyyy')}</span>
+                        {transaction.categoryName && (
+                          <>
+                            <span>•</span>
+                            <span>{transaction.categoryName}</span>
+                          </>
+                        )}
+                        {transaction.isRecurring && (
+                          <>
+                            <span>•</span>
+                            <div className="flex items-center">
+                              <Repeat className="h-3 w-3 mr-1" />
+                              <span>{transaction.recurringFrequency}</span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <span className="font-semibold text-green-600">
+                      +${parseFloat(transaction.amount).toFixed(2)}
+                    </span>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(transaction)}
+                      >
+                        <Edit3 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(transaction.id)}
+                        disabled={deleteIncomeMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Edit Dialog */}
+      {editingTransaction && (
+        <Dialog open={!!editingTransaction} onOpenChange={() => setEditingTransaction(null)}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit Income</DialogTitle>
+              <DialogDescription>
+                Update the income transaction details
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div className="grid w-full items-center gap-1.5">
+                <Label htmlFor="editAmount">Amount *</Label>
+                <Input
+                  id="editAmount"
+                  type="number"
+                  step="0.01"
+                  value={editingTransaction.amount}
+                  onChange={(e) => setEditingTransaction({
+                    ...editingTransaction,
+                    amount: e.target.value
+                  })}
+                  required
+                />
+              </div>
+              <div className="grid w-full items-center gap-1.5">
+                <Label htmlFor="editDescription">Description *</Label>
+                <Input
+                  id="editDescription"
+                  value={editingTransaction.description}
+                  onChange={(e) => setEditingTransaction({
+                    ...editingTransaction,
+                    description: e.target.value
+                  })}
+                  required
+                />
+              </div>
+              <div className="grid w-full items-center gap-1.5">
+                <Label htmlFor="editDate">Date</Label>
+                <Input
+                  id="editDate"
+                  type="date"
+                  value={editingTransaction.date}
+                  onChange={(e) => setEditingTransaction({
+                    ...editingTransaction,
+                    date: e.target.value
+                  })}
+                />
+              </div>
+              <div className="grid w-full items-center gap-1.5">
+                <Label htmlFor="editCategory">Category</Label>
+                <Select 
+                  value={editingTransaction.categoryId?.toString() || ""} 
+                  onValueChange={(value) => setEditingTransaction({
+                    ...editingTransaction,
+                    categoryId: parseInt(value)
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {incomeCategories.map((category: Category) => (
+                      <SelectItem key={category.id} value={category.id.toString()}>
+                        <span className="mr-2">{category.icon}</span>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="editRecurring"
+                  checked={editingTransaction.isRecurring}
+                  onCheckedChange={(checked) => setEditingTransaction({
+                    ...editingTransaction,
+                    isRecurring: checked as boolean
+                  })}
+                />
+                <Label htmlFor="editRecurring">Recurring income</Label>
+              </div>
+              {editingTransaction.isRecurring && (
+                <>
+                  <div className="grid w-full items-center gap-1.5">
+                    <Label htmlFor="editFrequency">Frequency</Label>
+                    <Select 
+                      value={editingTransaction.recurringFrequency} 
+                      onValueChange={(value) => setEditingTransaction({
+                        ...editingTransaction,
+                        recurringFrequency: value as any
+                      })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="yearly">Yearly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid w-full items-center gap-1.5">
+                    <Label htmlFor="editEndDate">End Date (optional)</Label>
+                    <Input
+                      id="editEndDate"
+                      type="date"
+                      value={editingTransaction.recurringEndDate || ""}
+                      onChange={(e) => setEditingTransaction({
+                        ...editingTransaction,
+                        recurringEndDate: e.target.value
+                      })}
+                    />
+                  </div>
+                </>
+              )}
+              <div className="grid w-full items-center gap-1.5">
+                <Label htmlFor="editReferenceNote">Reference Note</Label>
+                <Input
+                  id="editReferenceNote"
+                  value={editingTransaction.referenceNote || ""}
+                  onChange={(e) => setEditingTransaction({
+                    ...editingTransaction,
+                    referenceNote: e.target.value
+                  })}
+                />
+              </div>
+              <div className="flex space-x-2">
+                <Button type="submit" className="flex-1" disabled={editIncomeMutation.isPending}>
+                  {editIncomeMutation.isPending ? "Updating..." : "Update Income"}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setEditingTransaction(null)}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
