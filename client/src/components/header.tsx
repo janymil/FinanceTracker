@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useClerk, useUser } from "@clerk/clerk-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -71,8 +72,6 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { toast } = useToast();
   const { signOut } = useClerk();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-
   const [newTransaction, setNewTransaction] = useState({
     amount: "",
     description: "",
@@ -86,33 +85,16 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
     referenceNote: "",
   });
 
-  const fetchCategories = async () => {
-    if (!user?.id) return;
-    
-    try {
-      // Add small delay to ensure token is available
-      await new Promise(resolve => setTimeout(resolve, 100));
+  // Use React Query for categories to sync with categories page
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
       const response = await apiRequest("GET", "/api/categories");
-      const data = await response.json();
-      setCategories(data);
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
-      // Retry once after a longer delay
-      try {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const retryResponse = await apiRequest("GET", "/api/categories");
-        const retryData = await retryResponse.json();
-        setCategories(retryData);
-      } catch (retryError) {
-        console.error("Failed to fetch categories on retry:", retryError);
-        setCategories([]);
-      }
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, [user?.id]);
+      return response.json();
+    },
+    enabled: !!clerkUser?.id,
+    staleTime: 0,
+  });
 
   const queryClient = useQueryClient();
 
