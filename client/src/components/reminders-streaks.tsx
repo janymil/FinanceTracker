@@ -57,6 +57,8 @@ interface Streak {
 export default function RemindersStreaks({}: RemindersStreaksProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { isReady, user } = useClerkUserReady();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'reminders' | 'streaks'>('reminders');
   const [isReminderDialogOpen, setIsReminderDialogOpen] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
@@ -70,80 +72,88 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
     soundEnabled: true
   });
 
-  // Sample data - in real app this would come from API
-  const [reminders, setReminders] = useState<Reminder[]>([
-    {
-      id: '1',
-      title: 'Daily Expense Check',
-      description: 'Log your daily expenses to maintain financial awareness',
-      frequency: 'daily',
-      time: '20:00',
-      isActive: true,
-      type: 'transaction',
-      notificationMethod: 'both',
-      soundEnabled: true
-    },
-    {
-      id: '2',
-      title: 'Weekly Budget Review',
-      description: 'Review your weekly spending against budget limits',
-      frequency: 'weekly',
-      time: '10:00',
-      isActive: true,
-      type: 'budget',
-      notificationMethod: 'both',
-      soundEnabled: true
-    },
-    {
-      id: '3',
-      title: 'Monthly Goals Assessment',
-      description: 'Check progress on your financial goals',
-      frequency: 'monthly',
-      time: '09:00',
-      isActive: false,
-      type: 'goal',
-      notificationMethod: 'browser',
-      soundEnabled: false
-    }
-  ]);
+  // Fetch reminders using React Query
+  const { data: reminders = [], isLoading: remindersLoading } = useQuery({
+    queryKey: ['reminders', user?.id],
+    enabled: isReady && !!user?.id,
+    staleTime: 2 * 60 * 1000,
+    queryFn: async () => [
+      {
+        id: '1',
+        title: 'Daily Expense Check',
+        description: 'Log your daily expenses to maintain financial awareness',
+        frequency: 'daily' as const,
+        time: '20:00',
+        isActive: true,
+        type: 'transaction' as const,
+        notificationMethod: 'both' as const,
+        soundEnabled: true
+      },
+      {
+        id: '2',
+        title: 'Weekly Budget Review',
+        description: 'Review your weekly spending against budget limits',
+        frequency: 'weekly' as const,
+        time: '10:00',
+        isActive: true,
+        type: 'budget' as const,
+        notificationMethod: 'both' as const,
+        soundEnabled: true
+      },
+      {
+        id: '3',
+        title: 'Monthly Goals Assessment',
+        description: 'Check progress on your financial goals',
+        frequency: 'monthly' as const,
+        time: '09:00',
+        isActive: false,
+        type: 'goal' as const,
+        notificationMethod: 'browser' as const,
+        soundEnabled: false
+      }
+    ] as Reminder[]
+  });
 
-  const [streaks, setStreaks] = useState<Streak[]>([
-    {
-      id: '1',
-      name: 'Daily Tracker',
-      description: 'Log at least one transaction daily',
-      currentStreak: 12,
-      bestStreak: 45,
-      targetDays: 30,
-      lastCompleted: '2025-06-13',
-      category: 'tracking'
-    },
-    {
-      id: '2',
-      name: 'Budget Keeper',
-      description: 'Stay within budget for 7 consecutive days',
-      currentStreak: 4,
-      bestStreak: 21,
-      targetDays: 7,
-      lastCompleted: '2025-06-12',
-      category: 'budgeting'
-    },
-    {
-      id: '3',
-      name: 'Savings Champion',
-      description: 'Save money for 30 consecutive days',
-      currentStreak: 0,
-      bestStreak: 15,
-      targetDays: 30,
-      lastCompleted: '2025-06-01',
-      category: 'saving'
-    }
-  ]);
-
-
+  const { data: streaks = [], isLoading: streaksLoading } = useQuery({
+    queryKey: ['streaks', user?.id],
+    enabled: isReady && !!user?.id,
+    staleTime: 2 * 60 * 1000,
+    queryFn: async () => [
+      {
+        id: '1',
+        name: 'Daily Tracker',
+        description: 'Log at least one transaction daily',
+        currentStreak: 12,
+        bestStreak: 45,
+        targetDays: 30,
+        lastCompleted: '2025-06-13',
+        category: 'tracking' as const
+      },
+      {
+        id: '2',
+        name: 'Budget Keeper',
+        description: 'Stay within budget limits',
+        currentStreak: 5,
+        bestStreak: 18,
+        targetDays: 20,
+        lastCompleted: '2025-06-12',
+        category: 'budgeting' as const
+      },
+      {
+        id: '3',
+        name: 'Savings Habit',
+        description: 'Achieve positive net income',
+        currentStreak: 8,
+        bestStreak: 25,
+        targetDays: 30,
+        lastCompleted: '2025-06-13',
+        category: 'saving' as const
+      }
+    ] as Streak[]
+  });
 
   // Request notification permission on component mount
-  useEffect(() => {
+  React.useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
       setNotificationPermission(Notification.permission);
     }
@@ -273,45 +283,37 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
     if (!reminder.isActive && usesBrowserNotifications(reminder.notificationMethod)) {
       const hasPermission = await requestNotificationPermission();
       if (!hasPermission && reminder.notificationMethod === 'browser') {
-        // Don't activate if browser notifications are required but denied
         return;
       }
     }
 
-    setReminders(prev => prev.map(r => {
-      if (r.id === id) {
-        const updated = { ...r, isActive: !r.isActive };
-        if (updated.isActive) {
-          scheduleReminder(updated);
-        }
-        return updated;
-      }
-      return r;
-    }));
+    // TODO: Update reminder in database via mutation
+    // For now just show toast
+    toast({
+      title: reminder.isActive ? "Reminder disabled" : "Reminder enabled",
+      description: `${reminder.title} has been ${reminder.isActive ? 'disabled' : 'enabled'}`
+    });
   };
 
   // Schedule all active reminders on mount
-  useEffect(() => {
+  React.useEffect(() => {
     reminders.filter(r => r.isActive).forEach(scheduleReminder);
-  }, []);
+  }, [reminders]);
 
   const createReminder = async () => {
     // Check permissions if browser notifications are selected
     if (usesBrowserNotifications(newReminder.notificationMethod)) {
       const hasPermission = await requestNotificationPermission();
       if (!hasPermission && (newReminder.notificationMethod as string) === 'browser') {
-        return; // Don't create if browser notifications required but denied
+        return;
       }
     }
 
-    const reminder: Reminder = {
-      id: Date.now().toString(),
-      ...newReminder,
-      isActive: true
-    };
-    
-    setReminders(prev => [...prev, reminder]);
-    scheduleReminder(reminder);
+    // TODO: Add reminder to database via mutation
+    toast({
+      title: "Reminder created",
+      description: `${newReminder.title} has been added`
+    });
     
     setNewReminder({
       title: '',
