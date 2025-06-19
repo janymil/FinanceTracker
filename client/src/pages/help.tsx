@@ -162,9 +162,89 @@ export default function Help() {
       answer: "FinanzerPro is a responsive web application that works perfectly on mobile browsers. Simply bookmark the site on your phone for easy access anywhere."
     },
     {
+      id: "dashboard-widgets",
+      question: "What widgets are available on the dashboard?",
+      answer: "Dashboard includes Financial Summary Cards (income/expenses/balance), Recent Transactions widget, Budget Overview (Standard+), Financial Health Score, AI Financial Tips (Premium), Financial Mascot (Premium), and Transaction Reminders (Standard+). All widgets update automatically."
+    },
+    {
+      id: "transaction-editing",
+      question: "How do I edit or delete transactions?",
+      answer: "Click on any transaction in lists or dashboard widgets to edit. Modify amount, description, date, category, or notes. Use the delete button to remove transactions. Changes update immediately without page reloads."
+    },
+    {
+      id: "recurring-transactions",
+      question: "How do recurring transactions work?",
+      answer: "Standard+ users can mark transactions as recurring (weekly, monthly, yearly). The system shows upcoming reminders in the dashboard widget and detects patterns automatically. Set end dates or leave open-ended for ongoing bills."
+    },
+    {
+      id: "categories-custom",
+      question: "Can I create custom categories?",
+      answer: "Yes, create unlimited custom categories with personalized names, colors, and icons. Choose from income, expense, or goal types. Custom categories appear alongside 20+ predefined categories in all dropdown menus."
+    },
+    {
+      id: "financial-health-score",
+      question: "How is the Financial Health Score calculated?",
+      answer: "Free users see a simple calculation based on income/expense ratio. Standard+ users get AI-powered analysis evaluating spending habits, budget adherence, savings rate, and goal progress with detailed improvement recommendations."
+    },
+    {
+      id: "budget-tracking",
+      question: "How does budget tracking work?",
+      answer: "Standard+ users create budgets for categories with weekly/monthly/yearly limits. Progress bars show spending with color-coded status: green (under budget), yellow (approaching limit), red (over budget). Receive overspending alerts automatically."
+    },
+    {
+      id: "goals-collaboration",
+      question: "Can I share goals with family members?",
+      answer: "Yes, Standard+ users can create collaborative goals and invite family members or partners. Track shared contributions, view progress together, and celebrate achievements as a team for joint savings efforts."
+    },
+    {
+      id: "calendar-view",
+      question: "What is the calendar view feature?",
+      answer: "Standard+ users can view transactions in a monthly calendar grid showing daily spending totals and transaction previews. Navigate between months to see spending patterns over time with mobile-responsive design."
+    },
+    {
+      id: "trends-predictions",
+      question: "What are AI trend predictions?",
+      answer: "Premium users get AI-powered financial forecasting showing spending predictions, income projections, budget recommendations, and goal timeline estimates. Uses machine learning to analyze patterns and predict future financial trends."
+    },
+    {
+      id: "financial-mascot",
+      question: "What is the Financial Mascot feature?",
+      answer: "Premium users get a personalized AI companion that reflects financial health through mood changes and visual indicators. The mascot is draggable around the screen, has unique traits based on your profile, and can be hidden/restored."
+    },
+    {
+      id: "cloud-backup-restore",
+      question: "How does cloud backup work?",
+      answer: "Premium users get automatic daily backups at 2:00 AM storing all transactions, budgets, goals, categories, and receipt images securely. Manual backup options available with complete restore functionality to recover all data."
+    },
+    {
+      id: "data-import",
+      question: "Can I import data from other financial apps?",
+      answer: "Premium users can import from Mint, QuickBooks, YNAB, Personal Capital, and bank exports. Features include column mapping, data validation, preview before import, and batch processing with error handling."
+    },
+    {
+      id: "mobile-camera",
+      question: "Can I use my phone's camera for receipts?",
+      answer: "Yes, mobile browsers support direct camera access. Choose 'Take Photo' to use your camera or 'Choose from Gallery' to select existing photos. QR code scanning allows cross-device upload from phone to computer."
+    },
+    {
+      id: "reports-filtering",
+      question: "How do I filter and view reports?",
+      answer: "Use month dropdowns and period filters (week/month/quarter/year) on the Reports page. View financial overviews, category breakdowns, and analytics. Premium users get advanced trend analysis and comparative reports."
+    },
+    {
+      id: "subscription-changes",
+      question: "How do plan upgrades and downgrades work?",
+      answer: "Upgrades apply immediately with prorated billing. Downgrades are scheduled for the end of your current billing period. Access subscription management through Profile page with full billing transparency and Stripe customer portal integration."
+    },
+    {
+      id: "mobile-responsive",
+      question: "Is the app fully mobile-friendly?",
+      answer: "Yes, complete responsive design with touch-friendly interfaces, mobile navigation, collapsible filters, optimized forms, and camera integration. All desktop functionality is accessible on mobile browsers without requiring app downloads."
+    },
+    {
       id: "customer-support",
       question: "How can I get help or support?",
-      answer: "You can use this AI chat assistant for immediate help, check our comprehensive documentation below, or contact our support team through the contact page for personalized assistance."
+      answer: "Use this AI chat assistant for immediate help, check our comprehensive documentation below, or contact our support team through the contact page for personalized assistance."
     }
   ];
 
@@ -545,39 +625,360 @@ export default function Help() {
                   <Separator />
 
                   <div>
-                    <h3 className="font-semibold mb-4">Key Features Walkthrough</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-medium flex items-center gap-2">
-                          <DollarSign className="h-4 w-4" />
-                          Adding Transactions
+                    <h3 className="font-semibold mb-4">Comprehensive Feature Documentation</h3>
+                    <div className="space-y-8">
+                      
+                      {/* Dashboard Functions */}
+                      <div className="border-l-4 border-blue-500 pl-4">
+                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
+                          <BarChart3 className="h-5 w-5" />
+                          Dashboard Functions
                         </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 ml-6">
-                          Click the "+" button on the dashboard or navigate to Transactions → Add New. 
-                          Fill in the amount, description, date, and category. AI will suggest categories for Standard+ users.
-                        </p>
+                        <div className="space-y-4">
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Financial Summary Cards</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Top of dashboard<br/>
+                              <strong>Function:</strong> Display total income, expenses, and balance for selected month<br/>
+                              <strong>Features:</strong> Auto-updates with new transactions, clickable for detailed breakdown, color-coded positive/negative values
+                            </p>
+                          </div>
+                          
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Quick Transaction Entry</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Header "+" button or dashboard "Add Transaction" button<br/>
+                              <strong>Function:</strong> Add new income or expense transactions<br/>
+                              <strong>Features:</strong> Form validation, category selection, date picker, recurring transaction option (Standard+), receipt upload (Standard+)
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Recent Transactions Widget</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Left column of dashboard<br/>
+                              <strong>Function:</strong> Shows last 5 transactions with edit/delete options<br/>
+                              <strong>Features:</strong> One-click editing, category icons, amount formatting, receipt thumbnails, recurring transaction indicators
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Budget Overview Widget (Standard+)</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Right column of dashboard<br/>
+                              <strong>Function:</strong> Monitor budget progress across all categories<br/>
+                              <strong>Features:</strong> Progress bars, percentage completion, color-coded status (green/yellow/red), overspending alerts
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Financial Health Score</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Right column of dashboard<br/>
+                              <strong>Function:</strong> Calculate and display financial wellness score<br/>
+                              <strong>Free Users:</strong> Simple calculation based on income/expense ratio<br/>
+                              <strong>Standard+ Users:</strong> AI-powered analysis with detailed recommendations and improvement suggestions
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">AI Financial Tips (Premium)</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Left column of dashboard<br/>
+                              <strong>Function:</strong> Personalized financial advice based on spending patterns<br/>
+                              <strong>Features:</strong> AI-generated tips, trend analysis, actionable recommendations, persistent across sessions
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Financial Mascot (Premium)</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Floating on dashboard<br/>
+                              <strong>Function:</strong> Personalized AI companion reflecting financial health<br/>
+                              <strong>Features:</strong> Draggable positioning, mood changes based on spending, unique traits per user, hide/restore options
+                            </p>
+                          </div>
+                        </div>
                       </div>
 
-                      <div>
-                        <h4 className="font-medium flex items-center gap-2">
-                          <Target className="h-4 w-4" />
-                          Managing Budgets
+                      {/* Transaction Management */}
+                      <div className="border-l-4 border-green-500 pl-4">
+                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
+                          <DollarSign className="h-5 w-5" />
+                          Transaction Management
                         </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 ml-6">
-                          Go to Budgets section, click "Create Budget", select a category, set an amount and time period. 
-                          The app will track your spending against the budget automatically.
-                        </p>
+                        <div className="space-y-4">
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Transaction Entry Forms</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Expenses, Income, and Transactions pages<br/>
+                              <strong>Function:</strong> Add new financial transactions with complete details<br/>
+                              <strong>Fields:</strong> Amount, description, date, category, notes, recurring options<br/>
+                              <strong>Validation:</strong> Required fields, positive amounts, valid dates, category selection
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Transaction Lists and Filtering</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> All transaction pages<br/>
+                              <strong>Function:</strong> View, search, and filter transaction history<br/>
+                              <strong>Filters:</strong> Month selection, category filtering, transaction type, date ranges<br/>
+                              <strong>Features:</strong> Responsive design, mobile-friendly collapsible filters, real-time search
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Transaction Editing and Deletion</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Transaction list items and dashboard widgets<br/>
+                              <strong>Function:</strong> Modify or remove existing transactions<br/>
+                              <strong>Features:</strong> Inline editing, confirmation dialogs, immediate UI updates, undo options
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Recurring Transactions (Standard+)</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Transaction forms and reminders widget<br/>
+                              <strong>Function:</strong> Set up automatic transaction detection and reminders<br/>
+                              <strong>Features:</strong> Frequency selection (weekly, monthly, yearly), end date options, reminder notifications
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Receipt OCR Processing (Standard+)</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Upload Image buttons on transaction pages<br/>
+                              <strong>Function:</strong> Extract transaction data from receipt photos<br/>
+                              <strong>Features:</strong> Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload
+                            </p>
+                          </div>
+                        </div>
                       </div>
 
-                      <div>
-                        <h4 className="font-medium flex items-center gap-2">
-                          <BarChart3 className="h-4 w-4" />
-                          Viewing Reports
+                      {/* Category Management */}
+                      <div className="border-l-4 border-purple-500 pl-4">
+                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
+                          <Target className="h-5 w-5" />
+                          Category Management
                         </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 ml-6">
-                          Access Reports from the sidebar to see spending breakdowns, income vs. expenses, 
-                          and category analysis. Use the month filter to view different time periods.
-                        </p>
+                        <div className="space-y-4">
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Category Creation and Editing</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Categories page<br/>
+                              <strong>Function:</strong> Create custom expense and income categories<br/>
+                              <strong>Features:</strong> Custom names, color selection, icon choices, type assignment (income/expense/goal)
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Predefined Categories</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Available:</strong> 20+ built-in categories for common expenses and income<br/>
+                              <strong>Examples:</strong> Food & Dining, Transportation, Shopping, Bills & Utilities, Healthcare, Entertainment, Salary, Freelancing<br/>
+                              <strong>Features:</strong> Professional icons, optimized colors, cannot be deleted
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">AI Auto-Categorization (Standard+)</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Function:</strong> Automatically suggest categories based on transaction descriptions<br/>
+                              <strong>Features:</strong> Machine learning analysis, merchant recognition, user preference learning, manual override options
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Budget and Goals */}
+                      <div className="border-l-4 border-orange-500 pl-4">
+                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
+                          <Target className="h-5 w-5" />
+                          Budget and Goals (Standard+)
+                        </h4>
+                        <div className="space-y-4">
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Budget Creation and Management</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Budgets page<br/>
+                              <strong>Function:</strong> Set spending limits for categories with time periods<br/>
+                              <strong>Options:</strong> Weekly, monthly, quarterly, yearly timeframes<br/>
+                              <strong>Features:</strong> Progress tracking, overspending alerts, visual indicators, budget history
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Financial Goals</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Goals page<br/>
+                              <strong>Function:</strong> Set savings targets with deadlines<br/>
+                              <strong>Types:</strong> Emergency Fund, Vacation, House Down Payment, Car Purchase, Debt Payoff, Retirement<br/>
+                              <strong>Features:</strong> Progress tracking, milestone celebrations, contribution history, deadline reminders
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Collaborative Goals</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Function:</strong> Share goals with family members or partners<br/>
+                              <strong>Features:</strong> Friend invitations, shared contributions, progress visibility, achievement tracking
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Reports and Analytics */}
+                      <div className="border-l-4 border-red-500 pl-4">
+                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
+                          <BarChart3 className="h-5 w-5" />
+                          Reports and Analytics
+                        </h4>
+                        <div className="space-y-4">
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Financial Overview Reports</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Reports page - Overview tab<br/>
+                              <strong>Function:</strong> Comprehensive financial summary with charts and metrics<br/>
+                              <strong>Features:</strong> Income vs. expenses, category breakdowns, time period filtering, trend indicators
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Advanced Analytics (Premium)</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Reports page - Analytics tab<br/>
+                              <strong>Function:</strong> Detailed financial pattern analysis<br/>
+                              <strong>Features:</strong> Spending trends, seasonal patterns, category comparisons, growth metrics
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">AI Trend Predictions (Premium)</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Trends page - Forecasts tab<br/>
+                              <strong>Function:</strong> AI-powered financial forecasting<br/>
+                              <strong>Features:</strong> Spending predictions, income projections, budget recommendations, goal timeline estimates
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Calendar View (Standard+)</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Calendar page<br/>
+                              <strong>Function:</strong> Monthly grid view of all transactions<br/>
+                              <strong>Features:</strong> Daily spending totals, transaction previews, monthly navigation, mobile responsive grid
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Data Management */}
+                      <div className="border-l-4 border-indigo-500 pl-4">
+                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
+                          <Cloud className="h-5 w-5" />
+                          Data Management (Premium)
+                        </h4>
+                        <div className="space-y-4">
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Cloud Backup System</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Data Management page - Backup tab<br/>
+                              <strong>Function:</strong> Secure cloud storage of all financial data<br/>
+                              <strong>Features:</strong> Automatic daily backups at 2:00 AM, manual backup options, backup history, restore functionality
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Data Export</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Data Management page - Export tab<br/>
+                              <strong>Function:</strong> Download financial data in multiple formats<br/>
+                              <strong>Formats:</strong> PDF reports, Excel spreadsheets, CSV files, JSON data<br/>
+                              <strong>Features:</strong> Custom date ranges, selective data export, formatted reports
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Data Import</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Data Management page - Import tab<br/>
+                              <strong>Function:</strong> Import transactions from other financial apps<br/>
+                              <strong>Supported:</strong> Mint, QuickBooks, YNAB, Personal Capital, bank exports<br/>
+                              <strong>Features:</strong> Column mapping, data validation, preview before import, batch processing
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Profile and Settings */}
+                      <div className="border-l-4 border-teal-500 pl-4">
+                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
+                          <Users className="h-5 w-5" />
+                          Profile and Settings
+                        </h4>
+                        <div className="space-y-4">
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Account Management</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Profile page - Account tab<br/>
+                              <strong>Function:</strong> Manage personal information and security settings<br/>
+                              <strong>Features:</strong> Clerk authentication, email updates, password changes, profile photos
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Subscription Management</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Profile page - Subscription tab<br/>
+                              <strong>Function:</strong> View and modify subscription plans<br/>
+                              <strong>Features:</strong> Plan comparisons, upgrade/downgrade options, billing history, Stripe customer portal
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Notification Preferences</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Location:</strong> Profile page - Notifications tab<br/>
+                              <strong>Function:</strong> Control alert and reminder settings<br/>
+                              <strong>Features:</strong> Budget alerts, goal reminders, transaction notifications, email preferences
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Mobile Features */}
+                      <div className="border-l-4 border-pink-500 pl-4">
+                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
+                          <Camera className="h-5 w-5" />
+                          Mobile Features
+                        </h4>
+                        <div className="space-y-4">
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Responsive Design</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Function:</strong> Full mobile optimization for all features<br/>
+                              <strong>Features:</strong> Touch-friendly interfaces, mobile navigation, responsive layouts, optimized forms
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Mobile Camera Integration</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Function:</strong> Direct camera access for receipt scanning<br/>
+                              <strong>Features:</strong> Camera capture, gallery selection, image preview, auto-focus optimization
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">QR Code Cross-Device Upload</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Function:</strong> Scan receipts on mobile, process on desktop<br/>
+                              <strong>Features:</strong> QR code generation, anonymous mobile access, real-time polling, automatic form population
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
