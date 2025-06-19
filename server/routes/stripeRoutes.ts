@@ -154,7 +154,6 @@ export function registerStripeRoutes(app: Express) {
           }],
           success_url: successUrl,
           cancel_url: cancelUrl,
-          customer_email: userEmail || user.email || undefined,
           metadata: {
             plan: plan,
             userId: userId,
@@ -162,9 +161,11 @@ export function registerStripeRoutes(app: Express) {
           }
         };
         
-        // For existing customers, add customer ID to avoid duplicate customers
+        // For existing customers, use customer ID; for new customers, use email
         if (user.stripeCustomerId) {
           sessionConfig.customer = user.stripeCustomerId;
+        } else {
+          sessionConfig.customer_email = userEmail || user.email || undefined;
         }
       }
 
