@@ -358,6 +358,83 @@ export function registerStripeRoutes(app: Express) {
     }
   });
 
+  // Switch subscription plan with upgrade/downgrade logic
+  app.post("/api/switch-plan", isAuthenticated, async (req: any, res: Response) => {
+    if (!stripe) {
+      return res.status(503).json({ success: false, error: "Stripe not configured" });
+    }
+
+    try {
+      const { subscriptionId, newPriceId } = req.body;
+
+      if (!subscriptionId || !newPriceId) {
+        return res.status(400).json({ success: false, error: "Missing subscriptionId or newPriceId" });
+      }
+
+      // Hardcoded price weights for plan hierarchy
+      const priceWeights = {
+        'price_1RbfTvCRVFBT4Nls8UqqCGf0': 1, // standard_monthly
+        'price_1RbfUxCRVFBT4Nls5o1dmGHo': 2, // standard_yearly
+        'price_1RbfW6CRVFBT4NlsFBm9Rky0': 3, // premium_monthly
+        'price_1RbfWdCRVFBT4NlsdHEtcSqt': 4, // premium_yearly
+      };
+
+      // Validate price IDs
+      if (!priceWeights[newPriceId as keyof typeof priceWeights]) {
+        return res.status(400).json({ success: false, error: "Invalid newPriceId" });
+      }
+
+      // Fetch current subscription
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      const currentPriceId = subscription.items.data[0]?.price.id;
+
+      if (!currentPriceId || !priceWeights[currentPriceId as keyof typeof priceWeights]) {
+        return res.status(400).json({ success: false, error: "Invalid current subscription price" });
+      }
+
+      const currentWeight = priceWeights[currentPriceId as keyof typeof priceWeights];
+      const newWeight = priceWeights[newPriceId as keyof typeof priceWeights];
+
+      if (newWeight > currentWeight) {
+        // UPGRADE: Apply immediately with proration
+        await stripe.subscriptions.update(subscriptionId, {
+          items: [{
+            id: subscription.items.data[0].id,
+            price: newPriceId,
+          }],
+          proration_behavior: 'create_prorations',
+        });
+
+        console.log(`Subscription ${subscriptionId} upgraded immediately from weight ${currentWeight} to ${newWeight}`);
+        return res.json({ success: true, type: "upgrade" });
+
+      } else {
+        // DOWNGRADE: Schedule for end of current billing period
+        const schedulePhases = [
+          {
+            items: [{ price: currentPriceId, quantity: 1 }],
+            end_date: (subscription as any).current_period_end,
+          },
+          {
+            items: [{ price: newPriceId, quantity: 1 }],
+          },
+        ];
+
+        await stripe.subscriptionSchedules.create({
+          from_subscription: subscriptionId,
+          phases: schedulePhases,
+        });
+
+        console.log(`Subscription ${subscriptionId} scheduled to downgrade from weight ${currentWeight} to ${newWeight} at period end`);
+        return res.json({ success: true, type: "downgrade" });
+      }
+
+    } catch (error: any) {
+      console.error('Error switching subscription plan:', error);
+      return res.status(500).json({ success: false, error: error.message || "Failed to switch plan" });
+    }
+  });
+
   // Change Subscription Plan
   app.post("/api/change-subscription", isAuthenticated, async (req: any, res: Response) => {
     if (!stripe) {

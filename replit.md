@@ -425,6 +425,7 @@ Changelog:
 - June 18, 2025. FAQ ENHANCEMENT: Added detailed mobile QR code upload FAQ explaining cross-device receipt scanning functionality and workflow integration
 - June 19, 2025. STRIPE PRICE IDS IMPLEMENTED: Updated subscription system to use real Stripe price IDs instead of placeholder pricing data - premium yearly (price_1RbfWdCRVFBT4NlsdHEtcSqt), premium monthly (price_1RbfW6CRVFBT4NlsFBm9Rky0), standard yearly (price_1RbfUxCRVFBT4Nls5o1dmGHo), standard monthly (price_1RbfTvCRVFBT4Nls8UqqCGf0)
 - June 19, 2025. SUBSCRIPTION PRORATION FIXED: Implemented proper Stripe subscription modification flow using subscription.update() with proration_behavior for existing customers instead of cancel/create pattern - Stripe now handles prorated billing automatically for plan changes
+- June 19, 2025. ADVANCED SUBSCRIPTION SWITCHING: Implemented /api/switch-plan endpoint with weight-based plan hierarchy - upgrades apply immediately with proration, downgrades scheduled for billing period end using Stripe Subscription Schedules
 ```
 
 ## User Preferences
