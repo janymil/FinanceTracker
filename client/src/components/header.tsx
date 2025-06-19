@@ -1,10 +1,10 @@
 import { useAuth } from "@/hooks/useAuth";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useClerk, useUser } from "@clerk/clerk-react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,7 +49,7 @@ import { Link } from "wouter";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 
 interface Category {
   id: number;
@@ -69,6 +69,7 @@ interface HeaderProps {
 export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { user } = useAuth();
   const { user: clerkUser } = useUser();
+  const { isReady } = useClerkUserReady();
   const { toast } = useToast();
   const { signOut } = useClerk();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -92,7 +93,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
       const response = await apiRequest("GET", "/api/categories");
       return response.json();
     },
-    enabled: !!clerkUser?.id,
+    enabled: isReady && !!user?.id,
     staleTime: 0,
   });
 
