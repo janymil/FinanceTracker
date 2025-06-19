@@ -30,22 +30,23 @@ export async function handleContactForm(req: Request, res: Response) {
     }
 
     // Configure SMTP transporter
+    const port = parseInt(process.env.EMAIL_PORT || '587');
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
-      port: parseInt(process.env.EMAIL_PORT || '587'),
-      secure: process.env.EMAIL_PORT === '465',
+      port: port,
+      secure: port === 465,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
       }
     });
 
-    // Email options - use authenticated email as sender, include user email in body
+    // Email options - use authenticated sender address only
     const mailOptions = {
-      from: `"FinanzerPro Contact Form" <${process.env.EMAIL_USER}>`,
+      from: `"FinanzerPro Contact Form" <info@finanzerpro.com>`,
       to: process.env.EMAIL_TO,
       subject: `[Contact Form] ${subject}`,
-      text: `Contact Form Submission\n\nName: ${name}\nEmail: ${email}\nSubject: ${subject}\n\nMessage:\n${message}`
+      text: `Name: ${name}\nEmail: ${email}\nSubject: ${subject}\nMessage: ${message}`
     };
 
     // Send email
