@@ -110,6 +110,13 @@ export function registerStripeRoutes(app: Express) {
         'premium': process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID,
         'premium-yearly': process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID
       };
+      
+      console.log('Environment variables check:');
+      console.log('STRIPE_STANDARD_MONTHLY_PRICE_ID:', process.env.STRIPE_STANDARD_MONTHLY_PRICE_ID);
+      console.log('STRIPE_STANDARD_YEARLY_PRICE_ID:', process.env.STRIPE_STANDARD_YEARLY_PRICE_ID);
+      console.log('STRIPE_PREMIUM_MONTHLY_PRICE_ID:', process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID);
+      console.log('STRIPE_PREMIUM_YEARLY_PRICE_ID:', process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID);
+      console.log('Plan price IDs object:', planPriceIds);
 
       let sessionConfig: any;
 
