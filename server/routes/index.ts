@@ -15,10 +15,14 @@ import { registerAdminRoutes } from "./adminRoutes";
 import { registerStripeRoutes } from "./stripeRoutes";
 import { setCookieConsent } from "../cookieMiddleware";
 import { registerMobileUploadRoutes } from "./mobileUploadRoutes";
+import { handleContactForm } from "../contact";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Cookie consent middleware
   app.post('/api/cookie-consent', setCookieConsent);
+  
+  // Contact form endpoint
+  app.post('/api/contact', handleContactForm);
 
   // Register all route modules
   registerMobileUploadRoutes(app);
