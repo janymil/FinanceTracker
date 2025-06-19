@@ -90,6 +90,19 @@ export default function Income() {
 
   const isLoading = transactionsLoading || categoriesLoading;
 
+  const [newIncome, setNewIncome] = useState({
+    amount: "",
+    description: "",
+    date: new Date().toISOString().split('T')[0],
+    type: "income" as "income" | "expense",
+    categoryId: "",
+    isRecurring: false,
+    recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
+    recurringEndDate: "",
+    paymentUrl: "",
+    referenceNote: "",
+  });
+
   // React Query mutation for creating income transactions
   const createIncomeMutation = useMutation({
     mutationFn: async (incomeData: typeof newIncome) => {
@@ -184,19 +197,6 @@ export default function Income() {
       });
     }
   });
-  
-  const [newIncome, setNewIncome] = useState({
-    amount: "",
-    description: "",
-    date: new Date().toISOString().split('T')[0],
-    type: "income" as "income" | "expense",
-    categoryId: "",
-    isRecurring: false,
-    recurringFrequency: "monthly" as "weekly" | "monthly" | "yearly",
-    recurringEndDate: "",
-    paymentUrl: "",
-    referenceNote: "",
-  });
 
   // Filter transactions for income only
   const incomeTransactions = allTransactions.filter((transaction: Transaction) => transaction.type === "income");
@@ -275,7 +275,7 @@ export default function Income() {
     .slice(-6)
     .map(([month, amount]) => ({
       month: format(new Date(month + '-01'), 'MMM yyyy'),
-      amount: amount
+      amount: amount as number
     }));
 
   // Calculate category distribution
@@ -290,7 +290,7 @@ export default function Income() {
 
   const pieData = Object.entries(categoryData).map(([name, value]) => ({
     name,
-    value
+    value: value as number
   }));
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
@@ -345,7 +345,7 @@ export default function Income() {
     }
   };
 
-  const handleUploadComplete = (data: any) => {
+  const handleReceiptProcessed = (data: any) => {
     setNewIncome({
       amount: data.amount || "",
       description: data.description || "",
@@ -381,7 +381,7 @@ export default function Income() {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-2">
-            <UploadReceiptModal onUploadComplete={handleUploadComplete} />
+            <UploadReceiptModal onReceiptProcessed={handleReceiptProcessed} />
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="w-full sm:w-auto">
@@ -587,7 +587,7 @@ export default function Income() {
                 <Label>Month Filter</Label>
                 <MonthFilter 
                   selectedMonth={selectedMonth} 
-                  onMonthChange={setSelectedMonth}
+                  onMonthSelect={setSelectedMonth}
                 />
               </div>
             </div>
