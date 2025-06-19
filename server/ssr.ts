@@ -209,7 +209,7 @@ function getPageContent(route: string): string {
             
             <h2>Support Options</h2>
             <ul>
-                <li>Email Support: support@finanzerpro.com</li>
+                <li>Email Support: info@finanzerpro.com</li>
                 <li>Documentation: Browse our help section</li>
                 <li>FAQ: Common questions and answers</li>
             </ul>
