@@ -84,39 +84,14 @@ app.use('/uploads', express.static('uploads'));
 
 // Serve specific SEO files
 app.get('/sitemap.xml', (req, res) => {
-  res.sendFile(pathModule.resolve('public/sitemap.xml'));
+  res.sendFile(pathModule.resolve(process.cwd(), 'public/sitemap.xml'));
 });
 
 app.get('/robots.txt', (req, res) => {
-  res.sendFile(pathModule.resolve('public/robots.txt'));
+  res.sendFile(pathModule.resolve(process.cwd(), 'public/robots.txt'));
 });
 
-// Debug endpoint to test file paths (removed for production)
-
-// Safe file serving with error handling
-function safeSendFile(res: Response, filePath: string, next: NextFunction) {
-  try {
-    const resolvedPath = path.resolve(process.cwd(), filePath);
-    console.log(`[STATIC FILE] Attempting to serve: ${resolvedPath}`);
-    
-    const fs = require('fs');
-    if (!fs.existsSync(resolvedPath)) {
-      console.error(`[STATIC FILE] File not found: ${resolvedPath}`);
-      return next();
-    }
-    
-    res.sendFile(resolvedPath, (err) => {
-      if (err) {
-        console.error(`[STATIC FILE] Error serving ${filePath}:`, err.message);
-        return next();
-      }
-      console.log(`[STATIC FILE] Successfully served: ${filePath}`);
-    });
-  } catch (error) {
-    console.error(`[STATIC FILE] Critical error:`, error);
-    next();
-  }
-}
+// Production-ready crawler detection and static file serving
 
 // Serve static files only for actual web crawlers (not browsers)
 function isCrawler(userAgent: string): boolean {
@@ -134,36 +109,25 @@ const crawlerRoutes = [
 crawlerRoutes.forEach(({ path: routePath, file }) => {
   app.get(routePath, (req, res, next) => {
     const userAgent = req.get('User-Agent') || '';
-    console.log(`[ROUTE ${routePath}] User-Agent: ${userAgent.substring(0, 50)}...`);
     
     if (isCrawler(userAgent)) {
-      console.log(`[ROUTE ${routePath}] Crawler detected, serving static file: ${file}`);
-      
-      // Fix for /help route - use absolute path resolution
-      if (routePath === '/help') {
-        console.log(`[HELP DEBUG] Serving static HTML for /help to crawler`);
-        try {
-          const helpFilePath = path.resolve(process.cwd(), 'public/features.html');
-          console.log(`[HELP DEBUG] Resolved path: ${helpFilePath}`);
-          return res.sendFile(helpFilePath, (err) => {
-            if (err) {
-              console.error(`[HELP DEBUG] Error serving features.html:`, err);
-              // Fallback to index.html if features.html fails
-              const fallbackPath = path.resolve(process.cwd(), 'public/index.html');
-              return res.sendFile(fallbackPath);
-            }
-            console.log(`[HELP DEBUG] Successfully served features.html`);
-          });
-        } catch (error) {
-          console.error(`[HELP DEBUG] Critical error:`, error);
-          return next();
-        }
+      // Use absolute path resolution for all crawler routes
+      try {
+        const staticFilePath = pathModule.resolve(process.cwd(), file);
+        return res.sendFile(staticFilePath, (err) => {
+          if (err) {
+            console.error(`[CRAWLER] Error serving ${file} for ${routePath}:`, err.message);
+            // Fallback to index.html
+            const fallbackPath = pathModule.resolve(process.cwd(), 'public/index.html');
+            return res.sendFile(fallbackPath);
+          }
+        });
+      } catch (error) {
+        console.error(`[CRAWLER] Critical error serving ${routePath}:`, error);
+        return next();
       }
-      
-      return safeSendFile(res, file, next);
     }
     
-    console.log(`[ROUTE ${routePath}] Human user, passing to React app`);
     next();
   });
 });
