@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { useTransactions } from "@/hooks/useTransactions";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import UploadReceiptModal from "@/components/UploadReceiptModal";
 import { Button } from "@/components/ui/button";
@@ -23,7 +26,6 @@ import {
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import MonthFilter from "@/components/month-filter";
@@ -78,69 +80,35 @@ export default function Expenses() {
     referenceNote: "",
   });
 
-  // Direct state management instead of React Query
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // React Query hooks for data fetching using the same pattern as transactions page
+  const { data: transactions = [], isLoading: transactionsLoading, refetch: refetchTransactions } = useTransactions();
+  const queryClient = useQueryClient();
 
-  // Fetch transactions directly
-  const fetchTransactions = async () => {
-    if (!isReady) return;
-    try {
-      setIsLoading(true);
-      const response = await apiRequest("GET", "/api/transactions");
-      const data = await response.json();
-      setTransactions(data || []);
-    } catch (error) {
-      console.error("Failed to fetch transactions:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fetch categories directly  
-  const fetchCategories = async () => {
-    if (!isReady) return;
-    try {
-      // Add small delay to ensure token is available
-      await new Promise(resolve => setTimeout(resolve, 100));
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
+    queryKey: ["categories"],
+    queryFn: async () => {
       const response = await apiRequest("GET", "/api/categories");
-      const data = await response.json();
-      setCategories(data || []);
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
-      // Retry once after a longer delay
-      try {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const retryResponse = await apiRequest("GET", "/api/categories");
-        const retryData = await retryResponse.json();
-        setCategories(retryData || []);
-      } catch (retryError) {
-        console.error("Failed to fetch categories on retry:", retryError);
-      }
-    }
-  };
+      return response.json();
+    },
+    enabled: isReady && !!user?.id
+  });
 
-  // Initial data loading
-  useEffect(() => {
-    if (isReady) {
-      fetchTransactions();
-      fetchCategories();
-    }
-  }, [isReady]);
+  const isLoading = transactionsLoading || categoriesLoading;
 
-  const createExpense = async (expenseData: typeof newExpense) => {
-    try {
+  // React Query mutation for creating expenses
+  const createExpenseMutation = useMutation({
+    mutationFn: async (expenseData: typeof newExpense) => {
       const res = await apiRequest("POST", "/api/transactions", {
         ...expenseData,
         amount: parseFloat(expenseData.amount),
         type: "expense",
       });
-      const newTransaction = await res.json();
-      
-      // Update local state immediately
-      setTransactions(prev => [newTransaction, ...prev]);
-      
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       setIsDialogOpen(false);
       setNewExpense({
         amount: "",
@@ -157,17 +125,19 @@ export default function Expenses() {
         title: "Expense Added",
         description: "Expense transaction has been created successfully",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     }
-  };
+  });
 
-  const updateExpense = async ({ id, ...data }: { id: number } & typeof newExpense) => {
-    try {
+  // React Query mutation for updating expenses
+  const updateExpenseMutation = useMutation({
+    mutationFn: async ({ id, ...data }: { id: number } & typeof newExpense) => {
       const updateData = {
         amount: parseFloat(data.amount),
         description: data.description,
@@ -182,52 +152,60 @@ export default function Expenses() {
       };
       
       const res = await apiRequest("PUT", `/api/transactions/${id}`, updateData);
-      const updatedTransaction = await res.json();
-      
-      // Update local state immediately
-      setTransactions(prev => prev.map(t => t.id === id ? updatedTransaction : t));
-      
+      if (!res.ok) {
+        throw new Error(`Update failed: ${res.status}`);
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
         title: "Expense Updated",
         description: "Expense transaction has been updated successfully",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     }
-  };
+  });
 
-  const deleteExpense = async (id: number) => {
-    try {
+  // React Query mutation for deleting expenses
+  const deleteExpenseMutation = useMutation({
+    mutationFn: async (id: number) => {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
-      await res.json();
-      
-      // Update local state immediately
-      setTransactions(prev => prev.filter(t => t.id !== id));
-      
+      if (!res.ok) {
+        throw new Error(`Delete failed: ${res.status}`);
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       toast({
         title: "Expense Deleted",
         description: "Expense transaction has been removed successfully",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     }
-  };
+  });
 
   // Filter only expense transactions
   const expenseTransactions = transactions.filter((transaction: Transaction) => transaction.type === "expense");
-  
-  // Debug log to track re-renders
-  console.log("Expenses component rendered", expenseTransactions);
   
   // Apply additional filters
   const filteredExpenses = expenseTransactions.filter((transaction: Transaction) => {
@@ -347,9 +325,9 @@ export default function Expenses() {
     if (!newExpense.amount || !newExpense.description) return;
 
     if (editingTransaction) {
-      await updateExpense({ id: editingTransaction.id, ...newExpense });
+      updateExpenseMutation.mutate({ id: editingTransaction.id, ...newExpense });
     } else {
-      await createExpense(newExpense);
+      createExpenseMutation.mutate(newExpense);
     }
   };
 
@@ -409,7 +387,7 @@ export default function Expenses() {
               <UploadReceiptModal 
                 onReceiptProcessed={(data) => {
                   // Refresh expenses after receipt processing
-                  fetchTransactions();
+                  refetchTransactions();
                 }}
                 buttonText="Upload Image"
               />
