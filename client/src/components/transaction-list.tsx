@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Trash2, Filter, TrendingDown, TrendingUp, ChevronDown, ChevronUp, Receipt } from "lucide-react";
+import { Trash2, Filter, TrendingDown, TrendingUp, ChevronDown, ChevronUp, Receipt, Repeat } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useState, useMemo } from "react";
 import ReceiptModal from "@/components/receipt-modal";
@@ -26,6 +26,7 @@ interface Transaction {
   ocrVendor?: string;
   ocrDetectedAmount?: string;
   ocrDetectedDate?: string;
+  isRecurring?: boolean;
 }
 
 interface TransactionListProps {
@@ -224,6 +225,12 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                             <Badge variant="secondary" className="text-xs">
                               <Receipt className="h-3 w-3 mr-1" />
                               Receipt
+                            </Badge>
+                          )}
+                          {transaction.isRecurring && (
+                            <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 dark:border-blue-800 dark:text-blue-300">
+                              <Repeat className="h-3 w-3 mr-1" />
+                              Recurring
                             </Badge>
                           )}
                         </div>

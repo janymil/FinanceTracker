@@ -1,15 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { TrendingDown, TrendingUp, Repeat } from "lucide-react";
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Crown, TrendingDown, TrendingUp, Receipt, Edit, Trash2, MoreHorizontal, Repeat } from "lucide-react";
+import { Crown, Edit, Trash2, MoreHorizontal, Receipt } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Link } from "wouter";
 import { useState, useEffect } from "react";
 import ReceiptModal from "@/components/receipt-modal";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -102,7 +103,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
 
   const handleEdit = async (transaction: Transaction) => {
     if (!editingTransaction) return;
-    
+
     try {
       const updateData = {
         amount: parseFloat(editingTransaction.amount),
@@ -119,7 +120,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
       await queryClient.invalidateQueries({ queryKey: ["/api/budgets", user?.id] });
       await queryClient.invalidateQueries({ queryKey: ["/api/financial-health", user?.id] });
       await queryClient.invalidateQueries({ queryKey: ["/api/transaction-reminders"] });
-      
+
       setEditingTransaction(null);
       toast({
         title: "Transaction Updated",
@@ -197,7 +198,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                       <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
                     )}
                   </div>
-                  
+
                   {/* Receipt thumbnail */}
                   {transaction.imageUrl && (
                     <div className="hidden sm:block">
@@ -216,12 +217,20 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 overflow-visible">
-                      <p className="font-medium text-gray-900 dark:text-white flex-shrink">
-                        {transaction.description}
-                      </p>
+                      <div className="flex items-center space-x-2">
+                        <p className="font-medium text-gray-900 dark:text-white">
+                          {transaction.description}
+                        </p>
+                        {transaction.isRecurring && (
+                          <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 dark:border-blue-800 dark:text-blue-300">
+                            <Repeat className="h-3 w-3 mr-1" />
+                            Recurring
+                          </Badge>
+                        )}
+                      </div>
                       {transaction.isRecurring && (
                         <Badge variant="outline" className="text-xs shrink-0 border-blue-200 text-blue-700 dark:border-blue-700 dark:text-blue-300 flex items-center ml-2">
                           <Repeat className="h-3 w-3 mr-1" />
@@ -263,7 +272,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Action buttons */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -347,7 +356,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                     })}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="description">Description</Label>
                   <Input
@@ -359,7 +368,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                     })}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="date">Date</Label>
                   <Input
@@ -372,7 +381,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                     })}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="type">Type</Label>
                   <Select 
@@ -391,7 +400,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
                   <Select 
@@ -414,7 +423,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                   </Select>
                 </div>
               </div>
-              
+
               <div className="flex justify-end space-x-2">
                 <Button 
                   variant="outline" 
