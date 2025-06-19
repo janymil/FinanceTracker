@@ -101,54 +101,13 @@ export function registerStripeRoutes(app: Express) {
       const successUrl = `${baseUrl}/api/subscription-success?plan=${plan}&session_id={CHECKOUT_SESSION_ID}`;
       const cancelUrl = `${baseUrl}/subscribe`;
 
-      // Plan pricing in cents (Stripe uses cents)
-      const planPrices = {
-        'free': { 
-          priceData: {
-            currency: 'usd',
-            product_data: { name: 'FinanzerPro Free Plan' },
-            unit_amount: 0, // $0.00
-            recurring: { interval: 'month' as const }
-          }
-        },
-        'standard': { 
-          priceData: {
-            currency: 'usd',
-            product_data: { name: 'FinanzerPro Standard' },
-            unit_amount: 499, // $4.99
-            recurring: { interval: 'month' as const }
-          }
-        },
-        'standard-yearly': { 
-          priceData: {
-            currency: 'usd',
-            product_data: { name: 'FinanzerPro Standard (Yearly)' },
-            unit_amount: 4990, // $49.90
-            recurring: { interval: 'year' as const }
-          }
-        },
-        'premium': { 
-          priceData: {
-            currency: 'usd',
-            product_data: { name: 'FinanzerPro Premium' },
-            unit_amount: 999, // $9.99
-            recurring: { interval: 'month' as const }
-          }
-        },
-        'premium-yearly': { 
-          priceData: {
-            currency: 'usd',
-            product_data: { name: 'FinanzerPro Premium (Yearly)' },
-            unit_amount: 9990, // $99.90
-            recurring: { interval: 'year' as const }
-          }
-        }
+      // Plan pricing using real Stripe Price IDs from environment variables
+      const planPriceIds = {
+        'standard': process.env.STRIPE_STANDARD_MONTHLY_PRICE_ID,
+        'standard-yearly': process.env.STRIPE_STANDARD_YEARLY_PRICE_ID,
+        'premium': process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID,
+        'premium-yearly': process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID
       };
-
-      const selectedPlan = planPrices[plan as keyof typeof planPrices];
-      if (!selectedPlan) {
-        return res.status(400).json({ error: "Invalid plan selected" });
-      }
 
       let sessionConfig: any;
 
@@ -169,12 +128,17 @@ export function registerStripeRoutes(app: Express) {
           }
         };
       } else {
-        // For paid plans, create subscription
+        // For paid plans, create subscription using real Stripe Price IDs
+        const priceId = planPriceIds[plan as keyof typeof planPriceIds];
+        if (!priceId) {
+          return res.status(400).json({ error: "Price ID not configured for this plan" });
+        }
+        
         sessionConfig = {
           mode: 'subscription',
           payment_method_types: ['card'],
           line_items: [{
-            price_data: selectedPlan.priceData,
+            price: priceId,
             quantity: 1,
           }],
           success_url: successUrl,
