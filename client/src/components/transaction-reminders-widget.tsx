@@ -142,98 +142,7 @@ export default function TransactionRemindersWidget() {
     retry: 2,
   });
 
-  // Fetch transaction reminders
-  useEffect(() => {
-    const fetchTransactionReminders = async () => {
-      if (!isUserReady) return;
 
-      try {
-        setTransactionLoading(true);
-        const token = await getToken();
-        
-        const response = await fetch('/api/transaction-reminders?days=30', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setTransactionReminders(data || []);
-        }
-      } catch (error) {
-        console.error('Failed to fetch transaction reminders:', error);
-        setTransactionReminders([]);
-      } finally {
-        setTransactionLoading(false);
-      }
-    };
-
-    fetchTransactionReminders();
-  }, [isUserReady, getToken]);
-
-  // Fetch expense reminders
-  useEffect(() => {
-    const fetchExpenseReminders = async () => {
-      if (!isUserReady) return;
-
-      try {
-        setExpenseLoading(true);
-        const token = await getToken();
-        
-        const response = await fetch('/api/expense-reminders/upcoming', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setExpenseReminders(data || []);
-        }
-      } catch (error) {
-        console.error('Failed to fetch expense reminders:', error);
-        setExpenseReminders([]);
-      } finally {
-        setExpenseLoading(false);
-      }
-    };
-
-    fetchExpenseReminders();
-  }, [isUserReady, getToken]);
-
-  // Fetch categories
-  useEffect(() => {
-    const fetchCategories = async () => {
-      if (!isUserReady) return;
-
-      try {
-        const token = await getToken();
-        
-        const response = await fetch('/api/categories', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setCategories(data || []);
-        }
-      } catch (error) {
-        console.error('Failed to fetch categories:', error);
-        setCategories([]);
-      }
-    };
-
-    fetchCategories();
-  }, [isUserReady, getToken]);
 
   const getReminderPriority = useCallback((dueDate: Date): 'high' | 'medium' | 'low' | 'normal' => {
     const today = new Date();
@@ -281,61 +190,76 @@ export default function TransactionRemindersWidget() {
     return [...automaticReminders, ...manualReminders].sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
   }, [transactionReminders, expenseReminders, getReminderPriority]);
 
-  const createReminder = async (reminderData: any) => {
-    try {
-      await apiRequest('POST', '/api/expense-reminders', reminderData);
-      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
-      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
+  // Create reminder mutation
+  const createReminderMutation = useMutation({
+    mutationFn: async (reminderData: any) => {
+      const response = await apiRequest('POST', '/api/expense-reminders', reminderData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expense-reminders', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['transaction-reminders', user?.id] });
       setIsDialogOpen(false);
       resetForm();
       toast({
         title: "Reminder Created",
         description: "Payment reminder has been set successfully",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message || "Failed to create reminder",
         variant: "destructive",
       });
-    }
-  };
+    },
+  });
 
-  const completeReminder = async (id: number) => {
-    try {
-      await apiRequest('PUT', `/api/expense-reminders/${id}`, { isCompleted: true });
-      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
-      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
+  // Complete reminder mutation
+  const completeReminderMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest('PUT', `/api/expense-reminders/${id}`, { isCompleted: true });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expense-reminders', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['transaction-reminders', user?.id] });
       toast({
         title: "Reminder Completed",
         description: "Reminder marked as completed",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message || "Failed to complete reminder",
         variant: "destructive",
       });
-    }
-  };
+    },
+  });
 
-  const deleteReminder = async (id: number) => {
-    try {
-      await apiRequest('DELETE', `/api/expense-reminders/${id}`);
-      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
-      await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
+  // Delete reminder mutation
+  const deleteReminderMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest('DELETE', `/api/expense-reminders/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expense-reminders', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['transaction-reminders', user?.id] });
       toast({
         title: "Reminder Deleted",
         description: "Reminder has been removed",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message || "Failed to delete reminder",
         variant: "destructive",
       });
-    }
-  };
+    },
+  });
 
   const resetForm = () => {
     setNewReminder({
@@ -355,7 +279,7 @@ export default function TransactionRemindersWidget() {
 
   const handleSubmit = () => {
     if (!newReminder.title || !newReminder.dueDate) return;
-    createReminder(newReminder);
+    createReminderMutation.mutate(newReminder);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -654,7 +578,7 @@ export default function TransactionRemindersWidget() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => completeReminder(parseInt(reminder.id.split('_')[1]))}
+                              onClick={() => completeReminderMutation.mutate(parseInt(reminder.id.split('_')[1]))}
                               className="h-8 w-8 p-0"
                             >
                               <CheckCircle className="h-4 w-4" />
@@ -664,7 +588,7 @@ export default function TransactionRemindersWidget() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => deleteReminder(parseInt(reminder.id.split('_')[1]))}
+                              onClick={() => deleteReminderMutation.mutate(parseInt(reminder.id.split('_')[1]))}
                               className="h-8 w-8 p-0"
                             >
                               <Trash2 className="h-4 w-4" />

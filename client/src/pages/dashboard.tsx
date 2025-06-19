@@ -266,13 +266,11 @@ export default function Dashboard() {
     onSuccess: () => {
       // Invalidate all relevant queries to force refresh
       queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
-      queryClient.invalidateQueries({ 
-        predicate: (query) => 
-          query.queryKey[0] === "financial-summary" ||
-          query.queryKey[0] === "budgets" ||
-          query.queryKey[0] === "financial-health" ||
-          query.queryKey[0] === "transaction-reminders"
-      });
+      queryClient.invalidateQueries({ queryKey: ['transaction-reminders', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['expense-reminders', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['financial-summary', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['budgets', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['financial-health', user?.id] });
       
       setIsDialogOpen(false);
       setNewTransaction({
