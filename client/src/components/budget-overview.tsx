@@ -50,71 +50,7 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
     },
   });
 
-  // Get auth headers for Clerk authentication
-  const getAuthHeaders = async (): Promise<Record<string, string>> => {
-    try {
-      if (typeof window !== 'undefined' && window.Clerk?.session) {
-        const token = await window.Clerk.session.getToken();
-        if (token) {
-          return { Authorization: `Bearer ${token}` };
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to get Clerk token:', error);
-    }
-    return {};
-  };
 
-  // Fetch budgets
-  const fetchBudgets = async () => {
-    if (!isReady || isLimited) return;
-    
-    setBudgetsLoading(true);
-    try {
-      const authHeaders = await getAuthHeaders();
-      const response = await fetch('/api/budgets', {
-        headers: authHeaders,
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setBudgets(data);
-      }
-    } catch (error) {
-      console.error('Error fetching budgets:', error);
-    } finally {
-      setBudgetsLoading(false);
-    }
-  };
-
-  // Fetch transactions
-  const fetchTransactions = async () => {
-    if (!isReady) return;
-    
-    setTransactionsLoading(true);
-    try {
-      const authHeaders = await getAuthHeaders();
-      const response = await fetch('/api/transactions', {
-        headers: authHeaders,
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setTransactions(data);
-      }
-    } catch (error) {
-      console.error('Error fetching transactions:', error);
-    } finally {
-      setTransactionsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (isReady) {
-      fetchBudgets();
-      fetchTransactions();
-    }
-  }, [isReady, isLimited]);
 
   const formatCurrency = (amount: string | number) => {
     return new Intl.NumberFormat('en-US', {
