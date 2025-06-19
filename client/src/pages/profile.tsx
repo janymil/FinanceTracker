@@ -176,6 +176,9 @@ export default function ProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Subscription Schedule - Shows upcoming plan changes */}
+              <SubscriptionSchedule />
+
               {/* Current Plan Status */}
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
