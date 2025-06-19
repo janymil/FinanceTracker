@@ -8,6 +8,7 @@ import path from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { cookieConsentMiddleware } from "./cookieMiddleware";
+import { landingPageSSR, helpPageSSR, pricingPageSSR, contactPageSSR, privacyPageSSR } from "./ssr";
 import "./batch-processor"; // Initialize batch processing system
 
 const app = express();
@@ -92,6 +93,58 @@ app.get('/robots.txt', (req, res) => {
 
 // Serve static SEO files
 app.use(express.static('public'));
+
+// Server-side rendered routes for crawlers
+app.get('/', (req, res, next) => {
+  // Check if it's a crawler by User-Agent
+  const userAgent = req.get('User-Agent') || '';
+  const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|linkedinbot|slackbot|telegrambot|googlebot|bingbot|yahoobot|duckduckbot|baiduspider|yandexbot|applebot|petalbot|semrushbot|ahrefsbot|mj12bot|dotbot|screaming frog|chatgpt|gptbot|ccbot|anthropic|claude/i.test(userAgent);
+  
+  if (isCrawler) {
+    return landingPageSSR(req, res);
+  }
+  next();
+});
+
+app.get('/help', (req, res, next) => {
+  const userAgent = req.get('User-Agent') || '';
+  const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|linkedinbot|slackbot|telegrambot|googlebot|bingbot|yahoobot|duckduckbot|baiduspider|yandexbot|applebot|petalbot|semrushbot|ahrefsbot|mj12bot|dotbot|screaming frog|chatgpt|gptbot|ccbot|anthropic|claude/i.test(userAgent);
+  
+  if (isCrawler) {
+    return helpPageSSR(req, res);
+  }
+  next();
+});
+
+app.get('/pricing', (req, res, next) => {
+  const userAgent = req.get('User-Agent') || '';
+  const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|linkedinbot|slackbot|telegrambot|googlebot|bingbot|yahoobot|duckduckbot|baiduspider|yandexbot|applebot|petalbot|semrushbot|ahrefsbot|mj12bot|dotbot|screaming frog|chatgpt|gptbot|ccbot|anthropic|claude/i.test(userAgent);
+  
+  if (isCrawler) {
+    return pricingPageSSR(req, res);
+  }
+  next();
+});
+
+app.get('/contact', (req, res, next) => {
+  const userAgent = req.get('User-Agent') || '';
+  const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|linkedinbot|slackbot|telegrambot|googlebot|bingbot|yahoobot|duckduckbot|baiduspider|yandexbot|applebot|petalbot|semrushbot|ahrefsbot|mj12bot|dotbot|screaming frog|chatgpt|gptbot|ccbot|anthropic|claude/i.test(userAgent);
+  
+  if (isCrawler) {
+    return contactPageSSR(req, res);
+  }
+  next();
+});
+
+app.get('/privacy-policy', (req, res, next) => {
+  const userAgent = req.get('User-Agent') || '';
+  const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|linkedinbot|slackbot|telegrambot|googlebot|bingbot|yahoobot|duckduckbot|baiduspider|yandexbot|applebot|petalbot|semrushbot|ahrefsbot|mj12bot|dotbot|screaming frog|chatgpt|gptbot|ccbot|anthropic|claude/i.test(userAgent);
+  
+  if (isCrawler) {
+    return privacyPageSSR(req, res);
+  }
+  next();
+});
 
 app.use((req, res, next) => {
   const start = Date.now();
