@@ -300,7 +300,8 @@ export default function Income() {
     
     setEditingTransaction({
       ...transaction,
-      categoryId: category?.id || transaction.categoryId
+      categoryId: category?.id || transaction.categoryId,
+      date: transaction.date.split('T')[0] // Ensure date is in YYYY-MM-DD format
     });
   };
 
@@ -440,10 +441,7 @@ export default function Income() {
                       <SelectContent>
                         {incomeCategories.map((category: Category) => (
                           <SelectItem key={category.id} value={category.id.toString()}>
-                            <div className="flex items-center">
-                              <span className="mr-2">{category.icon}</span>
-                              <span>{category.name}</span>
-                            </div>
+                            {category.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -821,10 +819,7 @@ export default function Income() {
                   <SelectContent>
                     {incomeCategories.map((category: Category) => (
                       <SelectItem key={category.id} value={category.id.toString()}>
-                        <div className="flex items-center">
-                          <span className="mr-2">{category.icon}</span>
-                          <span>{category.name}</span>
-                        </div>
+                        {category.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
