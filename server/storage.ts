@@ -88,8 +88,8 @@ export interface IStorage {
   // Category operations
   getCategories(userId?: string): Promise<Category[]>;
   createCategory(category: { userId: string; name: string; icon: string; color: string; type: string }): Promise<Category>;
-  updateCategory(categoryId: number, category: { name: string; icon: string; color: string; type: string }): Promise<Category>;
-  deleteCategory(categoryId: number): Promise<Category>;
+  updateCategory(categoryId: number, userId: string, updateData: { name: string; icon: string; color: string; type: 'income' | 'expense' }): Promise<Category>;
+  deleteCategory(categoryId: number, userId: string): Promise<Category>;
 
   // Expense reminder operations (Standard/Premium only)
   createExpenseReminder(reminder: InsertExpenseReminder): Promise<ExpenseReminder>;
@@ -572,11 +572,22 @@ export class DatabaseStorage implements IStorage {
     return newCategory;
   }
 
-  async updateCategory(categoryId: number, updateData: { name: string; icon: string; color: string; type: 'income' | 'expense' }) {
+  async updateCategory(categoryId: number, userId: string, updateData: { name: string; icon: string; color: string; type: 'income' | 'expense' }) {
+    // SECURITY: Verify category ownership before allowing updates
+    const existingCategory = await db
+      .select()
+      .from(categories)
+      .where(and(eq(categories.id, categoryId), eq(categories.userId, userId)))
+      .limit(1);
+
+    if (existingCategory.length === 0) {
+      throw new Error("Category not found or access denied");
+    }
+
     const [category] = await db
       .update(categories)
       .set(updateData)
-      .where(eq(categories.id, categoryId))
+      .where(and(eq(categories.id, categoryId), eq(categories.userId, userId)))
       .returning();
 
     if (!category) {
@@ -586,12 +597,26 @@ export class DatabaseStorage implements IStorage {
     return category;
   }
 
-  async deleteCategory(categoryId: number) {
-    // Check if category is in use by any transactions
+  async deleteCategory(categoryId: number, userId: string) {
+    // SECURITY: First verify the category belongs to the user
+    const userCategory = await db
+      .select()
+      .from(categories)
+      .where(and(eq(categories.id, categoryId), eq(categories.userId, userId)))
+      .limit(1);
+
+    if (userCategory.length === 0) {
+      throw new Error("Category not found or access denied");
+    }
+
+    // Check if category is in use by any transactions (only user's transactions)
     const transactionsUsingCategory = await db
       .select({ count: sql<number>`count(*)` })
       .from(transactions)
-      .where(eq(transactions.categoryId, categoryId));
+      .where(and(
+        eq(transactions.categoryId, categoryId),
+        eq(transactions.userId, userId)
+      ));
 
     if (transactionsUsingCategory[0].count > 0) {
       throw new Error("Cannot delete category that is in use by transactions");
@@ -599,7 +624,7 @@ export class DatabaseStorage implements IStorage {
 
     const [deletedCategory] = await db
       .delete(categories)
-      .where(eq(categories.id, categoryId))
+      .where(and(eq(categories.id, categoryId), eq(categories.userId, userId)))
       .returning();
 
     if (!deletedCategory) {

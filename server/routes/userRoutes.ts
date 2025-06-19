@@ -92,7 +92,7 @@ export function registerUserRoutes(app: Express) {
         return res.status(403).json({ message: "Category not found or access denied" });
       }
 
-      const category = await storage.updateCategory(categoryId, { name, icon, color, type });
+      const category = await storage.updateCategory(categoryId, userId, { name, icon, color, type });
       res.json(category);
     } catch (error) {
       console.error("Error updating category:", error);
@@ -116,7 +116,7 @@ export function registerUserRoutes(app: Express) {
         return res.status(403).json({ message: "Category not found or access denied" });
       }
 
-      await storage.deleteCategory(categoryId);
+      await storage.deleteCategory(categoryId, userId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting category:", error);
