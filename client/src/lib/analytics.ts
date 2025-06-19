@@ -6,14 +6,14 @@ declare global {
   }
 }
 
-// Initialize Google Analytics
+// Initialize Google Analytics - Production Only
 export const initGA = () => {
-  const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
-
-  if (!measurementId) {
-    console.warn('Missing required Google Analytics key: VITE_GA_MEASUREMENT_ID');
+  // Only initialize in production
+  if (window.location.hostname !== 'finanzerpro.com') {
     return;
   }
+
+  const measurementId = 'G-PRRBGDT20Q';
 
   // Add Google Analytics script to the head
   const script1 = document.createElement('script');
@@ -34,10 +34,10 @@ export const initGA = () => {
 
 // Track page views - useful for single-page applications
 export const trackPageView = (url: string) => {
-  if (typeof window === 'undefined' || !window.gtag) return;
+  // Only track in production
+  if (typeof window === 'undefined' || !window.gtag || window.location.hostname !== 'finanzerpro.com') return;
   
-  const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
-  if (!measurementId) return;
+  const measurementId = 'G-PRRBGDT20Q';
   
   window.gtag('config', measurementId, {
     page_path: url
@@ -51,7 +51,8 @@ export const trackEvent = (
   label?: string, 
   value?: number
 ) => {
-  if (typeof window === 'undefined' || !window.gtag) return;
+  // Only track in production
+  if (typeof window === 'undefined' || !window.gtag || window.location.hostname !== 'finanzerpro.com') return;
   
   window.gtag('event', action, {
     event_category: category,

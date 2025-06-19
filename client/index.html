@@ -14,6 +14,25 @@
     <meta name="author" content="FinanzerPro" />
     <link rel="canonical" href="https://finanzerpro.com" />
     
+    <!-- Google Analytics - Production Only -->
+    <script>
+      // Only load Google Analytics in production
+      if (window.location.hostname === 'finanzerpro.com') {
+        (function() {
+          var script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-PRRBGDT20Q';
+          document.head.appendChild(script);
+          
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-PRRBGDT20Q');
+          window.gtag = gtag;
+        })();
+      }
+    </script>
+    
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
