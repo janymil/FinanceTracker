@@ -12,13 +12,20 @@ export default function Subscribe() {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
   
-  // Get user's current plan
+  // Get user's current plan and billing interval
   const userPlan = user && 'plan' in user && user.plan ? user.plan : 'free';
+  const userBillingInterval = user && 'billingInterval' in user && user.billingInterval ? user.billingInterval : 'monthly';
   
-  const isCurrentPlan = (plan: string) => userPlan === plan;
+  const isCurrentPlan = (plan: string, interval: 'monthly' | 'yearly') => {
+    // For free plan, billing interval doesn't matter
+    if (plan === 'free') {
+      return userPlan === 'free';
+    }
+    return userPlan === plan && userBillingInterval === interval;
+  };
   
-  const getButtonText = (plan: string) => {
-    if (isCurrentPlan(plan)) {
+  const getButtonText = (plan: string, interval: 'monthly' | 'yearly') => {
+    if (isCurrentPlan(plan, interval)) {
       return 'This is your plan';
     }
     return 'Subscribe Now';
@@ -135,8 +142,8 @@ export default function Subscribe() {
             <TabsContent value="monthly">
               <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
                 {/* Standard Plan */}
-                <Card className={`relative ${isCurrentPlan('standard') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}`}>
-                  {isCurrentPlan('standard') && (
+                <Card className={`relative ${isCurrentPlan('standard', 'monthly') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}`}>
+                  {isCurrentPlan('standard', 'monthly') && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                       <Badge className="bg-green-500 text-white px-4 py-1">
                         Current Plan
@@ -164,18 +171,18 @@ export default function Subscribe() {
                       ))}
                     </div>
                     <Button 
-                      onClick={() => !isCurrentPlan('standard') && handleSubscribe('standard', 'month')}
-                      disabled={loading || isCurrentPlan('standard')}
+                      onClick={() => !isCurrentPlan('standard', 'monthly') && handleSubscribe('standard', 'month')}
+                      disabled={loading || isCurrentPlan('standard', 'monthly')}
                       className={`w-full py-6 text-lg ${
-                        isCurrentPlan('standard') 
+                        isCurrentPlan('standard', 'monthly') 
                           ? 'bg-green-600 hover:bg-green-600 cursor-default' 
                           : 'bg-blue-600 hover:bg-blue-700'
                       }`}
                     >
-                      {isCurrentPlan('standard') ? (
+                      {isCurrentPlan('standard', 'monthly') ? (
                         <>
                           <Badge className="h-5 w-5 mr-2" />
-                          {getButtonText('standard')}
+                          {getButtonText('standard', 'monthly')}
                         </>
                       ) : (
                         <>
@@ -189,17 +196,17 @@ export default function Subscribe() {
 
                 {/* Premium Plan */}
                 <Card className={`relative ${
-                  isCurrentPlan('premium') 
+                  isCurrentPlan('premium', 'monthly') 
                     ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
                     : 'border-purple-200 dark:border-purple-800'
                 }`}>
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <Badge className={`px-4 py-1 ${
-                      isCurrentPlan('premium')
+                      isCurrentPlan('premium', 'monthly')
                         ? 'bg-green-500 text-white'
                         : 'bg-purple-600 text-white'
                     }`}>
-                      {isCurrentPlan('premium') ? (
+                      {isCurrentPlan('premium', 'monthly') ? (
                         'Current Plan'
                       ) : (
                         <>
@@ -230,18 +237,18 @@ export default function Subscribe() {
                       ))}
                     </div>
                     <Button 
-                      onClick={() => !isCurrentPlan('premium') && handleSubscribe('premium', 'month')}
-                      disabled={loading || isCurrentPlan('premium')}
+                      onClick={() => !isCurrentPlan('premium', 'monthly') && handleSubscribe('premium', 'month')}
+                      disabled={loading || isCurrentPlan('premium', 'monthly')}
                       className={`w-full py-6 text-lg ${
-                        isCurrentPlan('premium') 
+                        isCurrentPlan('premium', 'monthly') 
                           ? 'bg-green-600 hover:bg-green-600 cursor-default' 
                           : 'bg-purple-600 hover:bg-purple-700'
                       }`}
                     >
-                      {isCurrentPlan('premium') ? (
+                      {isCurrentPlan('premium', 'monthly') ? (
                         <>
                           <Badge className="h-5 w-5 mr-2" />
-                          {getButtonText('premium')}
+                          {getButtonText('premium', 'monthly')}
                         </>
                       ) : (
                         <>
@@ -258,8 +265,8 @@ export default function Subscribe() {
             <TabsContent value="yearly">
               <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
                 {/* Standard Plan - Yearly */}
-                <Card className={`relative ${isCurrentPlan('standard') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}`}>
-                  {isCurrentPlan('standard') && (
+                <Card className={`relative ${isCurrentPlan('standard', 'yearly') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}`}>
+                  {isCurrentPlan('standard', 'yearly') && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                       <Badge className="bg-green-500 text-white px-4 py-1">
                         Current Plan
@@ -292,18 +299,18 @@ export default function Subscribe() {
                       ))}
                     </div>
                     <Button 
-                      onClick={() => !isCurrentPlan('standard') && handleSubscribe('standard', 'year')}
-                      disabled={loading || isCurrentPlan('standard')}
+                      onClick={() => !isCurrentPlan('standard', 'yearly') && handleSubscribe('standard', 'year')}
+                      disabled={loading || isCurrentPlan('standard', 'yearly')}
                       className={`w-full py-6 text-lg ${
-                        isCurrentPlan('standard') 
+                        isCurrentPlan('standard', 'yearly') 
                           ? 'bg-green-600 hover:bg-green-600 cursor-default' 
                           : 'bg-blue-600 hover:bg-blue-700'
                       }`}
                     >
-                      {isCurrentPlan('standard') ? (
+                      {isCurrentPlan('standard', 'yearly') ? (
                         <>
                           <Badge className="h-5 w-5 mr-2" />
-                          {getButtonText('standard')}
+                          {getButtonText('standard', 'yearly')}
                         </>
                       ) : (
                         <>
@@ -317,17 +324,17 @@ export default function Subscribe() {
 
                 {/* Premium Plan - Yearly */}
                 <Card className={`relative ${
-                  isCurrentPlan('premium') 
+                  isCurrentPlan('premium', 'yearly') 
                     ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
                     : 'border-purple-200 dark:border-purple-800'
                 }`}>
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <Badge className={`px-4 py-1 ${
-                      isCurrentPlan('premium')
+                      isCurrentPlan('premium', 'yearly')
                         ? 'bg-green-500 text-white'
                         : 'bg-purple-600 text-white'
                     }`}>
-                      {isCurrentPlan('premium') ? (
+                      {isCurrentPlan('premium', 'yearly') ? (
                         'Current Plan'
                       ) : (
                         <>
@@ -363,18 +370,18 @@ export default function Subscribe() {
                       ))}
                     </div>
                     <Button 
-                      onClick={() => !isCurrentPlan('premium') && handleSubscribe('premium', 'year')}
-                      disabled={loading || isCurrentPlan('premium')}
+                      onClick={() => !isCurrentPlan('premium', 'yearly') && handleSubscribe('premium', 'year')}
+                      disabled={loading || isCurrentPlan('premium', 'yearly')}
                       className={`w-full py-6 text-lg ${
-                        isCurrentPlan('premium') 
+                        isCurrentPlan('premium', 'yearly') 
                           ? 'bg-green-600 hover:bg-green-600 cursor-default' 
                           : 'bg-purple-600 hover:bg-purple-700'
                       }`}
                     >
-                      {isCurrentPlan('premium') ? (
+                      {isCurrentPlan('premium', 'yearly') ? (
                         <>
                           <Badge className="h-5 w-5 mr-2" />
-                          {getButtonText('premium')}
+                          {getButtonText('premium', 'yearly')}
                         </>
                       ) : (
                         <>

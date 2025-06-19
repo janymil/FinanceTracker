@@ -159,17 +159,19 @@ export function registerStripeRoutes(app: Express) {
 
       // Map plan names to database values  
       const planMapping = {
-        'free': 'free',
-        'standard': 'standard',
-        'standard-yearly': 'standard',
-        'premium': 'premium',
-        'premium-yearly': 'premium'
+        'free': { plan: 'free', interval: 'monthly' },
+        'standard': { plan: 'standard', interval: 'monthly' },
+        'standard-yearly': { plan: 'standard', interval: 'yearly' },
+        'premium': { plan: 'premium', interval: 'monthly' },
+        'premium-yearly': { plan: 'premium', interval: 'yearly' }
       };
 
-      const dbPlan = planMapping[plan as keyof typeof planMapping] as 'free' | 'standard' | 'premium';
-      if (!dbPlan) {
+      const planConfig = planMapping[plan as keyof typeof planMapping];
+      if (!planConfig) {
         return res.redirect('/?error=invalid_plan');
       }
+
+      const { plan: dbPlan, interval: billingInterval } = planConfig;
 
       // Get user ID from session metadata
       const userId = session.metadata?.userId;
@@ -179,7 +181,7 @@ export function registerStripeRoutes(app: Express) {
 
       // Update user's plan in database
       try {
-        await storage.updateUserPlan(userId, dbPlan);
+        await storage.updateUserPlan(userId, dbPlan as 'free' | 'standard' | 'premium', billingInterval as 'monthly' | 'yearly');
         
         // Store Stripe customer and subscription info if available
         if (session.customer) {
@@ -190,10 +192,10 @@ export function registerStripeRoutes(app: Express) {
           );
         }
         
-        console.log(`Successfully upgraded user ${userId} to ${dbPlan} plan`);
+        console.log(`Successfully upgraded user ${userId} to ${dbPlan} plan (${billingInterval})`);
         
         // Redirect to dashboard with success message
-        return res.redirect(`/dashboard?upgrade=success&plan=${dbPlan}`);
+        return res.redirect(`/dashboard?upgrade=success&plan=${dbPlan}&interval=${billingInterval}`);
         
       } catch (dbError) {
         console.error('Error updating user plan in database:', dbError);
@@ -255,23 +257,24 @@ export function registerStripeRoutes(app: Express) {
         if (userId && plan) {
           // Map plan names to database values  
           const planMapping = {
-            'free': 'free',
-            'standard': 'standard',
-            'standard-yearly': 'standard',
-            'premium': 'premium',
-            'premium-yearly': 'premium'
+            'free': { plan: 'free', interval: 'monthly' },
+            'standard': { plan: 'standard', interval: 'monthly' },
+            'standard-yearly': { plan: 'standard', interval: 'yearly' },
+            'premium': { plan: 'premium', interval: 'monthly' },
+            'premium-yearly': { plan: 'premium', interval: 'yearly' }
           };
 
-          const dbPlan = planMapping[plan as keyof typeof planMapping] as 'free' | 'standard' | 'premium';
-          if (dbPlan) {
-            await storage.updateUserPlan(userId, dbPlan);
+          const planConfig = planMapping[plan as keyof typeof planMapping];
+          if (planConfig) {
+            const { plan: dbPlan, interval: billingInterval } = planConfig;
+            await storage.updateUserPlan(userId, dbPlan as 'free' | 'standard' | 'premium', billingInterval as 'monthly' | 'yearly');
             
             // Store Stripe customer info
             if (session.customer) {
               await storage.updateUserStripeInfo(userId, session.customer as string, session.subscription as string);
             }
             
-            console.log(`Updated user ${userId} to plan ${dbPlan}`);
+            console.log(`Updated user ${userId} to plan ${dbPlan} (${billingInterval})`);
           }
         }
       } catch (error) {

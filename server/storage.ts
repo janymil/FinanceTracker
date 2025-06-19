@@ -53,7 +53,7 @@ export interface IStorage {
   upsertUser(user: any): Promise<User>;
   createUser(user: Omit<InsertUser, 'id' | 'createdAt' | 'updatedAt'>): Promise<User>;
   updateUserStripeInfo(userId: string, customerId: string, subscriptionId: string): Promise<User>;
-  updateUserPlan(userId: string, plan: string): Promise<User>;
+  updateUserPlan(userId: string, plan: 'free' | 'standard' | 'premium', billingInterval?: 'monthly' | 'yearly'): Promise<User>;
   updateUserPremiumStatus(userId: string, isPremium: boolean): Promise<User>;
 
   // Admin operations
@@ -236,16 +236,22 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUserPlan(userId: string, plan: string): Promise<User> {
+  async updateUserPlan(userId: string, plan: 'free' | 'standard' | 'premium', billingInterval: 'monthly' | 'yearly' = 'monthly'): Promise<User> {
     const [user] = await db
       .update(users)
-      .set({
+      .set({ 
         plan,
+        billingInterval,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId))
       .returning();
-    return user;
+
+    if (user.length === 0) {
+      throw new Error('User not found');
+    }
+
+    return user[0];
   }
 
   async updateUserPremiumStatus(userId: string, isPremium: boolean): Promise<User> {
@@ -339,7 +345,7 @@ export class DatabaseStorage implements IStorage {
   async updateTransaction(id: number, transaction: Partial<InsertTransaction>): Promise<Transaction> {
         // Only encrypt and update fields that are actually provided
         const updateFields: any = {};
-        
+
         // Only update fields that are explicitly provided
         if (transaction.amount !== undefined) {
             updateFields.amount = transaction.amount;
@@ -485,7 +491,7 @@ export class DatabaseStorage implements IStorage {
       .from(budgets)
       .where(eq(budgets.id, id))
       .limit(1);
-    
+
     return result[0];
   }
 
@@ -518,7 +524,7 @@ export class DatabaseStorage implements IStorage {
       .from(goals)
       .where(and(eq(goals.id, id), eq(goals.userId, userId)))
       .limit(1);
-    
+
     return result[0];
   }
 
@@ -870,7 +876,7 @@ export class DatabaseStorage implements IStorage {
     console.log(`Found ${activeRecurringTransactions.length} active recurring transactions for user ${userId}`);
     activeRecurringTransactions.forEach(recurring => {
       console.log(`Processing recurring transaction: ${recurring.id}, date: ${recurring.date}, frequency: ${recurring.recurringFrequency}`);
-      
+
       const nextOccurrence = this.calculateNextOccurrence(
         recurring.date,
         recurring.recurringFrequency || 'monthly',
@@ -901,8 +907,8 @@ export class DatabaseStorage implements IStorage {
 
   private calculateNextOccurrence(lastDate: Date, frequency: string, endDate: Date | null): Date | null {
     const now = new Date();
-    now.setHours(0, 0, 0, 0); // Reset to start of day for accurate comparison
-    
+    now.setHours(0, 0,0, 0); // Reset to start of day for accurate comparison
+
     const next = new Date(lastDate);
     next.setHours(0, 0, 0, 0); // Reset to start of day for accurate comparison
 
@@ -1074,7 +1080,7 @@ export class DatabaseStorage implements IStorage {
     };
 
     const result = await db.update(users).set(updateData).where(eq(users.id, userId));
-    
+
     // Verify the update was successful
     if (!result) {
       throw new Error('Failed to update user profile in database');
@@ -1636,7 +1642,7 @@ export class DatabaseStorage implements IStorage {
     await db.delete(goalContributions).where(eq(goalContributions.userId, userId));
     await db.delete(challengeActivities).where(eq(challengeActivities.userId, userId));
     await db.delete(milestoneAchievements).where(eq(milestoneAchievements.userId, userId));
-    
+
     // Remove friendships
     await db.delete(friendships).where(
       or(
