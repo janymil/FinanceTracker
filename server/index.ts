@@ -94,15 +94,25 @@ app.get('/robots.txt', (req, res) => {
 // Safe file serving with error handling
 function safeSendFile(res: Response, filePath: string, next: NextFunction) {
   try {
-    const resolvedPath = path.resolve(filePath);
+    const resolvedPath = path.resolve(process.cwd(), filePath);
+    console.log(`[STATIC FILE] Serving: ${resolvedPath}`);
+    
+    // Check if file exists before serving
+    if (!require('fs').existsSync(resolvedPath)) {
+      console.error(`[STATIC FILE] File not found: ${resolvedPath}`);
+      return next(); // Let React handle the route
+    }
+    
     res.sendFile(resolvedPath, (err) => {
       if (err) {
-        console.error(`Error serving static file: ${filePath}`, err);
-        res.status(500).json({ error: 'Error serving static content' });
+        console.error(`[STATIC FILE] Error serving ${filePath}:`, err.message);
+        console.error(`[STATIC FILE] Full error:`, err);
+        return next(); // Fallback to React app instead of 500
       }
+      console.log(`[STATIC FILE] Successfully served: ${filePath}`);
     });
   } catch (error) {
-    console.error(`Failed to resolve path: ${filePath}`, error);
+    console.error(`[STATIC FILE] Failed to resolve path ${filePath}:`, error);
     next();
   }
 }
