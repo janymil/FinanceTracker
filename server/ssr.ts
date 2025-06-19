@@ -29,6 +29,24 @@ export function renderPageForCrawler(route: string): string {
           description: 'Get help with FinanzerPro. Contact our support team for questions about features, billing, or technical assistance.',
           keywords: 'contact, support, help, customer service, technical assistance'
         };
+      case '/privacy-policy':
+        return {
+          title: 'FinanzerPro Privacy Policy - Data Protection & Security',
+          description: 'Learn how FinanzerPro protects your financial data. Our privacy policy explains data collection, usage, and security measures.',
+          keywords: 'privacy policy, data protection, security, financial data, privacy'
+        };
+      case '/terms-of-service':
+        return {
+          title: 'FinanzerPro Terms of Service - User Agreement',
+          description: 'Read FinanzerPro terms of service and user agreement. Understand your rights and responsibilities when using our platform.',
+          keywords: 'terms of service, user agreement, legal terms, conditions'
+        };
+      case '/cookie-policy':
+        return {
+          title: 'FinanzerPro Cookie Policy - Website Cookies & Tracking',
+          description: 'Understand how FinanzerPro uses cookies and tracking technologies to improve your experience and provide analytics.',
+          keywords: 'cookie policy, cookies, tracking, analytics, website data'
+        };
       default:
         return {
           title: 'FinanzerPro - Smart Personal Finance Management',

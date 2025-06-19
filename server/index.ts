@@ -97,7 +97,7 @@ function isCrawler(userAgent: string): boolean {
 }
 
 // SSR routes for SEO - only serve to crawlers
-const seoRoutes = ['/', '/pricing', '/help', '/contact'];
+const seoRoutes = ['/', '/pricing', '/help', '/contact', '/privacy-policy', '/terms-of-service', '/cookie-policy'];
 
 seoRoutes.forEach(route => {
   app.get(route, (req, res, next) => {
