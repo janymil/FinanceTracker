@@ -438,7 +438,7 @@ export default function Reports() {
               <CardHeader>
                 <CardTitle>Category Breakdown</CardTitle>
                 <CardDescription>
-                  Detailed spending analysis by category
+                  Detailed analysis by category for all transaction types
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -457,12 +457,13 @@ export default function Reports() {
                 ) : (
                   <div className="space-y-4">
                     {(financialSummary.transactionsByCategory as any[])
-                      .filter((cat: any) => cat.type === 'expense')
-                      .sort((a: any, b: any) => b.amount - a.amount)
+                      .sort((a: any, b: any) => Math.abs(b.amount) - Math.abs(a.amount))
                       .slice(0, 6)
                       .map((category: any, index: number) => {
-                        const percentage = financialSummary.totalExpenses > 0 
-                          ? (category.amount / financialSummary.totalExpenses) * 100 
+                        const isExpense = category.type === 'expense';
+                        const totalForType = isExpense ? financialSummary.totalExpenses : financialSummary.totalIncome;
+                        const percentage = totalForType > 0 
+                          ? (Math.abs(category.amount) / Math.abs(totalForType)) * 100 
                           : 0;
                         return (
                           <div key={index} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
@@ -475,7 +476,7 @@ export default function Reports() {
                                   {category.categoryName}
                                 </p>
                                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                                  {percentage.toFixed(1)}% of expenses
+                                  {percentage.toFixed(1)}% of {isExpense ? 'expenses' : 'income'}
                                 </p>
                               </div>
                             </div>
@@ -521,7 +522,7 @@ export default function Reports() {
                       <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
                     </div>
                     <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {Array.isArray(transactions) ? transactions.length : 0}
+                      {financialSummary?.totalTransactionCount || 0}
                     </div>
                     <span className="text-xs text-gray-600 dark:text-gray-400">Total Transactions</span>
                   </div>
@@ -532,7 +533,7 @@ export default function Reports() {
                     </div>
                     <div className="text-lg font-semibold text-gray-900 dark:text-white">
                       {Array.isArray(financialSummary?.transactionsByCategory) 
-                        ? financialSummary.transactionsByCategory.filter((cat: any) => cat.type === 'expense').length 
+                        ? financialSummary.transactionsByCategory.length 
                         : 0}
                     </div>
                     <span className="text-xs text-gray-600 dark:text-gray-400">Categories Used</span>
@@ -544,7 +545,7 @@ export default function Reports() {
                     </div>
                     <div className="text-lg font-semibold text-gray-900 dark:text-white">
                       ${((financialSummary?.totalIncome || 0) / Math.max(
-                        Array.isArray(transactions) ? transactions.filter((t: any) => t.type === 'income').length : 1, 
+                        financialSummary?.incomeTransactionCount || 1, 
                         1
                       )).toFixed(0)}
                     </div>
@@ -557,7 +558,7 @@ export default function Reports() {
                     </div>
                     <div className="text-lg font-semibold text-gray-900 dark:text-white">
                       ${((financialSummary?.totalExpenses || 0) / Math.max(
-                        Array.isArray(transactions) ? transactions.filter((t: any) => t.type === 'expense').length : 1, 
+                        financialSummary?.expenseTransactionCount || 1, 
                         1
                       )).toFixed(0)}
                     </div>
