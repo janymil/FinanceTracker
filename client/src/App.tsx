@@ -5,6 +5,8 @@ import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { SignedIn, SignedOut, useClerk, useUser } from "@clerk/clerk-react";
+import { initGA } from "@/lib/analytics";
+import { useAnalytics } from "@/hooks/use-analytics";
 
 // Core components loaded immediately
 import Header from "@/components/header";
@@ -51,6 +53,51 @@ const AppLoader = () => (
   </div>
 );
 
+function Router() {
+  // Track page views when routes change
+  useAnalytics();
+  
+  return (
+    <Switch>
+      {/* Public routes for unauthenticated users */}
+      <SignedOut>
+        <Route path="/" component={Landing} />
+        <Route path="/pricing" component={Pricing} />
+        <Route path="/privacy-policy" component={PrivacyPolicy} />
+        <Route path="/terms-of-service" component={TermsOfService} />
+        <Route path="/cookie-policy" component={CookiePolicy} />
+        <Route path="/contact" component={Contact} />
+        <Route path="/help" component={Help} />
+        <Route path="/auth" component={AuthPage} />
+        <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
+        <Route component={NotFoundPage} />
+      </SignedOut>
+
+      {/* Private routes for authenticated users */}
+      <SignedIn>
+        <Route path="/" component={Dashboard} />
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/transactions" component={TransactionsPage} />
+        <Route path="/income" component={IncomePage} />
+        <Route path="/expenses" component={ExpensesPage} />
+        <Route path="/budget" component={BudgetPage} />
+        <Route path="/categories" component={CategoriesPage} />
+        <Route path="/goals" component={GoalsPage} />
+        <Route path="/collaborative-goals" component={CollaborativeGoalsPage} />
+        <Route path="/collaborative-goals/:goalId" component={CollaborativeGoalDetailPage} />
+        <Route path="/trends" component={TrendsPage} />
+        <Route path="/calendar" component={CalendarPage} />
+        <Route path="/reports" component={ReportsPage} />
+        <Route path="/data-management" component={ExportPage} />
+        <Route path="/profile" component={ProfilePage} />
+        <Route path="/admin-analytics" component={AdminAnalytics} />
+        <Route path="/help" component={Help} />
+        <Route component={NotFoundPage} />
+      </SignedIn>
+    </Switch>
+  );
+}
+
 function AppContent() {
   const clerk = useClerk();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -66,20 +113,8 @@ function AppContent() {
 
   return (
     <>
-      {/* Public routes for unauthenticated users */}
+      <Router />
       <SignedOut>
-        <Switch>
-          <Route path="/" component={Landing} />
-          <Route path="/pricing" component={Pricing} />
-          <Route path="/privacy-policy" component={PrivacyPolicy} />
-          <Route path="/terms-of-service" component={TermsOfService} />
-          <Route path="/cookie-policy" component={CookiePolicy} />
-          <Route path="/contact" component={Contact} />
-          <Route path="/help" component={Help} />
-          <Route path="/auth" component={AuthPage} />
-          <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
-          <Route component={Landing} />
-        </Switch>
         <Footer />
         <CookieBanner />
       </SignedOut>
@@ -164,6 +199,16 @@ function AuthenticatedApp({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSi
 }
 
 export default function App() {
+  // Initialize Google Analytics when app loads
+  useEffect(() => {
+    // Verify required environment variable is present
+    if (!import.meta.env.VITE_GA_MEASUREMENT_ID) {
+      console.warn('Missing required Google Analytics key: VITE_GA_MEASUREMENT_ID');
+    } else {
+      initGA();
+    }
+  }, []);
+
   return (
     <>
       <AppContent />
