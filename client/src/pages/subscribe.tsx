@@ -11,11 +11,11 @@ export default function Subscribe() {
   const [, setLocation] = useLocation();
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
-  
+
   // Get user's current plan and billing interval
   const userPlan = user && 'plan' in user && user.plan ? user.plan : 'free';
   const userBillingInterval = user && 'billingInterval' in user && user.billingInterval ? user.billingInterval : 'monthly';
-  
+
   const isCurrentPlan = (plan: string, interval: 'monthly' | 'yearly') => {
     // For free plan, billing interval doesn't matter
     if (plan === 'free') {
@@ -23,7 +23,7 @@ export default function Subscribe() {
     }
     return userPlan === plan && userBillingInterval === interval;
   };
-  
+
   const getButtonText = (plan: string, interval: 'monthly' | 'yearly') => {
     if (isCurrentPlan(plan, interval)) {
       return 'This is your plan';
@@ -36,14 +36,14 @@ export default function Subscribe() {
       setLocation('/auth');
       return;
     }
-    
+
     setLoading(true);
     try {
       // Get the Clerk session token for authentication
       const token = await window.Clerk?.session?.getToken();
-      
+
       const planName = interval === 'year' ? `${plan}-yearly` : plan;
-      
+
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {

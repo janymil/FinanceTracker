@@ -5,6 +5,67 @@ import { storage } from "../storage";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
+// Handle subscription changes (upgrade/downgrade)
+async function handleSubscriptionChange(user: any, newPlan: string, res: Response) {
+  if (!stripe) {
+    return res.status(503).json({ message: "Payment processing unavailable" });
+  }
+
+  try {
+    // Get current subscription
+    const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+    
+    // Plan pricing mapping
+    const planPrices = {
+      'standard': 'price_standard_monthly', // Replace with actual Stripe price IDs
+      'standard-yearly': 'price_standard_yearly',
+      'premium': 'price_premium_monthly',
+      'premium-yearly': 'price_premium_yearly'
+    };
+
+    const newPriceId = planPrices[newPlan as keyof typeof planPrices];
+    if (!newPriceId) {
+      return res.status(400).json({ error: "Invalid plan selected" });
+    }
+
+    // Update subscription with proration
+    const updatedSubscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
+      items: [{
+        id: subscription.items.data[0].id,
+        price: newPriceId,
+      }],
+      proration_behavior: 'create_prorations', // This handles the credit/charge calculation
+      metadata: {
+        plan: newPlan,
+        userId: user.id
+      }
+    });
+
+    // Update user plan in database
+    const planMapping = {
+      'standard': { plan: 'standard', interval: 'monthly' },
+      'standard-yearly': { plan: 'standard', interval: 'yearly' },
+      'premium': { plan: 'premium', interval: 'monthly' },
+      'premium-yearly': { plan: 'premium', interval: 'yearly' }
+    };
+
+    const planConfig = planMapping[newPlan as keyof typeof planMapping];
+    if (planConfig) {
+      await storage.updateUserPlan(user.id, planConfig.plan as 'free' | 'standard' | 'premium', planConfig.interval as 'monthly' | 'yearly');
+    }
+
+    return res.json({ 
+      success: true, 
+      message: "Subscription updated successfully",
+      subscription: updatedSubscription 
+    });
+
+  } catch (error) {
+    console.error('Error updating subscription:', error);
+    return res.status(500).json({ error: "Failed to update subscription" });
+  }
+}
+
 export function registerStripeRoutes(app: Express) {
   // Create Stripe Checkout Session
   app.post("/api/create-checkout-session", isAuthenticated, async (req: any, res: Response) => {
@@ -24,6 +85,12 @@ export function registerStripeRoutes(app: Express) {
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Check if user has existing Stripe subscription
+      if (user.stripeSubscriptionId && user.plan !== 'free') {
+        // Handle subscription change (upgrade/downgrade)
+        return await handleSubscriptionChange(user, plan, res);
       }
       
       // Get email from Clerk token
@@ -205,6 +272,33 @@ export function registerStripeRoutes(app: Express) {
     } catch (error) {
       console.error('Error processing subscription success:', error);
       return res.redirect('/?error=subscription_processing_failed');
+    }
+  });
+
+  // Change Subscription Plan
+  app.post("/api/change-subscription", isAuthenticated, async (req: any, res: Response) => {
+    if (!stripe) {
+      return res.status(503).json({ message: "Payment processing unavailable" });
+    }
+
+    try {
+      const userId = getUserId(req);
+      const { plan } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || !user.stripeSubscriptionId) {
+        return res.status(404).json({ error: "No active subscription found" });
+      }
+
+      return await handleSubscriptionChange(user, plan, res);
+
+    } catch (error) {
+      console.error('Error changing subscription:', error);
+      res.status(500).json({ error: "Failed to change subscription" });
     }
   });
 
