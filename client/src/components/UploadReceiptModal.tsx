@@ -223,6 +223,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
       if (result.data.category && categories.length > 0) {
         const suggestedCategory = result.data.category.toLowerCase();
         console.log('QR AI suggested category:', result.data.category);
+        console.log('Available categories:', categories.map(c => c.name));
         
         // Try exact match first
         let matchedCategory = categories.find(cat => 
@@ -238,21 +239,27 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
           );
         }
         
-        // If still no match, try common category mappings
+        // If still no match, try common category mappings with more comprehensive keyword matching
         if (!matchedCategory) {
           const categoryMappings = {
-            'food': ['food', 'groceries', 'dining', 'restaurant'],
-            'transportation': ['transport', 'travel', 'fuel', 'gas', 'car'],
-            'entertainment': ['entertainment', 'leisure', 'fun', 'movie'],
-            'healthcare': ['health', 'medical', 'doctor', 'pharmacy'],
-            'shopping': ['shopping', 'retail', 'clothes', 'clothing'],
-            'utilities': ['utilities', 'electric', 'water', 'internet']
+            'food': ['food', 'groceries', 'dining', 'restaurant', 'meal', 'eat', 'cafe', 'aldi', 'supermarket', 'grocery'],
+            'transportation': ['transport', 'travel', 'fuel', 'gas', 'car', 'uber', 'taxi', 'bus', 'train'],
+            'entertainment': ['entertainment', 'leisure', 'fun', 'movie', 'cinema', 'game', 'sport'],
+            'healthcare': ['health', 'medical', 'doctor', 'pharmacy', 'hospital', 'medicine'],
+            'shopping': ['shopping', 'retail', 'clothes', 'clothing', 'store', 'mall'],
+            'utilities': ['utilities', 'electric', 'water', 'internet', 'phone', 'cable']
           };
           
           for (const [key, keywords] of Object.entries(categoryMappings)) {
-            if (keywords.some(keyword => suggestedCategory.includes(keyword))) {
+            if (keywords.some(keyword => 
+              suggestedCategory.includes(keyword) || 
+              keyword.includes(suggestedCategory.split(' ')[0]) ||
+              keyword.includes(suggestedCategory.split(' ').pop() || '')
+            )) {
               matchedCategory = categories.find(cat => 
-                cat.name.toLowerCase().includes(key)
+                cat.name.toLowerCase().includes(key) ||
+                cat.name.toLowerCase() === 'groceries' && key === 'food' ||
+                cat.name.toLowerCase() === 'food & dining' && key === 'food'
               );
               if (matchedCategory) break;
             }
@@ -347,21 +354,27 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
             );
           }
           
-          // If still no match, try common category mappings
+          // If still no match, try common category mappings with more comprehensive keyword matching
           if (!matchedCategory) {
             const categoryMappings = {
-              'food': ['food', 'groceries', 'dining', 'restaurant'],
-              'transportation': ['transport', 'travel', 'fuel', 'gas', 'car'],
-              'entertainment': ['entertainment', 'leisure', 'fun', 'movie'],
-              'healthcare': ['health', 'medical', 'doctor', 'pharmacy'],
-              'shopping': ['shopping', 'retail', 'clothes', 'clothing'],
-              'utilities': ['utilities', 'electric', 'water', 'internet']
+              'food': ['food', 'groceries', 'dining', 'restaurant', 'meal', 'eat', 'cafe', 'aldi', 'supermarket', 'grocery'],
+              'transportation': ['transport', 'travel', 'fuel', 'gas', 'car', 'uber', 'taxi', 'bus', 'train'],
+              'entertainment': ['entertainment', 'leisure', 'fun', 'movie', 'cinema', 'game', 'sport'],
+              'healthcare': ['health', 'medical', 'doctor', 'pharmacy', 'hospital', 'medicine'],
+              'shopping': ['shopping', 'retail', 'clothes', 'clothing', 'store', 'mall'],
+              'utilities': ['utilities', 'electric', 'water', 'internet', 'phone', 'cable']
             };
             
             for (const [key, keywords] of Object.entries(categoryMappings)) {
-              if (keywords.some(keyword => suggestedCategory.includes(keyword))) {
+              if (keywords.some(keyword => 
+                suggestedCategory.includes(keyword) || 
+                keyword.includes(suggestedCategory.split(' ')[0]) ||
+                keyword.includes(suggestedCategory.split(' ').pop() || '')
+              )) {
                 matchedCategory = categories.find(cat => 
-                  cat.name.toLowerCase().includes(key)
+                  cat.name.toLowerCase().includes(key) ||
+                  cat.name.toLowerCase() === 'groceries' && key === 'food' ||
+                  cat.name.toLowerCase() === 'food & dining' && key === 'food'
                 );
                 if (matchedCategory) break;
               }
