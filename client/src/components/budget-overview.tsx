@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Edit3 } from "lucide-react";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo } from "react";
 import { useLocation } from "wouter";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface Budget {
   id: number;
@@ -25,10 +27,28 @@ interface BudgetOverviewProps {
 export default function BudgetOverview({ className, isLimited = false }: BudgetOverviewProps) {
   const [, setLocation] = useLocation();
   const { isReady, user } = useClerkUserReady();
-  const [budgets, setBudgets] = useState<any[]>([]);
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [budgetsLoading, setBudgetsLoading] = useState(false);
-  const [transactionsLoading, setTransactionsLoading] = useState(false);
+
+  // Fetch budgets using React Query
+  const { data: budgets = [], isLoading: budgetsLoading } = useQuery({
+    queryKey: ['budgets', user?.id],
+    enabled: isReady && !isLimited && !!user?.id,
+    staleTime: 0,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/budgets");
+      return response.json();
+    },
+  });
+
+  // Fetch transactions using React Query  
+  const { data: transactions = [], isLoading: transactionsLoading } = useQuery({
+    queryKey: ['transactions', user?.id],
+    enabled: isReady && !isLimited && !!user?.id,
+    staleTime: 0,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/transactions");
+      return response.json();
+    },
+  });
 
   // Get auth headers for Clerk authentication
   const getAuthHeaders = async (): Promise<Record<string, string>> => {

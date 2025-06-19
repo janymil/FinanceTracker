@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Lightbulb, Sparkles, TrendingUp, GraduationCap } from "lucide-react";
@@ -65,11 +65,10 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     },
   });
 
-  const generateTip = async () => {
-    if (!summary) return;
-    
-    try {
-      setIsGenerating(true);
+  // React Query mutation for generating tips
+  const generateTipMutation = useMutation({
+    mutationFn: async () => {
+      if (!summary) throw new Error("No financial summary available");
       
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
@@ -82,7 +81,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             categories: summary.transactionsByCategory || [],
             month: monthName,
             year: currentDate.getFullYear(),
-            timestamp: Date.now() // Force fresh generation
+            timestamp: Date.now()
           }
         }),
         headers: {
@@ -90,37 +89,41 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
         }
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.tip && data.tip.trim()) {
-          const cleanedTip = cleanAIText(data.tip);
-          setCurrentTip(cleanedTip);
-          // Save to localStorage for persistence
-          if (user?.id) {
-            localStorage.setItem(`ai-tip-${user.id}`, cleanedTip);
-          }
-          toast({
-            title: "AI Tip Generated",
-            description: "New financial advice based on your spending data",
-          });
-        }
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to generate AI tip. Please try again.",
-          variant: "destructive",
-        });
+      if (!response.ok) {
+        throw new Error("Failed to generate AI tip");
       }
-    } catch (error) {
+
+      const data = await response.json();
+      if (!data.tip || !data.tip.trim()) {
+        throw new Error("No tip received from AI");
+      }
+
+      return cleanAIText(data.tip);
+    },
+    onMutate: () => {
+      setIsGenerating(true);
+    },
+    onSuccess: (cleanedTip: string) => {
+      setCurrentTip(cleanedTip);
+      if (user?.id) {
+        localStorage.setItem(`ai-tip-${user.id}`, cleanedTip);
+      }
+      toast({
+        title: "AI Tip Generated",
+        description: "New financial advice based on your spending data",
+      });
+    },
+    onError: () => {
       toast({
         title: "Error",
         description: "Failed to generate AI tip. Please try again.",
         variant: "destructive",
       });
-    } finally {
+    },
+    onSettled: () => {
       setIsGenerating(false);
     }
-  };
+  });
 
   return (
     <Card className="h-full">
@@ -147,7 +150,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                 </p>
               </div>
               <Button 
-                onClick={generateTip}
+                onClick={() => generateTipMutation.mutate()}
                 disabled={!summary || isGenerating}
                 className="flex items-center gap-2"
               >
