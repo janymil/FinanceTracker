@@ -31,6 +31,18 @@ app.use(cookieConsentMiddleware);
 // Serve static mascot images
 app.use('/uploads', express.static('uploads'));
 
+// Serve specific SEO files
+app.get('/sitemap.xml', (req, res) => {
+  res.sendFile(path.resolve('public/sitemap.xml'));
+});
+
+app.get('/robots.txt', (req, res) => {
+  res.sendFile(path.resolve('public/robots.txt'));
+});
+
+// Serve static SEO files
+app.use(express.static('public'));
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
