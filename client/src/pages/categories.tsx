@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,10 +35,9 @@ const categoryColors = [
 ];
 
 export default function Categories() {
-  const { user } = useAuth();
+  const { isReady, user } = useClerkUserReady();
   const { toast } = useToast();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [newCategory, setNewCategory] = useState({
@@ -47,92 +47,81 @@ export default function Categories() {
     type: "expense" as "income" | "expense"
   });
 
-  const fetchCategories = async () => {
-    if (!user?.id) return;
-    
-    try {
-      setLoading(true);
+  const { data: categories = [], isLoading } = useQuery<Category[]>({
+    queryKey: ["categories"],
+    queryFn: async () => {
       const response = await apiRequest("GET", "/api/categories");
-      const data = await response.json();
-      setCategories(data);
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
-      setCategories([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return response.json();
+    },
+    enabled: isReady && !!user?.id
+  });
 
-  useEffect(() => {
-    fetchCategories();
-  }, [user?.id]);
-
-  const createCategoryAction = async (categoryData: typeof newCategory) => {
-    try {
+  const createCategoryMutation = useMutation({
+    mutationFn: async (categoryData: typeof newCategory) => {
       const res = await apiRequest("POST", "/api/categories", categoryData);
-      const newCat = await res.json();
-      
-      // Update local state immediately
-      setCategories(prev => [...prev, newCat]);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
       setIsDialogOpen(false);
       setNewCategory({ name: "", icon: "dollar-sign", color: "#3B82F6", type: "expense" });
-      
       toast({
         title: "Category Created",
         description: "New category has been added successfully",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     }
-  };
+  });
 
-  const updateCategoryAction = async ({ id, ...data }: { id: number } & typeof newCategory) => {
-    try {
+  const updateCategoryMutation = useMutation({
+    mutationFn: async ({ id, ...data }: { id: number } & typeof newCategory) => {
       const res = await apiRequest("PUT", `/api/categories/${id}`, data);
-      const updatedCat = await res.json();
-      
-      // Update local state immediately
-      setCategories(prev => prev.map(cat => cat.id === updatedCat.id ? updatedCat : cat));
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
       setEditingCategory(null);
       setIsDialogOpen(false);
-      
       toast({
         title: "Category Updated",
         description: "Category has been updated successfully",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     }
-  };
+  });
 
-  const deleteCategoryAction = async (id: number) => {
-    try {
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (id: number) => {
       const res = await apiRequest("DELETE", `/api/categories/${id}`);
-      await res.json();
-      
-      // Update local state immediately
-      setCategories(prev => prev.filter(cat => cat.id !== id));
-      
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast({
         title: "Category Deleted",
         description: "Category has been removed successfully",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     }
-  };
+  });
 
   const expenseCategories = categories.filter((cat: Category) => cat.type === "expense");
   const incomeCategories = categories.filter((cat: Category) => cat.type === "income");
@@ -141,9 +130,9 @@ export default function Categories() {
     if (!newCategory.name.trim()) return;
 
     if (editingCategory) {
-      updateCategoryAction({ id: editingCategory.id, ...newCategory });
+      updateCategoryMutation.mutate({ id: editingCategory.id, ...newCategory });
     } else {
-      createCategoryAction(newCategory);
+      createCategoryMutation.mutate(newCategory);
     }
   };
 
@@ -167,7 +156,7 @@ export default function Categories() {
       });
       return;
     }
-    deleteCategoryAction(id);
+    deleteCategoryMutation.mutate(id);
   };
 
   const CategoryCard = ({ category }: { category: Category }) => {
