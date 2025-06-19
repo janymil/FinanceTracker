@@ -43,22 +43,26 @@ export function getCurrentAppConfig(): AppConfiguration {
       ],
       standard: [
         "Up to 100 transactions",
+        "Receipt OCR scanning with mobile camera support",
+        "Mobile QR code upload for cross-device receipt scanning",
         "AI-powered expense categorization",
-        "Budget management and tracking",
-        "Financial goals setting",
-        "Transaction reminders",
-        "Calendar view of transactions",
-        "Basic reports and analytics",
-        "Export data functionality"
+        "Budget management and tracking with visual progress indicators", 
+        "Financial goals setting with collaborative sharing",
+        "Transaction reminders for recurring bills and payments",
+        "Calendar view of transactions with monthly grid",
+        "Financial health analysis with AI-powered recommendations",
+        "Basic reports and analytics with filtering options"
       ],
       premium: [
         "Unlimited transactions",
-        "Advanced AI insights and predictions",
-        "Trend analysis and forecasting",
-        "Cloud backup with configurable retention",
-        "Data import from multiple formats (CSV, Excel, JSON)",
-        "Import from financial apps (Mint, QuickBooks, YNAB)",
-        "Advanced analytics and reports",
+        "AI Financial Tips with personalized recommendations",
+        "Financial Mascot - personalized AI companion with mood indicators",
+        "Advanced AI insights and trend predictions with forecasting",
+        "Automatic cloud backup at 2:00 AM with restore functionality",
+        "Data export in PDF, Excel, CSV, and JSON formats",
+        "Data import from Mint, QuickBooks, YNAB, Personal Capital, bank exports",
+        "Advanced analytics with seasonal patterns and comparative analysis",
+        "Cloud receipt storage for all uploaded images",
         "Priority customer support"
       ]
     },
@@ -105,11 +109,18 @@ export function getCurrentAppConfig(): AppConfiguration {
         "6. Monitor your progress on the dashboard"
       ],
       commonTasks: [
-        "Adding transactions: Use the '+' button or go to Transactions page",
-        "Setting budgets: Go to Budget page and create category-based budgets",
-        "Viewing reports: Check the Reports page for spending analysis",
-        "Exporting data: Use Data Management for export/import (Premium)",
-        "Setting up backup: Configure automatic cloud backup (Premium)"
+        "Adding transactions: Use the '+' button in header or 'Add Transaction' on dashboard",
+        "Receipt scanning: Click 'Upload Image' on transaction pages for OCR extraction (Standard+)",
+        "Mobile QR upload: Click 'Upload Image' → 'Scan with Phone' for cross-device receipt scanning",
+        "Editing transactions: Click any transaction in lists or dashboard widgets to modify",
+        "Setting budgets: Go to Budgets page and create category-based spending limits (Standard+)",
+        "Creating goals: Use Goals page to set savings targets with deadlines (Standard+)",
+        "Viewing calendar: Check Calendar page for monthly transaction grid view (Standard+)",
+        "Managing categories: Use Categories page to create custom expense/income categories",
+        "Checking reports: Reports page shows spending breakdowns and financial analysis",
+        "AI predictions: Trends page provides forecasting and pattern analysis (Premium)",
+        "Cloud backup: Data Management page for automatic backup and restore (Premium)",
+        "Subscription: Profile page for plan upgrades and billing management"
       ],
       support: [
         "Use this AI chat for immediate help with app features",
