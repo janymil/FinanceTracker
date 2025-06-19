@@ -648,12 +648,6 @@ export function registerStripeRoutes(app: Express) {
       const portalSession = await stripe.billingPortal.sessions.create({
         customer: user.stripeCustomerId,
         return_url: returnUrl,
-        flow_data: {
-          type: 'subscription_update',
-          subscription_update: {
-            subscription: user.stripeSubscriptionId
-          }
-        }
       });
 
       res.json({ url: portalSession.url });
