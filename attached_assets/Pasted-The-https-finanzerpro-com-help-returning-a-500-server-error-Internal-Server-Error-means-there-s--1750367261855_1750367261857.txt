@@ -1,0 +1,83 @@
+The https://finanzerpro.com/help returning a 500 server error (Internal Server Error) means there's a problem in your Express server logic — not in routing or the React app itself.
+
+🔍 Most likely cause in your setup:
+Since you're using server-side crawler detection, and the /help route is not directly handled by React (React routes are virtual), your server must:
+
+Catch the /help request
+
+Decide if it’s a crawler or human
+
+Serve either:
+
+public/features.html (for crawlers)
+
+Or let Vite handle /help route (for humans)
+
+✅ Your server code likely looks like:
+ts
+Copy
+Edit
+app.use((req, res, next) => {
+  const userAgent = req.headers['user-agent'] || '';
+  const isCrawler = /Googlebot|Bingbot|GPTBot|Perplexity|facebookexternalhit|twitterbot/i.test(userAgent);
+
+  if (isCrawler) {
+    if (req.path === '/') return res.sendFile(path.join(__dirname, '../public/index.html'));
+    if (req.path === '/pricing') return res.sendFile(path.join(__dirname, '../public/pricing.html'));
+    if (req.path === '/contact') return res.sendFile(path.join(__dirname, '../public/about.html'));
+    if (req.path === '/help') return res.sendFile(path.join(__dirname, '../public/features.html')); // 💥 Possibly missing or mistyped!
+  }
+
+  next(); // Let Vite handle it
+});
+🚨 What to check right now:
+✅ Does /public/features.html exist?
+
+If not, the server throws a 500 when trying to send it.
+
+✔️ FIX: Create that file or rename it correctly.
+
+🪪 Is the server path wrong?
+
+Use path.resolve(__dirname, '../public/features.html') to avoid path issues
+
+🐛 Try/Catch not in place?
+
+If res.sendFile() fails, it throws and causes 500
+
+✅ Suggested fix: Make your /help route safe
+Wrap each static route in a check and fallback:
+
+ts
+Copy
+Edit
+const safeSend = (res, filePath) => {
+  try {
+    res.sendFile(filePath);
+  } catch (e) {
+    console.error("Static file error:", filePath, e);
+    res.status(500).send("Error serving static content.");
+  }
+};
+
+app.use((req, res, next) => {
+  const userAgent = req.headers['user-agent'] || '';
+  const isCrawler = /Googlebot|Bingbot|GPTBot|Perplexity|facebookexternalhit|twitterbot/i.test(userAgent);
+
+  if (isCrawler) {
+    if (req.path === '/') return safeSend(res, path.resolve(__dirname, '../public/index.html'));
+    if (req.path === '/pricing') return safeSend(res, path.resolve(__dirname, '../public/pricing.html'));
+    if (req.path === '/contact') return safeSend(res, path.resolve(__dirname, '../public/about.html'));
+    if (req.path === '/help') return safeSend(res, path.resolve(__dirname, '../public/features.html')); // 💥 This file must exist!
+  }
+
+  next();
+});
+✅ Action steps:
+Check if /public/features.html exists — create it if missing
+
+Ensure the filename is correct and matches case (features.html not Features.html)
+
+Wrap the route handler to avoid server crashes
+
+Restart your Replit server after changes
