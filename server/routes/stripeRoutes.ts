@@ -36,7 +36,7 @@ async function handleSubscriptionChange(user: any, newPlan: string, res: Respons
 
     const baseUrl = process.env.BASE_URL || 'http://localhost:5000';
     
-    // Create checkout session for subscription modification with proration
+    // Create checkout session for subscription modification
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: user.stripeCustomerId,
@@ -45,9 +45,6 @@ async function handleSubscriptionChange(user: any, newPlan: string, res: Respons
         price: newPriceId,
         quantity: 1,
       }],
-      subscription_data: {
-        proration_behavior: 'create_prorations',
-      },
       success_url: `${baseUrl}/api/subscription-success?plan=${newPlan}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/subscribe`,
       metadata: {
@@ -239,6 +236,18 @@ export function registerStripeRoutes(app: Express) {
       const userId = session.metadata?.userId;
       if (!userId || userId === 'anonymous') {
         return res.redirect('/?error=user_not_found');
+      }
+
+      // Handle existing subscription if this is an upgrade
+      if (session.metadata?.existingSubscriptionId) {
+        try {
+          // Cancel the existing subscription
+          await stripe.subscriptions.cancel(session.metadata.existingSubscriptionId);
+          console.log(`Cancelled existing subscription: ${session.metadata.existingSubscriptionId}`);
+        } catch (cancelError) {
+          console.error('Error cancelling existing subscription:', cancelError);
+          // Continue with the process even if cancellation fails
+        }
       }
 
       // Update user's plan in database
