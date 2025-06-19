@@ -15,12 +15,12 @@ async function handleSubscriptionChange(user: any, newPlan: string, res: Respons
     // Get current subscription
     const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
     
-    // Plan pricing mapping
+    // Plan pricing mapping using environment variables
     const planPrices = {
-      'standard': 'price_standard_monthly', // Replace with actual Stripe price IDs
-      'standard-yearly': 'price_standard_yearly',
-      'premium': 'price_premium_monthly',
-      'premium-yearly': 'price_premium_yearly'
+      'standard': process.env.STRIPE_STANDARD_MONTHLY_PRICE_ID,
+      'standard-yearly': process.env.STRIPE_STANDARD_YEARLY_PRICE_ID,
+      'premium': process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID,
+      'premium-yearly': process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID
     };
 
     const newPriceId = planPrices[newPlan as keyof typeof planPrices];
