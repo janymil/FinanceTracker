@@ -94,73 +94,98 @@ app.get('/robots.txt', (req, res) => {
 // Serve static SEO files
 app.use(express.static('public'));
 
-// Server-side rendered routes for crawlers
-app.get('/', (req, res, next) => {
-  // Check if it's a crawler by User-Agent
+// Enhanced crawler detection function
+function isCrawlerRequest(req: Request): boolean {
   const userAgent = req.get('User-Agent') || '';
-  const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|linkedinbot|slackbot|telegrambot|googlebot|bingbot|yahoobot|duckduckbot|baiduspider|yandexbot|applebot|petalbot|semrushbot|ahrefsbot|mj12bot|dotbot|screaming frog|chatgpt|gptbot|ccbot|anthropic|claude/i.test(userAgent);
+  const ip = req.ip || req.connection.remoteAddress || '';
+  const referer = req.get('Referer') || '';
+  
+  // Log all requests for debugging crawler access
+  console.log(`[CRAWLER DEBUG] ${req.method} ${req.path}`);
+  console.log(`User-Agent: ${userAgent}`);
+  console.log(`Accept: ${req.get('Accept')}`);
+  console.log(`Referer: ${referer}`);
+  console.log(`Headers count: ${Object.keys(req.headers).length}`);
+  console.log('---');
+  
+  // Comprehensive crawler detection patterns
+  const crawlerPatterns = [
+    // Search engines
+    /googlebot/i, /bingbot/i, /slurp/i, /duckduckbot/i, /baiduspider/i, /yandexbot/i,
+    // Social media crawlers
+    /facebookexternalhit/i, /twitterbot/i, /linkedinbot/i, /whatsapp/i, /telegrambot/i,
+    // AI crawlers - expanded patterns
+    /chatgpt-user/i, /gptbot/i, /ccbot/i, /anthropic/i, /claude/i,
+    /perplexity/i, /perplexitybot/i, /gemini/i, /bard/i, /openai/i,
+    /meta-externalagent/i, /meta-externalfetcher/i,
+    // Generic patterns (removed /bot/i as it's too broad)
+    /crawler/i, /spider/i, /crawling/i, /scraper/i, /fetch/i,
+    // SEO tools
+    /semrushbot/i, /ahrefsbot/i, /mj12bot/i, /dotbot/i, /screaming.frog/i
+  ];
+  
+  // Check user agent patterns
+  const isBot = crawlerPatterns.some(pattern => pattern.test(userAgent));
+  
+  // Additional fallback: serve SSR for any request with minimal headers (likely a bot)
+  const hasMinimalHeaders = Object.keys(req.headers).length <= 6;
+  const hasBasicAccept = !req.get('Accept') || req.get('Accept') === '*/*' || req.get('Accept')?.includes('text/html');
+  const noJavaScriptHeaders = !req.get('Sec-Fetch-Site') && !req.get('Sec-Fetch-Mode');
+  
+  const isCrawler = isBot || (hasMinimalHeaders && hasBasicAccept && noJavaScriptHeaders);
   
   if (isCrawler) {
+    console.log(`[CRAWLER DETECTED] Serving SSR for: ${userAgent}`);
+  }
+  
+  return isCrawler;
+}
+
+// Server-side rendered routes for crawlers
+app.get('/', (req, res, next) => {
+  if (isCrawlerRequest(req)) {
     return landingPageSSR(req, res);
   }
   next();
 });
 
 app.get('/help', (req, res, next) => {
-  const userAgent = req.get('User-Agent') || '';
-  const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|linkedinbot|slackbot|telegrambot|googlebot|bingbot|yahoobot|duckduckbot|baiduspider|yandexbot|applebot|petalbot|semrushbot|ahrefsbot|mj12bot|dotbot|screaming frog|chatgpt|gptbot|ccbot|anthropic|claude/i.test(userAgent);
-  
-  if (isCrawler) {
+  if (isCrawlerRequest(req)) {
     return helpPageSSR(req, res);
   }
   next();
 });
 
 app.get('/pricing', (req, res, next) => {
-  const userAgent = req.get('User-Agent') || '';
-  const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|linkedinbot|slackbot|telegrambot|googlebot|bingbot|yahoobot|duckduckbot|baiduspider|yandexbot|applebot|petalbot|semrushbot|ahrefsbot|mj12bot|dotbot|screaming frog|chatgpt|gptbot|ccbot|anthropic|claude/i.test(userAgent);
-  
-  if (isCrawler) {
+  if (isCrawlerRequest(req)) {
     return pricingPageSSR(req, res);
   }
   next();
 });
 
 app.get('/contact', (req, res, next) => {
-  const userAgent = req.get('User-Agent') || '';
-  const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|linkedinbot|slackbot|telegrambot|googlebot|bingbot|yahoobot|duckduckbot|baiduspider|yandexbot|applebot|petalbot|semrushbot|ahrefsbot|mj12bot|dotbot|screaming frog|chatgpt|gptbot|ccbot|anthropic|claude/i.test(userAgent);
-  
-  if (isCrawler) {
+  if (isCrawlerRequest(req)) {
     return contactPageSSR(req, res);
   }
   next();
 });
 
 app.get('/privacy-policy', (req, res, next) => {
-  const userAgent = req.get('User-Agent') || '';
-  const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|linkedinbot|slackbot|telegrambot|googlebot|bingbot|yahoobot|duckduckbot|baiduspider|yandexbot|applebot|petalbot|semrushbot|ahrefsbot|mj12bot|dotbot|screaming frog|chatgpt|gptbot|ccbot|anthropic|claude/i.test(userAgent);
-  
-  if (isCrawler) {
+  if (isCrawlerRequest(req)) {
     return privacyPageSSR(req, res);
   }
   next();
 });
 
 app.get('/terms-of-service', (req, res, next) => {
-  const userAgent = req.get('User-Agent') || '';
-  const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|linkedinbot|slackbot|telegrambot|googlebot|bingbot|yahoobot|duckduckbot|baiduspider|yandexbot|applebot|petalbot|semrushbot|ahrefsbot|mj12bot|dotbot|screaming frog|chatgpt|gptbot|ccbot|anthropic|claude/i.test(userAgent);
-  
-  if (isCrawler) {
+  if (isCrawlerRequest(req)) {
     return termsPageSSR(req, res);
   }
   next();
 });
 
 app.get('/cookie-policy', (req, res, next) => {
-  const userAgent = req.get('User-Agent') || '';
-  const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|linkedinbot|slackbot|telegrambot|googlebot|bingbot|yahoobot|duckduckbot|baiduspider|yandexbot|applebot|petalbot|semrushbot|ahrefsbot|mj12bot|dotbot|screaming frog|chatgpt|gptbot|ccbot|anthropic|claude/i.test(userAgent);
-  
-  if (isCrawler) {
+  if (isCrawlerRequest(req)) {
     return cookiePolicySSR(req, res);
   }
   next();
