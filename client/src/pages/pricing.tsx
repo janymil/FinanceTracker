@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, X, Crown, TrendingUp, Star } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { SEO } from "@/components/SEO";
 
 export default function Pricing() {
   const [, setLocation] = useLocation();
@@ -38,7 +39,14 @@ export default function Pricing() {
   const isCurrentPlan = (plan: string) => userPlan === plan;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <>
+      <SEO 
+        title="Pricing Plans - Choose Your Financial Plan | FinanzerPro"
+        description="Compare FinanzerPro pricing plans. Start free with basic expense tracking or upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features like AI insights and cloud backup."
+        keywords="finanzerpro pricing, subscription plans, expense tracker cost, personal finance app pricing, budget app plans"
+        canonical="https://finanzerpro.com/pricing"
+      />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Hero Section */}
       <section className="pt-32 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -450,5 +458,6 @@ export default function Pricing() {
         </div>
       </section>
     </div>
+    </>
   );
 }

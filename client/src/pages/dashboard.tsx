@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo, startTransition, useDeferredValue, useTra
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardSkeleton } from "@/components/dashboard-skeleton";
+import { SEO } from "@/components/SEO";
 
 
 // Core components for immediate display
@@ -337,8 +338,15 @@ export default function Dashboard() {
   };
 
   return (
-    <div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <>
+      <SEO 
+        title="Dashboard - Financial Overview | FinanzerPro"
+        description="View your complete financial picture with real-time expense tracking, budget insights, and AI-powered recommendations. Manage transactions and monitor your financial health."
+        keywords="personal finance dashboard, expense tracking, budget overview, financial insights, money management, transaction history"
+        canonical="https://finanzerpro.com/dashboard"
+      />
+      <div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -710,5 +718,6 @@ export default function Dashboard() {
         )}
       </div>
     </div>
+    </>
   );
 }

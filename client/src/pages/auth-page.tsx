@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 import { DollarSign, TrendingUp, Shield } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SEO } from "@/components/SEO";
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
