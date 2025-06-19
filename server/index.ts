@@ -122,36 +122,27 @@ function isCrawler(userAgent: string): boolean {
   return /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|chatgpt-user|gptbot|ccbot|anthropic|claude-bot|perplexitybot|meta-externalagent|semrushbot|ahrefsbot|mj12bot|dotbot/i.test(userAgent);
 }
 
-app.get('/', (req, res, next) => {
-  const userAgent = req.get('User-Agent') || '';
-  if (isCrawler(userAgent)) {
-    return safeSendFile(res, 'public/index.html', next);
-  }
-  next();
-});
+// Centralized crawler route handler with comprehensive error handling
+const crawlerRoutes = [
+  { path: '/', file: 'public/index.html' },
+  { path: '/pricing', file: 'public/pricing.html' },
+  { path: '/help', file: 'public/features.html' },
+  { path: '/contact', file: 'public/about.html' }
+];
 
-app.get('/pricing', (req, res, next) => {
-  const userAgent = req.get('User-Agent') || '';
-  if (isCrawler(userAgent)) {
-    return safeSendFile(res, 'public/pricing.html', next);
-  }
-  next();
-});
-
-app.get('/help', (req, res, next) => {
-  const userAgent = req.get('User-Agent') || '';
-  if (isCrawler(userAgent)) {
-    return safeSendFile(res, 'public/features.html', next);
-  }
-  next();
-});
-
-app.get('/contact', (req, res, next) => {
-  const userAgent = req.get('User-Agent') || '';
-  if (isCrawler(userAgent)) {
-    return safeSendFile(res, 'public/about.html', next);
-  }
-  next();
+crawlerRoutes.forEach(({ path, file }) => {
+  app.get(path, (req, res, next) => {
+    const userAgent = req.get('User-Agent') || '';
+    console.log(`[ROUTE ${path}] User-Agent: ${userAgent.substring(0, 50)}...`);
+    
+    if (isCrawler(userAgent)) {
+      console.log(`[ROUTE ${path}] Crawler detected, serving static file: ${file}`);
+      return safeSendFile(res, file, next);
+    }
+    
+    console.log(`[ROUTE ${path}] Human user, passing to React app`);
+    next();
+  });
 });
 
 app.use((req, res, next) => {
