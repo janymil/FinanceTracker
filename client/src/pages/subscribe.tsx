@@ -12,6 +12,18 @@ export default function Subscribe() {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
   
+  // Get user's current plan
+  const userPlan = user && 'plan' in user && user.plan ? user.plan : 'free';
+  
+  const isCurrentPlan = (plan: string) => userPlan === plan;
+  
+  const getButtonText = (plan: string) => {
+    if (isCurrentPlan(plan)) {
+      return 'This is your plan';
+    }
+    return 'Subscribe Now';
+  };
+
   const handleSubscribe = async (plan: string, interval: 'month' | 'year' = 'month') => {
     if (!user) {
       setLocation('/auth');
@@ -123,7 +135,14 @@ export default function Subscribe() {
             <TabsContent value="monthly">
               <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
                 {/* Standard Plan */}
-                <Card className="relative">
+                <Card className={`relative ${isCurrentPlan('standard') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}`}>
+                  {isCurrentPlan('standard') && (
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                      <Badge className="bg-green-500 text-white px-4 py-1">
+                        Current Plan
+                      </Badge>
+                    </div>
+                  )}
                   <CardHeader className="text-center pb-8 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-transparent">
                     <div className="p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-blue-100 dark:bg-blue-900">
                       <TrendingUp className="h-8 w-8 text-blue-600" />
@@ -145,22 +164,49 @@ export default function Subscribe() {
                       ))}
                     </div>
                     <Button 
-                      onClick={() => handleSubscribe('standard', 'month')}
-                      disabled={loading}
-                      className="w-full py-6 text-lg bg-blue-600 hover:bg-blue-700"
+                      onClick={() => !isCurrentPlan('standard') && handleSubscribe('standard', 'month')}
+                      disabled={loading || isCurrentPlan('standard')}
+                      className={`w-full py-6 text-lg ${
+                        isCurrentPlan('standard') 
+                          ? 'bg-green-600 hover:bg-green-600 cursor-default' 
+                          : 'bg-blue-600 hover:bg-blue-700'
+                      }`}
                     >
-                      <CreditCard className="h-5 w-5 mr-2" />
-                      {loading ? 'Processing...' : `Subscribe for $${plans.standard.monthly}/month`}
+                      {isCurrentPlan('standard') ? (
+                        <>
+                          <Badge className="h-5 w-5 mr-2" />
+                          {getButtonText('standard')}
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard className="h-5 w-5 mr-2" />
+                          {loading ? 'Processing...' : `Subscribe for $${plans.standard.monthly}/month`}
+                        </>
+                      )}
                     </Button>
                   </CardContent>
                 </Card>
 
                 {/* Premium Plan */}
-                <Card className="relative border-purple-200 dark:border-purple-800">
+                <Card className={`relative ${
+                  isCurrentPlan('premium') 
+                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
+                    : 'border-purple-200 dark:border-purple-800'
+                }`}>
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-purple-600 text-white px-4 py-1">
-                      <Crown className="h-3 w-3 mr-1" />
-                      Most Popular
+                    <Badge className={`px-4 py-1 ${
+                      isCurrentPlan('premium')
+                        ? 'bg-green-500 text-white'
+                        : 'bg-purple-600 text-white'
+                    }`}>
+                      {isCurrentPlan('premium') ? (
+                        'Current Plan'
+                      ) : (
+                        <>
+                          <Crown className="h-3 w-3 mr-1" />
+                          Most Popular
+                        </>
+                      )}
                     </Badge>
                   </div>
                   <CardHeader className="text-center pb-8 bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-transparent">
@@ -184,12 +230,25 @@ export default function Subscribe() {
                       ))}
                     </div>
                     <Button 
-                      onClick={() => handleSubscribe('premium', 'month')}
-                      disabled={loading}
-                      className="w-full py-6 text-lg bg-purple-600 hover:bg-purple-700"
+                      onClick={() => !isCurrentPlan('premium') && handleSubscribe('premium', 'month')}
+                      disabled={loading || isCurrentPlan('premium')}
+                      className={`w-full py-6 text-lg ${
+                        isCurrentPlan('premium') 
+                          ? 'bg-green-600 hover:bg-green-600 cursor-default' 
+                          : 'bg-purple-600 hover:bg-purple-700'
+                      }`}
                     >
-                      <CreditCard className="h-5 w-5 mr-2" />
-                      {loading ? 'Processing...' : `Subscribe for $${plans.premium.monthly}/month`}
+                      {isCurrentPlan('premium') ? (
+                        <>
+                          <Badge className="h-5 w-5 mr-2" />
+                          {getButtonText('premium')}
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard className="h-5 w-5 mr-2" />
+                          {loading ? 'Processing...' : `Subscribe for $${plans.premium.monthly}/month`}
+                        </>
+                      )}
                     </Button>
                   </CardContent>
                 </Card>
@@ -199,7 +258,14 @@ export default function Subscribe() {
             <TabsContent value="yearly">
               <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
                 {/* Standard Plan - Yearly */}
-                <Card className="relative">
+                <Card className={`relative ${isCurrentPlan('standard') ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}`}>
+                  {isCurrentPlan('standard') && (
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                      <Badge className="bg-green-500 text-white px-4 py-1">
+                        Current Plan
+                      </Badge>
+                    </div>
+                  )}
                   <CardHeader className="text-center pb-8 bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-transparent">
                     <div className="p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-blue-100 dark:bg-blue-900">
                       <TrendingUp className="h-8 w-8 text-blue-600" />
@@ -226,22 +292,49 @@ export default function Subscribe() {
                       ))}
                     </div>
                     <Button 
-                      onClick={() => handleSubscribe('standard', 'year')}
-                      disabled={loading}
-                      className="w-full py-6 text-lg bg-blue-600 hover:bg-blue-700"
+                      onClick={() => !isCurrentPlan('standard') && handleSubscribe('standard', 'year')}
+                      disabled={loading || isCurrentPlan('standard')}
+                      className={`w-full py-6 text-lg ${
+                        isCurrentPlan('standard') 
+                          ? 'bg-green-600 hover:bg-green-600 cursor-default' 
+                          : 'bg-blue-600 hover:bg-blue-700'
+                      }`}
                     >
-                      <CreditCard className="h-5 w-5 mr-2" />
-                      {loading ? 'Processing...' : `Subscribe for $${plans.standard.yearly}/year`}
+                      {isCurrentPlan('standard') ? (
+                        <>
+                          <Badge className="h-5 w-5 mr-2" />
+                          {getButtonText('standard')}
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard className="h-5 w-5 mr-2" />
+                          {loading ? 'Processing...' : `Subscribe for $${plans.standard.yearly}/year`}
+                        </>
+                      )}
                     </Button>
                   </CardContent>
                 </Card>
 
                 {/* Premium Plan - Yearly */}
-                <Card className="relative border-purple-200 dark:border-purple-800">
+                <Card className={`relative ${
+                  isCurrentPlan('premium') 
+                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
+                    : 'border-purple-200 dark:border-purple-800'
+                }`}>
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-purple-600 text-white px-4 py-1">
-                      <Crown className="h-3 w-3 mr-1" />
-                      Best Value
+                    <Badge className={`px-4 py-1 ${
+                      isCurrentPlan('premium')
+                        ? 'bg-green-500 text-white'
+                        : 'bg-purple-600 text-white'
+                    }`}>
+                      {isCurrentPlan('premium') ? (
+                        'Current Plan'
+                      ) : (
+                        <>
+                          <Crown className="h-3 w-3 mr-1" />
+                          Best Value
+                        </>
+                      )}
                     </Badge>
                   </div>
                   <CardHeader className="text-center pb-8 bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-transparent">
@@ -270,12 +363,25 @@ export default function Subscribe() {
                       ))}
                     </div>
                     <Button 
-                      onClick={() => handleSubscribe('premium', 'year')}
-                      disabled={loading}
-                      className="w-full py-6 text-lg bg-purple-600 hover:bg-purple-700"
+                      onClick={() => !isCurrentPlan('premium') && handleSubscribe('premium', 'year')}
+                      disabled={loading || isCurrentPlan('premium')}
+                      className={`w-full py-6 text-lg ${
+                        isCurrentPlan('premium') 
+                          ? 'bg-green-600 hover:bg-green-600 cursor-default' 
+                          : 'bg-purple-600 hover:bg-purple-700'
+                      }`}
                     >
-                      <CreditCard className="h-5 w-5 mr-2" />
-                      {loading ? 'Processing...' : `Subscribe for $${plans.premium.yearly}/year`}
+                      {isCurrentPlan('premium') ? (
+                        <>
+                          <Badge className="h-5 w-5 mr-2" />
+                          {getButtonText('premium')}
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard className="h-5 w-5 mr-2" />
+                          {loading ? 'Processing...' : `Subscribe for $${plans.premium.yearly}/year`}
+                        </>
+                      )}
                     </Button>
                   </CardContent>
                 </Card>
