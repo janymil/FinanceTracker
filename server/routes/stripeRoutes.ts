@@ -77,6 +77,8 @@ export function registerStripeRoutes(app: Express) {
       const { plan } = req.body;
       const userId = getUserId(req);
       
+      console.log('Checkout session request - Plan:', plan, 'User ID:', userId);
+      
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
@@ -130,8 +132,13 @@ export function registerStripeRoutes(app: Express) {
       } else {
         // For paid plans, create subscription using real Stripe Price IDs
         const priceId = planPriceIds[plan as keyof typeof planPriceIds];
+        console.log('Available plans:', Object.keys(planPriceIds));
+        console.log('Requested plan:', plan);
+        console.log('Found price ID:', priceId);
+        
         if (!priceId) {
-          return res.status(400).json({ error: "Price ID not configured for this plan" });
+          console.error('Invalid plan requested:', plan, 'Available plans:', Object.keys(planPriceIds));
+          return res.status(400).json({ error: "Invalid plan selected" });
         }
         
         sessionConfig = {
