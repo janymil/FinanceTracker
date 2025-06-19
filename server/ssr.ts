@@ -273,3 +273,73 @@ export const privacyPageSSR = (req: Request, res: Response) => {
     
     res.send(html);
 };
+
+export const termsPageSSR = (req: Request, res: Response) => {
+    const content = `
+        <h1>FinanzerPro Terms of Service</h1>
+        <p>These terms govern your use of FinanzerPro's financial management services.</p>
+        
+        <h2>Acceptance of Terms</h2>
+        <p>By using FinanzerPro, you agree to these terms and conditions.</p>
+        
+        <h2>Service Description</h2>
+        <p>FinanzerPro provides personal finance management tools including expense tracking, budgeting, receipt scanning, and AI-powered insights.</p>
+        
+        <h2>User Responsibilities</h2>
+        <p>You are responsible for maintaining the accuracy of your financial data and keeping your account secure.</p>
+        
+        <h2>Subscription Terms</h2>
+        <p>Paid plans are billed monthly or yearly. You can cancel anytime from your account settings.</p>
+        
+        <h2>Data Ownership</h2>
+        <p>You retain ownership of all financial data you input into FinanzerPro.</p>
+        
+        <h2>Limitation of Liability</h2>
+        <p>FinanzerPro provides financial tracking tools but is not responsible for financial decisions made based on the platform.</p>
+        
+        <p>Last updated: June 2025</p>
+    `;
+    
+    const html = generateStaticHTML(
+        "FinanzerPro Terms of Service - User Agreement",
+        "Terms and conditions for using FinanzerPro's personal finance management platform including subscription terms and user responsibilities.",
+        content
+    );
+    
+    res.send(html);
+};
+
+export const cookiePolicySSR = (req: Request, res: Response) => {
+    const content = `
+        <h1>FinanzerPro Cookie Policy</h1>
+        <p>This policy explains how we use cookies and similar technologies on FinanzerPro.</p>
+        
+        <h2>What Are Cookies</h2>
+        <p>Cookies are small data files stored on your device when you visit our website. They help us provide a better user experience.</p>
+        
+        <h2>Essential Cookies</h2>
+        <p>These cookies are necessary for the website to function properly, including authentication and security features.</p>
+        
+        <h2>Functional Cookies</h2>
+        <p>These cookies remember your preferences and settings to enhance your experience with FinanzerPro.</p>
+        
+        <h2>Analytics Cookies</h2>
+        <p>We use Google Analytics to understand how users interact with our site and improve our services.</p>
+        
+        <h2>Managing Cookies</h2>
+        <p>You can control cookie preferences through our cookie banner or your browser settings.</p>
+        
+        <h2>Third-Party Cookies</h2>
+        <p>Some features may use third-party services like Clerk for authentication, which may set their own cookies.</p>
+        
+        <p>Last updated: June 2025</p>
+    `;
+    
+    const html = generateStaticHTML(
+        "FinanzerPro Cookie Policy - Privacy & Data Collection",
+        "Learn about how FinanzerPro uses cookies for essential functionality, user preferences, and analytics to improve your experience.",
+        content
+    );
+    
+    res.send(html);
+};
