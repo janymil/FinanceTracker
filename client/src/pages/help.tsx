@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SEO } from "@/components/SEO";
 import { 
   TrendingUp, 
   CreditCard, 
@@ -285,7 +286,14 @@ export default function Help() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      <SEO 
+        title="Help & Documentation - FinanzerPro User Guide | Features & Support"
+        description="Complete FinanzerPro documentation covering expense tracking, receipt OCR scanning, AI categorization, budgeting, goals, and all features. Get help with setup, troubleshooting, and maximizing your financial management."
+        keywords="finanzerpro help, expense tracker guide, receipt scanning tutorial, AI categorization help, budget app documentation, personal finance support, financial management tutorial"
+        canonical="https://finanzerpro.com/help"
+      />
+      <div className="min-h-screen bg-background">
       {/* Header for anonymous users */}
       {!user && (
         <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
@@ -1276,5 +1284,6 @@ export default function Help() {
         </div>
       </div>
     </div>
+    </>
   );
 }
