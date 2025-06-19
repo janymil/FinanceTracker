@@ -352,14 +352,14 @@ export default function Transactions() {
     } else {
       // Use React Query mutation for creating
       const createData = {
-        amount: parseFloat(newTransaction.amount),
+        amount: newTransaction.amount,
         description: newTransaction.description,
         date: newTransaction.date,
         type: newTransaction.type,
-        categoryId: newTransaction.categoryId ? parseInt(newTransaction.categoryId) : null,
+        categoryId: newTransaction.categoryId || "",
         isRecurring: newTransaction.isRecurring,
         recurringFrequency: newTransaction.recurringFrequency,
-        recurringEndDate: newTransaction.recurringEndDate || null,
+        recurringEndDate: newTransaction.recurringEndDate || "",
         paymentUrl: newTransaction.paymentUrl || "",
         referenceNote: newTransaction.referenceNote || ""
       };
@@ -391,14 +391,14 @@ export default function Transactions() {
     );
 
     // Format the date properly - ensure it's in YYYY-MM-DD format
-    const formattedDate = transaction.date instanceof Date 
-      ? transaction.date.toISOString().split('T')[0]
+    const formattedDate = typeof transaction.date === 'string' 
+      ? transaction.date.split('T')[0]
       : new Date(transaction.date).toISOString().split('T')[0];
 
     // Format recurring end date if it exists
     const formattedRecurringEndDate = transaction.recurringEndDate 
-      ? (transaction.recurringEndDate instanceof Date 
-          ? transaction.recurringEndDate.toISOString().split('T')[0]
+      ? (typeof transaction.recurringEndDate === 'string' 
+          ? transaction.recurringEndDate.split('T')[0]
           : new Date(transaction.recurringEndDate).toISOString().split('T')[0])
       : "";
 
@@ -481,7 +481,7 @@ export default function Transactions() {
                     </DialogTitle>
                     <DialogDescription>
                       {editingTransaction ? "Update the transaction details" : 
-                       user?.plan === 'free' ? 
+                       user?.primaryEmailAddress ? 
                        `Record a new transaction (${transactions?.length || 0}/100 entries used)` :
                        "Record a new income or expense transaction"}
                     </DialogDescription>
@@ -793,7 +793,7 @@ export default function Transactions() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Categories</SelectItem>
-                        {availableCategories.map((category) => (
+                        {availableCategories.filter(Boolean).map((category) => (
                           <SelectItem key={category} value={category}>
                             {category}
                           </SelectItem>
@@ -962,8 +962,8 @@ export default function Transactions() {
                             setNewTransaction({
                               amount: transaction.amount.toString(),
                               description: transaction.description,
-                              date: transaction.date instanceof Date 
-                                ? transaction.date.toISOString().split('T')[0]
+                              date: typeof transaction.date === 'string' 
+                                ? transaction.date.split('T')[0]
                                 : new Date(transaction.date).toISOString().split('T')[0],
                               type: transaction.type,
                               categoryId: categoryId,
