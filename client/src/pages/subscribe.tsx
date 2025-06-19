@@ -56,27 +56,14 @@ export default function Subscribe() {
       if (response.ok) {
         const responseData = await response.json();
         console.log('Full response from server:', responseData);
-        
-        // Check if it's a subscription change (existing customer)
-        if (responseData.success && responseData.message) {
-          console.log('Subscription updated successfully:', responseData.message);
-          setLoading(false);
-          // Redirect to dashboard or show success message
-          setLocation('/dashboard');
-          return;
-        }
-        
-        // Check if it's a new subscription (Stripe checkout URL)
         const { url } = responseData;
         console.log('Extracted URL:', url);
         
         if (url && url.trim()) {
           console.log('Valid URL found, redirecting to:', url);
-          // Add a small delay to ensure logging is visible
-          setTimeout(() => {
-            window.location.href = url;
-          }, 100);
-          return; // Exit the function after redirect
+          // Redirect to Stripe checkout for user confirmation
+          window.location.href = url;
+          return;
         } else {
           console.error('No valid URL received from checkout session');
           console.error('Response data:', responseData);

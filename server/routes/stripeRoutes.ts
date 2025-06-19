@@ -89,11 +89,8 @@ export function registerStripeRoutes(app: Express) {
         return res.status(404).json({ error: "User not found" });
       }
       
-      // Check if user has existing Stripe subscription
-      if (user.stripeSubscriptionId && user.plan !== 'free') {
-        // Handle subscription change (upgrade/downgrade)
-        return await handleSubscriptionChange(user, plan, res);
-      }
+      // For plan changes, create a new checkout session instead of automatic updates
+      // This ensures users go through Stripe to confirm billing changes
       
       // Get email from Clerk token
       const auth = req.auth();
@@ -160,9 +157,15 @@ export function registerStripeRoutes(app: Express) {
           customer_email: userEmail || user.email || undefined,
           metadata: {
             plan: plan,
-            userId: userId
+            userId: userId,
+            isUpgrade: user.stripeSubscriptionId ? 'true' : 'false'
           }
         };
+        
+        // For existing customers, add customer ID to avoid duplicate customers
+        if (user.stripeCustomerId) {
+          sessionConfig.customer = user.stripeCustomerId;
+        }
       }
 
       const session = await stripe.checkout.sessions.create(sessionConfig);
