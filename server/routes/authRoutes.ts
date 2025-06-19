@@ -33,29 +33,21 @@ export function registerAuthRoutes(app: Express) {
 
       let user = await storage.getUser(userId);
       
-      // Get full user data from Clerk
-      const { clerkClient } = await import('@clerk/express');
-      let clerkUser;
-      try {
-        clerkUser = await clerkClient.users.getUser(userId);
-      } catch (error) {
-        console.error('Error fetching Clerk user:', error);
-        clerkUser = null;
+      // If user doesn't exist, create with basic data
+      if (!user) {
+        const userData = {
+          id: userId,
+          email: `${userId}@clerk.user`,
+          firstName: null,
+          lastName: null,
+          profileImageUrl: null,
+          plan: 'free',
+          stripeCustomerId: null,
+          stripeSubscriptionId: null,
+          settings: null
+        };
+        user = await storage.upsertUser(userData);
       }
-      
-      // Always sync latest Clerk data (for existing users) or create new user
-      const userData = {
-        id: userId,
-        email: clerkUser?.emailAddresses?.[0]?.emailAddress || user?.email || `${userId}@clerk.user`,
-        firstName: clerkUser?.firstName || null,
-        lastName: clerkUser?.lastName || null,
-        profileImageUrl: clerkUser?.imageUrl || null,
-        plan: user?.plan || 'free',
-        stripeCustomerId: user?.stripeCustomerId || null,
-        stripeSubscriptionId: user?.stripeSubscriptionId || null,
-        settings: user?.settings || null
-      };
-      user = await storage.upsertUser(userData);
 
       res.json(user);
     } catch (error) {
