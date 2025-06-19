@@ -446,6 +446,8 @@ Changelog:
 - June 19, 2025. REACT HELMET INTEGRATION COMPLETED: Installed react-helmet-async and created reusable SEO component for dynamic page-specific meta tag management across landing, dashboard, pricing, authentication, and help pages with proper HelmetProvider configuration
 - June 19, 2025. SITEMAP & ROBOTS.TXT CREATED: Implemented comprehensive sitemap.xml with all public pages (landing, auth, pricing, help, contact, legal) and robots.txt allowing all search engines while protecting authenticated areas - configured Express static file serving for SEO files
 - June 19, 2025. SECURITY HEADERS IMPLEMENTED: Added comprehensive security headers to prevent phishing detection including X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Content Security Policy, and enhanced admin panel security indicators to establish legitimacy
+- June 19, 2025. ICON SYSTEM CORRUPTION FIXED: Resolved critical issue where all category icons displayed same trending line icon instead of unique icons (car for transportation, heart for healthcare, shopping bag for shopping, etc.) - updated database records and icon registry system for proper category differentiation
+- June 19, 2025. ROBOTS.TXT GOOGLE SEARCH CONSOLE FIX: Updated robots.txt to explicitly allow public pages and resolve Google Search Console "indexed but blocked by robots.txt" warning for homepage - separated allowed public pages from blocked authenticated areas for clearer search engine interpretation
 ```
 
 ## User Preferences

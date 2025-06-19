@@ -1,10 +1,17 @@
 User-agent: *
+# Allow public pages
 Allow: /
+Allow: /auth
+Allow: /pricing
+Allow: /help
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /cookies
+Allow: /sitemap.xml
+Allow: /robots.txt
 
-# Sitemap
-Sitemap: https://finanzerpro.com/sitemap.xml
-
-# Disallow authenticated areas
+# Disallow authenticated/private areas
 Disallow: /dashboard
 Disallow: /transactions
 Disallow: /income
@@ -20,6 +27,9 @@ Disallow: /profile
 Disallow: /admin-analytics
 Disallow: /mobile-upload/
 Disallow: /api/
+
+# Sitemap location
+Sitemap: https://finanzerpro.com/sitemap.xml
 
 # Crawl delay
 Crawl-delay: 1
