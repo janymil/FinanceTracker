@@ -144,8 +144,14 @@ export function clearUserSession() {
     });
   }
   
-  // Clear query cache without forcing reload on auth page
-  if (window.location.pathname !== '/auth' && !window.location.pathname.startsWith('/auth')) {
+  // Clear query cache without forcing reload on auth, help, contact, and other public pages
+  const publicPages = ['/auth', '/help', '/contact', '/privacy-policy', '/terms-of-service', '/cookie-policy', '/pricing', '/'];
+  const isPublicPage = publicPages.some(page => 
+    window.location.pathname === page || 
+    window.location.pathname.startsWith('/auth')
+  );
+  
+  if (!isPublicPage) {
     window.location.reload();
   }
 }
