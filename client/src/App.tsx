@@ -70,38 +70,22 @@ function Router() {
         <Route path="/help" component={Help} />
         <Route path="/auth" component={AuthPage} />
         <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
-        <Route component={NotFoundPage} />
+        <Route path="/test-public" component={() => import("@/pages/test-public").then(m => m.default)} />
       </SignedOut>
 
       {/* Private routes for authenticated users */}
       <SignedIn>
-        <Route path="/" component={Dashboard} />
-        <Route path="/dashboard" component={Dashboard} />
-        <Route path="/transactions" component={TransactionsPage} />
-        <Route path="/income" component={IncomePage} />
-        <Route path="/expenses" component={ExpensesPage} />
-        <Route path="/budget" component={BudgetPage} />
-        <Route path="/categories" component={CategoriesPage} />
-        <Route path="/goals" component={GoalsPage} />
-        <Route path="/collaborative-goals" component={CollaborativeGoalsPage} />
-        <Route path="/collaborative-goals/:goalId" component={CollaborativeGoalDetailPage} />
-        <Route path="/trends" component={TrendsPage} />
-        <Route path="/calendar" component={CalendarPage} />
-        <Route path="/reports" component={ReportsPage} />
-        <Route path="/data-management" component={ExportPage} />
-        <Route path="/profile" component={ProfilePage} />
-        <Route path="/admin-analytics" component={AdminAnalytics} />
-        <Route path="/help" component={Help} />
-        <Route component={NotFoundPage} />
+        <AuthenticatedApp />
       </SignedIn>
+      
+      {/* Catch-all 404 route outside of SignedIn/SignedOut */}
+      <Route component={NotFoundPage} />
     </Switch>
   );
 }
 
 function AppContent() {
   const clerk = useClerk();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Initialize session persistence
   useSessionPersistence();
@@ -118,27 +102,14 @@ function AppContent() {
         <Footer />
         <CookieBanner />
       </SignedOut>
-
-      {/* Protected routes for authenticated users */}
-      <SignedIn>
-        <AuthenticatedApp 
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-          sidebarCollapsed={sidebarCollapsed}
-          setSidebarCollapsed={setSidebarCollapsed}
-        />
-      </SignedIn>
     </>
   );
 }
 
-function AuthenticatedApp({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSidebarCollapsed }: {
-  sidebarOpen: boolean;
-  setSidebarOpen: (open: boolean) => void;
-  sidebarCollapsed: boolean;
-  setSidebarCollapsed: (collapsed: boolean) => void;
-}) {
+function AuthenticatedApp() {
   const { user: clerkUser, isLoaded } = useUser();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
   // Use Clerk user directly for faster loading in production
   if (!isLoaded || !clerkUser) {
@@ -187,7 +158,6 @@ function AuthenticatedApp({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSi
               <Route path="/help" component={Help} />
               <Route path="/profile" component={ProfilePage} />
               <Route path="/admin-analytics" component={AdminAnalytics} />
-              <Route component={NotFoundPage} />
             </Switch>
           </div>
         </main>
