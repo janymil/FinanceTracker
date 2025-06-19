@@ -15,20 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import RequirePlan from "@/components/require-plan";
-import { 
-  Users, 
-  Plus, 
-  Target, 
-  Calendar, 
-  Trophy, 
-  DollarSign, 
-  UserPlus, 
-  Mail, 
-  Crown,
-  TrendingUp,
-  Activity,
-  Gift
-} from "lucide-react";
+import { Users, Plus, Target, Calendar, Trophy, DollarSign, UserPlus, Mail, Crown, TrendingUp, Activity, Gift } from "@/lib/icons-registry";
 import { format } from "date-fns";
 
 interface CollaborativeGoal {

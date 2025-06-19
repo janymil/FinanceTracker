@@ -1,13 +1,5 @@
 // Optimized production icon bundle - minimal imports to fix deployment loading
-import { 
-  DollarSign, TrendingUp, Home, Car, ShoppingBag, Utensils, Heart, Gamepad2,
-  Plus, Edit3, Trash2, Upload, Download, CheckCircle, AlertCircle,
-  TrendingDown, PiggyBank, Lightbulb, Settings, User, Menu, X, CreditCard,
-  PlusCircle, Calendar, Target, PieChart, BarChart3, ArrowUpRight, ArrowDownRight,
-  Crown, Zap, Shield, Star, ChevronRight, Minus, Eye, EyeOff, RefreshCw,
-  XCircle, Clock, Repeat, Filter, ChevronDown, ChevronUp, Receipt, 
-  Store, MoreHorizontal, LayoutDashboard, FileText, Users, Crosshair
-} from "lucide-react";
+import { DollarSign, TrendingUp, Home, Car, ShoppingBag, Utensils, Heart, Gamepad2, Plus, Edit3, Trash2, Upload, Download, CheckCircle, AlertCircle, TrendingDown, PiggyBank, Lightbulb, Settings, User, Menu, X, CreditCard, PlusCircle, Calendar, Target, PieChart, BarChart3, ArrowUpRight, ArrowDownRight, Crown, Zap, Shield, Star, ChevronRight, Minus, Eye, EyeOff, RefreshCw, XCircle, Clock, Repeat, Filter, ChevronDown, ChevronUp, Receipt, Store, MoreHorizontal, LayoutDashboard, FileText, Users, Crosshair } from "@/lib/icons-registry";
 
 export const productionIcons = {
   "dollar-sign": DollarSign,

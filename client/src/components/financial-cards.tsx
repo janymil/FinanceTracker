@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, DollarSign, Shield } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Shield } from "@/lib/icons-registry";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Target, Plus, Calendar, DollarSign, TrendingUp, Crown, Edit2, Trash2, Copy } from "lucide-react";
+import { Target, Plus, Calendar, DollarSign, TrendingUp, Crown, Edit2, Trash2, Copy } from "@/lib/icons-registry";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";

@@ -10,19 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useToast } from '@/hooks/use-toast';
 import RequirePlan from '@/components/require-plan';
 import { useClerkUserReady } from '@/hooks/useClerkUserReady';
-import { 
-  Download, 
-  Upload, 
-  FileText, 
-  Database,
-  Cloud,
-  Shield,
-  Calendar,
-  RefreshCw,
-  Check,
-  Loader2,
-  AlertCircle
-} from 'lucide-react';
+import { Download, Upload, FileText, Database, Cloud, Shield, Calendar, RefreshCw, Check, Loader2, AlertCircle } from "@/lib/icons-registry";
 import { format } from 'date-fns';
 
 interface ExportOptions {

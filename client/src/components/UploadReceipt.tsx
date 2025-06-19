@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Camera, Upload, FileText, AlertCircle, CheckCircle, Save, Edit } from "lucide-react";
+import { Camera, Upload, FileText, AlertCircle, CheckCircle, Save, Edit } from "@/lib/icons-registry";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 

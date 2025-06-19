@@ -9,19 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Bell, 
-  Clock, 
-  Calendar,
-  Plus,
-  CheckCircle,
-  AlertTriangle,
-  Trash2,
-  Edit,
-  Crown,
-  ExternalLink,
-  Copy
-} from "lucide-react";
+import { Bell, Clock, Calendar, Plus, CheckCircle, AlertTriangle, Trash2, Edit, Crown, ExternalLink, Copy } from "@/lib/icons-registry";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format, isToday, isTomorrow, isWithinInterval, addDays } from "date-fns";

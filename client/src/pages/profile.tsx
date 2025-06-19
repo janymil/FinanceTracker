@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Badge } from "../components/ui/badge";
 import { useToast } from "../hooks/use-toast";
-import { User, Bell, Palette, CreditCard, ExternalLink, Settings, Trash2 } from "lucide-react";
+import { User, Bell, Palette, CreditCard, ExternalLink, Settings, Trash2 } from "@/lib/icons-registry";
 import { SubscriptionSchedule } from "../components/subscription-schedule";
 
 export default function ProfilePage() {

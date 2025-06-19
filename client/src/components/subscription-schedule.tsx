@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, ArrowRight } from 'lucide-react';
+import { Calendar, Clock, ArrowRight } from "@/lib/icons-registry";
 
 interface SubscriptionSchedule {
   hasSchedule: boolean;

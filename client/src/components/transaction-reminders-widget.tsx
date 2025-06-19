@@ -10,21 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Bell, 
-  Clock, 
-  Calendar,
-  AlertTriangle,
-  TrendingUp,
-  TrendingDown,
-  Repeat,
-  Crown,
-  Plus,
-  CheckCircle,
-  Trash2,
-  User,
-  Zap
-} from "lucide-react";
+import { Bell, Clock, Calendar, AlertTriangle, TrendingUp, TrendingDown, Repeat, Crown, Plus, CheckCircle, Trash2, User, Zap } from "@/lib/icons-registry";
 import { format, isToday, isTomorrow, isWithinInterval, addDays } from "date-fns";
 import RequirePlan from "@/components/require-plan";
 import { apiRequest } from "@/lib/queryClient";

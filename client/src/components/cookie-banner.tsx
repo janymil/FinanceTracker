@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { X, Cookie, Settings } from "lucide-react";
+import { X, Cookie, Settings } from "@/lib/icons-registry";
 import { Link } from "wouter";
 
 interface CookiePreferences {

@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, DollarSign, CreditCard, Wallet, PiggyBank } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, CreditCard, Wallet, PiggyBank } from "@/lib/icons-registry";
 
 interface QuickSnapshotProps {
   summary?: {

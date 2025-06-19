@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Edit3 } from "lucide-react";
+import { Plus, Edit3 } from "@/lib/icons-registry";
 import { useMemo } from "react";
 import { useLocation } from "wouter";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";

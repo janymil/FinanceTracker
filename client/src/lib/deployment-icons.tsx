@@ -1,17 +1,5 @@
 // Minimal icon set for production deployment to reduce bundle size
-import { 
-  DollarSign, 
-  TrendingUp, 
-  Home, 
-  Car, 
-  ShoppingBag, 
-  Utensils,
-  Heart,
-  Gamepad2,
-  Plus,
-  Edit3,
-  Trash2
-} from "lucide-react";
+import { DollarSign, TrendingUp, Home, Car, ShoppingBag, Utensils, Heart, Gamepad2, Plus, Edit3, Trash2 } from "@/lib/icons-registry";
 
 // Only essential icons for deployment
 export const deploymentIcons = {

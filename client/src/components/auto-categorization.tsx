@@ -7,17 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Zap, 
-  Brain, 
-  Check, 
-  X, 
-  Edit3, 
-  Crown,
-  Sparkles,
-  Target,
-  ChevronRight
-} from "lucide-react";
+import { Zap, Brain, Check, X, Edit3, Crown, Sparkles, Target, ChevronRight } from "@/lib/icons-registry";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";

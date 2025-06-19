@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Lock, Target, TrendingUp, BarChart3, Calendar, Check } from "lucide-react";
+import { Crown, Lock, Target, TrendingUp, BarChart3, Calendar, Check } from "@/lib/icons-registry";
 import { Link } from "wouter";
 
 interface UpgradePromptProps {

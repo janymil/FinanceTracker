@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp } from "@/lib/icons-registry";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 

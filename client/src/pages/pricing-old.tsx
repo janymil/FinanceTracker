@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, X, Crown, TrendingUp, Star } from "lucide-react";
+import { Check, X, Crown, TrendingUp, Star } from "@/lib/icons-registry";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 

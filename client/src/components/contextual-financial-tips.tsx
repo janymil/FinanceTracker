@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Lightbulb, TrendingDown, PiggyBank, AlertCircle, CheckCircle } from "lucide-react";
+import { Lightbulb, TrendingDown, PiggyBank, AlertCircle, CheckCircle } from "@/lib/icons-registry";
 
 interface ContextualTipsProps {
   summary?: {

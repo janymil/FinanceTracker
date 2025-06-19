@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { X, Settings, Sparkles, RefreshCw } from "lucide-react";
+import { X, Settings, Sparkles, RefreshCw } from "@/lib/icons-registry";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Switch } from "./ui/switch";

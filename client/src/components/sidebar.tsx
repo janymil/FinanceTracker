@@ -3,26 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import {
-  BarChart3,
-  Calendar,
-  Crown,
-  CreditCard,
-  Download,
-  FileText,
-  HelpCircle,
-  LayoutDashboard,
-  Menu,
-  Target,
-  TrendingDown,
-  TrendingUp,
-  User,
-  Users,
-  X,
-  ChevronLeft,
-  ChevronRight,
-  Crosshair,
-} from "lucide-react";
+import { BarChart3, Calendar, Crown, CreditCard, Download, FileText, HelpCircle, LayoutDashboard, Menu, Target, TrendingDown, TrendingUp, User, Users, X, ChevronLeft, ChevronRight, Crosshair,  } from "@/lib/icons-registry";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";

@@ -1,24 +1,5 @@
 // Optimized icon loading for deployment
-import { 
-  DollarSign, 
-  TrendingUp, 
-  Home, 
-  Car, 
-  ShoppingBag, 
-  Utensils,
-  Heart,
-  Gamepad2,
-  Plus,
-  Edit3,
-  Trash2,
-  Upload,
-  Download,
-  CheckCircle,
-  AlertCircle,
-  TrendingDown,
-  PiggyBank,
-  Lightbulb
-} from "lucide-react";
+import { DollarSign, TrendingUp, Home, Car, ShoppingBag, Utensils, Heart, Gamepad2, Plus, Edit3, Trash2, Upload, Download, CheckCircle, AlertCircle, TrendingDown, PiggyBank, Lightbulb } from "@/lib/icons-registry";
 
 // Core icons used across the app
 export const icons = {

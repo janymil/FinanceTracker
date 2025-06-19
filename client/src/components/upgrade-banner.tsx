@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Crown, TrendingUp, BarChart3, Download } from "lucide-react";
+import { Crown, TrendingUp, BarChart3, Download } from "@/lib/icons-registry";
 import { Link } from "wouter";
 
 export default function UpgradeBanner() {

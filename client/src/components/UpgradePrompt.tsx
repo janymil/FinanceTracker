@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, TrendingUp, Check, X } from "lucide-react";
+import { Crown, TrendingUp, Check, X } from "@/lib/icons-registry";
 
 interface UpgradePromptProps {
   currentPlan: string;

@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { TrendingUp, Crown, ChevronDown, User, Settings, LogOut } from "lucide-react";
+import { TrendingUp, Crown, ChevronDown, User, Settings, LogOut } from "@/lib/icons-registry";
 import { Link } from "wouter";
 import { useClerk } from "@clerk/clerk-react";
 
