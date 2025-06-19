@@ -449,6 +449,62 @@ export function registerStripeRoutes(app: Express) {
     }
   });
 
+  // Get subscription schedule information for pending plan changes
+  app.get("/api/subscription-schedule", isAuthenticated, async (req: any, res: Response) => {
+    if (!stripe) {
+      return res.status(503).json({ error: "Stripe not configured" });
+    }
+
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || !user.stripeSubscriptionId) {
+        return res.json({ hasSchedule: false });
+      }
+
+      // Check if there's a subscription schedule for this subscription
+      const schedules = await stripe.subscriptionSchedules.list({
+        limit: 100
+      });
+
+      // Filter schedules for this specific subscription
+      const userSchedules = schedules.data.filter(schedule => 
+        schedule.subscription === user.stripeSubscriptionId
+      );
+
+      if (userSchedules.length === 0) {
+        return res.json({ hasSchedule: false });
+      }
+
+      const schedule = userSchedules[0];
+      const currentPhase = schedule.phases[0];
+      const nextPhase = schedule.phases[1];
+
+      if (nextPhase) {
+        const currentPlanEnd = new Date(currentPhase.end_date * 1000);
+        const newPlanStart = new Date(nextPhase.start_date * 1000);
+        
+        return res.json({
+          hasSchedule: true,
+          currentPlanEnds: currentPlanEnd.toISOString(),
+          newPlanStarts: newPlanStart.toISOString(),
+          currentPlan: currentPhase.items[0].price,
+          newPlan: nextPhase.items[0].price
+        });
+      }
+
+      return res.json({ hasSchedule: false });
+
+    } catch (error: any) {
+      console.error('Error fetching subscription schedule:', error);
+      return res.status(500).json({ error: "Failed to fetch subscription schedule" });
+    }
+  });
+
   // Change Subscription Plan
   app.post("/api/change-subscription", isAuthenticated, async (req: any, res: Response) => {
     if (!stripe) {
