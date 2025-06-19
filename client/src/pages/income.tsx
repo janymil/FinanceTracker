@@ -253,7 +253,7 @@ export default function Income() {
   });
 
   const incomeCategories = categories.filter((cat: Category) => cat.type === "income");
-  const availableCategories = Array.from(new Set(incomeTransactions.map((t: Transaction) => t.categoryName).filter(Boolean)));
+  const availableCategories = Array.from(new Set(incomeTransactions.map((t: Transaction) => t.categoryName).filter(Boolean))) as string[];
 
   const totalIncome = filteredIncomes.reduce((sum: number, t: Transaction) => sum + parseFloat(t.amount), 0);
 
@@ -544,7 +544,7 @@ export default function Income() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Categories</SelectItem>
-                    {availableCategories.map((category) => (
+                    {availableCategories.map((category: string) => (
                       <SelectItem key={category} value={category}>
                         {category}
                       </SelectItem>

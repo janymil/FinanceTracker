@@ -292,7 +292,7 @@ export default function Expenses() {
   });
 
   const expenseCategories = categories.filter((cat: Category) => cat.type === "expense");
-  const availableCategories = Array.from(new Set(expenseTransactions.map((t: Transaction) => t.categoryName).filter(Boolean)));
+  const availableCategories = Array.from(new Set(expenseTransactions.map((t: Transaction) => t.categoryName).filter(Boolean))) as string[];
 
   const totalExpenses = filteredExpenses.reduce((sum: number, t: Transaction) => sum + parseFloat(t.amount), 0);
   const averageExpense = filteredExpenses.length > 0 ? totalExpenses / filteredExpenses.length : 0;
@@ -751,7 +751,7 @@ export default function Expenses() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Categories</SelectItem>
-                        {availableCategories.map((category) => (
+                        {availableCategories.map((category: string) => (
                           <SelectItem key={category} value={category}>
                             {category}
                           </SelectItem>
@@ -905,7 +905,7 @@ export default function Expenses() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => deleteExpense(transaction.id)}
+                          onClick={() => deleteExpenseMutation.mutate(transaction.id)}
                           className="h-8 w-8 p-0"
                         >
                           <Trash2 className="h-4 w-4" />
