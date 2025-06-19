@@ -34,38 +34,15 @@ async function handleSubscriptionChange(user: any, newPlan: string, res: Respons
       return res.status(400).json({ error: "You are already subscribed to this plan" });
     }
 
-    // Update subscription with proper proration - Stripe handles the billing automatically
-    const updatedSubscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
-      items: [{
-        id: subscription.items.data[0].id,
-        price: newPriceId,
-      }],
-      proration_behavior: 'create_prorations', // This handles automatic prorated billing
-      metadata: {
-        plan: newPlan,
-        userId: user.id
-      }
+    // Use Stripe Customer Portal for proper subscription management with proration
+    // This is the recommended approach for subscription changes
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: user.stripeCustomerId,
+      return_url: `${process.env.BASE_URL || 'http://localhost:5000'}/dashboard?subscription_update=success`,
     });
 
-    // Update user plan in database
-    const planMapping = {
-      'standard': { plan: 'standard', interval: 'monthly' },
-      'standard-yearly': { plan: 'standard', interval: 'yearly' },
-      'premium': { plan: 'premium', interval: 'monthly' },
-      'premium-yearly': { plan: 'premium', interval: 'yearly' }
-    };
-
-    const planConfig = planMapping[newPlan as keyof typeof planMapping];
-    if (planConfig) {
-      await storage.updateUserPlan(user.id, planConfig.plan as 'free' | 'standard' | 'premium', planConfig.interval as 'monthly' | 'yearly');
-    }
-
-    console.log(`Successfully updated subscription ${user.stripeSubscriptionId} to ${newPlan}`);
-    return res.json({ 
-      success: true, 
-      message: "Subscription updated successfully with prorated billing",
-      subscription: updatedSubscription 
-    });
+    console.log('Customer portal session created for subscription change');
+    return res.json({ url: portalSession.url });
 
   } catch (error) {
     console.error('Error updating subscription:', error);
@@ -249,6 +226,18 @@ export function registerStripeRoutes(app: Express) {
 
 
 
+      // Handle existing subscription if this is an upgrade
+      if (session.metadata?.existingSubscriptionId) {
+        try {
+          // Cancel the existing subscription
+          await stripe.subscriptions.cancel(session.metadata.existingSubscriptionId);
+          console.log(`Cancelled existing subscription: ${session.metadata.existingSubscriptionId}`);
+        } catch (cancelError) {
+          console.error('Error cancelling existing subscription:', cancelError);
+          // Continue with the process even if cancellation fails
+        }
+      }
+
       // Update user's plan in database
       try {
         await storage.updateUserPlan(userId, dbPlan as 'free' | 'standard' | 'premium', billingInterval as 'monthly' | 'yearly');
@@ -275,6 +264,62 @@ export function registerStripeRoutes(app: Express) {
     } catch (error) {
       console.error('Error processing subscription success:', error);
       return res.redirect('/?error=subscription_processing_failed');
+    }
+  });
+
+  // Handle subscription change success (after prorated payment)
+  app.get("/api/subscription-change-success", async (req: Request, res: Response) => {
+    if (!stripe) {
+      return res.redirect('/?error=payment_processing_unavailable');
+    }
+
+    try {
+      const { plan, session_id, subscription_id } = req.query;
+      
+      if (!session_id || !plan || !subscription_id) {
+        return res.redirect('/?error=invalid_params');
+      }
+
+      // Verify the payment session
+      const session = await stripe.checkout.sessions.retrieve(session_id as string);
+      
+      if (session.payment_status !== 'paid') {
+        return res.redirect('/?error=payment_not_completed');
+      }
+
+      // Now update the subscription with the new price
+      const subscription = await stripe.subscriptions.retrieve(subscription_id as string);
+      const newPriceId = session.metadata?.newPriceId;
+      
+      if (newPriceId) {
+        await stripe.subscriptions.update(subscription_id as string, {
+          items: [{
+            id: subscription.items.data[0].id,
+            price: newPriceId,
+          }],
+          proration_behavior: 'create_prorations',
+        });
+      }
+
+      // Update user plan in database
+      const planMapping = {
+        'standard': { plan: 'standard', interval: 'monthly' },
+        'standard-yearly': { plan: 'standard', interval: 'yearly' },
+        'premium': { plan: 'premium', interval: 'monthly' },
+        'premium-yearly': { plan: 'premium', interval: 'yearly' }
+      };
+
+      const planConfig = planMapping[plan as keyof typeof planMapping];
+      if (planConfig && session.metadata?.userId) {
+        await storage.updateUserPlan(session.metadata.userId, planConfig.plan as 'free' | 'standard' | 'premium', planConfig.interval as 'monthly' | 'yearly');
+      }
+
+      console.log(`Successfully changed subscription ${subscription_id} to ${plan}`);
+      return res.redirect(`/dashboard?upgrade=success&plan=${planConfig?.plan}&interval=${planConfig?.interval}`);
+
+    } catch (error) {
+      console.error('Error processing subscription change:', error);
+      return res.redirect('/?error=subscription_change_failed');
     }
   });
 
