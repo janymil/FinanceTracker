@@ -42,7 +42,7 @@ import NotFoundPage from "./pages/not-found";
 import ProfilePage from "./pages/profile";
 import AdminAnalytics from "@/pages/admin-analytics";
 import MobileUpload from "@/pages/mobile-upload/sessionId";
-import TestPublic from "@/pages/test-public";
+
 
 // Optimized loading state
 const AppLoader = () => (
@@ -72,7 +72,6 @@ function Router() {
           <Route path="/help" component={Help} />
           <Route path="/auth" component={AuthPage} />
           <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
-          <Route path="/test-public" component={TestPublic} />
           <Route component={NotFoundPage} />
         </Switch>
       </SignedOut>
