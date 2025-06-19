@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrendingUp, TrendingDown, BarChart3, LineChart as LineChartIcon, Calendar, Crown, Download, Filter, RefreshCw } from "@/lib/icons-registry";
+import { TrendingUp, TrendingDown, BarChart3, LineChart as LineChartIcon, Calendar, Crown, Download, Filter, RefreshCw } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears, subDays, subWeeks } from "date-fns";
 import { useState, useMemo, useEffect } from "react";
 import RequirePlan from "@/components/require-plan";

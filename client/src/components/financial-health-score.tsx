@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { TrendingUp, Shield, AlertTriangle, CheckCircle, HelpCircle } from "@/lib/icons-registry";
+import { TrendingUp, Shield, AlertTriangle, CheckCircle, HelpCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useQuery } from "@tanstack/react-query";

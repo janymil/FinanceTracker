@@ -4,7 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import RequirePlan from "@/components/require-plan";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Minus, TrendingUp, TrendingDown, DollarSign,  } from "@/lib/icons-registry";
+import {
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Minus,
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+} from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 

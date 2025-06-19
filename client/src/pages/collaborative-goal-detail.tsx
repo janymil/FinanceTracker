@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { ArrowLeft, Users, Target, Calendar, Plus, DollarSign, Activity, Trophy, Mail } from "@/lib/icons-registry";
+import { ArrowLeft, Users, Target, Calendar, Plus, DollarSign, Activity, Trophy, Mail } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 

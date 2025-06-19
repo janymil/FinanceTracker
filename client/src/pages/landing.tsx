@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrendingUp, Shield, DollarSign, BarChart3, Crown, Check, X, Star } from "@/lib/icons-registry";
+import { TrendingUp, Shield, DollarSign, BarChart3, Crown, Check, X, Star } from "lucide-react";
 import { useLocation } from "wouter";
 import { SEO } from "@/components/SEO";
 

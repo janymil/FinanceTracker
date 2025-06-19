@@ -4,7 +4,20 @@ import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, TrendingDown, Heart, AlertTriangle, CheckCircle, Zap, Target, Smile, Frown, Meh, Star, Crown } from "@/lib/icons-registry";
+import { 
+  TrendingUp, 
+  TrendingDown, 
+  Heart, 
+  AlertTriangle,
+  CheckCircle,
+  Zap,
+  Target,
+  Smile,
+  Frown,
+  Meh,
+  Star,
+  Crown
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface FinancialHealthData {

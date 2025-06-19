@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import { Calendar, TrendingUp, AlertTriangle, BarChart3, Clock, Lock, Crown, Brain } from "@/lib/icons-registry";
+import { Calendar, TrendingUp, AlertTriangle, BarChart3, Clock, Lock, Crown, Brain } from 'lucide-react';
 import { Link } from 'wouter';
 import { useUser } from '@clerk/clerk-react';
 import { useQuery } from '@tanstack/react-query';

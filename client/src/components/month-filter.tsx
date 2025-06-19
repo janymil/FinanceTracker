@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, ChevronLeft, ChevronRight } from "@/lib/icons-registry";
+import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 
 interface MonthFilterProps {

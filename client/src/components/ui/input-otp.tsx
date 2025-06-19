@@ -1,6 +1,6 @@
 import * as React from "react"
 import { OTPInput, OTPInputContext } from "input-otp"
-import { Dot } from "@/lib/icons-registry";
+import { Dot } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 

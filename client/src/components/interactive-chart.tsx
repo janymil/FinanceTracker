@@ -3,7 +3,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ZoomIn, ZoomOut, RotateCcw, Download, TrendingUp, Info, Crown } from "@/lib/icons-registry";
+import { 
+  ZoomIn, 
+  ZoomOut, 
+  RotateCcw, 
+  Download, 
+  TrendingUp, 
+  Info,
+  Crown 
+} from "lucide-react";
 import { 
   LineChart, 
   Line, 

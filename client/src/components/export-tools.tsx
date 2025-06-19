@@ -3,7 +3,7 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { saveAs } from 'file-saver';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, FileText } from "@/lib/icons-registry";
+import { Download, FileText } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useClerkUserReady } from '@/hooks/useClerkUserReady';
 

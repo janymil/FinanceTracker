@@ -30,7 +30,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Crown, ChevronDown, User, Settings, LogOut, Menu, Plus, Bell, Search, Repeat, HelpCircle } from "@/lib/icons-registry";
+import { 
+  Crown, 
+  ChevronDown, 
+  User, 
+  Settings, 
+  LogOut, 
+  Menu,
+  Plus,
+  Bell,
+  Search,
+  Repeat,
+  HelpCircle
+} from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
 import { Link } from "wouter";

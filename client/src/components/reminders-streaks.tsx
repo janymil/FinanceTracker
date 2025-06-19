@@ -8,7 +8,21 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Bell, Clock, Calendar, Flame, Target, Plus, Settings, CheckCircle, Crown, TrendingUp, Zap, Monitor, Smartphone } from "@/lib/icons-registry";
+import { 
+  Bell, 
+  Clock, 
+  Calendar,
+  Flame,
+  Target,
+  Plus,
+  Settings,
+  CheckCircle,
+  Crown,
+  TrendingUp,
+  Zap,
+  Monitor,
+  Smartphone
+} from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 import { useClerkUserReady } from '@/hooks/useClerkUserReady';

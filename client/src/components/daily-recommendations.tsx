@@ -3,7 +3,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Lightbulb, TrendingUp, Target, Calendar, Crown, CheckCircle, AlertTriangle, DollarSign, PiggyBank, Coffee, Car, Home, Heart, Briefcase, Lock } from "@/lib/icons-registry";
+import { 
+  Lightbulb, 
+  TrendingUp, 
+  Target,
+  Calendar,
+  Crown,
+  CheckCircle,
+  AlertTriangle,
+  DollarSign,
+  PiggyBank,
+  Coffee,
+  Car,
+  Home,
+  Heart,
+  Briefcase,
+  Lock
+} from 'lucide-react';
 import { useLocation, Link } from 'wouter';
 import { useUser } from '@clerk/clerk-react';
 import { useQuery } from '@tanstack/react-query';

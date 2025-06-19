@@ -31,7 +31,33 @@ import {
   LazyAIFinancialTips,
   LazyTransactionRemindersWidget
 } from "@/components/dashboard/lazy-components";
-import { TrendingUp, TrendingDown, DollarSign, PlusCircle, Calendar, Target, PieChart, BarChart3, ArrowUpRight, ArrowDownRight, Crown, Zap, Shield, Star, ChevronRight, Plus, Minus, Eye, EyeOff, RefreshCw, AlertCircle, CheckCircle, XCircle, Clock, Repeat } from "@/lib/icons-registry";
+import { 
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  PlusCircle,
+  Calendar,
+  Target,
+  PieChart,
+  BarChart3,
+  ArrowUpRight,
+  ArrowDownRight,
+  Crown,
+  Zap,
+  Shield,
+  Star,
+  ChevronRight,
+  Plus,
+  Minus,
+  Eye,
+  EyeOff,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Repeat
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

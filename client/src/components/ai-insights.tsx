@@ -4,7 +4,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Brain, TrendingUp, TrendingDown, AlertTriangle, Target, DollarSign, Calendar, Crown, Lightbulb, ArrowRight } from "@/lib/icons-registry";
+import { 
+  Brain, 
+  TrendingUp, 
+  TrendingDown, 
+  AlertTriangle, 
+  Target, 
+  DollarSign,
+  Calendar,
+  Crown,
+  Lightbulb,
+  ArrowRight
+} from "lucide-react";
 import { useLocation } from "wouter";
 import RequirePlan from "@/components/require-plan";
 

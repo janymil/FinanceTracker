@@ -7,7 +7,30 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SEO } from "@/components/SEO";
-import { TrendingUp, CreditCard, Target, Calendar, PieChart, Shield, Bot, Send, BookOpen, HelpCircle, Star, Download, Clock, DollarSign, BarChart3, Cloud, Zap, Users, Lock, ChevronDown, ChevronRight, Camera } from "@/lib/icons-registry";
+import { 
+  TrendingUp, 
+  CreditCard, 
+  Target, 
+  Calendar, 
+  PieChart, 
+  Shield, 
+  Bot, 
+  Send,
+  BookOpen,
+  HelpCircle,
+  Star,
+  Download,
+  Clock,
+  DollarSign,
+  BarChart3,
+  Cloud,
+  Zap,
+  Users,
+  Lock,
+  ChevronDown,
+  ChevronRight,
+  Camera
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";

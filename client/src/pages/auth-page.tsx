@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { SignIn, SignUp } from "@clerk/clerk-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
-import { DollarSign, TrendingUp, Shield } from "@/lib/icons-registry";
+import { DollarSign, TrendingUp, Shield } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SEO } from "@/components/SEO";
 

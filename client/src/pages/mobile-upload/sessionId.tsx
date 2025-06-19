@@ -3,7 +3,7 @@ import { useParams } from "wouter";
 import { useAuth } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Camera, Upload, CheckCircle, AlertCircle, Loader2 } from "@/lib/icons-registry";
+import { Camera, Upload, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface UploadStatus {

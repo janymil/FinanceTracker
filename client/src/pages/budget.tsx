@@ -8,7 +8,22 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Edit3, Trash2, Calendar, Target, DollarSign, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Crown, Lock, ChevronLeft, ChevronRight } from "@/lib/icons-registry";
+import { 
+  Plus, 
+  Edit3, 
+  Trash2, 
+  Calendar,
+  Target,
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  CheckCircle,
+  Crown,
+  Lock,
+  ChevronLeft,
+  ChevronRight
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import { Link } from "wouter";

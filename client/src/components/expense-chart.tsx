@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
-import { DollarSign } from "@/lib/icons-registry";
+import { DollarSign } from "lucide-react";
 
 interface ExpenseChartProps {
   summary?: {

@@ -6,7 +6,7 @@ import { apiRequest } from '@/lib/queryClient';
 import UpgradePrompt from './upgrade-prompt';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
-import { Target, Crosshair, BarChart3, Calendar, TrendingUp, Users, Lock } from "@/lib/icons-registry";
+import { Target, Crosshair, BarChart3, Calendar, TrendingUp, Users, Lock } from 'lucide-react';
 
 type PlanType = 'free' | 'standard' | 'premium';
 

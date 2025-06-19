@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Trash2, Filter, TrendingDown, TrendingUp, ChevronDown, ChevronUp, Receipt, Repeat } from "@/lib/icons-registry";
+import { Trash2, Filter, TrendingDown, TrendingUp, ChevronDown, ChevronUp, Receipt, Repeat } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useState, useMemo } from "react";
 import ReceiptModal from "@/components/receipt-modal";

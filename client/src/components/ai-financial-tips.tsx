@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lightbulb, Sparkles, TrendingUp, GraduationCap } from "@/lib/icons-registry";
+import { Lightbulb, Sparkles, TrendingUp, GraduationCap } from "lucide-react";
 import { useUser } from '@clerk/clerk-react';
 
 import { useToast } from "@/hooks/use-toast";
