@@ -91,28 +91,66 @@ app.get('/robots.txt', (req, res) => {
   res.sendFile(path.resolve('public/robots.txt'));
 });
 
-// Safe file serving with error handling
+// Debug endpoint to test file paths
+app.get('/debug-paths', (req, res) => {
+  const fs = require('fs');
+  const debugInfo = {
+    cwd: process.cwd(),
+    dirname: __dirname,
+    nodeEnv: process.env.NODE_ENV,
+    files: {
+      'public/features.html': fs.existsSync(path.resolve(process.cwd(), 'public/features.html')),
+      'features.html': fs.existsSync(path.resolve(process.cwd(), 'features.html')),
+      '../public/features.html': fs.existsSync(path.resolve(__dirname, '..', 'public/features.html')),
+      './public/features.html': fs.existsSync(path.resolve(__dirname, 'public/features.html'))
+    },
+    resolvedPaths: {
+      'public/features.html': path.resolve(process.cwd(), 'public/features.html'),
+      '../public/features.html': path.resolve(__dirname, '..', 'public/features.html'),
+      './public/features.html': path.resolve(__dirname, 'public/features.html')
+    }
+  };
+  res.json(debugInfo);
+});
+
+// Safe file serving with comprehensive debugging
 function safeSendFile(res: Response, filePath: string, next: NextFunction) {
+  console.log(`[DEBUG] Starting safeSendFile for: ${filePath}`);
+  console.log(`[DEBUG] Current working directory: ${process.cwd()}`);
+  console.log(`[DEBUG] __dirname: ${__dirname}`);
+  
   try {
     const resolvedPath = path.resolve(process.cwd(), filePath);
-    console.log(`[STATIC FILE] Serving: ${resolvedPath}`);
+    console.log(`[STATIC FILE] Attempting to serve: ${resolvedPath}`);
     
     // Check if file exists before serving
-    if (!require('fs').existsSync(resolvedPath)) {
+    const fs = require('fs');
+    if (!fs.existsSync(resolvedPath)) {
       console.error(`[STATIC FILE] File not found: ${resolvedPath}`);
+      console.log(`[DEBUG] Checking alternative paths...`);
+      
+      // Try alternative paths
+      const altPath1 = path.resolve(__dirname, '..', filePath);
+      const altPath2 = path.resolve(__dirname, filePath);
+      console.log(`[DEBUG] Alternative path 1: ${altPath1} (exists: ${fs.existsSync(altPath1)})`);
+      console.log(`[DEBUG] Alternative path 2: ${altPath2} (exists: ${fs.existsSync(altPath2)})`);
+      
       return next(); // Let React handle the route
     }
     
+    console.log(`[STATIC FILE] File exists, serving: ${resolvedPath}`);
     res.sendFile(resolvedPath, (err) => {
       if (err) {
         console.error(`[STATIC FILE] Error serving ${filePath}:`, err.message);
+        console.error(`[STATIC FILE] Error code:`, (err as any).code);
+        console.error(`[STATIC FILE] Error status:`, (err as any).status);
         console.error(`[STATIC FILE] Full error:`, err);
         return next(); // Fallback to React app instead of 500
       }
       console.log(`[STATIC FILE] Successfully served: ${filePath}`);
     });
   } catch (error) {
-    console.error(`[STATIC FILE] Failed to resolve path ${filePath}:`, error);
+    console.error(`[STATIC FILE] Critical error in safeSendFile:`, error);
     next();
   }
 }
@@ -134,9 +172,34 @@ crawlerRoutes.forEach(({ path, file }) => {
   app.get(path, (req, res, next) => {
     const userAgent = req.get('User-Agent') || '';
     console.log(`[ROUTE ${path}] User-Agent: ${userAgent.substring(0, 50)}...`);
+    console.log(`[ROUTE ${path}] Full request URL: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
+    console.log(`[ROUTE ${path}] Request method: ${req.method}`);
+    console.log(`[ROUTE ${path}] Request headers:`, JSON.stringify(req.headers, null, 2));
     
     if (isCrawler(userAgent)) {
       console.log(`[ROUTE ${path}] Crawler detected, serving static file: ${file}`);
+      
+      // Fix for /help route - use absolute path resolution
+      if (path === '/help') {
+        console.log(`[HELP DEBUG] Serving static HTML for /help to crawler`);
+        try {
+          const helpFilePath = path.resolve(process.cwd(), 'public/features.html');
+          console.log(`[HELP DEBUG] Resolved path: ${helpFilePath}`);
+          return res.sendFile(helpFilePath, (err) => {
+            if (err) {
+              console.error(`[HELP DEBUG] Error serving features.html:`, err);
+              // Fallback to index.html if features.html fails
+              const fallbackPath = path.resolve(process.cwd(), 'public/index.html');
+              return res.sendFile(fallbackPath);
+            }
+            console.log(`[HELP DEBUG] Successfully served features.html`);
+          });
+        } catch (error) {
+          console.error(`[HELP DEBUG] Critical error:`, error);
+          return next();
+        }
+      }
+      
       return safeSendFile(res, file, next);
     }
     
