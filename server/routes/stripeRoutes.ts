@@ -96,10 +96,24 @@ export function registerStripeRoutes(app: Express) {
         return res.status(404).json({ error: "User not found" });
       }
       
-      // Check if user has existing subscription for proper handling
-      if (user.stripeSubscriptionId && user.plan !== 'free') {
-        // For existing subscribers, use subscription update with proration
-        return await handleSubscriptionChange(user, plan, res);
+      // Check if user has existing subscription - redirect to Customer Portal
+      if (user.stripeSubscriptionId && user.stripeCustomerId && user.plan !== 'free') {
+        try {
+          const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+          if (subscription.status === 'active') {
+            // Existing paid subscriber - redirect to Customer Portal for plan management
+            const portalSession = await stripe.billingPortal.sessions.create({
+              customer: user.stripeCustomerId,
+              return_url: `${req.headers.origin || 'http://localhost:5000'}/dashboard?subscription_update=success`,
+            });
+
+            console.log('Existing subscriber redirected to Customer Portal for plan change');
+            return res.json({ url: portalSession.url });
+          }
+        } catch (error) {
+          console.error('Error checking existing subscription:', error);
+          // Continue to checkout if subscription check fails
+        }
       }
       
       // Get email from Clerk token
