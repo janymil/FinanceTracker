@@ -489,7 +489,7 @@ export default function Help() {
                       <li>• Calendar view of transactions</li>
                       <li>• Automatic backup scheduling</li>
                       <li>• Data import from other apps</li>
-                      <li>• Financial mascot companion (Premium)</li>
+                      <li>• Financial mascot companion</li>
                       <li>• Expense prediction and forecasting</li>
                       <li>• Daily AI-powered financial tips</li>
                       <li>• Transaction reminders and alerts</li>
