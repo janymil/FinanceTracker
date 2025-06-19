@@ -8,7 +8,7 @@ import path from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { cookieConsentMiddleware } from "./cookieMiddleware";
-import { landingPageSSR, helpPageSSR, pricingPageSSR, contactPageSSR, privacyPageSSR } from "./ssr";
+import { landingPageSSR, helpPageSSR, pricingPageSSR, contactPageSSR, privacyPageSSR, termsPageSSR, cookiePolicySSR } from "./ssr-simple";
 import "./batch-processor"; // Initialize batch processing system
 
 const app = express();

@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
+import { renderToString } from "react-dom/server";
 
-// Static HTML content for public pages that crawlers can read
-const generateStaticHTML = (title: string, description: string, content: string) => `
+// Helper to generate SSR HTML that supports React hydration
+const generateSSRHTML = (title: string, description: string, reactHTML: string) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,32 +18,55 @@ const generateStaticHTML = (title: string, description: string, content: string)
     <meta property="og:description" content="${description}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://finanzerpro.com">
+    <meta property="og:image" content="https://finanzerpro.com/og-image.png">
+    
+    <!-- Google Analytics - Production Only -->
+    <script>
+      if (window.location.hostname === 'finanzerpro.com') {
+        (function() {
+          var script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-PRRBGDT20Q';
+          document.head.appendChild(script);
+          
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-PRRBGDT20Q');
+          window.gtag = gtag;
+        })();
+      }
+    </script>
     
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        h1 { color: #4f46e5; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; margin: 0; padding: 0; background: #f9fafb; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        h1 { color: #4f46e5; font-size: 2.5rem; margin-bottom: 1rem; }
         h2 { color: #374151; margin-top: 2rem; }
+        h3 { color: #374151; }
         p { color: #6b7280; }
-        .feature { margin: 1rem 0; padding: 1rem; background: #f9fafb; border-radius: 8px; }
+        .feature { margin: 1rem 0; padding: 1.5rem; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .price { font-size: 2rem; font-weight: bold; color: #4f46e5; }
         a { color: #4f46e5; text-decoration: none; }
         a:hover { text-decoration: underline; }
+        .btn { display: inline-block; padding: 0.75rem 1.5rem; background: #4f46e5; color: white; border-radius: 8px; text-decoration: none; margin: 0.5rem; }
+        .btn:hover { background: #4338ca; color: white; }
+        ul { color: #6b7280; }
+        li { margin: 0.5rem 0; }
     </style>
 </head>
 <body>
-    <div class="container">
-        ${content}
-        <footer style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e5e7eb; text-align: center;">
-            <p>&copy; 2025 FinanzerPro. All rights reserved.</p>
-            <p><a href="/">Home</a> | <a href="/pricing">Pricing</a> | <a href="/help">Help</a> | <a href="/contact">Contact</a> | <a href="/privacy-policy">Privacy</a></p>
-        </footer>
-    </div>
+    <div id="root">${reactHTML}</div>
+    <script>
+        // Mark page as SSR for hydration
+        window.__SSR__ = true;
+    </script>
 </body>
 </html>`;
 
-export const landingPageSSR = (req: Request, res: Response) => {
-    const content = `
+// Simple static components for SSR
+const LandingPageContent = () => `
+    <div class="container">
         <h1>FinanzerPro - Smart Personal Finance Management</h1>
         <p>Transform your financial life with AI-powered expense tracking, receipt OCR scanning, budgeting tools, and collaborative savings goals.</p>
         
@@ -74,20 +98,27 @@ export const landingPageSSR = (req: Request, res: Response) => {
         
         <h2>Start Managing Your Finances Today</h2>
         <p>Join thousands of users who have taken control of their financial future with FinanzerPro.</p>
-        <p><a href="/auth">Get Started Free</a> | <a href="/pricing">View Pricing Plans</a></p>
-    `;
-    
-    const html = generateStaticHTML(
+        <p><a href="/auth" class="btn">Get Started Free</a> <a href="/pricing" class="btn">View Pricing Plans</a></p>
+        
+        <footer style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e5e7eb; text-align: center;">
+            <p>&copy; 2025 FinanzerPro. All rights reserved.</p>
+            <p><a href="/">Home</a> | <a href="/pricing">Pricing</a> | <a href="/help">Help</a> | <a href="/contact">Contact</a> | <a href="/privacy-policy">Privacy</a></p>
+        </footer>
+    </div>
+`;
+
+export const landingPageSSR = (req: Request, res: Response) => {
+    const html = generateSSRHTML(
         "FinanzerPro - Smart Personal Finance Management",
         "Transform your financial life with AI-powered expense tracking, receipt OCR scanning, budgeting tools, and collaborative savings goals. Start free today!",
-        content
+        LandingPageContent()
     );
     
     res.send(html);
 };
 
-export const helpPageSSR = (req: Request, res: Response) => {
-    const content = `
+const HelpPageContent = () => `
+    <div class="container">
         <h1>FinanzerPro Help & Documentation</h1>
         <p>Complete guide to using FinanzerPro's powerful financial management features.</p>
         
@@ -96,100 +127,124 @@ export const helpPageSSR = (req: Request, res: Response) => {
         
         <h2>Key Features</h2>
         
-        <h3>Transaction Management</h3>
-        <p>Record income and expenses with automatic AI categorization. Edit, delete, and organize your financial data with ease.</p>
+        <div class="feature">
+            <h3>Transaction Management</h3>
+            <p>Record income and expenses with automatic AI categorization. Edit, delete, and organize your financial data with ease.</p>
+        </div>
         
-        <h3>Receipt OCR Scanning</h3>
-        <p>Use your phone camera to scan receipts. Our OCR technology extracts amount, vendor, and date information automatically.</p>
+        <div class="feature">
+            <h3>Receipt OCR Scanning</h3>
+            <p>Use your phone camera to scan receipts. Our OCR technology extracts amount, vendor, and date information automatically.</p>
+        </div>
         
-        <h3>Mobile QR Upload</h3>
-        <p>Scan QR codes from your desktop to upload receipts directly from your phone camera.</p>
+        <div class="feature">
+            <h3>Mobile QR Upload</h3>
+            <p>Scan QR codes from your desktop to upload receipts directly from your phone camera.</p>
+        </div>
         
-        <h3>Budget Tracking</h3>
-        <p>Set monthly budgets for different categories and track your spending progress with visual indicators.</p>
+        <div class="feature">
+            <h3>Budget Tracking</h3>
+            <p>Set monthly budgets for different categories and track your spending progress with visual indicators.</p>
+        </div>
         
-        <h3>Financial Goals</h3>
-        <p>Create savings goals for vacations, emergency funds, or major purchases. Track progress and collaborate with family.</p>
+        <div class="feature">
+            <h3>Financial Goals</h3>
+            <p>Create savings goals for vacations, emergency funds, or major purchases. Track progress and collaborate with family.</p>
+        </div>
         
-        <h3>AI Financial Assistant</h3>
-        <p>Get personalized financial tips, expense predictions, and spending insights powered by artificial intelligence.</p>
-        
-        <h3>Reports & Analytics</h3>
-        <p>View detailed spending reports, category breakdowns, and financial trends over time.</p>
-        
-        <h3>Data Management</h3>
-        <p>Export your data in multiple formats, create cloud backups, and import from other financial apps.</p>
+        <div class="feature">
+            <h3>AI Financial Assistant</h3>
+            <p>Get personalized financial tips, expense predictions, and spending insights powered by artificial intelligence.</p>
+        </div>
         
         <h2>Subscription Plans</h2>
         
-        <h3>Free Plan</h3>
-        <p>Perfect for getting started with basic expense tracking up to 100 transactions.</p>
+        <div class="feature">
+            <h3>Free Plan</h3>
+            <p>Perfect for getting started with basic expense tracking up to 100 transactions.</p>
+        </div>
         
-        <h3>Standard Plan - $4.99/month</h3>
-        <p>Includes receipt OCR scanning, budgets, goals, AI categorization, and mobile QR upload.</p>
+        <div class="feature">
+            <h3>Standard Plan - $4.99/month</h3>
+            <p>Includes receipt OCR scanning, budgets, goals, AI categorization, and mobile QR upload.</p>
+        </div>
         
-        <h3>Premium Plan - $9.99/month</h3>
-        <p>Everything in Standard plus unlimited transactions, AI insights, cloud backup, and advanced analytics.</p>
+        <div class="feature">
+            <h3>Premium Plan - $9.99/month</h3>
+            <p>Everything in Standard plus unlimited transactions, AI insights, cloud backup, and advanced analytics.</p>
+        </div>
         
-        <h2>Need More Help?</h2>
-        <p>Contact our support team at <a href="/contact">our contact page</a> for personalized assistance.</p>
-    `;
-    
-    const html = generateStaticHTML(
+        <p><a href="/contact" class="btn">Contact Support</a> <a href="/pricing" class="btn">View All Plans</a></p>
+        
+        <footer style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e5e7eb; text-align: center;">
+            <p>&copy; 2025 FinanzerPro. All rights reserved.</p>
+            <p><a href="/">Home</a> | <a href="/pricing">Pricing</a> | <a href="/help">Help</a> | <a href="/contact">Contact</a> | <a href="/privacy-policy">Privacy</a></p>
+        </footer>
+    </div>
+`;
+
+export const helpPageSSR = (req: Request, res: Response) => {
+    const html = generateSSRHTML(
         "FinanzerPro Help & Documentation",
         "Complete guide to using FinanzerPro's financial management features including receipt scanning, budgets, goals, and AI insights.",
-        content
+        HelpPageContent()
     );
     
     res.send(html);
 };
 
-export const pricingPageSSR = (req: Request, res: Response) => {
-    const content = `
+const PricingPageContent = () => `
+    <div class="container">
         <h1>FinanzerPro Pricing Plans</h1>
         <p>Choose the perfect plan for your financial management needs.</p>
         
-        <h2>Free Plan</h2>
-        <div class="price">$0</div>
-        <p>Perfect for getting started with personal finance tracking.</p>
-        <ul>
-            <li>Up to 100 transactions</li>
-            <li>Basic expense tracking</li>
-            <li>Simple financial health score</li>
-            <li>Manual transaction entry</li>
-        </ul>
+        <div class="feature">
+            <h2>Free Plan</h2>
+            <div class="price">$0</div>
+            <p>Perfect for getting started with personal finance tracking.</p>
+            <ul>
+                <li>Up to 100 transactions</li>
+                <li>Basic expense tracking</li>
+                <li>Simple financial health score</li>
+                <li>Manual transaction entry</li>
+            </ul>
+        </div>
         
-        <h2>Standard Plan</h2>
-        <div class="price">$4.99/month</div>
-        <p>Enhanced features for serious budgeters and goal-setters.</p>
-        <ul>
-            <li>Up to 100 transactions</li>
-            <li>Receipt OCR scanning</li>
-            <li>Mobile QR code upload</li>
-            <li>Budget management</li>
-            <li>Savings goals</li>
-            <li>AI expense categorization</li>
-            <li>Transaction reminders</li>
-            <li>Calendar view</li>
-            <li>AI financial health assistant</li>
-        </ul>
+        <div class="feature">
+            <h2>Standard Plan</h2>
+            <div class="price">$4.99/month</div>
+            <p>Enhanced features for serious budgeters and goal-setters.</p>
+            <ul>
+                <li>Up to 100 transactions</li>
+                <li>Receipt OCR scanning</li>
+                <li>Mobile QR code upload</li>
+                <li>Budget management</li>
+                <li>Savings goals</li>
+                <li>AI expense categorization</li>
+                <li>Transaction reminders</li>
+                <li>Calendar view</li>
+                <li>AI financial health assistant</li>
+            </ul>
+        </div>
         
-        <h2>Premium Plan</h2>
-        <div class="price">$9.99/month</div>
-        <p>Ultimate financial management with unlimited features.</p>
-        <ul>
-            <li>Unlimited transactions</li>
-            <li>All Standard features</li>
-            <li>Cloud receipt storage</li>
-            <li>Advanced AI insights</li>
-            <li>Expense predictions</li>
-            <li>Daily recommendations</li>
-            <li>Financial mascot</li>
-            <li>Data export & import</li>
-            <li>Cloud backup & restore</li>
-            <li>Advanced analytics</li>
-            <li>Trend predictions</li>
-        </ul>
+        <div class="feature">
+            <h2>Premium Plan</h2>
+            <div class="price">$9.99/month</div>
+            <p>Ultimate financial management with unlimited features.</p>
+            <ul>
+                <li>Unlimited transactions</li>
+                <li>All Standard features</li>
+                <li>Cloud receipt storage</li>
+                <li>Advanced AI insights</li>
+                <li>Expense predictions</li>
+                <li>Daily recommendations</li>
+                <li>Financial mascot</li>
+                <li>Data export & import</li>
+                <li>Cloud backup & restore</li>
+                <li>Advanced analytics</li>
+                <li>Trend predictions</li>
+            </ul>
+        </div>
         
         <h2>Save with Annual Plans</h2>
         <p>Get 2 months free with yearly subscriptions:</p>
@@ -198,13 +253,20 @@ export const pricingPageSSR = (req: Request, res: Response) => {
             <li>Premium: $99.90/year (save $19.98)</li>
         </ul>
         
-        <p><a href="/auth">Start Your Free Account</a> and upgrade anytime.</p>
-    `;
-    
-    const html = generateStaticHTML(
-        "FinanzerPro Pricing Plans - Free, Standard & Premium",
+        <p><a href="/auth" class="btn">Start Your Free Account</a></p>
+        
+        <footer style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e5e7eb; text-align: center;">
+            <p>&copy; 2025 FinanzerPro. All rights reserved.</p>
+            <p><a href="/">Home</a> | <a href="/pricing">Pricing</a> | <a href="/help">Help</a> | <a href="/contact">Contact</a> | <a href="/privacy-policy">Privacy</a></p>
+        </footer>
+    </div>
+`;
+
+export const pricingPageSSR = (req: Request, res: Response) => {
+    const html = generateSSRHTML(
+        "FinanzerPro Pricing Plans - Free, Standard & Premium", 
         "Choose from Free, Standard ($4.99/month), or Premium ($9.99/month) plans. Receipt scanning, AI categorization, cloud backup, and more.",
-        content
+        PricingPageContent()
     );
     
     res.send(html);
