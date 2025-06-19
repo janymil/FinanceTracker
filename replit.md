@@ -427,6 +427,7 @@ Changelog:
 - June 19, 2025. SUBSCRIPTION PRORATION FIXED: Implemented proper Stripe subscription modification flow using subscription.update() with proration_behavior for existing customers instead of cancel/create pattern - Stripe now handles prorated billing automatically for plan changes
 - June 19, 2025. ADVANCED SUBSCRIPTION SWITCHING: Implemented /api/switch-plan endpoint with weight-based plan hierarchy - upgrades apply immediately with proration, downgrades scheduled for billing period end using Stripe Subscription Schedules
 - June 19, 2025. SUBSCRIPTION TRANSPARENCY: Added /api/subscription-schedule endpoint and SubscriptionSchedule component to show users exact dates when current plan ends and new plan begins - ensures complete visibility of billing transitions without immediate charges for downgrades
+- June 19, 2025. DIRECT SUBSCRIPTION UPDATE FLOW: Implemented Stripe Customer Portal flow_data configuration to redirect existing subscribers directly to subscription update page when clicking upgrade buttons - bypasses general portal overview for streamlined plan changes
 ```
 
 ## User Preferences
