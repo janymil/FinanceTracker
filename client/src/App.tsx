@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { SignedIn, SignedOut, useClerk } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, useClerk, useUser } from "@clerk/clerk-react";
 
 // Core components loaded immediately
 import Header from "@/components/header";
@@ -103,10 +103,10 @@ function AuthenticatedApp({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSi
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
 }) {
-  const { user, isLoading } = useAuth();
-
-  // Show loading while user data is being fetched
-  if (isLoading || !user) {
+  const { user: clerkUser, isLoaded } = useUser();
+  
+  // Use Clerk user directly for faster loading in production
+  if (!isLoaded || !clerkUser) {
     return <AppLoader />;
   }
 
