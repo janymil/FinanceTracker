@@ -166,6 +166,15 @@ export function registerStripeRoutes(app: Express) {
       }
 
       const session = await stripe.checkout.sessions.create(sessionConfig);
+      
+      console.log('Stripe session created successfully');
+      console.log('Session ID:', session.id);
+      console.log('Session URL:', session.url);
+      
+      if (!session.url) {
+        console.error('No URL returned from Stripe session');
+        return res.status(500).json({ error: "No redirect URL received from Stripe" });
+      }
 
       res.json({ url: session.url });
 

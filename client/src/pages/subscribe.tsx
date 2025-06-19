@@ -54,15 +54,21 @@ export default function Subscribe() {
       });
 
       if (response.ok) {
-        const { url } = await response.json();
-        console.log('Stripe checkout URL received:', url);
-        if (url) {
-          console.log('Redirecting to Stripe checkout...');
-          // Don't set loading to false here since we're redirecting
-          window.location.href = url;
+        const responseData = await response.json();
+        console.log('Full response from server:', responseData);
+        const { url } = responseData;
+        console.log('Extracted URL:', url);
+        
+        if (url && url.trim()) {
+          console.log('Valid URL found, redirecting to:', url);
+          // Add a small delay to ensure logging is visible
+          setTimeout(() => {
+            window.location.href = url;
+          }, 100);
           return; // Exit the function after redirect
         } else {
-          console.error('No URL received from checkout session');
+          console.error('No valid URL received from checkout session');
+          console.error('Response data:', responseData);
           setLoading(false);
         }
       } else {
