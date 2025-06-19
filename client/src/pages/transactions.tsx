@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import UploadReceiptModal from "@/components/UploadReceiptModal";
 import { Button } from "@/components/ui/button";
@@ -87,114 +88,82 @@ export default function Transactions() {
     referenceNote: "",
   });
 
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // React Query hooks for data fetching
+  const { data: transactions = [], isLoading: transactionsLoading, refetch: refetchTransactions } = useQuery({
+    queryKey: ["transactions"],
+    enabled: isReady && !!user?.id,
+    gcTime: 0
+  });
 
-  // Load data when component mounts or user changes
-  useEffect(() => {
-    if (isReady && user?.id) {
-      loadTransactions();
-      loadCategories();
-    }
-  }, [isReady, user?.id]);
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ["categories"],
+    enabled: isReady && !!user?.id
+  });
 
-  const loadTransactions = async () => {
-    try {
-      setIsLoading(true);
-      const res = await apiRequest("GET", "/api/transactions");
-      const data = await res.json();
-      setTransactions(data);
-    } catch (error) {
-      console.error("Failed to load transactions:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loadCategories = async () => {
-    try {
-      // Add small delay to ensure token is available
-      await new Promise(resolve => setTimeout(resolve, 100));
-      const res = await apiRequest("GET", "/api/categories");
-      const data = await res.json();
-      setCategories(data);
-    } catch (error) {
-      console.error("Failed to load categories:", error);
-      // Retry once after a longer delay
-      try {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const retryRes = await apiRequest("GET", "/api/categories");
-        const retryData = await retryRes.json();
-        setCategories(retryData);
-      } catch (retryError) {
-        console.error("Failed to load categories on retry:", retryError);
-      }
-    }
-  };
+  const isLoading = transactionsLoading || categoriesLoading;
 
 
 
-  const createTransaction = async (transactionData: typeof newTransaction) => {
-    try {
+  // React Query mutation for creating transactions
+  const createTransactionMutation = useMutation({
+    mutationFn: async (transactionData: typeof newTransaction) => {
       const res = await apiRequest("POST", "/api/transactions", {
         ...transactionData,
         amount: parseFloat(transactionData.amount),
       });
-      const newTransaction = await res.json();
-      
-      // Update local state immediately
-      setTransactions(prev => [newTransaction, ...prev]);
-      
-      // Invalidate transaction reminders cache
-      await queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
-      
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       setIsDialogOpen(false);
       toast({
         title: "Transaction Added",
         description: "Transaction has been created successfully",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     }
-  };
+  });
 
-  // Direct edit function that bypasses form system
-  const directEditTransaction = async (transactionData: any) => {
-    try {
+  // React Query mutation for editing transactions
+  const editTransactionMutation = useMutation({
+    mutationFn: async (transactionData: any) => {
       const res = await apiRequest("PUT", `/api/transactions/${transactionData.id}`, transactionData);
-      
       if (!res.ok) {
         throw new Error(`Edit failed: ${res.status}`);
       }
-      
-      const updatedTransaction = await res.json();
-      
-      // Update local state immediately
-      setTransactions(prev => prev.map(t => t.id === transactionData.id ? updatedTransaction : t));
-      
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
         title: "Transaction Updated",
         description: "Transaction has been updated successfully",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Edit Failed",
         description: error.message,
         variant: "destructive",
       });
     }
-  };
+  });
 
-  // Form submission function
-  const updateTransaction = async ({ id, ...data }: { id: number } & typeof newTransaction) => {
-    try {
+  // React Query mutation for updating transactions via form
+  const updateTransactionMutation = useMutation({
+    mutationFn: async ({ id, ...data }: { id: number } & typeof newTransaction) => {
       const updateData = {
         amount: parseFloat(newTransaction.amount),
         description: newTransaction.description,
@@ -212,52 +181,51 @@ export default function Transactions() {
       if (!res.ok) {
         throw new Error(`Update failed: ${res.status}`);
       }
-      const updatedTransaction = await res.json();
-      
-      // Update local state immediately
-      setTransactions(prev => prev.map(t => t.id === id ? updatedTransaction : t));
-      
-      // Invalidate transaction reminders cache
-      await queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
-      
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
         title: "Transaction Updated",
         description: "Transaction has been updated successfully",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     }
-  };
+  });
 
-  const deleteTransaction = async (id: number) => {
-    try {
+  // React Query mutation for deleting transactions
+  const deleteTransactionMutation = useMutation({
+    mutationFn: async (id: number) => {
       const res = await apiRequest("DELETE", `/api/transactions/${id}`);
-      await res.json();
-      
-      // Update local state immediately
-      setTransactions(prev => prev.filter(t => t.id !== id));
-      
-      // Invalidate transaction reminders cache
-      await queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
-      
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
+      queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       toast({
         title: "Transaction Deleted",
         description: "Transaction has been removed successfully",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     }
-  };
+  });
 
   // Filter transactions based on search and filters
   const filteredTransactions = transactions.filter((transaction: Transaction) => {
