@@ -193,27 +193,36 @@ export default function ProfilePage() {
                 <h4 className="font-medium">Plan Features</h4>
                 {authUser.plan === 'free' && (
                   <div className="text-sm text-muted-foreground space-y-1">
-                    <p>• Up to 100 transactions</p>
-                    <p>• Basic expense tracking</p>
-                    <p>• Simple financial summaries</p>
+                    <p>• Basic expense and income tracking</p>
+                    <p>• Manual categorization</p>
+                    <p>• Up to 100 transaction entries</p>
+                    <p>• Simple financial overview</p>
+                    <p>• Personalized financial tips</p>
                   </div>
                 )}
                 {authUser.plan === 'standard' && (
                   <div className="text-sm text-muted-foreground space-y-1">
-                    <p>• Up to 100 transactions</p>
-                    <p>• Budget management</p>
-                    <p>• Goal tracking</p>
-                    <p>• Transaction reminders</p>
+                    <p>• Everything in Free plan</p>
+                    <p>• Goals and budget management</p>
+                    <p>• Interactive charts and reports</p>
                     <p>• AI expense categorization</p>
+                    <p>• Receipt OCR scanning</p>
+                    <p>• Mobile QR code upload</p>
+                    <p>• Calendar view and reminders</p>
+                    <p>• Unlimited transaction history</p>
                   </div>
                 )}
                 {authUser.plan === 'premium' && (
                   <div className="text-sm text-muted-foreground space-y-1">
-                    <p>• Unlimited transactions</p>
-                    <p>• Advanced analytics</p>
-                    <p>• AI financial insights</p>
-                    <p>• Data export & cloud backup</p>
-                    <p>• AI predictions & recommendations</p>
+                    <p>• Everything in Standard plan</p>
+                    <p>• AI financial tips and insights</p>
+                    <p>• Advanced trends analysis</p>
+                    <p>• Expense prediction</p>
+                    <p>• Daily personalized recommendations</p>
+                    <p>• Cloud receipt storage</p>
+                    <p>• Cloud data backup</p>
+                    <p>• Data management (CSV, PDF)</p>
+                    <p>• Priority email support</p>
                   </div>
                 )}
               </div>
