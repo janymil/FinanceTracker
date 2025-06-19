@@ -70,8 +70,14 @@ export default function Subscribe() {
           setLoading(false);
         }
       } else {
-        const error = await response.json();
+        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
         console.error('Failed to create checkout session:', error);
+        
+        if (error.error === "You are already subscribed to this plan") {
+          alert("You are already subscribed to this plan.");
+        } else {
+          alert(`Subscription error: ${error.error || 'Please try again'}`);
+        }
         setLoading(false);
       }
     } catch (error) {

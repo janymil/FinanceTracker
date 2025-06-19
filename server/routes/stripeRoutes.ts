@@ -5,7 +5,7 @@ import { storage } from "../storage";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
-// Handle subscription changes (upgrade/downgrade)
+// Handle subscription changes (upgrade/downgrade) via checkout session
 async function handleSubscriptionChange(user: any, newPlan: string, res: Response) {
   if (!stripe) {
     return res.status(503).json({ message: "Payment processing unavailable" });
@@ -28,41 +28,42 @@ async function handleSubscriptionChange(user: any, newPlan: string, res: Respons
       return res.status(400).json({ error: "Invalid plan selected" });
     }
 
-    // Update subscription with proration
-    const updatedSubscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
-      items: [{
-        id: subscription.items.data[0].id,
+    // Check if user is trying to switch to the same plan
+    const currentPriceId = subscription.items.data[0]?.price.id;
+    if (currentPriceId === newPriceId) {
+      return res.status(400).json({ error: "You are already subscribed to this plan" });
+    }
+
+    const baseUrl = process.env.BASE_URL || 'http://localhost:5000';
+    
+    // Create checkout session for subscription modification with proration
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      customer: user.stripeCustomerId,
+      payment_method_types: ['card'],
+      line_items: [{
         price: newPriceId,
+        quantity: 1,
       }],
-      proration_behavior: 'create_prorations', // This handles the credit/charge calculation
+      subscription_data: {
+        proration_behavior: 'create_prorations',
+      },
+      success_url: `${baseUrl}/api/subscription-success?plan=${newPlan}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/subscribe`,
       metadata: {
         plan: newPlan,
-        userId: user.id
+        userId: user.id,
+        isUpgrade: 'true',
+        existingSubscriptionId: user.stripeSubscriptionId
       }
     });
 
-    // Update user plan in database
-    const planMapping = {
-      'standard': { plan: 'standard', interval: 'monthly' },
-      'standard-yearly': { plan: 'standard', interval: 'yearly' },
-      'premium': { plan: 'premium', interval: 'monthly' },
-      'premium-yearly': { plan: 'premium', interval: 'yearly' }
-    };
-
-    const planConfig = planMapping[newPlan as keyof typeof planMapping];
-    if (planConfig) {
-      await storage.updateUserPlan(user.id, planConfig.plan as 'free' | 'standard' | 'premium', planConfig.interval as 'monthly' | 'yearly');
-    }
-
-    return res.json({ 
-      success: true, 
-      message: "Subscription updated successfully",
-      subscription: updatedSubscription 
-    });
+    console.log('Subscription change session created:', session.id);
+    return res.json({ url: session.url });
 
   } catch (error) {
-    console.error('Error updating subscription:', error);
-    return res.status(500).json({ error: "Failed to update subscription" });
+    console.error('Error creating subscription change session:', error);
+    return res.status(500).json({ error: "Failed to create subscription change session" });
   }
 }
 
@@ -89,8 +90,11 @@ export function registerStripeRoutes(app: Express) {
         return res.status(404).json({ error: "User not found" });
       }
       
-      // For plan changes, create a new checkout session instead of automatic updates
-      // This ensures users go through Stripe to confirm billing changes
+      // Check if user has existing subscription for proper handling
+      if (user.stripeSubscriptionId && user.plan !== 'free') {
+        // For existing subscribers, use subscription update with proration
+        return await handleSubscriptionChange(user, plan, res);
+      }
       
       // Get email from Clerk token
       const auth = req.auth();
