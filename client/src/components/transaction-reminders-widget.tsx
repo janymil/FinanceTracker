@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useUser, useAuth } from "@clerk/clerk-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +27,7 @@ import {
 } from "lucide-react";
 import { format, isToday, isTomorrow, isWithinInterval, addDays } from "date-fns";
 import RequirePlan from "@/components/require-plan";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface TransactionReminder {
@@ -86,7 +87,7 @@ interface UnifiedReminder {
 export default function TransactionRemindersWidget() {
   const { toast } = useToast();
   const { user, isLoaded, isSignedIn } = useUser();
-  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newReminder, setNewReminder] = useState({
     title: "",
@@ -102,15 +103,44 @@ export default function TransactionRemindersWidget() {
     referenceNote: "",
   });
 
-  // State management
-  const [transactionReminders, setTransactionReminders] = useState<TransactionReminder[]>([]);
-  const [expenseReminders, setExpenseReminders] = useState<ExpenseReminder[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [transactionLoading, setTransactionLoading] = useState(true);
-  const [expenseLoading, setExpenseLoading] = useState(true);
-
   // Check if user is ready for API calls
   const isUserReady = isLoaded && isSignedIn && !!user?.id;
+
+  // Use React Query for transaction reminders
+  const { data: transactionReminders = [], isLoading: transactionLoading } = useQuery({
+    queryKey: ['transaction-reminders', user?.id],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/transaction-reminders?days=30');
+      return response.json();
+    },
+    enabled: isUserReady,
+    staleTime: 0,
+    retry: 2,
+  });
+
+  // Use React Query for expense reminders
+  const { data: expenseReminders = [], isLoading: expenseLoading } = useQuery({
+    queryKey: ['expense-reminders', user?.id],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/expense-reminders/upcoming');
+      return response.json();
+    },
+    enabled: isUserReady,
+    staleTime: 0,
+    retry: 2,
+  });
+
+  // Use React Query for categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/categories');
+      return response.json();
+    },
+    enabled: isUserReady,
+    staleTime: 0,
+    retry: 2,
+  });
 
   // Fetch transaction reminders
   useEffect(() => {

@@ -1,8 +1,8 @@
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useTransactions } from "@/hooks/useTransactions";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useMemo, startTransition, useDeferredValue, useTransition } from "react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardSkeleton } from "@/components/dashboard-skeleton";
 
@@ -253,16 +253,27 @@ export default function Dashboard() {
     }
   }, [isReady, transactions]);
 
-  const createTransaction = async (transactionData: typeof newTransaction) => {
-    try {
-      const res = await apiRequest("POST", "/api/transactions", {
+  const queryClient = useQueryClient();
+
+  const createTransactionMutation = useMutation({
+    mutationFn: async (transactionData: typeof newTransaction) => {
+      const response = await apiRequest("POST", "/api/transactions", {
         ...transactionData,
         amount: parseFloat(transactionData.amount),
       });
-      await queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      await queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
-      await queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
-
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalidate all relevant queries to force refresh
+      queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
+      queryClient.invalidateQueries({ 
+        predicate: (query) => 
+          query.queryKey[0] === "financial-summary" ||
+          query.queryKey[0] === "budgets" ||
+          query.queryKey[0] === "financial-health" ||
+          query.queryKey[0] === "transaction-reminders"
+      });
+      
       setIsDialogOpen(false);
       setNewTransaction({
         amount: "",
@@ -280,14 +291,15 @@ export default function Dashboard() {
         title: "Transaction Added",
         description: "Transaction has been created successfully",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     }
-  };
+  });
 
   if (!user) {
     return null;
@@ -323,7 +335,7 @@ export default function Dashboard() {
 
   const handleSubmit = async () => {
     if (!newTransaction.amount || !newTransaction.description) return;
-    await createTransaction(newTransaction);
+    createTransactionMutation.mutate(newTransaction);
   };
 
   return (
