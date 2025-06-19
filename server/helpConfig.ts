@@ -114,7 +114,7 @@ export function getCurrentAppConfig(): AppConfiguration {
       support: [
         "Use this AI chat for immediate help with app features",
         "Check the FAQ section below for common questions", 
-        "Contact support at support@finanzerpro.app for technical issues",
+        "Contact support at info@finanzerpro.com for technical issues",
         "Visit the Help Center for detailed guides and tutorials"
       ]
     }

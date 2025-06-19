@@ -196,7 +196,7 @@ export default function CookiePolicy() {
             <p className="mb-4">
               If you have any questions about our use of cookies, please contact us at:
             </p>
-            <p className="mb-2">Email: privacy@financeflow.app</p>
+            <p className="mb-2">Email: info@finanzerpro.com</p>
             <p>Address: 123 Finance Street, San Francisco, CA 94105</p>
           </section>
         </div>

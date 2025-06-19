@@ -184,7 +184,7 @@ export default function Contact() {
                   <Mail className="h-5 w-5 text-primary" />
                   <div>
                     <p className="font-medium">Email</p>
-                    <p className="text-sm text-muted-foreground">support@financeflow.app</p>
+                    <p className="text-sm text-muted-foreground">info@finanzerpro.com</p>
                   </div>
                 </div>
 

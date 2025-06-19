@@ -147,7 +147,7 @@ export default function PrivacyPolicy() {
             <p className="mb-4">
               If you have any questions about this Privacy Policy, please contact us at:
             </p>
-            <p className="mb-2">Email: privacy@financeflow.app</p>
+            <p className="mb-2">Email: info@finanzerpro.com</p>
             <p>Address: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120</p>
           </section>
         </div>
