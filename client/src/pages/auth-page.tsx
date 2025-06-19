@@ -42,7 +42,14 @@ export default function AuthPage() {
   }, [isAuthenticated, user, setLocation]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
+    <>
+      <SEO 
+        title="Sign In & Sign Up - Join FinanzerPro | Smart Personal Finance"
+        description="Create your FinanzerPro account or sign in to access your personal finance dashboard. Start tracking expenses, managing budgets, and achieving your financial goals today."
+        keywords="finanzerpro login, sign up finance app, personal finance account, expense tracker registration, budget app login"
+        canonical="https://finanzerpro.com/auth"
+      />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
       <div className="w-full max-w-7xl grid lg:grid-cols-2 gap-12 items-center">
         {/* Hero Section */}
         <div className="space-y-6 text-center lg:text-left">
@@ -189,5 +196,6 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
