@@ -431,7 +431,7 @@ Changelog:
 - June 19, 2025. EXPENSES PAGE REACT QUERY MIGRATION: Successfully converted expenses page from manual state management to React Query patterns with immediate UI updates after create/edit/delete operations, matching transactions and income page implementations
 - June 19, 2025. CATEGORIES PAGE REACT QUERY CONVERSION: Migrated categories page from manual state management to React Query with proper cache invalidation - new categories now immediately appear in all dropdown menus across expenses, income, and transactions pages
 - June 19, 2025. REPORTS PAGE REACT QUERY CONVERSION: Successfully migrated reports page from manual data fetching to React Query patterns while preserving all functionality across all four tabs (Overview, Analytics, Auto-tag, AI Insights)
-- June 19, 2025. RECURRING TRANSACTION INDICATOR FIXED: Added RotateCcw icon to Recent Activity widget in reports page to properly display recurring transaction indicators for all transactions marked as recurring
+- June 19, 2025. RECURRING TRANSACTION INDICATOR FIXED: Implemented proper Badge component with RotateCcw icon in Recent Activity widget on reports page, matching the established design pattern from simple-transaction-list component for consistent recurring transaction display
 ```
 
 ## User Preferences

@@ -377,17 +377,7 @@ export default function Reports() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {(transactions as any[]).slice(0, 5).map((transaction: any) => {
-                        // Debug log to check transaction structure and recurring status
-                        console.log('Reports - Transaction:', {
-                          id: transaction.id,
-                          description: transaction.description,
-                          isRecurring: transaction.isRecurring,
-                          recurringFrequency: transaction.recurringFrequency,
-                          type: typeof transaction.isRecurring,
-                          value: transaction.isRecurring
-                        });
-                        return (
+                      {(transactions as any[]).slice(0, 5).map((transaction: any) => (
                           <div key={transaction.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
                             <div className="flex items-center gap-3">
                               <div className={`p-2 rounded-full ${
@@ -402,12 +392,15 @@ export default function Reports() {
                                 )}
                               </div>
                               <div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center space-x-2">
                                   <p className="text-sm font-medium text-gray-900 dark:text-white">
                                     {transaction.description}
                                   </p>
-                                  {(transaction.isRecurring === true || transaction.isRecurring === 1 || transaction.isRecurring === "true") && (
-                                    <RotateCcw className="h-3 w-3 text-blue-500 dark:text-blue-400" />
+                                  {transaction.isRecurring && (
+                                    <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 dark:border-blue-800 dark:text-blue-300">
+                                      <RotateCcw className="h-3 w-3 mr-1" />
+                                      Recurring
+                                    </Badge>
                                   )}
                                 </div>
                                 <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -426,8 +419,7 @@ export default function Reports() {
                               </p>
                             </div>
                           </div>
-                        );
-                      })}
+                      ))}
                       {Array.isArray(transactions) && transactions.length > 5 && (
                         <div className="text-center pt-2">
                           <p className="text-xs text-gray-500">
