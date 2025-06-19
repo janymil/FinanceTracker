@@ -125,7 +125,7 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
   const healthData = calculateHealthScore();
   const StatusIcon = healthData.icon || CheckCircle;
 
-  if (isLoading) {
+  if (aiScoreLoading) {
     return (
       <Card>
         <CardContent className="p-6">
@@ -142,7 +142,7 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
     );
   }
 
-  if (error) {
+  if (aiScoreQuery.error) {
     return (
       <Card>
         <CardContent className="p-6">
@@ -209,7 +209,7 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
           <button
             onClick={() => {
               if (!useAIScore && !aiScore) {
-                fetchAIScore();
+                aiScoreQuery.refetch();
               }
               setUseAIScore(!useAIScore);
             }}
