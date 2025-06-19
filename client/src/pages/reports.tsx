@@ -1,6 +1,8 @@
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,10 +23,6 @@ export default function Reports() {
   const [, setLocation] = useLocation();
   const [selectedPeriod, setSelectedPeriod] = useState("month");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  const [financialSummary, setFinancialSummary] = useState<any>(null);
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [summaryLoading, setSummaryLoading] = useState(false);
-  const [dataLoaded, setDataLoaded] = useState(false);
 
   if (!user) {
     return null;
@@ -72,68 +70,28 @@ export default function Reports() {
     }
   }, [selectedPeriod, selectedMonth]);
 
-  // Load data function
-  const loadData = async () => {
-    if (!isReady) return;
-
-    setSummaryLoading(true);
-    try {
-      // Get auth headers
-      let authHeaders = {};
-      if (typeof window !== 'undefined' && window.Clerk?.session) {
-        const token = await window.Clerk.session.getToken();
-        if (token) {
-          authHeaders = { Authorization: `Bearer ${token}` };
-        }
-      }
-
-      // Use the calculated date range from the memoized values
+  // React Query hooks for data fetching
+  const { data: financialSummary = null, isLoading: summaryLoading } = useQuery({
+    queryKey: ["financial-summary", startDate.toISOString(), endDate.toISOString()],
+    queryFn: async () => {
       const params = new URLSearchParams({
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString()
       });
-      const summaryResponse = await fetch(`/api/financial-summary?${params}`, {
-        headers: authHeaders,
-        credentials: 'include',
-      });
-      
-      // Fetch transactions
-      const transactionsResponse = await fetch('/api/transactions', {
-        headers: authHeaders,
-        credentials: 'include',
-      });
+      const response = await apiRequest("GET", `/api/financial-summary?${params}`);
+      return response.json();
+    },
+    enabled: isReady && !!user?.id
+  });
 
-      if (summaryResponse.ok && transactionsResponse.ok) {
-        const summaryData = await summaryResponse.json();
-        const transactionsData = await transactionsResponse.json();
-        
-        setFinancialSummary(summaryData);
-        setTransactions(transactionsData);
-        setDataLoaded(true);
-      } else {
-        console.error('Failed to fetch data');
-      }
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
-      setSummaryLoading(false);
-    }
-  };
-
-  // Load data when component mounts and user is ready
-  useEffect(() => {
-    if (isReady && !dataLoaded) {
-      loadData();
-    }
-  }, [isReady]);
-
-  // Reload data when month or period changes
-  useEffect(() => {
-    if (isReady && dataLoaded) {
-      setDataLoaded(false); // Reset to allow refetch
-      loadData();
-    }
-  }, [selectedMonth, selectedPeriod]);
+  const { data: transactions = [] } = useQuery({
+    queryKey: ["transactions"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/transactions");
+      return response.json();
+    },
+    enabled: isReady && !!user?.id
+  });
 
   // Filter transactions based on selected period and month
   const filteredTransactions = useMemo(() => {
