@@ -453,6 +453,7 @@ Changelog:
 - June 19, 2025. STATIC HTML SEO SOLUTION IMPLEMENTED: Replaced complex SSR with simple static HTML files in /public folder - index.html, pricing.html, features.html, about.html serve crawler-friendly content while redirecting human users to React app
 - June 19, 2025. FOOTER VISIBILITY FIXED: Added Footer component to authenticated app layout - now displays on all pages for both logged-in and logged-out users with company information, legal links, and responsive design
 - June 19, 2025. CRAWLER DETECTION WORKING: Simple user agent detection serves static HTML to search engines (Googlebot, Bingbot) and AI crawlers (ChatGPT, Gemini, Perplexity) while maintaining full React experience for users
+- June 19, 2025. SEO ROUTING CONFLICT FIXED: Resolved issue where static HTML was being served to human users - cleaned up crawler detection logic and removed conflicting static file serving to ensure browsers receive full React app while crawlers get SEO-optimized HTML
 ```
 
 ## User Preferences
