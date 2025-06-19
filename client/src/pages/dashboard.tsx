@@ -361,7 +361,7 @@ export default function Dashboard() {
             <div className="flex items-center space-x-4">
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
                 <SelectTrigger className="w-40">
-                  <Calendar className="h-4 w-4 mr-2" />
+                  <ProductionIcon name="calendar" className="h-4 w-4 mr-2" />
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -391,7 +391,7 @@ export default function Dashboard() {
                       });
                     }}
                   >
-                    <Plus className="h-4 w-4 mr-2" />
+                    <ProductionIcon name="plus" className="h-4 w-4 mr-2" />
                     Add Transaction
                   </Button>
                 </DialogTrigger>
@@ -445,7 +445,7 @@ export default function Dashboard() {
                           size="sm"
                           onClick={() => setNewTransaction({ ...newTransaction, type: "income" })}
                         >
-                          <ArrowUpRight className="h-4 w-4 mr-2" />
+                          <ProductionIcon name="arrow-up-right" className="h-4 w-4 mr-2" />
                           Income
                         </Button>
                         <Button
@@ -453,7 +453,7 @@ export default function Dashboard() {
                           size="sm"
                           onClick={() => setNewTransaction({ ...newTransaction, type: "expense" })}
                         >
-                          <ArrowDownRight className="h-4 w-4 mr-2" />
+                          <ProductionIcon name="arrow-down-right" className="h-4 w-4 mr-2" />
                           Expense
                         </Button>
                       </div>
