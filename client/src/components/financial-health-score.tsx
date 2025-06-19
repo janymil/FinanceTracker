@@ -3,7 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { TrendingUp, Shield, AlertTriangle, CheckCircle, HelpCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useAuth } from "@/hooks/useAuth";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface FinancialHealthProps {
   summary?: {
@@ -16,27 +18,18 @@ interface FinancialHealthProps {
 
 export default function FinancialHealthScore({ summary, budgets }: FinancialHealthProps) {
   const [useAIScore, setUseAIScore] = useState(false);
-  const [aiScore, setAIScore] = useState<any>(null);
-  const { user, isLoading, error } = useAuth();
+  const { isReady, user } = useClerkUserReady();
 
-  // Fetch AI-powered financial health score
-  const fetchAIScore = async () => {
-    try {
-      const response = await fetch('/api/ai/financial-health-score', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          summary,
-          budgets,
-          useAdvancedFactors: true
-        })
-      });
-      const data = await response.json();
-      setAIScore(data);
-    } catch (error) {
-      console.error('Failed to fetch AI score:', error);
-    }
-  };
+  // Fetch AI-powered financial health score using React Query
+  const { data: aiScore, isLoading: aiScoreLoading } = useQuery({
+    queryKey: ['financial-health', user?.id, summary, budgets],
+    enabled: isReady && useAIScore && !!user?.id && !!summary,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/financial-health");
+      return response.json();
+    },
+  });
 
   const calculateHealthScore = () => {
     if (!summary) return { score: 0, status: 'Loading...', color: 'gray' };
