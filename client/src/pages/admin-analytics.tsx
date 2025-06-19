@@ -282,23 +282,35 @@ export default function AdminAnalytics() {
             <div className="flex justify-center mb-4">
               <Shield className="h-12 w-12 text-blue-600" />
             </div>
-            <CardTitle className="text-2xl">Admin Access</CardTitle>
+            <CardTitle className="text-2xl">FinanzerPro Admin Access</CardTitle>
             <CardDescription>
-              Enter your admin password to access the system analytics
+              Authorized administrator login for FinanzerPro system analytics
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Security Notice */}
+            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="flex items-start gap-2">
+                <Shield className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <div className="text-xs text-blue-700 dark:text-blue-300">
+                  <strong>Internal Admin Portal</strong><br />
+                  This is the official FinanzerPro administrative interface for authorized personnel only.
+                </div>
+              </div>
+            </div>
+            
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <Label htmlFor="password">Admin Password</Label>
+                <Label htmlFor="password">Administrator Password</Label>
                 <Input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter admin password"
+                  placeholder="Enter administrator password"
                   required
                   className="mt-1"
+                  autoComplete="current-password"
                 />
               </div>
               <Button
