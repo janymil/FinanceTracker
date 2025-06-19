@@ -45,6 +45,7 @@ app.use((req, res, next) => {
     "img-src 'self' data: https:",
     "font-src 'self' data:",
     "connect-src 'self' https://clerk.finanzerpro.com https://api.openai.com",
+    "worker-src 'self' blob:",
     "form-action 'self'",
     "frame-ancestors 'none'"
   ].join('; ');
