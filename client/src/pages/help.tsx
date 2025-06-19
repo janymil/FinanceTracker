@@ -18,6 +18,7 @@ import {
   BookOpen,
   HelpCircle,
   Star,
+  Download,
   Clock,
   DollarSign,
   BarChart3,
@@ -407,7 +408,7 @@ export default function Help() {
             </TabsContent>
 
             <TabsContent value="features" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -424,6 +425,9 @@ export default function Help() {
                       <li>• Smart search and filtering</li>
                       <li>• Monthly view with dynamic navigation</li>
                       <li>• Recurring transaction detection</li>
+                      <li>• Transaction editing and deletion</li>
+                      <li>• Bulk operations and imports</li>
+                      <li>• Custom category creation</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -442,6 +446,9 @@ export default function Help() {
                       <li>• Create savings goals with deadlines</li>
                       <li>• Automatic budget vs. actual comparisons</li>
                       <li>• Smart notifications and reminders</li>
+                      <li>• Collaborative savings goals with friends</li>
+                      <li>• Goal achievement tracking</li>
+                      <li>• Budget overflow warnings</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -460,6 +467,10 @@ export default function Help() {
                       <li>• Trend analysis and predictions</li>
                       <li>• Income vs. expense comparisons</li>
                       <li>• Export data in multiple formats</li>
+                      <li>• Period filtering (week/month/quarter/year)</li>
+                      <li>• Visual charts and graphs</li>
+                      <li>• Custom date range analysis</li>
+                      <li>• Financial health scoring</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -478,6 +489,53 @@ export default function Help() {
                       <li>• Calendar view of transactions</li>
                       <li>• Automatic backup scheduling</li>
                       <li>• Data import from other apps</li>
+                      <li>• Financial mascot companion (Premium)</li>
+                      <li>• Expense prediction and forecasting</li>
+                      <li>• Daily AI-powered financial tips</li>
+                      <li>• Transaction reminders and alerts</li>
+                      <li>• Multi-device receipt scanning</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Download className="h-5 w-5" />
+                      Data Management
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 text-sm">
+                      <li>• Cloud storage and backup (Premium)</li>
+                      <li>• Import from CSV, Excel, JSON formats</li>
+                      <li>• Export to multiple file formats</li>
+                      <li>• Automatic daily backup scheduling</li>
+                      <li>• Data restore and recovery</li>
+                      <li>• Receipt image storage</li>
+                      <li>• Secure data encryption</li>
+                      <li>• Cross-platform synchronization</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Shield className="h-5 w-5" />
+                      Security & Privacy
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 text-sm">
+                      <li>• Industry-standard data encryption</li>
+                      <li>• Secure authentication with Clerk</li>
+                      <li>• Private data isolation</li>
+                      <li>• GDPR compliance and privacy controls</li>
+                      <li>• Cookie consent management</li>
+                      <li>• Secure API endpoints</li>
+                      <li>• Regular security audits</li>
+                      <li>• Data ownership transparency</li>
                     </ul>
                   </CardContent>
                 </Card>
