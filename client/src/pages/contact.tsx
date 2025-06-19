@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, MapPin, Phone, Clock, TrendingUp } from "lucide-react";
+import { Mail, MapPin, Clock, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
@@ -214,14 +214,6 @@ export default function Contact() {
                   <div>
                     <p className="font-medium">Email</p>
                     <p className="text-sm text-muted-foreground">info@finanzerpro.com</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <Phone className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="font-medium">Phone</p>
-                    <p className="text-sm text-muted-foreground">+1 (555) 123-4567</p>
                   </div>
                 </div>
 
