@@ -1,0 +1,724 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The 5-Step System to Take Control of Your Finances</title>
+    <style>
+        /* WordPress Compatible CSS with Prefixes */
+        .wp-financial-post * {
+            box-sizing: border-box;
+        }
+
+        .wp-financial-post {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .wp-financial-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: wp-fadeInUp 1s ease-out;
+        }
+
+        @keyframes wp-fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .wp-financial-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wp-financial-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+            animation: wp-float 20s linear infinite;
+        }
+
+        @keyframes wp-float {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .wp-financial-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin: 0 0 20px 0;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .wp-financial-subtitle {
+            font-size: 1.4rem;
+            margin: 0;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+
+        .wp-financial-content {
+            padding: 60px 40px;
+        }
+
+        .wp-financial-intro {
+            font-size: 1.2rem;
+            text-align: center;
+            margin-bottom: 50px;
+            color: #4a5568;
+            line-height: 1.8;
+        }
+
+        .wp-financial-steps {
+            display: grid;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .wp-financial-step {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 40px;
+            border-left: 6px solid #3b82f6;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wp-financial-step::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(30, 64, 175, 0.05) 100%);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .wp-financial-step:hover::before {
+            transform: translateX(0);
+        }
+
+        .wp-financial-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.2);
+            border-left-color: #1e40af;
+        }
+
+        .wp-financial-step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            color: white;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .wp-financial-step-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0 0 15px 0;
+            color: #1a202c;
+            position: relative;
+            z-index: 2;
+        }
+
+        .wp-financial-step-description {
+            color: #4a5568;
+            margin: 0 0 20px 0;
+            line-height: 1.7;
+            position: relative;
+            z-index: 2;
+        }
+
+        .wp-financial-step-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .wp-financial-step.active .wp-financial-step-details {
+            max-height: 500px;
+        }
+
+        .wp-financial-step-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0 0 0;
+        }
+
+        .wp-financial-step-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .wp-financial-step-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .wp-financial-cta {
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+            border-radius: 15px;
+            margin-top: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wp-financial-cta::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            animation: wp-sparkle 15s linear infinite;
+        }
+
+        @keyframes wp-sparkle {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .wp-financial-cta-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0 0 20px 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .wp-financial-cta-description {
+            font-size: 1.2rem;
+            margin: 0 0 30px 0;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+
+        .wp-financial-benefits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .wp-financial-benefit {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            backdrop-filter: blur(10px);
+        }
+
+        .wp-financial-benefit-icon {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .wp-financial-cta-button {
+            display: inline-block;
+            background: white;
+            color: #047857;
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .wp-financial-cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            color: #047857;
+        }
+
+        .wp-financial-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 50px 0;
+        }
+
+        .wp-financial-feature {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .wp-financial-feature:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .wp-financial-feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #3b82f6;
+        }
+
+        .wp-financial-feature-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 0 15px 0;
+            color: #1a202c;
+        }
+
+        .wp-financial-feature-description {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .wp-financial-post {
+                padding: 10px;
+            }
+
+            .wp-financial-title {
+                font-size: 2.5rem;
+            }
+
+            .wp-financial-header {
+                padding: 40px 20px;
+            }
+
+            .wp-financial-content {
+                padding: 40px 20px;
+            }
+
+            .wp-financial-cta {
+                padding: 40px 20px;
+            }
+
+            .wp-financial-step {
+                padding: 30px 20px;
+            }
+        }
+
+        .wp-financial-progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .wp-financial-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #1e40af);
+            border-radius: 3px;
+            transition: width 1s ease;
+            width: 0%;
+        }
+
+        .wp-financial-tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .wp-financial-tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #1a202c;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .wp-financial-tooltip:hover .wp-financial-tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="wp-financial-post">
+        <div class="wp-financial-container">
+            <header class="wp-financial-header">
+                <h1 class="wp-financial-title">The 5-Step System to Take Control of Your Finances</h1>
+                <p class="wp-financial-subtitle">Ready to stop guessing and start mastering your money?</p>
+            </header>
+
+            <div class="wp-financial-content">
+                <div class="wp-financial-intro">
+                    <p>We're giving away our exclusive 5-step PDF system that will transform your financial life. This comprehensive guide has helped thousands of people break free from financial stress and build lasting wealth.</p>
+                    
+                    <div class="wp-financial-progress-bar">
+                        <div class="wp-financial-progress-fill" id="wp-reading-progress"></div>
+                    </div>
+                </div>
+
+                <div class="wp-financial-features">
+                    <div class="wp-financial-feature">
+                        <div class="wp-financial-feature-icon">🎯</div>
+                        <h3 class="wp-financial-feature-title">Identify Money Flow</h3>
+                        <p class="wp-financial-feature-description">Discover exactly where your money goes with our proven tracking methods</p>
+                    </div>
+                    <div class="wp-financial-feature">
+                        <div class="wp-financial-feature-icon">📊</div>
+                        <h3 class="wp-financial-feature-title">Personalized Budget</h3>
+                        <p class="wp-financial-feature-description">Create a budget that actually works for your lifestyle and goals</p>
+                    </div>
+                    <div class="wp-financial-feature">
+                        <div class="wp-financial-feature-icon">💰</div>
+                        <h3 class="wp-financial-feature-title">Break the Cycle</h3>
+                        <p class="wp-financial-feature-description">End the paycheck-to-paycheck cycle once and for all</p>
+                    </div>
+                </div>
+
+                <div class="wp-financial-steps">
+                    <div class="wp-financial-step" onclick="toggleStep(this)">
+                        <div class="wp-financial-step-number">1</div>
+                        <h3 class="wp-financial-step-title">Identify Where Your Money Goes</h3>
+                        <p class="wp-financial-step-description">The foundation of financial control starts with awareness. Most people have no idea where their money disappears to each month.</p>
+                        
+                        <div class="wp-financial-step-details">
+                            <ul class="wp-financial-step-list">
+                                <li>Track every expense for 30 days using our proven method</li>
+                                <li>Categorize spending into needs, wants, and savings</li>
+                                <li>Identify money leaks and unconscious spending patterns</li>
+                                <li>Use our exclusive tracking templates and tools</li>
+                                <li>Create awareness without judgment or overwhelm</li>
+                            </ul>
+                            <p><strong>Result:</strong> Complete clarity on your spending patterns and immediate identification of $200-500+ in monthly savings opportunities.</p>
+                        </div>
+                    </div>
+
+                    <div class="wp-financial-step" onclick="toggleStep(this)">
+                        <div class="wp-financial-step-number">2</div>
+                        <h3 class="wp-financial-step-title">Set Up a Simple, Personalized Budget</h3>
+                        <p class="wp-financial-step-description">Forget complicated spreadsheets. Our system creates a budget that actually fits your life and personality.</p>
+                        
+                        <div class="wp-financial-step-details">
+                            <ul class="wp-financial-step-list">
+                                <li>Use the 50/30/20 rule adapted to your unique situation</li>
+                                <li>Create realistic spending categories based on your tracking data</li>
+                                <li>Build in flexibility for life's unexpected moments</li>
+                                <li>Set up automatic systems that work on autopilot</li>
+                                <li>Include fun money so you don't feel deprived</li>
+                            </ul>
+                            <p><strong>Result:</strong> A sustainable budget that feels natural and actually sticks, without constant willpower battles.</p>
+                        </div>
+                    </div>
+
+                    <div class="wp-financial-step" onclick="toggleStep(this)">
+                        <div class="wp-financial-step-number">3</div>
+                        <h3 class="wp-financial-step-title">Break the Paycheck-to-Paycheck Cycle</h3>
+                        <p class="wp-financial-step-description">Learn the specific strategies to create breathing room in your finances, even on a tight budget.</p>
+                        
+                        <div class="wp-financial-step-details">
+                            <ul class="wp-financial-step-list">
+                                <li>Build your first $1,000 emergency fund in 90 days or less</li>
+                                <li>Use the "pay yourself first" principle effectively</li>
+                                <li>Create multiple income streams with minimal time investment</li>
+                                <li>Eliminate high-interest debt using the avalanche method</li>
+                                <li>Master the art of living below your means without sacrifice</li>
+                            </ul>
+                            <p><strong>Result:</strong> Financial breathing room and the confidence that comes from having money in the bank.</p>
+                        </div>
+                    </div>
+
+                    <div class="wp-financial-step" onclick="toggleStep(this)">
+                        <div class="wp-financial-step-number">4</div>
+                        <h3 class="wp-financial-step-title">Track Your Progress Effortlessly</h3>
+                        <p class="wp-financial-step-description">Stay motivated and on track with our simple monitoring system that takes just 15 minutes per week.</p>
+                        
+                        <div class="wp-financial-step-details">
+                            <ul class="wp-financial-step-list">
+                                <li>Weekly 15-minute money check-ins that keep you accountable</li>
+                                <li>Visual progress tracking that motivates continued success</li>
+                                <li>Key performance indicators that actually matter</li>
+                                <li>Monthly financial health assessments</li>
+                                <li>Celebration milestones to maintain momentum</li>
+                            </ul>
+                            <p><strong>Result:</strong> Consistent progress toward your goals with clear visibility into your improving financial health.</p>
+                        </div>
+                    </div>
+
+                    <div class="wp-financial-step" onclick="toggleStep(this)">
+                        <div class="wp-financial-step-number">5</div>
+                        <h3 class="wp-financial-step-title">Feel in Control—Not Overwhelmed</h3>
+                        <p class="wp-financial-step-description">Transform your relationship with money from stress and anxiety to confidence and control.</p>
+                        
+                        <div class="wp-financial-step-details">
+                            <ul class="wp-financial-step-list">
+                                <li>Develop unshakeable financial confidence</li>
+                                <li>Create systems that prevent financial overwhelm</li>
+                                <li>Build long-term wealth through smart investing basics</li>
+                                <li>Prepare for major life events and emergencies</li>
+                                <li>Maintain work-life balance while building wealth</li>
+                            </ul>
+                            <p><strong>Result:</strong> Complete financial peace of mind and the freedom to make choices based on your values, not your bank account.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wp-financial-cta">
+                    <h2 class="wp-financial-cta-title">🔒 Get Your FREE PDF System</h2>
+                    <p class="wp-financial-cta-description">It's yours FREE when you try FinanzerPro – the smart, intuitive app that brings clarity to your financial life.</p>
+                    
+                    <div class="wp-financial-benefits">
+                        <div class="wp-financial-benefit">
+                            <div class="wp-financial-benefit-icon">✅</div>
+                            <strong>Complete 5-Step System</strong><br>
+                            Detailed PDF guide with worksheets
+                        </div>
+                        <div class="wp-financial-benefit">
+                            <div class="wp-financial-benefit-icon">✅</div>
+                            <strong>Tracking Templates</strong><br>
+                            Ready-to-use spreadsheets and tools
+                        </div>
+                        <div class="wp-financial-benefit">
+                            <div class="wp-financial-benefit-icon">✅</div>
+                            <strong>Budget Calculator</strong><br>
+                            Personalized budget creation tool
+                        </div>
+                        <div class="wp-financial-benefit">
+                            <div class="wp-financial-benefit-icon">✅</div>
+                            <strong>Progress Tracker</strong><br>
+                            Visual goal tracking system
+                        </div>
+                        <div class="wp-financial-benefit">
+                            <div class="wp-financial-benefit-icon">✅</div>
+                            <strong>Emergency Fund Guide</strong><br>
+                            Step-by-step savings strategy
+                        </div>
+                        <div class="wp-financial-benefit">
+                            <div class="wp-financial-benefit-icon">✅</div>
+                            <strong>Debt Elimination Plan</strong><br>
+                            Proven debt payoff strategies
+                        </div>
+                    </div>
+
+                    <a href="https://finanzerpro.com" class="wp-financial-cta-button" id="wp-cta-button">
+                        📥 Claim Your Free PDF Now
+                    </a>
+                    
+                    <p style="margin-top: 30px; font-size: 0.9rem; opacity: 0.8;">
+                        <strong>No catch. No spam.</strong> Just a powerful system to help you take back control.<br>
+                        Start today—your future self will thank you.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // WordPress Compatible JavaScript
+        (function() {
+            'use strict';
+
+            // Toggle step details
+            window.toggleStep = function(element) {
+                const isActive = element.classList.contains('active');
+                
+                // Close all steps
+                document.querySelectorAll('.wp-financial-step').forEach(step => {
+                    step.classList.remove('active');
+                });
+                
+                // Open clicked step if it wasn't active
+                if (!isActive) {
+                    element.classList.add('active');
+                }
+            };
+
+            // Reading progress bar
+            function updateReadingProgress() {
+                const article = document.querySelector('.wp-financial-content');
+                const progressBar = document.getElementById('wp-reading-progress');
+                
+                if (!article || !progressBar) return;
+                
+                const articleHeight = article.offsetHeight;
+                const articleTop = article.offsetTop;
+                const scrolled = window.scrollY - articleTop;
+                const progress = Math.min(Math.max(scrolled / articleHeight, 0), 1) * 100;
+                
+                progressBar.style.width = progress + '%';
+            }
+
+            // Smooth scrolling for internal links
+            function smoothScroll() {
+                const links = document.querySelectorAll('a[href^="#"]');
+                
+                links.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const target = document.querySelector(this.getAttribute('href'));
+                        
+                        if (target) {
+                            target.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    });
+                });
+            }
+
+            // Animate elements on scroll
+            function animateOnScroll() {
+                const elements = document.querySelectorAll('.wp-financial-step, .wp-financial-feature');
+                
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }
+                    });
+                }, {
+                    threshold: 0.1,
+                    rootMargin: '50px'
+                });
+
+                elements.forEach(element => {
+                    element.style.opacity = '0';
+                    element.style.transform = 'translateY(30px)';
+                    element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                    observer.observe(element);
+                });
+            }
+
+            // CTA button interaction
+            function enhanceCTAButton() {
+                const ctaButton = document.getElementById('wp-cta-button');
+                
+                if (ctaButton) {
+                    ctaButton.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateY(-3px) scale(1.05)';
+                    });
+                    
+                    ctaButton.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateY(0) scale(1)';
+                    });
+                    
+                    ctaButton.addEventListener('click', function() {
+                        // Track click event
+                        if (typeof gtag !== 'undefined') {
+                            gtag('event', 'click', {
+                                'event_category': 'CTA',
+                                'event_label': '5-Step System Download'
+                            });
+                        }
+                    });
+                }
+            }
+
+            // Initialize everything when DOM is ready
+            function init() {
+                updateReadingProgress();
+                smoothScroll();
+                animateOnScroll();
+                enhanceCTAButton();
+
+                // Add scroll listener for reading progress
+                window.addEventListener('scroll', updateReadingProgress);
+                
+                // Add resize listener
+                window.addEventListener('resize', updateReadingProgress);
+            }
+
+            // Start when DOM is loaded
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+            // Keyboard accessibility
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    const focusedElement = document.activeElement;
+                    if (focusedElement && focusedElement.classList.contains('wp-financial-step')) {
+                        e.preventDefault();
+                        toggleStep(focusedElement);
+                    }
+                }
+            });
+
+            // Make steps keyboard accessible
+            document.querySelectorAll('.wp-financial-step').forEach(step => {
+                step.setAttribute('tabindex', '0');
+                step.setAttribute('role', 'button');
+                step.setAttribute('aria-expanded', 'false');
+                
+                step.addEventListener('click', function() {
+                    const isActive = this.classList.contains('active');
+                    this.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+                });
+            });
+
+        })();
+    </script>
+</body>
+</html>
