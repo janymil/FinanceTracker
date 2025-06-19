@@ -436,6 +436,8 @@ Changelog:
 - June 19, 2025. APP LOADING OPTIMIZATION: Modified App.tsx to use Clerk user data directly instead of waiting for database user record, eliminating loading hang after successful authentication in production environment
 - June 19, 2025. REPORTS PAGE DATA CONSISTENCY FIXED: Resolved critical data inconsistency where Category Breakdown and Financial Statistics widgets showed mismatched data - Category Breakdown now displays both income and expense categories instead of expense-only, Categories Used count includes all transaction types, and all widgets use consistent date-filtered financial summary data source
 - June 19, 2025. MASCOT IMAGE PRESERVATION FIXED: Implemented production-compatible authentication fallback system for financial mascot - mascot data is now cached to localStorage and displayed during authentication failures, ensuring generated mascot images persist across sessions and domain restriction issues
+- June 19, 2025. REMINDERS & STREAKS WIDGET HIDDEN: Hidden non-functional "Reminders & Streaks" widget from dashboard for all users while preserving underlying component for future development
+- June 19, 2025. 7-DAY FREE TRIAL REFERENCES REMOVED: Eliminated all mentions of "7-day free trial" from landing page, pricing page, and help documentation - corrected to state no free trial available, users can start with free plan instead
 ```
 
 ## User Preferences

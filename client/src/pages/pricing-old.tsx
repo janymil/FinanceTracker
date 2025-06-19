@@ -494,7 +494,7 @@ export default function Pricing() {
                 Is there a free trial for paid plans?
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Yes, both Standard and Premium plans come with a 7-day free trial. No credit card required to start.
+                No, there is no free trial for paid plans. However, you can start with our free plan to explore basic features before upgrading to Standard or Premium.
               </p>
             </div>
             
