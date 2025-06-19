@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useClerk } from "@clerk/clerk-react";
+import { useClerk, useUser } from "@clerk/clerk-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   DropdownMenu,
@@ -67,6 +67,7 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { user } = useAuth();
+  const { user: clerkUser } = useUser();
   const { toast } = useToast();
   const { signOut } = useClerk();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -455,13 +456,13 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center space-x-2 h-auto p-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.profileImageUrl} alt={user?.firstName || "User"} />
+                  <AvatarImage src={clerkUser?.imageUrl ?? user?.profileImageUrl ?? undefined} alt={clerkUser?.fullName || clerkUser?.firstName || "User"} />
                   <AvatarFallback className="bg-primary text-white">
-                    {user?.firstName?.[0] || user?.email?.[0] || "U"}
+                    {clerkUser?.firstName?.[0] || clerkUser?.fullName?.[0] || user?.firstName?.[0] || user?.email?.[0] || "U"}
                   </AvatarFallback>
                 </Avatar>
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden lg:block">
-                  {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user?.email}
+                  {clerkUser?.fullName || (clerkUser?.firstName ? `${clerkUser.firstName} ${clerkUser.lastName || ''}`.trim() : (clerkUser?.primaryEmailAddress?.emailAddress || user?.email))}
                 </span>
                 <ChevronDown className="h-4 w-4 text-gray-500 hidden lg:block" />
               </Button>
@@ -469,10 +470,10 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
             <DropdownMenuContent align="end" className="w-56">
               <div className="px-2 py-1.5">
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user?.email}
+                  {clerkUser?.fullName || (clerkUser?.firstName ? `${clerkUser.firstName} ${clerkUser.lastName || ''}`.trim() : (clerkUser?.primaryEmailAddress?.emailAddress || user?.email))}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {user?.email}
+                  {clerkUser?.primaryEmailAddress?.emailAddress || user?.email}
                 </p>
               </div>
               <DropdownMenuSeparator />
