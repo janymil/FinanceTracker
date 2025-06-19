@@ -89,13 +89,13 @@ export default function Transactions() {
   });
 
   // React Query hooks for data fetching
-  const { data: transactions = [], isLoading: transactionsLoading, refetch: refetchTransactions } = useQuery({
+  const { data: transactions = [], isLoading: transactionsLoading, refetch: refetchTransactions } = useQuery<Transaction[]>({
     queryKey: ["transactions"],
     enabled: isReady && !!user?.id,
     gcTime: 0
   });
 
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ["categories"],
     enabled: isReady && !!user?.id
   });
@@ -319,122 +319,66 @@ export default function Transactions() {
     if (!newTransaction.amount || !newTransaction.description) return;
 
     if (editingTransaction) {
-      // Edit existing transaction
-      try {
-        const updateData = {
-          amount: parseFloat(newTransaction.amount),
-          description: newTransaction.description,
-          date: newTransaction.date,
-          type: newTransaction.type,
-          categoryId: newTransaction.categoryId ? parseInt(newTransaction.categoryId) : null,
-          isRecurring: newTransaction.isRecurring,
-          recurringFrequency: newTransaction.recurringFrequency,
-          recurringEndDate: newTransaction.recurringEndDate || null,
-          paymentUrl: newTransaction.paymentUrl || "",
-          referenceNote: newTransaction.referenceNote || ""
-        };
+      // Use React Query mutation for editing
+      const updateData = {
+        id: editingTransaction.id,
+        amount: parseFloat(newTransaction.amount),
+        description: newTransaction.description,
+        date: newTransaction.date,
+        type: newTransaction.type,
+        categoryId: newTransaction.categoryId ? parseInt(newTransaction.categoryId) : null,
+        isRecurring: newTransaction.isRecurring,
+        recurringFrequency: newTransaction.recurringFrequency,
+        recurringEndDate: newTransaction.recurringEndDate || null,
+        paymentUrl: newTransaction.paymentUrl || "",
+        referenceNote: newTransaction.referenceNote || ""
+      };
 
-        const response = await apiRequest('PUT', `/api/transactions/${editingTransaction.id}`, updateData);
-
-        if (response.ok) {
-          const updatedTransaction = await response.json();
-          
-          // Update transactions in state immediately
-          setTransactions(prev => prev.map(t => 
-            t.id === editingTransaction.id ? updatedTransaction : t
-          ));
-          
-          toast({
-            title: "Transaction Updated",
-            description: "Transaction has been updated successfully",
-          });
-          
-          setIsDialogOpen(false);
-          setEditingTransaction(null);
-          setNewTransaction({
-            amount: "",
-            description: "",
-            date: new Date().toISOString().split('T')[0],
-            type: "expense",
-            categoryId: "",
-            isRecurring: false,
-            recurringFrequency: "monthly",
-            recurringEndDate: "",
-            paymentUrl: "",
-            referenceNote: "",
-          });
-        } else {
-          toast({
-            title: "Update Failed",
-            description: "Failed to update transaction",
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        console.error("Edit transaction error:", error);
-        toast({
-          title: "Update Failed",
-          description: "Network error occurred",
-          variant: "destructive",
-        });
-      }
+      editTransactionMutation.mutate(updateData);
+      
+      // Reset form
+      setNewTransaction({
+        amount: "",
+        description: "",
+        date: new Date().toISOString().split('T')[0],
+        type: "expense",
+        categoryId: "",
+        isRecurring: false,
+        recurringFrequency: "monthly",
+        recurringEndDate: "",
+        paymentUrl: "",
+        referenceNote: "",
+      });
     } else {
-      // Create new transaction
-      try {
-        const createData = {
-          amount: parseFloat(newTransaction.amount),
-          description: newTransaction.description,
-          date: newTransaction.date,
-          type: newTransaction.type,
-          categoryId: newTransaction.categoryId ? parseInt(newTransaction.categoryId) : null,
-          isRecurring: newTransaction.isRecurring,
-          recurringFrequency: newTransaction.recurringFrequency,
-          recurringEndDate: newTransaction.recurringEndDate || null,
-          paymentUrl: newTransaction.paymentUrl || "",
-          referenceNote: newTransaction.referenceNote || ""
-        };
+      // Use React Query mutation for creating
+      const createData = {
+        amount: parseFloat(newTransaction.amount),
+        description: newTransaction.description,
+        date: newTransaction.date,
+        type: newTransaction.type,
+        categoryId: newTransaction.categoryId ? parseInt(newTransaction.categoryId) : null,
+        isRecurring: newTransaction.isRecurring,
+        recurringFrequency: newTransaction.recurringFrequency,
+        recurringEndDate: newTransaction.recurringEndDate || null,
+        paymentUrl: newTransaction.paymentUrl || "",
+        referenceNote: newTransaction.referenceNote || ""
+      };
 
-        const response = await apiRequest('POST', '/api/transactions', createData);
-
-        if (response.ok) {
-          const newTransactionData = await response.json();
-          
-          // Add new transaction to state immediately
-          setTransactions(prev => [...prev, newTransactionData]);
-          
-          toast({
-            title: "Transaction Added",
-            description: "Transaction has been added successfully",
-          });
-          
-          setIsDialogOpen(false);
-          setNewTransaction({
-            amount: "",
-            description: "",
-            date: new Date().toISOString().split('T')[0],
-            type: "expense",
-            categoryId: "",
-            isRecurring: false,
-            recurringFrequency: "monthly",
-            recurringEndDate: "",
-            paymentUrl: "",
-            referenceNote: "",
-          });
-        } else {
-          toast({
-            title: "Creation Failed",
-            description: "Failed to create transaction",
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        console.error("Create transaction error:", error);
-        toast({
-          title: "Creation Failed",
-          description: "Network error occurred",
-          variant: "destructive",
-        });
-      }
+      createTransactionMutation.mutate(createData);
+      
+      // Reset form
+      setNewTransaction({
+        amount: "",
+        description: "",
+        date: new Date().toISOString().split('T')[0],
+        type: "expense",
+        categoryId: "",
+        isRecurring: false,
+        recurringFrequency: "monthly",
+        recurringEndDate: "",
+        paymentUrl: "",
+        referenceNote: "",
+      });
     }
   };
 
@@ -503,7 +447,7 @@ export default function Transactions() {
               <UploadReceiptModal 
                 onReceiptProcessed={(data) => {
                   // Refresh transactions after receipt processing
-                  loadTransactions();
+                  refetchTransactions();
                 }}
                 buttonText="Upload Image"
               />
@@ -1037,7 +981,7 @@ export default function Transactions() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => deleteTransaction(transaction.id)}
+                          onClick={() => deleteTransactionMutation.mutate(transaction.id)}
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
