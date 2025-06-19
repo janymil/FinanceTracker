@@ -81,7 +81,7 @@ export interface IStorage {
   // Goal operations
   createGoal(goal: InsertGoal): Promise<Goal>;
   getUserGoals(userId: string): Promise<Goal[]>;
-  getGoal(id: number): Promise<Goal | undefined>;
+  getGoal(id: number, userId: string): Promise<Goal | undefined>;
   updateGoal(id: number, goal: Partial<InsertGoal>): Promise<Goal>;
   deleteGoal(id: number, userId: string): Promise<void>;
 
@@ -512,11 +512,11 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(goals.createdAt));
   }
 
-  async getGoal(id: number): Promise<Goal | undefined> {
+  async getGoal(id: number, userId: string): Promise<Goal | undefined> {
     const result = await db
       .select()
       .from(goals)
-      .where(eq(goals.id, id))
+      .where(and(eq(goals.id, id), eq(goals.userId, userId)))
       .limit(1);
     
     return result[0];

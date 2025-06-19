@@ -75,8 +75,8 @@ export function registerGoalRoutes(app: Express) {
       const { name, targetAmount, targetDate, category, description, currentAmount } = req.body;
 
       // Security: Verify goal ownership before update
-      const existingGoal = await storage.getGoal(id);
-      if (!existingGoal || existingGoal.userId !== userId) {
+      const existingGoal = await storage.getGoal(id, userId);
+      if (!existingGoal) {
         return res.status(403).json({ message: "Goal not found or access denied" });
       }
 
