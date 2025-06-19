@@ -29,44 +29,28 @@ export async function handleContactForm(req: Request, res: Response) {
       });
     }
 
-    // Log the contact form submission
-    console.log('=== CONTACT FORM SUBMISSION ===');
-    console.log(`Name: ${name}`);
-    console.log(`Email: ${email}`);
-    console.log(`Subject: ${subject}`);
-    console.log(`Message: ${message}`);
-    console.log(`Timestamp: ${new Date().toISOString()}`);
-    console.log('================================');
-
-    // If email configuration is available, send email
-    if (process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASS && process.env.EMAIL_TO) {
-      try {
-        const transporter = nodemailer.createTransporter({
-          host: process.env.EMAIL_HOST,
-          port: parseInt(process.env.EMAIL_PORT || '587'),
-          secure: process.env.EMAIL_PORT === '465',
-          auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-          }
-        });
-
-        const mailOptions = {
-          from: `"${name}" <${email}>`,
-          to: process.env.EMAIL_TO,
-          subject: `[Contact Form] ${subject}`,
-          text: message,
-          replyTo: email
-        };
-
-        await transporter.sendMail(mailOptions);
-        console.log('Email sent successfully');
-      } catch (emailError) {
-        console.error('Email sending failed, but form submission logged:', emailError);
+    // Configure SMTP transporter
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: parseInt(process.env.EMAIL_PORT || '587'),
+      secure: process.env.EMAIL_PORT === '465',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
       }
-    } else {
-      console.log('Email configuration not available - form submission logged only');
-    }
+    });
+
+    // Email options
+    const mailOptions = {
+      from: `"${name}" <${email}>`,
+      to: process.env.EMAIL_TO,
+      subject: `[Contact Form] ${subject}`,
+      text: message,
+      replyTo: email
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
 
     return res.json({ success: true });
 
