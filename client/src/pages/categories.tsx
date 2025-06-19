@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Edit3, Trash2, TrendingUp, DollarSign } from "lucide-react";
-import { categoryIcons } from "@/lib/icons";
+import { categoryIcons } from "@/lib/icons-registry";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -42,7 +42,7 @@ export default function Categories() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [newCategory, setNewCategory] = useState({
     name: "",
-    icon: "dollar-sign",
+    icon: "other",
     color: "#3B82F6",
     type: "expense" as "income" | "expense"
   });
@@ -160,7 +160,7 @@ export default function Categories() {
   };
 
   const CategoryCard = ({ category }: { category: Category }) => {
-    const IconComponent = categoryIcons[category.icon as keyof typeof categoryIcons] || categoryIcons["dollar-sign"];
+    const IconComponent = categoryIcons[category.icon as keyof typeof categoryIcons] || categoryIcons["other"];
     
     return (
       <Card className="group relative hover:shadow-md transition-shadow">

@@ -255,7 +255,20 @@ export const categoryIcons = {
   "car": Car,
   "emergency": Shield,
   "retirement": Trophy,
-  "education": GraduationCap
+  "education-goal": GraduationCap,
+  
+  // Legacy icon names for backward compatibility
+  "trending-up": TrendingUp,
+  "dollar-sign": DollarSign,
+  "heart": Heart,
+  "home": Building,
+  "shopping-bag": ShoppingBag,
+  "plane": Plane,
+  "shield": Shield,
+  "piggy-bank": PiggyBank,
+  "laptop": Laptop,
+  "credit-card": CreditCard,
+  "target": Target
 };
 
 export type CategoryIconName = keyof typeof categoryIcons;
