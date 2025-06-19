@@ -21,7 +21,7 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
   const { isReady, user } = useClerkUserReady();
 
   // Fetch AI-powered financial health score using React Query
-  const { data: aiScore, isLoading: aiScoreLoading } = useQuery({
+  const aiScoreQuery = useQuery({
     queryKey: ['financial-health', user?.id, summary, budgets],
     enabled: isReady && useAIScore && !!user?.id && !!summary,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
@@ -30,6 +30,8 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
       return response.json();
     },
   });
+
+  const { data: aiScore, isLoading: aiScoreLoading } = aiScoreQuery;
 
   const calculateHealthScore = () => {
     if (!summary) return { score: 0, status: 'Loading...', color: 'gray' };
