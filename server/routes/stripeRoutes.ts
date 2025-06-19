@@ -34,15 +34,38 @@ async function handleSubscriptionChange(user: any, newPlan: string, res: Respons
       return res.status(400).json({ error: "You are already subscribed to this plan" });
     }
 
-    // Use Stripe Customer Portal for proper subscription management with proration
-    // This is the recommended approach for subscription changes
-    const portalSession = await stripe.billingPortal.sessions.create({
+    const baseUrl = process.env.BASE_URL || 'http://localhost:5000';
+
+    // For subscription modifications, create a checkout session that will update the existing subscription
+    // This properly handles proration and billing
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
       customer: user.stripeCustomerId,
-      return_url: `${process.env.BASE_URL || 'http://localhost:5000'}/dashboard?subscription_update=success`,
+      payment_method_types: ['card'],
+      line_items: [{
+        price: newPriceId,
+        quantity: 1,
+      }],
+      subscription_data: {
+        metadata: {
+          plan: newPlan,
+          userId: user.id,
+          isUpgrade: 'true',
+          existingSubscriptionId: user.stripeSubscriptionId
+        }
+      },
+      success_url: `${baseUrl}/api/subscription-success?plan=${newPlan}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/subscribe`,
+      metadata: {
+        plan: newPlan,
+        userId: user.id,
+        isUpgrade: 'true',
+        existingSubscriptionId: user.stripeSubscriptionId
+      }
     });
 
-    console.log('Customer portal session created for subscription change');
-    return res.json({ url: portalSession.url });
+    console.log('Subscription modification session created:', session.id);
+    return res.json({ url: session.url });
 
   } catch (error) {
     console.error('Error updating subscription:', error);
@@ -225,6 +248,18 @@ export function registerStripeRoutes(app: Express) {
       }
 
 
+
+      // Handle existing subscription if this is an upgrade
+      if (session.metadata?.existingSubscriptionId) {
+        try {
+          // Cancel the existing subscription
+          await stripe.subscriptions.cancel(session.metadata.existingSubscriptionId);
+          console.log(`Cancelled existing subscription: ${session.metadata.existingSubscriptionId}`);
+        } catch (cancelError) {
+          console.error('Error cancelling existing subscription:', cancelError);
+          // Continue with the process even if cancellation fails
+        }
+      }
 
       // Handle existing subscription if this is an upgrade
       if (session.metadata?.existingSubscriptionId) {
