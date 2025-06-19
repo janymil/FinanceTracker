@@ -42,6 +42,7 @@ import NotFoundPage from "./pages/not-found";
 import ProfilePage from "./pages/profile";
 import AdminAnalytics from "@/pages/admin-analytics";
 import MobileUpload from "@/pages/mobile-upload/sessionId";
+import TestPublic from "@/pages/test-public";
 
 // Optimized loading state
 const AppLoader = () => (
@@ -58,29 +59,29 @@ function Router() {
   useAnalytics();
   
   return (
-    <Switch>
+    <>
       {/* Public routes for unauthenticated users */}
       <SignedOut>
-        <Route path="/" component={Landing} />
-        <Route path="/pricing" component={Pricing} />
-        <Route path="/privacy-policy" component={PrivacyPolicy} />
-        <Route path="/terms-of-service" component={TermsOfService} />
-        <Route path="/cookie-policy" component={CookiePolicy} />
-        <Route path="/contact" component={Contact} />
-        <Route path="/help" component={Help} />
-        <Route path="/auth" component={AuthPage} />
-        <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
-        <Route path="/test-public" component={() => import("@/pages/test-public").then(m => m.default)} />
+        <Switch>
+          <Route path="/" component={Landing} />
+          <Route path="/pricing" component={Pricing} />
+          <Route path="/privacy-policy" component={PrivacyPolicy} />
+          <Route path="/terms-of-service" component={TermsOfService} />
+          <Route path="/cookie-policy" component={CookiePolicy} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/help" component={Help} />
+          <Route path="/auth" component={AuthPage} />
+          <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
+          <Route path="/test-public" component={TestPublic} />
+          <Route component={NotFoundPage} />
+        </Switch>
       </SignedOut>
 
       {/* Private routes for authenticated users */}
       <SignedIn>
         <AuthenticatedApp />
       </SignedIn>
-      
-      {/* Catch-all 404 route outside of SignedIn/SignedOut */}
-      <Route component={NotFoundPage} />
-    </Switch>
+    </>
   );
 }
 
@@ -158,6 +159,7 @@ function AuthenticatedApp() {
               <Route path="/help" component={Help} />
               <Route path="/profile" component={ProfilePage} />
               <Route path="/admin-analytics" component={AdminAnalytics} />
+              <Route component={NotFoundPage} />
             </Switch>
           </div>
         </main>
