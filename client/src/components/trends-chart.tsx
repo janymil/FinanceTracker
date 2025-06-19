@@ -2,10 +2,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Crown } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import RequirePlan from "@/components/require-plan";
 
 export default function TrendsChart() {
-  // Generate dynamic months based on current date
+  const { isReady, user } = useClerkUserReady();
+
+  // Fetch user's actual financial data for trend calculation
+  const { data: transactions, isLoading: transactionsLoading } = useQuery({
+    queryKey: ["transactions", user?.id],
+    enabled: isReady && !!user?.id,
+    staleTime: 0,
+    gcTime: 0,
+  });
+
   const generateTrendData = () => {
+    if (!transactions || !Array.isArray(transactions)) {
+      return [];
+    }
+
     const data = [];
     const now = new Date();
     
@@ -16,13 +33,32 @@ export default function TrendsChart() {
         year: 'numeric'
       });
       
-      // Only show actual data for current and previous month, others show 0
-      const isRecentMonth = i <= 1;
+      // Calculate start and end of month
+      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
+      
+      // Filter transactions for this month
+      const monthTransactions = transactions.filter((t: any) => {
+        const tDate = new Date(t.date);
+        return tDate >= monthStart && tDate <= monthEnd;
+      });
+      
+      // Calculate totals for this month
+      const income = monthTransactions
+        .filter((t: any) => t.type === 'income')
+        .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
+      
+      const expenses = monthTransactions
+        .filter((t: any) => t.type === 'expense')
+        .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
+      
+      const netBalance = income - expenses;
+      
       data.push({
         month: monthLabel,
-        income: isRecentMonth ? (i === 0 ? 14000 : 2000) : 0,
-        expenses: isRecentMonth ? (i === 0 ? 330 : 150) : 0,
-        netBalance: isRecentMonth ? (i === 0 ? 13670 : 1850) : 0,
+        income: Math.round(income),
+        expenses: Math.round(expenses),
+        netBalance: Math.round(netBalance),
       });
     }
     
@@ -56,25 +92,55 @@ export default function TrendsChart() {
     return null;
   };
 
-  return (
-    <Card className="bg-white dark:bg-gray-800">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
-              Financial Trends
-            </CardTitle>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
-              Evolution of your income, expenses and net balance over the last months
-            </p>
+  // Show loading state while data is being fetched
+  if (!isReady || transactionsLoading) {
+    return (
+      <Card className="bg-white dark:bg-gray-800">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+                Financial Trends
+              </CardTitle>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Evolution of your income, expenses and net balance over the last months
+              </p>
+            </div>
+            <Badge className="bg-premium text-white">
+              <Crown className="h-3 w-3 mr-1" />
+              Premium
+            </Badge>
           </div>
-          <Badge className="bg-premium text-white">
-            <Crown className="h-3 w-3 mr-1" />
-            Premium
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
+        </CardHeader>
+        <CardContent>
+          <div className="h-80 w-full">
+            <Skeleton className="w-full h-full" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <RequirePlan plan="premium" feature="Financial Trends">
+      <Card className="bg-white dark:bg-gray-800">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+                Financial Trends
+              </CardTitle>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Evolution of your income, expenses and net balance over the last months
+              </p>
+            </div>
+            <Badge className="bg-premium text-white">
+              <Crown className="h-3 w-3 mr-1" />
+              Premium
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
         <div className="h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
@@ -131,5 +197,6 @@ export default function TrendsChart() {
         </div>
       </CardContent>
     </Card>
+    </RequirePlan>
   );
 }
