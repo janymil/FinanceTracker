@@ -308,9 +308,13 @@ export function registerStripeRoutes(app: Express) {
         return res.status(400).json({ message: "No active subscription found. Please subscribe first." });
       }
 
+      // Construct proper return URL with HTTPS scheme
+      const origin = req.headers.origin || 'http://localhost:5000';
+      const returnUrl = origin.startsWith('http') ? `${origin}/profile` : `https://${origin}/profile`;
+      
       const portalSession = await stripe.billingPortal.sessions.create({
         customer: user.stripeCustomerId,
-        return_url: `${req.headers.origin}/profile`,
+        return_url: returnUrl,
       });
 
       res.json({ url: portalSession.url });

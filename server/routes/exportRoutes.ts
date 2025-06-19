@@ -198,10 +198,14 @@ export function registerExportRoutes(app: Express) {
 
       console.log("Customer portal: Creating session for Stripe customer:", user.stripeCustomerId);
       
+      // Construct proper return URL with HTTPS scheme
+      const baseUrl = process.env.REPLIT_DOMAINS || 'http://localhost:5000';
+      const returnUrl = baseUrl.startsWith('http') ? `${baseUrl}/profile?tab=subscription` : `https://${baseUrl}/profile?tab=subscription`;
+      
       // Create customer portal session
       const session = await stripe.billingPortal.sessions.create({
         customer: user.stripeCustomerId,
-        return_url: `${process.env.REPLIT_DOMAINS || 'http://localhost:5000'}/profile?tab=subscription`,
+        return_url: returnUrl,
       });
 
       console.log("Customer portal: Session created successfully");
