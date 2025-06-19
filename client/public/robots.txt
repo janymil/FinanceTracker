@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://finanzerpro.com/sitemap.xml
+
+# Disallow authenticated areas
+Disallow: /dashboard
+Disallow: /transactions
+Disallow: /income
+Disallow: /expenses
+Disallow: /budget
+Disallow: /goals
+Disallow: /collaborative-goals
+Disallow: /reports
+Disallow: /trends
+Disallow: /calendar
+Disallow: /data-management
+Disallow: /profile
+Disallow: /admin-analytics
+Disallow: /mobile-upload/
+Disallow: /api/
+
+# Crawl delay
+Crawl-delay: 1
