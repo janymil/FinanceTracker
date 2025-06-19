@@ -85,7 +85,9 @@ export default function Income() {
       const response = await apiRequest("GET", "/api/categories");
       return response.json();
     },
-    enabled: isReady && !!user?.id
+    enabled: isReady && !!user?.id,
+    staleTime: 0,
+    gcTime: 0
   });
 
   const isLoading = transactionsLoading || categoriesLoading;
