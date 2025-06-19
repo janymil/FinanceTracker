@@ -8,7 +8,7 @@ import path from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { cookieConsentMiddleware } from "./cookieMiddleware";
-import { landingPageSSR, helpPageSSR, pricingPageSSR, contactPageSSR, privacyPageSSR, termsPageSSR, cookiePolicySSR } from "./ssr-simple";
+import { landingPageSSR, helpPageSSR, pricingPageSSR, contactPageSSR, privacyPageSSR, termsPageSSR, cookiePolicySSR } from "./ssr";
 import "./batch-processor"; // Initialize batch processing system
 
 const app = express();
@@ -142,6 +142,26 @@ app.get('/privacy-policy', (req, res, next) => {
   
   if (isCrawler) {
     return privacyPageSSR(req, res);
+  }
+  next();
+});
+
+app.get('/terms-of-service', (req, res, next) => {
+  const userAgent = req.get('User-Agent') || '';
+  const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|linkedinbot|slackbot|telegrambot|googlebot|bingbot|yahoobot|duckduckbot|baiduspider|yandexbot|applebot|petalbot|semrushbot|ahrefsbot|mj12bot|dotbot|screaming frog|chatgpt|gptbot|ccbot|anthropic|claude/i.test(userAgent);
+  
+  if (isCrawler) {
+    return termsPageSSR(req, res);
+  }
+  next();
+});
+
+app.get('/cookie-policy', (req, res, next) => {
+  const userAgent = req.get('User-Agent') || '';
+  const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|linkedinbot|slackbot|telegrambot|googlebot|bingbot|yahoobot|duckduckbot|baiduspider|yandexbot|applebot|petalbot|semrushbot|ahrefsbot|mj12bot|dotbot|screaming frog|chatgpt|gptbot|ccbot|anthropic|claude/i.test(userAgent);
+  
+  if (isCrawler) {
+    return cookiePolicySSR(req, res);
   }
   next();
 });
