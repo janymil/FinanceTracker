@@ -682,7 +682,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <LazyTransactionRemindersWidget />
 
-              <LazyRemindersStreaks />
+              {/* <LazyRemindersStreaks /> - Hidden until functionality is complete */}
 
               <LazyAutoCategorization transactions={transactions as any} />
             </div>
