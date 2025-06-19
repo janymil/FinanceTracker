@@ -91,46 +91,7 @@ app.get('/robots.txt', (req, res) => {
   res.sendFile(pathModule.resolve(process.cwd(), 'public/robots.txt'));
 });
 
-// Production-ready crawler detection and static file serving
-
-// Serve static files only for actual web crawlers (not browsers)
-function isCrawler(userAgent: string): boolean {
-  return /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|chatgpt-user|gptbot|ccbot|anthropic|claude-bot|perplexitybot|meta-externalagent|semrushbot|ahrefsbot|mj12bot|dotbot/i.test(userAgent);
-}
-
-// Centralized crawler route handler with comprehensive error handling
-const crawlerRoutes = [
-  { path: '/', file: 'public/index.html' },
-  { path: '/pricing', file: 'public/pricing.html' },
-  { path: '/help', file: 'public/features.html' },
-  { path: '/contact', file: 'public/about.html' }
-];
-
-crawlerRoutes.forEach(({ path: routePath, file }) => {
-  app.get(routePath, (req, res, next) => {
-    const userAgent = req.get('User-Agent') || '';
-    
-    if (isCrawler(userAgent)) {
-      // Use absolute path resolution for all crawler routes
-      try {
-        const staticFilePath = pathModule.resolve(process.cwd(), file);
-        return res.sendFile(staticFilePath, (err) => {
-          if (err) {
-            console.error(`[CRAWLER] Error serving ${file} for ${routePath}:`, err.message);
-            // Fallback to index.html
-            const fallbackPath = pathModule.resolve(process.cwd(), 'public/index.html');
-            return res.sendFile(fallbackPath);
-          }
-        });
-      } catch (error) {
-        console.error(`[CRAWLER] Critical error serving ${routePath}:`, error);
-        return next();
-      }
-    }
-    
-    next();
-  });
-});
+// Removed problematic crawler system - all routes now serve React app
 
 app.use((req, res, next) => {
   const start = Date.now();
