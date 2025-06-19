@@ -377,46 +377,50 @@ export default function Reports() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {(transactions as any[]).slice(0, 5).map((transaction: any) => (
-                        <div key={transaction.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-full ${
-                              transaction.type === 'income' 
-                                ? 'bg-green-100 dark:bg-green-900' 
-                                : 'bg-red-100 dark:bg-red-900'
-                            }`}>
-                              {transaction.type === 'income' ? (
-                                <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
-                              ) : (
-                                <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
-                              )}
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                  {transaction.description}
-                                </p>
-                                {transaction.is_recurring && (
-                                  <RotateCcw className="h-3 w-3 text-blue-500 dark:text-blue-400" />
+                      {(transactions as any[]).slice(0, 5).map((transaction: any) => {
+                        // Debug log to check transaction structure and recurring status
+                        console.log('Transaction data:', transaction, 'isRecurring:', transaction.isRecurring);
+                        return (
+                          <div key={transaction.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-full ${
+                                transaction.type === 'income' 
+                                  ? 'bg-green-100 dark:bg-green-900' 
+                                  : 'bg-red-100 dark:bg-red-900'
+                              }`}>
+                                {transaction.type === 'income' ? (
+                                  <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                ) : (
+                                  <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
                                 )}
                               </div>
-                              <p className="text-xs text-gray-600 dark:text-gray-400">
-                                {new Date(transaction.date).toLocaleDateString()}
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                    {transaction.description}
+                                  </p>
+                                  {transaction.isRecurring && (
+                                    <RotateCcw className="h-3 w-3 text-blue-500 dark:text-blue-400" />
+                                  )}
+                                </div>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
+                                  {new Date(transaction.date).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className={`text-sm font-semibold ${
+                                transaction.type === 'income' 
+                                  ? 'text-green-600 dark:text-green-400' 
+                                  : 'text-red-600 dark:text-red-400'
+                              }`}>
+                                {transaction.type === 'income' ? '+' : '-'}$
+                                {parseFloat(transaction.amount).toFixed(2)}
                               </p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className={`text-sm font-semibold ${
-                              transaction.type === 'income' 
-                                ? 'text-green-600 dark:text-green-400' 
-                                : 'text-red-600 dark:text-red-400'
-                            }`}>
-                              {transaction.type === 'income' ? '+' : '-'}$
-                              {parseFloat(transaction.amount).toFixed(2)}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                       {Array.isArray(transactions) && transactions.length > 5 && (
                         <div className="text-center pt-2">
                           <p className="text-xs text-gray-500">
