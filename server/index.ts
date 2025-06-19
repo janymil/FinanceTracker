@@ -8,6 +8,7 @@ import * as pathModule from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { cookieConsentMiddleware } from "./cookieMiddleware";
+import { renderPageForCrawler } from './ssr';
 // Removed SSR imports
 import "./batch-processor"; // Initialize batch processing system
 
@@ -91,7 +92,27 @@ app.get('/robots.txt', (req, res) => {
   res.sendFile(pathModule.resolve(process.cwd(), 'public/robots.txt'));
 });
 
-// Removed problematic crawler system - all routes now serve React app
+// SSR for crawlers - serve rendered HTML to search engines
+function isCrawler(userAgent: string): boolean {
+  return /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|chatgpt-user|gptbot|ccbot|anthropic|claude-bot|perplexitybot|meta-externalagent|semrushbot|ahrefsbot|mj12bot|dotbot/i.test(userAgent);
+}
+
+// SSR routes for SEO
+const seoRoutes = ['/', '/pricing', '/help', '/contact'];
+
+seoRoutes.forEach(route => {
+  app.get(route, (req, res, next) => {
+    const userAgent = req.get('User-Agent') || '';
+    
+    if (isCrawler(userAgent)) {
+      const html = renderPageForCrawler(route);
+      res.setHeader('Content-Type', 'text/html');
+      return res.send(html);
+    }
+    
+    next(); // Continue to React app for human users
+  });
+});
 
 app.use((req, res, next) => {
   const start = Date.now();
