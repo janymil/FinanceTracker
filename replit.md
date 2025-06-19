@@ -459,6 +459,7 @@ Changelog:
 - June 19, 2025. CRAWLER SYSTEM REMOVED: Completely removed problematic crawler detection and static HTML serving system that was causing 500 server errors in production - all routes now serve React app correctly with 200 status codes
 - June 19, 2025. SERVER-SIDE RENDERING IMPLEMENTED: Created comprehensive SSR system for search engine crawlers using Express middleware - crawlers receive fully rendered HTML with proper meta tags, titles, descriptions, and content while human users get full React app experience
 - June 19, 2025. SEO OPTIMIZATION COMPLETED: All major routes (/, /pricing, /help, /contact) now serve crawler-optimized HTML with complete page content, Open Graph tags, Twitter cards, canonical URLs, and structured data for proper search engine indexing
+- June 19, 2025. ROUTING CONFLICT RESOLVED: Fixed critical issue where static HTML files (index.html, pricing.html, features.html, about.html) from earlier SEO attempts were causing 404 errors to appear below page content - removed conflicting static files while preserving SSR system for proper search engine crawling
 ```
 
 ## User Preferences
