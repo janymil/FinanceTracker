@@ -458,6 +458,7 @@ Changelog:
 - June 19, 2025. CENTRALIZED CRAWLER ROUTE HANDLING: Applied comprehensive error handling to all crawler routes (/, /pricing, /help, /contact) with unified route handler, file existence checks, detailed logging, and production-ready fallbacks to prevent server crashes
 - June 19, 2025. CRAWLER ROUTE PATH MODULE FIXES: Fixed critical ESM module compatibility issues causing 500 server errors on crawler routes - replaced problematic __dirname references with pathModule.resolve(process.cwd()) pattern for proper static file serving in production environment
 - June 19, 2025. PRODUCTION CRAWLER SYSTEM VERIFIED: All crawler routes now serving correct static HTML files to search engines - /pricing shows pricing plans title, /contact shows support team title, /help shows documentation title, ensuring proper SEO indexing
+- June 19, 2025. CRITICAL PATH MODULE CONFLICT RESOLVED: Fixed 500 server error on /help route caused by naming conflict between dynamic path import in registerRoutes and static pathModule import in crawler handlers - renamed dynamic import from 'path' to 'pathUtil' eliminating scope interference with features.html serving
 ```
 
 ## User Preferences
