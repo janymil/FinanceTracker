@@ -201,8 +201,9 @@ export default function Contact() {
                   <div>
                     <p className="font-medium">Address</p>
                     <p className="text-sm text-muted-foreground">
-                      123 Finance Street<br />
-                      San Francisco, CA 94105
+                      NutriNova LLC<br />
+                      2105 Vista Oeste NW<br />
+                      Albuquerque, NM 87120
                     </p>
                   </div>
                 </div>

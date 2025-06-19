@@ -26,9 +26,10 @@ export function Footer({ sidebarCollapsed = false }: FooterProps) {
               budgeting, and AI-powered insights.
             </p>
             <div className="text-sm text-muted-foreground">
-              <p>123 Finance Street</p>
-              <p>San Francisco, CA 94105</p>
-              <p>support@finanzerpro.app</p>
+              <p>NutriNova LLC</p>
+              <p>2105 Vista Oeste NW</p>
+              <p>Albuquerque, NM 87120</p>
+              <p>info@finanzerpro.com</p>
             </div>
           </div>
 
