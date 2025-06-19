@@ -91,23 +91,25 @@ app.get('/robots.txt', (req, res) => {
   res.sendFile(path.resolve('public/robots.txt'));
 });
 
-// Serve static SEO files
-app.use(express.static('public'));
-
-// Simple static HTML routes for crawlers
+// Static HTML routes for crawlers only - specific bot patterns
 app.get('/', (req, res, next) => {
   const userAgent = req.get('User-Agent') || '';
-  const isCrawler = /bot|crawler|spider|crawling|googlebot|bingbot|chatgpt|gptbot|perplexity|gemini|bard|anthropic|claude/i.test(userAgent);
+  const isCrawler = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|chatgpt-user|gptbot|ccbot|anthropic|claude-bot|perplexitybot|meta-externalagent|semrushbot|ahrefsbot|mj12bot|dotbot/i.test(userAgent);
+  
+  console.log(`[ROOT] User-Agent: ${userAgent}`);
+  console.log(`[ROOT] Is Crawler: ${isCrawler}`);
   
   if (isCrawler) {
+    console.log('[ROOT] Serving static HTML to crawler');
     return res.sendFile(path.resolve('public/index.html'));
   }
+  console.log('[ROOT] Passing to React app');
   next();
 });
 
 app.get('/pricing', (req, res, next) => {
   const userAgent = req.get('User-Agent') || '';
-  const isCrawler = /bot|crawler|spider|crawling|googlebot|bingbot|chatgpt|gptbot|perplexity|gemini|bard|anthropic|claude/i.test(userAgent);
+  const isCrawler = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|chatgpt-user|gptbot|ccbot|anthropic|claude-bot|perplexitybot|meta-externalagent|semrushbot|ahrefsbot|mj12bot|dotbot/i.test(userAgent);
   
   if (isCrawler) {
     return res.sendFile(path.resolve('public/pricing.html'));
@@ -117,7 +119,7 @@ app.get('/pricing', (req, res, next) => {
 
 app.get('/help', (req, res, next) => {
   const userAgent = req.get('User-Agent') || '';
-  const isCrawler = /bot|crawler|spider|crawling|googlebot|bingbot|chatgpt|gptbot|perplexity|gemini|bard|anthropic|claude/i.test(userAgent);
+  const isCrawler = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|chatgpt-user|gptbot|ccbot|anthropic|claude-bot|perplexitybot|meta-externalagent|semrushbot|ahrefsbot|mj12bot|dotbot/i.test(userAgent);
   
   if (isCrawler) {
     return res.sendFile(path.resolve('public/features.html'));
@@ -127,7 +129,7 @@ app.get('/help', (req, res, next) => {
 
 app.get('/contact', (req, res, next) => {
   const userAgent = req.get('User-Agent') || '';
-  const isCrawler = /bot|crawler|spider|crawling|googlebot|bingbot|chatgpt|gptbot|perplexity|gemini|bard|anthropic|claude/i.test(userAgent);
+  const isCrawler = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|chatgpt-user|gptbot|ccbot|anthropic|claude-bot|perplexitybot|meta-externalagent|semrushbot|ahrefsbot|mj12bot|dotbot/i.test(userAgent);
   
   if (isCrawler) {
     return res.sendFile(path.resolve('public/about.html'));

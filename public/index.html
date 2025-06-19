@@ -93,15 +93,6 @@
         </footer>
     </div>
     
-    <!-- Redirect script for human users -->
-    <script>
-        // Only redirect if this is a human user (not a crawler)
-        if (navigator.userAgent && !(/bot|crawler|spider|crawling|googlebot|bingbot|chatgpt|gptbot|perplexity|gemini|bard|anthropic|claude/i.test(navigator.userAgent))) {
-            // Small delay to ensure crawlers can read content
-            setTimeout(function() {
-                window.location.href = '/';
-            }, 100);
-        }
-    </script>
+
 </body>
 </html>
