@@ -52,9 +52,47 @@ export function FinancialMascot() {
       if (response.ok) {
         const data = await response.json();
         setMascot(data);
+        // Cache mascot data for production fallback
+        localStorage.setItem(`mascot_${user.id}`, JSON.stringify(data));
+      } else if (response.status === 401 || response.status === 403) {
+        console.log('Mascot API: Authentication issue, checking localStorage for cached mascot data');
+        // Try to get cached mascot data from localStorage for production fallback
+        const cachedMascot = localStorage.getItem(`mascot_${user.id}`);
+        if (cachedMascot) {
+          try {
+            const parsedMascot = JSON.parse(cachedMascot);
+            setMascot(parsedMascot);
+            return;
+          } catch (parseError) {
+            console.warn('Failed to parse cached mascot data');
+          }
+        }
+        
+        // Set a default mascot state for unauthenticated users
+        setMascot({
+          id: '',
+          userId: user?.id || '',
+          imageUrl: '',
+          healthScore: 50,
+          mood: 'neutral',
+          lastGenerated: '',
+          isEnabled: true
+        });
+      } else {
+        console.error('Mascot API error:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Failed to fetch mascot:', error);
+      // Fallback to cached data on network errors
+      const cachedMascot = localStorage.getItem(`mascot_${user?.id}`);
+      if (cachedMascot) {
+        try {
+          const parsedMascot = JSON.parse(cachedMascot);
+          setMascot(parsedMascot);
+        } catch (parseError) {
+          console.warn('Failed to parse cached mascot data');
+        }
+      }
     }
   };
 
@@ -105,8 +143,10 @@ export function FinancialMascot() {
       });
       
       if (response.ok) {
+        const data = await response.json();
+        setMascot(data);
+        localStorage.setItem(`mascot_${user?.id}`, JSON.stringify(data));
         toast({ title: "New mascot generated!" });
-        await fetchMascot(); // Refresh mascot data
       } else {
         throw new Error("Failed to generate mascot");
       }
@@ -132,7 +172,9 @@ export function FinancialMascot() {
       });
       
       if (response.ok) {
-        await fetchMascot(); // Refresh mascot data
+        const data = await response.json();
+        setMascot(data);
+        localStorage.setItem(`mascot_${user?.id}`, JSON.stringify(data));
       }
     } catch (error: any) {
       toast({ title: "Failed to toggle mascot", variant: "destructive" });
