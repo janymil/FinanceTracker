@@ -423,6 +423,7 @@ Changelog:
 - June 18, 2025. PRICING PAGE UPDATES: Enhanced Standard plan to include "Receipt OCR scanning" and "Mobile QR code upload" features, added "Cloud receipt storage" to Premium plan
 - June 18, 2025. HELP DOCUMENTATION EXPANSION: Added comprehensive mobile QR upload workflow documentation with step-by-step instructions for both desktop and mobile scanning methods
 - June 18, 2025. FAQ ENHANCEMENT: Added detailed mobile QR code upload FAQ explaining cross-device receipt scanning functionality and workflow integration
+- June 19, 2025. STRIPE PRICE IDS IMPLEMENTED: Updated subscription system to use real Stripe price IDs instead of placeholder pricing data - premium yearly (price_1RbfWdCRVFBT4NlsdHEtcSqt), premium monthly (price_1RbfW6CRVFBT4NlsFBm9Rky0), standard yearly (price_1RbfUxCRVFBT4Nls5o1dmGHo), standard monthly (price_1RbfTvCRVFBT4Nls8UqqCGf0)
 ```
 
 ## User Preferences
