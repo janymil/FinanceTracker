@@ -292,7 +292,7 @@ export default function Expenses() {
   });
 
   const expenseCategories = categories.filter((cat: Category) => cat.type === "expense");
-  const availableCategories = expenseCategories.map(cat => cat.name);
+  const availableCategories = Array.from(new Set(expenseTransactions.map((t: Transaction) => t.categoryName).filter(Boolean))) as string[];
 
   const totalExpenses = filteredExpenses.reduce((sum: number, t: Transaction) => sum + parseFloat(t.amount), 0);
   const averageExpense = filteredExpenses.length > 0 ? totalExpenses / filteredExpenses.length : 0;
