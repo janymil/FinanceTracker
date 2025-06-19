@@ -192,6 +192,7 @@ function AuthenticatedApp({ sidebarOpen, setSidebarOpen, sidebarCollapsed, setSi
           </div>
         </main>
       </div>
+      <Footer sidebarCollapsed={sidebarCollapsed} />
       <FinancialMascot />
       <CookieBanner />
     </div>
