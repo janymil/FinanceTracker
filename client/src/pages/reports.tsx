@@ -379,7 +379,14 @@ export default function Reports() {
                     <div className="space-y-3">
                       {(transactions as any[]).slice(0, 5).map((transaction: any) => {
                         // Debug log to check transaction structure and recurring status
-                        console.log('Transaction data:', transaction, 'isRecurring:', transaction.isRecurring);
+                        console.log('Reports - Transaction:', {
+                          id: transaction.id,
+                          description: transaction.description,
+                          isRecurring: transaction.isRecurring,
+                          recurringFrequency: transaction.recurringFrequency,
+                          type: typeof transaction.isRecurring,
+                          value: transaction.isRecurring
+                        });
                         return (
                           <div key={transaction.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
                             <div className="flex items-center gap-3">
@@ -399,7 +406,7 @@ export default function Reports() {
                                   <p className="text-sm font-medium text-gray-900 dark:text-white">
                                     {transaction.description}
                                   </p>
-                                  {transaction.isRecurring && (
+                                  {(transaction.isRecurring === true || transaction.isRecurring === 1 || transaction.isRecurring === "true") && (
                                     <RotateCcw className="h-3 w-3 text-blue-500 dark:text-blue-400" />
                                   )}
                                 </div>
