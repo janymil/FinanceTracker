@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useTransactions } from "@/hooks/useTransactions";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import UploadReceiptModal from "@/components/UploadReceiptModal";
 import { Button } from "@/components/ui/button";
@@ -27,7 +29,7 @@ import {
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+
 import { useToast } from "@/hooks/use-toast";
 import MonthFilter from "@/components/month-filter";
 import { format } from "date-fns";
@@ -88,15 +90,16 @@ export default function Transactions() {
     referenceNote: "",
   });
 
-  // React Query hooks for data fetching
-  const { data: transactions = [], isLoading: transactionsLoading, refetch: refetchTransactions } = useQuery<Transaction[]>({
-    queryKey: ["transactions"],
-    enabled: isReady && !!user?.id,
-    gcTime: 0
-  });
+  // React Query hooks for data fetching using the same pattern as dashboard
+  const { data: transactions = [], isLoading: transactionsLoading, refetch: refetchTransactions } = useTransactions();
+  const queryClient = useQueryClient();
 
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ["categories"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/categories");
+      return response.json();
+    },
     enabled: isReady && !!user?.id
   });
 
