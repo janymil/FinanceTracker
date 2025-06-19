@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, FileText, Brain, Download, Zap, Crown } from "lucide-react";
+import { Calendar, TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, FileText, Brain, Download, Zap, Crown, RotateCcw } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from "date-fns";
 import RequirePlan from "@/components/require-plan";
 import MonthFilter from "@/components/month-filter";
@@ -392,9 +392,14 @@ export default function Reports() {
                               )}
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                {transaction.description}
-                              </p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                  {transaction.description}
+                                </p>
+                                {transaction.is_recurring && (
+                                  <RotateCcw className="h-3 w-3 text-blue-500 dark:text-blue-400" />
+                                )}
+                              </div>
                               <p className="text-xs text-gray-600 dark:text-gray-400">
                                 {new Date(transaction.date).toLocaleDateString()}
                               </p>
