@@ -1,53 +1,65 @@
-// Comprehensive icon registry for deployment compatibility
-import { 
+// Comprehensive icon registry for financial categories and UI components
+import {
+  // Core UI icons
   Lock, Check, Circle, ChevronRight, ChevronDown, ChevronUp, ChevronLeft,
-  DollarSign, TrendingUp, TrendingDown, Home, Car, ShoppingBag, Utensils,
-  Heart, Gamepad2, Plus, Edit3, Trash2, Upload, Download, CheckCircle, 
-  AlertCircle, PiggyBank, Lightbulb, Settings, User, Menu, X, Target,
-  Crosshair, BarChart3, Calendar, Users, FileText, CreditCard, LayoutDashboard,
-  Bell, Shield, Eye, EyeOff, RefreshCw, RotateCcw, Search, Filter,
-  MoreHorizontal, MoreVertical, Info, AlertTriangle, Zap, Star, Bookmark,
-  Share, Copy, ExternalLink, ArrowRight, ArrowLeft, ArrowUp, ArrowDown,
-  Mail, Phone, MapPin, Globe, Clock, Camera, Image, Paperclip, Send,
-  Play, Pause, Stop, Volume2, VolumeX, Maximize, Minimize, FullScreen,
-  Grid, List, Columns, Rows, Sidebar, Layout, Layers, Package, Tag,
-  Folder, File, Database, Server, Cloud, Wifi, Bluetooth, Battery,
-  Power, Cpu, HardDrive, Memory, Monitor, Keyboard, Mouse, Printer,
-  Smartphone, Tablet, Laptop, Desktop, Headphones, Speaker, Microphone,
-  Video, VideoOff, Image as ImageIcon, Music, Film, Book, Newspaper,
-  Calculator, Compass, Map, Navigation, Route, Truck, Plane, Train,
-  Bicycle, Walk, Run, Swim, Dumbbell, Trophy, Award, Medal, Flag,
-  Thermometer, Umbrella, Sun, Moon, CloudRain, CloudSnow, Wind,
-  Mountain, Tree, Flower, Leaf, Seedling, Apple, Coffee, Pizza,
-  IceCream, Cake, Gift, Balloon, PartyPopper, Fireworks, Sparkles
+  Plus, Minus, X, Edit3, Trash2, Search, Filter, Settings, Menu, MoreHorizontal, MoreVertical,
+  
+  // Navigation & Layout
+  Home, LayoutDashboard, FileText, Calendar, TrendingUp, TrendingDown, BarChart3, User, Users,
+  CreditCard, Target, Crosshair, ArrowRight, ArrowLeft, ArrowUp, ArrowDown,
+  
+  // Financial icons
+  DollarSign, PiggyBank, Coins, Banknote, Calculator, Receipt, Wallet,
+  
+  // Category icons for expenses/income/budget/goals
+  Car, Bus, Plane, Train, Fuel, // Transportation
+  Building, Building2, Zap, // Housing & Utilities
+  Utensils, Coffee, Pizza, Apple, // Food & Dining
+  ShoppingBag, ShoppingCart, Shirt, Gift, // Shopping & Personal
+  Heart, Pill, Stethoscope, Hospital, // Healthcare
+  Gamepad2, Film, Music, Camera, Headphones, // Entertainment
+  GraduationCap, Book, Laptop, School, // Education
+  Briefcase, Factory, Wrench, Hammer, // Work & Business
+  Map, MapPin, Luggage, Hotel, // Travel & Vacation
+  Baby, PawPrint, Trees, Flower, // Family & Pets
+  Shield, Umbrella, // Insurance & Security
+  HandCoins, Trophy, // Goals & Savings
+  
+  // Additional utility icons
+  Upload, Download, Copy, Share, ExternalLink, Info, AlertCircle,
+  Bell, Eye, EyeOff, Star, Bookmark, Tag, Folder, File, Database, Cloud,
+  Mail, Phone, Globe, Clock, RefreshCw, RotateCcw, Maximize, Minimize,
+  Play, Pause, Volume2, Image, Video, Mic, Printer, Save, Archive,
+  
+  // Status & feedback icons
+  AlertTriangle, XCircle, Loader2, Lightbulb, Crown,
+  Award, Medal, Flag, ThumbsUp, Smile, Frown
 } from "lucide-react";
 
 // Export all icons individually for direct import
 export {
   Lock, Check, Circle, ChevronRight, ChevronDown, ChevronUp, ChevronLeft,
-  DollarSign, TrendingUp, TrendingDown, Home, Car, ShoppingBag, Utensils,
-  Heart, Gamepad2, Plus, Edit3, Trash2, Upload, Download, CheckCircle,
-  AlertCircle, PiggyBank, Lightbulb, Settings, User, Menu, X, Target,
-  Crosshair, BarChart3, Calendar, Users, FileText, CreditCard, LayoutDashboard,
-  Bell, Shield, Eye, EyeOff, RefreshCw, RotateCcw, Search, Filter,
-  MoreHorizontal, MoreVertical, Info, AlertTriangle, Zap, Star, Bookmark,
-  Share, Copy, ExternalLink, ArrowRight, ArrowLeft, ArrowUp, ArrowDown,
-  Mail, Phone, MapPin, Globe, Clock, Camera, Image, Paperclip, Send,
-  Play, Pause, Stop, Volume2, VolumeX, Maximize, Minimize, FullScreen,
-  Grid, List, Columns, Rows, Sidebar, Layout, Layers, Package, Tag,
-  Folder, File, Database, Server, Cloud, Wifi, Bluetooth, Battery,
-  Power, Cpu, HardDrive, Memory, Monitor, Keyboard, Mouse, Printer,
-  Smartphone, Tablet, Laptop, Desktop, Headphones, Speaker, Microphone,
-  Video, VideoOff, ImageIcon, Music, Film, Book, Newspaper,
-  Calculator, Compass, Map, Navigation, Route, Truck, Plane, Train,
-  Bicycle, Walk, Run, Swim, Dumbbell, Trophy, Award, Medal, Flag,
-  Thermometer, Umbrella, Sun, Moon, CloudRain, CloudSnow, Wind,
-  Mountain, Tree, Flower, Leaf, Seedling, Apple, Coffee, Pizza,
-  IceCream, Cake, Gift, Balloon, PartyPopper, Fireworks, Sparkles
+  Plus, Minus, X, Edit3, Trash2, Search, Filter, Settings, Menu, MoreHorizontal, MoreVertical,
+  Home, LayoutDashboard, FileText, Calendar, TrendingUp, TrendingDown, BarChart3, User, Users,
+  CreditCard, Target, Crosshair, ArrowRight, ArrowLeft, ArrowUp, ArrowDown,
+  DollarSign, PiggyBank, Coins, Banknote, Calculator, Receipt, Wallet,
+  Car, Bus, Plane, Train, Fuel, Building, Building2, Zap,
+  Utensils, Coffee, Pizza, Apple, ShoppingBag, ShoppingCart, Shirt, Gift,
+  Heart, Pill, Stethoscope, Hospital, Gamepad2, Film, Music, Camera, Headphones,
+  GraduationCap, Book, Laptop, School, Briefcase, Factory, Wrench, Hammer,
+  Map, MapPin, Luggage, Hotel, Baby, PawPrint, Trees, Flower,
+  Shield, Umbrella, HandCoins, Trophy,
+  Upload, Download, Copy, Share, ExternalLink, Info, AlertCircle,
+  Bell, Eye, EyeOff, Star, Bookmark, Tag, Folder, File, Database, Cloud,
+  Mail, Phone, Globe, Clock, RefreshCw, RotateCcw, Maximize, Minimize,
+  Play, Pause, Volume2, Image, Video, Mic, Printer, Save, Archive,
+  AlertTriangle, XCircle, Loader2, Lightbulb, Crown,
+  Award, Medal, Flag, ThumbsUp, Smile, Frown
 };
 
 // Icon registry object for programmatic access
 export const iconRegistry = {
+  // Core UI
   lock: Lock,
   check: Check,
   circle: Circle,
@@ -55,159 +67,198 @@ export const iconRegistry = {
   chevronDown: ChevronDown,
   chevronUp: ChevronUp,
   chevronLeft: ChevronLeft,
-  dollarSign: DollarSign,
-  trendingUp: TrendingUp,
-  trendingDown: TrendingDown,
-  home: Home,
-  car: Car,
-  shoppingBag: ShoppingBag,
-  utensils: Utensils,
-  heart: Heart,
-  gamepad2: Gamepad2,
   plus: Plus,
+  minus: Minus,
+  x: X,
   edit3: Edit3,
   trash2: Trash2,
-  upload: Upload,
-  download: Download,
-  checkCircle: CheckCircle,
-  alertCircle: AlertCircle,
-  piggyBank: PiggyBank,
-  lightbulb: Lightbulb,
-  settings: Settings,
-  user: User,
-  menu: Menu,
-  x: X,
-  target: Target,
-  crosshair: Crosshair,
-  barChart3: BarChart3,
-  calendar: Calendar,
-  users: Users,
-  fileText: FileText,
-  creditCard: CreditCard,
-  layoutDashboard: LayoutDashboard,
-  bell: Bell,
-  shield: Shield,
-  eye: Eye,
-  eyeOff: EyeOff,
-  refreshCw: RefreshCw,
-  rotateCcw: RotateCcw,
   search: Search,
   filter: Filter,
+  settings: Settings,
+  menu: Menu,
   moreHorizontal: MoreHorizontal,
   moreVertical: MoreVertical,
-  info: Info,
-  alertTriangle: AlertTriangle,
+  
+  // Navigation
+  home: Home,
+  layoutDashboard: LayoutDashboard,
+  fileText: FileText,
+  calendar: Calendar,
+  trendingUp: TrendingUp,
+  trendingDown: TrendingDown,
+  barChart3: BarChart3,
+  user: User,
+  users: Users,
+  creditCard: CreditCard,
+  target: Target,
+  crosshair: Crosshair,
+  
+  // Financial
+  dollarSign: DollarSign,
+  piggyBank: PiggyBank,
+  coins: Coins,
+  banknote: Banknote,
+  calculator: Calculator,
+  receipt: Receipt,
+  wallet: Wallet,
+  
+  // Transportation
+  car: Car,
+  bus: Bus,
+  plane: Plane,
+  train: Train,
+  fuel: Fuel,
+  
+  // Housing
+  building: Building,
+  building2: Building2,
   zap: Zap,
+  
+  // Food
+  utensils: Utensils,
+  coffee: Coffee,
+  pizza: Pizza,
+  apple: Apple,
+  
+  // Shopping
+  shoppingBag: ShoppingBag,
+  shoppingCart: ShoppingCart,
+  shirt: Shirt,
+  gift: Gift,
+  
+  // Healthcare
+  heart: Heart,
+  pill: Pill,
+  stethoscope: Stethoscope,
+  hospital: Hospital,
+  
+  // Entertainment
+  gamepad2: Gamepad2,
+  film: Film,
+  music: Music,
+  camera: Camera,
+  headphones: Headphones,
+  
+  // Education
+  graduationCap: GraduationCap,
+  book: Book,
+  laptop: Laptop,
+  school: School,
+  
+  // Work
+  briefcase: Briefcase,
+  factory: Factory,
+  wrench: Wrench,
+  hammer: Hammer,
+  
+  // Travel
+  map: Map,
+  mapPin: MapPin,
+  luggage: Luggage,
+  hotel: Hotel,
+  
+  // Family & Pets
+  baby: Baby,
+  pawPrint: PawPrint,
+  trees: Trees,
+  flower: Flower,
+  
+  // Security
+  shield: Shield,
+  umbrella: Umbrella,
+  
+  // Goals
+  handCoins: HandCoins,
+  trophy: Trophy,
+  
+  // Utility
+  upload: Upload,
+  download: Download,
+  copy: Copy,
+  share: Share,
+  externalLink: ExternalLink,
+  info: Info,
+  alertCircle: AlertCircle,
+  bell: Bell,
+  eye: Eye,
+  eyeOff: EyeOff,
   star: Star,
   bookmark: Bookmark,
-  share: Share,
-  copy: Copy,
-  externalLink: ExternalLink,
-  arrowRight: ArrowRight,
-  arrowLeft: ArrowLeft,
-  arrowUp: ArrowUp,
-  arrowDown: ArrowDown,
-  mail: Mail,
-  phone: Phone,
-  mapPin: MapPin,
-  globe: Globe,
-  clock: Clock,
-  camera: Camera,
-  image: Image,
-  paperclip: Paperclip,
-  send: Send,
-  play: Play,
-  pause: Pause,
-  stop: Stop,
-  volume2: Volume2,
-  volumeX: VolumeX,
-  maximize: Maximize,
-  minimize: Minimize,
-  fullScreen: FullScreen,
-  grid: Grid,
-  list: List,
-  columns: Columns,
-  rows: Rows,
-  sidebar: Sidebar,
-  layout: Layout,
-  layers: Layers,
-  package: Package,
   tag: Tag,
   folder: Folder,
   file: File,
   database: Database,
-  server: Server,
   cloud: Cloud,
-  wifi: Wifi,
-  bluetooth: Bluetooth,
-  battery: Battery,
-  power: Power,
-  cpu: Cpu,
-  hardDrive: HardDrive,
-  memory: Memory,
-  monitor: Monitor,
-  keyboard: Keyboard,
-  mouse: Mouse,
-  printer: Printer,
-  smartphone: Smartphone,
-  tablet: Tablet,
-  laptop: Laptop,
-  desktop: Desktop,
-  headphones: Headphones,
-  speaker: Speaker,
-  microphone: Microphone,
+  mail: Mail,
+  phone: Phone,
+  globe: Globe,
+  clock: Clock,
+  refreshCw: RefreshCw,
+  rotateCcw: RotateCcw,
+  maximize: Maximize,
+  minimize: Minimize,
+  play: Play,
+  pause: Pause,
+  volume2: Volume2,
+  image: Image,
   video: Video,
-  videoOff: VideoOff,
-  imageIcon: ImageIcon,
-  music: Music,
-  film: Film,
-  book: Book,
-  newspaper: Newspaper,
-  calculator: Calculator,
-  compass: Compass,
-  map: Map,
-  navigation: Navigation,
-  route: Route,
-  truck: Truck,
-  plane: Plane,
-  train: Train,
-  bicycle: Bicycle,
-  walk: Walk,
-  run: Run,
-  swim: Swim,
-  dumbbell: Dumbbell,
-  trophy: Trophy,
+  mic: Mic,
+  printer: Printer,
+  save: Save,
+  archive: Archive,
+  
+  // Status
+  alertTriangle: AlertTriangle,
+  xCircle: XCircle,
+  loader2: Loader2,
+  lightbulb: Lightbulb,
+  crown: Crown,
   award: Award,
   medal: Medal,
   flag: Flag,
-  thermometer: Thermometer,
-  umbrella: Umbrella,
-  sun: Sun,
-  moon: Moon,
-  cloudRain: CloudRain,
-  cloudSnow: CloudSnow,
-  wind: Wind,
-  mountain: Mountain,
-  tree: Tree,
-  flower: Flower,
-  leaf: Leaf,
-  seedling: Seedling,
-  apple: Apple,
-  coffee: Coffee,
-  pizza: Pizza,
-  iceCream: IceCream,
-  cake: Cake,
-  gift: Gift,
-  balloon: Balloon,
-  partyPopper: PartyPopper,
-  fireworks: Fireworks,
-  sparkles: Sparkles
+  thumbsUp: ThumbsUp,
+  smile: Smile,
+  frown: Frown
 };
 
 // Helper function to get icon by name
 export function getIcon(name: string) {
   return iconRegistry[name as keyof typeof iconRegistry] || Lock;
 }
+
+// Category icon mapping for financial app
+export const categoryIcons = {
+  // Expense categories
+  "transportation": Car,
+  "food": Utensils,
+  "shopping": ShoppingBag,
+  "entertainment": Gamepad2,
+  "healthcare": Heart,
+  "housing": Building,
+  "education": GraduationCap,
+  "travel": Plane,
+  "utilities": Zap,
+  "other": Circle,
+  
+  // Income categories
+  "salary": Briefcase,
+  "business": Factory,
+  "investment": TrendingUp,
+  "gift": Gift,
+  "rental": Building,
+  "freelance": Laptop,
+  
+  // Goal categories
+  "savings": PiggyBank,
+  "vacation": Plane,
+  "house": Building,
+  "car": Car,
+  "emergency": Shield,
+  "retirement": Trophy,
+  "education": GraduationCap
+};
+
+export type CategoryIconName = keyof typeof categoryIcons;
 
 // Default exports for backward compatibility
 export default iconRegistry;
