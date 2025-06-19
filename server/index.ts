@@ -4,7 +4,7 @@ config(); // Load environment variables
 import express, { type Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import session from "express-session";
-import path from "path";
+import * as pathModule from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { cookieConsentMiddleware } from "./cookieMiddleware";
@@ -84,73 +84,36 @@ app.use('/uploads', express.static('uploads'));
 
 // Serve specific SEO files
 app.get('/sitemap.xml', (req, res) => {
-  res.sendFile(path.resolve('public/sitemap.xml'));
+  res.sendFile(pathModule.resolve('public/sitemap.xml'));
 });
 
 app.get('/robots.txt', (req, res) => {
-  res.sendFile(path.resolve('public/robots.txt'));
+  res.sendFile(pathModule.resolve('public/robots.txt'));
 });
 
-// Debug endpoint to test file paths
-app.get('/debug-paths', (req, res) => {
-  const fs = require('fs');
-  const debugInfo = {
-    cwd: process.cwd(),
-    dirname: __dirname,
-    nodeEnv: process.env.NODE_ENV,
-    files: {
-      'public/features.html': fs.existsSync(path.resolve(process.cwd(), 'public/features.html')),
-      'features.html': fs.existsSync(path.resolve(process.cwd(), 'features.html')),
-      '../public/features.html': fs.existsSync(path.resolve(__dirname, '..', 'public/features.html')),
-      './public/features.html': fs.existsSync(path.resolve(__dirname, 'public/features.html'))
-    },
-    resolvedPaths: {
-      'public/features.html': path.resolve(process.cwd(), 'public/features.html'),
-      '../public/features.html': path.resolve(__dirname, '..', 'public/features.html'),
-      './public/features.html': path.resolve(__dirname, 'public/features.html')
-    }
-  };
-  res.json(debugInfo);
-});
+// Debug endpoint to test file paths (removed for production)
 
-// Safe file serving with comprehensive debugging
+// Safe file serving with error handling
 function safeSendFile(res: Response, filePath: string, next: NextFunction) {
-  console.log(`[DEBUG] Starting safeSendFile for: ${filePath}`);
-  console.log(`[DEBUG] Current working directory: ${process.cwd()}`);
-  console.log(`[DEBUG] __dirname: ${__dirname}`);
-  
   try {
     const resolvedPath = path.resolve(process.cwd(), filePath);
     console.log(`[STATIC FILE] Attempting to serve: ${resolvedPath}`);
     
-    // Check if file exists before serving
     const fs = require('fs');
     if (!fs.existsSync(resolvedPath)) {
       console.error(`[STATIC FILE] File not found: ${resolvedPath}`);
-      console.log(`[DEBUG] Checking alternative paths...`);
-      
-      // Try alternative paths
-      const altPath1 = path.resolve(__dirname, '..', filePath);
-      const altPath2 = path.resolve(__dirname, filePath);
-      console.log(`[DEBUG] Alternative path 1: ${altPath1} (exists: ${fs.existsSync(altPath1)})`);
-      console.log(`[DEBUG] Alternative path 2: ${altPath2} (exists: ${fs.existsSync(altPath2)})`);
-      
-      return next(); // Let React handle the route
+      return next();
     }
     
-    console.log(`[STATIC FILE] File exists, serving: ${resolvedPath}`);
     res.sendFile(resolvedPath, (err) => {
       if (err) {
         console.error(`[STATIC FILE] Error serving ${filePath}:`, err.message);
-        console.error(`[STATIC FILE] Error code:`, (err as any).code);
-        console.error(`[STATIC FILE] Error status:`, (err as any).status);
-        console.error(`[STATIC FILE] Full error:`, err);
-        return next(); // Fallback to React app instead of 500
+        return next();
       }
       console.log(`[STATIC FILE] Successfully served: ${filePath}`);
     });
   } catch (error) {
-    console.error(`[STATIC FILE] Critical error in safeSendFile:`, error);
+    console.error(`[STATIC FILE] Critical error:`, error);
     next();
   }
 }
@@ -168,19 +131,16 @@ const crawlerRoutes = [
   { path: '/contact', file: 'public/about.html' }
 ];
 
-crawlerRoutes.forEach(({ path, file }) => {
-  app.get(path, (req, res, next) => {
+crawlerRoutes.forEach(({ path: routePath, file }) => {
+  app.get(routePath, (req, res, next) => {
     const userAgent = req.get('User-Agent') || '';
-    console.log(`[ROUTE ${path}] User-Agent: ${userAgent.substring(0, 50)}...`);
-    console.log(`[ROUTE ${path}] Full request URL: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
-    console.log(`[ROUTE ${path}] Request method: ${req.method}`);
-    console.log(`[ROUTE ${path}] Request headers:`, JSON.stringify(req.headers, null, 2));
+    console.log(`[ROUTE ${routePath}] User-Agent: ${userAgent.substring(0, 50)}...`);
     
     if (isCrawler(userAgent)) {
-      console.log(`[ROUTE ${path}] Crawler detected, serving static file: ${file}`);
+      console.log(`[ROUTE ${routePath}] Crawler detected, serving static file: ${file}`);
       
       // Fix for /help route - use absolute path resolution
-      if (path === '/help') {
+      if (routePath === '/help') {
         console.log(`[HELP DEBUG] Serving static HTML for /help to crawler`);
         try {
           const helpFilePath = path.resolve(process.cwd(), 'public/features.html');
@@ -203,7 +163,7 @@ crawlerRoutes.forEach(({ path, file }) => {
       return safeSendFile(res, file, next);
     }
     
-    console.log(`[ROUTE ${path}] Human user, passing to React app`);
+    console.log(`[ROUTE ${routePath}] Human user, passing to React app`);
     next();
   });
 });
