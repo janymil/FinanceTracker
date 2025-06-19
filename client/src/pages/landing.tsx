@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, Shield, DollarSign, BarChart3, Crown, Check, X, Star } from "lucide-react";
 import { useLocation } from "wouter";
+import { SEO } from "@/components/SEO";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
@@ -22,7 +23,14 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
+    <>
+      <SEO 
+        title="FinanzerPro - Smart Personal Finance Management | Take Control of Your Money"
+        description="Transform your financial life with FinanzerPro. AI-powered expense tracking, receipt OCR scanning, budgeting tools, and collaborative savings goals. Start free today!"
+        keywords="personal finance, expense tracker, budget app, financial management, receipt scanner, AI categorization, savings goals, financial health, money management"
+        canonical="https://finanzerpro.com"
+      />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
       {/* Navigation */}
       <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -682,5 +690,6 @@ export default function Landing() {
         </div>
       </footer>
     </div>
+    </>
   );
 }
