@@ -68,12 +68,45 @@ Meet your AI-powered financial companion—a unique digital mascot that:
 
 This isn't just a gimmick—it's behavioral psychology in action, making financial management emotionally engaging.
 
-### **Enterprise-Grade Security with Human-Friendly Access**
-Your financial data deserves military-grade protection:
-- **Industry-standard encryption** for all sensitive information
-- **Secure cloud backups** that you control
-- **Multi-factor authentication** without the complexity
-- **Privacy-first design** that puts you in control
+---
+
+## 💼 Essential Financial Management Features
+
+### **Complete Transaction Evidence & Organization**
+Build a solid foundation for your financial life:
+- **Comprehensive expense and income tracking** with detailed transaction records
+- **Logical category structure** with customizable expense and income categories
+- **Advanced filtering system** to find specific transactions instantly
+- **Date range selection** for analyzing any time period
+- **Search functionality** across all transaction data
+- **Transaction editing and deletion** for complete control over your records
+
+### **Visual Analytics & Reporting**
+See your money in action with powerful visualization tools:
+- **Interactive charts and graphs** showing spending patterns over time
+- **Category breakdown charts** revealing exactly where your money goes
+- **Monthly comparison reports** tracking your financial progress
+- **Budget vs. actual analysis** with clear visual indicators
+- **Trend analysis** identifying patterns in your spending habits
+- **Goal progress visualization** keeping you motivated toward targets
+
+### **Smart Automation & Reminders**
+Never miss important financial tasks again:
+- **Recurring transaction tracking** for subscriptions and regular payments
+- **Intelligent payment reminders** based on your transaction history
+- **Automatic transaction categorization** that learns your habits
+- **Budget alerts** when you're approaching spending limits
+- **Goal milestone notifications** celebrating your achievements
+- **Upcoming bill predictions** so you're always prepared
+
+### **Comprehensive Expense & Income Management**
+Master your financial foundation with powerful core features:
+- **Complete transaction tracking** for all expenses and income
+- **Logical category structure** that makes sense for your lifestyle
+- **Visual graphs and charts** for instant financial insights
+- **Advanced filtering options** to find exactly what you need
+- **Recurring payment tracking** for subscriptions and regular bills
+- **Smart reminders** so important payments are never missed
 
 ---
 
@@ -145,12 +178,14 @@ Built from the ground up for reliability and scale:
 - **Automatic security updates** that happen transparently
 - **Scalable infrastructure** that grows with your needs
 
-### **Privacy-First Design**
-Your financial data belongs to you, not us:
-- **Zero data selling** - your information never becomes a product
-- **Minimal data collection** - we only gather what's necessary
-- **Transparent policies** written in plain English
-- **User-controlled backups** you can download anytime
+### **Advanced Data Visualization & Analytics**
+Transform raw financial data into actionable insights:
+- **Interactive charts and graphs** showing spending trends over time
+- **Category breakdown visualizations** revealing where your money goes
+- **Monthly and yearly comparison reports** tracking financial progress
+- **Budget vs. actual spending analysis** with clear visual indicators
+- **Goal progress tracking** with motivational milestone displays
+- **Custom date range filtering** for detailed period analysis
 
 ---
 
