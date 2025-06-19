@@ -102,6 +102,8 @@ export function registerStripeRoutes(app: Express) {
           const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
           if (subscription.status === 'active') {
             // Existing paid subscriber - redirect directly to subscription update page
+            console.log('Creating portal session with subscription update flow for:', user.stripeSubscriptionId);
+            
             const portalSession = await stripe.billingPortal.sessions.create({
               customer: user.stripeCustomerId,
               return_url: `${req.headers.origin || 'http://localhost:5000'}/dashboard?subscription_update=success`,
@@ -113,7 +115,8 @@ export function registerStripeRoutes(app: Express) {
               }
             });
 
-            console.log('Existing subscriber redirected to Customer Portal for plan change');
+            console.log('Portal session created with URL:', portalSession.url);
+            console.log('Flow data configured for subscription:', user.stripeSubscriptionId);
             return res.json({ url: portalSession.url });
           }
         } catch (error) {
