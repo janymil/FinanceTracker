@@ -429,6 +429,7 @@ Changelog:
 - June 19, 2025. SUBSCRIPTION TRANSPARENCY: Added /api/subscription-schedule endpoint and SubscriptionSchedule component to show users exact dates when current plan ends and new plan begins - ensures complete visibility of billing transitions without immediate charges for downgrades
 - June 19, 2025. DIRECT SUBSCRIPTION UPDATE FLOW: Implemented Stripe Customer Portal flow_data configuration to redirect existing subscribers directly to subscription update page when clicking upgrade buttons - bypasses general portal overview for streamlined plan changes
 - June 19, 2025. EXPENSES PAGE REACT QUERY MIGRATION: Successfully converted expenses page from manual state management to React Query patterns with immediate UI updates after create/edit/delete operations, matching transactions and income page implementations
+- June 19, 2025. CATEGORIES PAGE REACT QUERY CONVERSION: Migrated categories page from manual state management to React Query with proper cache invalidation - new categories now immediately appear in all dropdown menus across expenses, income, and transactions pages
 ```
 
 ## User Preferences
