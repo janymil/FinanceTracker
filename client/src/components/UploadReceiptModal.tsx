@@ -216,14 +216,12 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
   const processQRUploadResult = (result: any) => {
     // Auto-populate form with extracted data from mobile upload
     if (result.data && result.data.extracted) {
-      console.log('QR Extracted data:', result.data.extracted);
       
       // Find best matching category using the same logic as desktop OCR
       let matchedCategoryId = '';
       if (result.data.category && categories.length > 0) {
         const suggestedCategory = result.data.category.toLowerCase();
-        console.log('QR AI suggested category:', result.data.category);
-        console.log('Available categories:', categories.map(c => c.name));
+
         
         // Try exact match first
         let matchedCategory = categories.find(cat => 
@@ -268,9 +266,6 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
         
         if (matchedCategory) {
           matchedCategoryId = matchedCategory.id.toString();
-          console.log('QR Matched to existing category:', matchedCategory.name);
-        } else {
-          console.log('QR No matching category found for:', result.data.category);
         }
       }
 
@@ -280,7 +275,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
         date: result.data.extracted.date || new Date().toISOString().split('T')[0],
         categoryId: matchedCategoryId
       };
-      console.log('QR Setting form data:', newFormData);
+
       setFormData(newFormData);
     }
     
@@ -329,16 +324,13 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
       }
 
       const result = await response.json();
-      console.log('Upload response:', result);
       
       // Auto-populate form with extracted data
       if (result.extracted) {
-        console.log('Extracted data:', result.extracted);
         // Find best matching category
         let matchedCategoryId = '';
         if (result.category && categories.length > 0) {
           const suggestedCategory = result.category.toLowerCase();
-          console.log('AI suggested category:', result.category);
           
           // Try exact match first
           let matchedCategory = categories.find(cat => 
@@ -383,9 +375,6 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
           
           if (matchedCategory) {
             matchedCategoryId = matchedCategory.id.toString();
-            console.log('Matched to existing category:', matchedCategory.name);
-          } else {
-            console.log('No matching category found for:', result.category);
           }
         }
 
@@ -395,10 +384,8 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
           date: result.extracted.date || new Date().toISOString().split('T')[0],
           categoryId: matchedCategoryId
         };
-        console.log('Setting form data:', newFormData);
+
         setFormData(newFormData);
-      } else {
-        console.log('No extracted data found in response');
       }
       
       setUploadState({
