@@ -56,7 +56,7 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
             <p className="mb-4">
-              By accessing and using FinanceFlow, you accept and agree to be bound by the terms 
+              By accessing and using FinanzerPro, you accept and agree to be bound by the terms 
               and provision of this agreement. If you do not agree to these terms, please do not use our service.
             </p>
           </section>
@@ -152,7 +152,7 @@ export default function TermsOfService() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">9. Intellectual Property</h2>
             <p className="mb-4">
-              The FinanceFlow service, including its design, functionality, and content, is protected by 
+              The FinanzerPro service, including its design, functionality, and content, is protected by 
               intellectual property laws. You may not copy, modify, or distribute our service.
             </p>
           </section>

@@ -19,7 +19,7 @@ export default function Contact() {
   const { toast } = useToast();
 
   useEffect(() => {
-    document.title = "Contact Us - FinanceFlow";
+    document.title = "Contact Us - FinanzerPro";
   }, []);
 
   const handleLogin = () => {
@@ -86,7 +86,7 @@ export default function Contact() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Have questions about FinanceFlow? We're here to help. Get in touch with our support team 
+            Have questions about FinanzerPro? We're here to help. Get in touch with our support team 
             and we'll respond as quickly as possible.
           </p>
         </div>
