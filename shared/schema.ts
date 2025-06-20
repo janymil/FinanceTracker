@@ -35,6 +35,7 @@ export const users = pgTable("users", {
   website: varchar("website"),
   password: varchar("password"), // Not used with Clerk auth, kept for compatibility
   plan: varchar("plan", { length: 20 }).default("free").notNull(),
+  billingInterval: varchar("billing_interval", { length: 20 }).default("monthly"), // monthly or yearly
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
   activatedAt: timestamp("activated_at"), // When user activated their plan via AppSumo code redemption
