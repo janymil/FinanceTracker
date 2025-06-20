@@ -539,7 +539,7 @@ export default function AdminAnalytics() {
             </div>
 
             <div className="flex gap-2">
-              <Button 
+            <Button 
                 onClick={syncClerkUsers}
                 disabled={isSyncingUsers}
                 variant="outline"
@@ -615,7 +615,6 @@ export default function AdminAnalytics() {
               </DialogContent>
             </Dialog>
           </div>
-
           <Card>
             <CardHeader>
               <CardTitle>Users ({filteredUsers.length})</CardTitle>
@@ -780,7 +779,6 @@ export default function AdminAnalytics() {
               </Table>
             </CardContent>
           </Card>
-          </div>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
