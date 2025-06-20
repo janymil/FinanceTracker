@@ -194,19 +194,39 @@ async function handleUserUpdated(userData: any) {
 // Handle user deletion from Clerk
 async function handleUserDeleted(userData: any) {
   try {
-    const { id } = userData;
+    // Clerk sends object ID in deletion webhook, but we need user ID
+    // Try both formats to handle the mismatch
+    const objectId = userData.id;
+    const userId = userData.object === 'user' ? userData.id : null;
     
-    // Check if user exists in our database
-    const existingUser = await storage.getUser(id);
+    console.log(`Attempting to delete user. Object ID: ${objectId}, User ID: ${userId}`);
+    
+    // First try with the provided ID
+    let existingUser = await storage.getUser(objectId);
+    let userIdToDelete = objectId;
+    
+    // If not found, try to find user by email or other identifier
+    if (!existingUser && userData.email_addresses?.length > 0) {
+      const email = userData.email_addresses[0]?.email_address;
+      if (email) {
+        // Search for user by email since ID formats might not match
+        const allUsers = await storage.getAllUsers();
+        existingUser = allUsers.find(u => u.email === email);
+        if (existingUser) {
+          userIdToDelete = existingUser.id;
+          console.log(`Found user by email ${email}: ${userIdToDelete}`);
+        }
+      }
+    }
+    
     if (!existingUser) {
-      console.log(`User ${id} not found in database, nothing to delete`);
+      console.log(`User with object ID ${objectId} not found in database, nothing to delete`);
       return;
     }
 
-    // Note: Instead of hard deleting, we could soft delete or anonymize
-    // For GDPR compliance, we should actually delete user data
-    await storage.deleteUserCompletely(id);
-    console.log(`User deleted from database: ${id}`);
+    // Delete user data completely for GDPR compliance
+    await storage.deleteUserCompletely(userIdToDelete);
+    console.log(`User deleted from database: ${userIdToDelete}`);
     
   } catch (error) {
     console.error('Error deleting user from webhook:', error);
