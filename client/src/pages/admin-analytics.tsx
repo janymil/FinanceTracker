@@ -241,8 +241,6 @@ export default function AdminAnalytics() {
     }
   };
 
-
-
   // Helper function to determine if user is from production or development
   const isProductionUser = (userId: string) => {
     // Production users have longer Clerk IDs starting with "user_2y"
@@ -599,11 +597,7 @@ export default function AdminAnalytics() {
                             <div className="font-medium">
                               {user.firstName && user.lastName 
                                 ? `${user.firstName} ${user.lastName}`
-                                : user.firstName || user.lastName
-                                ? (user.firstName || '') + ' ' + (user.lastName || '')
-                                : user.email?.includes('@clerk.user') 
-                                ? user.id?.split('_')[1]?.slice(0, 8) || 'Anonymous'
-                                : user.email?.split('@')[0] || 'Anonymous'
+                                : user.email?.split('@')[0] || 'No name'
                               }
                             </div>
                             <div className="text-sm text-gray-500 flex items-center gap-2">
