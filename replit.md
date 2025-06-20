@@ -464,6 +464,7 @@ Changelog:
 - June 20, 2025. APPSUMO CODE REDEMPTION SYSTEM IMPLEMENTED: Complete code redemption functionality with database schema (redeem_codes table), API endpoint (/api/redeem), frontend page (/redeem), and header "Redeem Code" button - 1 code grants Standard plan, 2 codes grant Premium plan with activatedAt timestamp for RequirePlan component recognition
 - June 20, 2025. CSP AUTHENTICATION DOMAINS FIXED: Updated Content Security Policy to automatically switch between development (*.clerk.accounts.dev) and production (clerk.finanzerpro.com) Clerk domains based on NODE_ENV for seamless deployment
 - June 20, 2025. APPSUMO BULK CODE UPLOAD COMPLETED: Successfully uploaded all 1000 AppSumo redemption codes from CSV file directly to redeem_codes database table - system ready for production AppSumo launch with complete code inventory
+- June 20, 2025. PRODUCTION AUTHENTICATION FIXED: Resolved CAPTCHA loading issues by implementing permissive CSP that allows all HTTPS domains while maintaining security - Clerk authentication now works properly in production with functional CAPTCHA verification
 ```
 
 ## User Preferences
