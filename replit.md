@@ -466,6 +466,7 @@ Changelog:
 - June 20, 2025. APPSUMO BULK CODE UPLOAD COMPLETED: Successfully uploaded all 1000 AppSumo redemption codes from CSV file directly to redeem_codes database table - system ready for production AppSumo launch with complete code inventory
 - June 20, 2025. DATABASE PERFORMANCE OPTIMIZATION: Added 11 strategic indexes on frequently queried fields (user_id, category_id, date combinations) to improve app loading speed by 30-60% without compromising dynamic data or functionality
 - June 20, 2025. LAZY LOADING OPTIMIZATION: Implemented code splitting with React.lazy() and Suspense for non-critical components (admin panels, analytics, legal pages, reporting) reducing initial bundle size by 40-50% and improving app startup performance
+- June 20, 2025. CSP CLERK AUTHENTICATION FIX: Fixed Content Security Policy configuration that was blocking Clerk authentication - updated CSP to properly allow all Clerk domains (*.clerk.accounts.dev, *.clerk.com) and WebSocket connections, resolving CAPTCHA errors and "Failed to load Clerk" issues
 ```
 
 ## User Preferences
