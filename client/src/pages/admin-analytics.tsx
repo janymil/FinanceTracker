@@ -779,6 +779,7 @@ export default function AdminAnalytics() {
               </Table>
             </CardContent>
           </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
