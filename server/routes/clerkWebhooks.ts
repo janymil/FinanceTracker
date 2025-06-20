@@ -5,15 +5,12 @@ import { storage } from "../storage";
 export function registerClerkWebhookRoutes(app: Express) {
   // Clerk webhook endpoint for production user synchronization
   app.post('/api/clerk-webhooks', async (req, res) => {
-    // Prevent multiple responses
-    if (res.headersSent) return;
-    
-    // Only allow webhooks in production environment
-    if (process.env.NODE_ENV !== 'production') {
-      return res.status(403).send('Webhook disabled in dev');
-    }
-    
     try {
+      // Only allow webhooks in production environment
+      if (process.env.NODE_ENV !== 'production') {
+        return res.status(403).send('Webhook disabled in dev');
+      }
+      
       // Get the webhook signing secret from environment
       const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
       
@@ -66,12 +63,10 @@ export function registerClerkWebhookRoutes(app: Express) {
           break;
           
         case 'email.created':
-          // Handle email verification events if needed
           console.log('Email created event received:', data);
           break;
           
         case 'sms.created':
-          // Handle SMS verification events if needed
           console.log('SMS created event received:', data);
           break;
           
@@ -79,11 +74,11 @@ export function registerClerkWebhookRoutes(app: Express) {
           console.log(`Unhandled webhook event type: ${type}`);
       }
 
-      res.status(200).json({ received: true });
+      return res.status(200).json({ received: true });
       
     } catch (error) {
       console.error('Clerk webhook error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      return res.status(500).json({ error: 'Internal server error' });
     }
   });
 }

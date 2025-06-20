@@ -1,0 +1,73 @@
+In your /api/contact handler (contact.ts), you have this line at the beginning:
+
+ts
+Copy
+Edit
+if (req.method !== 'POST') {
+  return res.status(405).json({ success: false, error: 'Method not allowed' });
+}
+This is redundant and problematic inside an Express route handler that was already registered as:
+
+ts
+Copy
+Edit
+app.post('/api/contact', handleContactForm);
+This means only POST requests will reach this function. That check is unnecessary.
+
+However, this isn't the direct cause of the header error. The real danger is likely multiple responses sent if the request throws an uncaught error after a response was already sent (like after await transporter.sendMail(...)).
+
+✅ Safe Fix Recommendation:
+Update your handleContactForm like this to avoid multiple response attempts:
+
+ts
+Copy
+Edit
+export async function handleContactForm(req: Request, res: Response) {
+  // No need for req.method check
+  try {
+    const { name, email, subject, message } = req.body;
+
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ success: false, error: 'All fields are required' });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ success: false, error: 'Invalid email format' });
+    }
+
+    const port = parseInt(process.env.EMAIL_PORT || '587');
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: port,
+      secure: port === 465,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: `"FinanzerPro Contact Form" <info@finanzerpro.com>`,
+      to: process.env.EMAIL_TO,
+      subject: `[Contact Form] ${subject}`,
+      text: `Name: ${name}\nEmail: ${email}\nSubject: ${subject}\nMessage: ${message}`
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.json({ success: true });
+  } catch (error) {
+    if (!res.headersSent) {
+      console.error('Contact form error:', error);
+      res.status(500).json({ success: false, error: 'Failed to send message' });
+    } else {
+      console.error('Headers already sent. Contact form error:', error);
+    }
+  }
+}
+🛡 Bonus Tip (for full prevention across app):
+In your global error handlers or async logic:
+
+Always check if (!res.headersSent) before calling res.status().send() or res.json().
+
+Use Express next(err) only if you’re not sending a response yourself.
