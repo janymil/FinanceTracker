@@ -282,28 +282,29 @@ export default function RedeemPage() {
                 </Form>
               )}
 
-              {/* Show message when user has redeemed maximum codes */}
-              {!statusLoading && redeemStatus && !redeemStatus.canRedeemMore && (
-                <div className="text-center p-6">
-                  <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-4">
-                    <Lock className="w-8 h-8 text-green-600 dark:text-green-400" />
+                {/* Show message when user has redeemed maximum codes */}
+                {!statusLoading && redeemStatus && !redeemStatus.canRedeemMore && (
+                  <div className="text-center p-6">
+                    <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-4">
+                      <Lock className="w-8 h-8 text-green-600 dark:text-green-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-green-700 dark:text-green-300 mb-2">
+                      All Codes Redeemed!
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      You've reached the maximum number of redemptions and have Premium access.
+                    </p>
                   </div>
-                  <h3 className="text-lg font-semibold text-green-700 dark:text-green-300 mb-2">
-                    All Codes Redeemed!
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    You've reached the maximum number of redemptions and have Premium access.
-                  </p>
-                </div>
-              )}
+                )}
 
-              {/* Loading state */}
-              {statusLoading && (
-                <div className="text-center p-6">
-                  <Loader2 className="mx-auto w-8 h-8 animate-spin text-gray-400" />
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Loading redemption status...</p>
-                </div>
-              )}
+                {/* Loading state */}
+                {statusLoading && (
+                  <div className="text-center p-6">
+                    <Loader2 className="mx-auto w-8 h-8 animate-spin text-gray-400" />
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Loading redemption status...</p>
+                  </div>
+                )}
+              </div>
 
               <div className="mt-6 text-center">
                 <Button
