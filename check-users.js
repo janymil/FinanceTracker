@@ -1,7 +1,7 @@
 
-import { storage } from './server/storage.js';
-import { db } from './server/db.js';
-import { users } from './shared/schema.js';
+import { storage } from './server/storage.ts';
+import { db } from './server/db.ts';
+import { users } from './shared/schema.ts';
 
 async function checkUsers() {
   try {
