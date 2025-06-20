@@ -8,6 +8,11 @@ export function registerClerkWebhookRoutes(app: Express) {
     // Prevent multiple responses
     if (res.headersSent) return;
     
+    // Only allow webhooks in production environment
+    if (process.env.NODE_ENV !== 'production') {
+      return res.status(403).send('Webhook disabled in dev');
+    }
+    
     try {
       // Get the webhook signing secret from environment
       const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
