@@ -56,14 +56,15 @@ app.use((req, res, next) => {
   // Content Security Policy to establish legitimacy
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://*.clerk.com https://*.finanzerpro.com https://replit.com",
-    "style-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://*.clerk.com https://*.finanzerpro.com",
-    "img-src 'self' data: https: https://*.clerk.accounts.dev https://*.clerk.com https://*.finanzerpro.com",
-    "font-src 'self' data: https://*.clerk.accounts.dev https://*.clerk.com https://*.finanzerpro.com",
-    "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://*.finanzerpro.com https://api.openai.com wss://*.clerk.accounts.dev wss://*.finanzerpro.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.finanzerpro.com https://*.finanzerpro.com https://replit.com",
+    "style-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.finanzerpro.com https://*.finanzerpro.com",
+    "img-src 'self' data: https: https://*.clerk.accounts.dev https://*.clerk.com https://clerk.finanzerpro.com https://*.finanzerpro.com",
+    "font-src 'self' data: https://*.clerk.accounts.dev https://*.clerk.com https://clerk.finanzerpro.com https://*.finanzerpro.com",
+    "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.finanzerpro.com https://*.finanzerpro.com https://api.openai.com wss://*.clerk.accounts.dev wss://*.finanzerpro.com wss://clerk.finanzerpro.com",
     "worker-src 'self' blob:",
-    "form-action 'self'",
-    "frame-ancestors 'none'"
+    "form-action 'self' https://clerk.finanzerpro.com",
+    "frame-ancestors 'none'",
+    "frame-src 'self' https://clerk.finanzerpro.com https://*.clerk.com https://*.clerk.accounts.dev"
   ].join('; ');
   
   res.setHeader('Content-Security-Policy', csp);
