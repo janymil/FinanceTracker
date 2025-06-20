@@ -63,12 +63,7 @@ const AppLoader = () => (
   </div>
 );
 
-// Loading fallback for lazy components
-const LazyLoader = () => (
-  <div className="flex items-center justify-center min-h-[200px]">
-    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 dark:border-blue-400"></div>
-  </div>
-);
+
 
 function Router() {
   // Track page views when routes change
@@ -151,123 +146,32 @@ function AuthenticatedApp() {
         )}>
           <div className="p-3 sm:p-6 max-w-full overflow-x-hidden">
             <Switch>
-              {/* Core pages - loaded immediately */}
               <Route path="/" component={Dashboard} />
               <Route path="/dashboard" component={Dashboard} />
               <Route path="/transactions" component={TransactionsPage} />
               <Route path="/income" component={IncomePage} />
               <Route path="/expenses" component={ExpensesPage} />
+              <Route path="/budget" component={BudgetPage} />
+              <Route path="/categories" component={CategoriesPage} />
+              <Route path="/goals" component={GoalsPage} />
+              <Route path="/collaborative-goals" component={CollaborativeGoalsPage} />
+              <Route path="/collaborative-goals/:id" component={CollaborativeGoalDetailPage} />
+              <Route path="/calendar" component={CalendarPage} />
+              <Route path="/trends" component={TrendsPage} />
+              <Route path="/reports" component={ReportsPage} />
+              <Route path="/export" component={ExportPage} />
+              <Route path="/subscribe" component={SubscribePage} />
+              <Route path="/pricing" component={Pricing} />
+              <Route path="/terms-of-service" component={TermsOfService} />
+              <Route path="/privacy-policy" component={PrivacyPolicy} />
+              <Route path="/cookie-policy" component={CookiePolicy} />
+              <Route path="/contact" component={Contact} />
+              <Route path="/help" component={Help} />
               <Route path="/redeem" component={RedeemPage} />
-              
-              {/* Secondary features - lazy loaded */}
-              <Route path="/budget">
-                <Suspense fallback={<LazyLoader />}>
-                  <BudgetPage />
-                </Suspense>
-              </Route>
-              <Route path="/categories">
-                <Suspense fallback={<LazyLoader />}>
-                  <CategoriesPage />
-                </Suspense>
-              </Route>
-              <Route path="/goals">
-                <Suspense fallback={<LazyLoader />}>
-                  <GoalsPage />
-                </Suspense>
-              </Route>
-              <Route path="/collaborative-goals">
-                <Suspense fallback={<LazyLoader />}>
-                  <CollaborativeGoalsPage />
-                </Suspense>
-              </Route>
-              <Route path="/collaborative-goals/:id">
-                <Suspense fallback={<LazyLoader />}>
-                  <CollaborativeGoalDetailPage />
-                </Suspense>
-              </Route>
-              <Route path="/profile">
-                <Suspense fallback={<LazyLoader />}>
-                  <ProfilePage />
-                </Suspense>
-              </Route>
-              
-              {/* Analytics and reporting - lazy loaded */}
-              <Route path="/calendar">
-                <Suspense fallback={<LazyLoader />}>
-                  <CalendarPage />
-                </Suspense>
-              </Route>
-              <Route path="/trends">
-                <Suspense fallback={<LazyLoader />}>
-                  <TrendsPage />
-                </Suspense>
-              </Route>
-              <Route path="/reports">
-                <Suspense fallback={<LazyLoader />}>
-                  <ReportsPage />
-                </Suspense>
-              </Route>
-              <Route path="/export">
-                <Suspense fallback={<LazyLoader />}>
-                  <ExportPage />
-                </Suspense>
-              </Route>
-              
-              {/* Admin and heavy features - lazy loaded */}
-              <Route path="/admin-analytics">
-                <Suspense fallback={<LazyLoader />}>
-                  <AdminAnalytics />
-                </Suspense>
-              </Route>
-              <Route path="/mobile-upload/:sessionId">
-                <Suspense fallback={<LazyLoader />}>
-                  <MobileUpload />
-                </Suspense>
-              </Route>
-              
-              {/* Marketing and legal pages - lazy loaded */}
-              <Route path="/subscribe">
-                <Suspense fallback={<LazyLoader />}>
-                  <SubscribePage />
-                </Suspense>
-              </Route>
-              <Route path="/pricing">
-                <Suspense fallback={<LazyLoader />}>
-                  <Pricing />
-                </Suspense>
-              </Route>
-              <Route path="/terms-of-service">
-                <Suspense fallback={<LazyLoader />}>
-                  <TermsOfService />
-                </Suspense>
-              </Route>
-              <Route path="/privacy-policy">
-                <Suspense fallback={<LazyLoader />}>
-                  <PrivacyPolicy />
-                </Suspense>
-              </Route>
-              <Route path="/cookie-policy">
-                <Suspense fallback={<LazyLoader />}>
-                  <CookiePolicy />
-                </Suspense>
-              </Route>
-              <Route path="/contact">
-                <Suspense fallback={<LazyLoader />}>
-                  <Contact />
-                </Suspense>
-              </Route>
-              <Route path="/help">
-                <Suspense fallback={<LazyLoader />}>
-                  <Help />
-                </Suspense>
-              </Route>
-              
-              {/* Fallback route - lazy loaded */}
-              <Route>
-                <Suspense fallback={<LazyLoader />}>
-                  <NotFoundPage />
-                </Suspense>
-              </Route>
+              <Route path="/profile" component={ProfilePage} />
+              <Route path="/admin-analytics" component={AdminAnalytics} />
+              <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
+              <Route component={NotFoundPage} />
             </Switch>
           </div>
         </main>
