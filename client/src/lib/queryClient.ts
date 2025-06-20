@@ -29,11 +29,6 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  // Prevent API calls during build time
-  if (typeof window === 'undefined') {
-    throw new Error('API calls not available during build time');
-  }
-  
   const authHeaders = await getAuthHeaders();
   const headers: Record<string, string> = {
     ...authHeaders,
@@ -60,11 +55,6 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    // Prevent API calls during build time or when window is undefined
-    if (typeof window === 'undefined') {
-      return null;
-    }
-    
     const authHeaders = await getAuthHeaders();
     
     const res = await fetch(queryKey[0] as string, {

@@ -17,7 +17,6 @@ import { setCookieConsent } from "../cookieMiddleware";
 import { registerMobileUploadRoutes } from "./mobileUploadRoutes";
 import { handleContactForm } from "../contact";
 import { registerRedeemRoutes } from "./redeemRoutes";
-import { registerClerkWebhookRoutes } from "./clerkWebhookRoutes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Cookie consent middleware
@@ -43,9 +42,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/upload-receipt', uploadReceiptHandler);
   registerAIRoutes(app);
   registerAdminRoutes(app);
-  
-  // Register Clerk webhooks last to avoid middleware conflicts
-  registerClerkWebhookRoutes(app);
 
   // Production fix: Handle mobile upload client-side routing
   // This ensures mobile-upload/:sessionId routes serve the React app in production
