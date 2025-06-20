@@ -616,7 +616,6 @@ export default function AdminAnalytics() {
               </DialogContent>
             </Dialog>
           </div>
-        </div>
 
           <Card>
             <CardHeader>
