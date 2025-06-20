@@ -5,6 +5,9 @@ import { storage } from "../storage";
 export function registerClerkWebhookRoutes(app: Express) {
   // Clerk webhook endpoint for production user synchronization
   app.post('/api/clerk-webhooks', async (req, res) => {
+    // Prevent multiple responses
+    if (res.headersSent) return;
+    
     try {
       // Get the webhook signing secret from environment
       const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
