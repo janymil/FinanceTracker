@@ -43,7 +43,7 @@ export default function RedeemPage() {
         codes.push(data.code2.trim());
       }
 
-      const response = await fetch("/api/redeem-codes", {
+      const response = await fetch("/api/redeem", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -75,7 +75,7 @@ export default function RedeemPage() {
         });
         
         // Redirect to dashboard after successful redemption
-        setTimeout(() => navigate("/dashboard"), 2000);
+        setTimeout(() => setLocation("/dashboard"), 2000);
       } else {
         throw new Error("No valid codes provided");
       }
@@ -192,7 +192,7 @@ export default function RedeemPage() {
               <div className="mt-6 text-center">
                 <Button
                   variant="ghost"
-                  onClick={() => navigate("/dashboard")}
+                  onClick={() => setLocation("/dashboard")}
                   className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                 >
                   Back to Dashboard
