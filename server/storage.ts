@@ -312,30 +312,7 @@ export class DatabaseStorage implements IStorage {
 
   async getUserTransactions(userId: string, limit?: number): Promise<Transaction[]> {
     const baseQuery = db
-      .select({
-        id: transactions.id,
-        userId: transactions.userId,
-        categoryId: transactions.categoryId,
-        amount: transactions.amount,
-        description: transactions.description,
-        date: transactions.date,
-        type: transactions.type,
-        createdAt: transactions.createdAt,
-        isRecurring: transactions.isRecurring,
-        recurringFrequency: transactions.recurringFrequency,
-        recurringEndDate: transactions.recurringEndDate,
-        parentTransactionId: transactions.parentTransactionId,
-        paymentUrl: transactions.paymentUrl,
-        referenceNote: transactions.referenceNote,
-        imageUrl: transactions.imageUrl,
-        ocrText: transactions.ocrText,
-        ocrVendor: transactions.ocrVendor,
-        ocrDetectedAmount: transactions.ocrDetectedAmount,
-        ocrDetectedDate: transactions.ocrDetectedDate,
-        categoryName: categories.name,
-        categoryIcon: categories.icon,
-        categoryColor: categories.color,
-      })
+      .select()
       .from(transactions)
       .leftJoin(categories, eq(transactions.categoryId, categories.id))
       .where(eq(transactions.userId, userId))
@@ -343,13 +320,31 @@ export class DatabaseStorage implements IStorage {
 
     const userTransactions = limit ? await baseQuery.limit(limit) : await baseQuery;
 
-    // Decrypt sensitive fields
-    return userTransactions.map(transaction => ({
-      ...transaction,
-      amount: DataEncryption.decryptAmount(transaction.amount),
-      description: DataEncryption.decryptDescription(transaction.description),
-      referenceNote: transaction.referenceNote ? DataEncryption.decrypt(transaction.referenceNote) : null
-    }));
+    // Decrypt sensitive fields and return Transaction objects
+    return userTransactions.map((row: any) => ({
+      id: row.transactions.id,
+      userId: row.transactions.userId,
+      categoryId: row.transactions.categoryId,
+      amount: DataEncryption.decryptAmount(row.transactions.amount),
+      description: DataEncryption.decryptDescription(row.transactions.description),
+      date: row.transactions.date,
+      type: row.transactions.type,
+      createdAt: row.transactions.createdAt,
+      isRecurring: row.transactions.isRecurring,
+      recurringFrequency: row.transactions.recurringFrequency,
+      recurringEndDate: row.transactions.recurringEndDate,
+      parentTransactionId: row.transactions.parentTransactionId,
+      paymentUrl: row.transactions.paymentUrl,
+      referenceNote: row.transactions.referenceNote ? DataEncryption.decrypt(row.transactions.referenceNote) : null,
+      imageUrl: row.transactions.imageUrl,
+      ocrText: row.transactions.ocrText,
+      ocrVendor: row.transactions.ocrVendor,
+      ocrDetectedAmount: row.transactions.ocrDetectedAmount,
+      ocrDetectedDate: row.transactions.ocrDetectedDate,
+      categoryName: row.categories?.name || null,
+      categoryIcon: row.categories?.icon || null,
+      categoryColor: row.categories?.color || null
+    })) as Transaction[];
   }
 
   async updateTransaction(id: number, transaction: Partial<InsertTransaction>): Promise<Transaction> {

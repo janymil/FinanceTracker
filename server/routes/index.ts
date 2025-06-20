@@ -26,8 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Contact form endpoint
   app.post('/api/contact', handleContactForm);
 
-  // Clerk webhook endpoint for user synchronization
-  app.post('/api/clerk-webhooks', handleClerkWebhook);
+
 
   // Register all route modules
   registerMobileUploadRoutes(app);
