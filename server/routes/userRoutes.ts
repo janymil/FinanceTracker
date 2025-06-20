@@ -1,8 +1,50 @@
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
+import { clerkClient } from "@clerk/express";
 
 export function registerUserRoutes(app: Express) {
+  // Sync user data from Clerk to local database
+  app.post('/api/sync-user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // Get user data from Clerk
+      const clerkUser = await clerkClient.users.getUser(userId);
+      
+      // Extract user information from Clerk
+      const userData = {
+        id: userId,
+        email: clerkUser.emailAddresses[0]?.emailAddress || '',
+        firstName: clerkUser.firstName || '',
+        lastName: clerkUser.lastName || '',
+        profileImageUrl: clerkUser.imageUrl || null
+      };
+
+      // Check if user exists in local database
+      const existingUser = await storage.getUser(userId);
+      
+      if (existingUser) {
+        // Update existing user with Clerk data
+        await storage.updateUser(userId, userData);
+      } else {
+        // Create new user with default free plan
+        await storage.createUser({
+          ...userData,
+          plan: 'free'
+        });
+      }
+
+      res.json({ success: true, message: "User data synchronized" });
+    } catch (error) {
+      console.error("Error syncing user data:", error);
+      res.status(500).json({ message: "Failed to sync user data" });
+    }
+  });
+
   // Update user plan
   app.post('/api/update-plan', isAuthenticated, async (req: any, res) => {
     try {
