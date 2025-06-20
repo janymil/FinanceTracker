@@ -36,7 +36,11 @@ export const adminLogin = async (req: AdminRequest, res: Response) => {
   console.log('Admin login attempt:', { 
     hasPassword: !!password, 
     sessionExists: !!req.session,
-    expectedPassword: !!ADMIN_PASSWORD 
+    expectedPassword: !!ADMIN_PASSWORD,
+    passwordLength: password?.length,
+    envPasswordLength: ADMIN_PASSWORD?.length,
+    actualPassword: password,
+    actualEnv: ADMIN_PASSWORD
   });
   
   if (!password) {
@@ -49,6 +53,7 @@ export const adminLogin = async (req: AdminRequest, res: Response) => {
   }
   
   // Simple password check - in production, use hashed passwords
+  console.log('Password comparison:', { provided: password, expected: ADMIN_PASSWORD, match: password === ADMIN_PASSWORD });
   if (password === ADMIN_PASSWORD) {
     req.session.isAdminAuthenticated = true;
     req.session.save((err: any) => {
