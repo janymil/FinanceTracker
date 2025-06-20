@@ -479,6 +479,8 @@ Changelog:
 - June 20, 2025. CRITICAL TYPESCRIPT ERRORS RESOLVED: Fixed all 3 critical compilation errors - added billingInterval field to users table database schema, corrected array handling in updateUserPlan method (.returning() returns array), and verified admin analytics query structure works properly
 - June 20, 2025. PRODUCTION ADMIN ANALYTICS FIXED: Resolved production admin authentication issues preventing display of 8 production users - fixed session configuration for production environment, enhanced admin login debugging, updated React Query structure in admin-analytics.tsx, and removed problematic adminRedeemRoutes.ts file causing LSP errors
 - June 20, 2025. ADMIN ANALYTICS UI ENHANCED: Fixed user display to show readable names instead of Clerk IDs, added dev/prod user type toggle filter, implemented production/development user badges, and confirmed all Clerk users are properly stored in local database for subscription tier management
+- June 20, 2025. ADMIN USER NAME DISPLAY FIXED: Improved name fallback logic to show email usernames or shortened IDs instead of long Clerk IDs - users without firstName/lastName now display readable names (milataj79 instead of user_2yZ5aHw5O5hZKG3PCVusDYGF57r)
+- June 20, 2025. EVENT-DRIVEN USER SYNCHRONIZATION IMPLEMENTED: Replaced inefficient hourly API polling with Clerk webhooks for real-time user profile updates - system now only syncs when users actually change their data (name, email, profile image), eliminating unnecessary API calls and ensuring immediate data consistency in admin panel
 ```
 
 ## User Preferences
