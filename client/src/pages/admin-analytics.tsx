@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Users, UserPlus, Edit, Trash2, Crown, Shield, TrendingUp, Search, Filter } from "lucide-react";
+import { Users, UserPlus, Edit, Trash2, Crown, Shield, TrendingUp, Search, Filter, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface User {
@@ -711,7 +711,8 @@ export default function AdminAnalytics() {
                     </TableRow>
                   ))}
                 </TableBody>
-              </Table>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
