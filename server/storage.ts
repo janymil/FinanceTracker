@@ -480,10 +480,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateBudget(id: number, budget: Partial<InsertBudget>): Promise<Budget> {
+    // SECURITY FIX: Verify ownership before allowing update
+    const existingBudget = await db
+      .select()
+      .from(budgets)
+      .where(eq(budgets.id, id))
+      .limit(1);
+    
+    if (!existingBudget.length || existingBudget[0].userId !== budget.userId) {
+      throw new Error("Budget not found or unauthorized access");
+    }
+    
     const [updatedBudget] = await db
       .update(budgets)
       .set(budget)
-      .where(eq(budgets.id, id))
+      .where(and(eq(budgets.id, id), eq(budgets.userId, budget.userId!)))
       .returning();
     return updatedBudget;
   }
@@ -538,10 +549,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateGoal(id: number, goal: Partial<InsertGoal>): Promise<Goal> {
+    // SECURITY FIX: Verify ownership before allowing update
+    const existingGoal = await db
+      .select()
+      .from(goals)
+      .where(eq(goals.id, id))
+      .limit(1);
+    
+    if (!existingGoal.length || existingGoal[0].userId !== goal.userId) {
+      throw new Error("Goal not found or unauthorized access");
+    }
+    
     const [updatedGoal] = await db
       .update(goals)
       .set(goal)
-      .where(eq(goals.id, id))
+      .where(and(eq(goals.id, id), eq(goals.userId, goal.userId!)))
       .returning();
     return updatedGoal;
   }
@@ -983,10 +1005,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateExpenseReminder(id: number, reminder: Partial<InsertExpenseReminder>): Promise<ExpenseReminder> {
+    // SECURITY FIX: Verify ownership before allowing update
+    const existingReminder = await db
+      .select()
+      .from(expenseReminders)
+      .where(eq(expenseReminders.id, id))
+      .limit(1);
+    
+    if (!existingReminder.length || existingReminder[0].userId !== reminder.userId) {
+      throw new Error("Expense reminder not found or unauthorized access");
+    }
+    
     const [result] = await db
       .update(expenseReminders)
       .set({ ...reminder, updatedAt: new Date() })
-      .where(eq(expenseReminders.id, id))
+      .where(and(eq(expenseReminders.id, id), eq(expenseReminders.userId, reminder.userId!)))
       .returning();
     return result;
   }
