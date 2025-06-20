@@ -1,6 +1,6 @@
 
 import { Request, Response } from 'express';
-import nodemailer from 'nodemailer';
+import * as nodemailer from 'nodemailer';
 
 export async function handleContactForm(req: Request, res: Response) {
   try {
