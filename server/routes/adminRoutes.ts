@@ -82,9 +82,9 @@ export function registerAdminRoutes(app: Express) {
             updatedUsers.push(user.id);
             console.log(`Synced user ${user.id} with Clerk data: ${primaryEmail}`);
           }
-        } catch (userError: any) {
+        } catch (userError) {
           console.error(`Failed to sync user ${user.id}:`, userError);
-          errors.push({ userId: user.id, error: userError?.message || 'Unknown error' });
+          errors.push({ userId: user.id, error: userError.message });
         }
       }
 
@@ -95,12 +95,12 @@ export function registerAdminRoutes(app: Express) {
         errors: errors.length,
         details: errors
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error syncing users with Clerk:", error);
       return res.status(500).json({ 
         success: false, 
         message: "Failed to sync users with Clerk",
-        error: error?.message || 'Unknown error'
+        error: error.message 
       });
     }
   });

@@ -504,7 +504,6 @@ export default function AdminAnalytics() {
 
         <TabsContent value="users" className="space-y-6">
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          </div>
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -538,9 +537,8 @@ export default function AdminAnalytics() {
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          <div className="flex gap-2">
+            <div className="flex gap-2">
               <Button 
                 onClick={syncClerkUsers}
                 disabled={isSyncingUsers}
@@ -617,6 +615,7 @@ export default function AdminAnalytics() {
               </DialogContent>
             </Dialog>
           </div>
+        </div>
 
           <Card>
             <CardHeader>

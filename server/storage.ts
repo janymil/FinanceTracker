@@ -191,7 +191,7 @@ export class DatabaseStorage implements IStorage {
         .insert(users)
         .values({
           id: userData.id,
-          email: userData.email, // No fallback - use real email from Clerk
+          email: userData.email || `${userData.id}@clerk.user`, // Fallback email for Clerk users
           firstName: userData.firstName,
           lastName: userData.lastName,
           profileImageUrl: userData.profileImageUrl,
@@ -243,6 +243,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
   }
 
   async updateUserPlan(userId: string, plan: 'free' | 'standard' | 'premium', billingInterval: 'monthly' | 'yearly' = 'monthly'): Promise<User> {
