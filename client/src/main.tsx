@@ -24,21 +24,13 @@ if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key");
 }
 
-// Enhanced Clerk configuration for better reliability
-const clerkConfig = {
-  publishableKey: PUBLISHABLE_KEY,
-  afterSignOutUrl: "/auth",
-  appearance: {
-    variables: {
-      colorPrimary: "#2563eb",
-    },
-  },
-};
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <HelmetProvider>
-      <ClerkProvider {...clerkConfig}>
+      <ClerkProvider 
+        publishableKey={PUBLISHABLE_KEY}
+        afterSignOutUrl="/auth"
+      >
         <QueryClientProvider client={queryClient}>
           <Router>
             <App />

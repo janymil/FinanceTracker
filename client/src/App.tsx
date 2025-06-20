@@ -2,7 +2,7 @@ import { Switch, Route } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/hooks/useAuth";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { SignedIn, SignedOut, useClerk, useUser } from "@clerk/clerk-react";
 import { initGA } from "@/lib/analytics";
@@ -16,41 +16,33 @@ import { CookieBanner } from "@/components/cookie-banner";
 import { FinancialMascot } from "@/components/financial-mascot";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
-import AuthPage from "@/pages/auth-page";
 
-// Essential transaction pages - load immediately for core functionality
+// Other components loaded on demand
+import AuthPage from "@/pages/auth-page";
 import TransactionsPage from "@/pages/transactions";
 import IncomePage from "@/pages/income";
 import ExpensesPage from "@/pages/expenses";
+import BudgetPage from "@/pages/budget";
+import CategoriesPage from "@/pages/categories";
+import GoalsPage from "@/pages/goals";
+import CollaborativeGoalsPage from "@/pages/collaborative-goals";
+import CollaborativeGoalDetailPage from "./pages/collaborative-goal-detail";
+import TrendsPage from "@/pages/trends";
+import CalendarPage from "@/pages/calendar";
+import ReportsPage from "@/pages/reports";
+import ExportPage from "@/pages/export";
+import SubscribePage from "@/pages/subscribe";
+import Pricing from "@/pages/pricing";
+import TermsOfService from "@/pages/terms-of-service";
+import PrivacyPolicy from "@/pages/privacy-policy";
+import CookiePolicy from "@/pages/cookie-policy";
+import Contact from "@/pages/contact";
+import Help from "@/pages/help";
+import NotFoundPage from "./pages/not-found";
+import ProfilePage from "./pages/profile";
+import AdminAnalytics from "@/pages/admin-analytics";
+import MobileUpload from "@/pages/mobile-upload/sessionId";
 import RedeemPage from "@/pages/redeem";
-
-// Secondary features - lazy loaded
-const BudgetPage = lazy(() => import("@/pages/budget"));
-const CategoriesPage = lazy(() => import("@/pages/categories"));
-const GoalsPage = lazy(() => import("@/pages/goals"));
-const CollaborativeGoalsPage = lazy(() => import("@/pages/collaborative-goals"));
-const CollaborativeGoalDetailPage = lazy(() => import("./pages/collaborative-goal-detail"));
-const ProfilePage = lazy(() => import("./pages/profile"));
-
-// Analytics and reporting - lazy loaded
-const TrendsPage = lazy(() => import("@/pages/trends"));
-const CalendarPage = lazy(() => import("@/pages/calendar"));
-const ReportsPage = lazy(() => import("@/pages/reports"));
-const ExportPage = lazy(() => import("@/pages/export"));
-
-// Admin and heavy features - lazy loaded
-const AdminAnalytics = lazy(() => import("@/pages/admin-analytics"));
-const MobileUpload = lazy(() => import("@/pages/mobile-upload/sessionId"));
-
-// Marketing and legal pages - lazy loaded
-const SubscribePage = lazy(() => import("@/pages/subscribe"));
-const Pricing = lazy(() => import("@/pages/pricing"));
-const TermsOfService = lazy(() => import("@/pages/terms-of-service"));
-const PrivacyPolicy = lazy(() => import("@/pages/privacy-policy"));
-const CookiePolicy = lazy(() => import("@/pages/cookie-policy"));
-const Contact = lazy(() => import("@/pages/contact"));
-const Help = lazy(() => import("@/pages/help"));
-const NotFoundPage = lazy(() => import("./pages/not-found"));
 
 
 // Optimized loading state
@@ -62,8 +54,6 @@ const AppLoader = () => (
     </div>
   </div>
 );
-
-
 
 function Router() {
   // Track page views when routes change
@@ -170,7 +160,6 @@ function AuthenticatedApp() {
               <Route path="/redeem" component={RedeemPage} />
               <Route path="/profile" component={ProfilePage} />
               <Route path="/admin-analytics" component={AdminAnalytics} />
-              <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
               <Route component={NotFoundPage} />
             </Switch>
           </div>
