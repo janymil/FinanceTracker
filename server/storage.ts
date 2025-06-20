@@ -48,7 +48,6 @@ import {
 import { db } from "./db";
 import { DataEncryption } from "./encryption";
 import { eq, and, gte, lte, desc, sum, count, sql, or, isNull } from "drizzle-orm";
-import { autoSyncUser } from "./autoSync";
 
 export interface IStorage {
   // User operations

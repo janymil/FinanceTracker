@@ -1,8 +1,6 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { storage } from "../storage";
 import { adminAuth, adminLogin, adminLogout } from "../adminAuth";
-import { clerkClient } from "@clerk/express";
-import { autoSyncAllUsers } from "../autoSync";
 
 export function registerAdminRoutes(app: Express) {
   // Admin login
