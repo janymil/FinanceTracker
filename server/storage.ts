@@ -1177,6 +1177,9 @@ export class DatabaseStorage implements IStorage {
     // Delete budgets
     await db.delete(budgets).where(eq(budgets.userId, userId));
 
+    // Delete recurring transactions first (they reference categories)
+    await db.delete(recurringTransactions).where(eq(recurringTransactions.userId, userId));
+
     // Delete transactions (encrypted data will be properly removed)
     await db.delete(transactions).where(eq(transactions.userId, userId));
 
@@ -1189,7 +1192,7 @@ export class DatabaseStorage implements IStorage {
     // Delete backup settings
     await db.delete(backupSettings).where(eq(backupSettings.userId, userId));
 
-    // Delete categories (only user-created ones)
+    // Delete categories (only user-created ones) - after recurring transactions
     await db.delete(categories).where(eq(categories.userId, userId));
 
     // Delete collaborative goal related data
