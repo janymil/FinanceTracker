@@ -55,12 +55,13 @@ app.use((req, res, next) => {
   
   res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.dev https://*.clerk.com https://*.accounts.dev https://www.google.com https://www.gstatic.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.dev https://*.clerk.com https://*.accounts.dev https://www.google.com https://www.gstatic.com blob:",
     "style-src 'self' 'unsafe-inline' https://*.clerk.dev https://*.clerk.com",
-    "img-src 'self' data: https:",
+    "img-src 'self' data: https: blob:",
     "font-src 'self' data: https:",
-    "connect-src 'self' https://*.clerk.dev https://*.clerk.com https://*.accounts.dev https://api.openai.com",
-    "frame-src https://*.clerk.dev https://*.clerk.com https://*.accounts.dev https://www.google.com https://www.gstatic.com",
+    "connect-src 'self' https://*.clerk.dev https://*.clerk.com https://*.accounts.dev https://api.openai.com wss: ws:",
+    "frame-src 'self' https://*.clerk.dev https://*.clerk.com https://*.accounts.dev https://www.google.com https://www.gstatic.com",
+    "worker-src 'self' blob:",
     "frame-ancestors 'none'"
   ].join('; '));
   
