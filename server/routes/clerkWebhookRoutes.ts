@@ -94,10 +94,10 @@ async function handleUserWebhook(userData: {
 }
 
 export function registerClerkWebhookRoutes(app: Express): void {
-  // Add specific middleware for webhook to capture raw body
-  app.use('/api/clerk-webhooks', express.raw({ type: 'application/json' }));
-  
-  app.post('/api/clerk-webhooks', async (req: Request, res: Response) => {
+  app.post('/api/clerk-webhooks', 
+    // Apply raw body parsing only to this specific route
+    express.raw({ type: 'application/json' }),
+    async (req: Request, res: Response) => {
     const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
     
     if (!webhookSecret) {

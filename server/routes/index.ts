@@ -26,10 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Contact form endpoint
   app.post('/api/contact', handleContactForm);
 
-  // Register Clerk webhooks first (needs raw body parsing)
-  registerClerkWebhookRoutes(app);
-  
-  // Register all other route modules
+  // Register all route modules
   registerMobileUploadRoutes(app);
   registerAuthRoutes(app);
   registerUserRoutes(app);
@@ -46,6 +43,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/upload-receipt', uploadReceiptHandler);
   registerAIRoutes(app);
   registerAdminRoutes(app);
+  
+  // Register Clerk webhooks last to avoid middleware conflicts
+  registerClerkWebhookRoutes(app);
 
   // Production fix: Handle mobile upload client-side routing
   // This ensures mobile-upload/:sessionId routes serve the React app in production
