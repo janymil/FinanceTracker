@@ -14,10 +14,10 @@ interface WebhookEvent {
 }
 
 export async function handleClerkWebhook(req: Request, res: Response) {
-  // Respond immediately to prevent timeout
-  res.status(200).json({ received: true });
-
   try {
+    // Respond immediately to prevent timeout
+    res.status(200).json({ received: true });
+
     const svix_id = req.headers['svix-id'] as string;
     const svix_timestamp = req.headers['svix-timestamp'] as string;
     const svix_signature = req.headers['svix-signature'] as string;
@@ -27,10 +27,15 @@ export async function handleClerkWebhook(req: Request, res: Response) {
       return;
     }
 
+    if (!webhookSecret) {
+      console.error('CLERK_WEBHOOK_SECRET not configured');
+      return;
+    }
+
     const body = JSON.stringify(req.body);
     const wh = new Webhook(webhookSecret);
 
-    let evt: any;
+    let evt: WebhookEvent;
 
     try {
       evt = wh.verify(body, {
@@ -43,11 +48,20 @@ export async function handleClerkWebhook(req: Request, res: Response) {
       return;
     }
 
-    // Process webhook asynchronously
-    await processWebhookEvent(evt);
+    // Process webhook asynchronously without blocking response
+    setImmediate(async () => {
+      try {
+        await processWebhookEvent(evt);
+      } catch (error) {
+        console.error('Async webhook processing error:', error);
+      }
+    });
 
   } catch (error) {
     console.error('Webhook processing error:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Webhook processing failed' });
+    }
   }
 }
 
