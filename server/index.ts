@@ -53,24 +53,24 @@ app.use((req, res, next) => {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
   
-  // Comprehensive CSP allowing all app services and functionality
+  // Production-optimized CSP allowing all required services
   res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
-    // Scripts: Clerk auth, Stripe payments, Google Analytics, CAPTCHA, CDN libraries
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://hcaptcha.com https://*.hcaptcha.com blob:",
-    // Styles: Google Fonts, Clerk UI, CAPTCHA styles
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.clerk.com https://*.clerk.dev https://hcaptcha.com https://*.hcaptcha.com",
-    // Images: All HTTPS sources, Clerk avatars, receipts, data URLs
-    "img-src 'self' data: blob: https://* https://*.clerk.com https://*.bunny.net",
-    // Fonts: Google Fonts and data URLs
-    "font-src 'self' https://fonts.gstatic.com data:",
-    // Connections: API calls to OpenAI, Stripe, Clerk, Google Analytics, Bunny.net storage
-    "connect-src 'self' https://api.openai.com https://*.stripe.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://*.finanzerpro.com https://www.google-analytics.com https://www.googletagmanager.com https://*.bunny.net https://la.storage.bunnycdn.com https://www.google.com https://www.recaptcha.net https://hcaptcha.com https://*.hcaptcha.com wss: ws:",
-    // Frames: Stripe checkout, Clerk auth, Google services, CAPTCHA
-    "frame-src https://js.stripe.com https://checkout.stripe.com https://*.clerk.com https://*.clerk.dev https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.net https://hcaptcha.com https://*.hcaptcha.com",
-    // Workers: Clerk authentication workers
+    // Scripts: All Clerk domains, Stripe, Google services, CAPTCHA, CDN
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://clerk.finanzerpro.com https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.net https://hcaptcha.com https://*.hcaptcha.com https://*.replit.dev https://*.replit.app blob:",
+    // Styles: All styling sources including Clerk production domains
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.clerk.com https://*.clerk.dev https://clerk.finanzerpro.com https://hcaptcha.com https://*.hcaptcha.com https://*.replit.dev https://*.replit.app",
+    // Images: All HTTPS sources for maximum compatibility
+    "img-src 'self' data: blob: https://*",
+    // Fonts: Google Fonts and all data sources
+    "font-src 'self' https://fonts.gstatic.com https://*.clerk.com https://*.clerk.dev data:",
+    // Connections: All API endpoints and websockets
+    "connect-src 'self' https://api.openai.com https://*.stripe.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://clerk.finanzerpro.com https://*.finanzerpro.com https://www.google-analytics.com https://www.googletagmanager.com https://*.bunny.net https://la.storage.bunnycdn.com https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.net https://hcaptcha.com https://*.hcaptcha.com https://*.replit.dev https://*.replit.app wss: ws:",
+    // Frames: All iframe sources for embedded content
+    "frame-src https://js.stripe.com https://checkout.stripe.com https://*.clerk.com https://*.clerk.dev https://clerk.finanzerpro.com https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.net https://hcaptcha.com https://*.hcaptcha.com",
+    // Workers: Clerk and other service workers
     "worker-src 'self' blob:",
-    // Security: Prevent embedding in other sites
+    // Security: Prevent embedding
     "frame-ancestors 'none'"
   ].join('; '));
   

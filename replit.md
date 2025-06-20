@@ -466,6 +466,7 @@ Changelog:
 - June 20, 2025. APPSUMO BULK CODE UPLOAD COMPLETED: Successfully uploaded all 1000 AppSumo redemption codes from CSV file directly to redeem_codes database table - system ready for production AppSumo launch with complete code inventory
 - June 20, 2025. PRODUCTION AUTHENTICATION FIXED: Resolved CAPTCHA loading issues by implementing permissive CSP that allows all HTTPS domains while maintaining security - Clerk authentication now works properly in production with functional CAPTCHA verification
 - June 20, 2025. SIDEBAR BADGE FIX FOR REDEEM CODES: Fixed sidebar plan badges not disappearing for users upgraded via AppSumo redeem codes - sidebar now correctly uses database plan data instead of Clerk plan data for badge visibility logic
+- June 20, 2025. PRODUCTION CSP OPTIMIZATION: Enhanced Content Security Policy with production Clerk domains, Replit deployment domains, and comprehensive service coverage to resolve production app loading issues
 ```
 
 ## User Preferences
