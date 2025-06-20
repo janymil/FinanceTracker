@@ -18,10 +18,10 @@ export function registerGoalRoutes(app: Express) {
       }
 
       const goals = await storage.getUserGoals(userId);
-      res.json(goals);
+      return res.json(goals);
     } catch (error) {
       console.error("Error fetching goals:", error);
-      res.status(500).json({ message: "Failed to fetch goals" });
+      return res.status(500).json({ message: "Failed to fetch goals" });
     }
   });
 
@@ -52,10 +52,10 @@ export function registerGoalRoutes(app: Express) {
       };
 
       const goal = await storage.createGoal(goalData);
-      res.json(goal);
+      return res.json(goal);
     } catch (error) {
       console.error("Error creating goal:", error);
-      res.status(400).json({ message: "Failed to create goal" });
+      return res.status(400).json({ message: "Failed to create goal" });
     }
   });
 
@@ -89,10 +89,10 @@ export function registerGoalRoutes(app: Express) {
       if (currentAmount !== undefined) updateData.currentAmount = String(currentAmount);
 
       const goal = await storage.updateGoal(id, updateData);
-      res.json(goal);
+      return res.json(goal);
     } catch (error) {
       console.error("Error updating goal:", error);
-      res.status(400).json({ message: "Failed to update goal" });
+      return res.status(400).json({ message: "Failed to update goal" });
     }
   });
 
@@ -110,10 +110,10 @@ export function registerGoalRoutes(app: Express) {
 
       const id = parseInt(req.params.id);
       await storage.deleteGoal(id, userId);
-      res.json({ success: true });
+      return res.json({ success: true });
     } catch (error) {
       console.error("Error deleting goal:", error);
-      res.status(500).json({ message: "Failed to delete goal" });
+      return res.status(500).json({ message: "Failed to delete goal" });
     }
   });
 
@@ -140,10 +140,10 @@ export function registerGoalRoutes(app: Express) {
       });
 
       const reminder = await storage.createExpenseReminder(validatedData);
-      res.json(reminder);
+      return res.json(reminder);
     } catch (error) {
       console.error("Error creating expense reminder:", error);
-      res.status(400).json({ message: "Failed to create expense reminder" });
+      return res.status(400).json({ message: "Failed to create expense reminder" });
     }
   });
 
@@ -160,10 +160,10 @@ export function registerGoalRoutes(app: Express) {
       }
 
       const reminders = await storage.getUserExpenseReminders(userId);
-      res.json(reminders);
+      return res.json(reminders);
     } catch (error) {
       console.error("Error fetching expense reminders:", error);
-      res.status(500).json({ message: "Failed to fetch expense reminders" });
+      return res.status(500).json({ message: "Failed to fetch expense reminders" });
     }
   });
 
@@ -181,10 +181,10 @@ export function registerGoalRoutes(app: Express) {
 
       const daysBefore = req.query.days ? parseInt(req.query.days as string) : 7;
       const reminders = await storage.getUpcomingExpenseReminders(userId, daysBefore);
-      res.json(reminders);
+      return res.json(reminders);
     } catch (error) {
       console.error("Error fetching upcoming expense reminders:", error);
-      res.status(500).json({ message: "Failed to fetch upcoming expense reminders" });
+      return res.status(500).json({ message: "Failed to fetch upcoming expense reminders" });
     }
   });
 
@@ -223,10 +223,10 @@ export function registerGoalRoutes(app: Express) {
       );
 
       const reminder = await storage.updateExpenseReminder(id, updateData);
-      res.json(reminder);
+      return res.json(reminder);
     } catch (error) {
       console.error("Error updating expense reminder:", error);
-      res.status(400).json({ message: "Failed to update expense reminder" });
+      return res.status(400).json({ message: "Failed to update expense reminder" });
     }
   });
 
@@ -244,10 +244,10 @@ export function registerGoalRoutes(app: Express) {
 
       const id = parseInt(req.params.id);
       await storage.deleteExpenseReminder(id, userId);
-      res.json({ success: true });
+      return res.json({ success: true });
     } catch (error) {
       console.error("Error deleting expense reminder:", error);
-      res.status(500).json({ message: "Failed to delete expense reminder" });
+      return res.status(500).json({ message: "Failed to delete expense reminder" });
     }
   });
 
@@ -265,10 +265,10 @@ export function registerGoalRoutes(app: Express) {
 
       const id = parseInt(req.params.id);
       await storage.markExpenseReminderCompleted(id, userId);
-      res.json({ success: true });
+      return res.json({ success: true });
     } catch (error) {
       console.error("Error completing expense reminder:", error);
-      res.status(500).json({ message: "Failed to complete expense reminder" });
+      return res.status(500).json({ message: "Failed to complete expense reminder" });
     }
   });
 }

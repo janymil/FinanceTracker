@@ -14,7 +14,7 @@ export function registerAdminRoutes(app: Express) {
     if (!req.session) {
       req.session = {};
     }
-    res.json({ authenticated: !!req.session?.isAdminAuthenticated });
+    return res.json({ authenticated: !!req.session?.isAdminAuthenticated });
   });
 
   // Admin dashboard - get all users
@@ -22,10 +22,10 @@ export function registerAdminRoutes(app: Express) {
     try {
       const users = await storage.getAllUsers();
       console.log(`Admin analytics - Fetched ${users.length} users:`, users.map(u => ({ id: u.id, email: u.email, plan: u.plan })));
-      res.json(users);
+      return res.json(users);
     } catch (error) {
       console.error("Error fetching users for admin:", error);
-      res.status(500).json({ message: "Failed to fetch users" });
+      return res.status(500).json({ message: "Failed to fetch users" });
     }
   });
 
@@ -40,10 +40,10 @@ export function registerAdminRoutes(app: Express) {
         plan: user.plan,
         transactionCount: 0 // Will be populated by separate query if needed
       }));
-      res.json(stats);
+      return res.json(stats);
     } catch (error) {
       console.error("Error fetching user stats for admin:", error);
-      res.status(500).json({ message: "Failed to fetch user stats" });
+      return res.status(500).json({ message: "Failed to fetch user stats" });
     }
   });
 
@@ -58,7 +58,7 @@ export function registerAdminRoutes(app: Express) {
       }
 
       const updatedUser = await storage.updateUserPlan(userId, plan);
-      res.json({ 
+      return res.json({ 
         success: true, 
         message: `User plan updated to ${plan}`,
         user: {
@@ -69,7 +69,7 @@ export function registerAdminRoutes(app: Express) {
       });
     } catch (error) {
       console.error("Error updating user plan:", error);
-      res.status(500).json({ message: "Failed to update user plan" });
+      return res.status(500).json({ message: "Failed to update user plan" });
     }
   });
 
@@ -87,10 +87,10 @@ export function registerAdminRoutes(app: Express) {
         planDistribution: planCounts,
         activeUsers: users.filter(u => u.updatedAt && new Date(u.updatedAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length
       };
-      res.json(overview);
+      return res.json(overview);
     } catch (error) {
       console.error("Error fetching system overview for admin:", error);
-      res.status(500).json({ message: "Failed to fetch system overview" });
+      return res.status(500).json({ message: "Failed to fetch system overview" });
     }
   });
 
@@ -102,10 +102,10 @@ export function registerAdminRoutes(app: Express) {
         acc[user.plan] = (acc[user.plan] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
-      res.json(planStats);
+      return res.json(planStats);
     } catch (error) {
       console.error("Error fetching plan stats for admin:", error);
-      res.status(500).json({ message: "Failed to fetch plan stats" });
+      return res.status(500).json({ message: "Failed to fetch plan stats" });
     }
   });
 }

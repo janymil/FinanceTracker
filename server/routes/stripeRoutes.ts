@@ -213,11 +213,11 @@ export function registerStripeRoutes(app: Express) {
         return res.status(500).json({ error: "No redirect URL received from Stripe" });
       }
 
-      res.json({ url: session.url });
+      return res.json({ url: session.url });
 
     } catch (error) {
       console.error('Error creating checkout session:', error);
-      res.status(500).json({ error: "Failed to create checkout session" });
+      return res.status(500).json({ error: "Failed to create checkout session" });
     }
   });
 
@@ -506,7 +506,7 @@ export function registerStripeRoutes(app: Express) {
         });
       }
 
-      return res.json({ hasSchedule: false });
+      return return res.json({ hasSchedule: false });
 
     } catch (error: any) {
       console.error('Error fetching subscription schedule:', error);
@@ -537,7 +537,7 @@ export function registerStripeRoutes(app: Express) {
 
     } catch (error) {
       console.error('Error changing subscription:', error);
-      res.status(500).json({ error: "Failed to change subscription" });
+      return res.status(500).json({ error: "Failed to change subscription" });
     }
   });
 
@@ -552,11 +552,11 @@ export function registerStripeRoutes(app: Express) {
       // Reset user to free plan
       await storage.updateUserPlan(userId, 'free');
 
-      res.json({ success: true, message: "Subscription cancelled successfully" });
+      return res.json({ success: true, message: "Subscription cancelled successfully" });
 
     } catch (error) {
       console.error('Error cancelling subscription:', error);
-      res.status(500).json({ error: "Failed to cancel subscription" });
+      return res.status(500).json({ error: "Failed to cancel subscription" });
     }
   });
 
@@ -615,7 +615,7 @@ export function registerStripeRoutes(app: Express) {
       }
     }
 
-    res.json({ received: true });
+    return res.json({ received: true });
   });
 
   // Stripe Customer Portal
@@ -653,10 +653,10 @@ export function registerStripeRoutes(app: Express) {
         return_url: returnUrl,
       });
 
-      res.json({ url: portalSession.url });
+      return res.json({ url: portalSession.url });
     } catch (error) {
       console.error('Error creating customer portal session:', error);
-      res.status(500).json({ message: "Failed to create portal session" });
+      return res.status(500).json({ message: "Failed to create portal session" });
     }
   });
 }

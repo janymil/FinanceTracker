@@ -56,10 +56,10 @@ export function registerAIRoutes(app: Express) {
         }
       }
 
-      res.json({ suggestions });
+      return res.json({ suggestions });
     } catch (error) {
       console.error("Error in auto-categorization:", error);
-      res.status(500).json({ message: "Failed to auto-categorize transactions" });
+      return res.status(500).json({ message: "Failed to auto-categorize transactions" });
     }
   });
 
@@ -84,10 +84,10 @@ export function registerAIRoutes(app: Express) {
       }
 
       const result = await categorizeExpense(description, amount || 0);
-      res.json({ category: result.category });
+      return res.json({ category: result.category });
     } catch (error) {
       console.error("Error categorizing expense:", error);
-      res.status(500).json({ message: "Failed to categorize expense" });
+      return res.status(500).json({ message: "Failed to categorize expense" });
     }
   });
 
@@ -139,22 +139,22 @@ export function registerAIRoutes(app: Express) {
       const tip = tips.length > 0 ? tips[0] : null;
 
       if (tip) {
-        res.json({ tip: `${tip.title}: ${tip.description}` });
+        return res.json({ tip: `${tip.title}: ${tip.description}` });
       } else {
         // Provide specific fallback based on actual data
         if (transactions.length === 0) {
-          res.json({ tip: "Start by adding some transactions to get personalized financial insights." });
+          return res.json({ tip: "Start by adding some transactions to get personalized financial insights." });
         } else {
           const expenseCount = transactions.filter(t => t.type === 'expense').length;
           const incomeCount = transactions.filter(t => t.type === 'income').length;
-          res.json({ 
+          return res.json({ 
             tip: `Based on your ${expenseCount} expense transactions ($${financialSummary.totalExpenses.toFixed(2)}) and ${incomeCount} income transactions ($${financialSummary.totalIncome.toFixed(2)}), consider setting up budgets for your top spending categories to better manage your finances.` 
           });
         }
       }
     } catch (error) {
       console.error("Error generating financial tip:", error);
-      res.status(500).json({ message: "Failed to generate financial tip" });
+      return res.status(500).json({ message: "Failed to generate financial tip" });
     }
   });
 
@@ -183,10 +183,10 @@ export function registerAIRoutes(app: Express) {
         type: t.type
       })));
 
-      res.json(insights);
+      return res.json(insights);
     } catch (error) {
       console.error("Error generating spending insights:", error);
-      res.status(500).json({ message: "Failed to generate spending insights" });
+      return res.status(500).json({ message: "Failed to generate spending insights" });
     }
   });
 
@@ -215,10 +215,10 @@ export function registerAIRoutes(app: Express) {
         useAdvancedFactors
       });
 
-      res.json(aiScore);
+      return res.json(aiScore);
     } catch (error) {
       console.error("Error generating AI financial health score:", error);
-      res.status(500).json({ message: "Failed to generate AI financial health score" });
+      return res.status(500).json({ message: "Failed to generate AI financial health score" });
     }
   });
 
@@ -263,10 +263,10 @@ export function registerAIRoutes(app: Express) {
           }))
       );
 
-      res.json(predictions);
+      return res.json(predictions);
     } catch (error) {
       console.error("Error generating trend predictions:", error);
-      res.status(500).json({ message: "Failed to generate trend predictions" });
+      return res.status(500).json({ message: "Failed to generate trend predictions" });
     }
   });
 
@@ -372,10 +372,10 @@ export function registerAIRoutes(app: Express) {
       aiCache.setFinancialHealth(userId, dataHash, healthData);
       console.log('Financial health: Cached new result for 24 hours');
 
-      res.json(healthData);
+      return res.json(healthData);
     } catch (error) {
       console.error("Error generating financial health score:", error);
-      res.status(500).json({ message: "Failed to generate financial health score" });
+      return res.status(500).json({ message: "Failed to generate financial health score" });
     }
   });
 
@@ -401,10 +401,10 @@ export function registerAIRoutes(app: Express) {
         });
       }
       
-      res.json(mascot);
+      return res.json(mascot);
     } catch (error) {
       console.error("Error fetching mascot:", error);
-      res.status(500).json({ message: "Failed to fetch mascot" });
+      return res.status(500).json({ message: "Failed to fetch mascot" });
     }
   });
 
@@ -564,10 +564,10 @@ export function registerAIRoutes(app: Express) {
         });
       }
 
-      res.json(mascot);
+      return res.json(mascot);
     } catch (error) {
       console.error("Error generating mascot:", error);
-      res.status(500).json({ message: "Failed to generate mascot" });
+      return res.status(500).json({ message: "Failed to generate mascot" });
     }
   });
 
@@ -595,10 +595,10 @@ export function registerAIRoutes(app: Express) {
         mascot = await storage.toggleMascot(userId, enabled);
       }
 
-      res.json(mascot);
+      return res.json(mascot);
     } catch (error) {
       console.error("Error toggling mascot:", error);
-      res.status(500).json({ message: "Failed to toggle mascot" });
+      return res.status(500).json({ message: "Failed to toggle mascot" });
     }
   });
 
@@ -650,10 +650,10 @@ Answer questions about features, subscription plans, how to use the app, trouble
 
       const assistantResponse = response.choices[0].message.content || "I'm sorry, I couldn't generate a response. Please try again.";
 
-      res.json({ response: assistantResponse });
+      return res.json({ response: assistantResponse });
     } catch (error) {
       console.error("Error in help chat:", error);
-      res.status(500).json({ message: "Failed to get help response" });
+      return res.status(500).json({ message: "Failed to get help response" });
     }
   });
 }

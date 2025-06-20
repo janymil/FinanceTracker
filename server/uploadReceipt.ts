@@ -258,7 +258,7 @@ export const uploadReceiptHandler = [
         response.category = predictedCategory;
       }
 
-      res.json(response);
+      return res.json(response);
 
     } catch (error) {
       console.error('Receipt upload error:', error);
@@ -269,7 +269,7 @@ export const uploadReceiptHandler = [
         }
       }
 
-      res.status(500).json({ 
+      return res.status(500).json({ 
         error: error instanceof Error ? error.message : 'Failed to process receipt' 
       });
     }

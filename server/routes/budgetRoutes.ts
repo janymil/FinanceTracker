@@ -29,10 +29,10 @@ export function registerBudgetRoutes(app: Express) {
       };
 
       const budget = await storage.createBudget(budgetData);
-      res.json(budget);
+      return res.json(budget);
     } catch (error) {
       console.error("Error creating budget:", error);
-      res.status(400).json({ message: "Failed to create budget" });
+      return res.status(400).json({ message: "Failed to create budget" });
     }
   });
 
@@ -65,10 +65,10 @@ export function registerBudgetRoutes(app: Express) {
       if (period !== undefined) updateData.period = String(period);
 
       const budget = await storage.updateBudget(id, updateData);
-      res.json(budget);
+      return res.json(budget);
     } catch (error) {
       console.error("Error updating budget:", error);
-      res.status(400).json({ message: "Failed to update budget" });
+      return res.status(400).json({ message: "Failed to update budget" });
     }
   });
 
@@ -87,10 +87,10 @@ export function registerBudgetRoutes(app: Express) {
 
       const id = parseInt(req.params.id);
       await storage.deleteBudget(id, userId);
-      res.json({ success: true });
+      return res.json({ success: true });
     } catch (error) {
       console.error("Error deleting budget:", error);
-      res.status(500).json({ message: "Failed to delete budget" });
+      return res.status(500).json({ message: "Failed to delete budget" });
     }
   });
 
@@ -107,10 +107,10 @@ export function registerBudgetRoutes(app: Express) {
       }
 
       const budgets = await storage.getUserBudgets(userId);
-      res.json(budgets);
+      return res.json(budgets);
     } catch (error) {
       console.error("Error fetching budgets:", error);
-      res.status(500).json({ message: "Failed to fetch budgets" });
+      return res.status(500).json({ message: "Failed to fetch budgets" });
     }
   });
 }

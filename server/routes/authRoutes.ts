@@ -8,15 +8,15 @@ export function registerAuthRoutes(app: Express) {
 
   // Explicitly block old auth endpoints that no longer exist
   app.get('/api/login', (req, res) => {
-    res.status(404).json({ error: 'Login endpoint no longer exists. Please use /sign-in-clerk' });
+    return res.status(404).json({ error: 'Login endpoint no longer exists. Please use /sign-in-clerk' });
   });
   
   app.get('/api/logout', (req, res) => {
-    res.status(404).json({ error: 'Logout endpoint no longer exists. Please use Clerk sign out' });
+    return res.status(404).json({ error: 'Logout endpoint no longer exists. Please use Clerk sign out' });
   });
   
   app.get('/api/callback', (req, res) => {
-    res.status(404).json({ error: 'Callback endpoint no longer exists. Authentication handled by Clerk' });
+    return res.status(404).json({ error: 'Callback endpoint no longer exists. Authentication handled by Clerk' });
   });
 
   // Auth routes
@@ -49,10 +49,10 @@ export function registerAuthRoutes(app: Express) {
         user = await storage.upsertUser(userData);
       }
 
-      res.json(user);
+      return res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+      return res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 }

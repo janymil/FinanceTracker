@@ -26,7 +26,7 @@ export function registerRedeemRoutes(app: Express) {
         tier: code.tier || 'standard'
       }));
 
-      res.json({
+      return res.json({
         redeemedCodes: codesWithDetails,
         plan: user?.plan || 'free',
         totalRedeemed: redeemedCodes.length,
@@ -36,7 +36,7 @@ export function registerRedeemRoutes(app: Express) {
 
     } catch (error) {
       console.error("Get my codes error:", error);
-      res.status(500).json({
+      return res.status(500).json({
         error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error"
       });
@@ -55,7 +55,7 @@ export function registerRedeemRoutes(app: Express) {
       const redeemedCodes = await storage.getUserRedeemedCodes(userId);
       const user = await storage.getUser(userId);
 
-      res.json({
+      return res.json({
         redeemedCodes: redeemedCodes.map((code: any) => code.code),
         plan: user?.plan || 'free',
         totalRedeemed: redeemedCodes.length
@@ -63,7 +63,7 @@ export function registerRedeemRoutes(app: Express) {
 
     } catch (error) {
       console.error("Get redeem status error:", error);
-      res.status(500).json({
+      return res.status(500).json({
         error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error"
       });
@@ -164,7 +164,7 @@ export function registerRedeemRoutes(app: Express) {
 
       console.log(`User ${userId} upgraded to ${plan} plan with ${totalCodesAfterRedemption} total codes`);
 
-      res.json({
+      return res.json({
         success: true,
         plan,
         validCodes: redeemedCodes,
@@ -176,7 +176,7 @@ export function registerRedeemRoutes(app: Express) {
 
     } catch (error) {
       console.error("Redeem codes error:", error);
-      res.status(500).json({
+      return res.status(500).json({
         error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error"
       });

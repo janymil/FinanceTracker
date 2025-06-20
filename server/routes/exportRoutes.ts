@@ -87,7 +87,7 @@ export function registerExportRoutes(app: Express) {
         }
       }
 
-      res.json({
+      return res.json({
         success: true,
         imported: importedCount,
         skipped: skippedCount,
@@ -97,7 +97,7 @@ export function registerExportRoutes(app: Express) {
 
     } catch (error) {
       console.error("Error importing transactions:", error);
-      res.status(500).json({ message: "Failed to import transactions" });
+      return res.status(500).json({ message: "Failed to import transactions" });
     }
   });
 
@@ -208,12 +208,12 @@ export function registerExportRoutes(app: Express) {
       // Send PDF response
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="finanzerpro-report-${month}-${targetYear}.pdf"`);
-      res.send(pdfBuffer);
+      return res.send(pdfBuffer);
 
     } catch (error) {
       console.error("Error generating PDF:", error);
       console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
-      res.status(500).json({ 
+      return res.status(500).json({ 
         message: "Failed to generate PDF report", 
         error: error instanceof Error ? error.message : 'Unknown error' 
       });
@@ -278,7 +278,7 @@ export function registerExportRoutes(app: Express) {
       if (format === 'json') {
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Content-Disposition', 'attachment; filename="finanzerpro-export.json"');
-        res.json(exportData);
+        return res.json(exportData);
       } else if (format === 'csv') {
         // For CSV, we'll export transactions only as CSV format is tabular
         if (exportData.transactions) {
@@ -289,17 +289,17 @@ export function registerExportRoutes(app: Express) {
           
           res.setHeader('Content-Type', 'text/csv');
           res.setHeader('Content-Disposition', 'attachment; filename="finanzerpro-transactions.csv"');
-          res.send(csvHeader + csvRows);
+          return res.send(csvHeader + csvRows);
         } else {
-          res.status(400).json({ message: "CSV export requires transactions to be included" });
+          return res.status(400).json({ message: "CSV export requires transactions to be included" });
         }
       } else {
-        res.status(400).json({ message: "Unsupported export format" });
+        return res.status(400).json({ message: "Unsupported export format" });
       }
 
     } catch (error) {
       console.error("Error exporting data:", error);
-      res.status(500).json({ message: "Failed to export data" });
+      return res.status(500).json({ message: "Failed to export data" });
     }
   });
 
@@ -364,7 +364,7 @@ export function registerExportRoutes(app: Express) {
       
       console.log('BACKUP DEBUG: Backup created successfully with filename:', filename);
 
-      res.json({ 
+      return res.json({ 
         success: true, 
         message: "Backup created successfully",
         filename 
@@ -373,7 +373,7 @@ export function registerExportRoutes(app: Express) {
     } catch (error) {
       console.error("BACKUP ERROR: Error creating backup:", error);
       console.error("BACKUP ERROR: Error details:", error.message);
-      res.status(500).json({ message: "Failed to create backup", error: error.message });
+      return res.status(500).json({ message: "Failed to create backup", error: error.message });
     }
   });
 
@@ -441,7 +441,7 @@ export function registerExportRoutes(app: Express) {
 
     } catch (error) {
       console.error("Error getting backup status:", error);
-      res.status(500).json({ message: "Failed to get backup status" });
+      return res.status(500).json({ message: "Failed to get backup status" });
     }
   });
 
@@ -474,13 +474,13 @@ export function registerExportRoutes(app: Express) {
         formattedSize: `${(backup.Length / 1024).toFixed(1)} KB`
       }));
 
-      res.json({
+      return res.json({
         backups: formattedBackups
       });
 
     } catch (error) {
       console.error("Error getting available backups:", error);
-      res.status(500).json({ message: "Failed to get available backups" });
+      return res.status(500).json({ message: "Failed to get available backups" });
     }
   });
 
@@ -497,11 +497,11 @@ export function registerExportRoutes(app: Express) {
         return res.status(403).json({ message: "Cloud backup requires Premium subscription" });
       }
 
-      res.json({ success: true, message: "Backup settings updated" });
+      return res.json({ success: true, message: "Backup settings updated" });
 
     } catch (error) {
       console.error("Error updating backup settings:", error);
-      res.status(500).json({ message: "Failed to update backup settings" });
+      return res.status(500).json({ message: "Failed to update backup settings" });
     }
   });
 
@@ -617,7 +617,7 @@ export function registerExportRoutes(app: Express) {
 
       console.log(`RESTORE DEBUG: Successfully restored backup: ${filename} with data:`, restoredData);
 
-      res.json({ 
+      return res.json({ 
         success: true, 
         message: "Backup restored successfully",
         restoredData,
@@ -629,7 +629,7 @@ export function registerExportRoutes(app: Express) {
       console.error("RESTORE ERROR: Error restoring backup:", error);
       console.error("RESTORE ERROR: Error details:", error.message);
       console.error("RESTORE ERROR: Error stack:", error.stack);
-      res.status(500).json({ message: "Failed to restore backup", error: error.message });
+      return res.status(500).json({ message: "Failed to restore backup", error: error.message });
     }
   });
 }

@@ -20,10 +20,10 @@ export function registerUserRoutes(app: Express) {
 
       // Add cache busting header
       res.set('Cache-Control', 'no-cache');
-      res.json({ success: true, message: `Plan updated to ${plan}` });
+      return res.json({ success: true, message: `Plan updated to ${plan}` });
     } catch (error) {
       console.error("Error updating plan:", error);
-      res.status(500).json({ message: "Failed to update plan" });
+      return res.status(500).json({ message: "Failed to update plan" });
     }
   });
 
@@ -35,10 +35,10 @@ export function registerUserRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
       const categories = await storage.getCategories(userId);
-      res.json(categories);
+      return res.json(categories);
     } catch (error) {
       console.error("Error fetching categories:", error);
-      res.status(500).json({ message: "Failed to fetch categories" });
+      return res.status(500).json({ message: "Failed to fetch categories" });
     }
   });
 
@@ -60,10 +60,10 @@ export function registerUserRoutes(app: Express) {
       }
 
       const category = await storage.createCategory({ userId, name, icon, color, type });
-      res.json(category);
+      return res.json(category);
     } catch (error) {
       console.error("Error creating category:", error);
-      res.status(400).json({ message: "Failed to create category" });
+      return res.status(400).json({ message: "Failed to create category" });
     }
   });
 
@@ -93,10 +93,10 @@ export function registerUserRoutes(app: Express) {
       }
 
       const category = await storage.updateCategory(categoryId, userId, { name, icon, color, type });
-      res.json(category);
+      return res.json(category);
     } catch (error) {
       console.error("Error updating category:", error);
-      res.status(400).json({ message: "Failed to update category" });
+      return res.status(400).json({ message: "Failed to update category" });
     }
   });
 
@@ -117,10 +117,10 @@ export function registerUserRoutes(app: Express) {
       }
 
       await storage.deleteCategory(categoryId, userId);
-      res.json({ success: true });
+      return res.json({ success: true });
     } catch (error) {
       console.error("Error deleting category:", error);
-      res.status(500).json({ message: "Failed to delete category" });
+      return res.status(500).json({ message: "Failed to delete category" });
     }
   });
 
@@ -149,13 +149,13 @@ export function registerUserRoutes(app: Express) {
 
         // Insert categories into database (this would need to be implemented in storage)
         // For now, return mock data
-        res.json(defaultCategories);
+        return res.json(defaultCategories);
       } else {
-        res.json(existingCategories);
+        return res.json(existingCategories);
       }
     } catch (error) {
       console.error("Error initializing categories:", error);
-      res.status(500).json({ message: "Failed to initialize categories" });
+      return res.status(500).json({ message: "Failed to initialize categories" });
     }
   });
 }

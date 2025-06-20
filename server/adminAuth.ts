@@ -27,7 +27,7 @@ export const adminAuth = (req: AdminRequest, res: Response, next: NextFunction) 
     return next();
   }
   
-  res.status(401).json({ message: 'Admin authentication required' });
+  return res.status(401).json({ message: 'Admin authentication required' });
 };
 
 export const adminLogin = async (req: AdminRequest, res: Response) => {
@@ -61,7 +61,7 @@ export const adminLogin = async (req: AdminRequest, res: Response) => {
     });
   } else {
     console.log('Invalid admin password provided');
-    res.status(401).json({ message: 'Invalid admin password' });
+    return res.status(401).json({ message: 'Invalid admin password' });
   }
 };
 
@@ -69,5 +69,5 @@ export const adminLogout = (req: AdminRequest, res: Response) => {
   if (req.session) {
     req.session.isAdminAuthenticated = false;
   }
-  res.json({ message: 'Admin logged out successfully' });
+  return res.json({ message: 'Admin logged out successfully' });
 };

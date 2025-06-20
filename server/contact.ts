@@ -34,11 +34,11 @@ export async function handleContactForm(req: Request, res: Response) {
     };
 
     await transporter.sendMail(mailOptions);
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (error) {
     if (!res.headersSent) {
       console.error('Contact form error:', error);
-      res.status(500).json({ success: false, error: 'Failed to send message' });
+      return res.status(500).json({ success: false, error: 'Failed to send message' });
     } else {
       console.error('Headers already sent. Contact form error:', error);
     }

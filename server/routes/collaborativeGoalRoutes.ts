@@ -13,10 +13,10 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const { recipientEmail } = req.body;
       
       const friendship = await storage.sendFriendRequest(userId, recipientEmail);
-      res.json(friendship);
+      return res.json(friendship);
     } catch (error) {
       console.error("Error sending friend request:", error);
-      res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error.message });
     }
   });
 
@@ -29,10 +29,10 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const friendshipId = parseInt(req.params.id);
       
       const friendship = await storage.acceptFriendRequest(friendshipId, userId);
-      res.json(friendship);
+      return res.json(friendship);
     } catch (error) {
       console.error("Error accepting friend request:", error);
-      res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error.message });
     }
   });
 
@@ -48,7 +48,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       res.status(204).send();
     } catch (error) {
       console.error("Error rejecting friend request:", error);
-      res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error.message });
     }
   });
 
@@ -59,10 +59,10 @@ export function registerCollaborativeGoalRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
       const friends = await storage.getUserFriends(userId);
-      res.json(friends);
+      return res.json(friends);
     } catch (error) {
       console.error("Error fetching friends:", error);
-      res.status(500).json({ message: "Failed to fetch friends" });
+      return res.status(500).json({ message: "Failed to fetch friends" });
     }
   });
 
@@ -73,10 +73,10 @@ export function registerCollaborativeGoalRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
       const requests = await storage.getPendingFriendRequests(userId);
-      res.json(requests);
+      return res.json(requests);
     } catch (error) {
       console.error("Error fetching friend requests:", error);
-      res.status(500).json({ message: "Failed to fetch friend requests" });
+      return res.status(500).json({ message: "Failed to fetch friend requests" });
     }
   });
 
@@ -94,10 +94,10 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       };
       
       const goal = await storage.createCollaborativeGoal(goalData);
-      res.json(goal);
+      return res.json(goal);
     } catch (error) {
       console.error("Error creating collaborative goal:", error);
-      res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error.message });
     }
   });
 
@@ -108,10 +108,10 @@ export function registerCollaborativeGoalRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
       const goals = await storage.getUserCollaborativeGoals(userId);
-      res.json(goals);
+      return res.json(goals);
     } catch (error) {
       console.error("Error fetching collaborative goals:", error);
-      res.status(500).json({ message: "Failed to fetch collaborative goals" });
+      return res.status(500).json({ message: "Failed to fetch collaborative goals" });
     }
   });
 
@@ -128,10 +128,10 @@ export function registerCollaborativeGoalRoutes(app: Express) {
         return res.status(404).json({ message: "Goal not found or access denied" });
       }
       
-      res.json(goal);
+      return res.json(goal);
     } catch (error) {
       console.error("Error fetching collaborative goal:", error);
-      res.status(500).json({ message: "Failed to fetch goal" });
+      return res.status(500).json({ message: "Failed to fetch goal" });
     }
   });
 
@@ -145,10 +145,10 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const { personalTarget } = req.body;
       
       const participant = await storage.joinCollaborativeGoal(goalId, userId, personalTarget);
-      res.json(participant);
+      return res.json(participant);
     } catch (error) {
       console.error("Error joining collaborative goal:", error);
-      res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error.message });
     }
   });
 
@@ -164,7 +164,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       res.status(204).send();
     } catch (error) {
       console.error("Error leaving collaborative goal:", error);
-      res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error.message });
     }
   });
 
@@ -177,10 +177,10 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const goalId = parseInt(req.params.id);
       
       const goal = await storage.updateCollaborativeGoal(goalId, userId, req.body);
-      res.json(goal);
+      return res.json(goal);
     } catch (error) {
       console.error("Error updating collaborative goal:", error);
-      res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error.message });
     }
   });
 
@@ -196,7 +196,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting collaborative goal:", error);
-      res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error.message });
     }
   });
 
@@ -216,10 +216,10 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       };
       
       const contribution = await storage.addGoalContribution(contributionData);
-      res.json(contribution);
+      return res.json(contribution);
     } catch (error) {
       console.error("Error adding contribution:", error);
-      res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error.message });
     }
   });
 
@@ -227,10 +227,10 @@ export function registerCollaborativeGoalRoutes(app: Express) {
     try {
       const goalId = parseInt(req.params.id);
       const contributions = await storage.getGoalContributions(goalId);
-      res.json(contributions);
+      return res.json(contributions);
     } catch (error) {
       console.error("Error fetching contributions:", error);
-      res.status(500).json({ message: "Failed to fetch contributions" });
+      return res.status(500).json({ message: "Failed to fetch contributions" });
     }
   });
 
@@ -238,10 +238,10 @@ export function registerCollaborativeGoalRoutes(app: Express) {
     try {
       const goalId = parseInt(req.params.id);
       const activities = await storage.getGoalActivities(goalId);
-      res.json(activities);
+      return res.json(activities);
     } catch (error) {
       console.error("Error fetching activities:", error);
-      res.status(500).json({ message: "Failed to fetch activities" });
+      return res.status(500).json({ message: "Failed to fetch activities" });
     }
   });
 
@@ -272,19 +272,19 @@ export function registerCollaborativeGoalRoutes(app: Express) {
         // User exists - add them directly to the goal
         try {
           const participant = await storage.joinCollaborativeGoal(goalId, existingUser.id);
-          res.json({ 
+          return res.json({ 
             existingUser: true, 
             email: email,
             participant 
           });
         } catch (error) {
-          res.status(400).json({ message: "User is already part of this goal or cannot join" });
+          return res.status(400).json({ message: "User is already part of this goal or cannot join" });
         }
       } else {
         // User doesn't exist - send invitation email
         // For now, we'll return a success response indicating email would be sent
         // In production, you'd integrate with SendGrid here
-        res.json({ 
+        return res.json({ 
           existingUser: false, 
           email: email,
           message: "Invitation email sent"
@@ -292,7 +292,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       }
     } catch (error) {
       console.error("Error inviting user:", error);
-      res.status(500).json({ message: "Failed to send invitation" });
+      return res.status(500).json({ message: "Failed to send invitation" });
     }
   });
 
@@ -314,10 +314,10 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       };
       
       const contribution = await storage.addGoalContribution(contributionData);
-      res.json(contribution);
+      return res.json(contribution);
     } catch (error) {
       console.error("Error adding contribution:", error);
-      res.status(400).json({ message: error.message || "Failed to add contribution" });
+      return res.status(400).json({ message: error.message || "Failed to add contribution" });
     }
   });
 
@@ -328,10 +328,10 @@ export function registerCollaborativeGoalRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
       const achievements = await storage.getUserAchievements(userId);
-      res.json(achievements);
+      return res.json(achievements);
     } catch (error) {
       console.error("Error fetching achievements:", error);
-      res.status(500).json({ message: "Failed to fetch achievements" });
+      return res.status(500).json({ message: "Failed to fetch achievements" });
     }
   });
 }
