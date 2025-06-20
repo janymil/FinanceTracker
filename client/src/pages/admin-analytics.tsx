@@ -74,7 +74,7 @@ export default function AdminAnalytics() {
         console.error('Error checking auth status:', error);
       }
     };
-    
+
     checkAuthStatus();
   }, []);
 
@@ -86,11 +86,11 @@ export default function AdminAnalytics() {
         'Content-Type': 'application/json',
       },
     });
-    
+
     if (!response.ok) {
       throw new Error(`${response.status}: ${response.statusText}`);
     }
-    
+
     return response.json();
   };
 
@@ -109,7 +109,7 @@ export default function AdminAnalytics() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoggingIn(true);
-    
+
     try {
       const response = await fetch('/api/admin-analytics/login', {
         method: 'POST',
@@ -119,18 +119,18 @@ export default function AdminAnalytics() {
         },
         body: JSON.stringify({ password }),
       });
-      
+
       if (!response.ok) {
         throw new Error('Invalid admin password');
       }
-      
+
       setIsAuthenticated(true);
       setPassword("");
-      
+
       // Fetch data immediately after successful authentication
       await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/users'] });
       await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/overview'] });
-      
+
       toast({
         title: "Success",
         description: "Admin login successful",
@@ -157,11 +157,11 @@ export default function AdminAnalytics() {
         },
         body: JSON.stringify(userData),
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to create user');
       }
-      
+
       // Force immediate refetch of data
       await queryClient.refetchQueries({ queryKey: ['admin-analytics-users'] });
       await queryClient.refetchQueries({ queryKey: ['admin-analytics-overview'] });
@@ -197,11 +197,11 @@ export default function AdminAnalytics() {
           plan: userData.plan
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to update user');
       }
-      
+
       // Force immediate refetch of data
       await queryClient.refetchQueries({ queryKey: ['admin-analytics-users'] });
       await queryClient.refetchQueries({ queryKey: ['admin-analytics-overview'] });
@@ -228,11 +228,11 @@ export default function AdminAnalytics() {
         method: 'DELETE',
         credentials: 'include',
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to delete user');
       }
-      
+
       // Force immediate refetch of data
       await queryClient.refetchQueries({ queryKey: ['admin-analytics-users'] });
       await queryClient.refetchQueries({ queryKey: ['admin-analytics-overview'] });
@@ -258,22 +258,22 @@ export default function AdminAnalytics() {
         method: 'POST',
         credentials: 'include',
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to sync users with Clerk');
       }
-      
+
       const result = await response.json();
-      
+
       // Force immediate refetch of data
       await queryClient.refetchQueries({ queryKey: ['admin-analytics-users'] });
       await queryClient.refetchQueries({ queryKey: ['admin-analytics-overview'] });
-      
+
       toast({
         title: "Sync Complete",
         description: `Updated ${result.updatedUsers} out of ${result.totalUsers} users with Clerk data`,
       });
-      
+
       if (result.errors > 0) {
         console.warn('Some users failed to sync:', result.details);
       }
@@ -301,13 +301,13 @@ export default function AdminAnalytics() {
       user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.id?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesPlan = planFilter === "all" || user.plan === planFilter;
-    
+
     const matchesUserType = userTypeFilter === "all" || 
       (userTypeFilter === "prod" && isProductionUser(user.id)) ||
       (userTypeFilter === "dev" && !isProductionUser(user.id));
-    
+
     return matchesSearch && matchesPlan && matchesUserType;
   });
 
@@ -317,10 +317,10 @@ export default function AdminAnalytics() {
       standard: { variant: "default" as const, icon: TrendingUp },
       premium: { variant: "default" as const, icon: Crown }
     };
-    
+
     const config = variants[plan as keyof typeof variants] || variants.free;
     const IconComponent = config.icon;
-    
+
     return (
       <Badge variant={config.variant} className="flex items-center gap-1">
         <IconComponent className="h-3 w-3" />
@@ -359,7 +359,7 @@ export default function AdminAnalytics() {
                 </div>
               </div>
             </div>
-            
+
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <Label htmlFor="password">Administrator Password</Label>
@@ -527,7 +527,7 @@ export default function AdminAnalytics() {
                     <SelectItem value="premium">Premium</SelectItem>
                   </SelectContent>
                 </Select>
-                
+
                 <Select value={userTypeFilter} onValueChange={setUserTypeFilter}>
                   <SelectTrigger className="w-32">
                     <SelectValue placeholder="Type" />
@@ -552,7 +552,7 @@ export default function AdminAnalytics() {
                 <span className="hidden sm:inline">{isSyncingUsers ? "Syncing..." : "Sync"}</span>
                 <span className="sm:hidden">Sync</span>
               </Button>
-              
+
               <Dialog>
                 <DialogTrigger asChild>
                   <Button size="sm">
@@ -792,6 +792,7 @@ export default function AdminAnalytics() {
               </div>
             </CardContent>
           </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
