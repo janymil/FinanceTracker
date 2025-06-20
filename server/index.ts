@@ -21,7 +21,7 @@ app.use((req, res, next) => {
     if (!this.headersSent && !this.finished) {
       try {
         return originalSetHeader.call(this, name, value);
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Header conflict prevented for ${name}:`, error.message);
         return this;
       }
@@ -35,7 +35,7 @@ app.use((req, res, next) => {
     if (!this.headersSent && !this.finished) {
       try {
         return originalWriteHead.call(this, statusCode, headers);
-      } catch (error) {
+      } catch (error: any) {
         console.error(`WriteHead conflict prevented:`, error.message);
         return this;
       }
