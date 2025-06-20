@@ -17,6 +17,12 @@ export const adminAuth = (req: AdminRequest, res: Response, next: NextFunction) 
     req.session = {};
   }
   
+  console.log('Admin auth check:', {
+    sessionExists: !!req.session,
+    isAuthenticated: req.session?.isAdminAuthenticated,
+    sessionId: req.sessionID
+  });
+  
   if (req.session.isAdminAuthenticated) {
     return next();
   }
@@ -26,6 +32,12 @@ export const adminAuth = (req: AdminRequest, res: Response, next: NextFunction) 
 
 export const adminLogin = async (req: AdminRequest, res: Response) => {
   const { password } = req.body;
+  
+  console.log('Admin login attempt:', { 
+    hasPassword: !!password, 
+    sessionExists: !!req.session,
+    expectedPassword: !!ADMIN_PASSWORD 
+  });
   
   if (!password) {
     return res.status(400).json({ message: 'Password required' });
@@ -39,10 +51,18 @@ export const adminLogin = async (req: AdminRequest, res: Response) => {
   // Simple password check - in production, use hashed passwords
   if (password === ADMIN_PASSWORD) {
     req.session.isAdminAuthenticated = true;
-    return res.json({ message: 'Admin login successful' });
+    req.session.save((err: any) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({ message: 'Session save failed' });
+      }
+      console.log('Admin login successful, session saved');
+      return res.json({ message: 'Admin login successful' });
+    });
+  } else {
+    console.log('Invalid admin password provided');
+    res.status(401).json({ message: 'Invalid admin password' });
   }
-  
-  res.status(401).json({ message: 'Invalid admin password' });
 };
 
 export const adminLogout = (req: AdminRequest, res: Response) => {

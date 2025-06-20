@@ -19,14 +19,15 @@ app.use(cookieParser());
 // Configure session middleware for admin authentication
 app.use(session({
   secret: process.env.SESSION_SECRET || 'admin-session-secret-fallback',
-  resave: false,
-  saveUninitialized: false,
+  resave: true, // Force session save
+  saveUninitialized: true, // Create session for all requests
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
+    secure: false, // Allow HTTP in all environments for admin sessions
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax'
-  }
+  },
+  name: 'admin.session.id' // Unique session name for admin
 }));
 
 app.use(cookieConsentMiddleware);
