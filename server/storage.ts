@@ -161,6 +161,7 @@ export interface IStorage {
   getRedeemCode(code: string): Promise<RedeemCode | undefined>;
   redeemCode(code: string, userId: string): Promise<RedeemCode>;
   redeemMultipleCodes(codes: string[], userId: string): Promise<{ validCodes: RedeemCode[], invalidCodes: string[] }>;
+  getUserRedeemedCodes(userId: string): Promise<RedeemCode[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1929,6 +1930,20 @@ export class DatabaseStorage implements IStorage {
     }
 
     return { validCodes, invalidCodes };
+  }
+
+  async getUserRedeemedCodes(userId: string): Promise<RedeemCode[]> {
+    const userCodes = await db
+      .select()
+      .from(redeemCodes)
+      .where(
+        and(
+          eq(redeemCodes.userId, userId),
+          eq(redeemCodes.redeemed, true)
+        )
+      )
+      .orderBy(redeemCodes.redeemedAt);
+    return userCodes;
   }
 }
 
