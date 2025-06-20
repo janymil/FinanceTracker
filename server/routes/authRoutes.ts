@@ -47,7 +47,7 @@ export function registerAuthRoutes(app: Express) {
             });
           }
           
-          const primaryEmail = clerkUser.emailAddresses?.find(email => email.id === clerkUser.primaryEmailAddressId)?.emailAddress;
+          const primaryEmail = clerkUser.emailAddresses?.find((email: any) => email.id === clerkUser.primaryEmailAddressId)?.emailAddress;
           
           const userData = {
             id: userId,

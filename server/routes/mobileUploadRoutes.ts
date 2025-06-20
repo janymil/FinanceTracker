@@ -54,7 +54,7 @@ export function registerMobileUploadRoutes(app: any) {
   });
 
   // Upload receipt from mobile
-  app.post('/api/mobile-upload/upload/:sessionId', upload.single('receipt'), async (req, res) => {
+  app.post('/api/mobile-upload/upload/:sessionId', upload.single('receipt'), async (req: any, res: any) => {
     try {
       const { sessionId } = req.params;
       const file = req.file;
@@ -207,7 +207,7 @@ export function registerMobileUploadRoutes(app: any) {
   });
 
   // Check upload status
-  app.get('/api/mobile-upload/status/:sessionId', async (req, res) => {
+  app.get('/api/mobile-upload/status/:sessionId', async (req: any, res: any) => {
     try {
       const { sessionId } = req.params;
       const session = mobileUploadSessions.get(sessionId);
