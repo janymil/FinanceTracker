@@ -758,7 +758,7 @@ export default function AdminAnalytics() {
                               )}
                             </DialogContent>
                           </Dialog>
-
+                    </div>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button variant="outline" size="sm" className="h-8 w-8 p-0">
