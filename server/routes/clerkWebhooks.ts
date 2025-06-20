@@ -1,0 +1,176 @@
+import type { Express } from "express";
+import { Webhook } from "svix";
+import { storage } from "../storage";
+
+export function registerClerkWebhookRoutes(app: Express) {
+  // Clerk webhook endpoint for production user synchronization
+  app.post('/api/clerk-webhooks', async (req, res) => {
+    try {
+      // Get the webhook signing secret from environment
+      const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
+      
+      if (!webhookSecret) {
+        console.error('CLERK_WEBHOOK_SECRET is not configured');
+        return res.status(500).json({ error: 'Webhook secret not configured' });
+      }
+
+      // Get headers and body for verification
+      const svix_id = req.get('svix-id');
+      const svix_timestamp = req.get('svix-timestamp');
+      const svix_signature = req.get('svix-signature');
+
+      if (!svix_id || !svix_timestamp || !svix_signature) {
+        return res.status(400).json({ error: 'Missing required svix headers' });
+      }
+
+      // Create webhook instance for verification
+      const wh = new Webhook(webhookSecret);
+      let evt;
+
+      try {
+        // Verify the webhook payload
+        evt = wh.verify(JSON.stringify(req.body), {
+          'svix-id': svix_id,
+          'svix-timestamp': svix_timestamp,
+          'svix-signature': svix_signature,
+        });
+      } catch (err) {
+        console.error('Webhook verification failed:', err);
+        return res.status(400).json({ error: 'Webhook verification failed' });
+      }
+
+      // Handle different event types
+      const { type, data } = evt as any;
+      
+      console.log(`Clerk webhook received: ${type} for user ${data.id}`);
+
+      switch (type) {
+        case 'user.created':
+          await handleUserCreated(data);
+          break;
+          
+        case 'user.updated':
+          await handleUserUpdated(data);
+          break;
+          
+        case 'user.deleted':
+          await handleUserDeleted(data);
+          break;
+          
+        case 'email.created':
+          // Handle email verification events if needed
+          console.log('Email created event received:', data);
+          break;
+          
+        case 'sms.created':
+          // Handle SMS verification events if needed
+          console.log('SMS created event received:', data);
+          break;
+          
+        default:
+          console.log(`Unhandled webhook event type: ${type}`);
+      }
+
+      res.status(200).json({ received: true });
+      
+    } catch (error) {
+      console.error('Clerk webhook error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+}
+
+// Handle user creation from Clerk
+async function handleUserCreated(userData: any) {
+  try {
+    const { id, email_addresses, first_name, last_name, image_url, phone_numbers, created_at } = userData;
+    
+    // Get primary email
+    const primaryEmail = email_addresses?.find((email: any) => email.id === userData.primary_email_address_id)?.email_address;
+    
+    // Get primary phone
+    const primaryPhone = phone_numbers?.find((phone: any) => phone.id === userData.primary_phone_number_id)?.phone_number;
+
+    // Create user in our database
+    const newUser = {
+      id: id, // Clerk user ID
+      email: primaryEmail || null,
+      firstName: first_name || null,
+      lastName: last_name || null,
+      profileImageUrl: image_url || null,
+      phone: primaryPhone || null,
+      plan: 'free', // Default to free plan
+      settings: null,
+      createdAt: new Date(created_at),
+      updatedAt: new Date()
+    };
+
+    await storage.createUser(newUser);
+    console.log(`User created in database: ${id} (${primaryEmail})`);
+    
+  } catch (error) {
+    console.error('Error creating user from webhook:', error);
+    throw error;
+  }
+}
+
+// Handle user updates from Clerk
+async function handleUserUpdated(userData: any) {
+  try {
+    const { id, email_addresses, first_name, last_name, image_url, phone_numbers, updated_at } = userData;
+    
+    // Check if user exists in our database
+    const existingUser = await storage.getUser(id);
+    if (!existingUser) {
+      console.log(`User ${id} not found in database, creating from update event`);
+      return await handleUserCreated(userData);
+    }
+    
+    // Get primary email
+    const primaryEmail = email_addresses?.find((email: any) => email.id === userData.primary_email_address_id)?.email_address;
+    
+    // Get primary phone
+    const primaryPhone = phone_numbers?.find((phone: any) => phone.id === userData.primary_phone_number_id)?.phone_number;
+
+    // Update user data
+    const updatedUser = {
+      ...existingUser,
+      email: primaryEmail || existingUser.email,
+      firstName: first_name || existingUser.firstName,
+      lastName: last_name || existingUser.lastName,
+      profileImageUrl: image_url || existingUser.profileImageUrl,
+      phone: primaryPhone || existingUser.phone,
+      updatedAt: new Date(updated_at || Date.now())
+    };
+
+    await storage.updateUser(id, updatedUser);
+    console.log(`User updated in database: ${id} (${primaryEmail})`);
+    
+  } catch (error) {
+    console.error('Error updating user from webhook:', error);
+    throw error;
+  }
+}
+
+// Handle user deletion from Clerk
+async function handleUserDeleted(userData: any) {
+  try {
+    const { id } = userData;
+    
+    // Check if user exists in our database
+    const existingUser = await storage.getUser(id);
+    if (!existingUser) {
+      console.log(`User ${id} not found in database, nothing to delete`);
+      return;
+    }
+
+    // Note: Instead of hard deleting, we could soft delete or anonymize
+    // For GDPR compliance, we should actually delete user data
+    await storage.deleteUserCompletely(id);
+    console.log(`User deleted from database: ${id}`);
+    
+  } catch (error) {
+    console.error('Error deleting user from webhook:', error);
+    throw error;
+  }
+}
