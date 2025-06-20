@@ -160,8 +160,8 @@ export default function AdminAnalytics() {
         throw new Error('Failed to create user');
       }
       
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/users'] });
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/overview'] });
+      await queryClient.invalidateQueries({ queryKey: ['admin-analytics-users'] });
+      await queryClient.invalidateQueries({ queryKey: ['admin-analytics-overview'] });
       setNewUser({ email: "", firstName: "", lastName: "", plan: "free" });
       toast({
         title: "Success",
