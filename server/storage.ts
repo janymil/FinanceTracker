@@ -1197,7 +1197,7 @@ export class DatabaseStorage implements IStorage {
     await db.delete(goalContributions).where(eq(goalContributions.userId, userId));
     await db.delete(challengeActivities).where(eq(challengeActivities.userId, userId));
     await db.delete(milestoneAchievements).where(eq(milestoneAchievements.userId, userId));
-    await db.delete(collaborativeGoals).where(eq(collaborativeGoals.creatorId, userId));
+    await db.delete(collaborativeGoals).where(eq(collaborativeGoals.createdBy, userId));
 
     // Delete friendships
     await db.delete(friendships).where(or(
