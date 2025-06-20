@@ -53,22 +53,22 @@ app.use((req, res, next) => {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
   
-  // Production-optimized CSP allowing all required services
+  // Production CSP with comprehensive CAPTCHA support
   res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
-    // Scripts: All Clerk domains, Stripe, Google services, CAPTCHA, CDN
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://clerk.finanzerpro.com https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.net https://hcaptcha.com https://*.hcaptcha.com https://*.replit.dev https://*.replit.app blob:",
-    // Styles: All styling sources including Clerk production domains
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.clerk.com https://*.clerk.dev https://clerk.finanzerpro.com https://hcaptcha.com https://*.hcaptcha.com https://*.replit.dev https://*.replit.app",
-    // Images: All HTTPS sources for maximum compatibility
+    // Scripts: All possible CAPTCHA domains and services
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://clerk.finanzerpro.com https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.net https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://recaptcha.google.com https://google.com/recaptcha/ https://gstatic.com/recaptcha/ https://apis.google.com https://ssl.gstatic.com https://hcaptcha.com https://*.hcaptcha.com https://assets.hcaptcha.com https://js.hcaptcha.com https://api.hcaptcha.com https://newassets.hcaptcha.com https://*.replit.dev https://*.replit.app blob:",
+    // Styles: All CAPTCHA styling sources
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.clerk.com https://*.clerk.dev https://clerk.finanzerpro.com https://www.gstatic.com https://gstatic.com https://ssl.gstatic.com https://hcaptcha.com https://*.hcaptcha.com https://assets.hcaptcha.com https://newassets.hcaptcha.com https://*.replit.dev https://*.replit.app",
+    // Images: All HTTPS for CAPTCHA images
     "img-src 'self' data: blob: https://*",
-    // Fonts: Google Fonts and all data sources
-    "font-src 'self' https://fonts.gstatic.com https://*.clerk.com https://*.clerk.dev data:",
-    // Connections: All API endpoints and websockets
-    "connect-src 'self' https://api.openai.com https://*.stripe.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://clerk.finanzerpro.com https://*.finanzerpro.com https://www.google-analytics.com https://www.googletagmanager.com https://*.bunny.net https://la.storage.bunnycdn.com https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.net https://hcaptcha.com https://*.hcaptcha.com https://*.replit.dev https://*.replit.app wss: ws:",
-    // Frames: All iframe sources for embedded content
-    "frame-src https://js.stripe.com https://checkout.stripe.com https://*.clerk.com https://*.clerk.dev https://clerk.finanzerpro.com https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.net https://hcaptcha.com https://*.hcaptcha.com",
-    // Workers: Clerk and other service workers
+    // Fonts: All Google and CAPTCHA fonts
+    "font-src 'self' https://fonts.gstatic.com https://gstatic.com https://ssl.gstatic.com https://*.clerk.com https://*.clerk.dev data:",
+    // Connections: All CAPTCHA API endpoints
+    "connect-src 'self' https://api.openai.com https://*.stripe.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://clerk.finanzerpro.com https://*.finanzerpro.com https://www.google-analytics.com https://www.googletagmanager.com https://*.bunny.net https://la.storage.bunnycdn.com https://www.google.com https://google.com https://www.gstatic.com https://gstatic.com https://ssl.gstatic.com https://www.recaptcha.net https://recaptcha.net https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://recaptcha.google.com https://google.com/recaptcha/ https://gstatic.com/recaptcha/ https://apis.google.com https://hcaptcha.com https://*.hcaptcha.com https://api.hcaptcha.com https://assets.hcaptcha.com https://js.hcaptcha.com https://newassets.hcaptcha.com https://*.replit.dev https://*.replit.app wss: ws:",
+    // Frames: All CAPTCHA iframe sources
+    "frame-src https://js.stripe.com https://checkout.stripe.com https://*.clerk.com https://*.clerk.dev https://clerk.finanzerpro.com https://www.google.com https://google.com https://www.gstatic.com https://gstatic.com https://ssl.gstatic.com https://www.recaptcha.net https://recaptcha.net https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://recaptcha.google.com https://google.com/recaptcha/ https://gstatic.com/recaptcha/ https://apis.google.com https://hcaptcha.com https://*.hcaptcha.com https://api.hcaptcha.com https://assets.hcaptcha.com https://js.hcaptcha.com https://newassets.hcaptcha.com",
+    // Workers: All service workers
     "worker-src 'self' blob:",
     // Security: Prevent embedding
     "frame-ancestors 'none'"

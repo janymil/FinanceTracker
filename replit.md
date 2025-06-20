@@ -467,6 +467,7 @@ Changelog:
 - June 20, 2025. PRODUCTION AUTHENTICATION FIXED: Resolved CAPTCHA loading issues by implementing permissive CSP that allows all HTTPS domains while maintaining security - Clerk authentication now works properly in production with functional CAPTCHA verification
 - June 20, 2025. SIDEBAR BADGE FIX FOR REDEEM CODES: Fixed sidebar plan badges not disappearing for users upgraded via AppSumo redeem codes - sidebar now correctly uses database plan data instead of Clerk plan data for badge visibility logic
 - June 20, 2025. PRODUCTION CSP OPTIMIZATION: Enhanced Content Security Policy with production Clerk domains, Replit deployment domains, and comprehensive service coverage to resolve production app loading issues
+- June 20, 2025. COMPREHENSIVE CAPTCHA CSP FIX: Added ALL possible CAPTCHA domains including Google reCAPTCHA (google.com/recaptcha/, gstatic.com/recaptcha/, apis.google.com, ssl.gstatic.com) and hCAPTCHA (assets.hcaptcha.com, js.hcaptcha.com, api.hcaptcha.com, newassets.hcaptcha.com) to all CSP directives to ensure CAPTCHA functionality in production
 ```
 
 ## User Preferences
