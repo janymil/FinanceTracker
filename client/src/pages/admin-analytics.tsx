@@ -405,26 +405,27 @@ export default function AdminAnalytics() {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Shield className="h-8 w-8 text-blue-600" />
-          <div>
-            <h1 className="text-3xl font-bold">System Analytics</h1>
-            <p className="text-gray-600">Monitor application metrics and user management</p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto p-4 max-w-7xl">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <Shield className="h-8 w-8 text-blue-600" />
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold">System Analytics</h1>
+              <p className="text-gray-600 text-sm md:text-base">Monitor application metrics and user management</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-1 md:grid-cols-3">
-          <TabsTrigger value="overview" className="text-xs md:text-sm">Overview</TabsTrigger>
-          <TabsTrigger value="users" className="text-xs md:text-sm">User Management</TabsTrigger>
-          <TabsTrigger value="analytics" className="text-xs md:text-sm">Analytics</TabsTrigger>
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-3 h-auto">
+          <TabsTrigger value="overview" className="text-xs md:text-sm px-2 py-2">Overview</TabsTrigger>
+          <TabsTrigger value="users" className="text-xs md:text-sm px-2 py-2">Users</TabsTrigger>
+          <TabsTrigger value="analytics" className="text-xs md:text-sm px-2 py-2">Analytics</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -502,57 +503,62 @@ export default function AdminAnalytics() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="users" className="space-y-6">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <TabsContent value="users" className="space-y-4">
+          <div className="flex flex-col gap-3">
             <div className="flex flex-col sm:flex-row gap-2">
-              <div className="relative">
+              <div className="relative flex-1">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search users..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8 w-full sm:w-80"
+                  className="pl-8"
                 />
               </div>
-              <Select value={planFilter} onValueChange={setPlanFilter}>
-                <SelectTrigger className="w-full sm:w-40">
-                  <SelectValue placeholder="Filter by plan" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Plans</SelectItem>
-                  <SelectItem value="free">Free</SelectItem>
-                  <SelectItem value="standard">Standard</SelectItem>
-                  <SelectItem value="premium">Premium</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select value={userTypeFilter} onValueChange={setUserTypeFilter}>
-                <SelectTrigger className="w-full sm:w-40">
-                  <SelectValue placeholder="Filter by type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Users</SelectItem>
-                  <SelectItem value="prod">Production</SelectItem>
-                  <SelectItem value="dev">Development</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2 flex-wrap">
+                <Select value={planFilter} onValueChange={setPlanFilter}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Plans</SelectItem>
+                    <SelectItem value="free">Free</SelectItem>
+                    <SelectItem value="standard">Standard</SelectItem>
+                    <SelectItem value="premium">Premium</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={userTypeFilter} onValueChange={setUserTypeFilter}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Users</SelectItem>
+                    <SelectItem value="prod">Production</SelectItem>
+                    <SelectItem value="dev">Development</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div className="flex gap-2">
-            <Button 
+            <div className="flex gap-2 flex-wrap">
+              <Button 
                 onClick={syncClerkUsers}
                 disabled={isSyncingUsers}
                 variant="outline"
+                size="sm"
               >
-                <RefreshCw className={cn("h-4 w-4 mr-2", isSyncingUsers && "animate-spin")} />
-                {isSyncingUsers ? "Syncing..." : "Sync with Clerk"}
+                <RefreshCw className={cn("h-4 w-4 mr-1", isSyncingUsers && "animate-spin")} />
+                <span className="hidden sm:inline">{isSyncingUsers ? "Syncing..." : "Sync"}</span>
+                <span className="sm:hidden">Sync</span>
               </Button>
               
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button>
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Add User
+                  <Button size="sm">
+                    <UserPlus className="h-4 w-4 mr-1" />
+                    <span className="hidden sm:inline">Add User</span>
+                    <span className="sm:hidden">Add</span>
                   </Button>
                 </DialogTrigger>
               <DialogContent>
@@ -615,71 +621,77 @@ export default function AdminAnalytics() {
               </DialogContent>
             </Dialog>
           </div>
-          <Card>
+          <Card className="w-full">
             <CardHeader>
-              <CardTitle>Users ({filteredUsers.length})</CardTitle>
+              <CardTitle className="text-lg">Users ({filteredUsers.length})</CardTitle>
               <CardDescription>
                 Manage user accounts and subscriptions
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <Table>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Plan</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead className="min-w-48">User</TableHead>
+                    <TableHead className="min-w-48">Email</TableHead>
+                    <TableHead className="min-w-24">Plan</TableHead>
+                    <TableHead className="min-w-24">Created</TableHead>
+                    <TableHead className="min-w-24">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredUsers.map((user: User) => (
                     <TableRow key={user.id}>
                       <TableCell>
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-2">
                           {user.profileImageUrl ? (
                             <img
                               src={user.profileImageUrl}
                               alt="Profile"
-                              className="h-8 w-8 rounded-full object-cover"
+                              className="h-8 w-8 rounded-full object-cover flex-shrink-0"
                             />
                           ) : (
-                            <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                            <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
                               <Users className="h-4 w-4 text-gray-500" />
                             </div>
                           )}
-                          <div>
-                            <div className="font-medium">
+                          <div className="min-w-0">
+                            <div className="font-medium text-sm truncate">
                               {user.firstName && user.lastName 
                                 ? `${user.firstName} ${user.lastName}`
                                 : user.email?.split('@')[0] || 'No name'
                               }
                             </div>
-                            <div className="text-sm text-gray-500 flex items-center gap-2">
+                            <div className="text-xs text-gray-500 flex items-center gap-1">
                               {isProductionUser(user.id) ? (
-                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">PROD</span>
+                                <span className="bg-green-100 text-green-800 px-1.5 py-0.5 rounded text-xs">PROD</span>
                               ) : (
-                                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">DEV</span>
+                                <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs">DEV</span>
                               )}
-                              <span className="truncate max-w-32">{user.id}</span>
+                              <span className="truncate max-w-20 text-xs">{user.id}</span>
                             </div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{user.email || "No email"}</TableCell>
+                      <TableCell>
+                        <div className="truncate max-w-48 text-sm" title={user.email || "No email"}>
+                          {user.email || "No email"}
+                        </div>
+                      </TableCell>
                       <TableCell>{getPlanBadge(user.plan)}</TableCell>
                       <TableCell>{formatDate(user.createdAt)}</TableCell>
                       <TableCell>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-1">
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button 
                                 variant="outline" 
                                 size="sm"
+                                className="h-8 w-8 p-0"
                                 onClick={() => setEditingUser(user)}
                               >
-                                <Edit className="h-4 w-4" />
+                                <Edit className="h-3 w-3" />
                               </Button>
                             </DialogTrigger>
                             <DialogContent>
@@ -749,8 +761,8 @@ export default function AdminAnalytics() {
 
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm">
-                                <Trash2 className="h-4 w-4 text-red-600" />
+                              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                                <Trash2 className="h-3 w-3 text-red-600" />
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
@@ -777,9 +789,9 @@ export default function AdminAnalytics() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </CardContent>
           </Card>
-          </div>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
@@ -799,6 +811,7 @@ export default function AdminAnalytics() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }
