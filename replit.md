@@ -472,6 +472,7 @@ Changelog:
 - June 20, 2025. COMPLETE CSP VIOLATIONS FIXED: Resolved all remaining CSP errors by adding Cloudflare Turnstile (challenges.cloudflare.com), Google Analytics regional endpoints (region1.google-analytics.com), and Replit development domains - Clerk authentication and all services now load without CSP violations
 - June 20, 2025. GOOGLE ANALYTICS SECURITY ENHANCEMENT: Moved Google Analytics measurement ID (VITE_GA_MEASUREMENT_ID) from .env file to secure Replit secrets for enhanced security - eliminated console warnings and improved production deployment security
 - June 20, 2025. CLOUDFLARE TURNSTILE CSP FIX: Enhanced CSP with additional Cloudflare domains (cloudflare.com, static.cloudflareinsights.com) to resolve Turnstile CAPTCHA error 300030 in production deployment - addresses widget hanging issues on finanzerpro.com
+- June 20, 2025. INCOGNITO MODE DETECTION IMPLEMENTED: Added automatic detection and user warning for incognito/private browsing mode where CAPTCHA and authentication may fail - displays dismissible notification with clear explanation of potential issues
 ```
 
 ## User Preferences

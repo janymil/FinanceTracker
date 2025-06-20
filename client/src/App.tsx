@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { SignedIn, SignedOut, useClerk, useUser } from "@clerk/clerk-react";
 import { initGA } from "@/lib/analytics";
 import { useAnalytics } from "@/hooks/use-analytics";
+import { detectIncognito, showIncognitoWarning } from "@/utils/incognito-detection";
 
 // Core components loaded immediately
 import Header from "@/components/header";
@@ -173,7 +174,7 @@ function AuthenticatedApp() {
 }
 
 export default function App() {
-  // Initialize Google Analytics when app loads
+  // Initialize Google Analytics and check for incognito mode when app loads
   useEffect(() => {
     // Verify required environment variable is present
     if (!import.meta.env.VITE_GA_MEASUREMENT_ID) {
@@ -181,6 +182,13 @@ export default function App() {
     } else {
       initGA();
     }
+
+    // Check for incognito mode and show warning if detected
+    detectIncognito().then(isIncognito => {
+      if (isIncognito) {
+        showIncognitoWarning();
+      }
+    });
   }, []);
 
   return (
