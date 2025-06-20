@@ -178,10 +178,10 @@ export function registerTransactionRoutes(app: Express) {
       console.log('Transaction returned from storage:', JSON.stringify(transaction, null, 2));
       console.log('=== END TRANSACTION UPDATE DEBUG ===');
 
-      res.json(transaction);
+      return res.json(transaction);
     } catch (error) {
       console.error("Error updating transaction:", error);
-      res.status(400).json({ message: "Failed to update transaction" });
+      return res.status(400).json({ message: "Failed to update transaction" });
     }
   });
 
@@ -195,10 +195,10 @@ export function registerTransactionRoutes(app: Express) {
 
       const transactionId = parseInt(req.params.id);
       await storage.deleteTransaction(transactionId, userId);
-      res.json({ success: true });
+      return res.json({ success: true });
     } catch (error) {
       console.error("Error deleting transaction:", error);
-      res.status(500).json({ message: "Failed to delete transaction" });
+      return res.status(500).json({ message: "Failed to delete transaction" });
     }
   });
 

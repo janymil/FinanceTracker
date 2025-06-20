@@ -46,10 +46,10 @@ export function registerMobileUploadRoutes(app) {
         }
       }
       
-      res.json({ sessionId });
+      return res.json({ sessionId });
     } catch (error) {
       console.error('Session creation error:', error);
-      res.status(500).json({ error: 'Failed to create session' });
+      return res.status(500).json({ error: 'Failed to create session' });
     }
   });
 
@@ -196,13 +196,13 @@ export function registerMobileUploadRoutes(app) {
 
       mobileUploadSessions.set(sessionId, sessionData);
       
-      res.json({ 
+      return res.json({ 
         success: true, 
         message: 'Receipt processed successfully' 
       });
     } catch (error) {
       console.error('Mobile upload error:', error);
-      res.status(500).json({ error: 'Upload failed' });
+      return res.status(500).json({ error: 'Upload failed' });
     }
   });
 
@@ -216,14 +216,14 @@ export function registerMobileUploadRoutes(app) {
         return res.status(404).json({ error: 'Session not found' });
       }
       
-      res.json({
+      return res.json({
         status: session.status,
         data: session.data || null,
         error: session.error || null
       });
     } catch (error) {
       console.error('Status check error:', error);
-      res.status(500).json({ error: 'Status check failed' });
+      return res.status(500).json({ error: 'Status check failed' });
     }
   });
 }
