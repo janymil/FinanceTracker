@@ -30,8 +30,12 @@ createRoot(document.getElementById("root")!).render(
       <ClerkProvider 
         publishableKey={PUBLISHABLE_KEY}
         afterSignOutUrl="/auth"
-        frontendApi={import.meta.env.PROD ? "clerk.finanzerpro.com" : undefined}
-        domain={import.meta.env.PROD ? "finanzerpro.com" : undefined}
+        appearance={{
+          baseTheme: undefined,
+          variables: {
+            colorPrimary: "#2563eb"
+          }
+        }}
       >
         <QueryClientProvider client={queryClient}>
           <Router>

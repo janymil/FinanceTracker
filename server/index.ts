@@ -53,20 +53,9 @@ app.use((req, res, next) => {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
   
-  // Content Security Policy - temporarily relaxed for Clerk compatibility
-  const csp = [
-    "default-src 'self' https:",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
-    "style-src 'self' 'unsafe-inline' https:",
-    "img-src 'self' data: https:",
-    "font-src 'self' data: https:",
-    "connect-src 'self' https:",
-    "worker-src 'self' blob:",
-    "form-action 'self' https:",
-    "frame-ancestors 'none'"
-  ].join('; ');
-  
-  res.setHeader('Content-Security-Policy', csp);
+  // Remove restrictive CSP that blocks Clerk authentication
+  // Only set frame-ancestors for clickjacking protection
+  res.setHeader('Content-Security-Policy', "frame-ancestors 'none'");
   
   // Additional security for admin and auth endpoints
   if (req.path.startsWith('/api/admin-analytics') || req.path.includes('auth')) {
