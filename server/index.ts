@@ -53,20 +53,16 @@ app.use((req, res, next) => {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
   
-  // Content Security Policy to establish legitimacy
-  const clerkDomain = process.env.NODE_ENV === 'production' 
-    ? 'https://clerk.finanzerpro.com' 
-    : 'https://*.clerk.accounts.dev';
-  
+  // Content Security Policy - temporarily relaxed for Clerk compatibility
   const csp = [
-    "default-src 'self'",
-    `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${clerkDomain} https://replit.com`,
-    "style-src 'self' 'unsafe-inline'",
+    "default-src 'self' https:",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+    "style-src 'self' 'unsafe-inline' https:",
     "img-src 'self' data: https:",
-    "font-src 'self' data:",
-    `connect-src 'self' ${clerkDomain} https://api.openai.com`,
+    "font-src 'self' data: https:",
+    "connect-src 'self' https:",
     "worker-src 'self' blob:",
-    "form-action 'self'",
+    "form-action 'self' https:",
     "frame-ancestors 'none'"
   ].join('; ');
   
