@@ -16,6 +16,7 @@ import { registerStripeRoutes } from "./stripeRoutes";
 import { setCookieConsent } from "../cookieMiddleware";
 import { registerMobileUploadRoutes } from "./mobileUploadRoutes";
 import { handleContactForm } from "../contact";
+import { registerRedeemRoutes } from "./redeemRoutes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Cookie consent middleware

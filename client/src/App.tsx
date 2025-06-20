@@ -157,6 +157,7 @@ function AuthenticatedApp() {
               <Route path="/cookie-policy" component={CookiePolicy} />
               <Route path="/contact" component={Contact} />
               <Route path="/help" component={Help} />
+              <Route path="/redeem" component={RedeemPage} />
               <Route path="/profile" component={ProfilePage} />
               <Route path="/admin-analytics" component={AdminAnalytics} />
               <Route component={NotFoundPage} />

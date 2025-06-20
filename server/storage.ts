@@ -14,6 +14,7 @@ import {
   challengeActivities,
   milestoneAchievements,
   financialMascots,
+  redeemCodes,
   type User,
   type InsertUser,
   type Transaction,
@@ -41,6 +42,8 @@ import {
   type InsertMilestoneAchievement,
   type FinancialMascot,
   type InsertFinancialMascot,
+  type RedeemCode,
+  type InsertRedeemCode,
 } from "@shared/schema";
 import { db } from "./db";
 import { DataEncryption } from "./encryption";
@@ -153,6 +156,11 @@ export interface IStorage {
   // Milestone and achievement tracking
   checkAndCreateMilestones(goalId: number): Promise<MilestoneAchievement[]>;
   getUserAchievements(userId: string): Promise<MilestoneAchievement[]>;
+
+  // Redeem code operations
+  getRedeemCode(code: string): Promise<RedeemCode | undefined>;
+  redeemCode(code: string, userId: string): Promise<RedeemCode>;
+  redeemMultipleCodes(codes: string[], userId: string): Promise<{ validCodes: RedeemCode[], invalidCodes: string[] }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1865,6 +1873,62 @@ export class DatabaseStorage implements IStorage {
       .where(eq(financialMascots.userId, userId))
       .returning();
     return updatedMascot;
+  }
+
+  // Redeem code operations
+  async getRedeemCode(code: string): Promise<RedeemCode | undefined> {
+    const [redeemCode] = await db
+      .select()
+      .from(redeemCodes)
+      .where(eq(redeemCodes.code, code.toUpperCase()));
+    return redeemCode;
+  }
+
+  async redeemCode(code: string, userId: string): Promise<RedeemCode> {
+    const [redeemedCode] = await db
+      .update(redeemCodes)
+      .set({
+        redeemed: true,
+        userId,
+        redeemedAt: new Date()
+      })
+      .where(
+        and(
+          eq(redeemCodes.code, code.toUpperCase()),
+          eq(redeemCodes.redeemed, false)
+        )
+      )
+      .returning();
+
+    if (!redeemedCode) {
+      throw new Error("Code not found or already redeemed");
+    }
+
+    return redeemedCode;
+  }
+
+  async redeemMultipleCodes(codes: string[], userId: string): Promise<{ validCodes: RedeemCode[], invalidCodes: string[] }> {
+    const validCodes: RedeemCode[] = [];
+    const invalidCodes: string[] = [];
+
+    for (const code of codes) {
+      try {
+        // Check if code exists and is not redeemed
+        const redeemCode = await this.getRedeemCode(code);
+        if (!redeemCode || redeemCode.redeemed) {
+          invalidCodes.push(code);
+          continue;
+        }
+
+        // Redeem the code
+        const redeemedCode = await this.redeemCode(code, userId);
+        validCodes.push(redeemedCode);
+      } catch (error) {
+        invalidCodes.push(code);
+      }
+    }
+
+    return { validCodes, invalidCodes };
   }
 }
 
