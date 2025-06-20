@@ -1222,6 +1222,10 @@ export class DatabaseStorage implements IStorage {
       const deletedCollaborativeGoals = await db.delete(collaborativeGoals).where(eq(collaborativeGoals.createdBy, userId)).execute();
       console.log(`Deleted collaborative goals for user: ${userId}`);
 
+      // Delete all redeem codes associated with the user
+      const deletedRedeemCodes = await db.delete(redeemCodes).where(eq(redeemCodes.userId, userId)).execute();
+      console.log(`Deleted redeem codes for user: ${userId}`);
+
       // Finally delete the user record
       const deletedUser = await db.delete(users).where(eq(users.id, userId)).execute();
       console.log(`Deleted user record: ${userId}`);
