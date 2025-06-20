@@ -488,11 +488,11 @@ export class DatabaseStorage implements IStorage {
       .from(budgets)
       .where(eq(budgets.id, id))
       .limit(1);
-    
+
     if (!existingBudget.length || existingBudget[0].userId !== budget.userId) {
       throw new Error("Budget not found or unauthorized access");
     }
-    
+
     const [updatedBudget] = await db
       .update(budgets)
       .set(budget)
@@ -557,11 +557,11 @@ export class DatabaseStorage implements IStorage {
       .from(goals)
       .where(eq(goals.id, id))
       .limit(1);
-    
+
     if (!existingGoal.length || existingGoal[0].userId !== goal.userId) {
       throw new Error("Goal not found or unauthorized access");
     }
-    
+
     const [updatedGoal] = await db
       .update(goals)
       .set(goal)
@@ -1013,11 +1013,11 @@ export class DatabaseStorage implements IStorage {
       .from(expenseReminders)
       .where(eq(expenseReminders.id, id))
       .limit(1);
-    
+
     if (!existingReminder.length || existingReminder[0].userId !== reminder.userId) {
       throw new Error("Expense reminder not found or unauthorized access");
     }
-    
+
     const [result] = await db
       .update(expenseReminders)
       .set({ ...reminder, updatedAt: new Date() })
@@ -1165,23 +1165,73 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteUserCompletely(userId: string): Promise<void> {
-    // Delete all user's data in correct order (respecting foreign keys)
-    // Note: This properly handles encrypted data deletion
+    console.log(`Starting complete deletion of user: ${userId}`);
 
-    // Delete goals first
-    await db.delete(goals).where(eq(goals.userId, userId));
+    try {
+      // Check if user exists first
+      const existingUser = await this.getUser(userId);
+      if (!existingUser) {
+        throw new Error(`User ${userId} not found`);
+      }
 
-    // Delete budgets
-    await db.delete(budgets).where(eq(budgets.userId, userId));
+      // Delete all user transactions first
+      const deletedTransactions = await db.delete(transactions).where(eq(transactions.userId, userId)).execute();
+      console.log(`Deleted transactions for user: ${userId}`);
 
-    // Delete transactions (encrypted data will be properly removed)
-    await db.delete(transactions).where(eq(transactions.userId, userId));
+      // Delete all user categories
+      const deletedCategories = await db.delete(categories).where(eq(categories.userId, userId)).execute();
+      console.log(`Deleted categories for user: ${userId}`);
 
-    // Delete expense reminders
-    await db.delete(expenseReminders).where(eq(expenseReminders.userId, userId));
+      // Delete all user budgets
+      const deletedBudgets = await db.delete(budgets).where(eq(budgets.userId, userId)).execute();
+      console.log(`Deleted budgets for user: ${userId}`);
 
-    // Finally delete the user
-    await db.delete(users).where(eq(users.id, userId));
+      // Delete all user goals
+      const deletedGoals = await db.delete(goals).where(eq(goals.userId, userId)).execute();
+      console.log(`Deleted goals for user: ${userId}`);
+
+      // Delete all expense reminders
+      const deletedExpenseReminders = await db.delete(expenseReminders).where(eq(expenseReminders.userId, userId)).execute();
+      console.log(`Deleted expense reminders for user: ${userId}`);
+
+      // Delete all collaborative goal participants
+      const deletedCollaborativeGoalParticipants = await db.delete(collaborativeGoalParticipants).where(eq(collaborativeGoalParticipants.userId, userId)).execute();
+      console.log(`Deleted collaborative goal participants for user: ${userId}`);
+
+      // Delete all goal contributions
+      const deletedGoalContributions = await db.delete(goalContributions).where(eq(goalContributions.userId, userId)).execute();
+      console.log(`Deleted goal contributions for user: ${userId}`);
+
+      // Delete all challenge activities
+      const deletedChallengeActivities = await db.delete(challengeActivities).where(eq(challengeActivities.userId, userId)).execute();
+      console.log(`Deleted challenge activities for user: ${userId}`);
+
+       // Delete all milestone achievements
+      const deletedMilestoneAchievements = await db.delete(milestoneAchievements).where(eq(milestoneAchievements.userId, userId)).execute();
+      console.log(`Deleted milestone achievements for user: ${userId}`);
+
+      // Delete all financial mascots
+      const deletedFinancialMascots = await db.delete(financialMascots).where(eq(financialMascots.userId, userId)).execute();
+      console.log(`Deleted financial mascots for user: ${userId}`);
+
+      // Delete all friendships
+      const deletedFriendships = await db.delete(friendships).where(or(eq(friendships.requesterId, userId), eq(friendships.recipientId, userId))).execute();
+      console.log(`Deleted friendships for user: ${userId}`);
+
+      // Delete all collaborative goals created by the user
+      const deletedCollaborativeGoals = await db.delete(collaborativeGoals).where(eq(collaborativeGoals.createdBy, userId)).execute();
+      console.log(`Deleted collaborative goals for user: ${userId}`);
+
+      // Finally delete the user record
+      const deletedUser = await db.delete(users).where(eq(users.id, userId)).execute();
+      console.log(`Deleted user record: ${userId}`);
+
+      console.log(`Successfully completed deletion of user: ${userId}`);
+
+    } catch (error: any) {
+      console.error(`Error deleting user ${userId}:`, error);
+      throw new Error(`Failed to delete user ${userId}: ${error.message}`);
+    }
   }
 
   async getAdminStats(): Promise<{

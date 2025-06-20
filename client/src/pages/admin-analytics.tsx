@@ -224,26 +224,36 @@ export default function AdminAnalytics() {
   const deleteUser = async (userId: string) => {
     setIsDeletingUser(true);
     try {
+      console.log('Attempting to delete user:', userId);
+      
       const response = await fetch(`/api/admin-analytics/users/${userId}`, {
         method: 'DELETE',
         credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
+      const responseData = await response.json();
+      console.log('Delete response:', responseData);
+
       if (!response.ok) {
-        throw new Error('Failed to delete user');
+        throw new Error(responseData.message || `HTTP ${response.status}: ${response.statusText}`);
       }
 
       // Force immediate refetch of data
       await queryClient.refetchQueries({ queryKey: ['admin-analytics-users'] });
       await queryClient.refetchQueries({ queryKey: ['admin-analytics-overview'] });
+      
       toast({
         title: "Success",
         description: "User deleted successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
       toast({
         title: "Error",
-        description: "Failed to delete user",
+        description: error.message || "Failed to delete user",
         variant: "destructive",
       });
     } finally {

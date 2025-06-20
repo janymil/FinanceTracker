@@ -184,16 +184,32 @@ export function registerAdminRoutes(app: Express) {
   app.delete('/api/admin-analytics/users/:userId', adminAuth, async (req: any, res: Response) => {
     try {
       const { userId } = req.params;
+      console.log(`Admin attempting to delete user: ${userId}`);
       
+      // Check if user exists first
+      const user = await storage.getUser(userId);
+      if (!user) {
+        console.log(`User ${userId} not found in database`);
+        return res.status(404).json({ 
+          success: false, 
+          message: "User not found" 
+        });
+      }
+      
+      console.log(`Deleting user: ${userId} (${user.email})`);
       await storage.deleteUserCompletely(userId);
+      console.log(`Successfully deleted user: ${userId}`);
       
       return res.json({ 
         success: true, 
         message: "User deleted successfully"
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting user:", error);
-      return res.status(500).json({ message: "Failed to delete user" });
+      return res.status(500).json({ 
+        success: false, 
+        message: error.message || "Failed to delete user" 
+      });
     }
   });
 
