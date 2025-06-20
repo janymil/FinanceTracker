@@ -181,30 +181,35 @@ export default function AdminAnalytics() {
   const updateUser = async ({ id, userData }: { id: string; userData: any }) => {
     setIsUpdatingUser(true);
     try {
-      const response = await fetch(`/api/admin-analytics/users/${id}/plan`, {
+      const response = await fetch(`/api/admin-analytics/users/${id}`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify({
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          plan: userData.plan
+        }),
       });
       
       if (!response.ok) {
-        throw new Error('Failed to update user plan');
+        throw new Error('Failed to update user');
       }
       
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/users'] });
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/overview'] });
+      await queryClient.invalidateQueries({ queryKey: ['admin-analytics-users'] });
+      await queryClient.invalidateQueries({ queryKey: ['admin-analytics-overview'] });
       setEditingUser(null);
       toast({
         title: "Success",
-        description: "User plan updated successfully",
+        description: "User updated successfully",
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update user plan",
+        description: "Failed to update user",
         variant: "destructive",
       });
     } finally {
@@ -224,8 +229,8 @@ export default function AdminAnalytics() {
         throw new Error('Failed to delete user');
       }
       
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/users'] });
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/overview'] });
+      await queryClient.invalidateQueries({ queryKey: ['admin-analytics-users'] });
+      await queryClient.invalidateQueries({ queryKey: ['admin-analytics-overview'] });
       toast({
         title: "Success",
         description: "User deleted successfully",

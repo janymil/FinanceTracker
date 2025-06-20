@@ -94,6 +94,51 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Admin - update user data (edit user)
+  app.put('/api/admin-analytics/users/:userId', adminAuth, async (req: any, res: Response) => {
+    try {
+      const { userId } = req.params;
+      const { email, firstName, lastName, plan } = req.body;
+      
+      if (plan && !['free', 'standard', 'premium'].includes(plan)) {
+        return res.status(400).json({ message: "Invalid plan. Must be 'free', 'standard', or 'premium'" });
+      }
+
+      const updatedUser = await storage.updateUser(userId, {
+        email: email || null,
+        firstName: firstName || null,
+        lastName: lastName || null,
+        plan: plan
+      });
+      
+      return res.json({ 
+        success: true, 
+        message: "User updated successfully",
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error("Error updating user:", error);
+      return res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  // Admin - delete user
+  app.delete('/api/admin-analytics/users/:userId', adminAuth, async (req: any, res: Response) => {
+    try {
+      const { userId } = req.params;
+      
+      await storage.deleteUserCompletely(userId);
+      
+      return res.json({ 
+        success: true, 
+        message: "User deleted successfully"
+      });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      return res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
   // Admin analytics - get subscription plan distribution
   app.get('/api/admin-analytics/plans', adminAuth, async (req: any, res: Response) => {
     try {
