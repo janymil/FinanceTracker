@@ -36,18 +36,24 @@ export function registerAuthRoutes(app: Express) {
       // If user doesn't exist, check if they were deleted from Clerk
       if (!user) {
         try {
-          // Get user data from Clerk auth context
-          const clerkUser = req.auth().user;
+          // Get user data from Clerk API directly since req.auth().user might be incomplete
+          const { createClerkClient } = await import('@clerk/backend');
+          const clerkClient = createClerkClient({ 
+            secretKey: process.env.CLERK_SECRET_KEY 
+          });
+          
+          const clerkUser = await clerkClient.users.getUser(userId);
           if (!clerkUser) {
-            // User has valid session but no Clerk user data - likely deleted account
-            console.log(`User ${userId} has valid token but no Clerk user data - account likely deleted`);
+            console.log(`User ${userId} not found in Clerk - account likely deleted`);
             return res.status(401).json({ 
               message: 'User account no longer exists',
               redirectToAuth: true 
             });
           }
           
-          const primaryEmail = clerkUser.emailAddresses?.find(email => email.id === clerkUser.primaryEmailAddressId)?.emailAddress;
+          const primaryEmail = clerkUser.emailAddresses?.find(email => 
+            email.id === clerkUser.primaryEmailAddressId
+          )?.emailAddress;
           
           const userData = {
             id: userId,
@@ -61,7 +67,7 @@ export function registerAuthRoutes(app: Express) {
             settings: null
           };
           user = await storage.upsertUser(userData);
-          console.log(`Created user from Clerk data: ${userId} (${primaryEmail})`);
+          console.log(`Created user from Clerk API: ${userId} - ${primaryEmail} (${clerkUser.firstName} ${clerkUser.lastName})`);
         } catch (error) {
           console.error('Error creating user from Clerk data:', error);
           // If this fails, the user likely doesn't exist in Clerk anymore

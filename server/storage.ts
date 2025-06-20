@@ -191,7 +191,7 @@ export class DatabaseStorage implements IStorage {
         .insert(users)
         .values({
           id: userData.id,
-          email: userData.email || `${userData.id}@clerk.user`, // Fallback email for Clerk users
+          email: userData.email, // No fallback - use real email from Clerk
           firstName: userData.firstName,
           lastName: userData.lastName,
           profileImageUrl: userData.profileImageUrl,
