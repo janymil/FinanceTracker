@@ -50,12 +50,8 @@ app.use((req, res, next) => {
 app.use('/api/clerk-webhooks', express.raw({ type: 'application/json' }));
 app.post('/api/clerk-webhooks', async (req, res) => {
   try {
-    // Completely isolated webhook handler - no middleware chain
-    if (process.env.NODE_ENV !== 'production') {
-      res.writeHead(403, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Webhook disabled in dev' }));
-      return;
-    }
+    // Allow webhooks in all environments to maintain user data sync
+    console.log('Clerk webhook received:', req.headers['svix-id']);
     
     const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
     if (!webhookSecret) {

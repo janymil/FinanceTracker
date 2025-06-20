@@ -38,11 +38,8 @@ export function registerClerkWebhookRoutes(app: Express) {
   // Clerk webhook endpoint for production user synchronization
   app.post('/api/clerk-webhooks', async (req, res) => {
     try {
-      // Only allow webhooks in production environment
-      if (process.env.NODE_ENV !== 'production') {
-        res.status(403).send('Webhook disabled in dev');
-        return;
-      }
+      // Allow webhooks in all environments for user data sync
+      console.log('Processing Clerk webhook:', req.headers['svix-id']);
       
       // Get the webhook signing secret from environment
       const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;

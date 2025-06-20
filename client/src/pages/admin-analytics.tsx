@@ -527,19 +527,7 @@ export default function AdminAnalytics() {
               </Select>
             </div>
           </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search users..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8 w-full sm:w-64"
-                />
-              </div>
-            </div>
-          </div>
-            <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex gap-2">
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
