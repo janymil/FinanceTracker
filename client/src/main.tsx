@@ -18,11 +18,10 @@ const queryClient = new QueryClient({
   },
 });
 
-// Use production or development key based on environment
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || import.meta.env.VITE_CLERK_PUBLISHABLE_KEY_DEV;
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 if (!PUBLISHABLE_KEY) {
-  console.warn("Missing Clerk Publishable Key - authentication will not work");
+  throw new Error("Missing Publishable Key");
 }
 
 createRoot(document.getElementById("root")!).render(
