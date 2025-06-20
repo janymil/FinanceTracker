@@ -94,10 +94,13 @@ async function handleUserWebhook(userData: {
 }
 
 export function registerClerkWebhookRoutes(app: Express): void {
-  app.post('/api/clerk-webhooks', 
-    // Apply raw body parsing only to this specific route
-    express.raw({ type: 'application/json' }),
-    async (req: Request, res: Response) => {
+  // Create a separate handler for the webhook with its own middleware
+  const webhookHandler = express.Router();
+  
+  // Apply raw body parsing only to webhook routes
+  webhookHandler.use('/api/clerk-webhooks', express.raw({ type: 'application/json' }));
+  
+  webhookHandler.post('/api/clerk-webhooks', async (req: Request, res: Response) => {
     const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
     
     if (!webhookSecret) {
@@ -158,4 +161,7 @@ export function registerClerkWebhookRoutes(app: Express): void {
       return res.status(500).json({ error: "Internal server error" });
     }
   });
+
+  // Mount the webhook handler to the app
+  app.use(webhookHandler);
 }
