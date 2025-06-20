@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import * as pathModule from "path";
 import { registerRoutes } from "./routes";
+import { registerClerkWebhooks } from "./clerkWebhooks";
 import { setupVite, serveStatic, log } from "./vite";
 import { cookieConsentMiddleware } from "./cookieMiddleware";
 import { renderPageForCrawler } from './ssr';
@@ -186,6 +187,9 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Register webhook endpoints before other routes
+  registerClerkWebhooks(app);
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

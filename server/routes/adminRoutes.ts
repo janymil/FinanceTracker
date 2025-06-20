@@ -19,12 +19,9 @@ export function registerAdminRoutes(app: Express) {
     res.json({ authenticated: !!req.session?.isAdminAuthenticated });
   });
 
-  // Admin dashboard - get all users with automatic synchronization
+  // Admin dashboard - get all users
   app.get('/api/admin-analytics/users', adminAuth, async (req: any, res: Response) => {
     try {
-      // Automatically sync all users from Clerk before displaying
-      await autoSyncAllUsers();
-      
       const users = await storage.getAllUsers();
       console.log(`Admin analytics - Fetched ${users.length} users:`, users.map(u => ({ id: u.id, email: u.email, plan: u.plan })));
       res.json(users);
@@ -114,58 +111,5 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  // Bulk sync all users from Clerk
-  app.post('/api/admin-analytics/sync-users', adminAuth, async (req: any, res: Response) => {
-    try {
-      console.log("Starting bulk user sync from Clerk...");
-      
-      // Get all users from local database
-      const localUsers = await storage.getAllUsers();
-      console.log(`Found ${localUsers.length} users in local database`);
-      
-      let syncedCount = 0;
-      let errorCount = 0;
-      
-      // Sync each user with Clerk data
-      for (const localUser of localUsers) {
-        try {
-          // Skip test users with placeholder emails
-          if (localUser.email?.includes('@clerk.user') || localUser.id === 'test-user-123') {
-            console.log(`Skipping placeholder user: ${localUser.id}`);
-            continue;
-          }
-          
-          // Get user data from Clerk
-          const clerkUser = await clerkClient.users.getUser(localUser.id);
-          
-          // Update local database with Clerk data
-          await storage.updateUser(localUser.id, {
-            email: clerkUser.emailAddresses[0]?.emailAddress || localUser.email,
-            firstName: clerkUser.firstName || '',
-            lastName: clerkUser.lastName || '',
-            profileImageUrl: clerkUser.imageUrl || null
-          });
-          
-          syncedCount++;
-          console.log(`Synced user: ${localUser.id} - ${clerkUser.firstName} ${clerkUser.lastName}`);
-          
-        } catch (userError) {
-          console.error(`Failed to sync user ${localUser.id}:`, userError);
-          errorCount++;
-        }
-      }
-      
-      console.log(`Bulk sync completed. Synced: ${syncedCount}, Errors: ${errorCount}`);
-      res.json({ 
-        success: true, 
-        message: `Bulk sync completed. Updated ${syncedCount} users with ${errorCount} errors.`,
-        syncedCount,
-        errorCount
-      });
-      
-    } catch (error) {
-      console.error("Error in bulk user sync:", error);
-      res.status(500).json({ message: "Failed to sync users from Clerk" });
-    }
-  });
+
 }
