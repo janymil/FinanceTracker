@@ -469,6 +469,7 @@ Changelog:
 - June 20, 2025. PRODUCTION CSP OPTIMIZATION: Enhanced Content Security Policy with production Clerk domains, Replit deployment domains, and comprehensive service coverage to resolve production app loading issues
 - June 20, 2025. COMPREHENSIVE CAPTCHA CSP FIX: Added ALL possible CAPTCHA domains including Google reCAPTCHA (google.com/recaptcha/, gstatic.com/recaptcha/, apis.google.com, ssl.gstatic.com) and hCAPTCHA (assets.hcaptcha.com, js.hcaptcha.com, api.hcaptcha.com, newassets.hcaptcha.com) to all CSP directives to ensure CAPTCHA functionality in production
 - June 20, 2025. DYNAMIC CRAWLER CSP SYSTEM: Implemented intelligent CSP that detects search engines, social media bots, AI crawlers (GPTBot, Claude-Web, Perplexity), and SEO tools to provide permissive HTTPS access for content indexing while maintaining strict security for regular users
+- June 20, 2025. COMPLETE CSP VIOLATIONS FIXED: Resolved all remaining CSP errors by adding Cloudflare Turnstile (challenges.cloudflare.com), Google Analytics regional endpoints (region1.google-analytics.com), and Replit development domains - Clerk authentication and all services now load without CSP violations
 ```
 
 ## User Preferences
