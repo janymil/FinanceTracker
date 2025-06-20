@@ -28,9 +28,9 @@ export async function handleClerkWebhook(req: Request, res: Response) {
     }
 
     const body = JSON.stringify(req.body);
-    const wh = new Webhook(webhookSecret as string);
+    const wh = new Webhook(webhookSecret);
 
-    let evt: WebhookEvent;
+    let evt: any;
 
     try {
       evt = wh.verify(body, {

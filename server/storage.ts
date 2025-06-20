@@ -327,11 +327,6 @@ export class DatabaseStorage implements IStorage {
         parentTransactionId: transactions.parentTransactionId,
         paymentUrl: transactions.paymentUrl,
         referenceNote: transactions.referenceNote,
-        imageUrl: transactions.imageUrl,
-        ocrText: transactions.ocrText,
-        ocrVendor: transactions.ocrVendor,
-        ocrDetectedAmount: transactions.ocrDetectedAmount,
-        ocrDetectedDate: transactions.ocrDetectedDate,
         categoryName: categories.name,
         categoryIcon: categories.icon,
         categoryColor: categories.color,
@@ -460,7 +455,7 @@ export class DatabaseStorage implements IStorage {
           .where(
             and(
               eq(transactions.userId, userId),
-              eq(transactions.categoryId, budget.categoryId!),
+              eq(transactions.categoryId, budget.categoryId),
               eq(transactions.type, 'expense'),
               gte(transactions.date, budget.startDate),
               lte(transactions.date, budget.endDate)
