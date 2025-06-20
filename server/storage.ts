@@ -312,25 +312,7 @@ export class DatabaseStorage implements IStorage {
 
   async getUserTransactions(userId: string, limit?: number): Promise<Transaction[]> {
     let query = db
-      .select({
-        id: transactions.id,
-        userId: transactions.userId,
-        categoryId: transactions.categoryId,
-        amount: transactions.amount,
-        description: transactions.description,
-        date: transactions.date,
-        type: transactions.type,
-        createdAt: transactions.createdAt,
-        isRecurring: transactions.isRecurring,
-        recurringFrequency: transactions.recurringFrequency,
-        recurringEndDate: transactions.recurringEndDate,
-        parentTransactionId: transactions.parentTransactionId,
-        paymentUrl: transactions.paymentUrl,
-        referenceNote: transactions.referenceNote,
-        categoryName: categories.name,
-        categoryIcon: categories.icon,
-        categoryColor: categories.color,
-      })
+      .select()
       .from(transactions)
       .leftJoin(categories, eq(transactions.categoryId, categories.id))
       .where(eq(transactions.userId, userId))
@@ -342,12 +324,30 @@ export class DatabaseStorage implements IStorage {
 
     const userTransactions = await query;
 
-    // Decrypt sensitive fields
-    return userTransactions.map(transaction => ({
-      ...transaction,
-      amount: DataEncryption.decryptAmount(transaction.amount),
-      description: DataEncryption.decryptDescription(transaction.description),
-      referenceNote: transaction.referenceNote ? DataEncryption.decrypt(transaction.referenceNote) : null
+    // Map and decrypt the results
+    return userTransactions.map(row => ({
+      id: row.transactions.id,
+      userId: row.transactions.userId,
+      categoryId: row.transactions.categoryId,
+      amount: row.transactions.amount,
+      description: row.transactions.description,
+      date: row.transactions.date,
+      type: row.transactions.type,
+      createdAt: row.transactions.createdAt,
+      isRecurring: row.transactions.isRecurring,
+      recurringFrequency: row.transactions.recurringFrequency,
+      recurringEndDate: row.transactions.recurringEndDate,
+      parentTransactionId: row.transactions.parentTransactionId,
+      paymentUrl: row.transactions.paymentUrl,
+      referenceNote: row.transactions.referenceNote,
+      imageUrl: row.transactions.imageUrl,
+      ocrText: row.transactions.ocrText,
+      ocrVendor: row.transactions.ocrVendor,
+      ocrDetectedAmount: row.transactions.ocrDetectedAmount,
+      ocrDetectedDate: row.transactions.ocrDetectedDate,
+      categoryName: row.categories?.name || null,
+      categoryIcon: row.categories?.icon || null,
+      categoryColor: row.categories?.color || null,
     }));
   }
 
@@ -455,7 +455,7 @@ export class DatabaseStorage implements IStorage {
           .where(
             and(
               eq(transactions.userId, userId),
-              eq(transactions.categoryId, budget.categoryId),
+              eq(transactions.categoryId, budget.categoryId!),
               eq(transactions.type, 'expense'),
               gte(transactions.date, budget.startDate),
               lte(transactions.date, budget.endDate)
