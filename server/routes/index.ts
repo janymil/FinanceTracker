@@ -36,6 +36,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerRealtimeRoutes(app);
   registerExportRoutes(app);
   registerStripeRoutes(app);
+  registerRedeemRoutes(app);
 
   // Receipt upload endpoint
   app.post('/api/upload-receipt', uploadReceiptHandler);
