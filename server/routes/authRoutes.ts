@@ -33,20 +33,59 @@ export function registerAuthRoutes(app: Express) {
 
       let user = await storage.getUser(userId);
       
-      // If user doesn't exist, create with basic data
+      // If user doesn't exist, get real data from Clerk and create user
       if (!user) {
-        const userData = {
-          id: userId,
-          email: `${userId}@clerk.user`,
-          firstName: null,
-          lastName: null,
-          profileImageUrl: null,
-          plan: 'free',
-          stripeCustomerId: null,
-          stripeSubscriptionId: null,
-          settings: null
-        };
-        user = await storage.upsertUser(userData);
+        try {
+          // Get user data from Clerk auth context
+          const clerkUser = req.auth().user;
+          if (clerkUser) {
+            const primaryEmail = clerkUser.emailAddresses?.find(email => email.id === clerkUser.primaryEmailAddressId)?.emailAddress;
+            
+            const userData = {
+              id: userId,
+              email: primaryEmail || null,
+              firstName: clerkUser.firstName || null,
+              lastName: clerkUser.lastName || null,
+              profileImageUrl: clerkUser.imageUrl || null,
+              plan: 'free',
+              stripeCustomerId: null,
+              stripeSubscriptionId: null,
+              settings: null
+            };
+            user = await storage.upsertUser(userData);
+            console.log(`Created user from Clerk data: ${userId} (${primaryEmail})`);
+          } else {
+            // Fallback if Clerk data not available
+            const userData = {
+              id: userId,
+              email: null,
+              firstName: null,
+              lastName: null,
+              profileImageUrl: null,
+              plan: 'free',
+              stripeCustomerId: null,
+              stripeSubscriptionId: null,
+              settings: null
+            };
+            user = await storage.upsertUser(userData);
+            console.log(`Created fallback user: ${userId}`);
+          }
+        } catch (error) {
+          console.error('Error creating user from Clerk data:', error);
+          // Final fallback
+          const userData = {
+            id: userId,
+            email: null,
+            firstName: null,
+            lastName: null,
+            profileImageUrl: null,
+            plan: 'free',
+            stripeCustomerId: null,
+            stripeSubscriptionId: null,
+            settings: null
+          };
+          user = await storage.upsertUser(userData);
+        }
       }
 
       return res.json(user);
