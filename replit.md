@@ -487,6 +487,7 @@ Changelog:
 - June 20, 2025. ADMIN USER MANAGEMENT FIXED: Completed missing PUT and DELETE API endpoints in adminRoutes.ts for user editing and deletion functionality - admin can now update user plans, names, emails and delete users completely with proper cache invalidation in frontend
 - June 20, 2025. REACT QUERY CACHE INVALIDATION FIXED: Replaced invalidateQueries with refetchQueries in admin analytics page for immediate UI updates after user edit/delete operations - no longer requires page reload to see changes
 - June 20, 2025. MASCOT IMAGE PERSISTENCE ENHANCED: Improved financial mascot component with immediate localStorage loading, authentication retry logic with exponential backoff, and better error handling to ensure generated mascot images persist across sessions
+- June 20, 2025. CLERK USER DATA INTEGRATION FIXED: Fixed admin analytics displaying long Clerk user IDs without names/emails by updating /api/auth/user endpoint to fetch real user data from Clerk authentication context instead of creating placeholder @clerk.user emails - new users will now have proper first name, last name, and email address displayed in admin panel
 ```
 
 ## User Preferences
