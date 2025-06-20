@@ -36,23 +36,16 @@ export function useAuth() {
   // Get our database user record that syncs with Clerk
   const canFetchUser = userLoaded && authLoaded && isSignedIn && !!clerkUser?.id;
   
-  const { data: user, isLoading: dbUserLoading } = useQuery<User>({
+  const { data: user, isLoading: dbUserLoading, error } = useQuery<User>({
     queryKey: ["/api/auth/user"],
     queryFn: getQueryFn({ 
       on401: "returnNull"
     }),
     enabled: canFetchUser,
-    retry: (failureCount, error: any) => {
-      // Don't retry on JWT/auth errors
-      if (error?.message?.includes('jwt') || error?.message?.includes('token') || error?.status === 401) {
-        return false;
-      }
-      return failureCount < 3;
-    },
+    retry: false, // Disable retries to prevent errors
     staleTime: 0,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     refetchInterval: false,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   const isLoading = !userLoaded || !authLoaded || dbUserLoading;

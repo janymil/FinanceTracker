@@ -55,12 +55,13 @@ app.use((req, res, next) => {
   
   res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net https://www.googletagmanager.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://www.google.com https://www.gstatic.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net https://www.googletagmanager.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://www.google.com https://www.gstatic.com blob:",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.clerk.com https://*.clerk.dev",
     "img-src 'self' data: blob: https://*",
     "font-src 'self' https://fonts.gstatic.com data:",
-    "connect-src 'self' https://api.openai.com https://*.stripe.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://*.finanzerpro.com",
+    "connect-src 'self' https://api.openai.com https://*.stripe.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://*.finanzerpro.com wss: ws:",
     "frame-src https://js.stripe.com https://*.clerk.com https://*.clerk.dev https://www.google.com https://www.gstatic.com",
+    "worker-src 'self' blob:",
     "frame-ancestors 'none'"
   ].join('; '));
   
