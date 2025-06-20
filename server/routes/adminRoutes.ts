@@ -57,7 +57,6 @@ export function registerAdminRoutes(app: Express) {
 
       const users = await storage.getAllUsers();
       const updatedUsers = [];
-      const deletedUsers = [];
       let errors = [];
 
       for (const user of users) {
@@ -84,28 +83,14 @@ export function registerAdminRoutes(app: Express) {
             console.log(`Synced user ${user.id} with Clerk data: ${primaryEmail}`);
           }
         } catch (userError: any) {
-          // Check if this is a "user not found" error from Clerk
-          if (userError?.status === 404 || userError?.message?.includes('not found')) {
-            try {
-              // User doesn't exist in Clerk anymore - delete from local database
-              await storage.deleteUserCompletely(user.id);
-              deletedUsers.push(user.id);
-              console.log(`Deleted user ${user.id} - no longer exists in Clerk`);
-            } catch (deleteError: any) {
-              console.error(`Failed to delete user ${user.id}:`, deleteError);
-              errors.push({ userId: user.id, error: `Delete failed: ${deleteError?.message || 'Unknown error'}` });
-            }
-          } else {
-            console.error(`Failed to sync user ${user.id}:`, userError);
-            errors.push({ userId: user.id, error: userError?.message || 'Unknown error' });
-          }
+          console.error(`Failed to sync user ${user.id}:`, userError);
+          errors.push({ userId: user.id, error: userError?.message || 'Unknown error' });
         }
       }
 
       return res.json({
         success: true,
         updatedUsers: updatedUsers.length,
-        deletedUsers: deletedUsers.length,
         totalUsers: users.length,
         errors: errors.length,
         details: errors

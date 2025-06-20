@@ -504,6 +504,7 @@ export default function AdminAnalytics() {
 
         <TabsContent value="users" className="space-y-6">
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          </div>
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -525,33 +526,21 @@ export default function AdminAnalytics() {
                   <SelectItem value="premium">Premium</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-          </div>
-          <div className="flex gap-2">
-              <Button 
-                onClick={syncClerkUsers}
-                disabled={isSyncingUsers}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                {isSyncingUsers ? (
-                  <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full"></div>
-                ) : (
-                  <RefreshCw className="h-4 w-4" />
-                )}
-                {isSyncingUsers ? 'Syncing...' : 'Sync with Clerk'}
-              </Button>
               
-              <Button
-                onClick={() => setDeleteConfirmOpen(true)}
-                variant="destructive"
-                className="flex items-center gap-2"
-              >
-                <Trash2 className="h-4 w-4" />
-                Delete All Users
-              </Button>
+              <Select value={userTypeFilter} onValueChange={setUserTypeFilter}>
+                <SelectTrigger className="w-full sm:w-40">
+                  <SelectValue placeholder="Filter by type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Users</SelectItem>
+                  <SelectItem value="prod">Production</SelectItem>
+                  <SelectItem value="dev">Development</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
+
+          <div className="flex gap-2">
               <Button 
                 onClick={syncClerkUsers}
                 disabled={isSyncingUsers}
