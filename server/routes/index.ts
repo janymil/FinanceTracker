@@ -17,7 +17,6 @@ import { setCookieConsent } from "../cookieMiddleware";
 import { registerMobileUploadRoutes } from "./mobileUploadRoutes";
 import { handleContactForm } from "../contact";
 import { registerRedeemRoutes } from "./redeemRoutes";
-import { handleClerkWebhook } from "../clerkWebhooks";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Cookie consent middleware
