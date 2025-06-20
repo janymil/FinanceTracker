@@ -53,16 +53,24 @@ app.use((req, res, next) => {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
   
-  // Production-ready CSP that allows CAPTCHA and all app functionality
+  // Comprehensive CSP allowing all app services and functionality
   res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:",
-    "style-src 'self' 'unsafe-inline' https:",
-    "img-src 'self' data: blob: https:",
-    "font-src 'self' data: https:",
-    "connect-src 'self' https: wss: ws:",
-    "frame-src https:",
+    // Scripts: Clerk auth, Stripe payments, Google Analytics, CAPTCHA, CDN libraries
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://hcaptcha.com https://*.hcaptcha.com blob:",
+    // Styles: Google Fonts, Clerk UI, CAPTCHA styles
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.clerk.com https://*.clerk.dev https://hcaptcha.com https://*.hcaptcha.com",
+    // Images: All HTTPS sources, Clerk avatars, receipts, data URLs
+    "img-src 'self' data: blob: https://* https://*.clerk.com https://*.bunny.net",
+    // Fonts: Google Fonts and data URLs
+    "font-src 'self' https://fonts.gstatic.com data:",
+    // Connections: API calls to OpenAI, Stripe, Clerk, Google Analytics, Bunny.net storage
+    "connect-src 'self' https://api.openai.com https://*.stripe.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://*.finanzerpro.com https://www.google-analytics.com https://www.googletagmanager.com https://*.bunny.net https://la.storage.bunnycdn.com https://www.google.com https://www.recaptcha.net https://hcaptcha.com https://*.hcaptcha.com wss: ws:",
+    // Frames: Stripe checkout, Clerk auth, Google services, CAPTCHA
+    "frame-src https://js.stripe.com https://checkout.stripe.com https://*.clerk.com https://*.clerk.dev https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.net https://hcaptcha.com https://*.hcaptcha.com",
+    // Workers: Clerk authentication workers
     "worker-src 'self' blob:",
+    // Security: Prevent embedding in other sites
     "frame-ancestors 'none'"
   ].join('; '));
   
