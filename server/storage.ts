@@ -245,9 +245,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users);
-  }
+  // Removed duplicate getAllUsers - using the one at line 1153
 
   async updateUserPlan(userId: string, plan: 'free' | 'standard' | 'premium', billingInterval: 'monthly' | 'yearly' = 'monthly'): Promise<User> {
     const updatedUsers = await db

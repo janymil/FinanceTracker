@@ -82,7 +82,7 @@ export function registerAdminRoutes(app: Express) {
             updatedUsers.push(user.id);
             console.log(`Synced user ${user.id} with Clerk data: ${primaryEmail}`);
           }
-        } catch (userError) {
+        } catch (userError: any) {
           console.error(`Failed to sync user ${user.id}:`, userError);
           errors.push({ userId: user.id, error: userError.message });
         }
@@ -95,7 +95,7 @@ export function registerAdminRoutes(app: Express) {
         errors: errors.length,
         details: errors
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error syncing users with Clerk:", error);
       return res.status(500).json({ 
         success: false, 

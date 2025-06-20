@@ -34,7 +34,7 @@ app.use((req, res, next) => {
   res.writeHead = function(statusCode, headers) {
     if (!this.headersSent && !this.finished) {
       try {
-        return originalWriteHead.call(this, statusCode, headers);
+        return originalWriteHead.call(this, statusCode, headers as any);
       } catch (error: any) {
         console.error(`WriteHead conflict prevented:`, error.message);
         return this;

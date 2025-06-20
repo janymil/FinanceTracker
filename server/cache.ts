@@ -113,7 +113,7 @@ class APICache {
   // Clear expired entries (call periodically)
   cleanup(): void {
     const now = Date.now();
-    for (const [key, entry] of this.cache.entries()) {
+    for (const [key, entry] of Array.from(this.cache.entries())) {
       if (this.isExpired(entry)) {
         this.cache.delete(key);
       }
