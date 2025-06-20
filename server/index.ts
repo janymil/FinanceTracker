@@ -54,13 +54,17 @@ app.use((req, res, next) => {
   }
   
   // Content Security Policy to establish legitimacy
+  const clerkDomain = process.env.NODE_ENV === 'production' 
+    ? 'https://clerk.finanzerpro.com' 
+    : 'https://*.clerk.accounts.dev';
+  
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://clerk.finanzerpro.com https://replit.com",
+    `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${clerkDomain} https://replit.com`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https:",
     "font-src 'self' data:",
-    "connect-src 'self' https://*.clerk.accounts.dev https://clerk.finanzerpro.com https://api.openai.com",
+    `connect-src 'self' ${clerkDomain} https://api.openai.com`,
     "worker-src 'self' blob:",
     "form-action 'self'",
     "frame-ancestors 'none'"
