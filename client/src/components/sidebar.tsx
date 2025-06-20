@@ -60,9 +60,8 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
   }
 
   const hasAccess = (requiredPlan: string) => {
-    if (!user?.plan) return false;
     const planHierarchy = { free: 0, standard: 1, premium: 2 };
-    return planHierarchy[user.plan as keyof typeof planHierarchy] >= planHierarchy[requiredPlan as keyof typeof planHierarchy];
+    return planHierarchy[currentPlan as keyof typeof planHierarchy] >= planHierarchy[requiredPlan as keyof typeof planHierarchy];
   };
 
   const menuItems = [
