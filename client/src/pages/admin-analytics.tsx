@@ -92,7 +92,7 @@ export default function AdminAnalytics() {
 
   const { data: users = [], isLoading: usersLoading } = useQuery({
     queryKey: ['/api/admin-analytics/users'],
-    queryFn: adminFetch,
+    queryFn: () => adminFetch('/api/admin-analytics/users'),
     enabled: isAuthenticated,
   });
 

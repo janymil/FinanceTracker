@@ -475,6 +475,7 @@ Changelog:
 - June 20, 2025. GOOGLE ANALYTICS SECURITY ENHANCEMENT: Moved Google Analytics measurement ID (VITE_GA_MEASUREMENT_ID) from .env file to secure Replit secrets for enhanced security - eliminated console warnings and improved production deployment security
 - June 20, 2025. CLOUDFLARE TURNSTILE CSP FIX: Enhanced CSP with additional Cloudflare domains (cloudflare.com, static.cloudflareinsights.com) to resolve Turnstile CAPTCHA error 300030 in production deployment - addresses widget hanging issues on finanzerpro.com
 - June 20, 2025. INCOGNITO MODE DETECTION IMPLEMENTED: Added automatic detection and user warning for incognito/private browsing mode where CAPTCHA and authentication may fail - displays dismissible notification with clear explanation of potential issues
+- June 20, 2025. ADMIN ANALYTICS DATABASE SCHEMA FIXED: Resolved admin-analytics page user display issues by correcting property name mismatches between frontend expectations and database schema - Drizzle ORM correctly maps snake_case database columns (first_name, last_name, profile_image_url, created_at) to camelCase TypeScript properties (firstName, lastName, profileImageUrl, createdAt) ensuring proper user data display in admin panel
 ```
 
 ## User Preferences
