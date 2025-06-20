@@ -311,7 +311,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserTransactions(userId: string, limit?: number): Promise<Transaction[]> {
-    let query = db
+    const baseQuery = db
       .select({
         id: transactions.id,
         userId: transactions.userId,
@@ -341,11 +341,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(transactions.userId, userId))
       .orderBy(desc(transactions.date));
 
-    if (limit) {
-      query = query.limit(limit);
-    }
-
-    const userTransactions = await query;
+    const userTransactions = limit ? await baseQuery.limit(limit) : await baseQuery;
 
     // Decrypt sensitive fields
     return userTransactions.map(transaction => ({
@@ -460,7 +456,7 @@ export class DatabaseStorage implements IStorage {
           .where(
             and(
               eq(transactions.userId, userId),
-              eq(transactions.categoryId, budget.categoryId),
+              budget.categoryId ? eq(transactions.categoryId, budget.categoryId) : sql`1=1`,
               eq(transactions.type, 'expense'),
               gte(transactions.date, budget.startDate),
               lte(transactions.date, budget.endDate)
