@@ -528,41 +528,30 @@ export default function AdminAnalytics() {
             </div>
           </div>
           <div className="flex gap-2">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search users..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8 w-full sm:w-80"
-                />
-              </div>
-              <Select value={planFilter} onValueChange={setPlanFilter}>
-                <SelectTrigger className="w-full sm:w-40">
-                  <SelectValue placeholder="Filter by plan" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Plans</SelectItem>
-                  <SelectItem value="free">Free</SelectItem>
-                  <SelectItem value="standard">Standard</SelectItem>
-                  <SelectItem value="premium">Premium</SelectItem>
-                </SelectContent>
-              </Select>
+              <Button 
+                onClick={syncClerkUsers}
+                disabled={isSyncingUsers}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                {isSyncingUsers ? (
+                  <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full"></div>
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                {isSyncingUsers ? 'Syncing...' : 'Sync with Clerk'}
+              </Button>
               
-              <Select value={userTypeFilter} onValueChange={setUserTypeFilter}>
-                <SelectTrigger className="w-full sm:w-40">
-                  <SelectValue placeholder="Filter by type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Users</SelectItem>
-                  <SelectItem value="prod">Production</SelectItem>
-                  <SelectItem value="dev">Development</SelectItem>
-                </SelectContent>
-              </Select>
+              <Button
+                onClick={() => setDeleteConfirmOpen(true)}
+                variant="destructive"
+                className="flex items-center gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete All Users
+              </Button>
             </div>
           </div>
-
-          <div className="flex gap-2">
               <Button 
                 onClick={syncClerkUsers}
                 disabled={isSyncingUsers}
