@@ -13,7 +13,7 @@ export const initGA = () => {
     return;
   }
 
-  const measurementId = 'G-PRRBGDT20Q';
+  const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
 
   // Add Google Analytics script to the head
   const script1 = document.createElement('script');

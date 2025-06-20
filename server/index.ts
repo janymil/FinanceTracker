@@ -70,6 +70,19 @@ app.use((req, res, next) => {
       "worker-src 'self' blob:",
       "frame-ancestors 'none'"
     ].join('; '));
+  } else if (process.env.NODE_ENV === 'development') {
+    // Development CSP - more permissive for localhost
+    res.setHeader('Content-Security-Policy', [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http: localhost:",
+      "style-src 'self' 'unsafe-inline' https:",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' https: data:",
+      "connect-src 'self' https: http: ws: wss: localhost:",
+      "frame-src 'self' https:",
+      "worker-src 'self' blob:",
+      "frame-ancestors 'none'"
+    ].join('; '));
   } else {
     // Production CSP with comprehensive service support for regular users
     res.setHeader('Content-Security-Policy', [
