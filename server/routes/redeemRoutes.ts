@@ -58,8 +58,11 @@ export function registerRedeemRoutes(app: Express) {
         redeemedCodes.push(redeemedCode);
       }
 
-      // Update user's plan
-      await storage.updateUser(userId, { plan });
+      // Update user's plan and set activation timestamp
+      await storage.updateUser(userId, { 
+        plan,
+        activatedAt: new Date()
+      });
 
       res.json({
         success: true,

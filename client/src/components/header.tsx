@@ -41,7 +41,8 @@ import {
   Bell,
   Search,
   Repeat,
-  HelpCircle
+  HelpCircle,
+  Gift
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
@@ -176,6 +177,18 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
+
+          {/* Redeem Code button */}
+          <Link href="/redeem">
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="border-orange-500 text-orange-600 hover:bg-orange-50 dark:border-orange-400 dark:text-orange-400 dark:hover:bg-orange-950"
+            >
+              <Gift className="h-4 w-4 mr-2" />
+              Redeem Code
+            </Button>
+          </Link>
 
           {/* Quick add transaction button */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

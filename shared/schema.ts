@@ -37,6 +37,7 @@ export const users = pgTable("users", {
   plan: varchar("plan", { length: 20 }).default("free").notNull(),
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
+  activatedAt: timestamp("activated_at"), // When user activated their plan via AppSumo code redemption
   settings: text("settings"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
