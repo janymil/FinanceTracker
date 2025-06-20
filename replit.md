@@ -463,6 +463,7 @@ Changelog:
 - June 19, 2025. COMPREHENSIVE MARKETING CONTENT CREATED: Developed professional marketing article (FINANZERPRO_ARTICLE.md) showcasing all key features, AI capabilities, subscription tiers, user testimonials, and technical specifications - ready for use in promotional materials and website content
 - June 20, 2025. APPSUMO CODE REDEMPTION SYSTEM IMPLEMENTED: Complete code redemption functionality with database schema (redeem_codes table), API endpoint (/api/redeem), frontend page (/redeem), and header "Redeem Code" button - 1 code grants Standard plan, 2 codes grant Premium plan with activatedAt timestamp for RequirePlan component recognition
 - June 20, 2025. CSP AUTHENTICATION DOMAINS FIXED: Updated Content Security Policy to automatically switch between development (*.clerk.accounts.dev) and production (clerk.finanzerpro.com) Clerk domains based on NODE_ENV for seamless deployment
+- June 20, 2025. APPSUMO BULK CODE UPLOAD COMPLETED: Successfully uploaded all 1000 AppSumo redemption codes from CSV file directly to redeem_codes database table - system ready for production AppSumo launch with complete code inventory
 ```
 
 ## User Preferences

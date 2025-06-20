@@ -1,8 +1,4 @@
-import { Express } from "express";
-import { z } from "zod";
-import { storage } from "../storage";
-import multer from "multer";
-import { parse } from "csv-parse/sync";
+// Admin redeem routes - no longer needed as codes uploaded directly
 
 const upload = multer({ 
   storage: multer.memoryStorage(),
