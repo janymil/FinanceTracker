@@ -19,11 +19,25 @@ const redeemSchema = z.object({
 
 type RedeemForm = z.infer<typeof redeemSchema>;
 
+interface RedeemStatus {
+  redeemedCodes: Array<{
+    code: string;
+    redeemedAt: string;
+    tier: string;
+  }>;
+  plan: string;
+  totalRedeemed: number;
+  canRedeemMore: boolean;
+  remainingSlots: number;
+}
+
 export default function RedeemPage() {
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [redeemStatus, setRedeemStatus] = useState<RedeemStatus | null>(null);
+  const [statusLoading, setStatusLoading] = useState(true);
 
   const form = useForm<RedeemForm>({
     resolver: zodResolver(redeemSchema),
@@ -32,6 +46,33 @@ export default function RedeemPage() {
       code2: "",
     },
   });
+
+  // Fetch current redemption status
+  useEffect(() => {
+    const fetchRedeemStatus = async () => {
+      if (!isLoaded || !isSignedIn) return;
+      
+      try {
+        const token = await getToken();
+        const response = await fetch("/api/my-codes", {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const status = await response.json();
+          setRedeemStatus(status);
+        }
+      } catch (error) {
+        console.error("Failed to fetch redeem status:", error);
+      } finally {
+        setStatusLoading(false);
+      }
+    };
+
+    fetchRedeemStatus();
+  }, [isLoaded, isSignedIn, getToken]);
 
   const onSubmit = async (data: RedeemForm) => {
     try {
@@ -71,11 +112,18 @@ export default function RedeemPage() {
       if (validCodes.length > 0) {
         toast({
           title: "Codes redeemed successfully!",
-          description: `You've been upgraded to ${plan} plan with ${validCodes.length} code(s).`,
+          description: `You've been upgraded to ${plan} plan with ${result.totalCodes} total codes.`,
         });
         
-        // Redirect to dashboard after successful redemption
-        setTimeout(() => setLocation("/dashboard"), 2000);
+        // Refresh status after successful redemption
+        const statusResponse = await fetch("/api/my-codes", {
+          headers: { "Authorization": `Bearer ${token}` },
+        });
+        if (statusResponse.ok) {
+          const newStatus = await statusResponse.json();
+          setRedeemStatus(newStatus);
+        }
+        form.reset();
       } else {
         throw new Error("No valid codes provided");
       }
@@ -114,8 +162,52 @@ export default function RedeemPage() {
             </CardHeader>
             
             <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div>
+                {/* Current Redemption Status */}
+                {!statusLoading && redeemStatus && (
+                  <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      Your Redeemed Codes
+                    </h3>
+                    
+                    {redeemStatus.totalRedeemed > 0 ? (
+                      <div className="space-y-2">
+                        {redeemStatus.redeemedCodes.map((codeData, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-white dark:bg-gray-600 rounded border">
+                            <span className="font-mono text-sm">{codeData.code}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {new Date(codeData.redeemedAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        ))}
+                        <div className="mt-3 p-2 bg-green-50 dark:bg-green-900 rounded border border-green-200 dark:border-green-700">
+                          <p className="text-sm text-green-700 dark:text-green-300">
+                            <strong>Current Plan:</strong> {redeemStatus.plan.toUpperCase()}
+                          </p>
+                          {redeemStatus.canRedeemMore ? (
+                            <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                              You can redeem {redeemStatus.remainingSlots} more code(s) {redeemStatus.remainingSlots === 1 ? 'to unlock Premium' : ''}
+                            </p>
+                          ) : (
+                            <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                              Maximum codes redeemed - Premium plan activated!
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        No codes redeemed yet. Redeem 1 code for Standard plan or 2 codes for Premium plan.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Show form only if user can redeem more codes */}
+                {!statusLoading && (!redeemStatus || redeemStatus.canRedeemMore) && (
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <FormField
                     control={form.control}
                     name="code1"
@@ -187,7 +279,31 @@ export default function RedeemPage() {
                     )}
                   </Button>
                 </form>
-              </Form>
+                </Form>
+              )}
+
+              {/* Show message when user has redeemed maximum codes */}
+              {!statusLoading && redeemStatus && !redeemStatus.canRedeemMore && (
+                <div className="text-center p-6">
+                  <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-4">
+                    <Lock className="w-8 h-8 text-green-600 dark:text-green-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-green-700 dark:text-green-300 mb-2">
+                    All Codes Redeemed!
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    You've reached the maximum number of redemptions and have Premium access.
+                  </p>
+                </div>
+              )}
+
+              {/* Loading state */}
+              {statusLoading && (
+                <div className="text-center p-6">
+                  <Loader2 className="mx-auto w-8 h-8 animate-spin text-gray-400" />
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Loading redemption status...</p>
+                </div>
+              )}
 
               <div className="mt-6 text-center">
                 <Button
