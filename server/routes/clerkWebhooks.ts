@@ -95,6 +95,7 @@ export function registerClerkWebhookRoutes(app: Express) {
           break;
           
         case 'user.deleted':
+          console.log('Processing user.deleted webhook for user:', data.id);
           await handleUserDeleted(data);
           break;
           
