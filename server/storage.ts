@@ -1166,7 +1166,12 @@ export class DatabaseStorage implements IStorage {
     // Delete all user's data in correct order (respecting foreign keys)
     // Note: This properly handles encrypted data deletion
 
-    // Delete goals first
+    // Delete or nullify redeem codes first (to handle foreign key constraint)
+    await db.update(redeemCodes)
+      .set({ userId: null })
+      .where(eq(redeemCodes.userId, userId));
+
+    // Delete goals
     await db.delete(goals).where(eq(goals.userId, userId));
 
     // Delete budgets
@@ -1177,6 +1182,28 @@ export class DatabaseStorage implements IStorage {
 
     // Delete expense reminders
     await db.delete(expenseReminders).where(eq(expenseReminders.userId, userId));
+
+    // Delete financial mascots
+    await db.delete(financialMascots).where(eq(financialMascots.userId, userId));
+
+    // Delete backup settings
+    await db.delete(backupSettings).where(eq(backupSettings.userId, userId));
+
+    // Delete categories (only user-created ones)
+    await db.delete(categories).where(eq(categories.userId, userId));
+
+    // Delete collaborative goal related data
+    await db.delete(collaborativeGoalParticipants).where(eq(collaborativeGoalParticipants.userId, userId));
+    await db.delete(goalContributions).where(eq(goalContributions.userId, userId));
+    await db.delete(challengeActivities).where(eq(challengeActivities.userId, userId));
+    await db.delete(milestoneAchievements).where(eq(milestoneAchievements.userId, userId));
+    await db.delete(collaborativeGoals).where(eq(collaborativeGoals.creatorId, userId));
+
+    // Delete friendships
+    await db.delete(friendships).where(or(
+      eq(friendships.userId, userId),
+      eq(friendships.friendId, userId)
+    ));
 
     // Finally delete the user
     await db.delete(users).where(eq(users.id, userId));
