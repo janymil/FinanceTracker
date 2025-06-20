@@ -47,6 +47,64 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Admin - sync all users with Clerk data
+  app.post('/api/admin-analytics/sync-clerk-users', adminAuth, async (req: any, res: Response) => {
+    try {
+      const { createClerkClient } = await import('@clerk/backend');
+      const clerkClient = createClerkClient({ 
+        secretKey: process.env.CLERK_SECRET_KEY 
+      });
+
+      const users = await storage.getAllUsers();
+      const updatedUsers = [];
+      let errors = [];
+
+      for (const user of users) {
+        try {
+          // Fetch user data from Clerk API
+          const clerkUser = await clerkClient.users.getUser(user.id);
+          
+          if (clerkUser) {
+            const primaryEmail = clerkUser.emailAddresses?.find(email => 
+              email.id === clerkUser.primaryEmailAddressId
+            )?.emailAddress;
+            
+            const updatedUserData = {
+              ...user,
+              email: primaryEmail || user.email,
+              firstName: clerkUser.firstName || user.firstName,
+              lastName: clerkUser.lastName || user.lastName,
+              profileImageUrl: clerkUser.imageUrl || user.profileImageUrl,
+              updatedAt: new Date()
+            };
+
+            await storage.updateUser(user.id, updatedUserData);
+            updatedUsers.push(user.id);
+            console.log(`Synced user ${user.id} with Clerk data: ${primaryEmail}`);
+          }
+        } catch (userError) {
+          console.error(`Failed to sync user ${user.id}:`, userError);
+          errors.push({ userId: user.id, error: userError.message });
+        }
+      }
+
+      return res.json({
+        success: true,
+        updatedUsers: updatedUsers.length,
+        totalUsers: users.length,
+        errors: errors.length,
+        details: errors
+      });
+    } catch (error) {
+      console.error("Error syncing users with Clerk:", error);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Failed to sync users with Clerk",
+        error: error.message 
+      });
+    }
+  });
+
   // Admin - update user subscription plan (MOST IMPORTANT FOR USER)
   app.put('/api/admin-analytics/users/:userId/plan', adminAuth, async (req: any, res: Response) => {
     try {

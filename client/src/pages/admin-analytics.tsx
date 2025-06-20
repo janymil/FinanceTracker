@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Users, UserPlus, Edit, Trash2, Crown, Shield, TrendingUp, Search, Filter } from "lucide-react";
+import { Users, UserPlus, Edit, Trash2, Crown, Shield, TrendingUp, Search, Filter, RefreshCw } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 interface User {
@@ -54,6 +55,7 @@ export default function AdminAnalytics() {
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [isUpdatingUser, setIsUpdatingUser] = useState(false);
   const [isDeletingUser, setIsDeletingUser] = useState(false);
+  const [isSyncingUsers, setIsSyncingUsers] = useState(false);
   const { toast } = useToast();
 
   // Check authentication status on component mount
@@ -246,6 +248,43 @@ export default function AdminAnalytics() {
       });
     } finally {
       setIsDeletingUser(false);
+    }
+  };
+
+  const syncClerkUsers = async () => {
+    setIsSyncingUsers(true);
+    try {
+      const response = await fetch('/api/admin-analytics/sync-clerk-users', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to sync users with Clerk');
+      }
+      
+      const result = await response.json();
+      
+      // Force immediate refetch of data
+      await queryClient.refetchQueries({ queryKey: ['admin-analytics-users'] });
+      await queryClient.refetchQueries({ queryKey: ['admin-analytics-overview'] });
+      
+      toast({
+        title: "Sync Complete",
+        description: `Updated ${result.updatedUsers} out of ${result.totalUsers} users with Clerk data`,
+      });
+      
+      if (result.errors > 0) {
+        console.warn('Some users failed to sync:', result.details);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sync users with Clerk",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSyncingUsers(false);
     }
   };
 
@@ -499,13 +538,23 @@ export default function AdminAnalytics() {
               </Select>
             </div>
 
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button>
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Add User
-                </Button>
-              </DialogTrigger>
+            <div className="flex gap-2">
+              <Button 
+                onClick={syncClerkUsers}
+                disabled={isSyncingUsers}
+                variant="outline"
+              >
+                <RefreshCw className={cn("h-4 w-4 mr-2", isSyncingUsers && "animate-spin")} />
+                {isSyncingUsers ? "Syncing..." : "Sync with Clerk"}
+              </Button>
+              
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button>
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Add User
+                  </Button>
+                </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Create New User</DialogTitle>
