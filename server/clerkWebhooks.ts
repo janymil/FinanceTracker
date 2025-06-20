@@ -14,45 +14,40 @@ interface WebhookEvent {
 }
 
 export async function handleClerkWebhook(req: Request, res: Response) {
-  const svix_id = req.headers['svix-id'] as string;
-  const svix_timestamp = req.headers['svix-timestamp'] as string;
-  const svix_signature = req.headers['svix-signature'] as string;
-
-  if (!svix_id || !svix_timestamp || !svix_signature) {
-    console.error('Missing svix headers');
-    return res.status(400).json({ error: 'Missing headers' });
-  }
-
-  if (!webhookSecret) {
-    console.error('CLERK_WEBHOOK_SECRET not configured');
-    return res.status(500).json({ error: 'Webhook not configured' });
-  }
+  // Respond immediately to prevent timeout
+  res.status(200).json({ received: true });
 
   try {
+    const svix_id = req.headers['svix-id'] as string;
+    const svix_timestamp = req.headers['svix-timestamp'] as string;
+    const svix_signature = req.headers['svix-signature'] as string;
+
+    if (!svix_id || !svix_timestamp || !svix_signature) {
+      console.error('Missing svix headers');
+      return;
+    }
+
     const body = JSON.stringify(req.body);
     const wh = new Webhook(webhookSecret);
 
-    const evt = wh.verify(body, {
-      'svix-id': svix_id,
-      'svix-timestamp': svix_timestamp,
-      'svix-signature': svix_signature,
-    }) as WebhookEvent;
+    let evt: any;
 
-    // Respond immediately
-    res.status(200).json({ received: true });
+    try {
+      evt = wh.verify(body, {
+        'svix-id': svix_id,
+        'svix-timestamp': svix_timestamp,
+        'svix-signature': svix_signature,
+      }) as WebhookEvent;
+    } catch (err) {
+      console.error('Webhook signature verification failed:', err);
+      return;
+    }
 
     // Process webhook asynchronously
-    setImmediate(async () => {
-      try {
-        await processWebhookEvent(evt);
-      } catch (error) {
-        console.error('Async webhook processing error:', error);
-      }
-    });
+    await processWebhookEvent(evt);
 
   } catch (error) {
-    console.error('Webhook verification failed:', error);
-    return res.status(400).json({ error: 'Invalid webhook' });
+    console.error('Webhook processing error:', error);
   }
 }
 

@@ -310,15 +310,45 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getUserTransactions(userId: string, limit?: number): Promise<any[]> {
-    const query = db
-      .select()
+  async getUserTransactions(userId: string, limit?: number): Promise<Transaction[]> {
+    let query = db
+      .select({
+        id: transactions.id,
+        userId: transactions.userId,
+        categoryId: transactions.categoryId,
+        amount: transactions.amount,
+        description: transactions.description,
+        date: transactions.date,
+        type: transactions.type,
+        createdAt: transactions.createdAt,
+        isRecurring: transactions.isRecurring,
+        recurringFrequency: transactions.recurringFrequency,
+        recurringEndDate: transactions.recurringEndDate,
+        parentTransactionId: transactions.parentTransactionId,
+        paymentUrl: transactions.paymentUrl,
+        referenceNote: transactions.referenceNote,
+        categoryName: categories.name,
+        categoryIcon: categories.icon,
+        categoryColor: categories.color,
+      })
       .from(transactions)
+      .leftJoin(categories, eq(transactions.categoryId, categories.id))
       .where(eq(transactions.userId, userId))
       .orderBy(desc(transactions.date));
 
-    const results = limit ? await query.limit(limit) : await query;
-    return results as any[];
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    const userTransactions = await query;
+
+    // Decrypt sensitive fields
+    return userTransactions.map(transaction => ({
+      ...transaction,
+      amount: DataEncryption.decryptAmount(transaction.amount),
+      description: DataEncryption.decryptDescription(transaction.description),
+      referenceNote: transaction.referenceNote ? DataEncryption.decrypt(transaction.referenceNote) : null
+    }));
   }
 
   async updateTransaction(id: number, transaction: Partial<InsertTransaction>): Promise<Transaction> {
@@ -425,7 +455,7 @@ export class DatabaseStorage implements IStorage {
           .where(
             and(
               eq(transactions.userId, userId),
-              eq(transactions.categoryId, budget.categoryId!),
+              eq(transactions.categoryId, budget.categoryId),
               eq(transactions.type, 'expense'),
               gte(transactions.date, budget.startDate),
               lte(transactions.date, budget.endDate)
