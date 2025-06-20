@@ -8,7 +8,8 @@ export function registerClerkWebhookRoutes(app: Express) {
     try {
       // Only allow webhooks in production environment
       if (process.env.NODE_ENV !== 'production') {
-        return res.status(403).send('Webhook disabled in dev');
+        res.status(403).send('Webhook disabled in dev');
+        return;
       }
       
       // Get the webhook signing secret from environment
@@ -16,7 +17,8 @@ export function registerClerkWebhookRoutes(app: Express) {
       
       if (!webhookSecret) {
         console.error('CLERK_WEBHOOK_SECRET is not configured');
-        return res.status(500).json({ error: 'Webhook secret not configured' });
+        res.status(500).json({ error: 'Webhook secret not configured' });
+        return;
       }
 
       // Get headers and body for verification
@@ -25,7 +27,8 @@ export function registerClerkWebhookRoutes(app: Express) {
       const svix_signature = req.get('svix-signature');
 
       if (!svix_id || !svix_timestamp || !svix_signature) {
-        return res.status(400).json({ error: 'Missing required svix headers' });
+        res.status(400).json({ error: 'Missing required svix headers' });
+        return;
       }
 
       // Create webhook instance for verification
@@ -41,7 +44,8 @@ export function registerClerkWebhookRoutes(app: Express) {
         });
       } catch (err) {
         console.error('Webhook verification failed:', err);
-        return res.status(400).json({ error: 'Webhook verification failed' });
+        res.status(400).json({ error: 'Webhook verification failed' });
+        return;
       }
 
       // Handle different event types
@@ -74,11 +78,11 @@ export function registerClerkWebhookRoutes(app: Express) {
           console.log(`Unhandled webhook event type: ${type}`);
       }
 
-      return res.status(200).json({ received: true });
+      res.status(200).json({ received: true });
       
     } catch (error) {
       console.error('Clerk webhook error:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 }
