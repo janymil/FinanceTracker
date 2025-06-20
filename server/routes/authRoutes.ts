@@ -33,46 +33,42 @@ export function registerAuthRoutes(app: Express) {
 
       let user = await storage.getUser(userId);
       
-      // If user doesn't exist, get real data from Clerk and create user
+      // If user doesn't exist, check if they were deleted from Clerk
       if (!user) {
         try {
           // Get user data from Clerk auth context
           const clerkUser = req.auth().user;
-          if (clerkUser) {
-            const primaryEmail = clerkUser.emailAddresses?.find(email => email.id === clerkUser.primaryEmailAddressId)?.emailAddress;
-            
-            const userData = {
-              id: userId,
-              email: primaryEmail || null,
-              firstName: clerkUser.firstName || null,
-              lastName: clerkUser.lastName || null,
-              profileImageUrl: clerkUser.imageUrl || null,
-              plan: 'free',
-              stripeCustomerId: null,
-              stripeSubscriptionId: null,
-              settings: null
-            };
-            user = await storage.upsertUser(userData);
-            console.log(`Created user from Clerk data: ${userId} (${primaryEmail})`);
-          } else {
-            // Fallback if Clerk data not available
-            const userData = {
-              id: userId,
-              email: null,
-              firstName: null,
-              lastName: null,
-              profileImageUrl: null,
-              plan: 'free',
-              stripeCustomerId: null,
-              stripeSubscriptionId: null,
-              settings: null
-            };
-            user = await storage.upsertUser(userData);
-            console.log(`Created fallback user: ${userId}`);
+          if (!clerkUser) {
+            // User has valid session but no Clerk user data - likely deleted account
+            console.log(`User ${userId} has valid token but no Clerk user data - account likely deleted`);
+            return res.status(401).json({ 
+              message: 'User account no longer exists',
+              redirectToAuth: true 
+            });
           }
+          
+          const primaryEmail = clerkUser.emailAddresses?.find(email => email.id === clerkUser.primaryEmailAddressId)?.emailAddress;
+          
+          const userData = {
+            id: userId,
+            email: primaryEmail || null,
+            firstName: clerkUser.firstName || null,
+            lastName: clerkUser.lastName || null,
+            profileImageUrl: clerkUser.imageUrl || null,
+            plan: 'free',
+            stripeCustomerId: null,
+            stripeSubscriptionId: null,
+            settings: null
+          };
+          user = await storage.upsertUser(userData);
+          console.log(`Created user from Clerk data: ${userId} (${primaryEmail})`);
         } catch (error) {
           console.error('Error creating user from Clerk data:', error);
-          // Final fallback
+          // If this fails, the user likely doesn't exist in Clerk anymore
+          return res.status(401).json({ 
+            message: 'User account no longer exists',
+            redirectToAuth: true 
+          });
           const userData = {
             id: userId,
             email: null,

@@ -374,6 +374,9 @@ Changelog:
 - June 18, 2025. Removed authentication requirements from mobile upload components while maintaining security through session-based user identification
 - June 18, 2025. QR code mobile upload system now fully operational - anonymous users can scan codes and upload photos for authenticated users
 - June 18, 2025. MASCOT ENHANCEMENT: Implemented comprehensive mascot restoration system - users can now restore hidden mascots via floating restore button
+- June 20, 2025. SECURITY FIX: Fixed critical deleted user authentication bug - users who delete accounts through Clerk no longer cause 500 errors
+- June 20, 2025. Enhanced error handling for deleted users - backend returns 401 with redirect flag, frontend automatically redirects to auth page
+- June 20, 2025. Improved authentication middleware to detect deleted user scenarios and return proper error codes instead of server crashes
 - June 18, 2025. Added full drag-and-drop functionality to financial mascot - users can reposition mascot anywhere on screen with mouse drag
 - June 18, 2025. Enhanced mascot positioning system with screen boundary constraints and persistent position state across user interactions
 - June 18, 2025. Fixed mobile responsiveness for categories page "Add New Category" button with responsive flex layout and abbreviated tab names

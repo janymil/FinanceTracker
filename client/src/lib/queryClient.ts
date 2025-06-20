@@ -3,6 +3,21 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
+    
+    // Handle deleted user scenario
+    if (res.status === 401) {
+      try {
+        const errorData = JSON.parse(text);
+        if (errorData.redirectToAuth) {
+          // User account was deleted, redirect to auth
+          window.location.href = '/auth';
+          return;
+        }
+      } catch (e) {
+        // Continue with normal error handling
+      }
+    }
+    
     throw new Error(`${res.status}: ${text}`);
   }
 }
