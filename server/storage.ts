@@ -246,7 +246,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserPlan(userId: string, plan: 'free' | 'standard' | 'premium', billingInterval: 'monthly' | 'yearly' = 'monthly'): Promise<User> {
-    const [user] = await db
+    const updatedUsers = await db
       .update(users)
       .set({ 
         plan,
@@ -256,11 +256,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
 
-    if (user.length === 0) {
+    if (updatedUsers.length === 0) {
       throw new Error('User not found');
     }
 
-    return user[0];
+    return updatedUsers[0];
   }
 
   async updateUserPremiumStatus(userId: string, isPremium: boolean): Promise<User> {
