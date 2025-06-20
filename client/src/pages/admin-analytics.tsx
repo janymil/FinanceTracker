@@ -504,6 +504,27 @@ export default function AdminAnalytics() {
 
         <TabsContent value="users" className="space-y-6">
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search users..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-8 w-full sm:w-64"
+                />
+              </div>
+              <Select value={selectedRole} onValueChange={setSelectedRole}>
+                <SelectTrigger className="w-full sm:w-32">
+                  <SelectValue placeholder="Role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Users</SelectItem>
+                  <SelectItem value="prod">Production</SelectItem>
+                  <SelectItem value="dev">Development</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative">
