@@ -17,12 +17,26 @@ export function registerAdminRoutes(app: Express) {
     res.json({ authenticated: !!req.session?.isAdminAuthenticated });
   });
 
-  // Admin dashboard - get all users
+  // Admin dashboard - get all users with filtering options
   app.get('/api/admin-analytics/users', adminAuth, async (req: any, res: Response) => {
     try {
+      const { plan, hasEmail } = req.query;
       const users = await storage.getAllUsers();
-      console.log(`Admin analytics - Fetched ${users.length} users:`, users.map(u => ({ id: u.id, email: u.email, plan: u.plan })));
-      res.json(users);
+      
+      let filteredUsers = users;
+      
+      // Filter by plan if specified
+      if (plan && plan !== 'all') {
+        filteredUsers = filteredUsers.filter(u => u.plan === plan);
+      }
+      
+      // Filter to show only users with real email addresses (not @clerk.user)
+      if (hasEmail === 'true') {
+        filteredUsers = filteredUsers.filter(u => u.email && !u.email.includes('@clerk.user'));
+      }
+      
+      console.log(`Admin analytics - Fetched ${filteredUsers.length}/${users.length} users`);
+      res.json(filteredUsers);
     } catch (error) {
       console.error("Error fetching users for admin:", error);
       res.status(500).json({ message: "Failed to fetch users" });

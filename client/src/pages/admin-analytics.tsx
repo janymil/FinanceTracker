@@ -43,6 +43,7 @@ export default function AdminAnalytics() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [planFilter, setPlanFilter] = useState("all");
+  const [showRealUsersOnly, setShowRealUsersOnly] = useState(true);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newUser, setNewUser] = useState({
     email: "",
@@ -92,8 +93,14 @@ export default function AdminAnalytics() {
   };
 
   const { data: users = [], isLoading: usersLoading } = useQuery({
-    queryKey: ['admin-analytics-users'],
-    queryFn: () => adminFetch('/api/admin-analytics/users'),
+    queryKey: ['admin-analytics-users', planFilter, showRealUsersOnly],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (planFilter !== 'all') params.append('plan', planFilter);
+      if (showRealUsersOnly) params.append('hasEmail', 'true');
+      const url = `/api/admin-analytics/users${params.toString() ? '?' + params.toString() : ''}`;
+      return adminFetch(url);
+    },
     enabled: isAuthenticated,
   });
 
@@ -443,6 +450,11 @@ export default function AdminAnalytics() {
         </TabsContent>
 
         <TabsContent value="users" className="space-y-6">
+          <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              <strong>Local Database Users:</strong> These users are synced from Clerk authentication and stored in your PostgreSQL database. You can modify their subscription plans directly here.
+            </p>
+          </div>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative">
@@ -465,6 +477,23 @@ export default function AdminAnalytics() {
                   <SelectItem value="premium">Premium</SelectItem>
                 </SelectContent>
               </Select>
+              
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="realUsersOnly"
+                  checked={showRealUsersOnly}
+                  onChange={(e) => setShowRealUsersOnly(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="realUsersOnly" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Real Users Only
+                </label>
+              </div>
+            </div>
+            
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Showing {filteredUsers.length} of {users.length} users
             </div>
 
             <Dialog>
