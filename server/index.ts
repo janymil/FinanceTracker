@@ -53,7 +53,60 @@ app.use((req, res, next) => {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
   
-  // CSP disabled to fix Clerk authentication issues in production
+  // Check if request is from a crawler/bot
+  const userAgent = req.headers['user-agent'] || '';
+  const isCrawler = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest\/0\.|developers\.google\.com\/\+\/web\/snippet|www\.google\.com\/webmasters\/tools\/richsnippets|slackbot|vkshare|w3c_validator|redditbot|applebot|whatsapp|flipboard|tumblr|bitlybot|skypeuripreview|nuzzel|discordbot|google page speed|qwantify|pinterestbot|bitrix link preview|xing-contenttabreceiver|chrome-lighthouse|telegrambot|integration-test|daum|ccbot|iaskspider|yisou|butterfly|msnbot|neevabot|seznambot|parsely|gluten free crawler|adscanner|ia_archiver|gptbot|chatgpt-user|ccbot|anthropic-ai|claude-web|perplexity|you-com-bot|cohere-ai/i;
+
+  if (isCrawler) {
+    // More permissive CSP for crawlers to ensure content accessibility
+    res.setHeader('Content-Security-Policy', [
+      "default-src 'self' https:",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+      "style-src 'self' 'unsafe-inline' https:",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' https: data:",
+      "connect-src 'self' https:",
+      "frame-src https:",
+      "worker-src 'self' blob:",
+      "frame-ancestors 'none'"
+    ].join('; '));
+  } else if (process.env.NODE_ENV === 'development') {
+    // Development CSP - more permissive for localhost
+    res.setHeader('Content-Security-Policy', [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http: localhost:",
+      "style-src 'self' 'unsafe-inline' https:",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' https: data:",
+      "connect-src 'self' https: http: ws: wss: localhost:",
+      "frame-src 'self' https:",
+      "worker-src 'self' blob:",
+      "frame-ancestors 'none'"
+    ].join('; '));
+  } else {
+    // Production CSP with comprehensive service support for regular users
+    res.setHeader('Content-Security-Policy', [
+      "default-src 'self'",
+      // Scripts: All possible CAPTCHA domains and services including Cloudflare Turnstile with comprehensive API endpoints
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://clerk.finanzerpro.com https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.net https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://recaptcha.google.com https://google.com/recaptcha/ https://gstatic.com/recaptcha/ https://apis.google.com https://ssl.gstatic.com https://challenges.cloudflare.com https://*.cloudflare.com https://cloudflare.com https://static.cloudflareinsights.com https://cf-hcaptcha.com https://hcaptcha.com https://*.hcaptcha.com https://assets.hcaptcha.com https://js.hcaptcha.com https://api.hcaptcha.com https://newassets.hcaptcha.com https://replit.com https://*.replit.com https://*.replit.dev https://*.replit.app https://turnstile.cloudflare.com https://*.turnstile.cloudflare.com https://api.cloudflare.com https://*.cloudflareapi.com blob:",
+      // Styles: All CAPTCHA styling sources including Cloudflare with turnstile specific domains
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.clerk.com https://*.clerk.dev https://clerk.finanzerpro.com https://www.gstatic.com https://gstatic.com https://ssl.gstatic.com https://challenges.cloudflare.com https://*.cloudflare.com https://cloudflare.com https://turnstile.cloudflare.com https://*.turnstile.cloudflare.com https://hcaptcha.com https://*.hcaptcha.com https://assets.hcaptcha.com https://newassets.hcaptcha.com https://*.replit.dev https://*.replit.app",
+      // Images: All HTTPS for CAPTCHA images including cloudflare turnstile assets
+      "img-src 'self' data: blob: https://* https://challenges.cloudflare.com https://*.cloudflare.com https://turnstile.cloudflare.com https://*.turnstile.cloudflare.com",
+      // Fonts: All Google and CAPTCHA fonts including cloudflare assets
+      "font-src 'self' https://fonts.gstatic.com https://gstatic.com https://ssl.gstatic.com https://*.clerk.com https://*.clerk.dev https://challenges.cloudflare.com https://*.cloudflare.com https://turnstile.cloudflare.com https://*.turnstile.cloudflare.com data:",
+      // Connections: All CAPTCHA API endpoints including comprehensive Cloudflare Turnstile API endpoints
+      "connect-src 'self' https://api.openai.com https://*.stripe.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://clerk.finanzerpro.com https://*.finanzerpro.com https://www.google-analytics.com https://www.googletagmanager.com https://*.google-analytics.com https://region1.google-analytics.com https://*.bunny.net https://la.storage.bunnycdn.com https://www.google.com https://google.com https://www.gstatic.com https://gstatic.com https://ssl.gstatic.com https://www.recaptcha.net https://recaptcha.net https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://recaptcha.google.com https://google.com/recaptcha/ https://gstatic.com/recaptcha/ https://apis.google.com https://challenges.cloudflare.com https://*.cloudflare.com https://cloudflare.com https://static.cloudflareinsights.com https://turnstile.cloudflare.com https://*.turnstile.cloudflare.com https://api.cloudflare.com https://*.cloudflareapi.com https://hcaptcha.com https://*.hcaptcha.com https://api.hcaptcha.com https://assets.hcaptcha.com https://js.hcaptcha.com https://newassets.hcaptcha.com https://replit.com https://*.replit.com https://*.replit.dev https://*.replit.app wss: ws:",
+      // Frames: All CAPTCHA iframe sources including comprehensive Cloudflare Turnstile domains
+      "frame-src https://js.stripe.com https://checkout.stripe.com https://*.clerk.com https://*.clerk.dev https://clerk.finanzerpro.com https://www.google.com https://google.com https://www.gstatic.com https://gstatic.com https://ssl.gstatic.com https://www.recaptcha.net https://recaptcha.net https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://recaptcha.google.com https://google.com/recaptcha/ https://gstatic.com/recaptcha/ https://apis.google.com https://challenges.cloudflare.com https://*.cloudflare.com https://cloudflare.com https://static.cloudflareinsights.com https://turnstile.cloudflare.com https://*.turnstile.cloudflare.com https://api.cloudflare.com https://*.cloudflareapi.com https://hcaptcha.com https://*.hcaptcha.com https://api.hcaptcha.com https://assets.hcaptcha.com https://js.hcaptcha.com https://newassets.hcaptcha.com",
+      // Workers: All service workers including cloudflare
+      "worker-src 'self' blob: https://challenges.cloudflare.com https://*.cloudflare.com https://turnstile.cloudflare.com https://*.turnstile.cloudflare.com",
+      // Forms: Allow form submissions to all auth providers including cloudflare
+      "form-action 'self' https://clerk.finanzerpro.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://challenges.cloudflare.com https://*.cloudflare.com https://turnstile.cloudflare.com https://*.turnstile.cloudflare.com",
+      // Security: Prevent embedding
+      "frame-ancestors 'none'"
+    ].join('; '));
+  }
   
   // Additional security for admin and auth endpoints
   if (req.path.startsWith('/api/admin-analytics') || req.path.includes('auth')) {

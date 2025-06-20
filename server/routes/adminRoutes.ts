@@ -21,7 +21,6 @@ export function registerAdminRoutes(app: Express) {
   app.get('/api/admin-analytics/users', adminAuth, async (req: any, res: Response) => {
     try {
       const users = await storage.getAllUsers();
-      console.log(`Admin: Fetched ${users.length} users for admin panel`);
       res.json(users);
     } catch (error) {
       console.error("Error fetching users for admin:", error);

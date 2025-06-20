@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Users, UserPlus, Edit, Trash2, Crown, Shield, TrendingUp, Search, Filter, Loader2 } from "lucide-react";
+import { Users, UserPlus, Edit, Trash2, Crown, Shield, TrendingUp, Search, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface User {
@@ -90,19 +90,10 @@ export default function AdminAnalytics() {
     return response.json();
   };
 
-  const { data: users = [], isLoading: usersLoading, error: usersError } = useQuery({
+  const { data: users = [], isLoading: usersLoading } = useQuery({
     queryKey: ['/api/admin-analytics/users'],
     queryFn: adminFetch,
     enabled: isAuthenticated,
-  });
-
-  // Debug logging
-  console.log('Admin Analytics Debug:', {
-    isAuthenticated,
-    usersLoading,
-    usersError,
-    usersCount: users?.length,
-    users: users?.slice(0, 2) // Log first 2 users for debugging
   });
 
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -551,32 +542,18 @@ export default function AdminAnalytics() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {usersLoading ? (
-                <div className="text-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-                  <p>Loading users...</p>
-                </div>
-              ) : usersError ? (
-                <div className="text-center py-12">
-                  <p className="text-red-500">Error loading users: {usersError.message}</p>
-                </div>
-              ) : filteredUsers.length === 0 ? (
-                <div className="text-center py-12">
-                  <p>No users found. Total users loaded: {users.length}</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>User</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Plan</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredUsers.map((user: User) => (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Plan</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredUsers.map((user: User) => (
                     <TableRow key={user.id}>
                       <TableCell>
                         <div className="flex items-center space-x-3">
@@ -711,8 +688,7 @@ export default function AdminAnalytics() {
                     </TableRow>
                   ))}
                 </TableBody>
-                </Table>
-              )}
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
