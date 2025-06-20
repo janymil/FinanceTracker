@@ -599,7 +599,9 @@ export default function AdminAnalytics() {
                                 ? `${user.firstName} ${user.lastName}`
                                 : user.firstName || user.lastName
                                 ? (user.firstName || '') + ' ' + (user.lastName || '')
-                                : user.email?.split('@')[0] || user.id?.split('_')[1]?.slice(0, 8) || 'Anonymous'
+                                : user.email?.includes('@clerk.user') 
+                                ? user.id?.split('_')[1]?.slice(0, 8) || 'Anonymous'
+                                : user.email?.split('@')[0] || 'Anonymous'
                               }
                             </div>
                             <div className="text-sm text-gray-500 flex items-center gap-2">
