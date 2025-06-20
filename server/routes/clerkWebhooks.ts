@@ -28,7 +28,7 @@ export function registerClerkWebhookRoutes(app: Express) {
       console.log('Test webhook user created successfully:', testUserData.id);
       res.json({ success: true, message: 'Test webhook processed', userId: testUserData.id });
       return;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Test webhook error:', error);
       res.status(500).json({ error: 'Test webhook failed', details: error.message });
       return;

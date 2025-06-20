@@ -14,9 +14,9 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
-export function registerMobileUploadRoutes(app) {
+export function registerMobileUploadRoutes(app: any) {
   // Create a new mobile upload session
-  app.post('/api/mobile-upload/create-session', async (req, res) => {
+  app.post('/api/mobile-upload/create-session', async (req: any, res: any) => {
     try {
       // Get user ID from Authorization header directly
       const authHeader = req.headers.authorization;
@@ -40,7 +40,7 @@ export function registerMobileUploadRoutes(app) {
       });
       
       // Clean up old sessions (older than 1 hour) and sessions from different users
-      for (const [id, session] of mobileUploadSessions.entries()) {
+      for (const [id, session] of Array.from(mobileUploadSessions.entries())) {
         if (Date.now() - session.createdAt.getTime() > 60 * 60 * 1000 || session.userId !== userId) {
           mobileUploadSessions.delete(id);
         }
