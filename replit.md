@@ -485,6 +485,8 @@ Changelog:
 - June 20, 2025. CSP HEADER CONFLICTS ELIMINATED: Resolved "Cannot set headers after they are sent" errors by temporarily removing Content Security Policy headers - webhook system now fully operational without server crashes
 - June 20, 2025. PRODUCTION WEBHOOK SYSTEM READY: Implemented isolated webhook handler that bypasses all middleware chains, added comprehensive header conflict prevention, and verified webhook endpoint responds correctly with proper authentication checks
 - June 20, 2025. ADMIN USER MANAGEMENT FIXED: Completed missing PUT and DELETE API endpoints in adminRoutes.ts for user editing and deletion functionality - admin can now update user plans, names, emails and delete users completely with proper cache invalidation in frontend
+- June 20, 2025. REACT QUERY CACHE INVALIDATION FIXED: Replaced invalidateQueries with refetchQueries in admin analytics page for immediate UI updates after user edit/delete operations - no longer requires page reload to see changes
+- June 20, 2025. MASCOT IMAGE PERSISTENCE ENHANCED: Improved financial mascot component with immediate localStorage loading, authentication retry logic with exponential backoff, and better error handling to ensure generated mascot images persist across sessions
 ```
 
 ## User Preferences

@@ -160,8 +160,9 @@ export default function AdminAnalytics() {
         throw new Error('Failed to create user');
       }
       
-      await queryClient.invalidateQueries({ queryKey: ['admin-analytics-users'] });
-      await queryClient.invalidateQueries({ queryKey: ['admin-analytics-overview'] });
+      // Force immediate refetch of data
+      await queryClient.refetchQueries({ queryKey: ['admin-analytics-users'] });
+      await queryClient.refetchQueries({ queryKey: ['admin-analytics-overview'] });
       setNewUser({ email: "", firstName: "", lastName: "", plan: "free" });
       toast({
         title: "Success",
@@ -199,8 +200,9 @@ export default function AdminAnalytics() {
         throw new Error('Failed to update user');
       }
       
-      await queryClient.invalidateQueries({ queryKey: ['admin-analytics-users'] });
-      await queryClient.invalidateQueries({ queryKey: ['admin-analytics-overview'] });
+      // Force immediate refetch of data
+      await queryClient.refetchQueries({ queryKey: ['admin-analytics-users'] });
+      await queryClient.refetchQueries({ queryKey: ['admin-analytics-overview'] });
       setEditingUser(null);
       toast({
         title: "Success",
@@ -229,8 +231,9 @@ export default function AdminAnalytics() {
         throw new Error('Failed to delete user');
       }
       
-      await queryClient.invalidateQueries({ queryKey: ['admin-analytics-users'] });
-      await queryClient.invalidateQueries({ queryKey: ['admin-analytics-overview'] });
+      // Force immediate refetch of data
+      await queryClient.refetchQueries({ queryKey: ['admin-analytics-users'] });
+      await queryClient.refetchQueries({ queryKey: ['admin-analytics-overview'] });
       toast({
         title: "Success",
         description: "User deleted successfully",

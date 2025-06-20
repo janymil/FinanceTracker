@@ -118,11 +118,43 @@ export function FinancialMascot() {
     }
   };
 
-  // Fetch data on mount and when user is ready
+  // Load cached mascot data immediately on mount
+  useEffect(() => {
+    if (user?.id) {
+      const cachedMascot = localStorage.getItem(`mascot_${user.id}`);
+      if (cachedMascot) {
+        try {
+          const parsedMascot = JSON.parse(cachedMascot);
+          setMascot(parsedMascot);
+          console.log('Loaded cached mascot data:', parsedMascot);
+        } catch (parseError) {
+          console.warn('Failed to parse cached mascot data');
+        }
+      }
+    }
+  }, [user?.id]);
+
+  // Fetch fresh data from API with retry logic
   useEffect(() => {
     if (isReady && user?.id) {
-      fetchMascot();
-      fetchFinancialHealth();
+      const fetchWithRetry = async (retries = 3) => {
+        for (let i = 0; i < retries; i++) {
+          try {
+            await fetchMascot();
+            await fetchFinancialHealth();
+            break;
+          } catch (error) {
+            console.log(`Fetch attempt ${i + 1} failed, retrying...`);
+            if (i === retries - 1) {
+              console.log('All fetch attempts failed, using cached data if available');
+            } else {
+              await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Exponential backoff
+            }
+          }
+        }
+      };
+      
+      fetchWithRetry();
     }
   }, [isReady, user?.id]);
 
