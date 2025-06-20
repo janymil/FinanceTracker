@@ -260,6 +260,16 @@ export const financialMascots = pgTable("financial_mascots", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// AppSumo redemption codes
+export const redeemCodes = pgTable("redeem_codes", {
+  id: serial("id").primaryKey(),
+  code: varchar("code", { length: 100 }).notNull().unique(),
+  redeemed: boolean("redeemed").default(false).notNull(),
+  userId: varchar("user_id").references(() => users.id),
+  redeemedAt: timestamp("redeemed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Schema exports
 export type InsertUser = typeof users.$inferInsert;
 export type UpsertUser = typeof users.$inferInsert;
@@ -306,6 +316,9 @@ export type MilestoneAchievement = typeof milestoneAchievements.$inferSelect;
 
 export type InsertFinancialMascot = typeof financialMascots.$inferInsert;
 export type FinancialMascot = typeof financialMascots.$inferSelect;
+
+export type InsertRedeemCode = typeof redeemCodes.$inferInsert;
+export type RedeemCode = typeof redeemCodes.$inferSelect;
 
 // Insert schemas
 export const insertTransactionSchema = createInsertSchema(transactions).omit({
@@ -376,4 +389,10 @@ export const insertChallengeActivitySchema = createInsertSchema(challengeActivit
 export const insertMilestoneAchievementSchema = createInsertSchema(milestoneAchievements).omit({
   id: true,
   achievedAt: true,
+});
+
+export const insertRedeemCodeSchema = createInsertSchema(redeemCodes).omit({
+  id: true,
+  createdAt: true,
+  redeemedAt: true,
 });

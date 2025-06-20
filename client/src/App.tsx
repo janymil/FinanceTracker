@@ -42,6 +42,7 @@ import NotFoundPage from "./pages/not-found";
 import ProfilePage from "./pages/profile";
 import AdminAnalytics from "@/pages/admin-analytics";
 import MobileUpload from "@/pages/mobile-upload/sessionId";
+import RedeemPage from "@/pages/redeem";
 
 
 // Optimized loading state
