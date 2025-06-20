@@ -54,7 +54,6 @@ export default function AdminAnalytics() {
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [isUpdatingUser, setIsUpdatingUser] = useState(false);
   const [isDeletingUser, setIsDeletingUser] = useState(false);
-  const [isSyncingUsers, setIsSyncingUsers] = useState(false);
   const { toast } = useToast();
 
   // Check authentication status on component mount
@@ -242,37 +241,7 @@ export default function AdminAnalytics() {
     }
   };
 
-  const syncUsersFromClerk = async () => {
-    setIsSyncingUsers(true);
-    try {
-      const response = await fetch('/api/admin-analytics/sync-users', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to sync users');
-      }
-      
-      const result = await response.json();
-      
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/users'] });
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/overview'] });
-      
-      toast({
-        title: "Success",
-        description: `${result.message}`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to sync users from Clerk",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSyncingUsers(false);
-    }
-  };
+
 
   // Helper function to determine if user is from production or development
   const isProductionUser = (userId: string) => {

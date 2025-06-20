@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { storage } from "../storage";
 import { adminAuth, adminLogin, adminLogout } from "../adminAuth";
 import { clerkClient } from "@clerk/express";
+import { autoSyncAllUsers } from "../autoSync";
 
 export function registerAdminRoutes(app: Express) {
   // Admin login
@@ -18,9 +19,12 @@ export function registerAdminRoutes(app: Express) {
     res.json({ authenticated: !!req.session?.isAdminAuthenticated });
   });
 
-  // Admin dashboard - get all users
+  // Admin dashboard - get all users with automatic synchronization
   app.get('/api/admin-analytics/users', adminAuth, async (req: any, res: Response) => {
     try {
+      // Automatically sync all users from Clerk before displaying
+      await autoSyncAllUsers();
+      
       const users = await storage.getAllUsers();
       console.log(`Admin analytics - Fetched ${users.length} users:`, users.map(u => ({ id: u.id, email: u.email, plan: u.plan })));
       res.json(users);
