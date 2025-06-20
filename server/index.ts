@@ -53,17 +53,18 @@ app.use((req, res, next) => {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
   
-  res.setHeader('Content-Security-Policy', [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net https://www.googletagmanager.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://www.gstatic.cn blob:",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.clerk.com https://*.clerk.dev",
-    "img-src 'self' data: blob: https://*",
-    "font-src 'self' https://fonts.gstatic.com data:",
-    "connect-src 'self' https://api.openai.com https://*.stripe.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://*.finanzerpro.com https://www.google.com https://www.recaptcha.net wss: ws:",
-    "frame-src https://js.stripe.com https://*.clerk.com https://*.clerk.dev https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.net",
-    "worker-src 'self' blob:",
-    "frame-ancestors 'none'"
-  ].join('; '));
+  // Temporarily disable CSP to test CAPTCHA
+  // res.setHeader('Content-Security-Policy', [
+  //   "default-src 'self'",
+  //   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net https://www.googletagmanager.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://www.gstatic.cn https://hcaptcha.com https://*.hcaptcha.com blob:",
+  //   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.clerk.com https://*.clerk.dev https://hcaptcha.com https://*.hcaptcha.com",
+  //   "img-src 'self' data: blob: https://*",
+  //   "font-src 'self' https://fonts.gstatic.com data:",
+  //   "connect-src 'self' https://api.openai.com https://*.stripe.com https://*.clerk.com https://*.clerk.dev https://*.accounts.dev https://*.finanzerpro.com https://www.google.com https://www.recaptcha.net https://hcaptcha.com https://*.hcaptcha.com wss: ws:",
+  //   "frame-src https://js.stripe.com https://*.clerk.com https://*.clerk.dev https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.net https://hcaptcha.com https://*.hcaptcha.com",
+  //   "worker-src 'self' blob:",
+  //   "frame-ancestors 'none'"
+  // ].join('; '));
   
   // Additional security for admin and auth endpoints
   if (req.path.startsWith('/api/admin-analytics') || req.path.includes('auth')) {
