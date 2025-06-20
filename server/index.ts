@@ -53,19 +53,16 @@ app.use((req, res, next) => {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
   
-  // Balanced CSP for security while allowing Clerk authentication
-  const csp = [
+  res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.com https://*.clerk.accounts.dev https://clerk.finanzerpro.com",
-    "style-src 'self' 'unsafe-inline' https://*.clerk.com https://clerk.finanzerpro.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.dev https://*.clerk.com https://*.accounts.dev https://www.google.com https://www.gstatic.com",
+    "style-src 'self' 'unsafe-inline' https://*.clerk.dev https://*.clerk.com",
     "img-src 'self' data: https:",
     "font-src 'self' data: https:",
-    "connect-src 'self' https://*.clerk.com https://*.clerk.accounts.dev https://clerk.finanzerpro.com https://api.openai.com",
-    "frame-src 'self' https://*.clerk.com https://clerk.finanzerpro.com",
+    "connect-src 'self' https://*.clerk.dev https://*.clerk.com https://*.accounts.dev https://api.openai.com",
+    "frame-src https://*.clerk.dev https://*.clerk.com https://*.accounts.dev https://www.google.com https://www.gstatic.com",
     "frame-ancestors 'none'"
-  ].join('; ');
-  
-  res.setHeader('Content-Security-Policy', csp);
+  ].join('; '));
   
   // Additional security for admin and auth endpoints
   if (req.path.startsWith('/api/admin-analytics') || req.path.includes('auth')) {
