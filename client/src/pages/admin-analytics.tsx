@@ -181,7 +181,7 @@ export default function AdminAnalytics() {
   const updateUser = async ({ id, userData }: { id: string; userData: any }) => {
     setIsUpdatingUser(true);
     try {
-      const response = await fetch(`/api/admin-analytics/users/${id}`, {
+      const response = await fetch(`/api/admin-analytics/users/${id}/plan`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
@@ -191,20 +191,20 @@ export default function AdminAnalytics() {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to update user');
+        throw new Error('Failed to update user plan');
       }
       
-      await queryClient.invalidateQueries({ queryKey: ['admin-analytics-users'] });
-      await queryClient.invalidateQueries({ queryKey: ['admin-analytics-overview'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/users'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/overview'] });
       setEditingUser(null);
       toast({
         title: "Success",
-        description: "User updated successfully",
+        description: "User plan updated successfully",
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update user",
+        description: "Failed to update user plan",
         variant: "destructive",
       });
     } finally {
@@ -224,8 +224,8 @@ export default function AdminAnalytics() {
         throw new Error('Failed to delete user');
       }
       
-      await queryClient.invalidateQueries({ queryKey: ['admin-analytics-users'] });
-      await queryClient.invalidateQueries({ queryKey: ['admin-analytics-overview'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/users'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/overview'] });
       toast({
         title: "Success",
         description: "User deleted successfully",

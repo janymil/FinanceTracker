@@ -1166,47 +1166,17 @@ export class DatabaseStorage implements IStorage {
     // Delete all user's data in correct order (respecting foreign keys)
     // Note: This properly handles encrypted data deletion
 
-    // Delete or nullify redeem codes first (to handle foreign key constraint)
-    await db.update(redeemCodes)
-      .set({ userId: null })
-      .where(eq(redeemCodes.userId, userId));
-
-    // Delete goals
+    // Delete goals first
     await db.delete(goals).where(eq(goals.userId, userId));
 
     // Delete budgets
     await db.delete(budgets).where(eq(budgets.userId, userId));
-
-    // Delete recurring transactions first (they reference categories)
-    await db.delete(recurringTransactions).where(eq(recurringTransactions.userId, userId));
 
     // Delete transactions (encrypted data will be properly removed)
     await db.delete(transactions).where(eq(transactions.userId, userId));
 
     // Delete expense reminders
     await db.delete(expenseReminders).where(eq(expenseReminders.userId, userId));
-
-    // Delete financial mascots
-    await db.delete(financialMascots).where(eq(financialMascots.userId, userId));
-
-    // Delete backup settings
-    await db.delete(backupSettings).where(eq(backupSettings.userId, userId));
-
-    // Delete categories (only user-created ones) - after recurring transactions
-    await db.delete(categories).where(eq(categories.userId, userId));
-
-    // Delete collaborative goal related data
-    await db.delete(collaborativeGoalParticipants).where(eq(collaborativeGoalParticipants.userId, userId));
-    await db.delete(goalContributions).where(eq(goalContributions.userId, userId));
-    await db.delete(challengeActivities).where(eq(challengeActivities.userId, userId));
-    await db.delete(milestoneAchievements).where(eq(milestoneAchievements.userId, userId));
-    await db.delete(collaborativeGoals).where(eq(collaborativeGoals.createdBy, userId));
-
-    // Delete friendships
-    await db.delete(friendships).where(or(
-      eq(friendships.requesterId, userId),
-      eq(friendships.recipientId, userId)
-    ));
 
     // Finally delete the user
     await db.delete(users).where(eq(users.id, userId));
