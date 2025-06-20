@@ -9,6 +9,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { cookieConsentMiddleware } from "./cookieMiddleware";
 import { renderPageForCrawler } from './ssr';
+import { setupClerkAuth } from "./clerkAuth";
 import "./batch-processor"; // Initialize batch processing system
 
 const app = express();
@@ -31,6 +32,9 @@ app.use(session({
 }));
 
 app.use(cookieConsentMiddleware);
+
+// Initialize Clerk authentication middleware
+setupClerkAuth(app);
 
 // HTTPS redirect middleware for production
 app.use((req, res, next) => {
