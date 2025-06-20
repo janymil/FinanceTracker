@@ -461,6 +461,7 @@ Changelog:
 - June 19, 2025. SEO OPTIMIZATION COMPLETED: All major routes (/, /pricing, /help, /contact) now serve crawler-optimized HTML with complete page content, Open Graph tags, Twitter cards, canonical URLs, and structured data for proper search engine indexing
 - June 19, 2025. ROUTING CONFLICT RESOLVED: Fixed critical issue where static HTML files (index.html, pricing.html, features.html, about.html) from earlier SEO attempts were causing 404 errors to appear below page content - removed conflicting static files while preserving SSR system for proper search engine crawling
 - June 19, 2025. COMPREHENSIVE MARKETING CONTENT CREATED: Developed professional marketing article (FINANZERPRO_ARTICLE.md) showcasing all key features, AI capabilities, subscription tiers, user testimonials, and technical specifications - ready for use in promotional materials and website content
+- June 20, 2025. APPSUMO CODE REDEMPTION SYSTEM IMPLEMENTED: Complete code redemption functionality with database schema (redeem_codes table), API endpoint (/api/redeem), frontend page (/redeem), and header "Redeem Code" button - 1 code grants Standard plan, 2 codes grant Premium plan with activatedAt timestamp for RequirePlan component recognition
 ```
 
 ## User Preferences

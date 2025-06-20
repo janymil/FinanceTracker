@@ -8,7 +8,7 @@ const redeemSchema = z.object({
 });
 
 export function registerRedeemRoutes(app: Express) {
-  app.post("/api/redeem", isAuthenticated, async (req, res) => {
+  app.post("/api/redeem", isAuthenticated, async (req: any, res) => {
     try {
       const auth = req.auth();
       const userId = auth?.userId;
