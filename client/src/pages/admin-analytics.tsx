@@ -792,6 +792,7 @@ export default function AdminAnalytics() {
               </div>
             </CardContent>
           </Card>
+            </div>
           </div>
         </TabsContent>
 
