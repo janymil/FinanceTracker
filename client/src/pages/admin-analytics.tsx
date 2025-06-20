@@ -43,6 +43,7 @@ export default function AdminAnalytics() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [planFilter, setPlanFilter] = useState("all");
+  const [userTypeFilter, setUserTypeFilter] = useState("all"); // New filter for dev/prod
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newUser, setNewUser] = useState({
     email: "",
@@ -240,15 +241,27 @@ export default function AdminAnalytics() {
     }
   };
 
+  // Helper function to determine if user is from production or development
+  const isProductionUser = (userId: string) => {
+    // Production users have longer Clerk IDs starting with "user_2y"
+    // Dev users typically have shorter IDs or different patterns
+    return userId.startsWith('user_2y') && userId.length > 20;
+  };
+
   const filteredUsers = users.filter((user: User) => {
     const matchesSearch = !searchTerm || 
       user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastName?.toLowerCase().includes(searchTerm.toLowerCase());
+      user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.id?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesPlan = planFilter === "all" || user.plan === planFilter;
     
-    return matchesSearch && matchesPlan;
+    const matchesUserType = userTypeFilter === "all" || 
+      (userTypeFilter === "prod" && isProductionUser(user.id)) ||
+      (userTypeFilter === "dev" && !isProductionUser(user.id));
+    
+    return matchesSearch && matchesPlan && matchesUserType;
   });
 
   const getPlanBadge = (plan: string) => {
@@ -465,6 +478,17 @@ export default function AdminAnalytics() {
                   <SelectItem value="premium">Premium</SelectItem>
                 </SelectContent>
               </Select>
+              
+              <Select value={userTypeFilter} onValueChange={setUserTypeFilter}>
+                <SelectTrigger className="w-full sm:w-40">
+                  <SelectValue placeholder="Filter by type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Users</SelectItem>
+                  <SelectItem value="prod">Production</SelectItem>
+                  <SelectItem value="dev">Development</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <Dialog>
@@ -576,7 +600,14 @@ export default function AdminAnalytics() {
                                 : user.email?.split('@')[0] || 'No name'
                               }
                             </div>
-                            <div className="text-sm text-gray-500">ID: {user.id}</div>
+                            <div className="text-sm text-gray-500 flex items-center gap-2">
+                              {isProductionUser(user.id) ? (
+                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">PROD</span>
+                              ) : (
+                                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">DEV</span>
+                              )}
+                              <span className="truncate max-w-32">{user.id}</span>
+                            </div>
                           </div>
                         </div>
                       </TableCell>
