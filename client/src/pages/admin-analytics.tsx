@@ -63,6 +63,7 @@ export default function AdminAnalytics() {
           credentials: 'include'
         });
         const data = await response.json();
+        console.log('Admin auth status:', data);
         if (data.authenticated) {
           setIsAuthenticated(true);
         }
@@ -75,8 +76,8 @@ export default function AdminAnalytics() {
   }, []);
 
   // Custom fetcher for admin endpoints that uses session cookies instead of Clerk tokens
-  const adminFetch = async ({ queryKey }: { queryKey: string[] }) => {
-    const response = await fetch(queryKey[0], {
+  const adminFetch = async (url: string) => {
+    const response = await fetch(url, {
       credentials: 'include', // Include session cookies
       headers: {
         'Content-Type': 'application/json',
@@ -91,13 +92,13 @@ export default function AdminAnalytics() {
   };
 
   const { data: users = [], isLoading: usersLoading } = useQuery({
-    queryKey: ['/api/admin-analytics/users'],
+    queryKey: ['admin-analytics-users'],
     queryFn: () => adminFetch('/api/admin-analytics/users'),
     enabled: isAuthenticated,
   });
 
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['/api/admin-analytics/overview'],
+    queryKey: ['admin-analytics-overview'],
     queryFn: () => adminFetch('/api/admin-analytics/overview'),
     enabled: isAuthenticated,
   });
