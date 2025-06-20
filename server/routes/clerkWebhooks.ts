@@ -3,6 +3,38 @@ import { Webhook } from "svix";
 import { storage } from "../storage";
 
 export function registerClerkWebhookRoutes(app: Express) {
+  // Test endpoint to verify webhook functionality in development
+  app.post('/api/test-webhook', async (req, res) => {
+    try {
+      console.log('Test webhook received:', JSON.stringify(req.body, null, 2));
+      
+      // Simulate processing a user.created event
+      const testUserData = {
+        id: 'test_webhook_user_' + Date.now(),
+        email_addresses: [{ email_address: 'webhook-test@example.com' }],
+        first_name: 'Webhook',
+        last_name: 'Test',
+        created_at: Date.now()
+      };
+      
+      await storage.createUser({
+        id: testUserData.id,
+        email: testUserData.email_addresses[0].email_address,
+        firstName: testUserData.first_name || null,
+        lastName: testUserData.last_name || null,
+        plan: 'free'
+      });
+      
+      console.log('Test webhook user created successfully:', testUserData.id);
+      res.json({ success: true, message: 'Test webhook processed', userId: testUserData.id });
+      return;
+    } catch (error) {
+      console.error('Test webhook error:', error);
+      res.status(500).json({ error: 'Test webhook failed', details: error.message });
+      return;
+    }
+  });
+
   // Clerk webhook endpoint for production user synchronization
   app.post('/api/clerk-webhooks', async (req, res) => {
     try {
