@@ -12,6 +12,161 @@ import { renderPageForCrawler } from './ssr';
 import "./batch-processor"; // Initialize batch processing system
 
 const app = express();
+
+// Register Clerk webhooks with raw body parser BEFORE any other middleware
+app.use('/api/clerk-webhooks', express.raw({ type: 'application/json' }));
+app.post('/api/clerk-webhooks', async (req, res) => {
+  try {
+    // Completely isolated webhook handler - no middleware chain
+    if (process.env.NODE_ENV !== 'production') {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Webhook disabled in dev' }));
+      return;
+    }
+    
+    const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
+    if (!webhookSecret) {
+      console.error('CLERK_WEBHOOK_SECRET is not configured');
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Webhook secret not configured' }));
+      return;
+    }
+
+    const svix_id = req.get('svix-id');
+    const svix_timestamp = req.get('svix-timestamp');
+    const svix_signature = req.get('svix-signature');
+
+    if (!svix_id || !svix_timestamp || !svix_signature) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Missing required svix headers' }));
+      return;
+    }
+
+    // Import Webhook here to avoid circular imports
+    const { Webhook } = await import('svix');
+    const wh = new Webhook(webhookSecret);
+    let evt;
+
+    try {
+      evt = wh.verify(req.body, {
+        'svix-id': svix_id,
+        'svix-timestamp': svix_timestamp,
+        'svix-signature': svix_signature,
+      });
+    } catch (err) {
+      console.error('Webhook verification failed:', err);
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Webhook verification failed' }));
+      return;
+    }
+
+    const { type, data } = evt as any;
+    console.log(`Clerk webhook received: ${type} for user ${data.id}`);
+
+    // Import storage here to avoid circular imports
+    const { storage } = await import('./storage');
+
+    switch (type) {
+      case 'user.created':
+        await handleUserCreatedInline(data, storage);
+        break;
+      case 'user.updated':
+        await handleUserUpdatedInline(data, storage);
+        break;
+      case 'user.deleted':
+        await handleUserDeletedInline(data, storage);
+        break;
+      default:
+        console.log(`Unhandled webhook event type: ${type}`);
+    }
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ received: true }));
+    
+  } catch (error) {
+    console.error('Clerk webhook error:', error);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Internal server error' }));
+  }
+});
+
+// Inline webhook handlers to avoid imports
+async function handleUserCreatedInline(userData: any, storage: any) {
+  try {
+    const { id, email_addresses, first_name, last_name, image_url, phone_numbers, created_at } = userData;
+    const primaryEmail = email_addresses?.find((email: any) => email.id === userData.primary_email_address_id)?.email_address;
+    const primaryPhone = phone_numbers?.find((phone: any) => phone.id === userData.primary_phone_number_id)?.phone_number;
+
+    const newUser = {
+      id: id,
+      email: primaryEmail || null,
+      firstName: first_name || null,
+      lastName: last_name || null,
+      profileImageUrl: image_url || null,
+      phone: primaryPhone || null,
+      plan: 'free',
+      settings: null,
+      createdAt: new Date(created_at),
+      updatedAt: new Date()
+    };
+
+    await storage.createUser(newUser);
+    console.log(`User created in database: ${id} (${primaryEmail})`);
+  } catch (error) {
+    console.error('Error creating user from webhook:', error);
+    throw error;
+  }
+}
+
+async function handleUserUpdatedInline(userData: any, storage: any) {
+  try {
+    const { id, email_addresses, first_name, last_name, image_url, phone_numbers, updated_at } = userData;
+    const existingUser = await storage.getUser(id);
+    
+    if (!existingUser) {
+      console.log(`User ${id} not found in database, creating from update event`);
+      return await handleUserCreatedInline(userData, storage);
+    }
+    
+    const primaryEmail = email_addresses?.find((email: any) => email.id === userData.primary_email_address_id)?.email_address;
+    const primaryPhone = phone_numbers?.find((phone: any) => phone.id === userData.primary_phone_number_id)?.phone_number;
+
+    const updatedUser = {
+      ...existingUser,
+      email: primaryEmail || existingUser.email,
+      firstName: first_name || existingUser.firstName,
+      lastName: last_name || existingUser.lastName,
+      profileImageUrl: image_url || existingUser.profileImageUrl,
+      phone: primaryPhone || existingUser.phone,
+      updatedAt: new Date(updated_at || Date.now())
+    };
+
+    await storage.updateUser(id, updatedUser);
+    console.log(`User updated in database: ${id} (${primaryEmail})`);
+  } catch (error) {
+    console.error('Error updating user from webhook:', error);
+    throw error;
+  }
+}
+
+async function handleUserDeletedInline(userData: any, storage: any) {
+  try {
+    const { id } = userData;
+    const existingUser = await storage.getUser(id);
+    
+    if (!existingUser) {
+      console.log(`User ${id} not found in database, nothing to delete`);
+      return;
+    }
+
+    await storage.deleteUserCompletely(id);
+    console.log(`User deleted from database: ${id}`);
+  } catch (error) {
+    console.error('Error deleting user from webhook:', error);
+    throw error;
+  }
+}
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

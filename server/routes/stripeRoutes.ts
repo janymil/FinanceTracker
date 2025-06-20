@@ -506,7 +506,7 @@ export function registerStripeRoutes(app: Express) {
         });
       }
 
-      return return res.json({ hasSchedule: false });
+      return res.json({ hasSchedule: false });
 
     } catch (error: any) {
       console.error('Error fetching subscription schedule:', error);
