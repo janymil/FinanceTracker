@@ -40,53 +40,55 @@ function verifyClerkWebhook(rawBody: string, signature: string, secret: string):
   }
 }
 
-async function handleUserCreated(userData: ClerkWebhookEvent['data']): Promise<void> {
-  const email = userData.email_addresses?.[0]?.email_address || `${userData.id}@clerk.user`;
+async function handleUserWebhook(userData: {
+  clerk_id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email_address: string | undefined;
+  image_url: string | null;
+}): Promise<void> {
+  const email = userData.email_address || `${userData.clerk_id}@clerk.user`;
   
   try {
-    await storage.upsertUser({
-      id: userData.id,
-      email: email,
-      firstName: userData.first_name,
-      lastName: userData.last_name,
-      profileImageUrl: userData.image_url,
-      plan: 'free',
-      billingInterval: 'monthly'
-    });
-    
-    console.log(`User created/updated in database: ${userData.id} (${email})`);
-  } catch (error) {
-    console.error("Error creating/updating user:", error);
-    throw error;
-  }
-}
-
-async function handleUserUpdated(userData: ClerkWebhookEvent['data']): Promise<void> {
-  const email = userData.email_addresses?.[0]?.email_address || `${userData.id}@clerk.user`;
-  
-  try {
-    // Check if user exists
-    const existingUser = await storage.getUser(userData.id);
+    // Check if user with this clerk_id already exists in the users table
+    const existingUser = await storage.getUser(userData.clerk_id);
     
     if (existingUser) {
-      // Update existing user
+      // User exists → update first_name, last_name, email, image_url
       await storage.upsertUser({
-        id: userData.id,
+        id: userData.clerk_id,
         email: email,
         firstName: userData.first_name,
         lastName: userData.last_name,
         profileImageUrl: userData.image_url,
-        plan: existingUser.plan, // Preserve existing plan
-        billingInterval: existingUser.billingInterval // Preserve existing billing interval
+        // Preserve existing subscription and app data
+        plan: existingUser.plan,
+        billingInterval: existingUser.billingInterval,
+        stripeCustomerId: existingUser.stripeCustomerId,
+        stripeSubscriptionId: existingUser.stripeSubscriptionId,
+        activatedAt: existingUser.activatedAt,
+        phone: existingUser.phone,
+        website: existingUser.website,
+        settings: existingUser.settings
       });
       
-      console.log(`User updated in database: ${userData.id} (${email})`);
+      console.log(`User updated in database: ${userData.clerk_id} (${email})`);
     } else {
-      // Create new user if doesn't exist (fallback)
-      await handleUserCreated(userData);
+      // User does not exist → insert new row with all these fields
+      await storage.upsertUser({
+        id: userData.clerk_id,
+        email: email,
+        firstName: userData.first_name,
+        lastName: userData.last_name,
+        profileImageUrl: userData.image_url,
+        plan: 'free',
+        billingInterval: 'monthly'
+      });
+      
+      console.log(`User created in database: ${userData.clerk_id} (${email})`);
     }
   } catch (error) {
-    console.error("Error updating user:", error);
+    console.error("Error handling user webhook:", error);
     throw error;
   }
 }
@@ -139,20 +141,10 @@ export function registerClerkWebhookRoutes(app: Express): void {
       
       console.log('Extracted user data:', userData);
       
-      // Handle different event types
-      switch (event.type) {
-        case 'user.created':
-          await handleUserCreated(event.data);
-          break;
-          
-        case 'user.updated':
-          await handleUserUpdated(event.data);
-          break;
-          
-        default:
-          console.log(`Unhandled webhook event type: ${event.type}`);
-          break;
-      }
+      // Handle user creation and updates with unified logic
+      await handleUserWebhook(userData);
+      
+      console.log(`Successfully processed webhook event: ${event.type}`);
       
       // Return success response
       res.status(200).json({ 
