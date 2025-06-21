@@ -153,7 +153,7 @@ export async function generateFinancialTips(financialData: {
     }
     const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
 
-    // Call the Fly.io AI processor service with complete financial data
+    // Call the Fly.io AI processor service for 4 independent tips
     let tips;
     try {
       const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'https://finanserpro-ai-processor.fly.dev';
@@ -171,21 +171,21 @@ export async function generateFinancialTips(financialData: {
             transactionsByCategory,
             recentTransactions: recentTransactions.slice(0, 10)
           }
-        }),
-        timeout: 45000 // 45 second timeout for 4 tips
+        })
       });
 
       if (!aiResponse.ok) {
-        throw new Error(`AI processor error: ${aiResponse.status} ${aiResponse.statusText}`);
+        const errorText = await aiResponse.text();
+        throw new Error(`AI processor error: ${aiResponse.status} - ${errorText}`);
       }
 
       const aiData = await aiResponse.json();
-      tips = aiData.tips;
-      console.log('Successfully received 4 tips from AI processor');
+      tips = aiData.tips || aiData;
+      console.log(`Successfully received ${tips.length} tips from Fly.io AI processor`);
     } catch (aiProcessorError) {
-      console.warn('AI processor service unavailable, falling back to basic tips:', aiProcessorError.message);
+      console.error('Fly.io AI processor error:', aiProcessorError.message);
       
-      // Fallback tips for when service is unavailable
+      // Fallback to basic tips if Fly.io is down
       tips = [
         {
           title: "Spending Pattern Analysis",
