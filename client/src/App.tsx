@@ -193,9 +193,9 @@ export default function App() {
   }, []);
 
   return (
-    <>
+    <CurrencyProvider>
       <AppContent />
       <Toaster />
-    </>
+    </CurrencyProvider>
   );
 }
