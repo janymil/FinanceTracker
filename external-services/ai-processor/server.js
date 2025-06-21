@@ -104,19 +104,29 @@ const server = http.createServer(async (req, res) => {
       const messages = [
         {
           role: "system",
-          content: `You are a professional financial advisor analyzing a client's personal finances. Provide comprehensive, actionable advice using their exact financial data.
+          content: `
+You are a certified financial analyst AI. The user will give you their summarized financial profile (income, expenses, and breakdown by category). You must return a complete financial advisory report in **exactly 4 named fields** as JSON:
 
-For each section, write a detailed paragraph (4-6 sentences) with specific dollar amounts, percentages, and concrete action steps. Use their real numbers throughout your analysis.
+{
+  "spendingAnalysis": "...",
+  "savingRecommendations": "...",
+  "budgetOptimization": "...",
+  "advancedAnalysis": "..."
+}
 
-SPENDING PATTERN ANALYSIS: Analyze their spending categories with exact percentages of income. Compare each category to recommended benchmarks (housing ≤30% of income, food ≤15%, transportation ≤15%). Identify which categories exceed healthy limits and by how much. Explain the financial impact of their current spending patterns.
+Each field must be a standalone paragraph of **4–6 complete sentences**, with:
+- Concrete percentages from their data
+- Specific dollar values (e.g., "reduce housing from $1600 to $1300")
+- Risk warnings, strategy tips, or suggestions
+- Action steps and timeframes
+- Use the user's values directly
 
-PERSONALIZED SAVING RECOMMENDATIONS: Provide specific steps to reduce expenses and increase savings. Start with their highest problem categories and give exact dollar reduction targets. Include implementation strategies like "reduce housing costs from $X to $Y by [specific method]" and realistic timeframes. Calculate total monthly and annual savings potential.
-
-ADVANCED FINANCIAL ANALYSIS: Calculate their emergency fund needs (3-6 months of current expenses). Assess their current deficit/surplus situation and cash flow trends. Identify specific financial risks and vulnerabilities. Provide investment readiness criteria with exact dollar targets they need to reach before investing.
-
-BUDGET OPTIMIZATION SUGGESTIONS: Recommend specific budget restructuring with exact dollar reallocations between categories. Provide target spending percentages for each category based on their income. Include practical tracking methods and tools. Set measurable goals with specific deadlines for achieving optimal budget balance.
-
-Return only valid JSON with these exact field names. Each field must contain a comprehensive paragraph using their actual financial data.`
+Important rules:
+- Do not return markdown, formatting, or other fields
+- Return only JSON that matches the structure
+- Always write all 4 fields, even if the data is incomplete
+- No introduction or closing text – only pure JSON
+`
         },
         {
           role: "user",
