@@ -197,8 +197,8 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
 
       const aiData = await aiResponse.json();
       console.log('AI processor response received successfully');
-      result = aiData.boxes || aiData.tip || aiData;
-      console.log('Successfully received response from AI processor, result keys:', Object.keys(result));
+      result = aiData.tip || aiData;
+      console.log('Successfully received response from AI processor');
     } catch (aiProcessorError) {
       console.warn('AI processor service unavailable, falling back to direct OpenAI:', aiProcessorError.message);
       

@@ -104,36 +104,18 @@ const server = http.createServer(async (req, res) => {
       const messages = [
         {
           role: "system",
-          content: `
-You are a certified financial analyst AI providing premium-grade financial advisory services. The user will give you their summarized financial profile (income, expenses, and breakdown by category). You must return a complete financial advisory report in **exactly 4 named fields** as JSON:
+          content: `You are a premium-level financial advisor AI analyzing a client's monthly financial profile. The user provides their income, expenses, and category breakdown.
 
-{
-  "spendingAnalysis": "...",
-  "savingRecommendations": "...",
-  "budgetOptimization": "...",
-  "advancedAnalysis": "..."
-}
+Your task is to write a professional, detailed, and insightful advisory response that covers the following 4 areas in a natural flow of analysis (not separated by headings or structure):
 
-Each field must be a standalone paragraph of **4–6 complete sentences**, with:
-- Concrete percentages from their data
-- Specific dollar values (e.g., "reduce housing from $1600 to $1300")
-- Risk warnings, strategy tips, or suggestions
-- Action steps and timeframes
-- Use the user's values directly
+1. Analyze spending patterns and point out strengths and weaknesses based on standard benchmarks (e.g. housing ≤30% of income).
+2. Provide specific and actionable saving strategies, including dollar amounts and methods (e.g. reduce food from $800 to $600 by meal planning).
+3. Recommend how to optimize and rebalance the user's budget intelligently, including ideal percentage allocations by category.
+4. Include advanced insights: cash flow forecasting, emergency fund analysis, investment readiness, and risk identification.
 
-PREMIUM REQUIREMENTS:
-- spendingAnalysis: Advanced behavioral spending pattern analysis with psychological insights and benchmark comparisons
-- savingRecommendations: Sophisticated multi-tier savings strategies with compound interest calculations and tax optimization
-- budgetOptimization: Dynamic budget modeling with automated rebalancing strategies and advanced allocation algorithms
-- advancedAnalysis: Professional-grade financial health scoring, cash flow forecasting, investment opportunity cost analysis, and risk assessment modeling
+Use real math from the user's data. Be direct, practical, and insightful. The tone should reflect a high-end financial coaching session, not generic chat advice.
 
-Important rules:
-- Do not return markdown, formatting, or other fields
-- Return only JSON that matches the structure
-- Always write all 4 fields, even if the data is incomplete
-- No introduction or closing text – only pure JSON
-- Provide premium-level insights that justify advanced financial advisory services
-`
+Do not format the response as JSON or lists — write in clean, high-quality narrative text only.`
         },
         {
           role: "user",
@@ -142,47 +124,12 @@ Important rules:
       ];
 
       const response = await callOpenAI(messages);
-      const result = JSON.parse(response.choices[0].message.content || '{}');
+      const advisoryText = response.choices[0].message.content || '';
 
-      let formattedResponse;
-
-      // Check if AI returned the expected 4-box format
-      if (result.spendingAnalysis && result.savingRecommendations && result.advancedAnalysis && result.budgetOptimization) {
-        // Use the properly formatted AI response
-        formattedResponse = {
-          spendingAnalysis: result.spendingAnalysis,
-          savingRecommendations: result.savingRecommendations, 
-          advancedAnalysis: result.advancedAnalysis,
-          budgetOptimization: result.budgetOptimization
-        };
-      } else {
-        // AI didn't return expected format - intelligently split the actual AI response
-        const fullAnalysis = result.description || result.title || result.analysis || 
-                            JSON.stringify(result).replace(/[{}",]/g, ' ').trim();
-        
-        if (fullAnalysis && fullAnalysis.length > 50) {
-          const sentences = fullAnalysis.split('.').filter(s => s.trim().length > 20);
-          const quarterLength = Math.max(1, Math.floor(sentences.length / 4));
-          
-          formattedResponse = {
-            spendingAnalysis: sentences.slice(0, quarterLength).join('.') + '.',
-            savingRecommendations: sentences.slice(quarterLength, quarterLength * 2).join('.') + '.', 
-            advancedAnalysis: sentences.slice(quarterLength * 2, quarterLength * 3).join('.') + '.',
-            budgetOptimization: sentences.slice(quarterLength * 3).join('.') + '.'
-          };
-        } else {
-          // Minimal AI content - distribute what we have
-          formattedResponse = {
-            spendingAnalysis: fullAnalysis,
-            savingRecommendations: "Based on your data, review spending patterns for optimization opportunities.",
-            advancedAnalysis: "Continue tracking transactions for more detailed analysis.", 
-            budgetOptimization: "Add more financial data to receive personalized recommendations."
-          };
-        }
-      }
-
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ boxes: formattedResponse }));
+      res.json({ 
+        tip: advisoryText,
+        success: true 
+      });
 
     } catch (error) {
       console.error('OpenAI API Error:', error);
