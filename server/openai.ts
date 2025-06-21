@@ -153,12 +153,56 @@ export async function generateFinancialTips(financialData: {
     }
     const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
+    // Prepare the financial summary for the AI processor
+    const summary = `Financial Summary:
+- Monthly Income: $${totalIncome}
+- Monthly Expenses: $${totalExpenses}
+- Net Balance: $${totalIncome - totalExpenses}
+
+Spending by Category:
+${transactionsByCategory.filter(cat => cat.type === 'expense').map(cat => 
+  `- ${cat.categoryName}: $${cat.amount}`
+).join('\n')}
+
+Recent Transactions (last 10):
+${recentTransactions.slice(0, 10).map(t => 
+  `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'})`
+).join('\n')}
+
+Please provide personalized financial tips based on this data.`;
+
+    // Call the Fly.io AI processor service with fallback to direct OpenAI
+    let result;
+    try {
+      const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'https://finanserpro-ai-processor.fly.dev';
+      console.log(`Calling AI processor at ${AI_PROCESSOR_URL}/generate-financial-tip`);
+      
+      const aiResponse = await fetch(`${AI_PROCESSOR_URL}/generate-financial-tip`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ summary }),
+        timeout: 30000 // 30 second timeout
+      });
+
+      if (!aiResponse.ok) {
+        throw new Error(`AI processor error: ${aiResponse.status} ${aiResponse.statusText}`);
+      }
+
+      const aiData = await aiResponse.json();
+      result = aiData.tip;
+      console.log('Successfully received response from AI processor');
+    } catch (aiProcessorError) {
+      console.warn('AI processor service unavailable, falling back to direct OpenAI:', aiProcessorError.message);
+      
+      // Fallback to direct OpenAI call
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
 
 1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
 2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
@@ -191,32 +235,18 @@ Return comprehensive analysis in JSON:
   "estimatedSaving": [realistic_amount],
   "educational": false
 }`
-        },
-        {
-          role: "user",
-          content: `Financial Summary:
-- Monthly Income: $${totalIncome}
-- Monthly Expenses: $${totalExpenses}
-- Net Balance: $${totalIncome - totalExpenses}
+          },
+          {
+            role: "user",
+            content: summary
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.9
+      });
 
-Spending by Category:
-${transactionsByCategory.filter(cat => cat.type === 'expense').map(cat => 
-  `- ${cat.categoryName}: $${cat.amount}`
-).join('\n')}
-
-Recent Transactions (last 10):
-${recentTransactions.slice(0, 10).map(t => 
-  `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'})`
-).join('\n')}
-
-Please provide personalized financial tips based on this data.`
-        }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.9
-    });
-
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+      result = JSON.parse(response.choices[0].message.content || '{}');
+    }
 
     // Handle single tip response (new format)
     const tips = result.title ? [result] : [];
