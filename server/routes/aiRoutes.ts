@@ -158,6 +158,38 @@ export function registerAIRoutes(app: Express) {
     }
   });
 
+  // AI Financial Tips endpoint (multiple independent tips)
+  app.post('/api/ai/tips', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const { financialData } = req.body;
+      if (!financialData) {
+        return res.status(400).json({ error: 'Financial data is required' });
+      }
+
+      // Get recent transactions for AI analysis
+      const recentTransactions = await storage.getTransactions(userId);
+      const transactionsByCategory = await storage.getTransactionsByCategory(userId);
+
+      const tips = await generateFinancialTips({
+        totalIncome: financialData.totalIncome || 0,
+        totalExpenses: financialData.totalExpenses || 0,
+        transactionsByCategory: transactionsByCategory || [],
+        recentTransactions: recentTransactions || [],
+        timestamp: financialData.timestamp // For bypassing cache
+      });
+
+      res.json({ tips });
+    } catch (error) {
+      console.error('Error generating AI tips:', error);
+      res.status(500).json({ error: 'Failed to generate AI tips' });
+    }
+  });
+
   // AI Spending Insights endpoint
   app.get('/api/ai/insights', isAuthenticated, async (req: any, res) => {
     try {
