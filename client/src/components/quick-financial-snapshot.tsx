@@ -18,6 +18,9 @@ interface QuickSnapshotProps {
 
 export default function QuickFinancialSnapshot({ summary, transactions }: QuickSnapshotProps) {
   const { currency } = useCurrency();
+  
+  // Don't show currency symbol if none is selected yet
+  const displayCurrency = currency || '$';
   const getTopCategories = () => {
     if (!summary?.transactionsByCategory) return { topExpense: null, topIncome: null };
 

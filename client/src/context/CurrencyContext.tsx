@@ -62,14 +62,15 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
           setIsInitialized(true);
         } else {
           // User has no currency set - show setup modal until they choose
-          setCurrencyState('$'); // Temporary default for display
+          setCurrencyState(''); // No currency symbol until user selects
           setShowSetupModal(true);
           setIsInitialized(true);
         }
       } catch (error) {
         console.error('Failed to initialize currency:', error);
-        // For auth errors, don't retry - fallback to default
-        setCurrencyState('$');
+        // For auth errors, don't set any currency - let user choose
+        setCurrencyState('');
+        setShowSetupModal(true);
         setIsInitialized(true);
       }
     };

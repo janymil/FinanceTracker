@@ -40,9 +40,11 @@ interface CurrencySetupModalProps {
 }
 
 export function CurrencySetupModal({ isOpen, onClose, onSelectCurrency }: CurrencySetupModalProps) {
-  const [selectedCurrency, setSelectedCurrency] = useState('$');
+  const [selectedCurrency, setSelectedCurrency] = useState('');
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+  
+  console.log('Currency Setup Modal - isOpen:', isOpen, 'selectedCurrency:', selectedCurrency);
 
   const handleSave = async () => {
     setSaving(true);
