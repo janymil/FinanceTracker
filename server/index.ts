@@ -61,11 +61,12 @@ app.use((req, res, next) => {
 app.use('/api/clerk-webhooks', express.raw({ type: 'application/json' }));
 app.post('/api/clerk-webhooks', async (req, res) => {
   try {
-    // Completely isolated webhook handler - no middleware chain
+    // Allow webhooks in both development and production for debugging
+    console.log('Clerk webhook received:', req.method, req.path);
+    console.log('Environment:', process.env.NODE_ENV);
+    
     if (process.env.NODE_ENV !== 'production') {
-      res.writeHead(403, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Webhook disabled in dev' }));
-      return;
+      console.log('Development webhook - processing anyway for debugging');
     }
     
     const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
