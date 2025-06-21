@@ -5,10 +5,13 @@
 Set these **exact** values in your Replit deployment environment:
 
 ```bash
-# Runtime Database (CRITICAL - must point to Neon)
+# Development Environment (Replit)
+DATABASE_URL=postgresql://user:password@localhost:5432/replit_db
+
+# Production Environment (Neon) 
 DATABASE_URL=postgresql://neondb_owner:npg_RtbJTXcaD6U5@ep-bold-re...neon.tech/neondb?sslmode=require
 
-# Development Sync Reference (used by sync scripts)
+# Sync Reference (always points to Neon)
 DATABASE_URL_PROD=postgresql://neondb_owner:npg_RtbJTXcaD6U5@ep-bold-re...neon.tech/neondb?sslmode=require
 
 # Authentication
