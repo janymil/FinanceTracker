@@ -1,5 +1,16 @@
 import { config } from "dotenv";
-config(); // Load environment variables
+import path from "path";
+import fs from "fs";
+
+// Force load .env.local in development to override system environment variables
+const envLocalPath = path.resolve(process.cwd(), '.env.local');
+if (fs.existsSync(envLocalPath)) {
+  config({ path: envLocalPath, override: true });
+  console.log('Development environment: Using .env.local for Clerk keys');
+} else {
+  config(); // Load .env as fallback for production
+  console.log('Production environment: Using system environment variables');
+}
 
 import express, { type Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
