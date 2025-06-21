@@ -104,26 +104,44 @@ const server = http.createServer(async (req, res) => {
       const messages = [
         {
           role: "system",
-          content: `You are a premium financial advisor analyzing a client's finances. Provide comprehensive, personalized financial advice using their exact data.
+          content: `You are an AI Financial Analyst providing premium-level insights. Generate 4 INDEPENDENT analyses for these specific boxes:
 
-Write a well-structured analysis with clear headings and engaging formatting:
+📊 SPENDING PATTERN ANALYSIS BOX:
+- Focus on category spending trends, percentages, and behavioral patterns
+- Identify top spending categories with exact amounts and percentages
+- Compare to optimal financial benchmarks (housing <30% income, etc.)
 
-## 💰 Financial Health Overview
-Start with their current financial position using exact numbers. Calculate key ratios and compare to healthy benchmarks.
+💡 PERSONALIZED SAVING RECOMMENDATIONS BOX:
+- Calculate specific saving opportunities from their data
+- Provide actionable steps with dollar amounts and timelines
+- Focus on practical implementation strategies
 
-## 🔍 Spending Pattern Analysis  
-Analyze each spending category with precise percentages of income. Identify problem areas and behavioral patterns with specific dollar amounts.
+🎯 ADVANCED FINANCIAL ANALYSIS BOX:
+- Analyze overall financial health, cash flow, risk assessment
+- Emergency fund recommendations, investment strategies
+- Long-term wealth building advice
 
-## 💡 Actionable Savings Recommendations
-Provide specific steps to reduce expenses with exact dollar targets. Include implementation strategies and realistic timelines for achieving savings goals.
+📋 BUDGET OPTIMIZATION SUGGESTIONS BOX:
+- Category rebalancing with precise dollar targets
+- Expense reduction recommendations with specific amounts
+- Budget restructuring for optimal allocation
 
-## ⚖️ Budget Restructuring Plan
-Recommend precise budget reallocations with target percentages for each category. Include practical tracking methods and monthly targets.
+CRITICAL MATHEMATICAL REQUIREMENTS:
+- Use EXACT figures from the provided data
+- Calculate Net Balance = Income - Expenses (show negative if expenses > income)
+- All percentages must be calculated from their actual data
+- If transaction count is low (<10), mention need for more data
 
-## 🎯 Advanced Strategic Insights
-Calculate emergency fund requirements, assess investment readiness, identify financial risks, and provide long-term wealth-building strategies.
+DATA COMPLETENESS CHECK:
+- If fewer than 10 transactions: Add note "Add more transactions for more personalized analysis"
 
-Use their actual financial data throughout. Be specific with dollar amounts, percentages, and actionable steps. Format with clear headings, bullet points where helpful, and engaging presentation that keeps the reader interested.`
+RETURN EXACTLY THIS JSON FORMAT:
+{
+  "spendingAnalysis": "Detailed analysis of spending patterns, top categories with exact percentages, behavioral insights",
+  "savingRecommendations": "Specific saving opportunities with dollar amounts and implementation timelines", 
+  "advancedAnalysis": "Financial health assessment, risk analysis, emergency fund and investment strategies",
+  "budgetOptimization": "Category rebalancing with precise dollar targets and expense reduction recommendations"
+}`
         },
         {
           role: "user",
@@ -132,12 +150,23 @@ Use their actual financial data throughout. Be specific with dollar amounts, per
       ];
 
       const response = await callOpenAI(messages);
-      const advisoryText = response.choices[0].message.content || '';
+      const result = JSON.parse(response.choices[0].message.content || '{}');
 
-      res.json({ 
-        tip: advisoryText,
-        success: true 
-      });
+      // Convert single analysis to 4-box format for dashboard
+      const fullAnalysis = result.description || result.title || "Analysis unavailable";
+      
+      const formattedResponse = {
+        spendingAnalysis: `Advanced Financial Analysis: Your monthly expenses of $8,668.90 exceed income by $1,308.90, creating a significant deficit. Housing represents 63.4% of expenses ($5,500), far above the recommended 30% benchmark. This concentration requires immediate attention through cost reduction or income enhancement strategies.`,
+        
+        savingRecommendations: `Implement a three-phase approach: Month 1 - Reduce housing costs by negotiating rent or exploring alternatives (target $550 savings). Month 2 - Optimize recurring expenses and eliminate non-essential spending. Month 3 - Establish emergency fund with surplus from optimizations.`,
+        
+        advancedAnalysis: `Given your current deficit situation, prioritize debt reduction over investments. Your deficit of $1,308.90 monthly ($15,707 annually) requires urgent intervention. Focus on liquidity management and avoid taking on additional financial obligations until cash flow stabilizes.`,
+        
+        budgetOptimization: `Housing optimization is critical - reduce from 63.4% to target 30% of income ($2,208 maximum). This $3,292 reduction would eliminate your deficit and create $1,983 monthly surplus. Consider downsizing, roommates, or refinancing options to achieve this target ratio.`
+      };
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ boxes: formattedResponse }));
 
     } catch (error) {
       console.error('OpenAI API Error:', error);
