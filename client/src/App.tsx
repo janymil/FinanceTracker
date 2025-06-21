@@ -8,6 +8,7 @@ import { SignedIn, SignedOut, useClerk, useUser } from "@clerk/clerk-react";
 import { initGA } from "@/lib/analytics";
 import { useAnalytics } from "@/hooks/use-analytics";
 import { detectIncognito, showIncognitoWarning } from "@/utils/incognito-detection";
+import { CurrencyProvider } from "@/context/CurrencyContext";
 
 // Core components loaded immediately
 import Header from "@/components/header";
