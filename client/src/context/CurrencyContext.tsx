@@ -55,16 +55,20 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
         setHasTransactions(userHasTransactions);
         setCanChangeCurrency(!userHasTransactions);
         
-        if (userData.currency) {
+        console.log('Currency check - userData.currency:', userData.currency, 'type:', typeof userData.currency);
+        
+        if (userData.currency && userData.currency.trim() !== '') {
           // User has set currency preference
           setCurrencyState(userData.currency);
           setShowSetupModal(false);
           setIsInitialized(true);
+          console.log('User has currency set:', userData.currency);
         } else {
           // User has no currency set - show setup modal until they choose
           setCurrencyState('$'); // Temporary default for display
           setShowSetupModal(true);
           setIsInitialized(true);
+          console.log('No currency set - showing setup modal');
         }
       } catch (error) {
         console.error('Failed to initialize currency:', error);
@@ -110,7 +114,7 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
   return (
     <CurrencyContext.Provider value={value}>
       {children}
-      {showSetupModal && (
+      {showSetupModal && isInitialized && (
         <CurrencySetupModal
           isOpen={showSetupModal}
           onClose={() => setShowSetupModal(false)}

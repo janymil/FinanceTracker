@@ -449,7 +449,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
           )}
 
           {/* Currency selector - only show if user hasn't set currency yet */}
-          {!user?.currency && <CurrencySelector variant="icon" className="mr-2" />}
+          {(!user?.currency || user?.currency.trim() === '') && <CurrencySelector variant="icon" className="mr-2" />}
 
           {/* User dropdown */}
           <DropdownMenu>

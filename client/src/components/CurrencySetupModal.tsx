@@ -88,7 +88,7 @@ export function CurrencySetupModal({ open, onComplete }: CurrencySetupModalProps
               <Button
                 key={currency.code}
                 variant={selectedCurrency === currency.symbol ? "default" : "outline"}
-                onClick={() => handleSaveCurrency(currency.symbol)}
+                onClick={() => handleSaveCurrency(currency.symbol, onSelectCurrency, onClose)}
                 className="h-16 p-3 flex flex-col items-center justify-center space-y-1 relative hover:scale-105 transition-transform"
               >
                 <span className="text-xl font-bold">{currency.symbol}</span>
