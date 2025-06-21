@@ -26,10 +26,15 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
   // Get Clerk session token for authentication
   try {
     if (typeof window !== 'undefined' && window.Clerk?.session) {
-      const token = await window.Clerk.session.getToken();
+      const token = await window.Clerk.session.getToken({
+        template: 'default'
+      });
       console.log('Clerk token available:', !!token);
       if (token) {
-        return { Authorization: `Bearer ${token}` };
+        return { 
+          Authorization: `Bearer ${token}`,
+          'clerk-db-jwt': token
+        };
       }
     }
     console.log('No Clerk session available');
