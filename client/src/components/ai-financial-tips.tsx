@@ -55,10 +55,10 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const generateTipsMutation = useMutation({
     mutationFn: async () => {
       if (!summary) throw new Error("No financial summary available");
-
+      
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
-
+      
       const response = await apiRequest("POST", "/api/ai/tips", {
         body: JSON.stringify({
           financialData: {
@@ -164,17 +164,17 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                     'pie-chart': PieChart,
                     'target': Target
                   };
-
+                  
                   const colorMap = {
                     'Spending Pattern Analysis': 'blue',
                     'Personalized Saving Recommendations': 'green',
                     'Budget Optimization Suggestions': 'purple',
                     'Advanced Financial Analysis': 'orange'
                   };
-
+                  
                   const IconComponent = iconMap[tip.icon as keyof typeof iconMap] || TrendingUp;
                   const color = colorMap[tip.title as keyof typeof colorMap] || 'blue';
-
+                  
                   return (
                     <div key={index} className={`p-4 rounded-lg border-l-4 ${
                       color === 'blue' ? 'bg-blue-50 border-blue-400 dark:bg-blue-900/20' :
@@ -206,6 +206,40 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                     </div>
                   );
                 })}
+              </div>
+            )}
+
+            {/* AI Analysis Features - show when no tips generated */}
+            {currentTips.length === 0 && (
+              <div className="space-y-4">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                    AI Analysis Features:
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      Spending pattern analysis
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      Personalized saving recommendations
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      Budget optimization suggestions
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      Context-aware financial advice
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                  <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Click "Get AI Tip" to generate personalized financial advice</p>
+                </div>
               </div>
             )}
           </div>
