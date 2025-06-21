@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Edit3, Trash2, TrendingUp, DollarSign } from "lucide-react";
+import { basicCategoryIcons } from "@/lib/basic-category-icons";
 import { categoryIcons } from "@/lib/icons-registry";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -160,7 +161,7 @@ export default function Categories() {
   };
 
   const CategoryCard = ({ category }: { category: Category }) => {
-    const IconComponent = categoryIcons[category.icon as keyof typeof categoryIcons] || categoryIcons["other"];
+    const IconComponent = categoryIcons[category.icon as keyof typeof categoryIcons] || categoryIcons["circle"];
     
     return (
       <Card className="group relative hover:shadow-md transition-shadow">
@@ -262,7 +263,7 @@ export default function Categories() {
                   New Category
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingCategory ? "Edit Category" : "Create New Category"}
@@ -306,7 +307,7 @@ export default function Categories() {
                   <div>
                     <Label>Icon</Label>
                     <div className="grid grid-cols-4 gap-2 mt-2">
-                      {Object.entries(categoryIcons).map(([key, IconComponent]) => (
+                      {Object.entries(basicCategoryIcons).map(([key, IconComponent]) => (
                         <Button
                           key={key}
                           variant={newCategory.icon === key ? "default" : "outline"}
