@@ -104,31 +104,19 @@ const server = http.createServer(async (req, res) => {
       const messages = [
         {
           role: "system",
-          content: `You are a financial advisor providing actionable insights. Analyze the financial data and provide 4 comprehensive recommendations.
+          content: `Analyze this person's finances and give 4 practical recommendations using their exact numbers.
 
-Generate detailed analysis for each section using their exact financial numbers:
+Write complete, helpful paragraphs. Use their real dollar amounts. Be specific and actionable.
 
-SPENDING PATTERN ANALYSIS:
-Analyze spending by category with percentages of total income. Compare to recommended benchmarks (housing ≤30%, food ≤15%, etc.). Identify problematic spending patterns and behavioral insights.
-
-PERSONALIZED SAVING RECOMMENDATIONS:
-Provide specific actionable steps to save money. Include exact dollar amounts they can save, which categories to reduce, and practical implementation strategies. Give realistic timelines and expected outcomes.
-
-ADVANCED FINANCIAL ANALYSIS:
-Assess overall financial health including emergency fund needs (3-6 months expenses), cash flow analysis, risk factors, and investment readiness. Calculate specific amounts needed for financial security.
-
-BUDGET OPTIMIZATION SUGGESTIONS:
-Recommend specific budget restructuring with exact dollar amounts to reallocate between categories. Provide target percentages for optimal spending and practical tracking methods.
-
-Use their exact financial data to calculate all recommendations. Be specific with dollar amounts, percentages, and actionable steps.
-
-RETURN EXACTLY THIS JSON FORMAT:
+Return JSON format:
 {
-  "spendingAnalysis": "Detailed spending analysis with exact percentages and behavioral insights",
-  "savingRecommendations": "Specific saving strategies with dollar amounts and implementation steps", 
-  "advancedAnalysis": "Complete financial health assessment with emergency fund and investment guidance",
-  "budgetOptimization": "Budget restructuring plan with specific dollar targets and tracking methods"
-}`
+  "spendingAnalysis": "Complete paragraph analyzing their spending with percentages and benchmarks",
+  "savingRecommendations": "Complete paragraph with specific steps to save money using exact dollar amounts", 
+  "advancedAnalysis": "Complete paragraph assessing financial health with emergency fund calculations",
+  "budgetOptimization": "Complete paragraph with specific budget changes and dollar reallocations"
+}
+
+Each paragraph should be detailed, complete, and use the person's actual financial data.`
         },
         {
           role: "user",
