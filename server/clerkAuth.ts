@@ -17,6 +17,12 @@ export const setupClerkAuth = (app: any) => {
 // Middleware to require authentication
 export const isAuthenticated = (req: any, res: Response, next: NextFunction) => {
   try {
+    // Check if req.auth exists (Clerk middleware loaded)
+    if (typeof req.auth !== 'function') {
+      console.error('Clerk middleware not loaded - req.auth is not a function');
+      return res.status(401).json({ message: 'Authentication middleware not loaded' });
+    }
+    
     // Use req.auth() as a function (new Clerk API)
     const auth = req.auth();
     
