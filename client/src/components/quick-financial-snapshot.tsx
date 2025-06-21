@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, DollarSign, CreditCard, Wallet, PiggyBank } from "lucide-react";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface QuickSnapshotProps {
   summary?: {
@@ -16,6 +17,7 @@ interface QuickSnapshotProps {
 }
 
 export default function QuickFinancialSnapshot({ summary, transactions }: QuickSnapshotProps) {
+  const { currency } = useCurrency();
   const getTopCategories = () => {
     if (!summary?.transactionsByCategory) return { topExpense: null, topIncome: null };
 
@@ -55,12 +57,7 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(Math.abs(amount));
+    return `${currency}${Math.abs(amount).toLocaleString()}`;
   };
 
   const topExpense = summary?.transactionsByCategory && Array.isArray(summary.transactionsByCategory)
@@ -116,7 +113,7 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
     {
       icon: CreditCard,
       title: "Top Expense",
-      value: topExpense ? formatCurrency(topExpense.amount) : "$0",
+      value: topExpense ? formatCurrency(topExpense.amount) : `${currency}0`,
       description: topExpense?.categoryName || "No expenses",
       color: "text-red-600",
       bgColor: "bg-red-50"
@@ -124,7 +121,7 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
     {
       icon: PiggyBank,
       title: "Top Income",
-      value: topIncome ? formatCurrency(topIncome.amount) : "$0",
+      value: topIncome ? formatCurrency(topIncome.amount) : `${currency}0`,
       description: topIncome?.categoryName || "No income",
       color: "text-green-600",
       bgColor: "bg-green-50"

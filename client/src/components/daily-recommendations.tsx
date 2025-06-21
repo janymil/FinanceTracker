@@ -24,6 +24,7 @@ import { useLocation, Link } from 'wouter';
 import { useUser } from '@clerk/clerk-react';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface DailyRecommendationsProps {
   summary?: any;
@@ -58,6 +59,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
   const [currentDate, setCurrentDate] = useState(new Date());
   const { user } = useUser();
+  const { currency } = useCurrency();
 
   // Get user's plan from database
   const { data: databaseUser } = useQuery({
@@ -87,7 +89,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
         title: 'Reduce High Spending',
         description: 'Your spending is approaching 80% of your income',
         action: 'Review your largest expense categories and identify areas to cut back',
-        impact: 'Save $200-500 this month',
+        impact: `Save ${currency}200-500 this month`,
         timeToComplete: '15 minutes',
         category: 'Financial Health'
       });
@@ -129,7 +131,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
       priority: 'medium',
       title: 'Emergency Fund Boost',
       description: 'Add to your emergency savings today',
-      action: 'Transfer $50 to your emergency fund',
+      action: `Transfer ${currency}50 to your emergency fund`,
       impact: 'Build financial security',
       timeToComplete: '2 minutes',
       amount: 50,
@@ -281,7 +283,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                           {rec.amount && (
                             <div className="flex items-center gap-1 text-sm font-medium text-green-600">
                               <PiggyBank className="h-4 w-4" />
-                              Potential savings: ${rec.amount.toLocaleString()}
+                              Potential savings: {currency}{rec.amount.toLocaleString()}
                             </div>
                           )}
                         </div>
