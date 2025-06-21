@@ -77,6 +77,7 @@ interface Category {
 
 export default function Dashboard() {
   const { isReady, user } = useClerkUserReady();
+  const { showSetupModal, setShowSetupModal } = useCurrency();
   const { toast } = useToast();
 
   // Check for subscription success/error messages

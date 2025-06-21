@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useCurrency } from '@/context/CurrencyContext';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Settings, Check } from 'lucide-react';
+import { Settings, Check, Lock } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const PRESET_CURRENCIES = [
   { symbol: '$', label: 'US Dollar ($)', code: 'USD' },
@@ -17,12 +18,14 @@ interface CurrencySelectorProps {
 }
 
 export function CurrencySelector({ className = '', variant = 'icon' }: CurrencySelectorProps) {
-  const { currency, setCurrency } = useCurrency();
+  const { currency, setCurrency, canChangeCurrency, hasTransactions } = useCurrency();
   const [open, setOpen] = useState(false);
 
   const handleCurrencyChange = (newCurrency: string) => {
-    setCurrency(newCurrency);
-    setOpen(false);
+    if (canChangeCurrency) {
+      setCurrency(newCurrency);
+      setOpen(false);
+    }
   };
 
   const getCurrentCurrencyInfo = () => {
@@ -45,21 +48,38 @@ export function CurrencySelector({ className = '', variant = 'icon' }: CurrencyS
         </DialogTrigger>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Currency Settings</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              Currency Settings
+              {!canChangeCurrency && <Lock className="h-4 w-4 text-gray-500" />}
+            </DialogTitle>
             <DialogDescription>
-              Choose your preferred currency symbol for displaying amounts. This doesn't affect subscription pricing.
+              {canChangeCurrency 
+                ? "Choose your preferred currency symbol for displaying amounts."
+                : "Currency cannot be changed after adding transactions."
+              }
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Current: <span className="font-medium">{getCurrentCurrencyInfo().symbol} - {getCurrentCurrencyInfo().label}</span>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            
+            {!canChangeCurrency && (
+              <Alert className="mb-4">
+                <Lock className="h-4 w-4" />
+                <AlertDescription>
+                  You have {hasTransactions ? 'transactions' : 'data'} in your account. Currency cannot be changed to maintain data consistency.
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            <div className={`grid grid-cols-2 gap-2 ${!canChangeCurrency ? 'opacity-50' : ''}`}>
               {PRESET_CURRENCIES.map((curr) => (
                 <Button
                   key={curr.code}
                   variant={currency === curr.symbol ? "default" : "outline"}
                   onClick={() => handleCurrencyChange(curr.symbol)}
+                  disabled={!canChangeCurrency}
                   className="justify-start h-12 p-3"
                 >
                   <div className="flex items-center space-x-3 w-full">
