@@ -388,6 +388,12 @@ Changelog:
 - June 18, 2025. Added comprehensive FAQ section covering OCR accuracy, supported receipt types, and editing extracted data
 - June 18, 2025. COMPLETED: Fixed QR code mobile upload system to follow complete standard OCR pipeline including user plan checking, AI categorization for standard+ users, and Bunny.net storage for premium users
 - June 18, 2025. Mobile upload now provides identical functionality to desktop OCR with proper polling detection, cache-busting, and form auto-population from mobile-captured receipt data
+- June 21, 2025. INFRASTRUCTURE OPTIMIZATION: Successfully deployed AI processor microservice to Fly.io for heavy OpenAI API processing
+- June 21, 2025. Created external AI processor service at https://finanserpro-ai-processor.fly.dev with auto-scaling, health checks, and cost optimization
+- June 21, 2025. Modified main application to offload financial tips generation to external service while maintaining data sovereignty in Replit
+- June 21, 2025. Implemented intelligent fallback system - external service for performance, direct OpenAI for redundancy
+- June 21, 2025. Verified AI financial tips working correctly for premium users with sophisticated analysis providing $3,600+ annual savings recommendations
+- June 21, 2025. Removed local testing configuration ensuring only Fly.io deployment handles OpenAI processing for optimal infrastructure efficiency
 - June 18, 2025. QR code system fully operational with backend session creation, anonymous mobile access, and authenticated result processing for seamless cross-device receipt scanning workflow
 - June 21, 2025. FIXED: Critical Clerk authentication key mismatch issue - implemented proper development/production key separation using .env.local with system environment variable override
 - June 21, 2025. Created .env.local file with development Clerk keys for Replit environment while preserving production keys for deployment
