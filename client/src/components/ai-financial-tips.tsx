@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import RequirePlan from "@/components/RequirePlan";
+import RequirePlan from "./RequirePlan";
 import { TrendingUp, Lightbulb, PieChart, Target, Sparkles } from "lucide-react";
 
 interface AIFinancialTipsProps {
