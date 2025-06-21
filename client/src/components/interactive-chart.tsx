@@ -28,6 +28,7 @@ import {
   Area,
   AreaChart
 } from "recharts";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface ChartData {
   date: string;
@@ -48,19 +49,19 @@ interface InteractiveChartProps {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label, currencySymbol }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
         <p className="text-sm font-medium text-gray-900 dark:text-white">{`Date: ${label}`}</p>
         {payload.map((entry: any, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
-            {`${entry.dataKey}: $${entry.value?.toLocaleString()}`}
+            {`${entry.dataKey}: ${currencySymbol}${entry.value?.toLocaleString()}`}
           </p>
         ))}
         {payload[0]?.payload?.balance && (
           <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
-            Net Balance: ${payload[0].payload.balance.toLocaleString()}
+            Net Balance: {currencySymbol}{payload[0].payload.balance.toLocaleString()}
           </p>
         )}
       </div>
@@ -69,14 +70,14 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const CustomPieTooltip = ({ active, payload }: any) => {
+const CustomPieTooltip = ({ active, payload, currencySymbol }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0];
     return (
       <div className="bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
         <p className="text-sm font-medium text-gray-900 dark:text-white">{data.payload.category}</p>
         <p className="text-sm" style={{ color: data.color }}>
-          Amount: ${data.value?.toLocaleString()}
+          Amount: {currencySymbol}{data.value?.toLocaleString()}
         </p>
         <p className="text-sm text-gray-600 dark:text-gray-300">
           Percentage: {((data.value / data.payload.total) * 100).toFixed(1)}%
@@ -94,6 +95,7 @@ export default function InteractiveChart({
   description,
   onExport 
 }: InteractiveChartProps) {
+  const { currency } = useCurrency();
   const chartRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
   const [chartRange, setChartRange] = useState("all");
@@ -178,9 +180,9 @@ export default function InteractiveChart({
             <YAxis 
               className="text-xs"
               tick={{ fontSize: 11 }}
-              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
+              tickFormatter={(value) => `${currency}${(value / 1000).toFixed(0)}K`}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip currencySymbol={currency} />} />
             <Line 
               type="monotone" 
               dataKey="income" 
@@ -255,7 +257,7 @@ export default function InteractiveChart({
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip content={<CustomPieTooltip />} />
+            <Tooltip content={<CustomPieTooltip currencySymbol={currency} />} />
           </PieChart>
         );
 
@@ -365,19 +367,19 @@ export default function InteractiveChart({
               {hoveredData.income && (
                 <div>
                   <span className="text-gray-600 dark:text-gray-300">Income:</span>
-                  <span className="ml-2 font-medium text-green-600">${hoveredData.income.toLocaleString()}</span>
+                  <span className="ml-2 font-medium text-green-600">{currency}{hoveredData.income.toLocaleString()}</span>
                 </div>
               )}
               {hoveredData.expenses && (
                 <div>
                   <span className="text-gray-600 dark:text-gray-300">Expenses:</span>
-                  <span className="ml-2 font-medium text-red-600">${hoveredData.expenses.toLocaleString()}</span>
+                  <span className="ml-2 font-medium text-red-600">{currency}{hoveredData.expenses.toLocaleString()}</span>
                 </div>
               )}
               {hoveredData.balance && (
                 <div>
                   <span className="text-gray-600 dark:text-gray-300">Balance:</span>
-                  <span className="ml-2 font-medium">${hoveredData.balance.toLocaleString()}</span>
+                  <span className="ml-2 font-medium">{currency}{hoveredData.balance.toLocaleString()}</span>
                 </div>
               )}
             </div>
