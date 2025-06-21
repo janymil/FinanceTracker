@@ -90,4 +90,33 @@ export function registerAuthRoutes(app: Express) {
       return res.status(500).json({ message: "Failed to fetch user" });
     }
   });
+
+  // Update user data (including currency)
+  app.put('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { currency, ...otherFields } = req.body;
+      
+      // Validate currency if provided
+      if (currency && typeof currency !== 'string') {
+        return res.status(400).json({ message: "Invalid currency format" });
+      }
+
+      const updateData: any = { ...otherFields };
+      if (currency) {
+        updateData.currency = currency;
+      }
+
+      const updatedUser = await storage.updateUser(userId, updateData);
+      
+      return res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      return res.status(500).json({ message: "Failed to update user" });
+    }
+  });
 }

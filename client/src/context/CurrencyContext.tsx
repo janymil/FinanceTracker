@@ -1,8 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useClerkUserReady } from '@/hooks/useClerkUserReady';
+import { apiRequest } from '@/lib/queryClient';
 
 interface CurrencyContextType {
   currency: string;
   setCurrency: (currency: string) => void;
+  canChangeCurrency: boolean;
+  hasTransactions: boolean;
+  showSetupModal: boolean;
+  setShowSetupModal: (show: boolean) => void;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
@@ -12,25 +18,79 @@ interface CurrencyProviderProps {
 }
 
 export function CurrencyProvider({ children }: CurrencyProviderProps) {
+  const { isReady, user } = useClerkUserReady();
   const [currency, setCurrencyState] = useState<string>('$');
+  const [canChangeCurrency, setCanChangeCurrency] = useState<boolean>(true);
+  const [hasTransactions, setHasTransactions] = useState<boolean>(false);
+  const [showSetupModal, setShowSetupModal] = useState<boolean>(false);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
-  // Load currency from localStorage on mount
+  // Load user currency and check transaction status
   useEffect(() => {
-    const savedCurrency = localStorage.getItem('financePro-currency');
-    if (savedCurrency) {
-      setCurrencyState(savedCurrency);
-    }
-  }, []);
+    if (!isReady || !user?.id || isInitialized) return;
 
-  // Save currency to localStorage when it changes
-  const setCurrency = (newCurrency: string) => {
-    setCurrencyState(newCurrency);
-    localStorage.setItem('financePro-currency', newCurrency);
+    const initializeCurrency = async () => {
+      try {
+        // Check if user has any transactions
+        const transactionsResponse = await apiRequest('GET', '/api/transactions');
+        const transactions = await transactionsResponse.json();
+        const userHasTransactions = Array.isArray(transactions) && transactions.length > 0;
+        
+        // Get user data including currency preference
+        const userResponse = await apiRequest('GET', '/api/auth/user');
+        const userData = await userResponse.json();
+        
+        setHasTransactions(userHasTransactions);
+        setCanChangeCurrency(!userHasTransactions);
+        
+        if (userData.currency) {
+          // User has set currency preference
+          setCurrencyState(userData.currency);
+          setIsInitialized(true);
+        } else {
+          // New user - show setup modal
+          setShowSetupModal(true);
+          setIsInitialized(true);
+        }
+      } catch (error) {
+        console.error('Failed to initialize currency:', error);
+        // Fallback to default
+        setCurrencyState('$');
+        setIsInitialized(true);
+      }
+    };
+
+    initializeCurrency();
+  }, [isReady, user?.id, isInitialized]);
+
+  const setCurrency = async (newCurrency: string) => {
+    if (!canChangeCurrency) {
+      console.warn('Cannot change currency after adding transactions');
+      return;
+    }
+
+    try {
+      await apiRequest('PUT', '/api/auth/user', {
+        currency: newCurrency
+      });
+      setCurrencyState(newCurrency);
+    } catch (error) {
+      console.error('Failed to update currency:', error);
+    }
+  };
+
+  const handleSetupComplete = (selectedCurrency: string) => {
+    setCurrencyState(selectedCurrency);
+    setShowSetupModal(false);
   };
 
   const value = {
     currency,
     setCurrency,
+    canChangeCurrency,
+    hasTransactions,
+    showSetupModal,
+    setShowSetupModal: handleSetupComplete,
   };
 
   return (

@@ -6,6 +6,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardSkeleton } from "@/components/dashboard-skeleton";
 import { SEO } from "@/components/SEO";
+import { useCurrency } from "@/context/CurrencyContext";
+import { CurrencySetupModal } from "@/components/CurrencySetupModal";
 
 
 // Core components for immediate display

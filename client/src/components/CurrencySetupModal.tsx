@@ -6,18 +6,31 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 const CURRENCY_OPTIONS = [
+  // Major global currencies
   { symbol: '$', label: 'US Dollar ($)', code: 'USD' },
   { symbol: '€', label: 'Euro (€)', code: 'EUR' },
   { symbol: '£', label: 'British Pound (£)', code: 'GBP' },
-  { symbol: '¥', label: 'Japanese Yen (¥)', code: 'JPY' },
-  { symbol: '₹', label: 'Indian Rupee (₹)', code: 'INR' },
   { symbol: 'C$', label: 'Canadian Dollar (C$)', code: 'CAD' },
   { symbol: 'A$', label: 'Australian Dollar (A$)', code: 'AUD' },
   { symbol: 'CHF', label: 'Swiss Franc (CHF)', code: 'CHF' },
-  { symbol: '₩', label: 'South Korean Won (₩)', code: 'KRW' },
+  { symbol: 'kr', label: 'Swedish Krona (kr)', code: 'SEK' },
+  { symbol: 'kr', label: 'Norwegian Krone (kr)', code: 'NOK' },
+  
+  // Latin American currencies
   { symbol: 'R$', label: 'Brazilian Real (R$)', code: 'BRL' },
+  { symbol: '$', label: 'Mexican Peso ($)', code: 'MXN' },
+  { symbol: '$', label: 'Argentine Peso ($)', code: 'ARS' },
+  { symbol: '$', label: 'Chilean Peso ($)', code: 'CLP' },
+  { symbol: '$', label: 'Colombian Peso ($)', code: 'COP' },
   { symbol: 'S/', label: 'Peruvian Sol (S/)', code: 'PEN' },
+  { symbol: '$U', label: 'Uruguayan Peso ($U)', code: 'UYU' },
+  { symbol: 'Bs', label: 'Bolivian Boliviano (Bs)', code: 'BOB' },
+  
+  // European currencies
+  { symbol: 'zł', label: 'Polish Złoty (zł)', code: 'PLN' },
   { symbol: 'Kč', label: 'Czech Koruna (Kč)', code: 'CZK' },
+  { symbol: 'Ft', label: 'Hungarian Forint (Ft)', code: 'HUF' },
+  { symbol: '₽', label: 'Russian Ruble (₽)', code: 'RUB' },
 ];
 
 interface CurrencySetupModalProps {
