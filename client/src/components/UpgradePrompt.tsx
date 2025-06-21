@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown, TrendingUp, Check, X } from "lucide-react";
-import { useCurrency } from "@/context/CurrencyContext";
 
 interface UpgradePromptProps {
   currentPlan: string;
@@ -13,7 +12,6 @@ interface UpgradePromptProps {
 export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { currency } = useCurrency();
 
   useEffect(() => {
     // Check if user selected a paid plan during signup
@@ -59,7 +57,7 @@ export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
   const planDetails = {
     standard: {
       name: 'Standard',
-      price: `${currency}4.99/month`,
+      price: '$4.99/month',
       color: 'blue',
       icon: TrendingUp,
       features: [
@@ -72,7 +70,7 @@ export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
     },
     premium: {
       name: 'Premium',
-      price: `${currency}9.99/month`,
+      price: '$9.99/month',
       color: 'purple',
       icon: Crown,
       features: [

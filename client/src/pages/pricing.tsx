@@ -6,6 +6,7 @@ import { Check, X, Crown, TrendingUp, Star } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { SEO } from "@/components/SEO";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function Pricing() {
   const [, setLocation] = useLocation();
