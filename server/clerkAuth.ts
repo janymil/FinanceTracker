@@ -2,28 +2,24 @@ import { clerkMiddleware, requireAuth } from '@clerk/express';
 import type { Request, Response, NextFunction } from 'express';
 
 export const setupClerkAuth = (app: any) => {
-  // Use CLERK_PUBLISHABLE_KEY in production, VITE_CLERK_PUBLISHABLE_KEY in development
-  const publishableKey = process.env.CLERK_PUBLISHABLE_KEY || process.env.VITE_CLERK_PUBLISHABLE_KEY;
-  const secretKey = process.env.CLERK_SECRET_KEY;
-  
   console.log('Setting up Clerk middleware with keys:', {
-    publishable: publishableKey?.substring(0, 20) + '...',
-    secret: secretKey?.substring(0, 20) + '...',
+    publishable: process.env.VITE_CLERK_PUBLISHABLE_KEY?.substring(0, 20) + '...',
+    secret: process.env.CLERK_SECRET_KEY?.substring(0, 20) + '...',
     environment: process.env.NODE_ENV
   });
   
-  if (!publishableKey || !secretKey) {
+  if (!process.env.VITE_CLERK_PUBLISHABLE_KEY || !process.env.CLERK_SECRET_KEY) {
     console.error('Missing Clerk keys:', {
-      publishable: !!publishableKey,
-      secret: !!secretKey
+      publishable: !!process.env.VITE_CLERK_PUBLISHABLE_KEY,
+      secret: !!process.env.CLERK_SECRET_KEY
     });
     throw new Error('Clerk authentication keys are missing');
   }
   
   // Add Clerk middleware to handle authentication
   app.use(clerkMiddleware({
-    publishableKey,
-    secretKey
+    publishableKey: process.env.VITE_CLERK_PUBLISHABLE_KEY,
+    secretKey: process.env.CLERK_SECRET_KEY
   }));
 };
 
