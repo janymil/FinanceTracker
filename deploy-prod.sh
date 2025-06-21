@@ -15,26 +15,17 @@ fi
 echo "✅ Database sync completed successfully"
 echo ""
 
-# Step 2: Build for production
-echo "🌐 Step 2: Building for production deployment..."
-NODE_ENV=production npm run build
+# Step 2: Set production environment
+echo "⚙️  Step 2: Setting production environment..."
+export NODE_ENV=production
+echo "✅ NODE_ENV set to production"
+echo ""
 
-if [ $? -ne 0 ]; then
-  echo "❌ Production build failed. Aborting deployment."
-  exit 1
-fi
+# Step 3: Start production server
+echo "🌐 Step 3: Starting production server..."
+echo "Server will start with Neon production database"
+echo "Press Ctrl+C to stop the server"
+echo ""
 
-echo "✅ Production build completed successfully"
-echo "📁 Build artifacts ready in dist/ directory"
-echo ""
-echo "🚀 Ready for deployment!"
-echo ""
-echo "📋 Deployment Checklist:"
-echo "1. ✅ Database synced to Neon"
-echo "2. ✅ Production build completed"
-echo "3. 🔄 CRITICAL: Set DATABASE_URL=$DATABASE_URL_PROD in deployment environment"
-echo "4. 🔄 Use Replit's Deploy button to deploy"
-echo ""
-echo "🚨 DEPLOYMENT REQUIREMENT:"
-echo "   Set DATABASE_URL to: $DATABASE_URL_PROD"
-echo "   (Same value as DATABASE_URL_PROD but named DATABASE_URL for runtime)"
+# Use the same command as development but with production environment
+NODE_ENV=production npm run dev

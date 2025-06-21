@@ -5,32 +5,42 @@ import { drizzle as pgDrizzle } from 'drizzle-orm/node-postgres';
 import ws from "ws";
 import * as schema from "@shared/schema";
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL must be set. Did you forget to provision a database?');
+// Determine which database to use based on environment
+const isProduction = process.env.NODE_ENV === 'production';
+const databaseUrl = isProduction 
+  ? process.env.DATABASE_URL_PROD 
+  : process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+  const missingVar = isProduction ? 'DATABASE_URL_PROD' : 'DATABASE_URL';
+  throw new Error(
+    `${missingVar} must be set. Did you forget to provision a database?`,
+  );
 }
 
-const databaseUrl = process.env.DATABASE_URL;
-const isNeonDatabase = databaseUrl.includes('neon.tech') || databaseUrl.includes('neon.database');
-
+// Initialize database connection based on environment
 let pool: NeonPool | PgPool;
 let db: ReturnType<typeof neonDrizzle> | ReturnType<typeof pgDrizzle>;
 
-if (isNeonDatabase) {
-  // Configure Neon with WebSocket
+if (isProduction) {
+  // Production: Use Neon with WebSocket for serverless
   neonConfig.webSocketConstructor = ws;
+  
   pool = new NeonPool({ 
     connectionString: databaseUrl,
     ssl: { rejectUnauthorized: false }
   });
   db = neonDrizzle({ client: pool, schema });
-  console.log('✅ Connected to Neon database');
+  
+  console.log('✅ Connected to Neon production database');
 } else {
-  // Use standard PostgreSQL for Replit
+  // Development: Use standard PostgreSQL connection for Replit
   pool = new PgPool({ 
     connectionString: databaseUrl
   });
   db = pgDrizzle(pool, { schema });
-  console.log('✅ Connected to PostgreSQL database');
+  
+  console.log('✅ Connected to Replit development database');
 }
 
 export { pool, db };

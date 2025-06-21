@@ -28,13 +28,8 @@ Required production environment variables:
 VITE_CLERK_PUBLISHABLE_KEY=pk_live_your_production_key
 CLERK_SECRET_KEY=sk_live_your_production_secret
 
-# Database (IMPORTANT: Set both for sync and runtime)
-DATABASE_URL=postgresql://neondb_owner:npg_RtbJTXcaD6U5@ep-bold-re...neon.tech/neondb?sslmode=require
-DATABASE_URL_PROD=postgresql://neondb_owner:npg_RtbJTXcaD6U5@ep-bold-re...neon.tech/neondb?sslmode=require
-
-# Clerk Authentication (Production)
-CLERK_SECRET_KEY=sk_live_...
-VITE_CLERK_PUBLISHABLE_KEY=pk_live_...
+# Database
+DATABASE_URL=your_production_database_url
 
 # Stripe Production
 STRIPE_SECRET_KEY=sk_live_your_production_stripe_key
@@ -42,10 +37,7 @@ STRIPE_PUBLISHABLE_KEY=pk_live_your_production_stripe_key
 
 # Other Services
 OPENAI_API_KEY=your_openai_key
-BUNNY_STORAGE_ZONE=finanzerpro-backups
-BUNNY_ACCESS_KEY=your_bunny_access_key
-BUNNY_STORAGE_PASSWORD=your_bunny_storage_password
-ADMIN_PASSWORD=your_secure_production_admin_password
+BUNNY_STORAGE_API_KEY=your_bunny_api_key
 ```
 
 ### 3. Troubleshooting Production Clerk Authentication
