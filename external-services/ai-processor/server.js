@@ -152,16 +152,42 @@ RETURN EXACTLY THIS JSON FORMAT:
       const response = await callOpenAI(messages);
       const result = JSON.parse(response.choices[0].message.content || '{}');
 
-      // Convert single analysis to 4-box format using dynamic AI response
-      const fullAnalysis = result.description || result.title || "Analysis unavailable";
-      const sentences = fullAnalysis.split('.').filter(s => s.trim().length > 0);
-      
-      const formattedResponse = {
-        spendingAnalysis: sentences.slice(0, Math.ceil(sentences.length * 0.35)).join('.') + '.',
-        savingRecommendations: sentences.slice(Math.ceil(sentences.length * 0.35), Math.ceil(sentences.length * 0.6)).join('.') + '.',
-        advancedAnalysis: sentences.slice(Math.ceil(sentences.length * 0.6), Math.ceil(sentences.length * 0.8)).join('.') + '.',
-        budgetOptimization: sentences.slice(Math.ceil(sentences.length * 0.8)).join('.') + '.'
-      };
+      let formattedResponse;
+
+      // Check if AI returned the expected 4-box format
+      if (result.spendingAnalysis && result.savingRecommendations && result.advancedAnalysis && result.budgetOptimization) {
+        // Use the properly formatted AI response
+        formattedResponse = {
+          spendingAnalysis: result.spendingAnalysis,
+          savingRecommendations: result.savingRecommendations, 
+          advancedAnalysis: result.advancedAnalysis,
+          budgetOptimization: result.budgetOptimization
+        };
+      } else {
+        // AI didn't return expected format - intelligently split the actual AI response
+        const fullAnalysis = result.description || result.title || result.analysis || 
+                            JSON.stringify(result).replace(/[{}",]/g, ' ').trim();
+        
+        if (fullAnalysis && fullAnalysis.length > 50) {
+          const sentences = fullAnalysis.split('.').filter(s => s.trim().length > 20);
+          const quarterLength = Math.max(1, Math.floor(sentences.length / 4));
+          
+          formattedResponse = {
+            spendingAnalysis: sentences.slice(0, quarterLength).join('.') + '.',
+            savingRecommendations: sentences.slice(quarterLength, quarterLength * 2).join('.') + '.', 
+            advancedAnalysis: sentences.slice(quarterLength * 2, quarterLength * 3).join('.') + '.',
+            budgetOptimization: sentences.slice(quarterLength * 3).join('.') + '.'
+          };
+        } else {
+          // Minimal AI content - distribute what we have
+          formattedResponse = {
+            spendingAnalysis: fullAnalysis,
+            savingRecommendations: "Based on your data, review spending patterns for optimization opportunities.",
+            advancedAnalysis: "Continue tracking transactions for more detailed analysis.", 
+            budgetOptimization: "Add more financial data to receive personalized recommendations."
+          };
+        }
+      }
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ boxes: formattedResponse }));
