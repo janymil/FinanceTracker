@@ -1,0 +1,296 @@
+lerk token available: true
+index-CpwoTAbD.js:602 
+            
+            
+           GET https://finanzerpro.com/api/auth/user 500 (Internal Server Error)
+(anonymous) @ index-CpwoTAbD.js:602
+await in (anonymous)
+i @ index-CpwoTAbD.js:56
+b @ index-CpwoTAbD.js:56
+start @ index-CpwoTAbD.js:56
+fetch @ index-CpwoTAbD.js:56
+Lh @ index-CpwoTAbD.js:56
+onSubscribe @ index-CpwoTAbD.js:56
+subscribe @ index-CpwoTAbD.js:56
+(anonymous) @ index-CpwoTAbD.js:56
+OM @ index-CpwoTAbD.js:39
+qg @ index-CpwoTAbD.js:41
+ku @ index-CpwoTAbD.js:41
+_R @ index-CpwoTAbD.js:41
+xo @ index-CpwoTAbD.js:39
+SJ @ index-CpwoTAbD.js:41
+Ul @ index-CpwoTAbD.js:41
+AR @ index-CpwoTAbD.js:41
+S @ index-CpwoTAbD.js:26
+R @ index-CpwoTAbD.js:26Understand this error
+index-CpwoTAbD.js:646 
+            
+            
+           GET https://finanzerpro.com/api/mascot 500 (Internal Server Error)
+C @ index-CpwoTAbD.js:646
+await in C
+(anonymous) @ index-CpwoTAbD.js:646
+(anonymous) @ index-CpwoTAbD.js:646
+qg @ index-CpwoTAbD.js:41
+ku @ index-CpwoTAbD.js:41
+_R @ index-CpwoTAbD.js:41
+xo @ index-CpwoTAbD.js:39
+SJ @ index-CpwoTAbD.js:41
+Ul @ index-CpwoTAbD.js:41
+AR @ index-CpwoTAbD.js:41
+S @ index-CpwoTAbD.js:26
+R @ index-CpwoTAbD.js:26Understand this error
+index-CpwoTAbD.js:646 Mascot API error: 500 
+C @ index-CpwoTAbD.js:646
+await in C
+(anonymous) @ index-CpwoTAbD.js:646
+(anonymous) @ index-CpwoTAbD.js:646
+qg @ index-CpwoTAbD.js:41
+ku @ index-CpwoTAbD.js:41
+_R @ index-CpwoTAbD.js:41
+xo @ index-CpwoTAbD.js:39
+SJ @ index-CpwoTAbD.js:41
+Ul @ index-CpwoTAbD.js:41
+AR @ index-CpwoTAbD.js:41
+S @ index-CpwoTAbD.js:26
+R @ index-CpwoTAbD.js:26Understand this error
+index-CpwoTAbD.js:602 
+            
+            
+           GET https://finanzerpro.com/api/financial-summary?startDate=2025-06-01T00%3A00%3A00.000Z&endDate=2025-06-29T22%3A00%3A00.000Z 500 (Internal Server Error)
+It @ index-CpwoTAbD.js:602
+await in It
+queryFn @ index-CpwoTAbD.js:659
+i @ index-CpwoTAbD.js:56
+b @ index-CpwoTAbD.js:56
+start @ index-CpwoTAbD.js:56
+fetch @ index-CpwoTAbD.js:56
+Lh @ index-CpwoTAbD.js:56
+onSubscribe @ index-CpwoTAbD.js:56
+subscribe @ index-CpwoTAbD.js:56
+(anonymous) @ index-CpwoTAbD.js:56
+OM @ index-CpwoTAbD.js:39
+qg @ index-CpwoTAbD.js:41
+ku @ index-CpwoTAbD.js:41
+_R @ index-CpwoTAbD.js:41
+xo @ index-CpwoTAbD.js:39
+SJ @ index-CpwoTAbD.js:41
+Ul @ index-CpwoTAbD.js:41
+AR @ index-CpwoTAbD.js:41
+S @ index-CpwoTAbD.js:26
+R @ index-CpwoTAbD.js:26Understand this error
+index-CpwoTAbD.js:602 
+            
+            
+           GET https://finanzerpro.com/api/categories 500 (Internal Server Error)
+It @ index-CpwoTAbD.js:602
+await in It
+queryFn @ index-CpwoTAbD.js:659
+i @ index-CpwoTAbD.js:56
+b @ index-CpwoTAbD.js:56
+start @ index-CpwoTAbD.js:56
+fetch @ index-CpwoTAbD.js:56
+Lh @ index-CpwoTAbD.js:56
+onSubscribe @ index-CpwoTAbD.js:56
+subscribe @ index-CpwoTAbD.js:56
+(anonymous) @ index-CpwoTAbD.js:56
+OM @ index-CpwoTAbD.js:39
+qg @ index-CpwoTAbD.js:41
+ku @ index-CpwoTAbD.js:41
+_R @ index-CpwoTAbD.js:41
+xo @ index-CpwoTAbD.js:39
+SJ @ index-CpwoTAbD.js:41
+Ul @ index-CpwoTAbD.js:41
+AR @ index-CpwoTAbD.js:41
+S @ index-CpwoTAbD.js:26
+R @ index-CpwoTAbD.js:26Understand this error
+index-CpwoTAbD.js:602 
+            
+            
+           GET https://finanzerpro.com/api/transactions 500 (Internal Server Error)
+It @ index-CpwoTAbD.js:602
+await in It
+queryFn @ index-CpwoTAbD.js:646
+i @ index-CpwoTAbD.js:56
+b @ index-CpwoTAbD.js:56
+start @ index-CpwoTAbD.js:56
+fetch @ index-CpwoTAbD.js:56
+Lh @ index-CpwoTAbD.js:56
+onSubscribe @ index-CpwoTAbD.js:56
+subscribe @ index-CpwoTAbD.js:56
+(anonymous) @ index-CpwoTAbD.js:56
+OM @ index-CpwoTAbD.js:39
+qg @ index-CpwoTAbD.js:41
+ku @ index-CpwoTAbD.js:41
+_R @ index-CpwoTAbD.js:41
+xo @ index-CpwoTAbD.js:39
+SJ @ index-CpwoTAbD.js:41
+Ul @ index-CpwoTAbD.js:41
+AR @ index-CpwoTAbD.js:41
+S @ index-CpwoTAbD.js:26
+R @ index-CpwoTAbD.js:26Understand this error
+index-CpwoTAbD.js:602 
+            
+            
+           GET https://finanzerpro.com/api/auth/user 500 (Internal Server Error)
+It @ index-CpwoTAbD.js:602
+await in It
+queryFn @ index-CpwoTAbD.js:659
+i @ index-CpwoTAbD.js:56
+b @ index-CpwoTAbD.js:56
+start @ index-CpwoTAbD.js:56
+fetch @ index-CpwoTAbD.js:56
+Lh @ index-CpwoTAbD.js:56
+onSubscribe @ index-CpwoTAbD.js:56
+subscribe @ index-CpwoTAbD.js:56
+(anonymous) @ index-CpwoTAbD.js:56
+OM @ index-CpwoTAbD.js:39
+qg @ index-CpwoTAbD.js:41
+ku @ index-CpwoTAbD.js:41
+_R @ index-CpwoTAbD.js:41
+xo @ index-CpwoTAbD.js:39
+SJ @ index-CpwoTAbD.js:41
+Ul @ index-CpwoTAbD.js:41
+AR @ index-CpwoTAbD.js:41
+S @ index-CpwoTAbD.js:26
+R @ index-CpwoTAbD.js:26Understand this error
+index-CpwoTAbD.js:646 
+            
+            
+           GET https://finanzerpro.com/api/financial-health 500 (Internal Server Error)
+A @ index-CpwoTAbD.js:646
+await in A
+(anonymous) @ index-CpwoTAbD.js:646
+await in (anonymous)
+(anonymous) @ index-CpwoTAbD.js:646
+qg @ index-CpwoTAbD.js:41
+ku @ index-CpwoTAbD.js:41
+_R @ index-CpwoTAbD.js:41
+xo @ index-CpwoTAbD.js:39
+SJ @ index-CpwoTAbD.js:41
+Ul @ index-CpwoTAbD.js:41
+AR @ index-CpwoTAbD.js:41
+S @ index-CpwoTAbD.js:26
+R @ index-CpwoTAbD.js:26Understand this error
+4index-CpwoTAbD.js:602 Clerk token available: true
+index-CpwoTAbD.js:602 
+            
+            
+           GET https://finanzerpro.com/api/auth/user 500 (Internal Server Error)
+(anonymous) @ index-CpwoTAbD.js:602
+await in (anonymous)
+i @ index-CpwoTAbD.js:56
+b @ index-CpwoTAbD.js:56
+(anonymous) @ index-CpwoTAbD.js:56
+Promise.then
+(anonymous) @ index-CpwoTAbD.js:56
+Promise.catch
+b @ index-CpwoTAbD.js:56
+start @ index-CpwoTAbD.js:56
+fetch @ index-CpwoTAbD.js:56
+Lh @ index-CpwoTAbD.js:56
+onSubscribe @ index-CpwoTAbD.js:56
+subscribe @ index-CpwoTAbD.js:56
+(anonymous) @ index-CpwoTAbD.js:56
+OM @ index-CpwoTAbD.js:39
+qg @ index-CpwoTAbD.js:41
+ku @ index-CpwoTAbD.js:41
+_R @ index-CpwoTAbD.js:41
+xo @ index-CpwoTAbD.js:39
+SJ @ index-CpwoTAbD.js:41
+Ul @ index-CpwoTAbD.js:41
+AR @ index-CpwoTAbD.js:41
+S @ index-CpwoTAbD.js:26
+R @ index-CpwoTAbD.js:26Understand this error
+index-CpwoTAbD.js:602 Clerk token available: true
+index-CpwoTAbD.js:602 
+            
+            
+           GET https://finanzerpro.com/api/transactions 500 (Internal Server Error)
+It @ index-CpwoTAbD.js:602
+await in It
+queryFn @ index-CpwoTAbD.js:646
+i @ index-CpwoTAbD.js:56
+b @ index-CpwoTAbD.js:56
+(anonymous) @ index-CpwoTAbD.js:56
+Promise.then
+(anonymous) @ index-CpwoTAbD.js:56
+Promise.catch
+b @ index-CpwoTAbD.js:56
+start @ index-CpwoTAbD.js:56
+fetch @ index-CpwoTAbD.js:56
+Lh @ index-CpwoTAbD.js:56
+onSubscribe @ index-CpwoTAbD.js:56
+subscribe @ index-CpwoTAbD.js:56
+(anonymous) @ index-CpwoTAbD.js:56
+OM @ index-CpwoTAbD.js:39
+qg @ index-CpwoTAbD.js:41
+ku @ index-CpwoTAbD.js:41
+_R @ index-CpwoTAbD.js:41
+xo @ index-CpwoTAbD.js:39
+SJ @ index-CpwoTAbD.js:41
+Ul @ index-CpwoTAbD.js:41
+AR @ index-CpwoTAbD.js:41
+S @ index-CpwoTAbD.js:26
+R @ index-CpwoTAbD.js:26Understand this error
+index-CpwoTAbD.js:602 
+            
+            
+           GET https://finanzerpro.com/api/financial-summary?startDate=2025-06-01T00%3A00%3A00.000Z&endDate=2025-06-29T22%3A00%3A00.000Z 500 (Internal Server Error)
+It @ index-CpwoTAbD.js:602
+await in It
+queryFn @ index-CpwoTAbD.js:659
+i @ index-CpwoTAbD.js:56
+b @ index-CpwoTAbD.js:56
+(anonymous) @ index-CpwoTAbD.js:56
+Promise.then
+(anonymous) @ index-CpwoTAbD.js:56
+Promise.catch
+b @ index-CpwoTAbD.js:56
+start @ index-CpwoTAbD.js:56
+fetch @ index-CpwoTAbD.js:56
+Lh @ index-CpwoTAbD.js:56
+onSubscribe @ index-CpwoTAbD.js:56
+subscribe @ index-CpwoTAbD.js:56
+(anonymous) @ index-CpwoTAbD.js:56
+OM @ index-CpwoTAbD.js:39
+qg @ index-CpwoTAbD.js:41
+ku @ index-CpwoTAbD.js:41
+_R @ index-CpwoTAbD.js:41
+xo @ index-CpwoTAbD.js:39
+SJ @ index-CpwoTAbD.js:41
+Ul @ index-CpwoTAbD.js:41
+AR @ index-CpwoTAbD.js:41
+S @ index-CpwoTAbD.js:26
+R @ index-CpwoTAbD.js:26Understand this error
+index-CpwoTAbD.js:602 
+            
+            
+           GET https://finanzerpro.com/api/categories 500 (Internal Server Error)
+It @ index-CpwoTAbD.js:602
+await in It
+queryFn @ index-CpwoTAbD.js:659
+i @ index-CpwoTAbD.js:56
+b @ index-CpwoTAbD.js:56
+(anonymous) @ index-CpwoTAbD.js:56
+Promise.then
+(anonymous) @ index-CpwoTAbD.js:56
+Promise.catch
+b @ index-CpwoTAbD.js:56
+start @ index-CpwoTAbD.js:56
+fetch @ index-CpwoTAbD.js:56
+Lh @ index-CpwoTAbD.js:56
+onSubscribe @ index-CpwoTAbD.js:56
+subscribe @ index-CpwoTAbD.js:56
+(anonymous) @ index-CpwoTAbD.js:56
+OM @ index-CpwoTAbD.js:39
+qg @ index-CpwoTAbD.js:41
+ku @ index-CpwoTAbD.js:41
+_R @ index-CpwoTAbD.js:41
+xo @ index-CpwoTAbD.js:39
+SJ @ index-CpwoTAbD.js:41
+Ul @ index-CpwoTAbD.js:41
+AR @ index-CpwoTAbD.js:41
+S @ index-CpwoTAbD.js:26
+R @ index-CpwoTAbD.js:26Understand this error
+9index-CpwoTAbD.js:602 Clerk token available: true

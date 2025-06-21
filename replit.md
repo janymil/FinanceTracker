@@ -379,8 +379,8 @@ Changelog:
 - June 20, 2025. Improved authentication middleware to detect deleted user scenarios and return proper error codes instead of server crashes
 - June 21, 2025. INFRASTRUCTURE: Implemented dual database synchronization system with Replit PostgreSQL (development) and Neon database (production)
 - June 21, 2025. Created automated deployment pipeline with sync-to-neon.sh script for database synchronization before production builds
-- June 21, 2025. Fixed production authentication issues by implementing environment-aware Clerk key configuration (CLERK_PUBLISHABLE_KEY for production, VITE_CLERK_PUBLISHABLE_KEY for development)
-- June 21, 2025. Enhanced database connection handling with proper SSL configuration for Neon production environment
+- June 21, 2025. FIXED: Resolved 500 errors in production by simplifying database connection logic - runtime uses DATABASE_URL for both environments, sync scripts handle data transfer
+- June 21, 2025. Database connection now works correctly: development uses Replit PostgreSQL, production uses Neon (both via DATABASE_URL)
 - June 18, 2025. Added full drag-and-drop functionality to financial mascot - users can reposition mascot anywhere on screen with mouse drag
 - June 18, 2025. Enhanced mascot positioning system with screen boundary constraints and persistent position state across user interactions
 - June 18, 2025. Fixed mobile responsiveness for categories page "Add New Category" button with responsive flex layout and abbreviated tab names
