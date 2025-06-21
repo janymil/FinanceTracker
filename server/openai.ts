@@ -169,10 +169,21 @@ ${transactionsByCategory.filter(cat => cat.type === 'expense').map(cat =>
   `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalExpenses) * 100).toFixed(1)}% of expenses)`
 ).join('\n')}
 
+Income by Category:
+${transactionsByCategory.filter(cat => cat.type === 'income').map(cat => 
+  `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalIncome) * 100).toFixed(1)}% of income)`
+).join('\n')}
+
 Recent Transactions (last 10):
 ${recentTransactions.slice(0, 10).map(t => 
-  `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'})`
+  `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'}) [${t.type}] on ${new Date(t.date).toLocaleDateString()}`
 ).join('\n')}
+
+Transaction Pattern Analysis:
+- Average transaction size: $${(totalIncome + totalExpenses) / transactionCount}
+- Income transactions: ${recentTransactions.filter(t => t.type === 'income').length}
+- Expense transactions: ${recentTransactions.filter(t => t.type === 'expense').length}
+- Date range: ${new Date(Math.min(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()} to ${new Date(Math.max(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()}
 
 Generate 4 independent box analyses with exact mathematical calculations.`;
 
@@ -197,7 +208,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
 
       const aiData = await aiResponse.json();
       console.log('AI processor response received successfully');
-      result = aiData.boxes || aiData.tip || aiData;
+      result = aiData.tip || aiData;
       console.log('Successfully received response from AI processor');
     } catch (aiProcessorError) {
       console.warn('AI processor service unavailable, falling back to direct OpenAI:', aiProcessorError.message);
@@ -254,54 +265,22 @@ Return comprehensive analysis in JSON:
       result = JSON.parse(response.choices[0].message.content || '{}');
     }
 
-    // Handle different response formats
-    let processedTips = [];
-    
-    if (result.spendingAnalysis) {
-      // New 4-box format
-      processedTips = [
-      {
-        title: 'Spending Pattern Analysis',
-        description: result.spendingAnalysis,
-        category: 'spending',
-        priority: 'high',
-        actionable: true
-      },
-      {
-        title: 'Personalized Saving Recommendations', 
-        description: result.savingRecommendations,
-        category: 'saving',
-        priority: 'high',
-        actionable: true
-      },
-      {
-        title: 'Advanced Financial Analysis',
-        description: result.advancedAnalysis,
-        category: 'education',
-        priority: 'medium',
-        actionable: true
-      },
-      {
-        title: 'Budget Optimization Suggestions',
-        description: result.budgetOptimization,
-        category: 'budgeting',
-        priority: 'high',
-        actionable: true
-      }
-      ];
-    } else if (result.title || result.description) {
-      // Old single tip format
-      processedTips = [{
-        title: result.title || 'Financial Analysis',
-        description: result.description || 'Analysis unavailable',
-        category: result.category || 'spending',
-        priority: result.priority || 'medium',
-        actionable: true
-      }];
-    } else {
-      // Fallback
-      processedTips = [];
-    }
+    // Handle comprehensive analysis response
+    const processedTips = result.title && result.description ? [{
+      title: result.title,
+      description: result.description,
+      category: result.category || 'comprehensive',
+      priority: result.priority || 'high',
+      actionable: Boolean(result.actionable),
+      estimatedSaving: result.estimatedSaving || undefined,
+      educational: Boolean(result.educational)
+    }] : [{
+      title: 'Track Your Expenses',
+      description: 'Start by categorizing all your expenses to understand where your money goes each month.',
+      category: 'budgeting',
+      priority: 'high',
+      actionable: true
+    }];
 
     // Only cache if not bypassing cache
     if (!financialData.timestamp) {

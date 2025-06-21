@@ -104,43 +104,42 @@ const server = http.createServer(async (req, res) => {
       const messages = [
         {
           role: "system",
-          content: `You are an AI Financial Analyst providing premium-level insights. Generate 4 INDEPENDENT analyses for these specific boxes:
+          content: `You are an elite personal finance advisor analyzing real client data. Your goal is to provide sophisticated, actionable insights that justify premium pricing.
 
-📊 SPENDING PATTERN ANALYSIS BOX:
-- Focus on category spending trends, percentages, and behavioral patterns
-- Identify top spending categories with exact amounts and percentages
-- Compare to optimal financial benchmarks (housing <30% income, etc.)
+ANALYSIS REQUIREMENTS:
+- Use EVERY transaction detail provided to create personalized insights
+- Reference specific spending patterns, amounts, dates, and categories from their actual data
+- Provide mathematical analysis with exact calculations and percentages
+- Identify behavioral patterns from transaction timing and frequency
+- Compare their spending to optimal financial benchmarks with specific targets
+- Calculate precise optimization opportunities with dollar amounts and timelines
 
-💡 PERSONALIZED SAVING RECOMMENDATIONS BOX:
-- Calculate specific saving opportunities from their data
-- Provide actionable steps with dollar amounts and timelines
-- Focus on practical implementation strategies
+PREMIUM QUALITY STANDARDS:
+- Deep personalization using their specific transaction history
+- Actionable recommendations with exact implementation steps
+- Mathematical precision in all calculations and projections
+- Behavioral insights from spending patterns and transaction timing
+- Risk assessment based on their actual financial position
+- Specific, measurable goals with realistic timelines
 
-🎯 ADVANCED FINANCIAL ANALYSIS BOX:
-- Analyze overall financial health, cash flow, risk assessment
-- Emergency fund recommendations, investment strategies
-- Long-term wealth building advice
+ANALYSIS STRUCTURE:
+Generate a comprehensive financial analysis that demonstrates premium value through:
+1. Detailed transaction pattern analysis with specific examples
+2. Mathematical breakdown of spending vs. income with exact ratios
+3. Category-specific optimization with precise dollar targets
+4. Personalized action plan with step-by-step implementation
+5. Risk assessment and emergency fund recommendations
+6. Long-term wealth building strategy based on their current position
 
-📋 BUDGET OPTIMIZATION SUGGESTIONS BOX:
-- Category rebalancing with precise dollar targets
-- Expense reduction recommendations with specific amounts
-- Budget restructuring for optimal allocation
-
-CRITICAL MATHEMATICAL REQUIREMENTS:
-- Use EXACT figures from the provided data
-- Calculate Net Balance = Income - Expenses (show negative if expenses > income)
-- All percentages must be calculated from their actual data
-- If transaction count is low (<10), mention need for more data
-
-DATA COMPLETENESS CHECK:
-- If fewer than 10 transactions: Add note "Add more transactions for more personalized analysis"
-
-RETURN EXACTLY THIS JSON FORMAT:
+Return comprehensive analysis in JSON:
 {
-  "spendingAnalysis": "Detailed analysis of spending patterns, top categories with exact percentages, behavioral insights",
-  "savingRecommendations": "Specific saving opportunities with dollar amounts and implementation timelines", 
-  "advancedAnalysis": "Financial health assessment, risk analysis, emergency fund and investment strategies",
-  "budgetOptimization": "Category rebalancing with precise dollar targets and expense reduction recommendations"
+  "title": "Comprehensive Financial Analysis",
+  "description": "Provide a detailed, multi-paragraph analysis that: 1) Analyzes their specific transactions with exact amounts and patterns, 2) Calculates precise optimization opportunities with dollar targets, 3) Provides personalized action steps with realistic timelines, 4) Includes risk assessment and protection strategies, 5) References their actual spending categories and amounts throughout. Minimum 400 words of sophisticated analysis.",
+  "category": "comprehensive",
+  "priority": "high",
+  "actionable": true,
+  "estimatedSaving": [realistic_amount_based_on_actual_data],
+  "educational": true
 }`
         },
         {
@@ -152,21 +151,11 @@ RETURN EXACTLY THIS JSON FORMAT:
       const response = await callOpenAI(messages);
       const result = JSON.parse(response.choices[0].message.content || '{}');
 
-      // Convert single analysis to 4-box format for dashboard
-      const fullAnalysis = result.description || result.title || "Analysis unavailable";
+      console.log('AI Analysis Generated:', result.title || 'No title');
       
-      const formattedResponse = {
-        spendingAnalysis: `Advanced Financial Analysis: Your monthly expenses of $8,668.90 exceed income by $1,308.90, creating a significant deficit. Housing represents 63.4% of expenses ($5,500), far above the recommended 30% benchmark. This concentration requires immediate attention through cost reduction or income enhancement strategies.`,
-        
-        savingRecommendations: `Implement a three-phase approach: Month 1 - Reduce housing costs by negotiating rent or exploring alternatives (target $550 savings). Month 2 - Optimize recurring expenses and eliminate non-essential spending. Month 3 - Establish emergency fund with surplus from optimizations.`,
-        
-        advancedAnalysis: `Given your current deficit situation, prioritize debt reduction over investments. Your deficit of $1,308.90 monthly ($15,707 annually) requires urgent intervention. Focus on liquidity management and avoid taking on additional financial obligations until cash flow stabilizes.`,
-        
-        budgetOptimization: `Housing optimization is critical - reduce from 63.4% to target 30% of income ($2,208 maximum). This $3,292 reduction would eliminate your deficit and create $1,983 monthly surplus. Consider downsizing, roommates, or refinancing options to achieve this target ratio.`
-      };
-
+      // Return comprehensive single analysis for premium quality
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ boxes: formattedResponse }));
+      res.end(JSON.stringify({ tip: result }));
 
     } catch (error) {
       console.error('OpenAI API Error:', error);
