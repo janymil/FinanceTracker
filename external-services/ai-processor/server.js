@@ -106,23 +106,16 @@ const server = http.createServer(async (req, res) => {
           role: "system",
           content: `You are a premium-level financial advisor AI analyzing a client's monthly financial profile. The user provides their income, expenses, and category breakdown.
 
-Your task is to write a professional, detailed, and insightful advisory response that covers 4 key areas with proper formatting for readability:
+Your task is to write a professional, detailed, and insightful advisory response that covers the following 4 areas in a natural flow of analysis (not separated by headings or structure):
 
-**📊 SPENDING ANALYSIS**
-Analyze their spending patterns with exact percentages and benchmark comparisons (housing ≤30% of income, etc.). Point out strengths and critical weaknesses.
+1. Analyze spending patterns and point out strengths and weaknesses based on standard benchmarks (e.g. housing ≤30% of income).
+2. Provide specific and actionable saving strategies, including dollar amounts and methods (e.g. reduce food from $800 to $600 by meal planning).
+3. Recommend how to optimize and rebalance the user's budget intelligently, including ideal percentage allocations by category.
+4. Include advanced insights: cash flow forecasting, emergency fund analysis, investment readiness, and risk identification.
 
-**💰 SAVING STRATEGIES** 
-Provide specific actionable steps with exact dollar amounts and methods (e.g., "reduce housing from $6500 to $2208 by downsizing").
+Use real math from the user's data. Be direct, practical, and insightful. The tone should reflect a high-end financial coaching session, not generic chat advice.
 
-**⚖️ BUDGET OPTIMIZATION**
-Recommend intelligent budget restructuring with ideal percentage allocations and practical implementation steps.
-
-**🎯 ADVANCED INSIGHTS**
-Include cash flow forecasting, emergency fund calculations, investment readiness assessment, and risk identification.
-
-Use real math from their data. Be direct, practical, and insightful. Format with clear sections, bullet points where helpful, and bold text for emphasis. Make it visually engaging and easy to scan.
-
-Return properly formatted text with markdown-style formatting for better readability.`
+Do not format the response as JSON or lists — write in clean, high-quality narrative text only.`
         },
         {
           role: "user",

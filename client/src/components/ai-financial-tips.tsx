@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sparkles, TrendingUp } from "lucide-react";
+import { Lightbulb, Sparkles, TrendingUp, GraduationCap } from "lucide-react";
+import { useUser } from '@clerk/clerk-react';
+
 import { useToast } from "@/hooks/use-toast";
-import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { useUser } from "@clerk/clerk-react";
-import RequirePlan from "@/components/RequirePlan";
+import RequirePlan from "./require-plan";
 
 interface AIFinancialTipsProps {
   summary?: {
@@ -26,50 +27,21 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const { user } = useUser();
 
-  // Function to render formatted AI text with proper markdown support
-  const renderFormattedText = (text: string): JSX.Element => {
-    // Split text by section headers (🎯, 📊, 💰, ⚖️)
-    const sections = text.split(/(\*\*[📊💰⚖️🎯].*?\*\*)/).filter(Boolean);
-    
-    return (
-      <div className="space-y-4">
-        {sections.map((section, index) => {
-          // Check if this is a header section
-          if (section.match(/\*\*[📊💰⚖️🎯].*?\*\*/)) {
-            const headerText = section.replace(/\*\*/g, '');
-            const icon = headerText.charAt(0); // Extract emoji
-            const title = headerText.substring(2); // Remove emoji and space
-            
-            return (
-              <div key={index} className="mb-2">
-                <h4 className="font-semibold text-lg flex items-center gap-2 text-gray-900 dark:text-white">
-                  <span className="text-xl">{icon}</span>
-                  {title}
-                </h4>
-              </div>
-            );
-          } else {
-            // This is content - format with bullet points and bold text
-            const formattedContent = section
-              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
-              .replace(/• /g, '• ') // Preserve bullet points
-              .replace(/\n/g, '<br>') // Line breaks
-              .trim();
-            
-            if (formattedContent) {
-              return (
-                <div 
-                  key={index} 
-                  className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 mb-4 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: formattedContent }}
-                />
-              );
-            }
-          }
-          return null;
-        })}
-      </div>
-    );
+  // Function to clean AI-generated text
+  const cleanAIText = (text: string): string => {
+    return text
+      // Remove asterisks used for emphasis
+      .replace(/\*\*/g, '')
+      .replace(/\*/g, '')
+      // Remove AI generation notes and system messages
+      .replace(/Note:|Important:|Remember:|Disclaimer:|Please note:|Keep in mind:/gi, '')
+      // Remove markdown-style formatting
+      .replace(/#{1,6}\s*/g, '')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      // Remove extra whitespace and clean up
+      .replace(/\s+/g, ' ')
+      .replace(/\n\s*\n/g, '\n')
+      .trim();
   };
 
   // Load saved tip from localStorage on component mount
@@ -77,10 +49,21 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     if (user?.id) {
       const savedTip = localStorage.getItem(`ai-tip-${user.id}`);
       if (savedTip) {
-        setCurrentTip(savedTip);
+        setCurrentTip(cleanAIText(savedTip));
       }
     }
   }, [user?.id]);
+
+  // Get user's plan from database
+  const { data: databaseUser } = useQuery({
+    queryKey: ["auth-user", user?.id],
+    enabled: !!user?.id,
+    staleTime: 0,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/auth/user");
+      return response.json();
+    },
+  });
 
   // React Query mutation for generating tips
   const generateTipMutation = useMutation({
@@ -115,15 +98,15 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
         throw new Error("No tip received from AI");
       }
 
-      return data.tip;
+      return cleanAIText(data.tip);
     },
     onMutate: () => {
       setIsGenerating(true);
     },
-    onSuccess: (tip: string) => {
-      setCurrentTip(tip);
+    onSuccess: (cleanedTip: string) => {
+      setCurrentTip(cleanedTip);
       if (user?.id) {
-        localStorage.setItem(`ai-tip-${user.id}`, tip);
+        localStorage.setItem(`ai-tip-${user.id}`, cleanedTip);
       }
       toast({
         title: "AI Tip Generated",
@@ -187,8 +170,150 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
 
             {/* Current Tip Display */}
             {currentTip && (
-              <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-6 rounded-lg border border-purple-200 dark:border-purple-700">
-                {renderFormattedText(currentTip)}
+              <div className="space-y-4">
+                {/* Parse the AI analysis into sections */}
+                {(() => {
+                  // Clean the content but preserve structure
+                  const cleanedContent = currentTip;
+                  
+                  // Define the 4 thematic sections with their patterns
+                  const sectionPatterns = [
+                    {
+                      title: "📊 Spending Pattern Analysis",
+                      icon: TrendingUp,
+                      keywords: ["spending", "pattern", "analysis", "breakdown", "category", "expenses", "mathematical", "reveals", "bulk"],
+                      color: "blue"
+                    },
+                    {
+                      title: "💡 Personalized Saving Recommendations", 
+                      icon: Lightbulb,
+                      keywords: ["saving", "recommend", "rebalancing", "budget", "limiting", "redirect", "sustainable", "implementation"],
+                      color: "green"
+                    },
+                    {
+                      title: "📋 Budget Optimization Suggestions",
+                      icon: GraduationCap, 
+                      keywords: ["budget", "optimization", "income-to-expense", "ratio", "financial", "strategies", "protection", "realigning"],
+                      color: "purple"
+                    },
+                    {
+                      title: "🎯 Advanced Financial Analysis",
+                      icon: Sparkles,
+                      keywords: ["advanced", "analysis", "necessitates", "action", "focus", "balanced", "cash flow", "immediate"],
+                      color: "orange"
+                    }
+                  ];
+
+                  // Split content into sentences and paragraphs
+                  const sentences = cleanedContent.split(/[.!?]+/).filter(s => s.trim().length > 10);
+                  const sections = [];
+
+                  // Try to match sentences to sections based on keywords
+                  sectionPatterns.forEach(pattern => {
+                    const matchedSentences = sentences.filter(sentence => {
+                      const lowerSentence = sentence.toLowerCase();
+                      return pattern.keywords.some(keyword => lowerSentence.includes(keyword.toLowerCase()));
+                    });
+
+                    if (matchedSentences.length > 0) {
+                      sections.push({
+                        ...pattern,
+                        content: cleanAIText(matchedSentences.join('. ').trim() + '.')
+                      });
+                      
+                      // Remove matched sentences from the pool
+                      matchedSentences.forEach(matched => {
+                        const index = sentences.indexOf(matched);
+                        if (index > -1) sentences.splice(index, 1);
+                      });
+                    }
+                  });
+
+                  // If we have remaining sentences or didn't get 4 sections, distribute them
+                  if (sentences.length > 0 || sections.length < 4) {
+                    const remainingText = sentences.join('. ').trim();
+                    
+                    // If we have less than 4 sections, add the remaining patterns with remaining content
+                    const missingSections = sectionPatterns.filter(pattern => 
+                      !sections.some(section => section.title === pattern.title)
+                    );
+
+                    if (remainingText && missingSections.length > 0) {
+                      // Split remaining text evenly among missing sections
+                      const chunks = remainingText.split(/(?:[.!?]+\s+)/).filter(chunk => chunk.trim());
+                      missingSections.forEach((pattern, index) => {
+                        const chunkStart = Math.floor((chunks.length / missingSections.length) * index);
+                        const chunkEnd = Math.floor((chunks.length / missingSections.length) * (index + 1));
+                        const content = chunks.slice(chunkStart, chunkEnd).join('. ').trim();
+                        
+                        if (content) {
+                          sections.push({
+                            ...pattern,
+                            content: cleanAIText(content + '.')
+                          });
+                        }
+                      });
+                    }
+                  }
+
+                  // Ensure we have at least one section
+                  if (sections.length === 0) {
+                    sections.push({
+                      title: "📊 AI Financial Analysis",
+                      icon: TrendingUp,
+                      content: cleanAIText(cleanedContent),
+                      color: "blue"
+                    });
+                  }
+
+                  return sections.map((section, index) => {
+                    const IconComponent = section.icon;
+                    const colorClasses = {
+                      blue: "from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700",
+                      green: "from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700", 
+                      purple: "from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700",
+                      orange: "from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700"
+                    };
+
+                    return (
+                      <div key={index} className={`p-4 bg-gradient-to-r ${colorClasses[section.color] || colorClasses.blue} rounded-lg border`}>
+                        <div className="flex items-start gap-3">
+                          <div className={`p-2 rounded-full ${
+                            section.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900' :
+                            section.color === 'green' ? 'bg-green-100 dark:bg-green-900' :
+                            section.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900' :
+                            'bg-orange-100 dark:bg-orange-900'
+                          }`}>
+                            <IconComponent className={`h-4 w-4 ${
+                              section.color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
+                              section.color === 'green' ? 'text-green-600 dark:text-green-400' :
+                              section.color === 'purple' ? 'text-purple-600 dark:text-purple-400' :
+                              'text-orange-600 dark:text-orange-400'
+                            }`} />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className={`font-medium mb-2 ${
+                              section.color === 'blue' ? 'text-blue-900 dark:text-blue-100' :
+                              section.color === 'green' ? 'text-green-900 dark:text-green-100' :
+                              section.color === 'purple' ? 'text-purple-900 dark:text-purple-100' :
+                              'text-orange-900 dark:text-orange-100'
+                            }`}>
+                              {section.title}
+                            </h4>
+                            <p className={`text-sm leading-relaxed ${
+                              section.color === 'blue' ? 'text-blue-800 dark:text-blue-200' :
+                              section.color === 'green' ? 'text-green-800 dark:text-green-200' :
+                              section.color === 'purple' ? 'text-purple-800 dark:text-purple-200' :
+                              'text-orange-800 dark:text-orange-200'
+                            }`}>
+                              {section.content}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             )}
 
@@ -224,7 +349,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-3 w-3 text-purple-600" />
-                  Advanced financial insights
+                  Context-aware financial advice
                 </div>
               </div>
             </div>
