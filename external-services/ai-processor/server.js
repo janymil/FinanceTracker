@@ -127,7 +127,7 @@ const server = http.createServer(async (req, res) => {
 - Budget restructuring for optimal allocation
 
 CRITICAL MATHEMATICAL REQUIREMENTS:
-- Use EXACT figures: Income = ${totalIncome}, Expenses = ${totalExpenses}
+- Use EXACT figures from the provided data
 - Calculate Net Balance = Income - Expenses (show negative if expenses > income)
 - All percentages must be calculated from their actual data
 - If transaction count is low (<10), mention need for more data
@@ -135,12 +135,12 @@ CRITICAL MATHEMATICAL REQUIREMENTS:
 DATA COMPLETENESS CHECK:
 - If fewer than 10 transactions: Add note "Add more transactions for more personalized analysis"
 
-Return 4 independent analyses in JSON:
+RETURN EXACTLY THIS JSON FORMAT:
 {
-  "spendingAnalysis": "Focus on spending patterns, top categories with percentages, behavioral insights",
-  "savingRecommendations": "Specific saving opportunities with dollar amounts and implementation steps", 
-  "advancedAnalysis": "Financial health assessment, risk analysis, long-term strategies",
-  "budgetOptimization": "Category rebalancing with exact dollar targets and restructuring advice"
+  "spendingAnalysis": "Detailed analysis of spending patterns, top categories with exact percentages, behavioral insights",
+  "savingRecommendations": "Specific saving opportunities with dollar amounts and implementation timelines", 
+  "advancedAnalysis": "Financial health assessment, risk analysis, emergency fund and investment strategies",
+  "budgetOptimization": "Category rebalancing with precise dollar targets and expense reduction recommendations"
 }`
         },
         {
@@ -152,13 +152,26 @@ Return 4 independent analyses in JSON:
       const response = await callOpenAI(messages);
       const result = JSON.parse(response.choices[0].message.content || '{}');
 
-      // Format response for 4-box layout
-      const formattedResponse = {
-        spendingAnalysis: result.spendingAnalysis || "Spending pattern data insufficient for detailed analysis.",
-        savingRecommendations: result.savingRecommendations || "Add more transactions for personalized saving recommendations.", 
-        advancedAnalysis: result.advancedAnalysis || "Comprehensive analysis requires more transaction data.",
-        budgetOptimization: result.budgetOptimization || "Budget optimization suggestions need more financial data."
-      };
+      // Handle both old and new response formats for 4-box layout
+      let formattedResponse;
+      if (result.spendingAnalysis) {
+        // New 4-box format
+        formattedResponse = {
+          spendingAnalysis: result.spendingAnalysis,
+          savingRecommendations: result.savingRecommendations, 
+          advancedAnalysis: result.advancedAnalysis,
+          budgetOptimization: result.budgetOptimization
+        };
+      } else {
+        // Old single format - convert to 4-box
+        const description = result.description || result.title || "Analysis unavailable";
+        formattedResponse = {
+          spendingAnalysis: description,
+          savingRecommendations: "Implement these changes over the next three months to gradually adjust your lifestyle and improve savings.", 
+          advancedAnalysis: "Given your negative cash flow, prioritizing emergency fund buildup and considering consolidating your investments for liquidity may mitigate risk exposure.",
+          budgetOptimization: description.includes("reduction") || description.includes("save") ? description : "Focus on reducing highest expense categories with specific dollar targets."
+        };
+      }
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ boxes: formattedResponse }));
