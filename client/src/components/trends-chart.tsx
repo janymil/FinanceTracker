@@ -6,9 +6,11 @@ import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import RequirePlan from "@/components/require-plan";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function TrendsChart() {
   const { isReady, user } = useClerkUserReady();
+  const { currency } = useCurrency();
 
   // Fetch user's actual financial data for trend calculation
   const { data: transactions, isLoading: transactionsLoading } = useQuery({
@@ -68,12 +70,7 @@ export default function TrendsChart() {
   const trendData = generateTrendData();
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
+    return `${currency}${value.toLocaleString()}`;
   };
 
   const CustomTooltip = ({ active, payload, label }: any) => {

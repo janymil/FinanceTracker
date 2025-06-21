@@ -10,9 +10,11 @@ import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, su
 import { useState, useMemo, useEffect } from "react";
 import RequirePlan from "@/components/require-plan";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, Area, AreaChart } from "recharts";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function Trends() {
   const { isReady, user } = useClerkUserReady();
+  const { currency } = useCurrency();
   const [selectedPeriod, setSelectedPeriod] = useState("6months");
   const [viewType, setViewType] = useState("overview");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -237,12 +239,7 @@ export default function Trends() {
   }, [transactions, categories]);
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
+    return `${currency}${value.toLocaleString()}`;
   };
 
   // Day of week spending analysis
