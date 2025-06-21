@@ -162,6 +162,7 @@ export async function generateFinancialTips(financialData: {
 - Monthly Expenses: $${totalExpenses}
 - Net Balance: $${netBalance} ${netBalance < 0 ? '(DEFICIT)' : '(SURPLUS)'}
 - Transaction Count: ${transactionCount}
+- Raw Transactions Retrieved: ${recentTransactions.length}
 
 Spending by Category:
 ${transactionsByCategory.filter(cat => cat.type === 'expense').map(cat => 

@@ -134,6 +134,8 @@ export function registerAIRoutes(app: Express) {
       };
 
       console.log(`Generating fresh AI tip for user ${getUserId(req)} with ${transactions.length} transactions`);
+      console.log(`Financial summary transactions count: ${financialSummary.totalTransactionCount}`);
+      console.log(`Date range: ${startOfYear.toISOString()} to ${currentDate.toISOString()}`);
       
       const tips = await generateFinancialTips(financialData);
       const tip = tips.length > 0 ? tips[0] : null;
