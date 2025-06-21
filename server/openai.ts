@@ -629,46 +629,7 @@ export async function generateTrendPredictions(
       budgets: budgets.map(b => ({ category: categoryMap.get(b.categoryId) || 'Other', budgetAmount: parseFloat(b.amount) }))
     };
 
-    // Try AI processor service first
-    try {
-      console.log('Calling AI processor for trend predictions at', AI_PROCESSOR_URL + '/generate-trend-predictions');
-      const aiResponse = await fetch(AI_PROCESSOR_URL + '/generate-trend-predictions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ financialSummary })
-      });
-
-      if (!aiResponse.ok) {
-        throw new Error(`HTTP ${aiResponse.status}`);
-      }
-
-      const aiData = await aiResponse.json();
-      console.log('AI processor trend predictions received successfully');
-      const result = aiData.predictions || aiData;
-      console.log('Successfully received trend predictions from AI processor');
-      
-      const predictions = {
-        categoryPredictions: result.categoryPredictions || [],
-        financialForecast: result.financialForecast || {
-          nextMonthExpenses: 0,
-          expectedSavings: 0,  
-          budgetVariance: 0,
-          confidence: 0,
-          keyInsights: [],
-          recommendations: [],
-          riskFactors: []
-        }
-      };
-
-      // Cache the result
-      aiCache.setTrends(transactionsHash, budgetsHash, predictions);
-      return predictions;
-
-    } catch (aiProcessorError) {
-      console.warn('AI processor service unavailable for trend predictions, falling back to direct OpenAI:', aiProcessorError.message);
-      
-      // Fallback to direct OpenAI call
-      const prompt = `Analyze this comprehensive financial data and provide AI-powered trend predictions and forecasting.
+    const prompt = `Analyze this comprehensive financial data and provide AI-powered trend predictions and forecasting.
 
 Financial Data Analysis:
 ${JSON.stringify(financialSummary, null, 2)}
@@ -677,7 +638,7 @@ Please provide detailed predictions in this JSON format:
 {
   "categoryPredictions": [
     {
-      "category": "category name", 
+      "category": "category name",
       "predictedAmount": 0,
       "confidence": 0.95,
       "trend": "increasing|decreasing|stable",
@@ -707,25 +668,24 @@ Analysis Requirements:
 - Include next 3 months forecast for each category
 - Analyze budget adherence and variance predictions`;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "You are an advanced financial forecasting AI that analyzes spending patterns and predicts future financial trends with high accuracy. Use sophisticated pattern recognition and statistical analysis to provide reliable predictions."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        response_format: { type: "json_object" },
-        max_tokens: 2000,
-        temperature: 0.3
-      });
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are an advanced financial forecasting AI that analyzes spending patterns and predicts future financial trends with high accuracy. Use sophisticated pattern recognition and statistical analysis to provide reliable predictions."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 2000,
+      temperature: 0.3 // Lower temperature for more consistent predictions
+    });
 
-      const result = JSON.parse(response.choices[0].message.content || '{"categoryPredictions": [], "financialForecast": {}}');
-    }
+    const result = JSON.parse(response.choices[0].message.content || '{"categoryPredictions": [], "financialForecast": {}}');
 
     const predictions = {
       categoryPredictions: result.categoryPredictions || [],
