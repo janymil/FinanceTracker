@@ -175,30 +175,91 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
               </Button>
             </div>
 
-            {/* Current Tip Display */}
+            {/* Current Tips Display */}
             {currentTip && (
               <div className="space-y-4">
-                {/* Parse the AI analysis into sections */}
+                {/* Parse and display the 4 independent tips */}
                 {(() => {
-                  // Clean the content but preserve structure
-                  const cleanedContent = currentTip;
-                  
-                  // Define the 4 thematic sections with their patterns
-                  const sectionPatterns = [
-                    {
-                      title: "📊 Spending Pattern Analysis",
-                      icon: TrendingUp,
-                      keywords: ["spending", "pattern", "analysis", "breakdown", "category", "expenses", "mathematical", "reveals", "bulk"],
-                      color: "blue"
-                    },
-                    {
-                      title: "💡 Personalized Saving Recommendations", 
-                      icon: Lightbulb,
-                      keywords: ["saving", "recommend", "rebalancing", "budget", "limiting", "redirect", "sustainable", "implementation"],
-                      color: "green"
-                    },
-                    {
-                      title: "📋 Budget Optimization Suggestions",
+                  try {
+                    const tips = JSON.parse(currentTip);
+                    
+                    // Icon mapping for each tip category
+                    const iconMap = {
+                      'trending-chart': TrendingUp,
+                      'lightbulb': Lightbulb,
+                      'pie-chart': PieChart,
+                      'target': Target
+                    };
+                    
+                    // Color mapping for each tip category
+                    const colorMap = {
+                      'Spending Pattern Analysis': 'blue',
+                      'Personalized Saving Recommendations': 'green',
+                      'Budget Optimization Suggestions': 'purple',
+                      'Advanced Financial Analysis': 'orange'
+                    };
+                    
+                    return tips.map((tip: any, index: number) => {
+                      const IconComponent = iconMap[tip.icon as keyof typeof iconMap] || TrendingUp;
+                      const color = colorMap[tip.title as keyof typeof colorMap] || 'blue';
+                      
+                      return (
+                        <div key={index} className={`p-4 rounded-lg border-l-4 ${
+                          color === 'blue' ? 'bg-blue-50 border-blue-400 dark:bg-blue-900/20' :
+                          color === 'green' ? 'bg-green-50 border-green-400 dark:bg-green-900/20' :
+                          color === 'purple' ? 'bg-purple-50 border-purple-400 dark:bg-purple-900/20' :
+                          'bg-orange-50 border-orange-400 dark:bg-orange-900/20'
+                        }`}>
+                          <div className="flex items-start gap-3">
+                            <IconComponent className={`h-5 w-5 mt-0.5 ${
+                              color === 'blue' ? 'text-blue-600' :
+                              color === 'green' ? 'text-green-600' :
+                              color === 'purple' ? 'text-purple-600' :
+                              'text-orange-600'
+                            }`} />
+                            <div className="flex-1">
+                              <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+                                {tip.title}
+                              </h4>
+                              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                {cleanAIText(tip.description)}
+                              </p>
+                              {tip.estimatedSaving && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                  Potential savings: ${tip.estimatedSaving}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    });
+                  } catch (error) {
+                    // Fallback for old format or parsing errors
+                    return (
+                      <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border">
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                          {cleanAIText(currentTip)}
+                        </p>
+                      </div>
+                    );
+                  }
+                })()}
+              </div>
+            )}
+
+            {!currentTip && (
+              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Click "Get AI Tip" to generate personalized financial advice</p>
+              </div>
+            )}
+          </div>
+        </RequirePlan>
+      </CardContent>
+    </Card>
+  );
+}
                       icon: GraduationCap, 
                       keywords: ["budget", "optimization", "income-to-expense", "ratio", "financial", "strategies", "protection", "realigning"],
                       color: "purple"
