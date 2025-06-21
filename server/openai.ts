@@ -171,7 +171,8 @@ export async function generateFinancialTips(financialData: {
             transactionsByCategory,
             recentTransactions: recentTransactions.slice(0, 10)
           }
-        })
+        }),
+        signal: AbortSignal.timeout(30000)
       });
 
       if (!aiResponse.ok) {
