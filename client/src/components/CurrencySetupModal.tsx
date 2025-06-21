@@ -34,11 +34,13 @@ const CURRENCY_OPTIONS = [
 ];
 
 interface CurrencySetupModalProps {
-  open: boolean;
-  onComplete: (currency: string) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  onSelectCurrency: (currency: string) => void;
 }
 
-export function CurrencySetupModal({ open, onComplete }: CurrencySetupModalProps) {
+export function CurrencySetupModal({ isOpen, onClose, onSelectCurrency }: CurrencySetupModalProps) {
+  console.log('CurrencySetupModal rendering - isOpen:', isOpen);
   const [selectedCurrency, setSelectedCurrency] = useState('$');
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -55,7 +57,8 @@ export function CurrencySetupModal({ open, onComplete }: CurrencySetupModalProps
         description: `Your preferred currency is now ${selectedCurrency}`,
       });
       
-      onComplete(selectedCurrency);
+      onSelectCurrency(selectedCurrency);
+      onClose();
     } catch (error) {
       console.error('Failed to save currency:', error);
       toast({
@@ -69,7 +72,7 @@ export function CurrencySetupModal({ open, onComplete }: CurrencySetupModalProps
   };
 
   return (
-    <Dialog open={open} onOpenChange={() => {}} modal={true}>
+    <Dialog open={isOpen} onOpenChange={() => {}} modal={true}>
       <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-xl">Welcome to FinanzerPro! 🌎</DialogTitle>
@@ -88,7 +91,21 @@ export function CurrencySetupModal({ open, onComplete }: CurrencySetupModalProps
               <Button
                 key={currency.code}
                 variant={selectedCurrency === currency.symbol ? "default" : "outline"}
-                onClick={() => handleSaveCurrency(currency.symbol, onSelectCurrency, onClose)}
+                onClick={async () => {
+                  setSelectedCurrency(currency.symbol);
+                  setSaving(true);
+                  try {
+                    await apiRequest('PUT', '/api/auth/user', {
+                      currency: currency.symbol
+                    });
+                    onSelectCurrency(currency.symbol);
+                    onClose();
+                  } catch (error) {
+                    console.error('Failed to update currency:', error);
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
                 className="h-16 p-3 flex flex-col items-center justify-center space-y-1 relative hover:scale-105 transition-transform"
               >
                 <span className="text-xl font-bold">{currency.symbol}</span>
