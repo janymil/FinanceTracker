@@ -101,12 +101,19 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
     canChangeCurrency,
     hasTransactions,
     showSetupModal,
-    setShowSetupModal: handleSetupComplete,
+    setShowSetupModal,
   };
 
   return (
     <CurrencyContext.Provider value={value}>
       {children}
+      {showSetupModal && (
+        <CurrencySetupModal
+          isOpen={showSetupModal}
+          onClose={() => setShowSetupModal(false)}
+          onSelectCurrency={setCurrency}
+        />
+      )}
     </CurrencyContext.Provider>
   );
 }
