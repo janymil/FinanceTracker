@@ -29,7 +29,11 @@ VITE_CLERK_PUBLISHABLE_KEY=pk_live_your_production_key
 CLERK_SECRET_KEY=sk_live_your_production_secret
 
 # Database
-DATABASE_URL=your_production_database_url
+DATABASE_URL_PROD=postgresql://user:password@ep-...neon.tech/finanzerpro?sslmode=require
+
+# Clerk Authentication (Production)
+CLERK_SECRET_KEY=sk_live_...
+CLERK_PUBLISHABLE_KEY=pk_live_...
 
 # Stripe Production
 STRIPE_SECRET_KEY=sk_live_your_production_stripe_key
@@ -37,7 +41,10 @@ STRIPE_PUBLISHABLE_KEY=pk_live_your_production_stripe_key
 
 # Other Services
 OPENAI_API_KEY=your_openai_key
-BUNNY_STORAGE_API_KEY=your_bunny_api_key
+BUNNY_STORAGE_ZONE=finanzerpro-backups
+BUNNY_ACCESS_KEY=your_bunny_access_key
+BUNNY_STORAGE_PASSWORD=your_bunny_storage_password
+ADMIN_PASSWORD=your_secure_production_admin_password
 ```
 
 ### 3. Troubleshooting Production Clerk Authentication
