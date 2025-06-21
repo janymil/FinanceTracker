@@ -274,16 +274,14 @@ export function registerAIRoutes(app: Express) {
       });
 
       const predictions = await generateTrendPredictions(
-        transactions
-          .filter(t => t.categoryId !== null) // Only include transactions with valid categories
-          .map(t => ({
-            id: t.id,
-            amount: t.amount,
-            description: t.description,
-            date: t.date.toISOString(),
-            type: t.type,
-            categoryId: t.categoryId as number
-          })),
+        transactions.map(t => ({
+          id: t.id,
+          amount: t.amount,
+          description: t.description,
+          date: t.date.toISOString(),
+          type: t.type,
+          categoryId: t.categoryId || 1 // Default to first category if null
+        })),
         categoryMap,
         budgets
           .filter(b => b.categoryId !== null)
