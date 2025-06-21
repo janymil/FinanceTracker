@@ -69,6 +69,18 @@ export function registerAuthRoutes(app: Express) {
             message: 'User account no longer exists',
             redirectToAuth: true 
           });
+          const userData = {
+            id: userId,
+            email: null,
+            firstName: null,
+            lastName: null,
+            profileImageUrl: null,
+            plan: 'free',
+            stripeCustomerId: null,
+            stripeSubscriptionId: null,
+            settings: null
+          };
+          user = await storage.upsertUser(userData);
         }
       }
 

@@ -19,6 +19,7 @@ export const isAuthenticated = (req: any, res: Response, next: NextFunction) => 
     if (!auth || !auth.userId) {
       return res.status(401).json({ message: 'Authentication required' });
     }
+    
     next();
   } catch (error) {
     console.error('Authentication error:', error);
