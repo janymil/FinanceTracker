@@ -2,6 +2,11 @@ import { clerkMiddleware, requireAuth } from '@clerk/express';
 import type { Request, Response, NextFunction } from 'express';
 
 export const setupClerkAuth = (app: any) => {
+  console.log('Setting up Clerk middleware with keys:', {
+    publishable: process.env.VITE_CLERK_PUBLISHABLE_KEY?.substring(0, 20) + '...',
+    secret: process.env.CLERK_SECRET_KEY?.substring(0, 20) + '...'
+  });
+  
   // Add Clerk middleware to handle authentication
   app.use(clerkMiddleware({
     publishableKey: process.env.VITE_CLERK_PUBLISHABLE_KEY,

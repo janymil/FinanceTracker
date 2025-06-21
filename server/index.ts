@@ -2,22 +2,29 @@ import { config } from "dotenv";
 import path from "path";
 import fs from "fs";
 
-// Clear any existing Clerk environment variables first
-delete process.env.VITE_CLERK_PUBLISHABLE_KEY;
-delete process.env.CLERK_SECRET_KEY;
-
-// Force load .env.local in development to override system environment variables
-const envLocalPath = path.resolve(process.cwd(), '.env.local');
-if (fs.existsSync(envLocalPath)) {
-  config({ path: envLocalPath, override: true });
-  console.log('Development environment: Using .env.local for Clerk keys');
-  console.log('Loaded keys:', {
+// Only load .env.local in development (NODE_ENV=development)
+// In production, use system environment variables only
+if (process.env.NODE_ENV === 'development') {
+  const envLocalPath = path.resolve(process.cwd(), '.env.local');
+  if (fs.existsSync(envLocalPath)) {
+    // Clear system vars first, then load dev keys
+    delete process.env.VITE_CLERK_PUBLISHABLE_KEY;
+    delete process.env.CLERK_SECRET_KEY;
+    config({ path: envLocalPath, override: true });
+    console.log('Development environment: Using .env.local for Clerk keys');
+    console.log('Loaded dev keys:', {
+      publishable: process.env.VITE_CLERK_PUBLISHABLE_KEY?.substring(0, 20) + '...',
+      secret: process.env.CLERK_SECRET_KEY?.substring(0, 20) + '...'
+    });
+  }
+} else {
+  // Production: use system environment variables only, ignore .env.local
+  config(); // Load .env as fallback
+  console.log('Production environment: Using system environment variables');
+  console.log('Production keys:', {
     publishable: process.env.VITE_CLERK_PUBLISHABLE_KEY?.substring(0, 20) + '...',
     secret: process.env.CLERK_SECRET_KEY?.substring(0, 20) + '...'
   });
-} else {
-  config(); // Load .env as fallback for production
-  console.log('Production environment: Using system environment variables');
 }
 
 import express, { type Request, Response, NextFunction } from "express";
