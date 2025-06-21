@@ -55,13 +55,14 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
         setHasTransactions(userHasTransactions);
         setCanChangeCurrency(!userHasTransactions);
         
-        if (userData.currency && userData.currency !== '$') {
-          // User has set a specific currency preference
+        if (userData.currency) {
+          // User has set currency preference
           setCurrencyState(userData.currency);
+          setShowSetupModal(false);
           setIsInitialized(true);
         } else {
-          // New user or user with default currency - show setup modal
-          console.log('New user detected - showing currency setup modal');
+          // User has no currency set - show setup modal until they choose
+          setCurrencyState('$'); // Temporary default for display
           setShowSetupModal(true);
           setIsInitialized(true);
         }
