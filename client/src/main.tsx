@@ -21,8 +21,11 @@ const queryClient = new QueryClient({
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 if (!PUBLISHABLE_KEY) {
+  console.error("Missing VITE_CLERK_PUBLISHABLE_KEY environment variable");
   throw new Error("Missing Publishable Key");
 }
+
+console.log("Clerk publishable key loaded:", PUBLISHABLE_KEY.substring(0, 20) + "...");
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -36,6 +39,7 @@ createRoot(document.getElementById("root")!).render(
             colorPrimary: "#2563eb"
           }
         }}
+        telemetry={false}
       >
         <QueryClientProvider client={queryClient}>
           <Router>
