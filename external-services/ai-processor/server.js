@@ -87,122 +87,68 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Generate 4 independent financial tips endpoint
-  if (path === '/generate-financial-tips' && method === 'POST') {
+  // Generate financial tip endpoint
+  if (path === '/generate-financial-tip' && method === 'POST') {
     try {
       const body = await parseBody(req);
-      const { financialData } = body;
+      const { summary } = body;
 
-      if (!financialData || typeof financialData !== 'object') {
+      if (!summary || typeof summary !== 'string') {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ 
-          error: 'Invalid request: financialData object is required' 
+          error: 'Invalid request: summary field (string) is required' 
         }));
         return;
       }
 
-      const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
-      const hasMinimalData = recentTransactions && recentTransactions.length >= 3;
+      const messages = [
+        {
+          role: "system",
+          content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
 
-      // Define the 4 independent tip categories
-      const tipCategories = [
-        {
-          focus: "Spending Pattern Analysis",
-          icon: "trending-chart",
-          systemPrompt: `Analyze spending patterns and behavioral insights. Focus ONLY on spending trends, frequency patterns, category concentrations, and spending habits. ${hasMinimalData ? 'Use their exact transaction data to identify patterns.' : 'Suggest adding more transactions for better pattern analysis.'}`
+1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
+2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
+3. BUDGET OPTIMIZATION SUGGESTIONS: Recommend category rebalancing with precise dollar amounts
+4. CONTEXT-AWARE FINANCIAL ADVICE: Consider their financial position, goals, and risk tolerance
+
+ANALYSIS REQUIREMENTS:
+- Use their EXACT transaction amounts and categories 
+- Calculate precise percentages and ratios from their data
+- Identify the highest-impact optimization opportunities
+- Provide specific dollar amounts for recommendations
+- Include mathematical analysis (savings rate, expense ratios, etc.)
+- Compare their spending to optimal financial benchmarks
+
+GENERATE VARIED RESPONSES by focusing on different analytical angles:
+- Detailed category spending analysis with optimization targets
+- Income-to-expense ratio analysis with improvement strategies  
+- Cash flow optimization with timing recommendations
+- Risk assessment with protection strategies
+- Wealth building analysis with investment allocation suggestions
+- Efficiency analysis identifying wasteful spending patterns
+
+Return comprehensive analysis in JSON:
+{
+  "title": "Advanced Financial Analysis: [Specific Focus Area]",
+  "description": "DETAILED multi-paragraph analysis including: 1) Mathematical breakdown of their spending patterns with percentages, 2) Specific optimization recommendations with exact dollar targets, 3) Implementation timeline with measurable milestones, 4) Risk assessment and protection strategies. Use their exact financial numbers throughout.",
+  "category": "spending|saving|budgeting|income|education", 
+  "priority": "high|medium|low",
+  "actionable": true,
+  "estimatedSaving": [realistic_amount],
+  "educational": false
+}`
         },
         {
-          focus: "Personalized Saving Recommendations", 
-          icon: "lightbulb",
-          systemPrompt: `Generate specific saving opportunities and strategies. Focus ONLY on actionable ways to save money based on their income/expense ratio. ${hasMinimalData ? 'Calculate exact saving targets from their data.' : 'Provide general saving strategies and encourage more transaction data for personalized recommendations.'}`
-        },
-        {
-          focus: "Budget Optimization Suggestions",
-          icon: "pie-chart", 
-          systemPrompt: `Recommend budget rebalancing and category optimization. Focus ONLY on budget allocation, category spending limits, and expense prioritization. ${hasMinimalData ? 'Use their category data for specific optimization targets.' : 'Explain budget basics and suggest tracking more expenses for detailed optimization.'}`
-        },
-        {
-          focus: "Advanced Financial Analysis",
-          icon: "target",
-          systemPrompt: `Provide strategic financial insights and risk assessment. Focus ONLY on financial health, risk mitigation, and wealth building strategies. ${hasMinimalData ? 'Analyze their financial position for strategic recommendations.' : 'Provide foundational financial advice and recommend comprehensive transaction tracking.'}`
+          role: "user",
+          content: summary
         }
       ];
 
-      const tips = [];
-
-      for (const category of tipCategories) {
-        const messages = [
-          {
-            role: "system",
-            content: `You are a Premium AI Financial Advisor specializing in ${category.focus}. 
-
-FOCUS AREA: ${category.focus}
-${category.systemPrompt}
-
-CONTENT REQUIREMENTS:
-- Generate ONLY content related to ${category.focus}
-- Do NOT overlap with other categories
-- Provide 2-3 specific, actionable recommendations
-- Use exact financial figures when available
-- Keep content concise but valuable (100-150 words)
-
-DATA AVAILABILITY: ${hasMinimalData ? 'Sufficient transaction data available' : 'Limited transaction data - encourage more tracking'}
-
-${hasMinimalData ? `
-FINANCIAL DATA:
-- Monthly Income: $${totalIncome}
-- Monthly Expenses: $${totalExpenses}
-- Net Balance: $${totalIncome - totalExpenses}
-- Transaction Categories: ${transactionsByCategory?.filter(cat => cat.type === 'expense').map(cat => `${cat.categoryName}: $${cat.amount}`).join(', ')}
-- Recent Transactions: ${recentTransactions?.length || 0} transactions
-` : `
-LIMITED DATA NOTICE: User has ${recentTransactions?.length || 0} transactions. Recommend adding more financial data for personalized analysis.
-`}
-
-Return JSON:
-{
-  "title": "${category.focus}",
-  "description": "[Focused content for this category only]",
-  "category": "spending|saving|budgeting|income|education",
-  "priority": "high|medium|low",
-  "actionable": true,
-  "estimatedSaving": [number_or_null],
-  "educational": false,
-  "icon": "${category.icon}"
-}`
-          },
-          {
-            role: "user", 
-            content: hasMinimalData ? 
-              `Please analyze my financial data and provide specific recommendations for ${category.focus}.` :
-              `I have limited financial data (${recentTransactions?.length || 0} transactions). Please provide guidance for ${category.focus} and encourage better tracking.`
-          }
-        ];
-
-        try {
-          const response = await callOpenAI(messages);
-          const result = JSON.parse(response.choices[0].message.content || '{}');
-          tips.push(result);
-        } catch (error) {
-          console.error(`Error generating ${category.focus}:`, error);
-          // Provide fallback tip
-          tips.push({
-            title: category.focus,
-            description: hasMinimalData ? 
-              `Analysis for ${category.focus} requires more comprehensive data. Please add more transactions to unlock detailed insights.` :
-              `To provide personalized ${category.focus}, please add more financial transactions to your account.`,
-            category: "education",
-            priority: "medium", 
-            actionable: true,
-            estimatedSaving: null,
-            educational: true,
-            icon: category.icon
-          });
-        }
-      }
+      const response = await callOpenAI(messages);
+      const result = JSON.parse(response.choices[0].message.content || '{}');
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ tips }));
+      res.end(JSON.stringify({ tip: result }));
 
     } catch (error) {
       console.error('OpenAI API Error:', error);

@@ -153,91 +153,103 @@ export async function generateFinancialTips(financialData: {
     }
     const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
 
-    // Call the Fly.io AI processor service for 4 independent tips
-    let tips;
+    // Prepare the financial summary for the AI processor
+    const summary = `Financial Summary:
+- Monthly Income: $${totalIncome}
+- Monthly Expenses: $${totalExpenses}
+- Net Balance: $${totalIncome - totalExpenses}
+
+Spending by Category:
+${transactionsByCategory.filter(cat => cat.type === 'expense').map(cat => 
+  `- ${cat.categoryName}: $${cat.amount}`
+).join('\n')}
+
+Recent Transactions (last 10):
+${recentTransactions.slice(0, 10).map(t => 
+  `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'})`
+).join('\n')}
+
+Please provide personalized financial tips based on this data.`;
+
+    // Call the Fly.io AI processor service with fallback to direct OpenAI
+    let result;
     try {
       const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'https://finanserpro-ai-processor.fly.dev';
-      console.log(`Calling AI processor at ${AI_PROCESSOR_URL}/generate-financial-tips`);
+      console.log(`Calling AI processor at ${AI_PROCESSOR_URL}/generate-financial-tip`);
       
-      const aiResponse = await fetch(`${AI_PROCESSOR_URL}/generate-financial-tips`, {
+      const aiResponse = await fetch(`${AI_PROCESSOR_URL}/generate-financial-tip`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
-          financialData: {
-            totalIncome,
-            totalExpenses,
-            transactionsByCategory,
-            recentTransactions: recentTransactions.slice(0, 10)
-          }
-        }),
-        signal: AbortSignal.timeout(30000)
+        body: JSON.stringify({ summary }),
+        timeout: 30000 // 30 second timeout
       });
 
       if (!aiResponse.ok) {
-        const errorText = await aiResponse.text();
-        throw new Error(`AI processor error: ${aiResponse.status} - ${errorText}`);
+        throw new Error(`AI processor error: ${aiResponse.status} ${aiResponse.statusText}`);
       }
 
       const aiData = await aiResponse.json();
-      tips = aiData.tips || aiData;
-      console.log(`Successfully received ${tips.length} tips from Fly.io AI processor`);
+      result = aiData.tip;
+      console.log('Successfully received response from AI processor');
     } catch (aiProcessorError) {
-      console.error('Fly.io AI processor error:', aiProcessorError.message);
+      console.warn('AI processor service unavailable, falling back to direct OpenAI:', aiProcessorError.message);
       
-      // Fallback to basic tips if Fly.io is down
-      tips = [
-        {
-          title: "Spending Pattern Analysis",
-          description: recentTransactions.length >= 3 ? 
-            `You have ${recentTransactions.length} transactions recorded. Track spending patterns across categories to identify trends and optimize your budget allocation.` :
-            `Add more transactions (minimum 10-15) to unlock detailed spending pattern analysis and behavioral insights.`,
-          category: "spending",
-          priority: "high",
-          actionable: true,
-          estimatedSaving: null,
-          educational: recentTransactions.length < 3,
-          icon: "trending-chart"
-        },
-        {
-          title: "Personalized Saving Recommendations", 
-          description: totalIncome > totalExpenses ?
-            `With a positive balance of $${totalIncome - totalExpenses}, consider setting up automatic savings and investment contributions.` :
-            `Focus on expense reduction and income optimization to achieve financial stability. Add more transaction data for personalized saving strategies.`,
-          category: "saving",
-          priority: "high", 
-          actionable: true,
-          estimatedSaving: totalIncome > totalExpenses ? Math.round((totalIncome - totalExpenses) * 0.2) : null,
-          educational: false,
-          icon: "lightbulb"
-        },
-        {
-          title: "Budget Optimization Suggestions",
-          description: transactionsByCategory.length > 0 ?
-            `Review your category spending and set monthly limits. Consider the 50/30/20 rule: 50% needs, 30% wants, 20% savings.` :
-            `Create a budget by categorizing your expenses. Add more transactions to get specific optimization recommendations.`,
-          category: "budgeting",
-          priority: "medium",
-          actionable: true,
-          estimatedSaving: null,
-          educational: transactionsByCategory.length === 0,
-          icon: "pie-chart"
-        },
-        {
-          title: "Advanced Financial Analysis",
-          description: recentTransactions.length >= 5 ?
-            `Build an emergency fund covering 3-6 months of expenses. Consider investment opportunities once you have stable cash flow.` :
-            `Establish comprehensive financial tracking to unlock advanced analysis, risk assessment, and wealth building strategies.`,
-          category: "education",
-          priority: "medium",
-          actionable: true,
-          estimatedSaving: null,
-          educational: recentTransactions.length < 5,
-          icon: "target"
-        }
-      ];
+      // Fallback to direct OpenAI call
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
+
+1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
+2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
+3. BUDGET OPTIMIZATION SUGGESTIONS: Recommend category rebalancing with precise dollar amounts
+4. CONTEXT-AWARE FINANCIAL ADVICE: Consider their financial position, goals, and risk tolerance
+
+ANALYSIS REQUIREMENTS:
+- Use their EXACT transaction amounts and categories 
+- Calculate precise percentages and ratios from their data
+- Identify the highest-impact optimization opportunities
+- Provide specific dollar amounts for recommendations
+- Include mathematical analysis (savings rate, expense ratios, etc.)
+- Compare their spending to optimal financial benchmarks
+
+GENERATE VARIED RESPONSES by focusing on different analytical angles:
+- Detailed category spending analysis with optimization targets
+- Income-to-expense ratio analysis with improvement strategies  
+- Cash flow optimization with timing recommendations
+- Risk assessment with protection strategies
+- Wealth building analysis with investment allocation suggestions
+- Efficiency analysis identifying wasteful spending patterns
+
+Return comprehensive analysis in JSON:
+{
+  "title": "Advanced Financial Analysis: [Specific Focus Area]",
+  "description": "DETAILED multi-paragraph analysis including: 1) Mathematical breakdown of their spending patterns with percentages, 2) Specific optimization recommendations with exact dollar targets, 3) Implementation timeline with measurable milestones, 4) Risk assessment and protection strategies. Use their exact financial numbers throughout.",
+  "category": "spending|saving|budgeting|income|education", 
+  "priority": "high|medium|low",
+  "actionable": true,
+  "estimatedSaving": [realistic_amount],
+  "educational": false
+}`
+          },
+          {
+            role: "user",
+            content: summary
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.9
+      });
+
+      result = JSON.parse(response.choices[0].message.content || '{}');
     }
+
+    // Handle single tip response (new format)
+    const tips = result.title ? [result] : [];
 
     const processedTips = tips.map((tip: any) => ({
       title: tip.title || 'Financial Tip',
@@ -246,8 +258,7 @@ export async function generateFinancialTips(financialData: {
       priority: ['high', 'medium', 'low'].includes(tip.priority) ? tip.priority : 'medium',
       actionable: Boolean(tip.actionable),
       estimatedSaving: tip.estimatedSaving || undefined,
-      educational: Boolean(tip.educational),
-      icon: tip.icon || 'lightbulb'
+      educational: Boolean(tip.educational)
     }));
 
     // Only cache if not bypassing cache
