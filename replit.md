@@ -398,6 +398,13 @@ Changelog:
 - June 18, 2025. COMPLETED: Fixed mobile QR upload user authentication issue - mobile upload now correctly uses current logged-in user ID instead of hardcoded value
 - June 18, 2025. VERIFIED: Mobile QR upload provides complete feature parity with desktop OCR - includes image storage to Bunny.net, AI categorization, and standard processing pipeline
 - June 18, 2025. FIXED: Mobile QR upload frontend display - now shows uploaded receipt image, AI category suggestions, and pre-filled form data matching desktop experience exactly
+- June 21, 2025. MICROSERVICE ARCHITECTURE: Successfully implemented Fly.io AI processor microservice to offload heavy OpenAI API calls from Replit infrastructure
+- June 21, 2025. Created external AI processor service using dependency-free Node.js with complete OpenAI GPT-4o integration for financial tips generation
+- June 21, 2025. Modified generateFinancialTips function to call Fly.io service with intelligent fallback to direct OpenAI calls for resilient operation
+- June 21, 2025. Maintained complete data sovereignty - all user data, authentication, and personalization logic remains in Replit while only compute moves to Fly.io
+- June 21, 2025. AI processor service fully tested locally with sophisticated financial analysis returning $300+ estimated savings recommendations
+- June 21, 2025. Created comprehensive Fly.io deployment configuration with auto-scaling, health checks, and cost optimization (256MB RAM, shared CPU)
+- June 21, 2025. Infrastructure optimization achieved - heavy AI processing moved to dedicated infrastructure while preserving all existing functionality
 - June 18, 2025. COMPLETED: Mobile QR upload backend data structure corrected - properly formats imageUrl and category fields for frontend consumption
 - June 18, 2025. FINAL FIX: Mobile QR upload authentication resolved - now properly extracts user ID from JWT tokens enabling complete OCR pipeline with Bunny.net storage and AI categorization
 - June 18, 2025. AUTHENTICATION ISSUE RESOLVED: Fixed critical "verifyToken is not a function" error in mobile QR upload system by implementing proper JWT token parsing
