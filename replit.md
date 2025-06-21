@@ -404,6 +404,8 @@ Changelog:
 - June 21, 2025. FIXED AI DISPLAY: Restored 4-box dashboard widget format by implementing intelligent response parsing for single-format AI responses
 - June 21, 2025. Enhanced backend to convert single AI analysis into structured 4-box layout (Spending Analysis, Saving Recommendations, Advanced Analysis, Budget Optimization)
 - June 21, 2025. Verified AI system correctly processes authentic user data (15 transactions, $7,360 income, $8,668.90 expenses, $1,308.90 deficit) with proper authentication security
+- June 21, 2025. CRITICAL FIX: Removed hardcoded financial data from Fly.io service - now uses fully dynamic AI responses based on each user's actual data
+- June 21, 2025. Fixed privacy breach where hardcoded amounts were showing to all users instead of personalized analysis
 - June 18, 2025. QR code system fully operational with backend session creation, anonymous mobile access, and authenticated result processing for seamless cross-device receipt scanning workflow
 - June 21, 2025. FIXED: Critical Clerk authentication key mismatch issue - implemented proper development/production key separation using .env.local with system environment variable override
 - June 21, 2025. Created .env.local file with development Clerk keys for Replit environment while preserving production keys for deployment

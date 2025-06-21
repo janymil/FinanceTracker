@@ -152,17 +152,15 @@ RETURN EXACTLY THIS JSON FORMAT:
       const response = await callOpenAI(messages);
       const result = JSON.parse(response.choices[0].message.content || '{}');
 
-      // Convert single analysis to 4-box format for dashboard
+      // Convert single analysis to 4-box format using dynamic AI response
       const fullAnalysis = result.description || result.title || "Analysis unavailable";
+      const sentences = fullAnalysis.split('.').filter(s => s.trim().length > 0);
       
       const formattedResponse = {
-        spendingAnalysis: `Advanced Financial Analysis: Your monthly expenses of $8,668.90 exceed income by $1,308.90, creating a significant deficit. Housing represents 63.4% of expenses ($5,500), far above the recommended 30% benchmark. This concentration requires immediate attention through cost reduction or income enhancement strategies.`,
-        
-        savingRecommendations: `Implement a three-phase approach: Month 1 - Reduce housing costs by negotiating rent or exploring alternatives (target $550 savings). Month 2 - Optimize recurring expenses and eliminate non-essential spending. Month 3 - Establish emergency fund with surplus from optimizations.`,
-        
-        advancedAnalysis: `Given your current deficit situation, prioritize debt reduction over investments. Your deficit of $1,308.90 monthly ($15,707 annually) requires urgent intervention. Focus on liquidity management and avoid taking on additional financial obligations until cash flow stabilizes.`,
-        
-        budgetOptimization: `Housing optimization is critical - reduce from 63.4% to target 30% of income ($2,208 maximum). This $3,292 reduction would eliminate your deficit and create $1,983 monthly surplus. Consider downsizing, roommates, or refinancing options to achieve this target ratio.`
+        spendingAnalysis: sentences.slice(0, Math.ceil(sentences.length * 0.35)).join('.') + '.',
+        savingRecommendations: sentences.slice(Math.ceil(sentences.length * 0.35), Math.ceil(sentences.length * 0.6)).join('.') + '.',
+        advancedAnalysis: sentences.slice(Math.ceil(sentences.length * 0.6), Math.ceil(sentences.length * 0.8)).join('.') + '.',
+        budgetOptimization: sentences.slice(Math.ceil(sentences.length * 0.8)).join('.') + '.'
       };
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
