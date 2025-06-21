@@ -198,7 +198,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
       const aiData = await aiResponse.json();
       console.log('AI processor response received successfully');
       result = aiData.boxes || aiData.tip || aiData;
-      console.log('Successfully received response from AI processor');
+      console.log('Successfully received response from AI processor, result keys:', Object.keys(result));
     } catch (aiProcessorError) {
       console.warn('AI processor service unavailable, falling back to direct OpenAI:', aiProcessorError.message);
       
@@ -257,8 +257,8 @@ Return comprehensive analysis in JSON:
     // Handle different response formats
     let processedTips = [];
     
-    if (result.spendingAnalysis) {
-      // New 4-box format
+    if (result.spendingAnalysis && result.savingRecommendations && result.advancedAnalysis && result.budgetOptimization) {
+      // New 4-box format from Fly.io AI processor
       processedTips = [
       {
         title: 'Spending Pattern Analysis',
