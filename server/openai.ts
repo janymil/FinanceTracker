@@ -304,14 +304,18 @@ Return comprehensive analysis in JSON:
         },
         {
           title: 'Personalized Saving Recommendations',
-          description: 'Implement optimization strategies over the next 3 months to reduce your deficit and improve financial stability.',
+          description: financialData.totalIncome - financialData.totalExpenses < 0 
+            ? `With expenses of $${financialData.totalExpenses} exceeding income of $${financialData.totalIncome}, focus on reducing your top spending categories by $${Math.abs(financialData.totalIncome - financialData.totalExpenses)} to balance your budget.`
+            : `With surplus of $${financialData.totalIncome - financialData.totalExpenses}, consider allocating 20% to emergency fund and 10% to investment opportunities based on your ${financialData.recentTransactions.length} transaction history.`,
           category: 'saving',
           priority: 'high',
           actionable: true
         },
         {
           title: 'Advanced Financial Analysis',
-          description: 'Given your current deficit, focus on emergency fund building and debt reduction before investment expansion.',
+          description: financialData.totalIncome - financialData.totalExpenses < 0 
+            ? `Your current deficit of $${Math.abs(financialData.totalIncome - financialData.totalExpenses)} requires immediate expense reduction. Focus on building emergency fund after achieving positive cash flow.`
+            : `Your positive cash flow of $${financialData.totalIncome - financialData.totalExpenses} positions you well for wealth building. Consider emergency fund completion and investment strategies based on your spending patterns.`,
           category: 'education',
           priority: 'medium',
           actionable: true
@@ -338,10 +342,18 @@ Return comprehensive analysis in JSON:
     return processedTips;
   } catch (error) {
     console.error('Error generating financial tips:', error);
+    
+    // Emergency fallback using user's actual financial calculations
+    const netBalance = financialData.totalIncome - financialData.totalExpenses;
+    const savingsRate = financialData.totalIncome > 0 ? ((netBalance / financialData.totalIncome) * 100).toFixed(1) : '0';
+    const transactionCount = financialData.recentTransactions.length;
+    
     return [
       {
-        title: 'Track Your Expenses',
-        description: 'Start by categorizing all your expenses to understand where your money goes each month.',
+        title: 'Financial Analysis Summary',
+        description: netBalance >= 0 
+          ? `Your ${transactionCount} transactions show income of $${financialData.totalIncome} and expenses of $${financialData.totalExpenses}, creating a surplus of $${netBalance} (${savingsRate}% savings rate). Continue tracking to build long-term wealth.`
+          : `Your ${transactionCount} transactions show expenses of $${financialData.totalExpenses} exceeding income of $${financialData.totalIncome} by $${Math.abs(netBalance)}. Focus on reducing spending in your highest expense categories.`,
         category: 'budgeting',
         priority: 'high',
         actionable: true
