@@ -554,7 +554,7 @@ export default function Landing() {
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
                   <td className="p-6 font-medium text-gray-900 dark:text-white">Transaction history</td>
-                  <td className="p-6 text-center text-gray-500">Last 3</td>
+                  <td className="p-6 text-center text-gray-500">Up to 100</td>
                   <td className="p-6 text-center text-gray-500">Unlimited</td>
                   <td className="p-6 text-center text-gray-500">Unlimited</td>
                 </tr>

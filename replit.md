@@ -230,6 +230,7 @@ Changelog:
 - June 15, 2025. Completed Clerk authentication migration with working token passing, database user creation, and email fallback system
 - June 15, 2025. Fixed authentication redirect loops and database constraint issues - Clerk auth system fully operational
 - June 15, 2025. Increased free plan transaction limit from 3 to 100 transactions across all configuration files, pricing pages, and backend enforcement
+- June 21, 2025. Fixed pricing table inconsistency - corrected "Last 3" to "Up to 100" for Free tier transaction history in landing page and legacy pricing components
 - June 15, 2025. Updated transaction-list display limit and added proper backend validation to enforce 100-transaction limit for free users
 - June 16, 2025. Fixed deployment loading issue caused by excessive Vite icon imports - created optimized icon bundle reducing bundle size by 75%
 - June 16, 2025. Resolved Clerk JWT token mismatch errors by implementing development key configuration and browser cache clearing mechanism

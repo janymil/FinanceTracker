@@ -145,7 +145,7 @@ function getPageContent(route: string): string {
                 
                 <h2>Standard Plan - $4.99/month</h2>
                 <ul>
-                    <li>Up to 100 transactions</li>
+                    <li>Unlimited transactions</li>
                     <li>Budget management</li>
                     <li>Financial goals</li>
                     <li>AI expense categorization</li>
