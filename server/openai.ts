@@ -154,14 +154,18 @@ export async function generateFinancialTips(financialData: {
     const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
 
     // Prepare the financial summary for the AI processor
+    const netBalance = totalIncome - totalExpenses;
+    const transactionCount = recentTransactions.length;
+    
     const summary = `Financial Summary:
 - Monthly Income: $${totalIncome}
 - Monthly Expenses: $${totalExpenses}
-- Net Balance: $${totalIncome - totalExpenses}
+- Net Balance: $${netBalance} ${netBalance < 0 ? '(DEFICIT)' : '(SURPLUS)'}
+- Transaction Count: ${transactionCount}
 
 Spending by Category:
 ${transactionsByCategory.filter(cat => cat.type === 'expense').map(cat => 
-  `- ${cat.categoryName}: $${cat.amount}`
+  `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalExpenses) * 100).toFixed(1)}% of expenses)`
 ).join('\n')}
 
 Recent Transactions (last 10):
@@ -169,7 +173,7 @@ ${recentTransactions.slice(0, 10).map(t =>
   `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'})`
 ).join('\n')}
 
-Please provide personalized financial tips based on this data.`;
+Generate 4 independent box analyses with exact mathematical calculations.`;
 
     // Call the Fly.io AI processor service with fallback to direct OpenAI
     let result;
@@ -191,8 +195,8 @@ Please provide personalized financial tips based on this data.`;
       }
 
       const aiData = await aiResponse.json();
-      result = aiData.tip;
-      console.log('Successfully received response from AI processor');
+      result = aiData.boxes;
+      console.log('Successfully received 4-box response from AI processor');
     } catch (aiProcessorError) {
       console.warn('AI processor service unavailable, falling back to direct OpenAI:', aiProcessorError.message);
       
@@ -248,18 +252,37 @@ Return comprehensive analysis in JSON:
       result = JSON.parse(response.choices[0].message.content || '{}');
     }
 
-    // Handle single tip response (new format)
-    const tips = result.title ? [result] : [];
-
-    const processedTips = tips.map((tip: any) => ({
-      title: tip.title || 'Financial Tip',
-      description: tip.description || 'No description available',
-      category: ['spending', 'saving', 'budgeting', 'income', 'education'].includes(tip.category) ? tip.category : 'spending',
-      priority: ['high', 'medium', 'low'].includes(tip.priority) ? tip.priority : 'medium',
-      actionable: Boolean(tip.actionable),
-      estimatedSaving: tip.estimatedSaving || undefined,
-      educational: Boolean(tip.educational)
-    }));
+    // Handle 4-box response format
+    const processedTips = result.spendingAnalysis ? [
+      {
+        title: 'Spending Pattern Analysis',
+        description: result.spendingAnalysis,
+        category: 'spending',
+        priority: 'high',
+        actionable: true
+      },
+      {
+        title: 'Personalized Saving Recommendations', 
+        description: result.savingRecommendations,
+        category: 'saving',
+        priority: 'high',
+        actionable: true
+      },
+      {
+        title: 'Advanced Financial Analysis',
+        description: result.advancedAnalysis,
+        category: 'education',
+        priority: 'medium',
+        actionable: true
+      },
+      {
+        title: 'Budget Optimization Suggestions',
+        description: result.budgetOptimization,
+        category: 'budgeting',
+        priority: 'high',
+        actionable: true
+      }
+    ] : [];
 
     // Only cache if not bypassing cache
     if (!financialData.timestamp) {

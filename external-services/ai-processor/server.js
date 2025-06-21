@@ -104,38 +104,43 @@ const server = http.createServer(async (req, res) => {
       const messages = [
         {
           role: "system",
-          content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
+          content: `You are an AI Financial Analyst providing premium-level insights. Generate 4 INDEPENDENT analyses for these specific boxes:
 
-1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
-2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
-3. BUDGET OPTIMIZATION SUGGESTIONS: Recommend category rebalancing with precise dollar amounts
-4. CONTEXT-AWARE FINANCIAL ADVICE: Consider their financial position, goals, and risk tolerance
+📊 SPENDING PATTERN ANALYSIS BOX:
+- Focus on category spending trends, percentages, and behavioral patterns
+- Identify top spending categories with exact amounts and percentages
+- Compare to optimal financial benchmarks (housing <30% income, etc.)
 
-ANALYSIS REQUIREMENTS:
-- Use their EXACT transaction amounts and categories 
-- Calculate precise percentages and ratios from their data
-- Identify the highest-impact optimization opportunities
-- Provide specific dollar amounts for recommendations
-- Include mathematical analysis (savings rate, expense ratios, etc.)
-- Compare their spending to optimal financial benchmarks
+💡 PERSONALIZED SAVING RECOMMENDATIONS BOX:
+- Calculate specific saving opportunities from their data
+- Provide actionable steps with dollar amounts and timelines
+- Focus on practical implementation strategies
 
-GENERATE VARIED RESPONSES by focusing on different analytical angles:
-- Detailed category spending analysis with optimization targets
-- Income-to-expense ratio analysis with improvement strategies  
-- Cash flow optimization with timing recommendations
-- Risk assessment with protection strategies
-- Wealth building analysis with investment allocation suggestions
-- Efficiency analysis identifying wasteful spending patterns
+🎯 ADVANCED FINANCIAL ANALYSIS BOX:
+- Analyze overall financial health, cash flow, risk assessment
+- Emergency fund recommendations, investment strategies
+- Long-term wealth building advice
 
-Return comprehensive analysis in JSON:
+📋 BUDGET OPTIMIZATION SUGGESTIONS BOX:
+- Category rebalancing with precise dollar targets
+- Expense reduction recommendations with specific amounts
+- Budget restructuring for optimal allocation
+
+CRITICAL MATHEMATICAL REQUIREMENTS:
+- Use EXACT figures: Income = ${totalIncome}, Expenses = ${totalExpenses}
+- Calculate Net Balance = Income - Expenses (show negative if expenses > income)
+- All percentages must be calculated from their actual data
+- If transaction count is low (<10), mention need for more data
+
+DATA COMPLETENESS CHECK:
+- If fewer than 10 transactions: Add note "Add more transactions for more personalized analysis"
+
+Return 4 independent analyses in JSON:
 {
-  "title": "Advanced Financial Analysis: [Specific Focus Area]",
-  "description": "DETAILED multi-paragraph analysis including: 1) Mathematical breakdown of their spending patterns with percentages, 2) Specific optimization recommendations with exact dollar targets, 3) Implementation timeline with measurable milestones, 4) Risk assessment and protection strategies. Use their exact financial numbers throughout.",
-  "category": "spending|saving|budgeting|income|education", 
-  "priority": "high|medium|low",
-  "actionable": true,
-  "estimatedSaving": [realistic_amount],
-  "educational": false
+  "spendingAnalysis": "Focus on spending patterns, top categories with percentages, behavioral insights",
+  "savingRecommendations": "Specific saving opportunities with dollar amounts and implementation steps", 
+  "advancedAnalysis": "Financial health assessment, risk analysis, long-term strategies",
+  "budgetOptimization": "Category rebalancing with exact dollar targets and restructuring advice"
 }`
         },
         {
@@ -147,8 +152,16 @@ Return comprehensive analysis in JSON:
       const response = await callOpenAI(messages);
       const result = JSON.parse(response.choices[0].message.content || '{}');
 
+      // Format response for 4-box layout
+      const formattedResponse = {
+        spendingAnalysis: result.spendingAnalysis || "Spending pattern data insufficient for detailed analysis.",
+        savingRecommendations: result.savingRecommendations || "Add more transactions for personalized saving recommendations.", 
+        advancedAnalysis: result.advancedAnalysis || "Comprehensive analysis requires more transaction data.",
+        budgetOptimization: result.budgetOptimization || "Budget optimization suggestions need more financial data."
+      };
+
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ tip: result }));
+      res.end(JSON.stringify({ boxes: formattedResponse }));
 
     } catch (error) {
       console.error('OpenAI API Error:', error);
