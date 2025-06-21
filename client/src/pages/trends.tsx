@@ -242,6 +242,22 @@ export default function Trends() {
     return `${currency}${value.toLocaleString()}`;
   };
 
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+          <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">{label}</p>
+          {payload.map((entry: any, index: number) => (
+            <p key={index} className="text-sm" style={{ color: entry.color }}>
+              {entry.name}: {formatCurrency(entry.value)}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
   // Day of week spending analysis
   const getDayOfWeekData = () => {
     if (!transactions || !Array.isArray(transactions)) return [];
@@ -354,21 +370,7 @@ export default function Trends() {
     }
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white dark:bg-gray-800 p-4 border rounded-lg shadow-lg">
-          <p className="font-medium text-gray-900 dark:text-white mb-2">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} style={{ color: entry.color }} className="text-sm">
-              {entry.name}: {formatCurrency(entry.value)}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
+
 
   if (!user) {
     return null;
