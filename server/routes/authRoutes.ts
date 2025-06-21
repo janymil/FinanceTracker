@@ -33,41 +33,27 @@ export function registerAuthRoutes(app: Express) {
 
       let user = await storage.getUser(userId);
       
-      // If user doesn't exist, check if they were deleted from Clerk
+      // If user doesn't exist in database, create them
       if (!user) {
         try {
-          // Get user data from Clerk auth context
-          const clerkUser = req.auth().user;
-          if (!clerkUser) {
-            // User has valid session but no Clerk user data - likely deleted account
-            console.log(`User ${userId} has valid token but no Clerk user data - account likely deleted`);
-            return res.status(401).json({ 
-              message: 'User account no longer exists',
-              redirectToAuth: true 
-            });
-          }
-          
-          const primaryEmail = clerkUser.emailAddresses?.find((email: any) => email.id === clerkUser.primaryEmailAddressId)?.emailAddress;
-          
+          // Create user with basic data from authentication
           const userData = {
             id: userId,
-            email: primaryEmail || null,
-            firstName: clerkUser.firstName || null,
-            lastName: clerkUser.lastName || null,
-            profileImageUrl: clerkUser.imageUrl || null,
+            email: null, // Will be populated from Clerk webhooks
+            firstName: null,
+            lastName: null,
+            profileImageUrl: null,
             plan: 'free',
             stripeCustomerId: null,
             stripeSubscriptionId: null,
             settings: null
           };
           user = await storage.upsertUser(userData);
-          console.log(`Created user from Clerk data: ${userId} (${primaryEmail})`);
+          console.log(`Created new user in database: ${userId}`);
         } catch (error) {
-          console.error('Error creating user from Clerk data:', error);
-          // If this fails, the user likely doesn't exist in Clerk anymore
-          return res.status(401).json({ 
-            message: 'User account no longer exists',
-            redirectToAuth: true 
+          console.error('Error creating user in database:', error);
+          return res.status(500).json({ 
+            message: 'Failed to create user account'
           });
         }
       }
