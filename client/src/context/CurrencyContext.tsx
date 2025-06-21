@@ -31,14 +31,25 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
 
     const initializeCurrency = async () => {
       try {
+        // Get user data including currency preference first
+        const userResponse = await apiRequest('GET', '/api/auth/user');
+        
+        if (!userResponse.ok) {
+          if (userResponse.status === 401) {
+            // User account doesn't exist, force cleanup and redirect
+            const { forceSignOutAndRedirect } = await import('../utils/sessionCleanup');
+            await forceSignOutAndRedirect();
+            return;
+          }
+          throw new Error('Failed to fetch user data');
+        }
+        
+        const userData = await userResponse.json();
+        
         // Check if user has any transactions
         const transactionsResponse = await apiRequest('GET', '/api/transactions');
         const transactions = await transactionsResponse.json();
         const userHasTransactions = Array.isArray(transactions) && transactions.length > 0;
-        
-        // Get user data including currency preference
-        const userResponse = await apiRequest('GET', '/api/auth/user');
-        const userData = await userResponse.json();
         
         setHasTransactions(userHasTransactions);
         setCanChangeCurrency(!userHasTransactions);
@@ -54,7 +65,7 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
         }
       } catch (error) {
         console.error('Failed to initialize currency:', error);
-        // Fallback to default
+        // For auth errors, don't retry - fallback to default
         setCurrencyState('$');
         setIsInitialized(true);
       }

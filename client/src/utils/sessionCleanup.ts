@@ -1,41 +1,41 @@
-/**
- * Utility functions for cleaning up localStorage and session data
- * to prevent cross-user data contamination
- */
-
-export function clearUserSession() {
-  // Preserve cookie consent and other non-user-specific data
-  const cookieConsent = localStorage.getItem('cookie-consent');
-  const theme = localStorage.getItem('theme');
-  
-  // Clear all localStorage
-  localStorage.clear();
-  
-  // Restore non-user-specific data
-  if (cookieConsent) {
-    localStorage.setItem('cookie-consent', cookieConsent);
-  }
-  if (theme) {
-    localStorage.setItem('theme', theme);
+// Session cleanup utility for handling authentication issues
+export function clearStaleSession() {
+  // Clear all Clerk-related localStorage data
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (key.includes('clerk') || key.includes('__clerk'))) {
+      keysToRemove.push(key);
+    }
   }
   
-  console.log('Session cleaned - localStorage cleared for user switch');
+  keysToRemove.forEach(key => localStorage.removeItem(key));
+  
+  // Clear session storage as well
+  const sessionKeysToRemove = [];
+  for (let i = 0; i < sessionStorage.length; i++) {
+    const key = sessionStorage.key(i);
+    if (key && (key.includes('clerk') || key.includes('__clerk'))) {
+      sessionKeysToRemove.push(key);
+    }
+  }
+  
+  sessionKeysToRemove.forEach(key => sessionStorage.removeItem(key));
+  
+  console.log('Cleared stale authentication session data');
 }
 
-export function initializeCleanSession(newUserId: string) {
-  // Store new user ID for tracking
-  localStorage.setItem('clerk-user-id', newUserId);
-  
-  console.log('Clean session initialized for user:', newUserId);
-}
-
-export function detectUserSwitch(currentUserId: string): boolean {
-  const storedUserId = localStorage.getItem('clerk-user-id');
-  
-  if (storedUserId && storedUserId !== currentUserId) {
-    console.log('User switch detected:', storedUserId, '->', currentUserId);
-    return true;
+// Force sign out and redirect to auth
+export async function forceSignOutAndRedirect() {
+  try {
+    const clerk = (window as any).Clerk;
+    if (clerk) {
+      await clerk.signOut();
+    }
+  } catch (error) {
+    console.warn('Error during Clerk signOut:', error);
   }
   
-  return false;
+  clearStaleSession();
+  window.location.href = '/auth';
 }
