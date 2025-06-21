@@ -392,6 +392,10 @@ Changelog:
 - June 21, 2025. Created external AI processor service at https://finanserpro-ai-processor.fly.dev with auto-scaling, health checks, and cost optimization
 - June 21, 2025. Modified main application to offload financial tips generation to external service while maintaining data sovereignty in Replit
 - June 21, 2025. Implemented intelligent fallback system - external service for performance, direct OpenAI for redundancy
+- June 21, 2025. CURRENCY LOCALIZATION: Implemented comprehensive currency symbol context system for user financial data display
+- June 21, 2025. Created CurrencyContext with localStorage persistence supporting $, €, S/, Kč and other major currency symbols
+- June 21, 2025. Updated financial components (daily-recommendations, quick-financial-snapshot) to use dynamic currency symbols for user amounts
+- June 21, 2025. Subscription pricing intentionally kept in USD ($) since billing is processed in dollars regardless of user's display preference
 - June 21, 2025. Verified AI financial tips working correctly for premium users with sophisticated analysis providing $3,600+ annual savings recommendations
 - June 21, 2025. Removed local testing configuration ensuring only Fly.io deployment handles OpenAI processing for optimal infrastructure efficiency
 - June 21, 2025. ENHANCED AI TIPS: Fixed mathematical calculation errors and improved 4-box analysis quality
