@@ -27,21 +27,50 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const { user } = useUser();
 
-  // Function to clean AI-generated text
-  const cleanAIText = (text: string): string => {
-    return text
-      // Remove asterisks used for emphasis
-      .replace(/\*\*/g, '')
-      .replace(/\*/g, '')
-      // Remove AI generation notes and system messages
-      .replace(/Note:|Important:|Remember:|Disclaimer:|Please note:|Keep in mind:/gi, '')
-      // Remove markdown-style formatting
-      .replace(/#{1,6}\s*/g, '')
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-      // Remove extra whitespace and clean up
-      .replace(/\s+/g, ' ')
-      .replace(/\n\s*\n/g, '\n')
-      .trim();
+  // Function to render formatted AI text with proper markdown support
+  const renderFormattedText = (text: string): JSX.Element => {
+    // Split text by section headers (🎯, 📊, 💰, ⚖️)
+    const sections = text.split(/(\*\*[📊💰⚖️🎯].*?\*\*)/).filter(Boolean);
+    
+    return (
+      <div className="space-y-4">
+        {sections.map((section, index) => {
+          // Check if this is a header section
+          if (section.match(/\*\*[📊💰⚖️🎯].*?\*\*/)) {
+            const headerText = section.replace(/\*\*/g, '');
+            const icon = headerText.charAt(0); // Extract emoji
+            const title = headerText.substring(2); // Remove emoji and space
+            
+            return (
+              <div key={index} className="mb-2">
+                <h4 className="font-semibold text-lg flex items-center gap-2 text-gray-900 dark:text-white">
+                  <span className="text-xl">{icon}</span>
+                  {title}
+                </h4>
+              </div>
+            );
+          } else {
+            // This is content - format with bullet points and bold text
+            const formattedContent = section
+              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
+              .replace(/• /g, '• ') // Preserve bullet points
+              .replace(/\n/g, '<br>') // Line breaks
+              .trim();
+            
+            if (formattedContent) {
+              return (
+                <div 
+                  key={index} 
+                  className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 mb-4 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: formattedContent }}
+                />
+              );
+            }
+          }
+          return null;
+        })}
+      </div>
+    );
   };
 
   // Load saved tip from localStorage on component mount
@@ -49,7 +78,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     if (user?.id) {
       const savedTip = localStorage.getItem(`ai-tip-${user.id}`);
       if (savedTip) {
-        setCurrentTip(cleanAIText(savedTip));
+        setCurrentTip(savedTip);
       }
     }
   }, [user?.id]);
@@ -98,15 +127,15 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
         throw new Error("No tip received from AI");
       }
 
-      return cleanAIText(data.tip);
+      return data.tip;
     },
     onMutate: () => {
       setIsGenerating(true);
     },
-    onSuccess: (cleanedTip: string) => {
-      setCurrentTip(cleanedTip);
+    onSuccess: (tip: string) => {
+      setCurrentTip(tip);
       if (user?.id) {
-        localStorage.setItem(`ai-tip-${user.id}`, cleanedTip);
+        localStorage.setItem(`ai-tip-${user.id}`, tip);
       }
       toast({
         title: "AI Tip Generated",
@@ -170,13 +199,10 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
 
             {/* Current Tip Display */}
             {currentTip && (
-              <div className="space-y-4">
-                {/* Parse the AI analysis into sections */}
-                {(() => {
-                  // Clean the content but preserve structure
-                  const cleanedContent = currentTip;
-                  
-                  // Define the 4 thematic sections with their patterns
+              <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-6 rounded-lg border border-purple-200 dark:border-purple-700">
+                {renderFormattedText(currentTip)}
+              </div>
+            )}
                   const sectionPatterns = [
                     {
                       title: "📊 Spending Pattern Analysis",
