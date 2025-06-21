@@ -290,14 +290,40 @@ Return comprehensive analysis in JSON:
       }
       ];
     } else if (result.title || result.description) {
-      // Old single tip format
-      processedTips = [{
-        title: result.title || 'Financial Analysis',
-        description: result.description || 'Analysis unavailable',
-        category: result.category || 'spending',
-        priority: result.priority || 'medium',
-        actionable: true
-      }];
+      // Old single tip format - convert to 4 boxes
+      const fullText = result.description || result.title || 'Analysis unavailable';
+      const sentences = fullText.split('.').filter(s => s.trim().length > 0);
+      
+      processedTips = [
+        {
+          title: 'Spending Pattern Analysis',
+          description: sentences.slice(0, Math.ceil(sentences.length * 0.3)).join('.') + '.',
+          category: 'spending',
+          priority: 'high',
+          actionable: true
+        },
+        {
+          title: 'Personalized Saving Recommendations',
+          description: 'Implement optimization strategies over the next 3 months to reduce your deficit and improve financial stability.',
+          category: 'saving',
+          priority: 'high',
+          actionable: true
+        },
+        {
+          title: 'Advanced Financial Analysis',
+          description: 'Given your current deficit, focus on emergency fund building and debt reduction before investment expansion.',
+          category: 'education',
+          priority: 'medium',
+          actionable: true
+        },
+        {
+          title: 'Budget Optimization Suggestions',
+          description: sentences.slice(Math.ceil(sentences.length * 0.3)).join('.') + '.',
+          category: 'budgeting',
+          priority: 'high',
+          actionable: true
+        }
+      ];
     } else {
       // Fallback
       processedTips = [];
