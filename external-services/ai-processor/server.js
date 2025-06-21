@@ -104,43 +104,56 @@ const server = http.createServer(async (req, res) => {
       const messages = [
         {
           role: "system",
-          content: `You are an AI Financial Analyst providing premium-level insights. Generate 4 INDEPENDENT analyses for these specific boxes:
+          content: `You are a premium financial advisor analyzing a client's finances. Generate 4 SPECIFIC, ACTIONABLE analyses with exact implementation steps:
 
 📊 SPENDING PATTERN ANALYSIS BOX:
-- Focus on category spending trends, percentages, and behavioral patterns
-- Identify top spending categories with exact amounts and percentages
-- Compare to optimal financial benchmarks (housing <30% income, etc.)
+- Calculate exact spending percentages by category from their data
+- Identify the 3 highest expense categories with dollar amounts and percentages of total income
+- Compare each to financial benchmarks (housing ≤30%, food ≤15%, transportation ≤15%)
+- Point out specific categories that exceed optimal percentages
+- Analyze spending frequency patterns (daily/weekly/monthly habits)
 
 💡 PERSONALIZED SAVING RECOMMENDATIONS BOX:
-- Calculate specific saving opportunities from their data
-- Provide actionable steps with dollar amounts and timelines
-- Focus on practical implementation strategies
+Must include ALL of these elements:
+- "Start by..." followed by 2-3 specific actionable steps
+- Exact dollar amounts to save per month/week
+- Specific timeline: "Within 30/60/90 days you should..."
+- Target categories to reduce with specific reduction amounts
+- Practical implementation: "Set up automatic transfers of $X on the 1st of each month"
+- Expected outcome: "This will save you $X annually"
 
 🎯 ADVANCED FINANCIAL ANALYSIS BOX:
-- Analyze overall financial health, cash flow, risk assessment
-- Emergency fund recommendations, investment strategies
-- Long-term wealth building advice
+Must provide comprehensive assessment including:
+- Emergency fund status: "You need $X for 3-6 months expenses" (calculate exact amount)
+- Debt-to-income ratio if applicable
+- Cash flow trend analysis: "Your deficit/surplus trend shows..."
+- Risk factors: Identify 2-3 specific financial vulnerabilities
+- Investment readiness: Specific criteria they must meet first
+- Credit utilization optimization if relevant
+- Long-term wealth projection: "At current savings rate, in 5 years you'll have..."
 
 📋 BUDGET OPTIMIZATION SUGGESTIONS BOX:
-- Category rebalancing with precise dollar targets
-- Expense reduction recommendations with specific amounts
-- Budget restructuring for optimal allocation
+Provide specific restructuring plan:
+- "Reduce [specific category] from $X to $Y (saving $Z monthly)"
+- "Reallocate $X from [category A] to [category B] for better balance"
+- Target percentages: "Aim for Housing: X%, Food: Y%, Entertainment: Z%"
+- Month-by-month implementation plan
+- Specific apps/tools to use: "Use [specific budgeting method]"
+- Success metrics: "Track weekly to ensure you stay under $X in [category]"
 
-CRITICAL MATHEMATICAL REQUIREMENTS:
-- Use EXACT figures from the provided data
-- Calculate Net Balance = Income - Expenses (show negative if expenses > income)
-- All percentages must be calculated from their actual data
-- If transaction count is low (<10), mention need for more data
-
-DATA COMPLETENESS CHECK:
-- If fewer than 10 transactions: Add note "Add more transactions for more personalized analysis"
+REQUIREMENTS FOR EACH BOX:
+- Use EXACT dollar amounts from their actual data
+- Provide specific deadlines and timelines
+- Include implementation steps ("Download X app", "Set up automatic transfer", "Review weekly")
+- Calculate precise savings opportunities
+- Give measurable success criteria
 
 RETURN EXACTLY THIS JSON FORMAT:
 {
-  "spendingAnalysis": "Detailed analysis of spending patterns, top categories with exact percentages, behavioral insights",
-  "savingRecommendations": "Specific saving opportunities with dollar amounts and implementation timelines", 
-  "advancedAnalysis": "Financial health assessment, risk analysis, emergency fund and investment strategies",
-  "budgetOptimization": "Category rebalancing with precise dollar targets and expense reduction recommendations"
+  "spendingAnalysis": "Category breakdown with exact percentages, benchmark comparisons, and spending pattern insights",
+  "savingRecommendations": "Step-by-step action plan with specific dollar amounts, timelines, and implementation methods", 
+  "advancedAnalysis": "Complete financial health assessment with emergency fund calculations, risk analysis, and wealth projections",
+  "budgetOptimization": "Detailed restructuring plan with specific category targets, reallocation amounts, and tracking methods"
 }`
         },
         {

@@ -375,6 +375,8 @@ Changelog:
 - June 18, 2025. QR code mobile upload system now fully operational - anonymous users can scan codes and upload photos for authenticated users
 - June 18, 2025. MASCOT ENHANCEMENT: Implemented comprehensive mascot restoration system - users can now restore hidden mascots via floating restore button
 - June 20, 2025. SECURITY FIX: Fixed critical deleted user authentication bug - users who delete accounts through Clerk no longer cause 500 errors
+- June 21, 2025. FIXED: AI financial tips response format - resolved fragmented text display by strengthening 4-box format validation
+- June 21, 2025. ENHANCED: AI prompt engineering for financial tips - upgraded from generic observations to specific, actionable recommendations with exact dollar amounts and implementation timelines
 - June 20, 2025. Enhanced error handling for deleted users - backend returns 401 with redirect flag, frontend automatically redirects to auth page
 - June 20, 2025. Improved authentication middleware to detect deleted user scenarios and return proper error codes instead of server crashes
 - June 18, 2025. Added full drag-and-drop functionality to financial mascot - users can reposition mascot anywhere on screen with mouse drag
