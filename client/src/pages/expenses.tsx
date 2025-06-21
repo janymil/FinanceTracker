@@ -30,6 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import MonthFilter from "@/components/month-filter";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface Transaction {
   id: number;
@@ -58,6 +59,7 @@ interface Category {
 
 export default function Expenses() {
   const { isReady, user } = useClerkUserReady();
+  const { currency } = useCurrency();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -654,7 +656,7 @@ export default function Expenses() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
-                    <Tooltip formatter={(value) => [`$${value}`, 'Expenses']} />
+                    <Tooltip formatter={(value) => [`${currency}${value}`, 'Expenses']} />
                     <Line 
                       type="monotone" 
                       dataKey="amount" 

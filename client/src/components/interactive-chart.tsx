@@ -208,7 +208,7 @@ export default function InteractiveChart({
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
             <XAxis dataKey="date" className="text-xs" />
             <YAxis className="text-xs" />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip currencySymbol={currency} />} />
             <Area 
               type="monotone" 
               dataKey="income" 
@@ -234,7 +234,7 @@ export default function InteractiveChart({
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
             <XAxis dataKey="date" className="text-xs" />
             <YAxis className="text-xs" />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip currencySymbol={currency} />} />
             <Bar dataKey="income" fill="#10B981" />
             <Bar dataKey="expenses" fill="#EF4444" />
           </BarChart>
