@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useClerkUserReady } from '@/hooks/useClerkUserReady';
 import { apiRequest } from '@/lib/queryClient';
+import { CurrencySetupModal } from '@/components/CurrencySetupModal';
 
 interface CurrencyContextType {
   currency: string;
@@ -54,12 +55,13 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
         setHasTransactions(userHasTransactions);
         setCanChangeCurrency(!userHasTransactions);
         
-        if (userData.currency) {
-          // User has set currency preference
+        if (userData.currency && userData.currency !== '$') {
+          // User has set a specific currency preference
           setCurrencyState(userData.currency);
           setIsInitialized(true);
         } else {
-          // New user - show setup modal
+          // New user or user with default currency - show setup modal
+          console.log('New user detected - showing currency setup modal');
           setShowSetupModal(true);
           setIsInitialized(true);
         }
