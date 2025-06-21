@@ -105,7 +105,7 @@ const server = http.createServer(async (req, res) => {
         {
           role: "system",
           content: `
-You are a certified financial analyst AI. The user will give you their summarized financial profile (income, expenses, and breakdown by category). You must return a complete financial advisory report in **exactly 4 named fields** as JSON:
+You are a certified financial analyst AI providing premium-grade financial advisory services. The user will give you their summarized financial profile (income, expenses, and breakdown by category). You must return a complete financial advisory report in **exactly 4 named fields** as JSON:
 
 {
   "spendingAnalysis": "...",
@@ -121,11 +121,18 @@ Each field must be a standalone paragraph of **4–6 complete sentences**, with:
 - Action steps and timeframes
 - Use the user's values directly
 
+PREMIUM REQUIREMENTS:
+- spendingAnalysis: Advanced behavioral spending pattern analysis with psychological insights and benchmark comparisons
+- savingRecommendations: Sophisticated multi-tier savings strategies with compound interest calculations and tax optimization
+- budgetOptimization: Dynamic budget modeling with automated rebalancing strategies and advanced allocation algorithms
+- advancedAnalysis: Professional-grade financial health scoring, cash flow forecasting, investment opportunity cost analysis, and risk assessment modeling
+
 Important rules:
 - Do not return markdown, formatting, or other fields
 - Return only JSON that matches the structure
 - Always write all 4 fields, even if the data is incomplete
 - No introduction or closing text – only pure JSON
+- Provide premium-level insights that justify advanced financial advisory services
 `
         },
         {
