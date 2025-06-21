@@ -12,8 +12,9 @@ export function useClerkUserReady() {
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
       // Clear any stale session data
-      const { clearStaleSession } = require('../utils/sessionCleanup');
-      clearStaleSession();
+      import('../utils/sessionCleanup').then(({ clearStaleSession }) => {
+        clearStaleSession();
+      });
     }
   }, [isLoaded, isSignedIn]);
   
