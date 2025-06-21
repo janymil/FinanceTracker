@@ -44,12 +44,18 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       .trim();
   };
 
-  // Load saved tip from localStorage on component mount
+  // Load saved tips from localStorage on component mount
   useEffect(() => {
     if (user?.id) {
-      const savedTip = localStorage.getItem(`ai-tip-${user.id}`);
-      if (savedTip) {
-        setCurrentTip(cleanAIText(savedTip));
+      const savedTips = localStorage.getItem(`ai-tip-${user.id}`);
+      if (savedTips) {
+        try {
+          JSON.parse(savedTips); // Validate JSON
+          setCurrentTip(savedTips);
+        } catch {
+          // Clear invalid data
+          localStorage.removeItem(`ai-tip-${user.id}`);
+        }
       }
     }
   }, [user?.id]);
@@ -73,7 +79,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
       
-      const response = await apiRequest("POST", "/api/ai/tip", {
+      const response = await apiRequest("POST", "/api/ai/tips", {
         body: JSON.stringify({
           financialData: {
             totalIncome: summary.totalIncome,
@@ -94,19 +100,20 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       }
 
       const data = await response.json();
-      if (!data.tip || !data.tip.trim()) {
-        throw new Error("No tip received from AI");
+      if (!data.tips || !Array.isArray(data.tips) || data.tips.length === 0) {
+        throw new Error("No tips received from AI");
       }
 
-      return cleanAIText(data.tip);
+      return data.tips;
     },
     onMutate: () => {
       setIsGenerating(true);
     },
-    onSuccess: (cleanedTip: string) => {
-      setCurrentTip(cleanedTip);
+    onSuccess: (tips: any[]) => {
+      const tipsData = JSON.stringify(tips);
+      setCurrentTip(tipsData);
       if (user?.id) {
-        localStorage.setItem(`ai-tip-${user.id}`, cleanedTip);
+        localStorage.setItem(`ai-tip-${user.id}`, tipsData);
       }
       toast({
         title: "AI Tip Generated",
