@@ -209,10 +209,37 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
               </div>
             )}
 
+            {/* AI Analysis Features - show when no tips generated */}
             {currentTips.length === 0 && (
-              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Click "Get AI Tip" to generate personalized financial advice</p>
+              <div className="space-y-4">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                    AI Analysis Features:
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      Spending pattern analysis
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      Personalized saving recommendations
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      Budget optimization suggestions
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      Context-aware financial advice
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                  <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Click "Get AI Tip" to generate personalized financial advice</p>
+                </div>
               </div>
             )}
           </div>
