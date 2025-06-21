@@ -28,8 +28,9 @@ Required production environment variables:
 VITE_CLERK_PUBLISHABLE_KEY=pk_live_your_production_key
 CLERK_SECRET_KEY=sk_live_your_production_secret
 
-# Database
-DATABASE_URL_PROD=postgresql://user:password@ep-...neon.tech/finanzerpro?sslmode=require
+# Database (IMPORTANT: Set both for sync and runtime)
+DATABASE_URL=postgresql://neondb_owner:npg_RtbJTXcaD6U5@ep-bold-re...neon.tech/neondb?sslmode=require
+DATABASE_URL_PROD=postgresql://neondb_owner:npg_RtbJTXcaD6U5@ep-bold-re...neon.tech/neondb?sslmode=require
 
 # Clerk Authentication (Production)
 CLERK_SECRET_KEY=sk_live_...
