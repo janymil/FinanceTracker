@@ -95,8 +95,8 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
         localStorage.setItem(`ai-tips-${user.id}`, JSON.stringify(tips));
       }
       toast({
-        title: "AI Tips Generated",
-        description: "4 personalized financial insights based on your data",
+        title: "AI Tip Generated",
+        description: "New financial advice based on your spending data",
       });
     },
     onError: () => {
@@ -119,7 +119,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
           AI Financial Tips
         </CardTitle>
         <CardDescription>
-          Get 4 personalized financial insights based on your spending patterns
+          Get personalized financial advice based on your spending patterns
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -132,7 +132,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                   Personalized AI Analysis
                 </h4>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Generate 4 independent financial insights
+                  Generate insights based on your monthly spending data
                 </p>
               </div>
               <Button 
@@ -148,7 +148,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                 ) : (
                   <>
                     <TrendingUp className="h-4 w-4" />
-                    Get AI Tips
+                    Get AI Tip
                   </>
                 )}
               </Button>
@@ -212,7 +212,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             {currentTips.length === 0 && (
               <div className="text-center text-gray-500 dark:text-gray-400 py-8">
                 <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Click "Get AI Tips" to generate 4 personalized financial insights</p>
+                <p className="text-sm">Click "Get AI Tip" to generate personalized financial advice</p>
               </div>
             )}
           </div>
