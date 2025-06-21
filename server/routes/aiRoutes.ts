@@ -109,33 +109,59 @@ export function registerAIRoutes(app: Express) {
       const currentDate = new Date();
       const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
       
-      const financialSummary = await storage.getUserFinancialSummary(userId, startOfYear, currentDate);
-      const transactions = await storage.getUserTransactions(userId, 100);
+      // Get all user transactions (no date filtering for AI analysis)
+      const allTransactions = await storage.getUserTransactions(userId, 100);
       const categories = await storage.getCategories(userId);
+      
+      // Get financial summary for the full year
+      const financialSummary = await storage.getUserFinancialSummary(userId, startOfYear, currentDate);
 
       // Create category name mapping
       const categoryMap = new Map();
       categories.forEach(cat => categoryMap.set(cat.id, cat.name));
 
-      // Prepare comprehensive financial data
+      // Use ALL transactions for AI analysis (not date-filtered)
+      const processedTransactions = allTransactions.map(t => ({
+        description: t.description,
+        amount: parseFloat(t.amount),
+        date: t.date.toISOString(),
+        categoryName: categoryMap.get(t.categoryId) || 'Uncategorized',
+        type: t.type
+      }));
+
+      // Calculate totals from actual transactions
+      const actualTotalIncome = processedTransactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+      
+      const actualTotalExpenses = processedTransactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      // Create category breakdown from actual transactions
+      const categoryBreakdown = new Map();
+      processedTransactions.forEach(t => {
+        const key = `${t.categoryName}_${t.type}`;
+        categoryBreakdown.set(key, (categoryBreakdown.get(key) || 0) + t.amount);
+      });
+
+      const transactionsByCategory = Array.from(categoryBreakdown.entries()).map(([key, amount]) => {
+        const [categoryName, type] = key.split('_');
+        return { categoryName, amount, type };
+      });
+
+      // Prepare comprehensive financial data using ACTUAL transaction data
       const financialData = {
-        totalIncome: financialSummary.totalIncome,
-        totalExpenses: financialSummary.totalExpenses,
-        transactionsByCategory: financialSummary.transactionsByCategory,
-        recentTransactions: transactions.map(t => ({
-          description: t.description,
-          amount: parseFloat(t.amount),
-          date: t.date.toISOString(),
-          categoryName: categoryMap.get(t.categoryId) || 'Uncategorized',
-          type: t.type
-        })),
-        // Add timestamp to force fresh AI response
+        totalIncome: actualTotalIncome,
+        totalExpenses: actualTotalExpenses,
+        transactionsByCategory,
+        recentTransactions: processedTransactions,
         timestamp: Date.now()
       };
 
-      console.log(`Generating fresh AI tip for user ${getUserId(req)} with ${transactions.length} transactions`);
-      console.log(`Financial summary transactions count: ${financialSummary.totalTransactionCount}`);
-      console.log(`Date range: ${startOfYear.toISOString()} to ${currentDate.toISOString()}`);
+      console.log(`FIXED: AI processing ${allTransactions.length} total transactions for user ${getUserId(req)}`);
+      console.log(`Income: $${actualTotalIncome}, Expenses: $${actualTotalExpenses}, Net: $${actualTotalIncome - actualTotalExpenses}`);
+      console.log(`Date range spans: ${processedTransactions.length > 0 ? processedTransactions[processedTransactions.length-1].date : 'N/A'} to ${processedTransactions.length > 0 ? processedTransactions[0].date : 'N/A'}`);
       
       const tips = await generateFinancialTips(financialData);
       const tip = tips.length > 0 ? tips[0] : null;

@@ -398,6 +398,9 @@ Changelog:
 - June 21, 2025. Updated AI processor prompt to generate independent analyses for each widget box with correct deficit calculations
 - June 21, 2025. Enhanced financial data preprocessing to include transaction count and percentage calculations for better AI accuracy
 - June 21, 2025. Implemented intelligent format conversion handling both new 4-box and legacy single-format responses from AI processor
+- June 21, 2025. CRITICAL FIX: Resolved transaction count discrepancy - AI system now processes all 15 user transactions instead of incorrectly filtered 4
+- June 21, 2025. Fixed data isolation issue where financial summary date filtering was excluding valid transactions from AI analysis
+- June 21, 2025. Enhanced AI financial data to use complete transaction dataset with real-time totals instead of date-filtered summaries
 - June 18, 2025. QR code system fully operational with backend session creation, anonymous mobile access, and authenticated result processing for seamless cross-device receipt scanning workflow
 - June 21, 2025. FIXED: Critical Clerk authentication key mismatch issue - implemented proper development/production key separation using .env.local with system environment variable override
 - June 21, 2025. Created .env.local file with development Clerk keys for Replit environment while preserving production keys for deployment
