@@ -48,6 +48,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
 import { Link } from "wouter";
 import { useState, useEffect } from "react";
+import { CurrencySelector } from "@/components/CurrencySelector";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -446,6 +447,9 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
               </Button>
             </Link>
           )}
+
+          {/* Currency selector */}
+          <CurrencySelector variant="icon" className="mr-2" />
 
           {/* User dropdown */}
           <DropdownMenu>
