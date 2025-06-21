@@ -389,6 +389,9 @@ Changelog:
 - June 18, 2025. COMPLETED: Fixed QR code mobile upload system to follow complete standard OCR pipeline including user plan checking, AI categorization for standard+ users, and Bunny.net storage for premium users
 - June 18, 2025. Mobile upload now provides identical functionality to desktop OCR with proper polling detection, cache-busting, and form auto-population from mobile-captured receipt data
 - June 18, 2025. QR code system fully operational with backend session creation, anonymous mobile access, and authenticated result processing for seamless cross-device receipt scanning workflow
+- June 21, 2025. FIXED: Critical Clerk authentication key mismatch issue - implemented proper development/production key separation using .env.local with system environment variable override
+- June 21, 2025. Created .env.local file with development Clerk keys for Replit environment while preserving production keys for deployment
+- June 21, 2025. Enhanced server startup to force clear system environment variables and prioritize .env.local file loading for consistent development authentication
 - June 18, 2025. FIXED: Mobile QR upload system now properly connects to standard OCR pipeline instead of independent processing - corrected storage method from getUserById to getUser
 - June 18, 2025. Mobile upload integration complete - QR code scanning connects to Google Cloud Vision API, AI categorization, and Bunny.net storage following identical workflow as desktop upload
 - June 18, 2025. COMPLETED: Mobile QR upload now calls actual standard OCR endpoint (/api/upload-receipt) instead of independent processing - uses internal authentication and identical processing pipeline as desktop
