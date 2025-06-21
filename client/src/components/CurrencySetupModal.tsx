@@ -69,34 +69,33 @@ export function CurrencySetupModal({ open, onComplete }: CurrencySetupModalProps
   };
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md" hideCloseButton>
+    <Dialog open={open} onOpenChange={() => {}} modal={true}>
+      <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle>Choose Your Currency</DialogTitle>
-          <DialogDescription>
-            Select your preferred currency for displaying financial amounts. This cannot be changed after you add your first transaction.
+          <DialogTitle className="text-xl">Welcome to FinanzerPro! 🌎</DialogTitle>
+          <DialogDescription className="text-base">
+            Please choose your preferred currency to get started. You can change this later until you add your first transaction.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-4 py-4">
+          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            🌎 Choose from 20+ currencies including Latin American options:
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {CURRENCY_OPTIONS.map((currency) => (
               <Button
                 key={currency.code}
                 variant={selectedCurrency === currency.symbol ? "default" : "outline"}
-                onClick={() => setSelectedCurrency(currency.symbol)}
-                className="justify-start h-12 p-3"
+                onClick={() => handleSaveCurrency(currency.symbol)}
+                className="h-16 p-3 flex flex-col items-center justify-center space-y-1 relative hover:scale-105 transition-transform"
               >
-                <div className="flex items-center space-x-3 w-full">
-                  <span className="text-lg font-bold">{currency.symbol}</span>
-                  <div className="text-left">
-                    <div className="text-sm font-medium">{currency.code}</div>
-                    <div className="text-xs text-gray-500">{currency.label.split(' (')[0]}</div>
-                  </div>
-                  {selectedCurrency === currency.symbol && (
-                    <Check className="h-4 w-4 ml-auto text-green-600" />
-                  )}
-                </div>
+                <span className="text-xl font-bold">{currency.symbol}</span>
+                <span className="text-xs text-center leading-tight">{currency.label}</span>
+                {selectedCurrency === currency.symbol && (
+                  <Check className="h-4 w-4 text-green-600 absolute top-2 right-2" />
+                )}
               </Button>
             ))}
           </div>

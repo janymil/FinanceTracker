@@ -448,8 +448,8 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
             </Link>
           )}
 
-          {/* Currency selector */}
-          <CurrencySelector variant="icon" className="mr-2" />
+          {/* Currency selector - only show if user hasn't set currency yet */}
+          {!user?.currency && <CurrencySelector variant="icon" className="mr-2" />}
 
           {/* User dropdown */}
           <DropdownMenu>
