@@ -262,7 +262,7 @@ export default function Categories() {
                   New Category
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingCategory ? "Edit Category" : "Create New Category"}
@@ -272,7 +272,7 @@ export default function Categories() {
                   </DialogDescription>
                 </DialogHeader>
                 
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto px-1">
                   <div>
                     <Label htmlFor="name">Category Name</Label>
                     <Input
@@ -306,17 +306,40 @@ export default function Categories() {
                   <div>
                     <Label>Icon</Label>
                     <div className="grid grid-cols-4 gap-2 mt-2">
-                      {Object.entries(categoryIcons).map(([key, IconComponent]) => (
-                        <Button
-                          key={key}
-                          variant={newCategory.icon === key ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setNewCategory({ ...newCategory, icon: key })}
-                          className="h-10"
-                        >
-                          <IconComponent className="h-4 w-4" />
-                        </Button>
-                      ))}
+                      {(() => {
+                        // Define basic icons based on category type
+                        const expenseIcons = {
+                          "food": categoryIcons["food"],
+                          "transportation": categoryIcons["transportation"], 
+                          "shopping": categoryIcons["shopping"],
+                          "entertainment": categoryIcons["entertainment"],
+                          "healthcare": categoryIcons["healthcare"],
+                          "housing": categoryIcons["housing"],
+                          "education": categoryIcons["education"],
+                          "other": categoryIcons["other"]
+                        };
+                        
+                        const incomeIcons = {
+                          "salary": categoryIcons["salary"],
+                          "business": categoryIcons["business"],
+                          "investment": categoryIcons["investment"],
+                          "gift": categoryIcons["gift"]
+                        };
+                        
+                        const iconsToShow = newCategory.type === "expense" ? expenseIcons : incomeIcons;
+                        
+                        return Object.entries(iconsToShow).map(([key, IconComponent]) => (
+                          <Button
+                            key={key}
+                            variant={newCategory.icon === key ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setNewCategory({ ...newCategory, icon: key })}
+                            className="h-10"
+                          >
+                            <IconComponent className="h-4 w-4" />
+                          </Button>
+                        ));
+                      })()}
                     </div>
                   </div>
 
