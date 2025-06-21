@@ -2,11 +2,19 @@ import { config } from "dotenv";
 import path from "path";
 import fs from "fs";
 
+// Clear any existing Clerk environment variables first
+delete process.env.VITE_CLERK_PUBLISHABLE_KEY;
+delete process.env.CLERK_SECRET_KEY;
+
 // Force load .env.local in development to override system environment variables
 const envLocalPath = path.resolve(process.cwd(), '.env.local');
 if (fs.existsSync(envLocalPath)) {
   config({ path: envLocalPath, override: true });
   console.log('Development environment: Using .env.local for Clerk keys');
+  console.log('Loaded keys:', {
+    publishable: process.env.VITE_CLERK_PUBLISHABLE_KEY?.substring(0, 20) + '...',
+    secret: process.env.CLERK_SECRET_KEY?.substring(0, 20) + '...'
+  });
 } else {
   config(); // Load .env as fallback for production
   console.log('Production environment: Using system environment variables');
