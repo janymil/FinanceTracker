@@ -1,6 +1,24 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+const http = require('http');
+const url = require('url');
+const fs = require('fs');
+
+// Load environment variables from .env file
+function loadEnv() {
+  try {
+    const envFile = fs.readFileSync('.env', 'utf8');
+    const lines = envFile.split('\n');
+    lines.forEach(line => {
+      const [key, ...values] = line.split('=');
+      if (key && values.length > 0) {
+        process.env[key.trim()] = values.join('=').trim();
+      }
+    });
+  } catch (error) {
+    console.log('No .env file found, using environment variables');
+  }
+}
+
+loadEnv();
 
 const app = express();
 const port = parseInt(process.env.PORT || '3000', 10);
