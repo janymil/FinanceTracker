@@ -117,10 +117,6 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
           onSelectCurrency={setCurrency}
         />
       )}
-      {/* Debug modal state */}
-      <div style={{position: 'fixed', top: 10, right: 10, background: 'red', color: 'white', padding: '5px', fontSize: '12px', zIndex: 9999}}>
-        Modal: {showSetupModal ? 'SHOW' : 'HIDE'} | Init: {isInitialized ? 'YES' : 'NO'}
-      </div>
     </CurrencyContext.Provider>
   );
 }

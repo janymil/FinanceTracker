@@ -40,7 +40,6 @@ interface CurrencySetupModalProps {
 }
 
 export function CurrencySetupModal({ isOpen, onClose, onSelectCurrency }: CurrencySetupModalProps) {
-  console.log('CurrencySetupModal rendering - isOpen:', isOpen);
   const [selectedCurrency, setSelectedCurrency] = useState('$');
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -98,6 +97,12 @@ export function CurrencySetupModal({ isOpen, onClose, onSelectCurrency }: Curren
                     await apiRequest('PUT', '/api/auth/user', {
                       currency: currency.symbol
                     });
+                    
+                    toast({
+                      title: "Currency Set Successfully",
+                      description: `Your currency has been set to ${currency.symbol}. You can change it later until you add your first transaction.`,
+                    });
+                    
                     onSelectCurrency(currency.symbol);
                     onClose();
                   } catch (error) {
