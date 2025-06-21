@@ -10,13 +10,7 @@ export const setupClerkAuth = (app: any) => {
   // Add Clerk middleware to handle authentication
   app.use(clerkMiddleware({
     publishableKey: process.env.VITE_CLERK_PUBLISHABLE_KEY,
-    secretKey: process.env.CLERK_SECRET_KEY,
-    // Add production domain configuration
-    domain: process.env.NODE_ENV === 'production' ? process.env.CLERK_DOMAIN : undefined,
-    isSatellite: false,
-    signInUrl: '/auth',
-    afterSignInUrl: '/dashboard',
-    afterSignUpUrl: '/dashboard'
+    secretKey: process.env.CLERK_SECRET_KEY
   }));
 };
 
@@ -26,38 +20,9 @@ export const isAuthenticated = (req: any, res: Response, next: NextFunction) => 
     // Use req.auth() as a function (new Clerk API)
     const auth = req.auth();
     
-    // Enhanced logging for production debugging
-    console.log('Auth check:', {
-      hasAuth: !!auth,
-      hasUserId: !!auth?.userId,
-      sessionId: auth?.sessionId?.substring(0, 10) + '...' || 'none',
-      headers: {
-        authorization: !!req.headers.authorization,
-        'clerk-db-jwt': !!req.headers['clerk-db-jwt']
-      },
-      environment: process.env.NODE_ENV
-    });
-    
     // Check if user is authenticated via Clerk
     if (!auth || !auth.userId) {
-      console.log('Authentication failed: No auth or userId');
-      return res.status(401).json({ 
-        message: 'Authentication required',
-        redirect: '/auth',
-        error: 'NO_AUTH'
-      });
-    }
-    
-    // Additional validation for production
-    if (process.env.NODE_ENV === 'production') {
-      if (!auth.sessionId) {
-        console.log('Authentication failed: No session ID in production');
-        return res.status(401).json({ 
-          message: 'Invalid session',
-          redirect: '/auth',
-          error: 'NO_SESSION'
-        });
-      }
+      return res.status(401).json({ message: 'Authentication required' });
     }
     
     next();
@@ -65,17 +30,9 @@ export const isAuthenticated = (req: any, res: Response, next: NextFunction) => 
     console.error('Authentication error:', error);
     // If this is a user deletion scenario, return 401 instead of 500
     if (error.message?.includes('User not found') || error.message?.includes('deleted')) {
-      return res.status(401).json({ 
-        message: 'User account no longer exists',
-        redirect: '/auth',
-        error: 'USER_DELETED'
-      });
+      return res.status(401).json({ message: 'User account no longer exists' });
     }
-    res.status(401).json({ 
-      message: 'Authentication failed',
-      redirect: '/auth',
-      error: 'AUTH_ERROR'
-    });
+    res.status(401).json({ message: 'Authentication failed' });
   }
 };
 
