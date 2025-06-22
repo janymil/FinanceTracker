@@ -44,7 +44,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       .trim();
   };
 
-  // Load saved tip from localStorage on component mount
+  // Load saved tip from localStorage on component mount and auto-generate if needed
   useEffect(() => {
     if (user?.id && summary) {
       // Create a cache key based on monthly data to ensure tips match the displayed period
@@ -57,8 +57,17 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       if (savedTip) {
         setCurrentTip(cleanAIText(savedTip));
       } else {
-        // Clear any old tip if no monthly tip exists
-        setCurrentTip(null);
+        // Auto-generate tips if we have financial data but no saved tip
+        const hasFinancialData = (summary.totalIncome > 0 || summary.totalExpenses > 0);
+        if (hasFinancialData && !isGenerating) {
+          console.log('AI Tips: Auto-generating for', monthName, year, 'with data:', {
+            totalIncome: summary.totalIncome,
+            totalExpenses: summary.totalExpenses
+          });
+          generateTipMutation.mutate();
+        } else {
+          setCurrentTip(null);
+        }
       }
     }
   }, [user?.id, summary]);
@@ -82,26 +91,21 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
       
-      console.log('AI Tips: Generating with data:', {
-        totalIncome: summary.totalIncome,
-        totalExpenses: summary.totalExpenses,
-        categories: summary.transactionsByCategory || [],
-        month: monthName,
-        year: currentDate.getFullYear()
-      });
+      const requestData = {
+        financialData: {
+          totalIncome: summary.totalIncome,
+          totalExpenses: summary.totalExpenses,
+          categories: summary.transactionsByCategory || [],
+          month: monthName,
+          year: currentDate.getFullYear(),
+          timestamp: Date.now()
+        }
+      };
+
+      console.log('AI Tips: Sending request with data:', requestData);
 
       const response = await apiRequest("POST", "/api/ai/tip", {
-        body: JSON.stringify({
-          financialData: {
-            totalIncome: summary.totalIncome,
-            totalExpenses: summary.totalExpenses,
-            categories: summary.transactionsByCategory || [],
-            month: monthName,
-            year: currentDate.getFullYear(),
-            // Include timestamp to force fresh generation for debugging
-            timestamp: Date.now()
-          }
-        }),
+        body: JSON.stringify(requestData),
         headers: {
           'Content-Type': 'application/json'
         }

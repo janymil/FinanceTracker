@@ -108,9 +108,13 @@ export function registerAIRoutes(app: Express) {
       // Get financial data from the request body (matches what frontend is showing)
       const { financialData } = req.body;
       
+      console.log('AI Tips: Request received with body:', JSON.stringify(req.body, null, 2));
+      
       if (!financialData) {
         return res.status(400).json({ message: "Financial data is required" });
       }
+      
+      console.log('AI Tips: Processing financial data:', financialData);
       
       // Use the financial data that matches the selected month period
       const { totalIncome, totalExpenses, categories: categoryData, month, year } = financialData;
