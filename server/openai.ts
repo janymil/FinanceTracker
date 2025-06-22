@@ -46,16 +46,16 @@ export interface FinancialForecast {
 export interface ExpensePrediction {
   categoryPredictions: Array<{
     category: string;
-    currentMonthSpending: number;
-    predictedNextMonth: number;
-    confidenceLevel: number;
+    currentMonth: number;
+    predictedNext: number;
+    confidence: number;
     trend: 'increasing' | 'decreasing' | 'stable';
     factors: string[];
   }>;
   monthlyPredictions: Array<{
     month: string;
-    totalPredicted: number;
-    confidenceLevel: number;
+    predicted: number;
+    confidence: number;
     breakdown: Array<{
       category: string;
       amount: number;
@@ -862,9 +862,9 @@ RESPONSE FORMAT (JSON):
   "categoryPredictions": [
     {
       "category": "Food & Dining",
-      "currentMonthSpending": 450.00,
-      "predictedNextMonth": 475.00,
-      "confidenceLevel": 0.85,
+      "currentMonth": 450.00,
+      "predictedNext": 475.00,
+      "confidence": 0.85,
       "trend": "increasing",
       "factors": ["Seasonal increase", "Recent dining out trend", "Grocery price inflation"]
     }
@@ -872,8 +872,8 @@ RESPONSE FORMAT (JSON):
   "monthlyPredictions": [
     {
       "month": "2025-07",
-      "totalPredicted": 2150.00,
-      "confidenceLevel": 0.80,
+      "predicted": 2150.00,
+      "confidence": 0.80,
       "breakdown": [
         { "category": "Food & Dining", "amount": 475.00 },
         { "category": "Transportation", "amount": 320.00 }
@@ -881,8 +881,8 @@ RESPONSE FORMAT (JSON):
     },
     {
       "month": "2025-08",
-      "totalPredicted": 2200.00,
-      "confidenceLevel": 0.75,
+      "predicted": 2200.00,
+      "confidence": 0.75,
       "breakdown": [
         { "category": "Food & Dining", "amount": 480.00 },
         { "category": "Transportation", "amount": 330.00 }
@@ -890,8 +890,8 @@ RESPONSE FORMAT (JSON):
     },
     {
       "month": "2025-09",
-      "totalPredicted": 2100.00,
-      "confidenceLevel": 0.70,
+      "predicted": 2100.00,
+      "confidence": 0.70,
       "breakdown": [
         { "category": "Food & Dining", "amount": 460.00 },
         { "category": "Transportation", "amount": 310.00 }
@@ -934,9 +934,9 @@ ANALYSIS GUIDELINES:
     const categoryPredictions = Array.isArray(result.categoryPredictions) 
       ? result.categoryPredictions.map(pred => ({
           category: pred.category || 'Unknown',
-          currentMonthSpending: Number(pred.currentMonthSpending) || 0,
-          predictedNextMonth: Number(pred.predictedNextMonth) || 0,
-          confidenceLevel: Number(pred.confidenceLevel) || 0.5,
+          currentMonth: Number(pred.currentMonth) || 0,
+          predictedNext: Number(pred.predictedNext) || 0,
+          confidence: Number(pred.confidence) || 0.5,
           trend: pred.trend || 'stable',
           factors: Array.isArray(pred.factors) ? pred.factors : ['No specific factors identified']
         }))
@@ -945,8 +945,8 @@ ANALYSIS GUIDELINES:
     const monthlyPredictions = Array.isArray(result.monthlyPredictions)
       ? result.monthlyPredictions.map(month => ({
           month: month.month || 'Unknown',
-          totalPredicted: Number(month.totalPredicted) || 0,
-          confidenceLevel: Number(month.confidenceLevel) || 0.5,
+          predicted: Number(month.predicted) || 0,
+          confidence: Number(month.confidence) || 0.5,
           breakdown: Array.isArray(month.breakdown) ? month.breakdown : []
         }))
       : [];
