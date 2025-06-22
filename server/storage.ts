@@ -2042,6 +2042,31 @@ export class DatabaseStorage implements IStorage {
       .orderBy(redeemCodes.redeemedAt);
     return userCodes;
   }
+
+  // Import log operations
+  async createImportLog(importLog: InsertImportLog): Promise<ImportLog> {
+    const [result] = await db.insert(importLogs).values(importLog).returning();
+    return result;
+  }
+
+  async getUserImportLogs(userId: string, limit: number = 10): Promise<ImportLog[]> {
+    const results = await db
+      .select()
+      .from(importLogs)
+      .where(eq(importLogs.userId, userId))
+      .orderBy(desc(importLogs.importedAt))
+      .limit(limit);
+    return results;
+  }
+
+  async getImportLogById(id: number): Promise<ImportLog | null> {
+    const results = await db
+      .select()
+      .from(importLogs)
+      .where(eq(importLogs.id, id))
+      .limit(1);
+    return results[0] || null;
+  }
 }
 
 export const storage = new DatabaseStorage();
