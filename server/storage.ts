@@ -165,6 +165,11 @@ export interface IStorage {
   redeemCode(code: string, userId: string): Promise<RedeemCode>;
   redeemMultipleCodes(codes: string[], userId: string): Promise<{ validCodes: RedeemCode[], invalidCodes: string[] }>;
   getUserRedeemedCodes(userId: string): Promise<RedeemCode[]>;
+
+  // Import log operations
+  createImportLog(importLog: InsertImportLog): Promise<ImportLog>;
+  getUserImportLogs(userId: string, limit?: number): Promise<ImportLog[]>;
+  getImportLogById(id: number): Promise<ImportLog | null>;
 }
 
 export class DatabaseStorage implements IStorage {

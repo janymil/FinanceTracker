@@ -417,7 +417,8 @@ export function registerImportRoutes(app: Express) {
       // Log failed import
       try {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
-        const filename = `import_${new Date().toISOString().split('T')[0]}.${format}`;
+        const { format } = req.body;
+        const filename = `import_${new Date().toISOString().split('T')[0]}.${format || 'unknown'}`;
         
         await saveImportLog(
           userId,
@@ -431,7 +432,7 @@ export function registerImportRoutes(app: Express) {
             errors: [errorMessage]
           }),
           filename,
-          format as 'csv' | 'json',
+          (format as 'csv' | 'json') || 'csv',
           'failed',
           errorMessage
         );
