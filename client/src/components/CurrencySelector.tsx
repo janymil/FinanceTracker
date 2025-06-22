@@ -6,25 +6,25 @@ import { Settings, Check, Lock } from 'lucide-react';
 
 const PRESET_CURRENCIES = [
   // Major global currencies
-  { symbol: 'USD', label: 'US Dollar ($)', code: 'USD' },
-  { symbol: 'EUR', label: 'Euro (€)', code: 'EUR' },
-  { symbol: 'GBP', label: 'British Pound (£)', code: 'GBP' },
-  { symbol: 'CAD', label: 'Canadian Dollar (C$)', code: 'CAD' },
-  { symbol: 'AUD', label: 'Australian Dollar (A$)', code: 'AUD' },
+  { symbol: '$', label: 'US Dollar ($)', code: 'USD' },
+  { symbol: '€', label: 'Euro (€)', code: 'EUR' },
+  { symbol: '£', label: 'British Pound (£)', code: 'GBP' },
+  { symbol: 'C$', label: 'Canadian Dollar (C$)', code: 'CAD' },
+  { symbol: 'A$', label: 'Australian Dollar (A$)', code: 'AUD' },
   { symbol: 'CHF', label: 'Swiss Franc (CHF)', code: 'CHF' },
-  { symbol: 'SEK', label: 'Swedish Krona (kr)', code: 'SEK' },
+  { symbol: 'kr', label: 'Swedish Krona (kr)', code: 'SEK' },
   
   // Latin American currencies
-  { symbol: 'BRL', label: 'Brazilian Real (R$)', code: 'BRL' },
-  { symbol: 'PEN', label: 'Peruvian Sol (S/)', code: 'PEN' },
-  { symbol: 'UYU', label: 'Uruguayan Peso ($U)', code: 'UYU' },
-  { symbol: 'BOB', label: 'Bolivian Boliviano (Bs)', code: 'BOB' },
+  { symbol: 'R$', label: 'Brazilian Real (R$)', code: 'BRL' },
+  { symbol: 'S/', label: 'Peruvian Sol (S/)', code: 'PEN' },
+  { symbol: '$U', label: 'Uruguayan Peso ($U)', code: 'UYU' },
+  { symbol: 'Bs', label: 'Bolivian Boliviano (Bs)', code: 'BOB' },
   
   // European currencies
-  { symbol: 'PLN', label: 'Polish Złoty (zł)', code: 'PLN' },
-  { symbol: 'CZK', label: 'Czech Koruna (Kč)', code: 'CZK' },
-  { symbol: 'HUF', label: 'Hungarian Forint (Ft)', code: 'HUF' },
-  { symbol: 'RUB', label: 'Russian Ruble (₽)', code: 'RUB' },
+  { symbol: 'zł', label: 'Polish Złoty (zł)', code: 'PLN' },
+  { symbol: 'Kč', label: 'Czech Koruna (Kč)', code: 'CZK' },
+  { symbol: 'Ft', label: 'Hungarian Forint (Ft)', code: 'HUF' },
+  { symbol: '₽', label: 'Russian Ruble (₽)', code: 'RUB' },
 ];
 
 interface CurrencySelectorProps {
