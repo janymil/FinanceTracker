@@ -4,6 +4,7 @@ import {
   varchar,
   timestamp,
   jsonb,
+  json,
   index,
   serial,
   decimal,

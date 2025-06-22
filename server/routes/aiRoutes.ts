@@ -13,12 +13,12 @@ import {
 import { aiCache } from "../cache";
 import { db } from "../db";
 import { 
-  transactionsTable, 
-  categoriesTable, 
-  budgetsTable, 
-  goalsTable,
-  expenseRemindersTable,
-  usersTable,
+  transactions, 
+  categories, 
+  budgets, 
+  goals,
+  expenseReminders,
+  users,
   dailyRecommendations
 } from "../../shared/schema";
 
@@ -357,8 +357,8 @@ export function registerAIRoutes(app: Express) {
       }
 
       // Get categories for proper naming
-      const categories = await db.select().from(categoriesTable);
-      const categoryMap = new Map(categories.map(cat => [cat.id, cat.name]));
+      const categoriesData = await db.select().from(categories);
+      const categoryMap = new Map(categoriesData.map(cat => [cat.id, cat.name]));
 
       console.log('Daily recommendations: Making new OpenAI API call');
       const recommendations = await generateDailyRecommendations({
