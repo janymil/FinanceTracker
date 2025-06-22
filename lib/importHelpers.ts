@@ -237,6 +237,43 @@ export function getUserFromRequest(req: Request): string {
 }
 
 /**
+ * Security function to validate import data doesn't contain user_id injection
+ * @param data - Data to validate
+ * @param currentUserId - The authenticated user's ID
+ * @returns Validation result
+ */
+export function validateDataSecurity(data: any, currentUserId: string): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  
+  // Check for user_id fields in the data
+  const checkForUserIdFields = (obj: any, path: string = 'root'): void => {
+    if (Array.isArray(obj)) {
+      obj.forEach((item, index) => checkForUserIdFields(item, `${path}[${index}]`));
+    } else if (typeof obj === 'object' && obj !== null) {
+      for (const key in obj) {
+        if (key.toLowerCase().includes('user') && key.toLowerCase().includes('id')) {
+          errors.push(`Unauthorized user ID field found at ${path}.${key}`);
+        }
+        if (typeof obj[key] === 'string' && obj[key] !== currentUserId && obj[key].match(/^[a-zA-Z0-9_-]+$/)) {
+          // Check if value looks like a user ID but isn't the current user's
+          if (obj[key].length > 10 && obj[key].includes('_')) {
+            errors.push(`Suspicious user ID value found at ${path}.${key}: ${obj[key]}`);
+          }
+        }
+        checkForUserIdFields(obj[key], `${path}.${key}`);
+      }
+    }
+  };
+  
+  checkForUserIdFields(data);
+  
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}
+
+/**
  * Validates that required fields are present for a specific data type
  * @param data - CSV row data
  * @param dataType - Type of data (transaction, budget, goal)

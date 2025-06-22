@@ -8,7 +8,8 @@ import {
   formatBudget, 
   formatGoal,
   getUserFromRequest,
-  validateRequiredFields 
+  validateRequiredFields,
+  validateDataSecurity
 } from "../../lib/importHelpers";
 import { 
   saveImportLog, 
@@ -278,7 +279,7 @@ export function registerImportRoutes(app: Express) {
           }
 
           await storage.createTransaction({
-            userId,
+            userId, // Security: Always use authenticated user's ID
             categoryId,
             amount: incomeData.amount.toString(),
             description: incomeData.description,
@@ -307,7 +308,7 @@ export function registerImportRoutes(app: Express) {
           }
 
           await storage.createTransaction({
-            userId,
+            userId, // Security: Always use authenticated user's ID
             categoryId,
             amount: expenseData.amount.toString(),
             description: expenseData.description,
@@ -335,7 +336,7 @@ export function registerImportRoutes(app: Express) {
           }
 
           await storage.createBudget({
-            userId,
+            userId, // Security: Always use authenticated user's ID
             categoryId,
             amount: budgetData.amount.toString(),
             period: budgetData.period,
