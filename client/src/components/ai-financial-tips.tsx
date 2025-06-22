@@ -53,6 +53,15 @@ export default function AIFinancialTips({ summary, selectedMonth }: AIFinancialT
       const monthName = currentDate.toLocaleString('en-US', { month: 'long' });
       const year = currentDate.getFullYear();
       
+      // Clear May 2025 tips completely since it only has 2 transactions
+      if (monthName === 'May' && year === 2025) {
+        const monthlyKey = `ai-tip-${user.id}-${monthName}-${year}`;
+        localStorage.removeItem(monthlyKey);
+        console.log(`AI Tips: Cleared invalid May 2025 cached tip - only 2 transactions`);
+        setCurrentTip(null);
+        return;
+      }
+      
       const monthlyKey = `ai-tip-${user.id}-${monthName}-${year}`;
       const savedTip = localStorage.getItem(monthlyKey);
       
@@ -67,14 +76,7 @@ export default function AIFinancialTips({ summary, selectedMonth }: AIFinancialT
       if (savedTip) {
         console.log(`AI Tips: Found cached tip for ${monthName} ${year}:`, savedTip.substring(0, 100) + '...');
         
-        // For May 2025, always clear cached tips since it only has 2 transactions
-        if (monthName === 'May' && year === 2025) {
-          console.log(`AI Tips: Clearing invalid cached tip for May 2025 - only has 2 transactions`);
-          localStorage.removeItem(monthlyKey);
-          setCurrentTip(null);
-        } else {
-          setCurrentTip(cleanAIText(savedTip));
-        }
+        setCurrentTip(cleanAIText(savedTip));
       } else {
         // Auto-generate tips if we have financial data but no saved tip
         const hasFinancialData = (summary.totalIncome > 0 || summary.totalExpenses > 0);
@@ -125,22 +127,7 @@ export default function AIFinancialTips({ summary, selectedMonth }: AIFinancialT
       console.log('AI Tips: Sending request for', monthName, currentDate.getFullYear());
       console.log('AI Tips: Financial data:', requestData.financialData);
 
-      const response = await fetch('/api/ai/tip', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${await user.getToken()}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData)
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('AI Tips: Backend error:', errorText);
-        throw new Error(`Server error: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await apiRequest("POST", "/api/ai/tip", requestData);
       console.log('AI Tips: Received JSON data:', data);
       
       if (!data.tip || !data.tip.trim()) {
