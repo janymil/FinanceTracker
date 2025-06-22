@@ -432,6 +432,9 @@ Changelog:
 - June 22, 2025. Enhanced period validation for budgets and recurring transactions - now supports daily, weekly, monthly, quarterly, and yearly periods
 - June 22, 2025. Updated transaction import validation to support comprehensive recurring frequency options
 - June 22, 2025. Fixed CSV validation logic - removed redundant validation that was causing field processing issues
+- June 22, 2025. FIXED: Implemented fuzzy category matching to prevent duplicate categories (Food vs Food & Dining)
+- June 22, 2025. Enhanced category creation with similarity detection for food, transport, and other common category groups
+- June 22, 2025. Fixed duplicate "Food & Dining" category by updating transactions to use existing "Food" category
 - June 18, 2025. Implemented real-time polling system for mobile uploads with 5-second intervals and automatic timeout handling
 - June 18, 2025. Enhanced mobile upload workflow with OCR processing, AI categorization, and automatic form population from mobile-captured receipt data
 - June 18, 2025. FIXED: Mobile upload QR code 404 errors by removing duplicate route and ensuring proper SignedOut routing configuration

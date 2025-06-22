@@ -17,13 +17,48 @@ export async function ensureCategoryExists(
   // Get existing categories for the user
   const categories = await storage.getCategories(userId);
   
-  // Check if category already exists
-  const existingCategory = categories.find(
-    cat => cat.name === name && cat.type === type
+  // Check if category already exists (exact match first)
+  const exactMatch = categories.find(
+    cat => cat.name.toLowerCase() === name.toLowerCase() && cat.type === type
   );
   
-  if (existingCategory) {
-    return existingCategory.id;
+  if (exactMatch) {
+    return exactMatch.id;
+  }
+  
+  // Check for similar categories using fuzzy matching
+  const similarCategory = categories.find(cat => {
+    if (cat.type !== type) return false;
+    
+    const catName = cat.name.toLowerCase();
+    const inputName = name.toLowerCase();
+    
+    // Check if one contains the other (e.g., "Food" and "Food & Dining")
+    if (catName.includes(inputName) || inputName.includes(catName)) {
+      return true;
+    }
+    
+    // Check for common food-related synonyms
+    const foodSynonyms = ['food', 'dining', 'restaurant', 'groceries', 'grocery'];
+    const isFoodCategory = (str: string) => foodSynonyms.some(syn => str.includes(syn));
+    
+    if (isFoodCategory(catName) && isFoodCategory(inputName)) {
+      return true;
+    }
+    
+    // Check for transport-related synonyms
+    const transportSynonyms = ['transport', 'transportation', 'travel', 'car', 'vehicle', 'fuel', 'gas'];
+    const isTransportCategory = (str: string) => transportSynonyms.some(syn => str.includes(syn));
+    
+    if (isTransportCategory(catName) && isTransportCategory(inputName)) {
+      return true;
+    }
+    
+    return false;
+  });
+  
+  if (similarCategory) {
+    return similarCategory.id;
   }
   
   // Create new category with appropriate defaults
