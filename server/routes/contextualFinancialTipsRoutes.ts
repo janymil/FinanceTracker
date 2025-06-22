@@ -2,6 +2,8 @@
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { openai } from "../openaiClient";
+import { storage } from "../storage";
+import crypto from "crypto";
 
 export function registerContextualFinancialTipsRoutes(app: Express) {
   app.post('/api/ai/contextual-financial-tips', isAuthenticated, async (req: any, res) => {

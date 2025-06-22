@@ -16,6 +16,7 @@ import {
   financialMascots,
   redeemCodes,
   importLogs,
+  contextualFinancialTips,
   type User,
   type InsertUser,
   type Transaction,
@@ -47,6 +48,8 @@ import {
   type InsertRedeemCode,
   type ImportLog,
   type InsertImportLog,
+  type SelectContextualFinancialTips,
+  type InsertContextualFinancialTips,
 } from "@shared/schema";
 import { db } from "./db";
 import { DataEncryption } from "./encryption";
@@ -170,6 +173,12 @@ export interface IStorage {
   createImportLog(importLog: InsertImportLog): Promise<ImportLog>;
   getUserImportLogs(userId: string, limit?: number): Promise<ImportLog[]>;
   getImportLogById(id: number): Promise<ImportLog | null>;
+
+  // Contextual Financial Tips operations
+  getContextualFinancialTips(userId: string): Promise<SelectContextualFinancialTips | undefined>;
+  saveContextualFinancialTips(tips: InsertContextualFinancialTips): Promise<SelectContextualFinancialTips>;
+  updateContextualFinancialTips(userId: string, tips: InsertContextualFinancialTips): Promise<SelectContextualFinancialTips>;
+  shouldRegenerateFinancialTips(userId: string, currentDataHash: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2066,6 +2075,63 @@ export class DatabaseStorage implements IStorage {
       .where(eq(importLogs.id, id))
       .limit(1);
     return results[0] || null;
+  }
+
+  // Contextual Financial Tips operations
+  async getContextualFinancialTips(userId: string): Promise<SelectContextualFinancialTips | undefined> {
+    const [result] = await db
+      .select()
+      .from(contextualFinancialTips)
+      .where(eq(contextualFinancialTips.userId, userId))
+      .orderBy(desc(contextualFinancialTips.updatedAt))
+      .limit(1);
+    return result;
+  }
+
+  async saveContextualFinancialTips(tips: InsertContextualFinancialTips): Promise<SelectContextualFinancialTips> {
+    const [result] = await db
+      .insert(contextualFinancialTips)
+      .values({
+        ...tips,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return result;
+  }
+
+  async updateContextualFinancialTips(userId: string, tips: InsertContextualFinancialTips): Promise<SelectContextualFinancialTips> {
+    const [result] = await db
+      .update(contextualFinancialTips)
+      .set({
+        ...tips,
+        updatedAt: new Date(),
+      })
+      .where(eq(contextualFinancialTips.userId, userId))
+      .returning();
+    return result;
+  }
+
+  async shouldRegenerateFinancialTips(userId: string, currentDataHash: string): Promise<boolean> {
+    const existingTips = await this.getContextualFinancialTips(userId);
+    
+    if (!existingTips) {
+      return true; // No existing tips, generate new ones
+    }
+
+    // Check if data has changed significantly
+    if (existingTips.dataHash !== currentDataHash) {
+      return true; // Financial data has changed
+    }
+
+    // Check if tips are older than 7 days
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    if (existingTips.updatedAt < sevenDaysAgo) {
+      return true; // Tips are too old
+    }
+
+    return false; // Use existing tips
   }
 }
 
