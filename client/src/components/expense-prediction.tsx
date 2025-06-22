@@ -172,13 +172,13 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                         <div>
                           <h5 className="font-medium text-sm">{prediction.category}</h5>
                           <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className={`text-xs ${prediction.trend === 'increasing' ? 'text-red-600' : prediction.trend === 'decreasing' ? 'text-green-600' : 'text-gray-600'}`}>{prediction.trend || 'stable'}</Badge>
-                            <Badge variant="outline" className="text-xs">{((prediction.confidence || 0) * 100).toFixed(0)}% confidence</Badge>
+                            <Badge variant="outline" className={`text-xs ${prediction.trend === 'increasing' ? 'text-red-600' : prediction.trend === 'decreasing' ? 'text-green-600' : 'text-gray-600'}`}>{prediction.trend}</Badge>
+                            <Badge variant="outline" className="text-xs">{(prediction.confidence * 100).toFixed(0)}% confidence</Badge>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-lg font-bold">${(prediction.predictedNext || 0).toLocaleString()}</div>
-                          <div className="text-xs text-gray-600 dark:text-gray-300">vs ${(prediction.currentMonth || 0).toLocaleString()} current</div>
+                          <div className="text-lg font-bold">${prediction.predictedNext.toLocaleString()}</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300">vs ${prediction.currentMonth.toLocaleString()} current</div>
                         </div>
                       </div>
                       {prediction.factors.length > 0 && (
@@ -226,8 +226,8 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="month" />
                         <YAxis />
-                        <Tooltip formatter={(value: any) => [`$${(value || 0).toLocaleString()}`, 'Predicted Expenses']} />
-                        <Bar dataKey="totalPredicted" fill="#8884d8" />
+                        <Tooltip formatter={(value: any) => [`$${value.toLocaleString()}`, 'Predicted Expenses']} />
+                        <Bar dataKey="predicted" fill="#8884d8" />
                       </BarChart>
                     </ResponsiveContainer>
                   </Card>
@@ -241,11 +241,11 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                           </div>
                           <div>
                             <h5 className="font-medium text-sm">{month.month}</h5>
-                            <p className="text-xs text-gray-600 dark:text-gray-300">{((month.confidence || 0) * 100).toFixed(0)}% confidence</p>
+                            <p className="text-xs text-gray-600 dark:text-gray-300">{(month.confidence * 100).toFixed(0)}% confidence</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold">${(month.totalPredicted || 0).toLocaleString()}</div>
+                          <div className="font-bold">${month.predicted.toLocaleString()}</div>
                           <div className="text-xs text-gray-600 dark:text-gray-300">predicted</div>
                         </div>
                       </div>

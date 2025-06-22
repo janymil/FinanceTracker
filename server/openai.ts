@@ -50,6 +50,7 @@ export interface ExpensePrediction {
     predictedNextMonth: number;
     confidenceLevel: number;
     trend: 'increasing' | 'decreasing' | 'stable';
+    factors: string[];
   }>;
   monthlyPredictions: Array<{
     month: string;
@@ -877,6 +878,24 @@ RESPONSE FORMAT (JSON):
         { "category": "Food & Dining", "amount": 475.00 },
         { "category": "Transportation", "amount": 320.00 }
       ]
+    },
+    {
+      "month": "2025-08",
+      "totalPredicted": 2200.00,
+      "confidenceLevel": 0.75,
+      "breakdown": [
+        { "category": "Food & Dining", "amount": 480.00 },
+        { "category": "Transportation", "amount": 330.00 }
+      ]
+    },
+    {
+      "month": "2025-09",
+      "totalPredicted": 2100.00,
+      "confidenceLevel": 0.70,
+      "breakdown": [
+        { "category": "Food & Dining", "amount": 460.00 },
+        { "category": "Transportation", "amount": 310.00 }
+      ]
     }
   ]
 }
@@ -887,8 +906,10 @@ ANALYSIS GUIDELINES:
 - Consider trend direction (increasing/decreasing/stable)
 - Provide realistic confidence levels (0.6-0.95 range)
 - Include next 3-6 months in monthly predictions
+- Always include "factors" array for each category prediction
 - Explain prediction factors clearly
-- Account for seasonal variations if detectable`;
+- Account for seasonal variations if detectable
+- Ensure all numeric values are provided (no null/undefined)`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -909,9 +930,30 @@ ANALYSIS GUIDELINES:
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
     
+    // Ensure all required fields are present with proper data types
+    const categoryPredictions = Array.isArray(result.categoryPredictions) 
+      ? result.categoryPredictions.map(pred => ({
+          category: pred.category || 'Unknown',
+          currentMonthSpending: Number(pred.currentMonthSpending) || 0,
+          predictedNextMonth: Number(pred.predictedNextMonth) || 0,
+          confidenceLevel: Number(pred.confidenceLevel) || 0.5,
+          trend: pred.trend || 'stable',
+          factors: Array.isArray(pred.factors) ? pred.factors : ['No specific factors identified']
+        }))
+      : [];
+
+    const monthlyPredictions = Array.isArray(result.monthlyPredictions)
+      ? result.monthlyPredictions.map(month => ({
+          month: month.month || 'Unknown',
+          totalPredicted: Number(month.totalPredicted) || 0,
+          confidenceLevel: Number(month.confidenceLevel) || 0.5,
+          breakdown: Array.isArray(month.breakdown) ? month.breakdown : []
+        }))
+      : [];
+    
     return {
-      categoryPredictions: Array.isArray(result.categoryPredictions) ? result.categoryPredictions : [],
-      monthlyPredictions: Array.isArray(result.monthlyPredictions) ? result.monthlyPredictions : []
+      categoryPredictions,
+      monthlyPredictions
     };
 
   } catch (error) {
