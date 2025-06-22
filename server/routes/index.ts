@@ -19,11 +19,12 @@ import { registerImportRoutes } from "./importRoutes";
 import { handleContactForm } from "../contact";
 import { registerRedeemRoutes } from "./redeemRoutes";
 import { registerClerkWebhookRoutes } from "./clerkWebhooks";
+import { registerContextualFinancialTipsRoutes } from './contextualFinancialTipsRoutes';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Cookie consent middleware
   app.post('/api/cookie-consent', setCookieConsent);
-  
+
   // Contact form endpoint
   app.post('/api/contact', handleContactForm);
 
@@ -45,7 +46,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/upload-receipt', uploadReceiptHandler);
   registerAIRoutes(app);
   registerAdminRoutes(app);
-  
+  registerContextualFinancialTipsRoutes(app);
+
   // Register Clerk webhooks after other routes to avoid middleware conflicts
   registerClerkWebhookRoutes(app);
 
