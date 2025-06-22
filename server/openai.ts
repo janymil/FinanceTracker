@@ -979,6 +979,190 @@ ANALYSIS GUIDELINES:
   }
 }
 
+export async function generateDailyRecommendations(financialData: {
+  transactions: Array<{
+    id: number;
+    amount: string;
+    description: string;
+    date: string;
+    type: 'income' | 'expense';
+    categoryId?: number;
+  }>;
+  summary: {
+    totalIncome: number;
+    totalExpenses: number;
+    netAmount: number;
+  };
+  budgets: Array<{
+    id: number;
+    name: string;
+    amount: string;
+    categoryId: number;
+    period: string;
+  }>;
+}) {
+  try {
+    // Check cache first
+    const dataHash = aiCache.createDataHash(financialData);
+    const cached = aiCache.get(`daily_recommendations_${dataHash}`);
+    if (cached) {
+      console.log('Using cached daily recommendations');
+      return cached;
+    }
+
+    console.log('Generating new daily recommendations with OpenAI');
+
+    // Limit data to last 3 months and 100 transactions for efficiency
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    
+    const recentTransactions = financialData.transactions
+      .filter(t => new Date(t.date) >= threeMonthsAgo)
+      .slice(0, 100);
+
+    // Calculate spending patterns
+    const categorySpending = new Map();
+    const dailySpending = new Map();
+    
+    recentTransactions.forEach(t => {
+      if (t.type === 'expense') {
+        const amount = parseFloat(t.amount);
+        const category = t.categoryId?.toString() || 'Other';
+        const date = new Date(t.date).toDateString();
+        
+        categorySpending.set(category, (categorySpending.get(category) || 0) + amount);
+        dailySpending.set(date, (dailySpending.get(date) || 0) + amount);
+      }
+    });
+
+    const topCategories = Array.from(categorySpending.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    const avgDailySpending = Array.from(dailySpending.values())
+      .reduce((sum, amount) => sum + amount, 0) / Math.max(dailySpending.size, 1);
+
+    const prompt = `You are a financial advisor analyzing a user's spending patterns. Based on their financial data, provide personalized daily recommendations and insights.
+
+Financial Summary:
+- Total Income: $${financialData.summary.totalIncome.toFixed(2)}
+- Total Expenses: $${financialData.summary.totalExpenses.toFixed(2)}
+- Net Amount: $${financialData.summary.netAmount.toFixed(2)}
+- Recent Transactions: ${recentTransactions.length}
+- Average Daily Spending: $${avgDailySpending.toFixed(2)}
+
+Top Spending Categories:
+${topCategories.map(([cat, amount]) => `- Category ${cat}: $${amount.toFixed(2)}`).join('\n')}
+
+Budget Information:
+${financialData.budgets.map(b => `- ${b.name}: $${b.amount} (${b.period})`).join('\n')}
+
+Recent Transaction Sample:
+${recentTransactions.slice(0, 10).map(t => 
+  `- ${t.date}: ${t.type} $${t.amount} - ${t.description}`
+).join('\n')}
+
+Please provide:
+1. 3-5 actionable daily task recommendations
+2. 2-3 personalized financial insights
+
+Return your response in this exact JSON format:
+{
+  "recommendations": [
+    {
+      "id": "rec-1",
+      "type": "budget_review",
+      "priority": "high",
+      "title": "Review Budget Allocation",
+      "description": "Your spending in dining exceeded budget by 20% this week",
+      "action": "Reduce dining expenses for the next 3 days",
+      "impact": "Save $50-75 this week",
+      "timeToComplete": "5 minutes"
+    }
+  ],
+  "insights": [
+    {
+      "id": "insight-1", 
+      "insight": "Your weekend spending is 40% higher than weekdays",
+      "basedOn": "Transaction pattern analysis",
+      "confidence": 0.85,
+      "timeframe": "Last 30 days"
+    }
+  ]
+}
+
+Focus on:
+- Actionable tasks for today/this week
+- Specific spending patterns from their actual data
+- Budget optimization opportunities
+- Realistic financial improvements
+- Data-driven insights with confidence levels
+
+Only provide recommendations and insights based on the actual financial data provided. Do not include generic advice.`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert financial advisor who provides personalized, actionable recommendations based on real user data. Always return valid JSON."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 1000,
+      temperature: 0.3 // Moderate creativity for personalized recommendations
+    });
+
+    const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
+    
+    // Ensure proper data structure
+    const recommendations = Array.isArray(aiResponse.recommendations) 
+      ? aiResponse.recommendations.map((rec, index) => ({
+          id: rec.id || `rec-${index + 1}`,
+          type: rec.type || 'general',
+          priority: rec.priority || 'medium',
+          title: rec.title || 'Financial Task',
+          description: rec.description || 'Complete this financial task',
+          action: rec.action || 'Take action on this recommendation',
+          impact: rec.impact || 'Positive financial impact',
+          timeToComplete: rec.timeToComplete || '10 minutes'
+        }))
+      : [];
+
+    const insights = Array.isArray(aiResponse.insights)
+      ? aiResponse.insights.map((insight, index) => ({
+          id: insight.id || `insight-${index + 1}`,
+          insight: insight.insight || 'Financial insight based on your data',
+          basedOn: insight.basedOn || 'Transaction analysis',
+          confidence: Number(insight.confidence) || 0.7,
+          timeframe: insight.timeframe || 'Recent activity'
+        }))
+      : [];
+
+    const result = {
+      recommendations,
+      insights
+    };
+
+    // Cache for 30 minutes
+    aiCache.set(`daily_recommendations_${dataHash}`, result, 1800);
+    console.log('Cached daily recommendations for 30 minutes');
+    
+    return result;
+
+  } catch (error) {
+    console.error('Error generating daily recommendations:', error);
+    return {
+      recommendations: [],
+      insights: []
+    };
+  }
+}
+
 export async function generateFinancialHealthScore(financialData: {
   transactions: Array<{
     id: number;

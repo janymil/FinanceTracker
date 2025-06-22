@@ -7,6 +7,7 @@ import {
   generateSpendingInsights, 
   generateTrendPredictions,
   generateAIFinancialHealthScore,
+  generateDailyRecommendations,
   type ExpenseCategorizationResult 
 } from "../openai";
 import { aiCache } from "../cache";
@@ -272,6 +273,68 @@ export function registerAIRoutes(app: Express) {
     } catch (error) {
       console.error("Error generating trend predictions:", error);
       return res.status(500).json({ message: "Failed to generate trend predictions" });
+    }
+  });
+
+  // Daily Recommendations endpoint (Premium only)
+  app.post('/api/ai/daily-recommendations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "Daily recommendations require premium plan" });
+      }
+
+      const { transactions, summary, budgets } = req.body;
+
+      if (!transactions || !Array.isArray(transactions)) {
+        return res.status(400).json({ message: "Transactions array is required" });
+      }
+
+      // Check minimum data requirements
+      if (transactions.length < 5) {
+        return res.json({
+          recommendations: [],
+          insights: [],
+          message: "Add at least 5 transactions to get personalized daily recommendations"
+        });
+      }
+
+      // Create a data hash for caching (30 minutes)
+      const dataForHash = {
+        transactionCount: transactions.length,
+        totalIncome: Math.round(summary?.totalIncome || 0),
+        totalExpenses: Math.round(summary?.totalExpenses || 0),
+        budgetCount: budgets?.length || 0,
+        currentDate: new Date().toDateString() // Daily cache refresh
+      };
+      const dataHash = aiCache.createDataHash(dataForHash);
+
+      // Check cache first
+      const cached = aiCache.get(`daily_recommendations_${dataHash}`);
+      if (cached) {
+        console.log('Daily recommendations: Using cached data');
+        return res.json(cached);
+      }
+
+      console.log('Daily recommendations: Making new OpenAI API call');
+      const recommendations = await generateDailyRecommendations({
+        transactions,
+        summary: summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 },
+        budgets: budgets || []
+      });
+
+      // Cache for 30 minutes
+      aiCache.set(`daily_recommendations_${dataHash}`, recommendations, 1800);
+
+      return res.json(recommendations);
+    } catch (error) {
+      console.error("Error generating daily recommendations:", error);
+      return res.status(500).json({ message: "Failed to generate daily recommendations" });
     }
   });
 
