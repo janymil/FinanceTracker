@@ -29,21 +29,21 @@ export const sessions = pgTable(
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(), // Clerk user ID (user_xxxxxxxxxxxxxxxxxxxxxxxx)
   email: varchar("email").unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
+  firstName: varchar("firstName"),
+  lastName: varchar("lastName"),
+  profileImageUrl: varchar("profileImageUrl"),
   phone: varchar("phone"),
   website: varchar("website"),
   password: varchar("password"), // Not used with Clerk auth, kept for compatibility
   plan: varchar("plan", { length: 20 }).default("free").notNull(),
-  billingInterval: varchar("billing_interval", { length: 20 }).default("monthly"), // monthly or yearly
+  billingInterval: varchar("billingInterval", { length: 20 }).default("monthly"), // monthly or yearly
   currency: varchar("currency", { length: 5 }), // User's preferred currency symbol - null until user selects
-  stripeCustomerId: varchar("stripe_customer_id"),
-  stripeSubscriptionId: varchar("stripe_subscription_id"),
-  activatedAt: timestamp("activated_at"), // When user activated their plan via AppSumo code redemption
+  stripeCustomerId: varchar("stripeCustomerId"),
+  stripeSubscriptionId: varchar("stripeSubscriptionId"),
+  activatedAt: timestamp("activatedAt"), // When user activated their plan via AppSumo code redemption
   settings: text("settings"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").defaultNow(),
 });
 
 // Categories for transactions, budgets, and goals
