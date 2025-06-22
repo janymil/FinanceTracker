@@ -249,6 +249,20 @@ export const milestoneAchievements = pgTable("milestone_achievements", {
   achievedAt: timestamp("achieved_at").defaultNow(),
 });
 
+// Contextual Financial Tips - Persistent AI-generated tips
+export const contextualFinancialTips = pgTable("contextual_financial_tips", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  tips: jsonb("tips").notNull(), // Array of tip objects
+  dataHash: varchar("data_hash", { length: 255 }).notNull(), // Hash of financial data used to generate tips
+  transactionCount: integer("transaction_count").notNull(),
+  totalIncome: decimal("total_income", { precision: 12, scale: 2 }).notNull(),
+  totalExpenses: decimal("total_expenses", { precision: 12, scale: 2 }).notNull(),
+  budgetCount: integer("budget_count").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Financial Health Mascots
 export const financialMascots = pgTable("financial_mascots", {
   id: serial("id").primaryKey(),
@@ -414,3 +428,13 @@ export const insertRedeemCodeSchema = createInsertSchema(redeemCodes).omit({
   createdAt: true,
   redeemedAt: true,
 });
+
+export const insertContextualFinancialTipsSchema = createInsertSchema(contextualFinancialTips).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Types
+export type InsertContextualFinancialTips = z.infer<typeof insertContextualFinancialTipsSchema>;
+export type SelectContextualFinancialTips = typeof contextualFinancialTips.$inferSelect;
