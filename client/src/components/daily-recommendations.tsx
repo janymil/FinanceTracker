@@ -62,7 +62,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
   const { currency } = useCurrency();
 
   // Get user's plan from database
-  const { data: databaseUser } = useQuery({
+  const { data: databaseUser, isLoading: userLoading } = useQuery({
     queryKey: ["auth-user", user?.id],
     enabled: !!user?.id,
     staleTime: 0,
@@ -73,23 +73,47 @@ export default function DailyRecommendations({ summary, transactions = [], budge
   });
 
   const isPremiumUser = databaseUser?.plan === 'premium';
+  const isUserReady = !!user?.id && !userLoading && !!databaseUser;
 
   // Check if we have transaction data for AI analysis
   const hasTransactionData = transactions && transactions.length >= 3;
   
+  // Enhanced debug logging
+  useEffect(() => {
+    console.log('Daily Recommendations Debug:', {
+      userId: user?.id,
+      isPremiumUser,
+      hasTransactionData,
+      transactionCount: transactions?.length,
+      databaseUserPlan: databaseUser?.plan,
+      databaseUserLoaded: !!databaseUser,
+      isUserReady,
+      userLoading,
+      enabled: isUserReady && isPremiumUser && hasTransactionData,
+      transactions: transactions?.slice(0, 3) // Show sample transactions
+    });
+  }, [user?.id, isPremiumUser, hasTransactionData, transactions?.length, databaseUser]);
+  
   // Fetch AI recommendations from backend
   const { data: recommendationsData, isLoading: recommendationsLoading, error: recommendationsError } = useQuery({
     queryKey: ['daily-recommendations', user?.id, transactions?.length],
-    enabled: !!user?.id && isPremiumUser && hasTransactionData,
+    enabled: isUserReady && isPremiumUser && hasTransactionData,
     staleTime: 5 * 60 * 1000, // 5 minutes cache
     queryFn: async () => {
+      console.log('Making daily recommendations API call with data:', {
+        transactionCount: transactions?.length,
+        summaryExists: !!summary,
+        budgetCount: budgets?.length
+      });
       try {
         const response = await apiRequest('POST', '/api/ai/daily-recommendations', {
           transactions,
           summary,
           budgets
         });
-        return response.json();
+        const data = await response.json();
+        console.log('Daily recommendations response:', data);
+        return data;
       } catch (error) {
         console.error('Failed to fetch daily recommendations:', error);
         throw error;
