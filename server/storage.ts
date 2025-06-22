@@ -2166,6 +2166,12 @@ export class DatabaseStorage implements IStorage {
 
     return false; // Use existing tips
   }
+
+  // Daily recommendations cache management
+  async deleteCachedDailyRecommendations(userId: string): Promise<void> {
+    await db.delete(dailyRecommendations).where(eq(dailyRecommendations.userId, userId));
+    console.log(`Deleted cached daily recommendations for user ${userId}`);
+  }
 }
 
 export const storage = new DatabaseStorage();
