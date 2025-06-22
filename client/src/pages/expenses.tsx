@@ -656,7 +656,7 @@ export default function Expenses() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
-                    <Tooltip formatter={(value) => [`${currency}${value}`, 'Expenses']} />
+                    <Tooltip formatter={(value) => [`${displayCurrency}${value}`, 'Expenses']} />
                     <Line 
                       type="monotone" 
                       dataKey="amount" 

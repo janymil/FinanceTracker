@@ -24,6 +24,8 @@ export default function Reports() {
   const [, setLocation] = useLocation();
   const [selectedPeriod, setSelectedPeriod] = useState("month");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const { currency } = useCurrency();
+  const displayCurrency = currency || '$';
 
   if (!user) {
     return null;
@@ -545,7 +547,7 @@ export default function Reports() {
                       <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                      ${currency || '$'}{((financialSummary?.totalIncome || 0) / Math.max(
+                      {displayCurrency}{((financialSummary?.totalIncome || 0) / Math.max(
                         financialSummary?.incomeTransactionCount || 1, 
                         1
                       )).toFixed(0)}

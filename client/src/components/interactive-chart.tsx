@@ -56,12 +56,12 @@ const CustomTooltip = ({ active, payload, label, currencySymbol }: any) => {
         <p className="text-sm font-medium text-gray-900 dark:text-white">{`Date: ${label}`}</p>
         {payload.map((entry: any, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
-            {`${entry.dataKey}: ${currencySymbol}${entry.value?.toLocaleString()}`}
+            {`${entry.dataKey}: ${currencySymbol || '$'}${entry.value?.toLocaleString()}`}
           </p>
         ))}
         {payload[0]?.payload?.balance && (
           <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
-            Net Balance: {currencySymbol}{payload[0].payload.balance.toLocaleString()}
+            Net Balance: {currencySymbol || '$'}{payload[0].payload.balance.toLocaleString()}
           </p>
         )}
       </div>
@@ -77,7 +77,7 @@ const CustomPieTooltip = ({ active, payload, currencySymbol }: any) => {
       <div className="bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
         <p className="text-sm font-medium text-gray-900 dark:text-white">{data.payload.category}</p>
         <p className="text-sm" style={{ color: data.color }}>
-          Amount: {currencySymbol}{data.value?.toLocaleString()}
+          Amount: {currencySymbol || '$'}{data.value?.toLocaleString()}
         </p>
         <p className="text-sm text-gray-600 dark:text-gray-300">
           Percentage: {((data.value / data.payload.total) * 100).toFixed(1)}%

@@ -649,7 +649,7 @@ export default function Income() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
-                <Tooltip formatter={(value) => [`${currency}${value}`, 'Income']} />
+                <Tooltip formatter={(value) => [`${displayCurrency}${value}`, 'Income']} />
                 <Line type="monotone" dataKey="amount" stroke="#10b981" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
