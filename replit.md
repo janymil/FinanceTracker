@@ -449,6 +449,7 @@ Changelog:
 - June 22, 2025. FIXED: AI Financial Tips frontend-backend communication issue - corrected apiRequest usage and response handling
 - June 22, 2025. FIXED: AI Financial Tips "year is not defined" JavaScript error and adjusted minimum requirement to 3 transactions
 - June 22, 2025. COMPLETED: AI Financial Tips fully operational - generating real OpenAI insights for June 2025 with proper caching
+- June 22, 2025. FIXED: AI Tips cache validation - invalid cached tips are now removed when transaction count drops below 3-transaction minimum
 - June 18, 2025. Implemented real-time polling system for mobile uploads with 5-second intervals and automatic timeout handling
 - June 18, 2025. Enhanced mobile upload workflow with OCR processing, AI categorization, and automatic form population from mobile-captured receipt data
 - June 18, 2025. FIXED: Mobile upload QR code 404 errors by removing duplicate route and ensuring proper SignedOut routing configuration

@@ -65,8 +65,17 @@ export default function AIFinancialTips({ summary, selectedMonth }: AIFinancialT
       });
       
       if (savedTip) {
-        console.log(`AI Tips: Using saved tip for ${monthName} ${year}:`, savedTip.substring(0, 100) + '...');
-        setCurrentTip(cleanAIText(savedTip));
+        console.log(`AI Tips: Found cached tip for ${monthName} ${year}:`, savedTip.substring(0, 100) + '...');
+        
+        // Validate cached tip against current transaction count
+        const transactionCount = (summary.totalIncome > 0 ? 1 : 0) + (summary.totalExpenses > 0 ? 1 : 0);
+        if (transactionCount < 3) {
+          console.log(`AI Tips: Clearing invalid cached tip for ${monthName} ${year} - insufficient transactions (${transactionCount})`);
+          localStorage.removeItem(monthlyKey);
+          setCurrentTip(null);
+        } else {
+          setCurrentTip(cleanAIText(savedTip));
+        }
       } else {
         // Auto-generate tips if we have financial data but no saved tip
         const hasFinancialData = (summary.totalIncome > 0 || summary.totalExpenses > 0);
@@ -120,6 +129,12 @@ export default function AIFinancialTips({ summary, selectedMonth }: AIFinancialT
       const data = await apiRequest("POST", "/api/ai/tip", requestData);
       
       console.log('AI Tips: Received response:', data);
+      console.log('AI Tips: Response type:', typeof data);
+      console.log('AI Tips: Response keys:', Object.keys(data));
+      
+      if (!data || typeof data !== 'object') {
+        throw new Error("Invalid response format from server");
+      }
       
       if (!data.tip || !data.tip.trim()) {
         throw new Error("No tip received from AI");
