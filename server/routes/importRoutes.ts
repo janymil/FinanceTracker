@@ -2,6 +2,14 @@ import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { z } from "zod";
+import { 
+  ensureCategoryExists, 
+  formatTransaction, 
+  formatBudget, 
+  formatGoal,
+  getUserFromRequest,
+  validateRequiredFields 
+} from "../../lib/importHelpers";
 
 // Validation schemas for import data
 const importTransactionSchema = z.object({
@@ -92,51 +100,54 @@ function convertCSVToJSON(csvData: Record<string, any>[]): any {
     collaborativeGoals: [] as any[]
   };
 
-  csvData.forEach(row => {
+  const errors: string[] = [];
+
+  csvData.forEach((row, index) => {
     const dataType = row.dataType?.toLowerCase();
     
-    // Process transactions
-    if (dataType === 'transaction' && row.transactionType && row.amount) {
-      const transaction = {
-        amount: parseFloat(row.amount || '0'),
-        description: row.description || '',
-        type: row.transactionType,
-        date: row.date,
-        categoryName: row.category,
-        isRecurring: row.isRecurring === 'true' || row.isRecurring === true,
-        recurringFrequency: row.recurringFrequency,
-      };
-      
-      if (row.transactionType === 'income') {
-        result.incomes.push(transaction);
-      } else if (row.transactionType === 'expense') {
-        result.expenses.push(transaction);
+    if (!dataType) {
+      errors.push(`Row ${index + 2}: Missing dataType`);
+      return;
+    }
+
+    // Validate required fields
+    const validation = validateRequiredFields(row, dataType);
+    if (!validation.valid) {
+      errors.push(`Row ${index + 2}: ${validation.errors.join(', ')}`);
+      return;
+    }
+    
+    try {
+      // Process transactions
+      if (dataType === 'transaction') {
+        const transaction = formatTransaction(row);
+        
+        if (row.transactionType === 'income') {
+          result.incomes.push(transaction);
+        } else if (row.transactionType === 'expense') {
+          result.expenses.push(transaction);
+        }
       }
-    }
-    
-    // Process budgets
-    if (dataType === 'budget' && row.category && row.budgetAmount) {
-      result.budgets.push({
-        categoryName: row.category,
-        amount: parseFloat(row.budgetAmount),
-        period: row.budgetPeriod || 'monthly',
-        startDate: new Date().toISOString().split('T')[0], // Default to current month
-        endDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0],
-      });
-    }
-    
-    // Process goals
-    if (dataType === 'goal' && row.goalTargetAmount && row.goalCategory) {
-      result.goals.push({
-        name: row.goalCategory,
-        description: `Goal for ${row.goalCategory}`,
-        targetAmount: parseFloat(row.goalTargetAmount),
-        currentAmount: parseFloat(row.goalCurrentAmount || '0'),
-        targetDate: row.goalTargetDate,
-        category: row.goalCategory,
-      });
+      
+      // Process budgets
+      else if (dataType === 'budget') {
+        const budget = formatBudget(row);
+        result.budgets.push(budget);
+      }
+      
+      // Process goals
+      else if (dataType === 'goal') {
+        const goal = formatGoal(row);
+        result.goals.push(goal);
+      }
+    } catch (error) {
+      errors.push(`Row ${index + 2}: ${error instanceof Error ? error.message : 'Processing error'}`);
     }
   });
+
+  if (errors.length > 0) {
+    throw new Error(`CSV validation errors:\n${errors.join('\n')}`);
+  }
 
   return result;
 }
@@ -231,20 +242,11 @@ export function registerImportRoutes(app: Express) {
         try {
           let categoryId = null;
           if (incomeData.categoryName) {
-            const categoryKey = `${incomeData.categoryName}_income`;
-            if (!categoryMap.has(categoryKey)) {
-              // Create category if it doesn't exist
-              const newCategory = await storage.createCategory({
-                userId,
-                name: incomeData.categoryName,
-                type: 'income',
-                icon: 'DollarSign',
-                color: '#10B981',
-              });
-              categoryMap.set(categoryKey, newCategory.id);
+            categoryId = await ensureCategoryExists(incomeData.categoryName, 'income', userId);
+            if (!categoryMap.has(`${incomeData.categoryName}_income`)) {
+              categoryMap.set(`${incomeData.categoryName}_income`, categoryId);
               summary.categories++;
             }
-            categoryId = categoryMap.get(categoryKey) || null;
           }
 
           await storage.createTransaction({
@@ -269,20 +271,11 @@ export function registerImportRoutes(app: Express) {
         try {
           let categoryId = null;
           if (expenseData.categoryName) {
-            const categoryKey = `${expenseData.categoryName}_expense`;
-            if (!categoryMap.has(categoryKey)) {
-              // Create category if it doesn't exist
-              const newCategory = await storage.createCategory({
-                userId,
-                name: expenseData.categoryName,
-                type: 'expense',
-                icon: 'ShoppingCart',
-                color: '#EF4444',
-              });
-              categoryMap.set(categoryKey, newCategory.id);
+            categoryId = await ensureCategoryExists(expenseData.categoryName, 'expense', userId);
+            if (!categoryMap.has(`${expenseData.categoryName}_expense`)) {
+              categoryMap.set(`${expenseData.categoryName}_expense`, categoryId);
               summary.categories++;
             }
-            categoryId = categoryMap.get(categoryKey) || null;
           }
 
           await storage.createTransaction({
@@ -307,20 +300,10 @@ export function registerImportRoutes(app: Express) {
         try {
           let categoryId = null;
           if (budgetData.categoryName) {
-            const categoryKey = `${budgetData.categoryName}_expense`;
-            if (!categoryMap.has(categoryKey)) {
-              // Create category if it doesn't exist
-              const newCategory = await storage.createCategory({
-                userId,
-                name: budgetData.categoryName,
-                type: 'expense',
-                icon: 'Target',
-                color: '#8B5CF6',
-              });
-              categoryMap.set(categoryKey, newCategory.id);
-              summary.categories++;
+            categoryId = await ensureCategoryExists(budgetData.categoryName, 'expense', userId);
+            if (!categoryMap.has(`${budgetData.categoryName}_budget`)) {
+              categoryMap.set(`${budgetData.categoryName}_budget`, categoryId);
             }
-            categoryId = categoryMap.get(categoryKey) || null;
           }
 
           await storage.createBudget({
