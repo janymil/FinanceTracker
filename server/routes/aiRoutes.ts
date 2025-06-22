@@ -105,23 +105,50 @@ export function registerAIRoutes(app: Express) {
         return res.status(403).json({ message: "AI financial tips require premium plan" });
       }
 
-      // Get user's complete financial data for analysis
-      const currentDate = new Date();
-      const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
+      // Get financial data from the request body (matches what frontend is showing)
+      const { financialData } = req.body;
       
-      // Get all user transactions (no date filtering for AI analysis)
+      if (!financialData) {
+        return res.status(400).json({ message: "Financial data is required" });
+      }
+      
+      // Use the financial data that matches the selected month period
+      const { totalIncome, totalExpenses, categories: categoryData, month, year } = financialData;
+      
+      // Get user transactions for context (not for calculation)
       const allTransactions = await storage.getUserTransactions(userId, 100);
-      const categories = await storage.getCategories(userId);
-      
-      // Get financial summary for the full year
-      const financialSummary = await storage.getUserFinancialSummary(userId, startOfYear, currentDate);
+      const categoriesData = await storage.getCategories(userId);
 
       // Create category name mapping
       const categoryMap = new Map();
-      categories.forEach(cat => categoryMap.set(cat.id, cat.name));
+      categoriesData.forEach(cat => categoryMap.set(cat.id, cat.name));
 
-      // Use ALL transactions for AI analysis (not date-filtered)
-      const processedTransactions = allTransactions.map(t => ({
+      // Filter transactions for the current month/year being analyzed
+      const currentMonthTransactions = allTransactions.filter(t => {
+        const transactionDate = new Date(t.date);
+        const transactionMonth = transactionDate.toLocaleString('default', { month: 'long' });
+        const transactionYear = transactionDate.getFullYear();
+        return transactionMonth === month && transactionYear === year;
+      });
+
+      // Check if we have enough data for meaningful analysis
+      const monthlyExpenseCount = currentMonthTransactions.filter(t => t.type === 'expense').length;
+      const monthlyIncomeCount = currentMonthTransactions.filter(t => t.type === 'income').length;
+      const totalMonthlyTransactions = monthlyExpenseCount + monthlyIncomeCount;
+
+      // If insufficient monthly data, provide guidance message
+      if (totalMonthlyTransactions < 2) {
+        return res.json({ 
+          tip: `Add more transactions for ${month} ${year} to get personalized AI insights. Currently showing ${totalMonthlyTransactions} transaction${totalMonthlyTransactions !== 1 ? 's' : ''}.` 
+        });
+      }
+
+      // Use the provided financial data from frontend
+      const actualTotalIncome = totalIncome;
+      const actualTotalExpenses = totalExpenses;
+
+      // Process monthly transactions for AI analysis
+      const processedMonthlyTransactions = currentMonthTransactions.map(t => ({
         description: t.description,
         amount: parseFloat(t.amount),
         date: t.date.toISOString(),
@@ -129,56 +156,43 @@ export function registerAIRoutes(app: Express) {
         type: t.type
       }));
 
-      // Calculate totals from actual transactions
-      const actualTotalIncome = processedTransactions
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + t.amount, 0);
-      
-      const actualTotalExpenses = processedTransactions
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + t.amount, 0);
+      // Create category breakdown from frontend data or monthly transactions
+      const transactionsByCategory = categoryData && categoryData.length > 0 
+        ? categoryData 
+        : (() => {
+            const categoryBreakdown = new Map();
+            processedMonthlyTransactions.forEach(t => {
+              const key = `${t.categoryName}_${t.type}`;
+              categoryBreakdown.set(key, (categoryBreakdown.get(key) || 0) + t.amount);
+            });
+            return Array.from(categoryBreakdown.entries()).map(([key, amount]) => {
+              const [categoryName, type] = key.split('_');
+              return { categoryName, amount, type };
+            });
+          })();
 
-      // Create category breakdown from actual transactions
-      const categoryBreakdown = new Map();
-      processedTransactions.forEach(t => {
-        const key = `${t.categoryName}_${t.type}`;
-        categoryBreakdown.set(key, (categoryBreakdown.get(key) || 0) + t.amount);
-      });
-
-      const transactionsByCategory = Array.from(categoryBreakdown.entries()).map(([key, amount]) => {
-        const [categoryName, type] = key.split('_');
-        return { categoryName, amount, type };
-      });
-
-      // Prepare comprehensive financial data using ACTUAL transaction data
-      const financialData = {
+      // Prepare financial data for AI analysis using monthly scope
+      const aiFinancialData = {
         totalIncome: actualTotalIncome,
         totalExpenses: actualTotalExpenses,
         transactionsByCategory,
-        recentTransactions: processedTransactions,
+        recentTransactions: processedMonthlyTransactions,
         timestamp: Date.now()
       };
 
-      console.log(`FIXED: AI processing ${allTransactions.length} total transactions for user ${getUserId(req)}`);
-      console.log(`Income: $${actualTotalIncome}, Expenses: $${actualTotalExpenses}, Net: $${actualTotalIncome - actualTotalExpenses}`);
-      console.log(`Date range spans: ${processedTransactions.length > 0 ? processedTransactions[processedTransactions.length-1].date : 'N/A'} to ${processedTransactions.length > 0 ? processedTransactions[0].date : 'N/A'}`);
+      console.log(`AI analyzing ${month} ${year}: ${totalMonthlyTransactions} transactions (${monthlyIncomeCount} income, ${monthlyExpenseCount} expenses)`);
+      console.log(`Monthly totals - Income: $${actualTotalIncome}, Expenses: $${actualTotalExpenses}, Net: $${actualTotalIncome - actualTotalExpenses}`);
       
-      const tips = await generateFinancialTips(financialData);
+      const tips = await generateFinancialTips(aiFinancialData);
       const tip = tips.length > 0 ? tips[0] : null;
 
       if (tip) {
         return res.json({ tip: `${tip.title}: ${tip.description}` });
       } else {
-        // Provide specific fallback based on actual data
-        if (transactions.length === 0) {
-          return res.json({ tip: "Start by adding some transactions to get personalized financial insights." });
-        } else {
-          const expenseCount = transactions.filter(t => t.type === 'expense').length;
-          const incomeCount = transactions.filter(t => t.type === 'income').length;
-          return res.json({ 
-            tip: `Based on your ${expenseCount} expense transactions ($${financialSummary.totalExpenses.toFixed(2)}) and ${incomeCount} income transactions ($${financialSummary.totalIncome.toFixed(2)}), consider setting up budgets for your top spending categories to better manage your finances.` 
-          });
-        }
+        // Fallback based on monthly data
+        return res.json({ 
+          tip: `Based on your ${monthlyExpenseCount} expense transactions ($${actualTotalExpenses.toFixed(2)}) and ${monthlyIncomeCount} income transactions ($${actualTotalIncome.toFixed(2)}) for ${month} ${year}, consider reviewing your spending patterns and setting budgets for your top expense categories.` 
+        });
       }
     } catch (error) {
       console.error("Error generating financial tip:", error);

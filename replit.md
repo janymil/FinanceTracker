@@ -435,6 +435,9 @@ Changelog:
 - June 22, 2025. FIXED: Implemented fuzzy category matching to prevent duplicate categories (Food vs Food & Dining)
 - June 22, 2025. Enhanced category creation with similarity detection for food, transport, and other common category groups
 - June 22, 2025. Fixed duplicate "Food & Dining" category by updating transactions to use existing "Food" category
+- June 22, 2025. FIXED: AI Financial Tips widget inconsistency - now properly analyzes monthly data matching selected period
+- June 22, 2025. Enhanced AI Tips backend to use monthly transaction scope instead of all-time data for consistent behavior
+- June 22, 2025. Added minimum transaction threshold (2 transactions) for monthly AI analysis with helpful guidance messages
 - June 18, 2025. Implemented real-time polling system for mobile uploads with 5-second intervals and automatic timeout handling
 - June 18, 2025. Enhanced mobile upload workflow with OCR processing, AI categorization, and automatic form population from mobile-captured receipt data
 - June 18, 2025. FIXED: Mobile upload QR code 404 errors by removing duplicate route and ensuring proper SignedOut routing configuration
