@@ -17,29 +17,41 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
         return res.status(400).json({ message: "Transactions and summary are required" });
       }
 
-      // Prepare financial summary for AI analysis
-      const financialSummary = `
-Financial Summary for ${selectedMonth || 'Current Month'}:
-- Total Income: $${summary.totalIncome || 0}
-- Total Expenses: $${summary.totalExpenses || 0}
-- Net Balance: $${summary.netBalance || 0}
-- Transaction Count: ${transactions.length || 0}
+      // Format the selected month for natural language
+      const formatMonth = (selectedMonth: string) => {
+        if (!selectedMonth) return 'Current Month';
+        const [year, month] = selectedMonth.split('-');
+        const date = new Date(parseInt(year), parseInt(month) - 1);
+        return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      };
 
-Spending by Category:
-${summary.transactionsByCategory?.filter((cat: any) => cat.type === 'expense')
-  .map((cat: any) => `- ${cat.categoryName}: $${cat.amount}`)
-  .join('\n') || 'No expense categories'}
+      const formattedMonth = formatMonth(selectedMonth);
 
-Budget Information:
-${budgets?.map((budget: any) => 
-  `- ${budget.categoryName}: Budget $${budget.amount}, Spent $${budget.spent || 0}, Remaining $${budget.remaining || budget.amount}`
-).join('\n') || 'No budgets set'}
+      // Prepare natural language prompt for AI analysis
+      const financialPrompt = `Given the following financial data for the user in ${formattedMonth}:
 
-Recent Transactions:
-${transactions.slice(0, 10).map((t: any) => 
-  `- ${t.description || t.note || 'Transaction'}: $${t.amount} (${t.category || 'Uncategorized'})`
-).join('\n')}
-      `;
+Summary: ${JSON.stringify({
+        totalIncome: summary.totalIncome || 0,
+        totalExpenses: summary.totalExpenses || 0,
+        netBalance: summary.netBalance || 0,
+        transactionCount: transactions.length || 0
+      })}
+
+Budgets: ${JSON.stringify(budgets?.map((budget: any) => ({
+        category: budget.categoryName,
+        budgetAmount: budget.amount,
+        spent: budget.spent || 0,
+        remaining: budget.remaining || budget.amount
+      })) || [])}
+
+Transactions: ${JSON.stringify(transactions.slice(0, 10).map((t: any) => ({
+        description: t.description || t.note || 'Transaction',
+        amount: t.amount,
+        category: t.category || 'Uncategorized',
+        date: t.date
+      })))}
+
+Analyze this data and return 4 personalized financial improvement tips in JSON format with keys: id, title, description, category, priority (high|medium|low), actionable (true|false). Tips must be clear, direct, and relevant to the data. Output only a valid JSON.`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
@@ -48,7 +60,7 @@ ${transactions.slice(0, 10).map((t: any) =>
             role: "system",
             content: `You are a financial advisor AI that provides personalized financial tips based on user data. 
 
-Generate 2-3 contextual financial tips that are:
+Generate 4 contextual financial tips that are:
 - Specific to their spending patterns and financial situation
 - Actionable with clear next steps
 - Relevant to their current month's activity
@@ -73,7 +85,7 @@ Respond with JSON in this exact format:
           },
           {
             role: "user",
-            content: financialSummary
+            content: financialPrompt
           }
         ],
         response_format: { type: "json_object" },
