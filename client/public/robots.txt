@@ -1,0 +1,35 @@
+User-agent: *
+# Allow public pages
+Allow: /
+Allow: /auth
+Allow: /pricing
+Allow: /help
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /cookies
+Allow: /sitemap.xml
+Allow: /robots.txt
+
+# Disallow authenticated/private areas
+Disallow: /dashboard
+Disallow: /transactions
+Disallow: /income
+Disallow: /expenses
+Disallow: /budget
+Disallow: /goals
+Disallow: /collaborative-goals
+Disallow: /reports
+Disallow: /trends
+Disallow: /calendar
+Disallow: /data-management
+Disallow: /profile
+Disallow: /admin-analytics
+Disallow: /mobile-upload/
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://finanzerpro.com/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 1

@@ -1,0 +1,25 @@
+import { useQuery } from "@tanstack/react-query";
+import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { apiRequest } from "@/lib/queryClient";
+
+export function useTransactions() {
+  const { isReady, user } = useClerkUserReady();
+
+  return useQuery({
+    queryKey: ["transactions", user?.id],
+    enabled: isReady,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/transactions");
+      return response.json();
+    },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    retry: (failureCount, error: any) => {
+      if (error?.status === 401 && !isReady) return false;
+      return failureCount < 3;
+    },
+    retryDelay: 1000,
+  });
+}
