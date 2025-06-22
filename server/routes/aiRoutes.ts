@@ -401,7 +401,6 @@ export function registerAIRoutes(app: Express) {
 
       // Generate financial health score with OpenAI
       console.log('Financial health: Making new OpenAI API call - no cached data available');
-      const { generateFinancialHealthScore } = await import('../openai');
       const healthData = await generateFinancialHealthScore({
         transactions: processedTransactions,
         budgets: processedBudgets,

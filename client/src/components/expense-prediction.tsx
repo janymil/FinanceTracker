@@ -8,6 +8,8 @@ import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Cart
 import { Calendar, TrendingUp, AlertTriangle, BarChart3, Clock, Lock, Crown, Brain } from 'lucide-react';
 import { Link } from 'wouter';
 import { useUser } from '@clerk/clerk-react';
+import { formatCurrency } from '@/lib/utils';
+import { useCurrency } from '@/context/CurrencyContext';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -169,7 +171,7 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                         <span className="text-sm font-medium">Next Month</span>
                       </div>
                       <div className="text-2xl font-bold text-blue-600">
-                        ${totalPredicted.toLocaleString()}
+                        {formatCurrency(totalPredicted, currency)}
                       </div>
                       <p className="text-xs text-gray-600 dark:text-gray-300">
                         Predicted total expenses
@@ -307,10 +309,10 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold">
-                          ${prediction.predictedNext.toLocaleString()}
+                          {formatCurrency(prediction.predictedNext, currency)}
                         </div>
                         <div className="text-xs text-gray-600 dark:text-gray-300">
-                          vs ${prediction.currentMonth.toLocaleString()} current
+                          vs {formatCurrency(prediction.currentMonth, currency)} current
                         </div>
                       </div>
                     </div>
