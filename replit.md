@@ -424,6 +424,7 @@ Changelog:
 - June 22, 2025. Added validateDataSecurity helper function to prevent data tampering and cross-user data contamination
 - June 22, 2025. Fixed Clerk authentication error "user?.getToken is not a function" by updating all authentication calls to use useAuth hook's getToken method
 - June 22, 2025. Updated Data Management page to use proper Clerk authentication pattern throughout import logs, backup, and restore functionality
+- June 22, 2025. Fixed CSV template data alignment issue - corrected example rows to properly align with column headers, ensuring budget and goal data appears in correct columns
 - June 18, 2025. Implemented real-time polling system for mobile uploads with 5-second intervals and automatic timeout handling
 - June 18, 2025. Enhanced mobile upload workflow with OCR processing, AI categorization, and automatic form population from mobile-captured receipt data
 - June 18, 2025. FIXED: Mobile upload QR code 404 errors by removing duplicate route and ensuring proper SignedOut routing configuration

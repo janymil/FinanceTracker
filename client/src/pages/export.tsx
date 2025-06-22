@@ -106,10 +106,10 @@ transaction,income,500,Freelance Project,2025-01-15,Freelance,false,,,,,,
 transaction,expense,1200,Monthly Rent,2025-01-01,Housing,true,monthly,,,,,
 transaction,expense,300,Groceries,2025-01-05,Food & Dining,false,,,,,,
 transaction,expense,80,Electric Bill,2025-01-10,Utilities,true,monthly,,,,,
-budget,,,,,,Food & Dining,,,500,monthly,,,
-budget,,,,,,Utilities,,,150,monthly,,,
-goal,,,,,,,,,30000,5000,2025-12-31,Emergency Fund
-goal,,,,,,,,,8000,1000,2025-06-01,Vacation`;
+budget,,,,,Food & Dining,,,500,monthly,,,
+budget,,,,,Utilities,,,150,monthly,,,
+goal,,,,,,,,,,30000,5000,2025-12-31,Emergency Fund
+goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
 
     const blob = new Blob([exampleCSV], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
