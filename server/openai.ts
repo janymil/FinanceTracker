@@ -841,15 +841,7 @@ async function generateFinancialHealthScore(financialData: {
       warnings: []
     };
   }
-    amount: string;
-    spent: number;
-  }>;
-  summary: {
-    totalIncome: number;
-    totalExpenses: number;
-    netBalance: number;
-  };
-}): Promise<FinancialHealthData> {
+}
   try {
     const { transactions, budgets, summary } = financialData;
     
