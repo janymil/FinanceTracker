@@ -780,6 +780,77 @@ async function generateFinancialHealthScore(financialData: {
   };
 }): Promise<FinancialHealthData> {
   try {
+    // Simple mathematical calculation for financial health score
+    const { summary } = financialData;
+    const savingsRate = summary.totalIncome > 0 ? 
+      (summary.totalIncome - summary.totalExpenses) / summary.totalIncome : 0;
+    
+    let score = 50;
+    let category: 'excellent' | 'good' | 'fair' | 'poor' = 'fair';
+    let trend: 'improving' | 'declining' | 'stable' = 'stable';
+    
+    if (savingsRate > 0.2) {
+      score = 85;
+      category = 'excellent';
+      trend = 'improving';
+    } else if (savingsRate > 0.1) {
+      score = 70;
+      category = 'good';
+      trend = 'stable';
+    } else if (savingsRate > 0) {
+      score = 55;
+      category = 'fair';
+      trend = 'stable';
+    } else {
+      score = 30;
+      category = 'poor';
+      trend = 'declining';
+    }
+    
+    const insights = [];
+    const achievements = [];
+    const warnings = [];
+    
+    if (savingsRate > 0.1) {
+      insights.push(`Good savings rate of ${(savingsRate * 100).toFixed(1)}%`);
+      achievements.push('Maintaining positive savings');
+    }
+    
+    if (summary.netBalance > 0) {
+      achievements.push('Positive net balance');
+    } else {
+      warnings.push('Expenses exceed income');
+    }
+    
+    return {
+      score,
+      trend,
+      category,
+      insights,
+      achievements,
+      warnings
+    };
+  } catch (error) {
+    console.error('Error generating financial health score:', error);
+    return {
+      score: 50,
+      trend: 'stable',
+      category: 'fair',
+      insights: ['Unable to calculate health score'],
+      achievements: [],
+      warnings: []
+    };
+  }
+    amount: string;
+    spent: number;
+  }>;
+  summary: {
+    totalIncome: number;
+    totalExpenses: number;
+    netBalance: number;
+  };
+}): Promise<FinancialHealthData> {
+  try {
     const { transactions, budgets, summary } = financialData;
     
     // Create a more stable hash that focuses on significant financial changes
