@@ -660,6 +660,7 @@ export default function Dashboard() {
                 summary={financialSummary}
                 transactions={transactions as any}
                 budgets={budgets as any}
+                selectedMonth={selectedMonth}
               />
             </div>
 
