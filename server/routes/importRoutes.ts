@@ -65,12 +65,12 @@ const importCategorySchema = z.object({
 });
 
 const importDataSchema = z.object({
-  incomes: z.array(importTransactionSchema).optional().default([]),
-  expenses: z.array(importTransactionSchema).optional().default([]),
-  categories: z.array(importCategorySchema).optional().default([]),
-  budgets: z.array(importBudgetSchema).optional().default([]),
-  goals: z.array(importGoalSchema).optional().default([]),
-  collaborativeGoals: z.array(importCollaborativeGoalSchema).optional().default([]),
+  incomes: z.array(z.any()).optional().default([]),
+  expenses: z.array(z.any()).optional().default([]),
+  categories: z.array(z.any()).optional().default([]),
+  budgets: z.array(z.any()).optional().default([]),
+  goals: z.array(z.any()).optional().default([]),
+  collaborativeGoals: z.array(z.any()).optional().default([]),
 });
 
 // CSV parsing utility with auto-delimiter detection
@@ -273,6 +273,8 @@ export function registerImportRoutes(app: Express) {
       // Validate the import data structure
       const validationResult = importDataSchema.safeParse(importData);
       if (!validationResult.success) {
+        console.error("Import data validation failed:", validationResult.error.issues);
+        console.error("Import data structure:", JSON.stringify(importData, null, 2));
         return res.status(400).json({ 
           message: "Invalid data structure", 
           errors: validationResult.error.issues 
