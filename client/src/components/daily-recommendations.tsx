@@ -79,106 +79,26 @@ export default function DailyRecommendations({ summary, transactions = [], budge
   
   // Generate AI-powered daily recommendations
   const generateDailyRecommendations = (): Recommendation[] => {
-    // Only generate recommendations if we have transaction data
-    if (!hasTransactionData) {
+    // Only show recommendations when we have sufficient transaction data for analysis
+    if (!hasTransactionData || transactions.length < 5) {
       return [];
     }
     
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    const recommendations: Recommendation[] = [];
-
-    // Spending analysis recommendations
-    if (summary?.totalExpenses > summary?.totalIncome * 0.8) {
-      recommendations.push({
-        id: 'reduce-spending',
-        type: 'spending',
-        priority: 'high',
-        title: 'Reduce High Spending',
-        description: 'Your spending is approaching 80% of your income',
-        action: 'Review your largest expense categories and identify areas to cut back',
-        impact: `Save ${currency}200-500 this month`,
-        timeToComplete: '15 minutes',
-        category: 'Financial Health'
-      });
-    }
-
-    // Daily habit recommendations based on day of week
-    if (dayOfWeek === 1) { // Monday
-      recommendations.push({
-        id: 'weekly-budget-review',
-        type: 'budgeting',
-        priority: 'medium',
-        title: 'Weekly Budget Check',
-        description: 'Start your week with a budget review',
-        action: 'Review last week\'s spending and set this week\'s spending targets',
-        impact: 'Stay on track with monthly budget',
-        timeToComplete: '10 minutes',
-        category: 'Planning'
-      });
-    }
-
-    if (dayOfWeek === 5) { // Friday
-      recommendations.push({
-        id: 'expense-logging',
-        type: 'habit',
-        priority: 'medium',
-        title: 'Log Weekly Expenses',
-        description: 'End the week by logging any missed transactions',
-        action: 'Check bank statements and add any missing transactions',
-        impact: 'Maintain accurate financial records',
-        timeToComplete: '5 minutes',
-        category: 'Organization'
-      });
-    }
-
-    // Goal-based recommendations
-    recommendations.push({
-      id: 'emergency-fund',
-      type: 'saving',
-      priority: 'medium',
-      title: 'Emergency Fund Boost',
-      description: 'Add to your emergency savings today',
-      action: `Transfer ${currency}50 to your emergency fund`,
-      impact: 'Build financial security',
-      timeToComplete: '2 minutes',
-      amount: 50,
-      category: 'Emergency Fund'
-    });
-
-    return recommendations;
+    // Real AI recommendations would come from backend API here
+    // For now, return empty until AI backend is implemented
+    return [];
   };
 
   // Generate personalization insights
   const generatePersonalizationInsights = (): PersonalizationInsight[] => {
-    // Only generate insights if we have transaction data
-    if (!hasTransactionData) {
+    // Only show insights when we have sufficient transaction data for meaningful analysis
+    if (!hasTransactionData || transactions.length < 10) {
       return [];
     }
     
-    return [
-      {
-        id: 'spending-pattern',
-        insight: 'You tend to spend more on weekends, particularly on dining and entertainment',
-        basedOn: 'Transaction timing analysis',
-        confidence: 0.85,
-        timeframe: 'Last 3 months'
-      },
-      {
-        id: 'budget-adherence',
-        insight: 'Your grocery spending has been consistently under budget by 15%',
-        basedOn: 'Budget vs actual comparison',
-        confidence: 0.92,
-        timeframe: 'Current month'
-      },
-      {
-        id: 'income-stability',
-        insight: 'Your income shows strong stability with predictable monthly patterns',
-        basedOn: 'Income trend analysis',
-        confidence: 0.88,
-        timeframe: 'Last 6 months'
-      }
-    ];
+    // Real AI insights would come from backend API here
+    // For now, return empty until AI backend is implemented
+    return [];
   };
 
   const toggleTaskCompletion = (taskId: string) => {
@@ -322,10 +242,10 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                     <>
                       <Lightbulb className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                        No Transaction Data Available
+                        No Recommendations Available
                       </h3>
                       <p className="text-gray-600 dark:text-gray-300">
-                        Add transactions to receive AI-powered daily recommendations
+                        Add more transactions to receive AI-powered daily recommendations
                       </p>
                     </>
                   )}
@@ -389,7 +309,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                     No Personal Insights Available
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300 mb-6">
-                    Add transactions to generate AI-powered personalized financial insights
+                    Add more transactions to generate AI-powered personalized financial insights
                   </p>
                   
                   {/* Empty State Preview */}
