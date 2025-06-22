@@ -212,10 +212,14 @@ Respond with JSON in this exact format:
         console.error("Error retrieving cached tips:", cacheError);
       }
       
-      // Return fallback tips based on available data
+      // Return smart fallback tips based on actual financial situation
       const fallbackTips = [];
-      const { summary, budgets } = req.body;
+      const { summary, budgets, transactions } = req.body;
       
+      const savingsRate = summary?.totalIncome > 0 ? 
+        ((summary.totalIncome - summary.totalExpenses) / summary.totalIncome) * 100 : 0;
+      
+      // Only suggest deficit help if actually overspending
       if (summary?.netBalance < 0) {
         fallbackTips.push({
           id: 'fallback_deficit',
@@ -225,9 +229,21 @@ Respond with JSON in this exact format:
           priority: 'high',
           actionable: true
         });
+      } 
+      // For excellent savers (>90% savings rate), suggest investment tips
+      else if (savingsRate > 90) {
+        fallbackTips.push({
+          id: 'fallback_investment',
+          title: 'Consider Investment Opportunities',
+          description: `With a ${Math.round(savingsRate)}% savings rate, consider investing your surplus in index funds, retirement accounts, or other growth vehicles.`,
+          category: 'saving',
+          priority: 'medium',
+          actionable: true
+        });
       }
       
-      if (!budgets || budgets.length === 0) {
+      // Only suggest budgeting if they actually have significant expenses
+      if ((!budgets || budgets.length === 0) && summary?.totalExpenses > 100) {
         fallbackTips.push({
           id: 'fallback_budget',
           title: 'Create Monthly Budgets',
@@ -239,14 +255,26 @@ Respond with JSON in this exact format:
       }
       
       if (fallbackTips.length === 0) {
-        fallbackTips.push({
-          id: 'fallback_general',
-          title: 'Track Your Progress',
-          description: 'Continue monitoring your financial transactions to identify spending patterns and optimization opportunities.',
-          category: 'budgeting',
-          priority: 'low',
-          actionable: true
-        });
+        // For users with good finances, give appropriate advice
+        if (savingsRate > 50) {
+          fallbackTips.push({
+            id: 'fallback_wealth_building',
+            title: 'Build Long-term Wealth',
+            description: 'Your excellent financial discipline creates opportunities for wealth building. Consider diversifying investments and setting long-term financial goals.',
+            category: 'saving',
+            priority: 'low',
+            actionable: true
+          });
+        } else {
+          fallbackTips.push({
+            id: 'fallback_general',
+            title: 'Track Your Progress',
+            description: 'Continue monitoring your financial transactions to identify spending patterns and optimization opportunities.',
+            category: 'budgeting',
+            priority: 'low',
+            actionable: true
+          });
+        }
       }
       
       return res.json({ tips: fallbackTips });
