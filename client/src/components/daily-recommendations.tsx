@@ -87,26 +87,13 @@ export default function DailyRecommendations({ summary, transactions = [], budge
     staleTime: 5 * 60 * 1000, // 5 minutes cache
     refetchOnWindowFocus: false,
     queryFn: async () => {
-      console.log('Making daily recommendations API call');
-      
-      if (!transactions || transactions.length < 3) {
-        throw new Error('Insufficient transaction data');
-      }
-      
       try {
         const response = await apiRequest('POST', '/api/ai/daily-recommendations', {
           transactions: transactions.slice(0, 50), // Limit for performance
           summary: summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 },
           budgets: budgets || []
         });
-        
-        if (!response.ok) {
-          throw new Error(`API responded with status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('Daily recommendations response received');
-        return data;
+        return response.json();
       } catch (error) {
         console.error('Failed to fetch daily recommendations:', error);
         throw error;
