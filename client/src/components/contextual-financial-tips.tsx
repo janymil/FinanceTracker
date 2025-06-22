@@ -49,8 +49,8 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
       });
     }
 
-    // Low savings rate tips
-    if (savingsRate < 0.1 && summary.netBalance >= 0) {
+    // Only show savings tips if there's actual financial data
+    if (savingsRate < 0.1 && summary.netBalance >= 0 && summary.totalIncome > 0 && transactions && transactions.length > 0) {
       tips.push({
         id: 'low-savings',
         title: 'Increase Your Savings Rate',
@@ -150,7 +150,8 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
       });
     }
 
-    if (expenseRatio < 0.7) {
+    // Only show positive spending tips if there's actual transaction data
+    if (expenseRatio < 0.7 && summary.totalIncome > 0 && summary.totalExpenses > 0 && transactions && transactions.length > 0) {
       tips.push({
         id: 'controlled-spending',
         title: 'Well-Controlled Spending',
