@@ -85,7 +85,9 @@ class APICache {
 
   getTips(financialDataHash: string) {
     const key = `tips:${financialDataHash}`;
-    return this.get(key);
+    const result = this.get(key);
+    console.log(`Cache getTips for key ${key}:`, result ? 'Found' : 'Not found');
+    return result;
   }
 
   setTips(financialDataHash: string, result: any) {
