@@ -301,7 +301,7 @@ export default function Reports() {
                         {summaryLoading ? (
                           <Skeleton className="h-6 w-16" />
                         ) : (
-                          `${currency || '$'}${financialSummary?.totalIncome?.toFixed(2) || '0.00'}`
+                          `${displayCurrency}${financialSummary?.totalIncome?.toFixed(2) || '0.00'}`
                         )}
                       </div>
                     </div>
@@ -325,7 +325,7 @@ export default function Reports() {
                         {summaryLoading ? (
                           <Skeleton className="h-6 w-16" />
                         ) : (
-                          `${currency || '$'}${financialSummary?.totalExpenses?.toFixed(2) || '0.00'}`
+                          `${displayCurrency}${financialSummary?.totalExpenses?.toFixed(2) || '0.00'}`
                         )}
                       </div>
                     </div>
@@ -349,7 +349,7 @@ export default function Reports() {
                         {summaryLoading ? (
                           <Skeleton className="h-6 w-16" />
                         ) : (
-                          `${currency || '$'}${((financialSummary?.totalIncome || 0) - (financialSummary?.totalExpenses || 0)).toFixed(2)}`
+                          `${displayCurrency}${((financialSummary?.totalIncome || 0) - (financialSummary?.totalExpenses || 0)).toFixed(2)}`
                         )}
                       </div>
                     </div>
@@ -417,7 +417,7 @@ export default function Reports() {
                                   ? 'text-green-600 dark:text-green-400' 
                                   : 'text-red-600 dark:text-red-400'
                               }`}>
-                                {transaction.type === 'income' ? '+' : '-'}$
+                                {transaction.type === 'income' ? '+' : '-'}{displayCurrency}
                                 {parseFloat(transaction.amount).toFixed(2)}
                               </p>
                             </div>
@@ -560,7 +560,7 @@ export default function Reports() {
                       <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
                     </div>
                     <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                      ${currency || '$'}{((financialSummary?.totalExpenses || 0) / Math.max(
+                      {displayCurrency}{((financialSummary?.totalExpenses || 0) / Math.max(
                         financialSummary?.expenseTransactionCount || 1, 
                         1
                       )).toFixed(0)}
