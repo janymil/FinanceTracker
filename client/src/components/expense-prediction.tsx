@@ -73,8 +73,11 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
     );
   }
 
-  // Mock data for demonstration (will be replaced with real AI predictions)
-  const predictions: Prediction[] = [
+  // Check if we have transaction data to base predictions on
+  const hasTransactionData = transactions && transactions.length > 0;
+  
+  // Generate predictions only if we have data, otherwise return empty arrays
+  const predictions: Prediction[] = hasTransactionData ? [
     {
       category: 'Food & Dining',
       currentMonth: 450,
@@ -107,16 +110,16 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
       trend: 'increasing',
       factors: ['Upcoming events', 'Holiday activities']
     }
-  ];
+  ] : [];
 
-  const monthlyPredictions: MonthlyPrediction[] = [
+  const monthlyPredictions: MonthlyPrediction[] = hasTransactionData ? [
     { month: 'Jan 2025', predicted: 1200, confidence: 0.85 },
     { month: 'Feb 2025', predicted: 1150, confidence: 0.82 },
     { month: 'Mar 2025', predicted: 1300, confidence: 0.79 },
     { month: 'Apr 2025', predicted: 1250, confidence: 0.76 },
     { month: 'May 2025', predicted: 1180, confidence: 0.73 },
     { month: 'Jun 2025', predicted: 1220, confidence: 0.70 }
-  ];
+  ] : [];
 
   const totalPredicted = predictions.reduce((sum, p) => sum + p.predictedNext, 0);
 
@@ -141,88 +144,132 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              {/* Summary Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Calendar className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm font-medium">Next Month</span>
-                  </div>
-                  <div className="text-2xl font-bold text-blue-600">
-                    ${totalPredicted.toLocaleString()}
-                  </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-300">
-                    Predicted total expenses
-                  </p>
-                </Card>
+              {hasTransactionData ? (
+                <>
+                  {/* Summary Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Calendar className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-medium">Next Month</span>
+                      </div>
+                      <div className="text-2xl font-bold text-blue-600">
+                        ${totalPredicted.toLocaleString()}
+                      </div>
+                      <p className="text-xs text-gray-600 dark:text-gray-300">
+                        Predicted total expenses
+                      </p>
+                    </Card>
 
-                <Card className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="h-4 w-4 text-green-600" />
-                    <span className="text-sm font-medium">Confidence</span>
-                  </div>
-                  <div className="text-2xl font-bold text-green-600">
-                    {(predictions.reduce((sum, p) => sum + p.confidence, 0) / predictions.length * 100).toFixed(0)}%
-                  </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-300">
-                    Average prediction accuracy
-                  </p>
-                </Card>
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <TrendingUp className="h-4 w-4 text-green-600" />
+                        <span className="text-sm font-medium">Confidence</span>
+                      </div>
+                      <div className="text-2xl font-bold text-green-600">
+                        {(predictions.reduce((sum, p) => sum + p.confidence, 0) / predictions.length * 100).toFixed(0)}%
+                      </div>
+                      <p className="text-xs text-gray-600 dark:text-gray-300">
+                        Average prediction accuracy
+                      </p>
+                    </Card>
 
-                <Card className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                    <span className="text-sm font-medium">Trend</span>
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                        <span className="text-sm font-medium">Trend</span>
+                      </div>
+                      <div className="text-2xl font-bold text-yellow-600">
+                        {predictions.filter(p => p.trend === 'increasing').length > predictions.filter(p => p.trend === 'decreasing').length ? '+' : '-'}
+                        {Math.abs(((totalPredicted - Math.abs(summary?.totalExpenses || 0)) / Math.abs(summary?.totalExpenses || 1)) * 100).toFixed(0)}%
+                      </div>
+                      <p className="text-xs text-gray-600 dark:text-gray-300">
+                        vs current month
+                      </p>
+                    </Card>
                   </div>
-                  <div className="text-2xl font-bold text-yellow-600">
-                    {predictions.filter(p => p.trend === 'increasing').length > predictions.filter(p => p.trend === 'decreasing').length ? '+' : '-'}
-                    {Math.abs(((totalPredicted - Math.abs(summary?.totalExpenses || 0)) / Math.abs(summary?.totalExpenses || 1)) * 100).toFixed(0)}%
-                  </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-300">
-                    vs current month
-                  </p>
-                </Card>
-              </div>
 
-              {/* Monthly Trend Chart */}
-              <Card className="p-4">
-                <h4 className="font-medium mb-4 flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4" />
-                  6-Month Expense Forecast
-                </h4>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={monthlyPredictions}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip 
-                      formatter={(value: any, name) => [
-                        `$${value.toLocaleString()}`,
-                        name === 'predicted' ? 'Predicted' : 'Confidence'
-                      ]}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="predicted" 
-                      stroke="#8884d8" 
-                      strokeWidth={2}
-                      dot={{ fill: '#8884d8' }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </Card>
+                  {/* Monthly Trend Chart */}
+                  <Card className="p-4">
+                    <h4 className="font-medium mb-4 flex items-center gap-2">
+                      <BarChart3 className="h-4 w-4" />
+                      6-Month Expense Forecast
+                    </h4>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={monthlyPredictions}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <Tooltip 
+                          formatter={(value: any, name) => [
+                            `$${value.toLocaleString()}`,
+                            name === 'predicted' ? 'Predicted' : 'Confidence'
+                          ]}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="predicted" 
+                          stroke="#8884d8" 
+                          strokeWidth={2}
+                          dot={{ fill: '#8884d8' }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </Card>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                    No Transaction Data Available
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6">
+                    Add transactions to generate AI-powered expense predictions
+                  </p>
+                  
+                  {/* Empty State Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 opacity-50">
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Calendar className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm font-medium text-gray-400">Next Month</span>
+                      </div>
+                      <div className="text-2xl font-bold text-gray-400">$0</div>
+                      <p className="text-xs text-gray-400">No data</p>
+                    </Card>
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <TrendingUp className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm font-medium text-gray-400">Confidence</span>
+                      </div>
+                      <div className="text-2xl font-bold text-gray-400">0%</div>
+                      <p className="text-xs text-gray-400">No data</p>
+                    </Card>
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertTriangle className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm font-medium text-gray-400">Trend</span>
+                      </div>
+                      <div className="text-2xl font-bold text-gray-400">0%</div>
+                      <p className="text-xs text-gray-400">No data</p>
+                    </Card>
+                  </div>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="categories" className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium">Category Predictions</h4>
-                <Badge variant="outline" className="text-xs">
-                  Next Month Forecast
-                </Badge>
-              </div>
+              {hasTransactionData ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">Category Predictions</h4>
+                    <Badge variant="outline" className="text-xs">
+                      Next Month Forecast
+                    </Badge>
+                  </div>
 
-              <div className="space-y-3">
-                {predictions.slice(0, 8).map((prediction) => (
+                  <div className="space-y-3">
+                    {predictions.slice(0, 8).map((prediction) => (
                   <Card key={prediction.category} className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div>
@@ -266,60 +313,86 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                       </div>
                     )}
                   </Card>
-                ))}
-              </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                    No Category Data Available
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Add transactions to generate category-specific expense predictions
+                  </p>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="timeline" className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium">Timeline Forecast</h4>
-                <Select value={predictionPeriod} onValueChange={(value: any) => setPredictionPeriod(value)}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1m">1 Month</SelectItem>
-                    <SelectItem value="3m">3 Months</SelectItem>
-                    <SelectItem value="6m">6 Months</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Card className="p-4">
-                <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={monthlyPredictions.slice(0, predictionPeriod === '1m' ? 1 : predictionPeriod === '3m' ? 3 : 6)}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip 
-                      formatter={(value: any) => [`$${value.toLocaleString()}`, 'Predicted Expenses']}
-                    />
-                    <Bar dataKey="predicted" fill="#8884d8" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </Card>
-
-              <div className="grid gap-3">
-                {monthlyPredictions.slice(0, predictionPeriod === '1m' ? 1 : predictionPeriod === '3m' ? 3 : 6).map((month) => (
-                  <div key={month.month} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                        <Clock className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <h5 className="font-medium text-sm">{month.month}</h5>
-                        <p className="text-xs text-gray-600 dark:text-gray-300">
-                          {(month.confidence * 100).toFixed(0)}% confidence
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold">${month.predicted.toLocaleString()}</div>
-                      <div className="text-xs text-gray-600 dark:text-gray-300">predicted</div>
-                    </div>
+              {hasTransactionData ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">Timeline Forecast</h4>
+                    <Select value={predictionPeriod} onValueChange={(value: any) => setPredictionPeriod(value)}>
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1m">1 Month</SelectItem>
+                        <SelectItem value="3m">3 Months</SelectItem>
+                        <SelectItem value="6m">6 Months</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                ))}
-              </div>
+
+                  <Card className="p-4">
+                    <ResponsiveContainer width="100%" height={400}>
+                      <BarChart data={monthlyPredictions.slice(0, predictionPeriod === '1m' ? 1 : predictionPeriod === '3m' ? 3 : 6)}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <Tooltip 
+                          formatter={(value: any) => [`$${value.toLocaleString()}`, 'Predicted Expenses']}
+                        />
+                        <Bar dataKey="predicted" fill="#8884d8" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Card>
+
+                  <div className="grid gap-3">
+                    {monthlyPredictions.slice(0, predictionPeriod === '1m' ? 1 : predictionPeriod === '3m' ? 3 : 6).map((month) => (
+                      <div key={month.month} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                            <Clock className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <h5 className="font-medium text-sm">{month.month}</h5>
+                            <p className="text-xs text-gray-600 dark:text-gray-300">
+                              {(month.confidence * 100).toFixed(0)}% confidence
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold">${month.predicted.toLocaleString()}</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300">predicted</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                    No Timeline Data Available
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Add transactions to generate timeline expense predictions
+                  </p>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         ) : (
