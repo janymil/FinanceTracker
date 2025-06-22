@@ -296,6 +296,9 @@ Changelog:
 - June 22, 2025. FIXED PRODUCTION: Updated drizzle-kit to latest version and corrected database schema migration commands for production deployment
 - June 22, 2025. Fixed 500 server errors in production by updating updateUser method with proper field validation and error handling
 - June 22, 2025. Enhanced deployment script with correct schema migration commands to safely update production database
+- June 22, 2025. PRODUCTION FIX: Added missing import_logs and daily_recommendations tables to production database
+- June 22, 2025. Fixed CSV import format - changed from semicolon to comma delimited and corrected recurring frequency values
+- June 22, 2025. Resolved all production database schema mismatches - import functionality and currency setting now working
 - June 15, 2025. Updated transaction-list display limit and added proper backend validation to enforce 100-transaction limit for free users
 - June 16, 2025. Fixed deployment loading issue caused by excessive Vite icon imports - created optimized icon bundle reducing bundle size by 75%
 - June 16, 2025. Resolved Clerk JWT token mismatch errors by implementing development key configuration and browser cache clearing mechanism
