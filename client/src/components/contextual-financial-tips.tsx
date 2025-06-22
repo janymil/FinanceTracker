@@ -35,6 +35,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
   const [tips, setTips] = useState<FinancialTip[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState<string | null>(null);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -55,18 +56,28 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
     }
   };
 
+  // Reset loading state when month changes
+  useEffect(() => {
+    const monthKey = selectedMonth || new Date().toISOString().slice(0, 7);
+    if (currentMonth !== monthKey) {
+      setCurrentMonth(monthKey);
+      setHasLoaded(false);
+      setTips(null);
+    }
+  }, [selectedMonth, currentMonth]);
+
   useEffect(() => {
     if (!transactions || transactions.length === 0 || !summary || hasLoaded) return;
 
-    // Create a stable cache key based on financial data
+    // Create a month-specific cache key
+    const monthKey = selectedMonth || new Date().toISOString().slice(0, 7); // YYYY-MM format
     const dataHash = JSON.stringify({
       transactionCount: transactions.length,
       totalIncome: summary?.totalIncome || 0,
       totalExpenses: summary?.totalExpenses || 0,
-      budgetCount: budgets?.length || 0,
-      month: selectedMonth
+      budgetCount: budgets?.length || 0
     });
-    const cacheKey = `financial-tips-${btoa(dataHash).slice(0, 16)}`;
+    const cacheKey = `financial-tips-${monthKey}-${btoa(dataHash).slice(0, 12)}`;
 
     // Check localStorage for cached tips first
     const cachedData = localStorage.getItem(cacheKey);
@@ -101,7 +112,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
         setTips(fetchedTips);
         setHasLoaded(true);
         
-        // Cache the tips with timestamp
+        // Cache the tips with timestamp for this specific month
         if (fetchedTips.length > 0) {
           localStorage.setItem(cacheKey, JSON.stringify({
             tips: fetchedTips,
