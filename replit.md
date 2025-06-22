@@ -262,9 +262,7 @@ Changelog:
 - June 22, 2025. COMPLETED: Eliminated all remaining hardcoded data from Daily Recommendations widget including "Reduce High Spending", "Emergency Fund Boost" recommendations
 - June 22, 2025. Fixed Daily Recommendations to require minimum 5 transactions for recommendations and 10 transactions for insights before showing any content
 - June 22, 2025. Restored AI Financial Tips widget to dashboard after accidental removal during component fixes
-- June 22, 2025. COMPLETED: Added simple "Refresh AI" button to dashboard header that triggers all AI components to refresh with fresh insights
-- June 22, 2025. Combined automated cache invalidation (after CSV imports) with manual refresh button for optimal user control
-- June 22, 2025. Button uses same cache clearing mechanism as automated system - localStorage flag + React Query invalidation without touching OpenAI/API code
+- June 22, 2025. Removed manual "Refresh AI" button from dashboard per user request - keeping only automated cache invalidation system
 - June 22, 2025. FIXED: Replaced hardcoded fallback tips with AI-based fallback system for contextual financial tips
 - June 22, 2025. Contextual tips now use simplified AI prompt as fallback instead of generic hardcoded messages inappropriate for user's financial situation
 - June 22, 2025. Emergency fallback shows dynamic financial summary rather than static text, maintaining personalization even when AI services fail
