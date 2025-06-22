@@ -702,7 +702,7 @@ export default function Transactions() {
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Expenses</p>
                   <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-                    ${totalExpenses.toFixed(2)}
+                    {currency || '$'}{totalExpenses.toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -718,7 +718,7 @@ export default function Transactions() {
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Net Balance</p>
                   <p className={`text-2xl font-bold ${(totalIncome - totalExpenses) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                    ${(totalIncome - totalExpenses).toFixed(2)}
+                    {currency || '$'}{(totalIncome - totalExpenses).toFixed(2)}
                   </p>
                 </div>
               </div>

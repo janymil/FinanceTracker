@@ -730,7 +730,7 @@ export default function Income() {
                   </div>
                   <div className="flex items-center space-x-4">
                     <span className="font-semibold text-green-600">
-                      +${parseFloat(transaction.amount).toFixed(2)}
+                      +{currency || '$'}{parseFloat(transaction.amount).toFixed(2)}
                     </span>
                     <div className="flex space-x-2">
                       <Button

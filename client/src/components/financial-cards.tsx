@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, DollarSign, Shield } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface FinancialSummary {
   totalIncome: number;
@@ -20,6 +21,7 @@ interface FinancialCardsProps {
 }
 
 export default function FinancialCards({ summary, isLoading, budgetsData, selectedMonth }: FinancialCardsProps) {
+  const { currency } = useCurrency();
   const [animatedValues, setAnimatedValues] = useState({
     income: 0,
     expenses: 0,
@@ -27,10 +29,8 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
   });
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
+    const displayCurrency = currency || '$';
+    return `${displayCurrency}${Math.abs(amount).toFixed(2)}`;
   };
 
   // Animate values when summary changes
