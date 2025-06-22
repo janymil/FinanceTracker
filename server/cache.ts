@@ -15,7 +15,7 @@ class APICache {
     categorization: Number.MAX_SAFE_INTEGER, // No expiration - categories are stable
     insights: 24 * 60 * 60 * 1000,          // 24 hours - daily insights refresh
     trends: Number.MAX_SAFE_INTEGER,         // No expiration - only invalidate on data change
-    tips: Number.MAX_SAFE_INTEGER,           // No expiration - only invalidate on data change
+    tips: 48 * 60 * 60 * 1000,              // 48 hours - tips change less frequently
     financialHealth: 24 * 60 * 60 * 1000    // 24 hours - financial health cache
   };
 
@@ -85,9 +85,7 @@ class APICache {
 
   getTips(financialDataHash: string) {
     const key = `tips:${financialDataHash}`;
-    const result = this.get(key);
-    console.log(`Cache getTips for key ${key}:`, result ? 'Found' : 'Not found');
-    return result;
+    return this.get(key);
   }
 
   setTips(financialDataHash: string, result: any) {

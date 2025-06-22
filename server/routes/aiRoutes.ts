@@ -108,13 +108,9 @@ export function registerAIRoutes(app: Express) {
       // Get financial data from the request body (matches what frontend is showing)
       const { financialData } = req.body;
       
-      console.log('AI Tips: Request received. financialData exists:', !!req.body.financialData);
-      
       if (!financialData) {
         return res.status(400).json({ message: "Financial data is required" });
       }
-      
-      console.log('AI Tips: Processing financial data:', financialData);
       
       // Use the financial data that matches the selected month period
       const { totalIncome, totalExpenses, categories: categoryData, month, year } = financialData;
@@ -130,7 +126,7 @@ export function registerAIRoutes(app: Express) {
       // Filter transactions for the current month/year being analyzed
       const currentMonthTransactions = allTransactions.filter(t => {
         const transactionDate = new Date(t.date);
-        const transactionMonth = transactionDate.toLocaleString('en-US', { month: 'long' });
+        const transactionMonth = transactionDate.toLocaleString('default', { month: 'long' });
         const transactionYear = transactionDate.getFullYear();
         return transactionMonth === month && transactionYear === year;
       });
@@ -140,25 +136,8 @@ export function registerAIRoutes(app: Express) {
       const monthlyIncomeCount = currentMonthTransactions.filter(t => t.type === 'income').length;
       const totalMonthlyTransactions = monthlyExpenseCount + monthlyIncomeCount;
 
-      console.log(`AI Tips Debug - Month: ${month} ${year}, Total monthly transactions: ${totalMonthlyTransactions}`);
-      console.log(`Monthly transactions found:`, currentMonthTransactions.map(t => ({ 
-        description: t.description, 
-        amount: t.amount, 
-        date: t.date.toISOString().split('T')[0],
-        type: t.type 
-      })));
-      console.log(`All transactions for debugging:`, allTransactions.map(t => ({
-        description: t.description,
-        amount: t.amount,
-        date: t.date.toISOString().split('T')[0],
-        month: new Date(t.date).toLocaleString('en-US', { month: 'long' }),
-        year: new Date(t.date).getFullYear(),
-        type: t.type
-      })));
-
-      // If insufficient monthly data, provide guidance message  
-      if (totalMonthlyTransactions < 3) {
-        console.log(`Insufficient transactions for AI tips: ${totalMonthlyTransactions} transactions for ${month} ${year}`);
+      // If insufficient monthly data, provide guidance message
+      if (totalMonthlyTransactions < 2) {
         return res.json({ 
           tip: `Add more transactions for ${month} ${year} to get personalized AI insights. Currently showing ${totalMonthlyTransactions} transaction${totalMonthlyTransactions !== 1 ? 's' : ''}.` 
         });
@@ -192,70 +171,28 @@ export function registerAIRoutes(app: Express) {
             });
           })();
 
-      // Create a stable cache key based on monthly data content (not timestamp)
-      const monthlyDataForCaching = {
-        totalIncome: actualTotalIncome,
-        totalExpenses: actualTotalExpenses,
-        transactionsByCategory,
-        monthlyTransactions: processedMonthlyTransactions,
-        month,
-        year,
-        userId
-      };
-      
-      const cacheKey = aiCache.createDataHash(monthlyDataForCaching);
-      console.log(`Cache key for ${month} ${year}:`, cacheKey);
-      
-      // Check if we have cached tips for this exact monthly data
-      const cachedTips = aiCache.getTips(cacheKey);
-      if (cachedTips && cachedTips.length > 0 && !financialData.timestamp) {
-        console.log(`Using cached AI tips for ${month} ${year} - no data changes detected`);
-        const tip = cachedTips[0];
-        const formattedTip = `${tip.title}: ${tip.description}`;
-        console.log(`Returning cached tip for ${month} ${year}:`, formattedTip.substring(0, 100) + '...');
-        return res.json({ tip: formattedTip });
-      }
-
       // Prepare financial data for AI analysis using monthly scope
       const aiFinancialData = {
         totalIncome: actualTotalIncome,
         totalExpenses: actualTotalExpenses,
         transactionsByCategory,
         recentTransactions: processedMonthlyTransactions,
-        // Don't include timestamp for caching stability
+        timestamp: Date.now()
       };
 
-      console.log(`Generating new AI tips for ${month} ${year}: ${totalMonthlyTransactions} transactions (${monthlyIncomeCount} income, ${monthlyExpenseCount} expenses)`);
+      console.log(`AI analyzing ${month} ${year}: ${totalMonthlyTransactions} transactions (${monthlyIncomeCount} income, ${monthlyExpenseCount} expenses)`);
       console.log(`Monthly totals - Income: $${actualTotalIncome}, Expenses: $${actualTotalExpenses}, Net: $${actualTotalIncome - actualTotalExpenses}`);
       
-      let tips;
-      try {
-        tips = await generateFinancialTips(aiFinancialData);
-        console.log(`OpenAI returned ${tips?.length || 0} tips for ${month} ${year}`);
-      } catch (error) {
-        console.error(`OpenAI API error for ${month} ${year}:`, error.message);
-        // Instead of failing, provide a fallback tip based on actual data
-        const fallbackTip = `Based on your ${month} ${year} data with $${actualTotalIncome} income and $${actualTotalExpenses} expenses, you have a positive cash flow of $${(actualTotalIncome - actualTotalExpenses).toFixed(2)}. Consider setting aside some of this surplus for savings or investments.`;
-        console.log(`OpenAI error fallback for ${month} ${year}:`, fallbackTip.substring(0, 100) + '...');
-        return res.json({ tip: fallbackTip });
-      }
-      
-      // Handle response from AI generation
-      if (tips && Array.isArray(tips) && tips.length > 0) {
-        console.log(`OpenAI returned ${tips.length} tips for ${month} ${year}`);
-        aiCache.setTips(cacheKey, tips);
-        console.log(`Cached new AI tips for ${month} ${year}`);
-        
-        const tip = tips[0];
-        const formattedTip = `${tip.title}: ${tip.description}`;
-        console.log(`Returning AI tip for ${month} ${year}:`, formattedTip.substring(0, 100) + '...');
-        return res.json({ tip: formattedTip });
+      const tips = await generateFinancialTips(aiFinancialData);
+      const tip = tips.length > 0 ? tips[0] : null;
+
+      if (tip) {
+        return res.json({ tip: `${tip.title}: ${tip.description}` });
       } else {
-        console.log(`No valid tips generated by OpenAI for ${month} ${year}, tips:`, tips);
         // Fallback based on monthly data
-        const fallbackTip = `Based on your ${monthlyExpenseCount} expense transactions ($${actualTotalExpenses.toFixed(2)}) and ${monthlyIncomeCount} income transactions ($${actualTotalIncome.toFixed(2)}) for ${month} ${year}, consider reviewing your spending patterns and setting budgets for your top expense categories.`;
-        console.log(`Returning fallback tip for ${month} ${year}:`, fallbackTip.substring(0, 100) + '...');
-        return res.json({ tip: fallbackTip });
+        return res.json({ 
+          tip: `Based on your ${monthlyExpenseCount} expense transactions ($${actualTotalExpenses.toFixed(2)}) and ${monthlyIncomeCount} income transactions ($${actualTotalIncome.toFixed(2)}) for ${month} ${year}, consider reviewing your spending patterns and setting budgets for your top expense categories.` 
+        });
       }
     } catch (error) {
       console.error("Error generating financial tip:", error);
