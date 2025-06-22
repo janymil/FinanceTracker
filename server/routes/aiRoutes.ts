@@ -322,11 +322,28 @@ export function registerAIRoutes(app: Express) {
       };
       const dataHash = aiCache.createDataHash(dataForHash);
 
-      // Check cache first
-      const cached = aiCache.get(`daily_recommendations_${dataHash}`);
-      if (cached) {
-        console.log('Daily recommendations: Using cached data');
-        return res.json(cached);
+      // Check database cache first (persistent across sessions)
+      try {
+        const existingRecommendations = await db
+          .select()
+          .from(dailyRecommendations)
+          .where(and(
+            eq(dailyRecommendations.userId, userId),
+            eq(dailyRecommendations.dataHash, dataHash),
+            gt(dailyRecommendations.expiresAt, new Date())
+          ))
+          .limit(1);
+
+        if (existingRecommendations.length > 0) {
+          console.log('Daily recommendations: Using persistent cached data');
+          const cached = existingRecommendations[0];
+          return res.json({
+            recommendations: cached.recommendations,
+            insights: cached.insights
+          });
+        }
+      } catch (error) {
+        console.log('Database cache check failed, continuing with OpenAI generation');
       }
 
       // Get categories for proper naming
@@ -341,7 +358,34 @@ export function registerAIRoutes(app: Express) {
         categories: categoryMap
       });
 
-      // Cache for 24 hours for session persistence
+      // Save to database for session persistence
+      try {
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7); // Expire in 7 days
+
+        // Clean up old recommendations first
+        await db
+          .delete(dailyRecommendations)
+          .where(and(
+            eq(dailyRecommendations.userId, userId),
+            lt(dailyRecommendations.expiresAt, new Date())
+          ));
+
+        // Insert new recommendations
+        await db.insert(dailyRecommendations).values({
+          userId,
+          recommendations: recommendations.recommendations,
+          insights: recommendations.insights,
+          dataHash,
+          expiresAt
+        });
+
+        console.log('Daily recommendations saved to database for persistence');
+      } catch (error) {
+        console.error('Failed to save recommendations to database:', error);
+      }
+
+      // Also cache in memory for fast access
       aiCache.set(`daily_recommendations_${dataHash}`, recommendations, 86400);
 
       return res.json(recommendations);
