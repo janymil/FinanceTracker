@@ -262,6 +262,9 @@ Changelog:
 - June 22, 2025. COMPLETED: Eliminated all remaining hardcoded data from Daily Recommendations widget including "Reduce High Spending", "Emergency Fund Boost" recommendations
 - June 22, 2025. Fixed Daily Recommendations to require minimum 5 transactions for recommendations and 10 transactions for insights before showing any content
 - June 22, 2025. Restored AI Financial Tips widget to dashboard after accidental removal during component fixes
+- June 22, 2025. COMPLETED: Added simple "Refresh AI" button to dashboard header that triggers all AI components to refresh with fresh insights
+- June 22, 2025. Combined automated cache invalidation (after CSV imports) with manual refresh button for optimal user control
+- June 22, 2025. Button uses same cache clearing mechanism as automated system - localStorage flag + React Query invalidation without touching OpenAI/API code
 - June 22, 2025. FIXED: AI Expense Prediction widget hardcoded data completely eliminated - removed fake predictions array with "Food & Dining: $520" and monthlyPredictions with "$1200, $1150, $1300"
 - June 22, 2025. Updated AI Expense Prediction to require minimum 10 transactions before showing any predictions across all three tabs (Overview, By Category, Timeline)
 - June 22, 2025. All dashboard AI components now show authentic personalized data or proper "no data" states only - zero hardcoded content remaining

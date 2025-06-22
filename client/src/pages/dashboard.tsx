@@ -48,12 +48,12 @@ import {
   Zap,
   Shield,
   Star,
+  RefreshCw,
   ChevronRight,
   Plus,
   Minus,
   Eye,
   EyeOff,
-  RefreshCw,
   AlertCircle,
   CheckCircle,
   XCircle,
@@ -154,6 +154,33 @@ export default function Dashboard() {
     paymentUrl: "",
     referenceNote: "",
   });
+
+  const [isRefreshingAI, setIsRefreshingAI] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Simple AI refresh function
+  const refreshAllAI = () => {
+    setIsRefreshingAI(true);
+    
+    // Set localStorage flag to bypass cache
+    localStorage.setItem('invalidate-ai-cache', 'true');
+    
+    // Invalidate all AI-related query cache
+    queryClient.invalidateQueries({ queryKey: ['ai'] });
+    queryClient.invalidateQueries({ queryKey: ['financial-health'] });
+    queryClient.invalidateQueries({ queryKey: ['expense-predictions'] });
+    queryClient.invalidateQueries({ queryKey: ['daily-recommendations'] });
+    
+    // Reset the flag after a short delay
+    setTimeout(() => {
+      localStorage.removeItem('invalidate-ai-cache');
+      setIsRefreshingAI(false);
+      toast({
+        title: "AI Insights Refreshed",
+        description: "All AI components have been updated with fresh insights.",
+      });
+    }, 3000);
+  };
 
   // Get start and end dates for the selected month
   const startDate = new Date(`${selectedMonth}-01`);
@@ -256,8 +283,6 @@ export default function Dashboard() {
       fetchBudgets();
     }
   }, [isReady, transactions]);
-
-  const queryClient = useQueryClient();
 
   const createTransactionMutation = useMutation({
     mutationFn: async (transactionData: typeof newTransaction) => {
@@ -375,6 +400,16 @@ export default function Dashboard() {
                   ))}
                 </SelectContent>
               </Select>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refreshAllAI}
+                disabled={isRefreshingAI}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefreshingAI ? 'animate-spin' : ''}`} />
+                {isRefreshingAI ? 'Refreshing...' : 'Refresh AI'}
+              </Button>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button 
