@@ -256,6 +256,9 @@ Changelog:
 - June 22, 2025. FIXED: AI Expense Prediction dashboard widget now shows proper "no data" states instead of hardcoded $1005, 82%, +100500% values
 - June 22, 2025. Enhanced all three tabs (Overview, By Category, Timeline) in expense prediction widget to handle empty transaction data gracefully
 - June 22, 2025. Replaced mock prediction data with conditional logic that only shows AI predictions when actual transaction data exists
+- June 22, 2025. FIXED: Daily Recommendations widget now shows proper "no data" states instead of hardcoded insights with fake confidence percentages
+- June 22, 2025. Enhanced both tabs (Today's Tasks, Personal Insights) to only display AI-generated content when transaction data exists
+- June 22, 2025. Preserved premium AI functionality - full personalized recommendations and insights work when data is available
 - June 15, 2025. Updated transaction-list display limit and added proper backend validation to enforce 100-transaction limit for free users
 - June 16, 2025. Fixed deployment loading issue caused by excessive Vite icon imports - created optimized icon bundle reducing bundle size by 75%
 - June 16, 2025. Resolved Clerk JWT token mismatch errors by implementing development key configuration and browser cache clearing mechanism

@@ -74,8 +74,16 @@ export default function DailyRecommendations({ summary, transactions = [], budge
 
   const isPremiumUser = databaseUser?.plan === 'premium';
 
+  // Check if we have transaction data for AI analysis
+  const hasTransactionData = transactions && transactions.length > 0;
+  
   // Generate AI-powered daily recommendations
   const generateDailyRecommendations = (): Recommendation[] => {
+    // Only generate recommendations if we have transaction data
+    if (!hasTransactionData) {
+      return [];
+    }
+    
     const today = new Date();
     const dayOfWeek = today.getDay();
     const recommendations: Recommendation[] = [];
@@ -143,6 +151,11 @@ export default function DailyRecommendations({ summary, transactions = [], budge
 
   // Generate personalization insights
   const generatePersonalizationInsights = (): PersonalizationInsight[] => {
+    // Only generate insights if we have transaction data
+    if (!hasTransactionData) {
+      return [];
+    }
+    
     return [
       {
         id: 'spending-pattern',
@@ -295,13 +308,27 @@ export default function DailyRecommendations({ summary, transactions = [], budge
 
               {recommendations.length === 0 && (
                 <div className="text-center py-8">
-                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    All Caught Up!
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    You're doing great with your finances today. Check back tomorrow for new recommendations.
-                  </p>
+                  {hasTransactionData ? (
+                    <>
+                      <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                        All Caught Up!
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300">
+                        You're doing great with your finances today. Check back tomorrow for new recommendations.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <Lightbulb className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                        No Transaction Data Available
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300">
+                        Add transactions to receive AI-powered daily recommendations
+                      </p>
+                    </>
+                  )}
                 </div>
               )}
             </TabsContent>
@@ -314,44 +341,81 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                 </Badge>
               </div>
 
-              <div className="space-y-3">
-                {insights.map((insight) => (
-                  <Card key={insight.id} className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                        <Lightbulb className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-                          {insight.insight}
-                        </p>
-                        <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-300">
-                          <span>Based on: {insight.basedOn}</span>
-                          <span>•</span>
-                          <span>{(insight.confidence * 100).toFixed(0)}% confidence</span>
-                          <span>•</span>
-                          <span>{insight.timeframe}</span>
+{hasTransactionData ? (
+                <>
+                  <div className="space-y-3">
+                    {insights.map((insight) => (
+                      <Card key={insight.id} className="p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                            <Lightbulb className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                              {insight.insight}
+                            </p>
+                            <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-300">
+                              <span>Based on: {insight.basedOn}</span>
+                              <span>•</span>
+                              <span>{(insight.confidence * 100).toFixed(0)}% confidence</span>
+                              <span>•</span>
+                              <span>{insight.timeframe}</span>
+                            </div>
+                          </div>
                         </div>
+                      </Card>
+                    ))}
+                  </div>
+
+                  <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white dark:bg-gray-800 rounded-lg">
+                        <Crown className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-sm mb-1">Personalization Engine</h5>
+                        <p className="text-xs text-gray-600 dark:text-gray-300">
+                          These insights are generated using machine learning analysis of your financial behavior, 
+                          spending patterns, and goal progress.
+                        </p>
                       </div>
                     </div>
                   </Card>
-                ))}
-              </div>
-
-              <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-white dark:bg-gray-800 rounded-lg">
-                    <Crown className="h-4 w-4 text-purple-600" />
-                  </div>
-                  <div>
-                    <h5 className="font-medium text-sm mb-1">Personalization Engine</h5>
-                    <p className="text-xs text-gray-600 dark:text-gray-300">
-                      These insights are generated using machine learning analysis of your financial behavior, 
-                      spending patterns, and goal progress.
-                    </p>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <Lightbulb className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                    No Personal Insights Available
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6">
+                    Add transactions to generate AI-powered personalized financial insights
+                  </p>
+                  
+                  {/* Empty State Preview */}
+                  <div className="space-y-3 opacity-50">
+                    <Card className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                          <Lightbulb className="h-4 w-4 text-gray-400" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-400 mb-2">
+                            Spending pattern analysis will appear here
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-400">
+                            <span>Based on: Transaction analysis</span>
+                            <span>•</span>
+                            <span>0% confidence</span>
+                            <span>•</span>
+                            <span>No data</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
                   </div>
                 </div>
-              </Card>
+              )}
             </TabsContent>
           </Tabs>
         ) : (
