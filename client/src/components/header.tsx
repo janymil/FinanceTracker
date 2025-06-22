@@ -49,6 +49,7 @@ import RequirePlan from "@/components/require-plan";
 import { Link } from "wouter";
 import { useState, useEffect } from "react";
 import { CurrencySelector } from "@/components/CurrencySelector";
+import { useCurrency } from "@/context/CurrencyContext";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";

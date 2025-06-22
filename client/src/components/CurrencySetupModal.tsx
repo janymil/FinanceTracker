@@ -102,7 +102,7 @@ export function CurrencySetupModal({ isOpen, onClose, onSelectCurrency }: Curren
                     
                     toast({
                       title: "Currency Set Successfully",
-                      description: `Your currency has been set to ${currency.symbol}. You can change it later until you add your first transaction.`,
+                      description: `Your currency has been set to ${currency.symbol}. Use the gear icon in the header to change it before adding transactions.`,
                     });
                     
                     onSelectCurrency(currency.symbol);
