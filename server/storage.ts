@@ -179,6 +179,9 @@ export interface IStorage {
   saveContextualFinancialTips(tips: InsertContextualFinancialTips): Promise<SelectContextualFinancialTips>;
   updateContextualFinancialTips(userId: string, tips: InsertContextualFinancialTips): Promise<SelectContextualFinancialTips>;
   shouldRegenerateFinancialTips(userId: string, currentDataHash: string): Promise<boolean>;
+  
+  // Daily recommendations cache management
+  deleteCachedDailyRecommendations(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {

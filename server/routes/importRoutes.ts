@@ -11,6 +11,9 @@ import {
   validateRequiredFields,
   validateDataSecurity
 } from "../../lib/importHelpers";
+import { eq } from "drizzle-orm";
+import { contextualFinancialTips, dailyRecommendations } from "../../shared/schema";
+import { db } from "../db";
 import { 
   saveImportLog, 
   createImportSummary, 
@@ -460,6 +463,18 @@ export function registerImportRoutes(app: Express) {
         format as 'csv' | 'json',
         importStatus
       );
+
+      // Clear all AI caches after successful import to trigger fresh AI insights
+      const { aiCache } = await import('../cache');
+      aiCache.clearUserCache(userId);
+      
+      // Delete cached daily recommendations from database
+      await storage.deleteCachedDailyRecommendations(userId);
+      
+      // Clear contextual financial tips cache
+      await db.delete(contextualFinancialTips).where(eq(contextualFinancialTips.userId, userId));
+      
+      console.log(`Cleared all AI caches for user ${userId} after data import`);
 
       return res.json({
         success: true,

@@ -137,6 +137,27 @@ class APICache {
   clear(): void {
     this.cache.clear();
   }
+
+  // Clear all cache entries for a specific user
+  clearUserCache(userId: string): void {
+    const keysToDelete: string[] = [];
+    
+    for (const [key, _] of this.cache.entries()) {
+      // Clear any cache entries that contain the user ID or are user-specific
+      if (key.includes(userId) || 
+          key.includes('insights:') || 
+          key.includes('trends:') || 
+          key.includes('tips:') || 
+          key.includes('financial_health:') ||
+          key.includes('daily_recommendations_') ||
+          key.includes('expense_predictions_')) {
+        keysToDelete.push(key);
+      }
+    }
+    
+    keysToDelete.forEach(key => this.cache.delete(key));
+    console.log(`Cleared ${keysToDelete.length} cache entries for user ${userId}`);
+  }
 }
 
 export const aiCache = new APICache();
