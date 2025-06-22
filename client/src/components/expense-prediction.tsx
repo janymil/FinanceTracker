@@ -53,14 +53,15 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
   const userPlan = databaseUser?.plan || 'free';
   const isPremiumUser = userPlan === 'premium';
 
-  const hasEnoughExpenses = transactions.filter(t => t.type === 'expense').length >= 3;
+  const expenseTransactions = transactions.filter(t => t.type === 'expense');
+  const hasTransactionData = expenseTransactions.length >= 3;
 
   useEffect(() => {
     const fetchPredictions = async () => {
-      if (!hasEnoughExpenses) return;
+      if (!hasTransactionData) return;
 
       const response = await apiRequest('POST', '/api/ai/expense-predictions', {
-        transactions: transactions.filter(t => t.type === 'expense'),
+        transactions: expenseTransactions,
       });
       const result = await response.json();
 
@@ -107,32 +108,166 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
       </CardHeader>
       <CardContent>
         {isPremiumUser ? (
-          hasEnoughExpenses ? (
-            <Tabs defaultValue="overview" className="space-y-6">
-              {/* Same as original Tabs implementation */}
-            </Tabs>
-          ) : (
-            <div className="text-center py-8">
-              <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                Not Enough Expense Data
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Add at least 3 expense transactions to generate predictions.
-              </p>
-            </div>
-          )
+          <Tabs defaultValue="overview" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="categories">By Category</TabsTrigger>
+              <TabsTrigger value="timeline">Timeline</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-6">
+              {hasTransactionData && predictions.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Calendar className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm font-medium">Next Month</span>
+                    </div>
+                    <div className="text-2xl font-bold text-blue-600">
+                      ${totalPredicted.toLocaleString()}
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">Predicted total expenses</p>
+                  </Card>
+                  <Card className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <TrendingUp className="h-4 w-4 text-green-600" />
+                      <span className="text-sm font-medium">Confidence</span>
+                    </div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {(predictions.reduce((sum, p) => sum + p.confidence, 0) / predictions.length * 100).toFixed(0)}%
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">Average prediction accuracy</p>
+                  </Card>
+                  <Card className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                      <span className="text-sm font-medium">Trend</span>
+                    </div>
+                    <div className="text-2xl font-bold text-yellow-600">
+                      {predictions.filter(p => p.trend === 'increasing').length > predictions.filter(p => p.trend === 'decreasing').length ? '+' : '-'}
+                      {Math.abs(((totalPredicted - Math.abs(summary?.totalExpenses || 0)) / Math.abs(summary?.totalExpenses || 1)) * 100).toFixed(0)}%
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">vs current month</p>
+                  </Card>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                    No Prediction Data Available
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6">
+                    Add more transactions to generate AI-powered expense predictions
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="categories" className="space-y-4">
+              {hasTransactionData && predictions.length > 0 ? (
+                <div className="space-y-3">
+                  {predictions.slice(0, 8).map((prediction) => (
+                    <Card key={prediction.category} className="p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <h5 className="font-medium text-sm">{prediction.category}</h5>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="outline" className={`text-xs ${prediction.trend === 'increasing' ? 'text-red-600' : prediction.trend === 'decreasing' ? 'text-green-600' : 'text-gray-600'}`}>{prediction.trend || 'stable'}</Badge>
+                            <Badge variant="outline" className="text-xs">{((prediction.confidence || 0) * 100).toFixed(0)}% confidence</Badge>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-bold">${(prediction.predictedNext || 0).toLocaleString()}</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300">vs ${(prediction.currentMonth || 0).toLocaleString()} current</div>
+                        </div>
+                      </div>
+                      {prediction.factors.length > 0 && (
+                        <div className="mt-3 pt-3 border-t">
+                          <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">Prediction factors:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {prediction.factors.map((factor, index) => (
+                              <Badge key={index} variant="secondary" className="text-xs">{factor}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Category Data Available</h3>
+                  <p className="text-gray-600 dark:text-gray-300">Add transactions to generate category-specific expense predictions</p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="timeline" className="space-y-4">
+              {hasTransactionData && monthlyPredictions.length > 0 ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">Timeline Forecast</h4>
+                    <Select value={predictionPeriod} onValueChange={(value: any) => setPredictionPeriod(value)}>
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1m">1 Month</SelectItem>
+                        <SelectItem value="3m">3 Months</SelectItem>
+                        <SelectItem value="6m">6 Months</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Card className="p-4">
+                    <ResponsiveContainer width="100%" height={400}>
+                      <BarChart data={monthlyPredictions.slice(0, predictionPeriod === '1m' ? 1 : predictionPeriod === '3m' ? 3 : 6)}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <Tooltip formatter={(value: any) => [`$${(value || 0).toLocaleString()}`, 'Predicted Expenses']} />
+                        <Bar dataKey="totalPredicted" fill="#8884d8" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Card>
+
+                  <div className="grid gap-3">
+                    {monthlyPredictions.slice(0, predictionPeriod === '1m' ? 1 : predictionPeriod === '3m' ? 3 : 6).map((month) => (
+                      <div key={month.month} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                            <Clock className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <h5 className="font-medium text-sm">{month.month}</h5>
+                            <p className="text-xs text-gray-600 dark:text-gray-300">{((month.confidence || 0) * 100).toFixed(0)}% confidence</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold">${(month.totalPredicted || 0).toLocaleString()}</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300">predicted</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Timeline Data Available</h3>
+                  <p className="text-gray-600 dark:text-gray-300">Add transactions to generate timeline expense predictions</p>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         ) : (
           <div className="text-center py-8 px-6">
             <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
               <Lock className="h-8 w-8 text-purple-600" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              Premium Feature
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-              AI-powered expense predictions help you plan your budget with machine learning insights
-            </p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Premium Feature</h3>
+            <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">AI-powered expense predictions help you plan your budget with machine learning insights</p>
             <Link href="/subscribe">
               <Button className="bg-purple-600 hover:bg-purple-700 text-white">
                 <Crown className="h-4 w-4 mr-2" />
