@@ -197,9 +197,9 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
       <CardContent className="space-y-4">
         {tips.length === 0 ? (
           <div className="text-center py-8">
-            <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+            <Lightbulb className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400">
-              Your finances look healthy! Keep up the good work.
+              Add transactions to get personalized financial insights
             </p>
           </div>
         ) : (
