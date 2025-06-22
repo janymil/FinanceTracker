@@ -15,6 +15,7 @@ import { registerAdminRoutes } from "./adminRoutes";
 import { registerStripeRoutes } from "./stripeRoutes";
 import { setCookieConsent } from "../cookieMiddleware";
 import { registerMobileUploadRoutes } from "./mobileUploadRoutes";
+import { registerImportRoutes } from "./importRoutes";
 import { handleContactForm } from "../contact";
 import { registerRedeemRoutes } from "./redeemRoutes";
 import { registerClerkWebhookRoutes } from "./clerkWebhooks";
@@ -36,6 +37,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerCollaborativeGoalRoutes(app);
   registerRealtimeRoutes(app);
   registerExportRoutes(app);
+  registerImportRoutes(app);
   registerStripeRoutes(app);
   registerRedeemRoutes(app);
 

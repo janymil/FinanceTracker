@@ -406,6 +406,11 @@ Changelog:
 - June 18, 2025. COMPLETED: Implemented comprehensive QR code mobile receipt upload system with sessionId-based routing
 - June 18, 2025. Created mobile upload page at /mobile-upload/[sessionId] with camera capture and gallery selection functionality
 - June 18, 2025. Added QR code generation to UploadReceiptModal with "Scan with Phone" option alongside traditional file upload
+- June 22, 2025. COMPLETED: Implemented comprehensive data import API route at /api/import-data supporting both JSON and CSV formats
+- June 22, 2025. Created secure import system for incomes, expenses, categories, budgets, goals, and collaborative goals with proper user authentication
+- June 22, 2025. Added automatic category creation functionality - system creates missing categories during import process
+- June 22, 2025. Implemented CSV-to-JSON conversion with support for mixed data types in single CSV file
+- June 22, 2025. Added comprehensive data validation using Zod schemas with detailed error reporting and import summaries
 - June 18, 2025. Implemented real-time polling system for mobile uploads with 5-second intervals and automatic timeout handling
 - June 18, 2025. Enhanced mobile upload workflow with OCR processing, AI categorization, and automatic form population from mobile-captured receipt data
 - June 18, 2025. FIXED: Mobile upload QR code 404 errors by removing duplicate route and ensuring proper SignedOut routing configuration
