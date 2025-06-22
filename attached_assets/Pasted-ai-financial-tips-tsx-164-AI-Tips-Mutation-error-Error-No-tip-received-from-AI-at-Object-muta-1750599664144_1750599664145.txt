@@ -1,0 +1,51 @@
+ai-financial-tips.tsx:164 AI Tips: Mutation error: Error: No tip received from AI
+    at Object.mutationFn (ai-financial-tips.tsx:140:15)
+onError @ ai-financial-tips.tsx:164
+execute @ @tanstack_react-query.js?v=13c782f7:1254
+await in execute
+mutate @ @tanstack_react-query.js?v=13c782f7:2630
+(anonymous) @ @tanstack_react-query.js?v=13c782f7:3295
+(anonymous) @ ai-financial-tips.tsx:87
+commitHookEffectListMount @ chunk-SXRIVT2P.js?v=13c782f7:16963
+commitPassiveMountOnFiber @ chunk-SXRIVT2P.js?v=13c782f7:18206
+commitPassiveMountEffects_complete @ chunk-SXRIVT2P.js?v=13c782f7:18179
+commitPassiveMountEffects_begin @ chunk-SXRIVT2P.js?v=13c782f7:18169
+commitPassiveMountEffects @ chunk-SXRIVT2P.js?v=13c782f7:18159
+flushPassiveEffectsImpl @ chunk-SXRIVT2P.js?v=13c782f7:19543
+flushPassiveEffects @ chunk-SXRIVT2P.js?v=13c782f7:19500
+performSyncWorkOnRoot @ chunk-SXRIVT2P.js?v=13c782f7:18921
+flushSyncCallbacks @ chunk-SXRIVT2P.js?v=13c782f7:9166
+commitRootImpl @ chunk-SXRIVT2P.js?v=13c782f7:19485
+commitRoot @ chunk-SXRIVT2P.js?v=13c782f7:19330
+finishConcurrentRender @ chunk-SXRIVT2P.js?v=13c782f7:18858
+performConcurrentWorkOnRoot @ chunk-SXRIVT2P.js?v=13c782f7:18768
+workLoop @ chunk-SXRIVT2P.js?v=13c782f7:197
+flushWork @ chunk-SXRIVT2P.js?v=13c782f7:176
+performWorkUntilDeadline @ chunk-SXRIVT2P.js?v=13c782f7:384Understand this error
+ai-financial-tips.tsx:131 AI Tips: Received response: Response {type: 'basic', url: 'https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/ai/tip', redirected: false, status: 200, ok: true, …}
+ai-financial-tips.tsx:132 AI Tips: Response type: object
+ai-financial-tips.tsx:133 AI Tips: Response keys: []
+ai-financial-tips.tsx:164 AI Tips: Mutation error: Error: No tip received from AI
+    at Object.mutationFn (ai-financial-tips.tsx:140:15)
+onError @ ai-financial-tips.tsx:164
+execute @ @tanstack_react-query.js?v=13c782f7:1254
+await in execute
+mutate @ @tanstack_react-query.js?v=13c782f7:2630
+(anonymous) @ @tanstack_react-query.js?v=13c782f7:3295
+(anonymous) @ ai-financial-tips.tsx:87
+commitHookEffectListMount @ chunk-SXRIVT2P.js?v=13c782f7:16963
+invokePassiveEffectMountInDEV @ chunk-SXRIVT2P.js?v=13c782f7:18374
+invokeEffectsInDev @ chunk-SXRIVT2P.js?v=13c782f7:19754
+commitDoubleInvokeEffectsInDEV @ chunk-SXRIVT2P.js?v=13c782f7:19739
+flushPassiveEffectsImpl @ chunk-SXRIVT2P.js?v=13c782f7:19556
+flushPassiveEffects @ chunk-SXRIVT2P.js?v=13c782f7:19500
+performSyncWorkOnRoot @ chunk-SXRIVT2P.js?v=13c782f7:18921
+flushSyncCallbacks @ chunk-SXRIVT2P.js?v=13c782f7:9166
+commitRootImpl @ chunk-SXRIVT2P.js?v=13c782f7:19485
+commitRoot @ chunk-SXRIVT2P.js?v=13c782f7:19330
+finishConcurrentRender @ chunk-SXRIVT2P.js?v=13c782f7:18858
+performConcurrentWorkOnRoot @ chunk-SXRIVT2P.js?v=13c782f7:18768
+workLoop @ chunk-SXRIVT2P.js?v=13c782f7:197
+flushWork @ chunk-SXRIVT2P.js?v=13c782f7:176
+performWorkUntilDeadline @ chunk-SXRIVT2P.js?v=13c782f7:384Understand this error
+7queryClient.ts:30 Clerk token available: true
