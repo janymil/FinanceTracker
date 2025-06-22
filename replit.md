@@ -271,6 +271,7 @@ Changelog:
 - June 22, 2025. FIXED: Contextual Financial Tips month-switching functionality - component now receives selectedMonth prop and properly displays different tips for each month
 - June 22, 2025. Enhanced contextual financial tips to validate month-specific transaction data before API calls - prevents unnecessary OpenAI costs for months without transactions
 - June 22, 2025. Updated deploy-prod.sh script to use drizzle-kit schema migrations instead of full database dumps - safely preserves production data while updating schema
+- June 22, 2025. Removed sync-to-neon.sh script to prevent accidental data overwrites - deployment now exclusively uses safe schema-only migrations
 - June 15, 2025. Updated transaction-list display limit and added proper backend validation to enforce 100-transaction limit for free users
 - June 16, 2025. Fixed deployment loading issue caused by excessive Vite icon imports - created optimized icon bundle reducing bundle size by 75%
 - June 16, 2025. Resolved Clerk JWT token mismatch errors by implementing development key configuration and browser cache clearing mechanism
