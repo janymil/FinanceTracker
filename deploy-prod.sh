@@ -7,7 +7,7 @@ echo "=============================================="
 echo "📊 Step 1: Updating schema in Neon production database..."
 echo "ℹ️  This will update only the database schema, preserving all existing user data"
 
-DATABASE_URL=$DATABASE_URL_PROD npx drizzle-kit up:pg --config=drizzle.config.ts
+DATABASE_URL=$DATABASE_URL_PROD npx drizzle-kit push --config=drizzle.config.ts
 
 if [ $? -ne 0 ]; then
   echo "❌ Schema migration failed. Aborting deployment."
