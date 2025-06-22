@@ -114,7 +114,7 @@ export default function AIFinancialTips({ summary, selectedMonth }: AIFinancialT
         }
       };
 
-      console.log('AI Tips: Sending request for', monthName, year);
+      console.log('AI Tips: Sending request for', monthName, currentDate.getFullYear());
       console.log('AI Tips: Financial data:', requestData.financialData);
 
       const data = await apiRequest("POST", "/api/ai/tip", requestData);

@@ -156,8 +156,8 @@ export function registerAIRoutes(app: Express) {
         type: t.type
       })));
 
-      // If insufficient monthly data, provide guidance message
-      if (totalMonthlyTransactions < 1) {
+      // If insufficient monthly data, provide guidance message  
+      if (totalMonthlyTransactions < 3) {
         console.log(`Insufficient transactions for AI tips: ${totalMonthlyTransactions} transactions for ${month} ${year}`);
         return res.json({ 
           tip: `Add more transactions for ${month} ${year} to get personalized AI insights. Currently showing ${totalMonthlyTransactions} transaction${totalMonthlyTransactions !== 1 ? 's' : ''}.` 
