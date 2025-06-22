@@ -1,9 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Lightbulb, TrendingDown, PiggyBank, AlertCircle, CheckCircle } from "lucide-react";
+'use client';
+
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Lightbulb, TrendingDown, PiggyBank, AlertCircle, CheckCircle } from 'lucide-react';
+import axios from 'axios';
 
 interface ContextualTipsProps {
-  summary?: {
+  summary: {
     totalIncome: number;
     totalExpenses: number;
     netBalance: number;
@@ -13,8 +17,9 @@ interface ContextualTipsProps {
       type: string;
     }>;
   };
-  transactions?: any[];
-  budgets?: any[];
+  transactions: any[];
+  budgets: any[];
+  selectedMonth: string; // e.g. '2025-06'
 }
 
 interface FinancialTip {
@@ -24,117 +29,11 @@ interface FinancialTip {
   category: 'spending' | 'saving' | 'budgeting' | 'income';
   priority: 'high' | 'medium' | 'low';
   actionable: boolean;
-  icon: any;
 }
 
-export default function ContextualFinancialTips({ summary, transactions, budgets }: ContextualTipsProps) {
-  const generateTips = (): FinancialTip[] => {
-    const tips: FinancialTip[] = [];
-
-    if (!summary) return tips;
-
-    const expenseRatio = summary.totalIncome > 0 ? Math.abs(summary.totalExpenses) / summary.totalIncome : 0;
-    const savingsRate = summary.totalIncome > 0 ? summary.netBalance / summary.totalIncome : 0;
-
-    // High expense ratio tips
-    if (expenseRatio > 0.9) {
-      tips.push({
-        id: 'high-expenses',
-        title: 'Expenses Too High',
-        description: 'You\'re spending over 90% of your income. Consider reviewing your largest expense categories and finding areas to cut back.',
-        category: 'spending',
-        priority: 'high',
-        actionable: true,
-        icon: AlertCircle
-      });
-    }
-
-    // Removed hardcoded savings rate tip
-
-    // Negative balance tips
-    if (summary.netBalance < 0) {
-      tips.push({
-        id: 'negative-balance',
-        title: 'Spending Exceeds Income',
-        description: 'You\'re spending more than you earn this month. Review your expenses and consider creating an emergency budget.',
-        category: 'spending',
-        priority: 'high',
-        actionable: true,
-        icon: AlertCircle
-      });
-    }
-
-    // Category-specific tips
-    if (summary.transactionsByCategory) {
-      const expenseCategories = summary.transactionsByCategory
-        .filter(cat => cat.type === 'expense')
-        .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount));
-
-      // High single category spending
-      const topExpense = expenseCategories[0];
-      if (topExpense && Math.abs(topExpense.amount) > summary.totalIncome * 0.4) {
-        tips.push({
-          id: 'high-category-spending',
-          title: `High ${topExpense.categoryName} Spending`,
-          description: `Your ${topExpense.categoryName.toLowerCase()} expenses are taking up a large portion of your income. Consider ways to reduce these costs.`,
-          category: 'spending',
-          priority: 'medium',
-          actionable: true,
-          icon: TrendingDown
-        });
-      }
-    }
-
-    // Budget adherence tips
-    if (budgets && budgets.length > 0) {
-      const totalBudget = budgets.reduce((sum, budget) => sum + parseFloat(budget.amount), 0);
-      const budgetUsage = totalBudget > 0 ? Math.abs(summary.totalExpenses) / totalBudget : 0;
-
-      if (budgetUsage > 1.1) {
-        tips.push({
-          id: 'over-budget',
-          title: 'Over Budget This Month',
-          description: 'You\'ve exceeded your total budget by more than 10%. Review your spending patterns and adjust your budgets or spending habits.',
-          category: 'budgeting',
-          priority: 'high',
-          actionable: true,
-          icon: AlertCircle
-        });
-      }
-    }
-
-    // Frequent small transactions tip
-    if (transactions) {
-      const smallTransactions = transactions.filter(t => 
-        t.type === 'expense' && Math.abs(parseFloat(t.amount)) < 50
-      );
-      
-      if (smallTransactions.length > 10) {
-        const smallTransactionTotal = smallTransactions.reduce((sum, t) => sum + Math.abs(parseFloat(t.amount)), 0);
-        
-        if (smallTransactionTotal > summary.totalIncome * 0.15) {
-          tips.push({
-            id: 'small-purchases',
-            title: 'Small Purchases Add Up',
-            description: `You have ${smallTransactions.length} small transactions totaling $${smallTransactionTotal.toFixed(2)}. Consider tracking these micro-expenses more carefully.`,
-            category: 'spending',
-            priority: 'low',
-            actionable: true,
-            icon: Lightbulb
-          });
-        }
-      }
-    }
-
-    // Positive reinforcement tips
-    // Removed hardcoded excellent savings tip
-
-    // Removed hardcoded controlled spending tip
-
-    return tips.slice(0, 4); // Limit to 4 most relevant tips
-  };
-
-  const tips = generateTips();
+export default function ContextualFinancialTips({ summary, transactions, budgets, selectedMonth }: ContextualTipsProps) {
+  const [tips, setTips] = useState<FinancialTip[] | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -155,6 +54,30 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
     }
   };
 
+  useEffect(() => {
+    if (!transactions || transactions.length === 0) return;
+
+    const fetchTips = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.post('/api/ai/contextual-financial-tips', {
+          summary,
+          transactions,
+          budgets,
+          selectedMonth
+        });
+        setTips(res.data.tips || []);
+      } catch (error) {
+        console.error('Failed to fetch AI tips:', error);
+        setTips([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTips();
+  }, [summary, transactions, budgets, selectedMonth]);
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -164,16 +87,18 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {tips.length === 0 ? (
+        {loading ? (
+          <p className="text-sm text-gray-500">Generating AI insights...</p>
+        ) : tips && tips.length === 0 ? (
           <div className="text-center py-8">
             <Lightbulb className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400">
-              Add transactions to get personalized financial insights
+              No tips available. Add more transactions to receive personalized insights.
             </p>
           </div>
         ) : (
-          tips.map((tip) => {
-            const IconComponent = tip.icon;
+          tips?.map((tip) => {
+            const IconComponent = getCategoryIcon(tip.category);
             return (
               <div key={tip.id} className="border rounded-lg p-4 space-y-3">
                 <div className="flex items-start justify-between">
@@ -189,11 +114,9 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
                     {tip.priority}
                   </Badge>
                 </div>
-                
                 <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                   {tip.description}
                 </p>
-                
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="text-xs">
                     {tip.category}
@@ -208,12 +131,10 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
             );
           })
         )}
-        
-        {tips.length > 0 && (
+        {tips && tips.length > 0 && (
           <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Tips are generated based on your current spending patterns and financial goals.
-              Review them regularly to maintain healthy financial habits.
+              Tips are generated using AI based on your current transactions and budget settings.
             </p>
           </div>
         )}
