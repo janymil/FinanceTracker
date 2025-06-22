@@ -34,6 +34,7 @@ interface FinancialTip {
 export default function ContextualFinancialTips({ summary, transactions, budgets, selectedMonth }: ContextualTipsProps) {
   const [tips, setTips] = useState<FinancialTip[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -55,9 +56,38 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
   };
 
   useEffect(() => {
-    if (!transactions || transactions.length === 0) return;
+    if (!transactions || transactions.length === 0 || hasLoaded) return;
+
+    // Create a stable cache key based on financial data
+    const dataHash = JSON.stringify({
+      transactionCount: transactions.length,
+      totalIncome: summary.totalIncome || 0,
+      totalExpenses: summary.totalExpenses || 0,
+      budgetCount: budgets?.length || 0,
+      month: selectedMonth
+    });
+    const cacheKey = `financial-tips-${btoa(dataHash).slice(0, 16)}`;
+
+    // Check localStorage for cached tips first
+    const cachedData = localStorage.getItem(cacheKey);
+    if (cachedData) {
+      try {
+        const { tips: cachedTips, timestamp } = JSON.parse(cachedData);
+        const isExpired = Date.now() - timestamp > 60 * 60 * 1000; // 1 hour
+        
+        if (!isExpired && cachedTips && cachedTips.length > 0) {
+          setTips(cachedTips);
+          setHasLoaded(true);
+          return; // Use cached tips, skip API call
+        }
+      } catch (e) {
+        // Invalid cached data, continue to fetch
+      }
+    }
 
     const fetchTips = async () => {
+      if (loading) return; // Prevent multiple simultaneous calls
+      
       setLoading(true);
       try {
         const res = await axios.post('/api/ai/contextual-financial-tips', {
@@ -66,17 +96,31 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
           budgets,
           selectedMonth
         });
-        setTips(res.data.tips || []);
+        
+        const fetchedTips = res.data.tips || [];
+        setTips(fetchedTips);
+        setHasLoaded(true);
+        
+        // Cache the tips with timestamp
+        if (fetchedTips.length > 0) {
+          localStorage.setItem(cacheKey, JSON.stringify({
+            tips: fetchedTips,
+            timestamp: Date.now()
+          }));
+        }
       } catch (error) {
         console.error('Failed to fetch AI tips:', error);
         setTips([]);
+        setHasLoaded(true);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTips();
-  }, [summary, transactions, budgets, selectedMonth]);
+    // Debounce the API call to prevent multiple rapid calls
+    const timeoutId = setTimeout(fetchTips, 100);
+    return () => clearTimeout(timeoutId);
+  }, [summary?.totalIncome, summary?.totalExpenses, transactions?.length, budgets?.length, selectedMonth, hasLoaded, loading]);
 
   return (
     <Card className="h-full">
