@@ -160,10 +160,7 @@ export default function CalendarPage() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
+    return `${displayCurrency}${amount.toFixed(2)}`;
   };
 
   return (

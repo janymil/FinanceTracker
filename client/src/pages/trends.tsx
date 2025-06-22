@@ -692,7 +692,7 @@ export default function Trends() {
                         <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                           <h4 className="font-medium mb-2">Next Month Expenses</h4>
                           <p className="text-2xl font-bold text-blue-600">
-                            ${aiPredictions.financialForecast?.nextMonthExpenses?.toLocaleString() || '0'}
+                            {displayCurrency}{aiPredictions.financialForecast?.nextMonthExpenses?.toLocaleString() || '0'}
                           </p>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
                             {Math.round((aiPredictions.financialForecast?.confidence || 0) * 100)}% confidence
@@ -701,7 +701,7 @@ export default function Trends() {
                         <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                           <h4 className="font-medium mb-2">Expected Savings</h4>
                           <p className="text-2xl font-bold text-green-600">
-                            ${aiPredictions.financialForecast?.expectedSavings?.toLocaleString() || '0'}
+                            {displayCurrency}{aiPredictions.financialForecast?.expectedSavings?.toLocaleString() || '0'}
                           </p>
                           <p className="text-sm text-gray-600 dark:text-gray-400">Based on AI analysis</p>
                         </div>
@@ -790,7 +790,7 @@ export default function Trends() {
                             <div className="space-y-1">
                               <div className="flex justify-between text-sm">
                                 <span>Predicted Amount:</span>
-                                <span className="font-medium">${prediction.predictedAmount?.toLocaleString()}</span>
+                                <span className="font-medium">{displayCurrency}{prediction.predictedAmount?.toLocaleString()}</span>
                               </div>
                               <div className="flex justify-between text-sm">
                                 <span>Confidence:</span>

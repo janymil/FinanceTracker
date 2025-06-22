@@ -246,6 +246,10 @@ Changelog:
 - June 22, 2025. Resolved "currency is not defined" error in reports page by adding proper currency context integration
 - June 22, 2025. Updated all interactive chart components to display currency symbols in hover tooltips with fallback to dollar sign
 - June 22, 2025. Fixed remaining hardcoded dollar signs in Financial Statistics cards and Recent Activity section of reports page
+- June 22, 2025. COMPLETED: Fixed all remaining hardcoded dollar signs across transactions, income, expenses, budget, calendar, and trends pages
+- June 22, 2025. Updated formatCurrency functions in calendar.tsx and trends.tsx to use dynamic currency from context instead of hardcoded USD
+- June 22, 2025. Fixed AI Financial Forecasts in trends page to display user's selected currency instead of hardcoded dollar signs
+- June 22, 2025. All financial amounts throughout the entire application now display using the user's selected currency symbol
 - June 15, 2025. Updated transaction-list display limit and added proper backend validation to enforce 100-transaction limit for free users
 - June 16, 2025. Fixed deployment loading issue caused by excessive Vite icon imports - created optimized icon bundle reducing bundle size by 75%
 - June 16, 2025. Resolved Clerk JWT token mismatch errors by implementing development key configuration and browser cache clearing mechanism
