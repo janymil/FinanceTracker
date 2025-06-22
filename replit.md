@@ -296,6 +296,9 @@ Changelog:
 - June 22, 2025. FIXED PRODUCTION: Updated drizzle-kit to latest version and corrected database schema migration commands for production deployment
 - June 22, 2025. Fixed 500 server errors in production by updating updateUser method with proper field validation and error handling
 - June 22, 2025. Enhanced deployment script with correct schema migration commands to safely update production database
+- June 22, 2025. FIXED PRODUCTION SCHEMA: Manually migrated production database from old integer user IDs to Clerk string IDs
+- June 22, 2025. Recreated users table with proper firstName/lastName columns and Clerk-compatible structure
+- June 22, 2025. Preserved all 1,011 redeem codes during schema migration - no data loss occurred
 - June 15, 2025. Updated transaction-list display limit and added proper backend validation to enforce 100-transaction limit for free users
 - June 16, 2025. Fixed deployment loading issue caused by excessive Vite icon imports - created optimized icon bundle reducing bundle size by 75%
 - June 16, 2025. Resolved Clerk JWT token mismatch errors by implementing development key configuration and browser cache clearing mechanism
