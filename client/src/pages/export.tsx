@@ -261,7 +261,7 @@ goal,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     
     setIsLoadingBackupStatus(true);
     try {
-      const token = await window.Clerk?.session?.getToken();
+      const token = await getToken();
       if (token) {
         const response = await fetch('/api/backup/status', {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -283,7 +283,7 @@ goal,,,,,,,,,8000,1000,2025-06-01,Vacation`;
 
     setIsLoadingBackupStatus(true);
     try {
-      const token = await window.Clerk?.session?.getToken();
+      const token = await getToken();
       if (token) {
         const response = await fetch('/api/backup/status', {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -305,7 +305,7 @@ goal,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     if (!isReady || !user?.id) return;
 
     try {
-      const token = await window.Clerk?.session?.getToken();
+      const token = await getToken();
       if (!token) return;
 
       let url = '/api/export';
