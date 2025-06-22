@@ -578,6 +578,23 @@ export async function generateTrendPredictions(
   financialForecast: FinancialForecast;
 }> {
   try {
+    // Return zeros for empty data instead of AI-generated examples
+    if (!transactions || transactions.length === 0) {
+      console.log('No transaction data available - returning zero predictions');
+      return {
+        categoryPredictions: [],
+        financialForecast: {
+          nextMonthExpenses: 0,
+          expectedSavings: 0,
+          budgetVariance: 0,
+          confidence: 0,
+          keyInsights: ['Add transactions to generate AI-powered financial forecasts'],
+          recommendations: ['Start tracking your expenses to receive personalized predictions'],
+          riskFactors: []
+        }
+      };
+    }
+
     // Create cache keys for the input data
     const transactionsHash = aiCache.createDataHash(transactions);
     const budgetsHash = aiCache.createDataHash(budgets);

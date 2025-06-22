@@ -250,6 +250,9 @@ Changelog:
 - June 22, 2025. Updated formatCurrency functions in calendar.tsx and trends.tsx to use dynamic currency from context instead of hardcoded USD
 - June 22, 2025. Fixed AI Financial Forecasts in trends page to display user's selected currency instead of hardcoded dollar signs
 - June 22, 2025. All financial amounts throughout the entire application now display using the user's selected currency symbol
+- June 22, 2025. FIXED: AI trend predictions now return zeros for empty data instead of hardcoded placeholder examples (€810, €200, +50.0%)
+- June 22, 2025. Enhanced trends forecasts UI to show proper "no data" state when no transactions exist instead of displaying fake AI predictions
+- June 22, 2025. Added backend validation to prevent AI from generating sample data - returns authentic zeros with helpful guidance messages
 - June 15, 2025. Updated transaction-list display limit and added proper backend validation to enforce 100-transaction limit for free users
 - June 16, 2025. Fixed deployment loading issue caused by excessive Vite icon imports - created optimized icon bundle reducing bundle size by 75%
 - June 16, 2025. Resolved Clerk JWT token mismatch errors by implementing development key configuration and browser cache clearing mechanism
