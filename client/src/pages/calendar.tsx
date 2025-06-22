@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface Transaction {
   id: number;

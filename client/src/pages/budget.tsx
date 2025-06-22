@@ -28,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import { Link } from "wouter";
 import RequirePlan from "@/components/require-plan";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface Budget {
   id: number;
