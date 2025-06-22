@@ -96,6 +96,7 @@ export default function InteractiveChart({
   onExport 
 }: InteractiveChartProps) {
   const { currency } = useCurrency();
+  const displayCurrency = currency || '$';
   const chartRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
   const [chartRange, setChartRange] = useState("all");

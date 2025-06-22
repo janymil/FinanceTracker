@@ -11,6 +11,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 export default function TrendsChart() {
   const { isReady, user } = useClerkUserReady();
   const { currency } = useCurrency();
+  const displayCurrency = currency || '$';
 
   // Fetch user's actual financial data for trend calculation
   const { data: transactions, isLoading: transactionsLoading } = useQuery({
@@ -70,7 +71,7 @@ export default function TrendsChart() {
   const trendData = generateTrendData();
 
   const formatCurrency = (value: number) => {
-    return `${currency}${value.toLocaleString()}`;
+    return `${displayCurrency}${value.toLocaleString()}`;
   };
 
   const CustomTooltip = ({ active, payload, label }: any) => {

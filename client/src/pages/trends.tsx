@@ -15,6 +15,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 export default function Trends() {
   const { isReady, user } = useClerkUserReady();
   const { currency } = useCurrency();
+  const displayCurrency = currency || '$';
   const [selectedPeriod, setSelectedPeriod] = useState("6months");
   const [viewType, setViewType] = useState("overview");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -239,7 +240,7 @@ export default function Trends() {
   }, [transactions, categories]);
 
   const formatCurrency = (value: number) => {
-    return `${currency}${value.toLocaleString()}`;
+    return `${displayCurrency}${value.toLocaleString()}`;
   };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
