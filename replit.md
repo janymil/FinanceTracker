@@ -278,6 +278,7 @@ Changelog:
 - June 22, 2025. Lowered AI expense prediction minimum requirement from 10 to 3 expense transactions for better user accessibility
 - June 22, 2025. Fixed backend API data structure to match frontend interface requirements - expense predictions now return proper data types and required fields
 - June 22, 2025. Updated backend API property names to exactly match frontend expectations (currentMonth, predictedNext, confidence, predicted) - resolved undefined toLocaleString errors
+- June 22, 2025. Optimized expense predictions system: added React Query with 5-minute caching, premium user check before API calls, limited data to last 12 months/100 transactions, added 30-minute server-side caching, proper error handling and loading states
 - June 15, 2025. Updated transaction-list display limit and added proper backend validation to enforce 100-transaction limit for free users
 - June 16, 2025. Fixed deployment loading issue caused by excessive Vite icon imports - created optimized icon bundle reducing bundle size by 75%
 - June 16, 2025. Resolved Clerk JWT token mismatch errors by implementing development key configuration and browser cache clearing mechanism

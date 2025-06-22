@@ -778,16 +778,28 @@ export async function generateExpensePredictions(transactions: Array<{
       };
     }
 
-    // Filter expense transactions only and sort by date
+    // Filter expense transactions only and limit to last 12 months for efficiency
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    
     const expenseTransactions = transactions
-      .filter(t => t.type === 'expense')
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      .filter(t => t.type === 'expense' && new Date(t.date) >= oneYearAgo)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(-100); // Limit to last 100 transactions for token efficiency
 
     if (expenseTransactions.length < 3) {
       return {
         categoryPredictions: [],
         monthlyPredictions: []
       };
+    }
+
+    // Check cache first
+    const dataHash = aiCache.createDataHash(expenseTransactions);
+    const cached = aiCache.get(`expense_predictions_${dataHash}`);
+    if (cached) {
+      console.log('Using cached expense predictions - avoiding OpenAI API call');
+      return cached;
     }
 
     // Analyze spending patterns by month and category
@@ -816,10 +828,6 @@ export async function generateExpensePredictions(transactions: Array<{
       if (t.recurring) catData.recurring += 1;
     });
 
-    // Get current month data
-    const currentDate = new Date();
-    const currentMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
-    
     // Prepare data for AI analysis
     const analysisData = {
       totalTransactions: expenseTransactions.length,
@@ -928,11 +936,11 @@ ANALYSIS GUIDELINES:
       temperature: 0.2 // Low temperature for consistent financial predictions
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
     
     // Ensure all required fields are present with proper data types
-    const categoryPredictions = Array.isArray(result.categoryPredictions) 
-      ? result.categoryPredictions.map(pred => ({
+    const categoryPredictions = Array.isArray(aiResponse.categoryPredictions) 
+      ? aiResponse.categoryPredictions.map(pred => ({
           category: pred.category || 'Unknown',
           currentMonth: Number(pred.currentMonth) || 0,
           predictedNext: Number(pred.predictedNext) || 0,
@@ -942,8 +950,8 @@ ANALYSIS GUIDELINES:
         }))
       : [];
 
-    const monthlyPredictions = Array.isArray(result.monthlyPredictions)
-      ? result.monthlyPredictions.map(month => ({
+    const monthlyPredictions = Array.isArray(aiResponse.monthlyPredictions)
+      ? aiResponse.monthlyPredictions.map(month => ({
           month: month.month || 'Unknown',
           predicted: Number(month.predicted) || 0,
           confidence: Number(month.confidence) || 0.5,
@@ -951,10 +959,16 @@ ANALYSIS GUIDELINES:
         }))
       : [];
     
-    return {
+    const finalResult = {
       categoryPredictions,
       monthlyPredictions
     };
+
+    // Cache the result for 30 minutes
+    aiCache.set(`expense_predictions_${dataHash}`, finalResult, 1800);
+    console.log('Cached expense predictions for 30 minutes');
+    
+    return finalResult;
 
   } catch (error) {
     console.error('Error generating expense predictions:', error);

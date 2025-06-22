@@ -56,21 +56,30 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
   const expenseTransactions = transactions.filter(t => t.type === 'expense');
   const hasTransactionData = expenseTransactions.length >= 3;
 
+  // Use React Query for predictions with premium check and caching
+  const { data: predictionsData, isLoading: predictionsLoading, error: predictionsError } = useQuery({
+    queryKey: ['expense-predictions', user?.id, expenseTransactions.length],
+    enabled: isReady && isPremiumUser && hasTransactionData,
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
+    queryFn: async () => {
+      try {
+        const response = await apiRequest('POST', '/api/ai/expense-predictions', {
+          transactions: expenseTransactions,
+        });
+        return response.json();
+      } catch (error) {
+        console.error('Failed to fetch expense predictions:', error);
+        throw error;
+      }
+    },
+  });
+
   useEffect(() => {
-    const fetchPredictions = async () => {
-      if (!hasTransactionData) return;
-
-      const response = await apiRequest('POST', '/api/ai/expense-predictions', {
-        transactions: expenseTransactions,
-      });
-      const result = await response.json();
-
-      setPredictions(result.categoryPredictions || []);
-      setMonthlyPredictions(result.monthlyPredictions || []);
-    };
-
-    fetchPredictions();
-  }, [transactions]);
+    if (predictionsData) {
+      setPredictions(predictionsData.categoryPredictions || []);
+      setMonthlyPredictions(predictionsData.monthlyPredictions || []);
+    }
+  }, [predictionsData]);
 
   const totalPredicted = predictions.reduce((sum, p) => sum + p.predictedNext, 0);
 
@@ -116,7 +125,21 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              {hasTransactionData && predictions.length > 0 ? (
+              {predictionsLoading ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                </div>
+              ) : predictionsError ? (
+                <div className="text-center py-8">
+                  <Brain className="h-12 w-12 text-red-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                    Prediction Error
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Failed to generate predictions. Please try again later.
+                  </p>
+                </div>
+              ) : hasTransactionData && predictions.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Card className="p-4">
                     <div className="flex items-center gap-2 mb-2">
