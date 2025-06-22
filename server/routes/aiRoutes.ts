@@ -607,6 +607,41 @@ export function registerAIRoutes(app: Express) {
     }
   });
 
+  // AI Expense Predictions endpoint
+  app.post('/api/ai/expense-predictions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+
+      // Require premium plan for expense predictions
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "AI expense predictions require Premium subscription" });
+      }
+
+      const { transactions } = req.body;
+
+      if (!transactions || !Array.isArray(transactions) || transactions.length === 0) {
+        return res.json({ 
+          categoryPredictions: [],
+          monthlyPredictions: []
+        });
+      }
+
+      // Generate predictions using OpenAI
+      const { generateExpensePredictions } = await import('../openai');
+      const predictions = await generateExpensePredictions(transactions);
+
+      return res.json(predictions);
+    } catch (error) {
+      console.error("Error generating expense predictions:", error);
+      return res.status(500).json({ message: "Failed to generate expense predictions" });
+    }
+  });
+
   // Help Chat Assistant endpoint
   app.post('/api/help-chat', async (req: any, res) => {
     try {

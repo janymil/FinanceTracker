@@ -43,6 +43,25 @@ export interface FinancialForecast {
   riskFactors: string[];
 }
 
+export interface ExpensePrediction {
+  categoryPredictions: Array<{
+    category: string;
+    currentMonthSpending: number;
+    predictedNextMonth: number;
+    confidenceLevel: number;
+    trend: 'increasing' | 'decreasing' | 'stable';
+  }>;
+  monthlyPredictions: Array<{
+    month: string;
+    totalPredicted: number;
+    confidenceLevel: number;
+    breakdown: Array<{
+      category: string;
+      amount: number;
+    }>;
+  }>;
+}
+
 export interface FinancialHealthData {
   score: number;
   trend: 'improving' | 'declining' | 'stable';
@@ -735,6 +754,171 @@ Analysis Requirements:
         recommendations: [],
         riskFactors: []
       }
+    };
+  }
+}
+
+export async function generateExpensePredictions(transactions: Array<{
+  id: number;
+  amount: string;
+  description: string;
+  date: string;
+  type: string;
+  categoryId?: number;
+  categoryName?: string;
+  recurring?: boolean;
+}>): Promise<ExpensePrediction> {
+  try {
+    // Return empty predictions for insufficient data
+    if (!transactions || transactions.length < 5) {
+      return {
+        categoryPredictions: [],
+        monthlyPredictions: []
+      };
+    }
+
+    // Filter expense transactions only and sort by date
+    const expenseTransactions = transactions
+      .filter(t => t.type === 'expense')
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    if (expenseTransactions.length < 3) {
+      return {
+        categoryPredictions: [],
+        monthlyPredictions: []
+      };
+    }
+
+    // Analyze spending patterns by month and category
+    const monthlyData = new Map<string, Map<string, number>>();
+    const categoryTotals = new Map<string, { total: number, count: number, recurring: number }>();
+    
+    expenseTransactions.forEach(t => {
+      const month = t.date.slice(0, 7); // YYYY-MM format
+      const category = t.categoryName || 'Other';
+      const amount = Math.abs(parseFloat(t.amount));
+      
+      // Track monthly spending by category
+      if (!monthlyData.has(month)) {
+        monthlyData.set(month, new Map());
+      }
+      const monthData = monthlyData.get(month)!;
+      monthData.set(category, (monthData.get(category) || 0) + amount);
+      
+      // Track category statistics
+      if (!categoryTotals.has(category)) {
+        categoryTotals.set(category, { total: 0, count: 0, recurring: 0 });
+      }
+      const catData = categoryTotals.get(category)!;
+      catData.total += amount;
+      catData.count += 1;
+      if (t.recurring) catData.recurring += 1;
+    });
+
+    // Get current month data
+    const currentDate = new Date();
+    const currentMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+    
+    // Prepare data for AI analysis
+    const analysisData = {
+      totalTransactions: expenseTransactions.length,
+      timeSpan: `${expenseTransactions[0].date.slice(0, 7)} to ${expenseTransactions[expenseTransactions.length - 1].date.slice(0, 7)}`,
+      monthlyBreakdown: Array.from(monthlyData.entries()).map(([month, categories]) => ({
+        month,
+        totalSpent: Array.from(categories.values()).reduce((sum, amount) => sum + amount, 0),
+        categories: Array.from(categories.entries()).map(([cat, amount]) => ({ category: cat, amount }))
+      })),
+      categoryAnalysis: Array.from(categoryTotals.entries()).map(([category, data]) => ({
+        category,
+        totalSpent: data.total,
+        averagePerTransaction: data.total / data.count,
+        transactionCount: data.count,
+        recurringTransactions: data.recurring,
+        recurringPercentage: (data.recurring / data.count * 100).toFixed(1)
+      })),
+      recentTransactions: expenseTransactions.slice(-20).map(t => ({
+        date: t.date.slice(0, 10),
+        description: t.description,
+        amount: Math.abs(parseFloat(t.amount)),
+        category: t.categoryName || 'Other',
+        recurring: t.recurring || false
+      }))
+    };
+
+    const prompt = `Analyze this detailed expense data and generate accurate predictions for future spending patterns.
+
+EXPENSE ANALYSIS DATA:
+${JSON.stringify(analysisData, null, 2)}
+
+REQUIREMENTS:
+1. Identify spending trends, seasonal patterns, and recurring expenses
+2. Calculate realistic predictions based on historical data
+3. Assess confidence levels based on data consistency and patterns
+4. Consider factors like spending volatility, growth trends, and recurring expenses
+
+RESPONSE FORMAT (JSON):
+{
+  "categoryPredictions": [
+    {
+      "category": "Food & Dining",
+      "currentMonthSpending": 450.00,
+      "predictedNextMonth": 475.00,
+      "confidenceLevel": 0.85,
+      "trend": "increasing",
+      "factors": ["Seasonal increase", "Recent dining out trend", "Grocery price inflation"]
+    }
+  ],
+  "monthlyPredictions": [
+    {
+      "month": "2025-07",
+      "totalPredicted": 2150.00,
+      "confidenceLevel": 0.80,
+      "breakdown": [
+        { "category": "Food & Dining", "amount": 475.00 },
+        { "category": "Transportation", "amount": 320.00 }
+      ]
+    }
+  ]
+}
+
+ANALYSIS GUIDELINES:
+- Use actual spending patterns to predict future amounts
+- Factor in recurring expenses for higher confidence
+- Consider trend direction (increasing/decreasing/stable)
+- Provide realistic confidence levels (0.6-0.95 range)
+- Include next 3-6 months in monthly predictions
+- Explain prediction factors clearly
+- Account for seasonal variations if detectable`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are an advanced financial forecasting AI specializing in expense prediction analysis. You analyze spending patterns, identify trends, and generate accurate predictions based on historical transaction data. Focus on realistic, data-driven predictions with appropriate confidence levels."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 1500,
+      temperature: 0.2 // Low temperature for consistent financial predictions
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    
+    return {
+      categoryPredictions: Array.isArray(result.categoryPredictions) ? result.categoryPredictions : [],
+      monthlyPredictions: Array.isArray(result.monthlyPredictions) ? result.monthlyPredictions : []
+    };
+
+  } catch (error) {
+    console.error('Error generating expense predictions:', error);
+    return {
+      categoryPredictions: [],
+      monthlyPredictions: []
     };
   }
 }
