@@ -53,7 +53,7 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
   const userPlan = databaseUser?.plan || 'free';
   const isPremiumUser = userPlan === 'premium';
 
-  const hasEnoughExpenses = transactions.filter(t => t.type === 'expense').length >= 10;
+  const hasEnoughExpenses = transactions.filter(t => t.type === 'expense').length >= 3;
 
   useEffect(() => {
     const fetchPredictions = async () => {
@@ -118,7 +118,7 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                 Not Enough Expense Data
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Add at least 10 expense transactions to generate predictions.
+                Add at least 3 expense transactions to generate predictions.
               </p>
             </div>
           )
