@@ -40,37 +40,13 @@ interface CurrencySetupModalProps {
 }
 
 export function CurrencySetupModal({ isOpen, onClose, onSelectCurrency }: CurrencySetupModalProps) {
-  const [selectedCurrency, setSelectedCurrency] = useState('');
+  const [selectedCurrency, setSelectedCurrency] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
   
 
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      await apiRequest('PUT', '/api/auth/user', {
-        currency: selectedCurrency
-      });
-      
-      toast({
-        title: "Currency set successfully",
-        description: `Your preferred currency is now ${selectedCurrency}`,
-      });
-      
-      onSelectCurrency(selectedCurrency);
-      onClose();
-    } catch (error) {
-      console.error('Failed to save currency:', error);
-      toast({
-        title: "Error saving currency",
-        description: "Please try again or contact support if the issue persists.",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
+
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}} modal={true}>
@@ -91,47 +67,39 @@ export function CurrencySetupModal({ isOpen, onClose, onSelectCurrency }: Curren
             {CURRENCY_OPTIONS.map((currency) => (
               <Button
                 key={currency.code}
-                variant={selectedCurrency === currency.symbol ? "default" : "outline"}
+                variant="outline"
                 onClick={async () => {
-                  setSelectedCurrency(currency.symbol);
                   setSaving(true);
                   try {
                     await apiRequest('PUT', '/api/auth/user', {
-                      currency: currency.symbol
+                      currency: currency.code
                     });
                     
                     toast({
                       title: "Currency Set Successfully",
-                      description: `Your currency has been set to ${currency.symbol}. Use the gear icon in the header to change it before adding transactions.`,
+                      description: `Your currency has been set to ${currency.code}. Use the gear icon in the header to change it before adding transactions.`,
                     });
                     
-                    onSelectCurrency(currency.symbol);
+                    onSelectCurrency(currency.code);
                     onClose();
                   } catch (error) {
                     console.error('Failed to update currency:', error);
+                    toast({
+                      title: "Error",
+                      description: "Failed to set currency. Please try again.",
+                      variant: "destructive",
+                    });
                   } finally {
                     setSaving(false);
                   }
                 }}
-                className="h-16 p-3 flex flex-col items-center justify-center space-y-1 relative hover:scale-105 transition-transform"
+                disabled={saving}
+                className="h-16 p-3 flex flex-col items-center justify-center space-y-1 relative hover:scale-105 transition-transform disabled:opacity-50"
               >
-                <span className="text-xl font-bold">{currency.symbol}</span>
+                <span className="text-xl font-bold">{currency.code}</span>
                 <span className="text-xs text-center leading-tight">{currency.label}</span>
-                {selectedCurrency === currency.symbol && (
-                  <Check className="h-4 w-4 text-green-600 absolute top-2 right-2" />
-                )}
               </Button>
             ))}
-          </div>
-          
-          <div className="flex justify-end pt-4 border-t">
-            <Button 
-              onClick={handleSave} 
-              disabled={saving}
-              className="w-full"
-            >
-              {saving ? "Setting up..." : "Complete Setup"}
-            </Button>
           </div>
         </div>
       </DialogContent>
