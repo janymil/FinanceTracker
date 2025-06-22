@@ -56,7 +56,7 @@ export function CurrencySetupModal({ isOpen, onClose, onSelectCurrency }: Curren
         
         <div className="space-y-4 py-4">
           <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-            🌎 Choose from 20+ currencies including Latin American options:
+            🌎 Choose from 15 currencies including Latin American options:
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">

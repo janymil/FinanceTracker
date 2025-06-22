@@ -181,7 +181,7 @@ export default function Help() {
     {
       id: "categories-custom",
       question: "Can I create custom categories?",
-      answer: "Yes, create unlimited custom categories with personalized names, colors, and icons. Choose from income, expense, or goal types. Custom categories appear alongside 20+ predefined categories in all dropdown menus."
+      answer: "Yes, create unlimited custom categories with personalized names, colors, and icons. Choose from income, expense, or goal types. Custom categories appear alongside 15+ predefined categories in all dropdown menus."
     },
     {
       id: "financial-health-score",

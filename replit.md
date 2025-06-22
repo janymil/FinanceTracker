@@ -232,7 +232,7 @@ Changelog:
 - June 15, 2025. Increased free plan transaction limit from 3 to 100 transactions across all configuration files, pricing pages, and backend enforcement
 - June 21, 2025. Fixed pricing table inconsistency - corrected "Last 3" to "Up to 100" for Free tier transaction history in landing page and legacy pricing components
 - June 21, 2025. Fixed critical authentication issue - simplified user creation logic in authRoutes.ts to eliminate false "account deleted" errors
-- June 21, 2025. COMPLETED: Implemented comprehensive currency selection system with 20+ currencies focusing on Latin American options
+- June 21, 2025. COMPLETED: Implemented comprehensive currency selection system with 15 currencies focusing on Latin American options
 - June 21, 2025. Currency setup modal appears when user currency is NULL and persists until selection made
 - June 21, 2025. Removed gear icon from header once currency is selected - only shows for new users without currency
 - June 21, 2025. Currency locks permanently after first transaction is added, changeable only during initial setup
@@ -241,6 +241,7 @@ Changelog:
 - June 22, 2025. Updated all formatCurrency functions to use selected currency from context instead of hardcoded USD
 - June 22, 2025. Fixed database schema to properly trigger currency modal for new users - removed default currency value
 - June 22, 2025. Currency selection system now fully operational - modal appears for new users and currency displays correctly throughout app
+- June 22, 2025. Corrected inaccurate "20+ currencies" text to "15 currencies" throughout application and documentation
 - June 15, 2025. Updated transaction-list display limit and added proper backend validation to enforce 100-transaction limit for free users
 - June 16, 2025. Fixed deployment loading issue caused by excessive Vite icon imports - created optimized icon bundle reducing bundle size by 75%
 - June 16, 2025. Resolved Clerk JWT token mismatch errors by implementing development key configuration and browser cache clearing mechanism
