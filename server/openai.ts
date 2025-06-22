@@ -1063,6 +1063,8 @@ ${recentTransactions.slice(0, 10).map(t =>
   `- ${t.date}: ${t.type} $${t.amount} - ${t.description}`
 ).join('\n')}
 
+IMPORTANT: Use actual category names from the Top Spending Categories list above. Do NOT use "Category 1", "Category 2", etc. Use the real category names like "Transportation", "Food", "Utilities", etc.
+
 Please provide:
 1. 3-5 actionable daily task recommendations
 2. 2-3 personalized financial insights

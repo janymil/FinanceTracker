@@ -288,6 +288,16 @@ export const redeemCodes = pgTable("redeem_codes", {
 });
 
 // Import logs for tracking data imports
+export const dailyRecommendations = pgTable("daily_recommendations", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  recommendations: json("recommendations").notNull(),
+  insights: json("insights").notNull(),
+  dataHash: text("data_hash").notNull(),
+  generatedAt: timestamp("generated_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
 export const importLogs = pgTable("import_logs", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),

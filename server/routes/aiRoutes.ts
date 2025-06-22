@@ -11,6 +11,16 @@ import {
   type ExpenseCategorizationResult 
 } from "../openai";
 import { aiCache } from "../cache";
+import { db } from "../db";
+import { 
+  transactionsTable, 
+  categoriesTable, 
+  budgetsTable, 
+  goalsTable,
+  expenseRemindersTable,
+  usersTable,
+  dailyRecommendations
+} from "../../shared/schema";
 
 export function registerAIRoutes(app: Express) {
   // Auto-categorization endpoint for bulk processing

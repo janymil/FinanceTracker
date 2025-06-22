@@ -249,10 +249,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                     No Recommendations Available
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    {hasTransactionData 
-                      ? "No recommendations available. Check back later for new suggestions." 
-                      : "Add at least 3 transactions to receive AI-powered daily recommendations"
-                    }
+                    Add at least 3 transactions to receive AI-powered daily recommendations with real category insights.
                   </p>
                 </div>
               )}

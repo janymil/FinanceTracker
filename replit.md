@@ -289,6 +289,10 @@ Changelog:
 - June 22, 2025. Daily recommendations system now fully operational with OpenAI GPT-4o generating personalized tasks and insights for premium users
 - June 22, 2025. COMPLETED: Fixed daily recommendations backend error - resolved undefined property access in financial summary data causing API failures
 - June 22, 2025. Daily recommendations widget now successfully displays AI-generated personalized tasks and financial insights for premium users with 3+ transactions
+- June 22, 2025. COMPLETED: Fixed category naming issue - AI now returns actual category names instead of "Category 6" or "Category 3"
+- June 22, 2025. Implemented cost-effective caching system with 24-hour persistence and database storage for session continuity
+- June 22, 2025. Added intelligent cache invalidation based on significant transaction changes (every 5 transactions) instead of minor fluctuations
+- June 22, 2025. Enhanced daily recommendations to persist between sessions using database storage with 7-day expiration
 - June 15, 2025. Updated transaction-list display limit and added proper backend validation to enforce 100-transaction limit for free users
 - June 16, 2025. Fixed deployment loading issue caused by excessive Vite icon imports - created optimized icon bundle reducing bundle size by 75%
 - June 16, 2025. Resolved Clerk JWT token mismatch errors by implementing development key configuration and browser cache clearing mechanism
