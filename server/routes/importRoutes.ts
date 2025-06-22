@@ -93,62 +93,47 @@ function convertCSVToJSON(csvData: Record<string, any>[]): any {
   };
 
   csvData.forEach(row => {
-    // Process transactions (income/expense)
-    if (row.type === 'income' || row.type === 'expense') {
+    const dataType = row.dataType?.toLowerCase();
+    
+    // Process transactions
+    if (dataType === 'transaction' && row.transactionType && row.amount) {
       const transaction = {
         amount: parseFloat(row.amount || '0'),
         description: row.description || '',
-        type: row.type,
+        type: row.transactionType,
         date: row.date,
-        categoryName: row.category || row.categoryName,
+        categoryName: row.category,
         isRecurring: row.isRecurring === 'true' || row.isRecurring === true,
         recurringFrequency: row.recurringFrequency,
-        recurringEndDate: row.recurringEndDate,
       };
       
-      if (row.type === 'income') {
+      if (row.transactionType === 'income') {
         result.incomes.push(transaction);
-      } else {
+      } else if (row.transactionType === 'expense') {
         result.expenses.push(transaction);
       }
     }
     
-    // Process categories - removed as system will auto-create with default icons/colors
-    
     // Process budgets
-    if (row.budgetCategory && row.budgetAmount) {
+    if (dataType === 'budget' && row.category && row.budgetAmount) {
       result.budgets.push({
-        categoryName: row.budgetCategory,
+        categoryName: row.category,
         amount: parseFloat(row.budgetAmount),
         period: row.budgetPeriod || 'monthly',
-        startDate: row.budgetStartDate,
-        endDate: row.budgetEndDate,
+        startDate: new Date().toISOString().split('T')[0], // Default to current month
+        endDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0],
       });
     }
     
     // Process goals
-    if (row.goalName && row.goalTargetAmount) {
+    if (dataType === 'goal' && row.goalTargetAmount && row.goalCategory) {
       result.goals.push({
-        name: row.goalName,
-        description: row.goalDescription,
+        name: row.goalCategory,
+        description: `Goal for ${row.goalCategory}`,
         targetAmount: parseFloat(row.goalTargetAmount),
         currentAmount: parseFloat(row.goalCurrentAmount || '0'),
         targetDate: row.goalTargetDate,
-        category: row.goalCategory || 'Other',
-      });
-    }
-    
-    // Process collaborative goals
-    if (row.collaborativeGoalName && row.collaborativeGoalTargetAmount) {
-      result.collaborativeGoals.push({
-        name: row.collaborativeGoalName,
-        description: row.collaborativeGoalDescription,
-        targetAmount: parseFloat(row.collaborativeGoalTargetAmount),
-        currentAmount: parseFloat(row.collaborativeGoalCurrentAmount || '0'),
-        targetDate: row.collaborativeGoalTargetDate,
-        category: row.collaborativeGoalCategory || 'Other',
-        challengeType: row.collaborativeGoalType || 'collaborative',
-        isPublic: row.collaborativeGoalIsPublic === 'true',
+        category: row.goalCategory,
       });
     }
   });

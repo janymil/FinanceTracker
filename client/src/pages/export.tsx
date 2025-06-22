@@ -96,15 +96,16 @@ export default function ExportPage() {
 
   // Import functionality
   const handleDownloadExample = () => {
-    const exampleCSV = `type,amount,description,date,category,isRecurring,recurringFrequency,budgetCategory,budgetAmount,budgetPeriod,budgetStartDate,budgetEndDate,goalName,goalDescription,goalTargetAmount,goalCurrentAmount,goalTargetDate,goalCategory,collaborativeGoalName,collaborativeGoalDescription,collaborativeGoalTargetAmount,collaborativeGoalCurrentAmount,collaborativeGoalTargetDate,collaborativeGoalCategory,collaborativeGoalType,collaborativeGoalIsPublic
-income,5000,Monthly Salary,2025-01-01,Salary,true,monthly,,,,,,,,,,,,,,,,,,,
-income,500,Freelance Project,2025-01-15,Freelance,false,,,,,,,,,,,,,,,,,,,,
-expense,1200,Monthly Rent,2025-01-01,Housing,true,monthly,,,,,,,,,,,,,,,,,,,
-expense,300,Groceries,2025-01-05,Food & Dining,false,,Food & Dining,500,monthly,2025-01-01,2025-01-31,,,,,,,,,,,,,,
-expense,80,Electric Bill,2025-01-10,Utilities,true,monthly,Utilities,150,monthly,2025-01-01,2025-01-31,,,,,,,,,,,,,,
-,,,,,,,,,,,,Emergency Fund,Build 6 month emergency fund,30000,5000,2025-12-31,Emergency Fund,,,,,,,
-,,,,,,,,,,,,Vacation,Save for summer vacation,8000,1000,2025-06-01,Vacation,,,,,,,
-,,,,,,,,,,,,,,,,,Family Vacation,Save for family trip to Europe,12000,2000,2025-07-01,Vacation,collaborative,false`;
+    const exampleCSV = `dataType,transactionType,amount,description,date,category,isRecurring,recurringFrequency,budgetAmount,budgetPeriod,goalTargetAmount,goalCurrentAmount,goalTargetDate,goalCategory
+transaction,income,5000,Monthly Salary,2025-01-01,Salary,true,monthly,,,,,
+transaction,income,500,Freelance Project,2025-01-15,Freelance,false,,,,,,
+transaction,expense,1200,Monthly Rent,2025-01-01,Housing,true,monthly,,,,,
+transaction,expense,300,Groceries,2025-01-05,Food & Dining,false,,,,,,
+transaction,expense,80,Electric Bill,2025-01-10,Utilities,true,monthly,,,,,
+budget,,,,,,Food & Dining,,,500,monthly,,,
+budget,,,,,,Utilities,,,150,monthly,,,
+goal,,,,,,,,,30000,5000,2025-12-31,Emergency Fund
+goal,,,,,,,,,8000,1000,2025-06-01,Vacation`;
 
     const blob = new Blob([exampleCSV], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);

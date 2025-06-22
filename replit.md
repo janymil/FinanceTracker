@@ -411,6 +411,8 @@ Changelog:
 - June 22, 2025. Added automatic category creation functionality - system creates missing categories during import process
 - June 22, 2025. Implemented CSV-to-JSON conversion with support for mixed data types in single CSV file
 - June 22, 2025. Added comprehensive data validation using Zod schemas with detailed error reporting and import summaries
+- June 22, 2025. SIMPLIFIED: Redesigned CSV format to be user-friendly - removed complex category icon/color columns, system auto-creates with defaults
+- June 22, 2025. Updated CSV template to use clear dataType column (transaction/budget/goal) for better data organization and user understanding
 - June 18, 2025. Implemented real-time polling system for mobile uploads with 5-second intervals and automatic timeout handling
 - June 18, 2025. Enhanced mobile upload workflow with OCR processing, AI categorization, and automatic form population from mobile-captured receipt data
 - June 18, 2025. FIXED: Mobile upload QR code 404 errors by removing duplicate route and ensuring proper SignedOut routing configuration
