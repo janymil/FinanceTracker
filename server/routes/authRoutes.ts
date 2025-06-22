@@ -46,7 +46,8 @@ export function registerAuthRoutes(app: Express) {
             plan: 'free',
             stripeCustomerId: null,
             stripeSubscriptionId: null,
-            settings: null
+            settings: null,
+            currency: null // Explicitly set to null to trigger currency setup modal
           };
           user = await storage.upsertUser(userData);
           console.log(`Created new user in database: ${userId}`);
