@@ -119,11 +119,29 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
       
       setLoading(true);
       try {
+        // Get auth headers for Clerk authentication
+        const getAuthHeaders = async (): Promise<Record<string, string>> => {
+          try {
+            if (typeof window !== 'undefined' && window.Clerk?.session) {
+              const token = await window.Clerk.session.getToken();
+              if (token) {
+                return { Authorization: `Bearer ${token}` };
+              }
+            }
+          } catch (error) {
+            console.warn('Failed to get Clerk token:', error);
+          }
+          return {};
+        };
+
+        const authHeaders = await getAuthHeaders();
         const res = await axios.post('/api/ai/contextual-financial-tips', {
           summary,
           transactions: monthTransactions, // Pass only filtered transactions
           budgets,
           selectedMonth
+        }, {
+          headers: authHeaders
         });
         
         const fetchedTips = res.data.tips || [];
