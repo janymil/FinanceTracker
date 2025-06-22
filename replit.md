@@ -438,6 +438,9 @@ Changelog:
 - June 22, 2025. FIXED: AI Financial Tips widget inconsistency - now properly analyzes monthly data matching selected period
 - June 22, 2025. Enhanced AI Tips backend to use monthly transaction scope instead of all-time data for consistent behavior
 - June 22, 2025. Added minimum transaction threshold (2 transactions) for monthly AI analysis with helpful guidance messages
+- June 22, 2025. COMPLETED: Implemented intelligent caching system for AI Financial Tips to prevent unnecessary OpenAI API calls
+- June 22, 2025. Enhanced caching with monthly data hashing - tips only regenerate when transaction data changes for specific months
+- June 22, 2025. Added persistent localStorage caching with monthly keys for consistent user experience across sessions
 - June 18, 2025. Implemented real-time polling system for mobile uploads with 5-second intervals and automatic timeout handling
 - June 18, 2025. Enhanced mobile upload workflow with OCR processing, AI categorization, and automatic form population from mobile-captured receipt data
 - June 18, 2025. FIXED: Mobile upload QR code 404 errors by removing duplicate route and ensuring proper SignedOut routing configuration

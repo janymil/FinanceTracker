@@ -171,19 +171,48 @@ export function registerAIRoutes(app: Express) {
             });
           })();
 
+      // Create a stable cache key based on monthly data content (not timestamp)
+      const monthlyDataForCaching = {
+        totalIncome: actualTotalIncome,
+        totalExpenses: actualTotalExpenses,
+        transactionsByCategory,
+        monthlyTransactions: processedMonthlyTransactions,
+        month,
+        year,
+        userId
+      };
+      
+      const cacheKey = aiCache.createDataHash(monthlyDataForCaching);
+      
+      // Check if we have cached tips for this exact monthly data
+      const cachedTips = aiCache.getTips(cacheKey);
+      if (cachedTips && !financialData.timestamp) {
+        console.log(`Using cached AI tips for ${month} ${year} - no data changes detected`);
+        const tip = cachedTips.length > 0 ? cachedTips[0] : null;
+        if (tip) {
+          return res.json({ tip: `${tip.title}: ${tip.description}` });
+        }
+      }
+
       // Prepare financial data for AI analysis using monthly scope
       const aiFinancialData = {
         totalIncome: actualTotalIncome,
         totalExpenses: actualTotalExpenses,
         transactionsByCategory,
         recentTransactions: processedMonthlyTransactions,
-        timestamp: Date.now()
+        // Don't include timestamp for caching stability
       };
 
-      console.log(`AI analyzing ${month} ${year}: ${totalMonthlyTransactions} transactions (${monthlyIncomeCount} income, ${monthlyExpenseCount} expenses)`);
+      console.log(`Generating new AI tips for ${month} ${year}: ${totalMonthlyTransactions} transactions (${monthlyIncomeCount} income, ${monthlyExpenseCount} expenses)`);
       console.log(`Monthly totals - Income: $${actualTotalIncome}, Expenses: $${actualTotalExpenses}, Net: $${actualTotalIncome - actualTotalExpenses}`);
       
       const tips = await generateFinancialTips(aiFinancialData);
+      
+      // Cache the new tips with the monthly data hash
+      if (tips && tips.length > 0) {
+        aiCache.setTips(cacheKey, tips);
+        console.log(`Cached new AI tips for ${month} ${year}`);
+      }
       const tip = tips.length > 0 ? tips[0] : null;
 
       if (tip) {

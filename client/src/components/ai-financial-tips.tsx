@@ -46,13 +46,22 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
 
   // Load saved tip from localStorage on component mount
   useEffect(() => {
-    if (user?.id) {
-      const savedTip = localStorage.getItem(`ai-tip-${user.id}`);
+    if (user?.id && summary) {
+      // Create a cache key based on monthly data to ensure tips match the displayed period
+      const currentDate = new Date();
+      const monthName = currentDate.toLocaleString('default', { month: 'long' });
+      const year = currentDate.getFullYear();
+      
+      const monthlyKey = `ai-tip-${user.id}-${monthName}-${year}`;
+      const savedTip = localStorage.getItem(monthlyKey);
       if (savedTip) {
         setCurrentTip(cleanAIText(savedTip));
+      } else {
+        // Clear any old tip if no monthly tip exists
+        setCurrentTip(null);
       }
     }
-  }, [user?.id]);
+  }, [user?.id, summary]);
 
   // Get user's plan from database
   const { data: databaseUser } = useQuery({
@@ -81,7 +90,8 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             categories: summary.transactionsByCategory || [],
             month: monthName,
             year: currentDate.getFullYear(),
-            timestamp: Date.now()
+            // Only include timestamp for fresh generation (bypass cache)
+            ...(Math.random() < 0.1 ? { timestamp: Date.now() } : {})
           }
         }),
         headers: {
@@ -106,7 +116,12 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     onSuccess: (cleanedTip: string) => {
       setCurrentTip(cleanedTip);
       if (user?.id) {
-        localStorage.setItem(`ai-tip-${user.id}`, cleanedTip);
+        // Save tip with monthly key to ensure it persists for the specific month
+        const currentDate = new Date();
+        const monthName = currentDate.toLocaleString('default', { month: 'long' });
+        const year = currentDate.getFullYear();
+        const monthlyKey = `ai-tip-${user.id}-${monthName}-${year}`;
+        localStorage.setItem(monthlyKey, cleanedTip);
       }
       toast({
         title: "AI Tip Generated",
