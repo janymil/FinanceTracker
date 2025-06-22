@@ -82,6 +82,14 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
       
+      console.log('AI Tips: Generating with data:', {
+        totalIncome: summary.totalIncome,
+        totalExpenses: summary.totalExpenses,
+        categories: summary.transactionsByCategory || [],
+        month: monthName,
+        year: currentDate.getFullYear()
+      });
+
       const response = await apiRequest("POST", "/api/ai/tip", {
         body: JSON.stringify({
           financialData: {
@@ -90,8 +98,8 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             categories: summary.transactionsByCategory || [],
             month: monthName,
             year: currentDate.getFullYear(),
-            // Only include timestamp for fresh generation (bypass cache)
-            ...(Math.random() < 0.1 ? { timestamp: Date.now() } : {})
+            // Include timestamp to force fresh generation for debugging
+            timestamp: Date.now()
           }
         }),
         headers: {

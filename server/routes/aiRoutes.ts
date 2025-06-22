@@ -136,8 +136,17 @@ export function registerAIRoutes(app: Express) {
       const monthlyIncomeCount = currentMonthTransactions.filter(t => t.type === 'income').length;
       const totalMonthlyTransactions = monthlyExpenseCount + monthlyIncomeCount;
 
+      console.log(`AI Tips Debug - Month: ${month} ${year}, Total monthly transactions: ${totalMonthlyTransactions}`);
+      console.log(`Monthly transactions found:`, currentMonthTransactions.map(t => ({ 
+        description: t.description, 
+        amount: t.amount, 
+        date: t.date.toISOString().split('T')[0],
+        type: t.type 
+      })));
+
       // If insufficient monthly data, provide guidance message
       if (totalMonthlyTransactions < 2) {
+        console.log(`Insufficient transactions for AI tips: ${totalMonthlyTransactions} transactions for ${month} ${year}`);
         return res.json({ 
           tip: `Add more transactions for ${month} ${year} to get personalized AI insights. Currently showing ${totalMonthlyTransactions} transaction${totalMonthlyTransactions !== 1 ? 's' : ''}.` 
         });
