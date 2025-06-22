@@ -213,6 +213,7 @@ export class DatabaseStorage implements IStorage {
           lastName: userData.lastName,
           profileImageUrl: userData.profileImageUrl,
           plan: userData.plan || 'free',
+          currency: userData.currency,
           stripeCustomerId: userData.stripeCustomerId,
           stripeSubscriptionId: userData.stripeSubscriptionId,
           settings: userData.settings,

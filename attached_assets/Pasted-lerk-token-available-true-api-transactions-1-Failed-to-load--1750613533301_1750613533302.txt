@@ -1,0 +1,132 @@
+lerk token available: true
+/api/transactions:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+/api/auth/user:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+/api/auth/user:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+/api/auth/user:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+index-zrWyzGUh.js:646 Failed to initialize currency: Error: 500: {"message":"Failed to fetch user"}
+    at jq (index-zrWyzGUh.js:602:2175)
+    at async Ot (index-zrWyzGUh.js:602:2726)
+    at async index-zrWyzGUh.js:646:6418
+(anonymous) @ index-zrWyzGUh.js:646
+2index-zrWyzGUh.js:602 Clerk token available: true
+/api/auth/user:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+index-zrWyzGUh.js:602 Clerk token available: true
+/api/transactions:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+/api/auth/user:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+index-zrWyzGUh.js:602 Clerk token available: true
+/api/transactions:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+index-zrWyzGUh.js:602 Clerk token available: true
+/api/auth/user:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+index-zrWyzGUh.js:602 Clerk token available: true
+/api/transactions:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+index-zrWyzGUh.js:602 Clerk token available: true
+/api/auth/user:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+index-zrWyzGUh.js:602 Clerk token available: true
+/api/auth/user:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+index-zrWyzGUh.js:646 Failed to update currency: Error: 500: {"message":"Failed to update user"}
+    at jq (index-zrWyzGUh.js:602:2175)
+    at async Ot (index-zrWyzGUh.js:602:2726)
+    at async onClick (index-zrWyzGUh.js:646:5419)
+onClick @ index-zrWyzGUh.js:646
+index-zrWyzGUh.js:602 Clerk token available: true
+/api/auth/user:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+index-zrWyzGUh.js:646 Failed to update currency: Error: 500: {"message":"Failed to update user"}
+    at jq (index-zrWyzGUh.js:602:2175)
+    at async Ot (index-zrWyzGUh.js:602:2726)
+    at async onClick (index-zrWyzGUh.js:646:5419)
+onClick @ index-zrWyzGUh.js:646
+5index-zrWyzGUh.js:602 Clerk token available: true
+/api/auth/user:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+/api/transactions:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+/api/auth/user:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+3index-zrWyzGUh.js:602 Clerk token available: true
+/api/transactions:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+/api/auth/user:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+/api/auth/user:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+index-zrWyzGUh.js:602 Clerk token available: true
+/api/transactions:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+2index-zrWyzGUh.js:602 Clerk token available: true
+/api/auth/user:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+/api/transactions:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.
+index-zrWyzGUh.js:602 Clerk token available: true
+index-zrWyzGUh.js:602 
+            
+            
+           GET https://finanzerpro.com/api/auth/user 500 (Internal Server Error)
+(anonymous) @ index-zrWyzGUh.js:602
+await in (anonymous)
+i @ index-zrWyzGUh.js:56
+b @ index-zrWyzGUh.js:56
+(anonymous) @ index-zrWyzGUh.js:56
