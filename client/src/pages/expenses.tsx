@@ -601,7 +601,7 @@ export default function Expenses() {
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Expenses</p>
                   <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-                    ${totalExpenses.toFixed(2)}
+                    {displayCurrency}{totalExpenses.toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -617,7 +617,7 @@ export default function Expenses() {
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Average Expense</p>
                   <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                    {currency || '$'}{averageExpense.toFixed(2)}
+                    {displayCurrency}{averageExpense.toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -894,7 +894,7 @@ export default function Expenses() {
                     </div>
                     <div className="flex items-center justify-between sm:justify-end sm:gap-4 shrink-0">
                       <p className="font-semibold text-red-600 dark:text-red-400 text-lg">
-                        -${parseFloat(transaction.amount).toFixed(2)}
+                        -{displayCurrency}{parseFloat(transaction.amount).toFixed(2)}
                       </p>
                       <div className="flex items-center gap-1">
                         <Button

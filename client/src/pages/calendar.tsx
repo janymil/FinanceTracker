@@ -45,6 +45,8 @@ export default function CalendarPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { isReady, user, getAuthHeaders } = useClerkUserReady();
+  const { currency } = useCurrency();
+  const displayCurrency = currency || '$';
 
   useEffect(() => {
     if (!isReady || !user?.id) {

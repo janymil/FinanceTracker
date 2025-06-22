@@ -689,7 +689,7 @@ export default function Transactions() {
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Income</p>
                   <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                    ${totalIncome.toFixed(2)}
+                    {displayCurrency}{totalIncome.toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -945,7 +945,7 @@ export default function Transactions() {
                     </div>
                     <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 shrink-0">
                       <p className={`font-semibold text-lg ${transaction.type === "income" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                        {transaction.type === "income" ? "+" : "-"}${parseFloat(transaction.amount).toFixed(2)}
+                        {transaction.type === "income" ? "+" : "-"}{displayCurrency}{parseFloat(transaction.amount).toFixed(2)}
                       </p>
                       <div className="flex items-center gap-1">
                         <Button

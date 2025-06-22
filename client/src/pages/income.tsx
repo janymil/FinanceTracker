@@ -605,7 +605,7 @@ export default function Income() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Income</p>
-                <p className="text-2xl font-bold">${totalIncome.toFixed(2)}</p>
+                <p className="text-2xl font-bold">{displayCurrency}{totalIncome.toFixed(2)}</p>
               </div>
               <DollarSign className="h-8 w-8 text-green-600" />
             </div>
@@ -731,7 +731,7 @@ export default function Income() {
                   </div>
                   <div className="flex items-center space-x-4">
                     <span className="font-semibold text-green-600">
-                      +{currency || '$'}{parseFloat(transaction.amount).toFixed(2)}
+                      +{displayCurrency}{parseFloat(transaction.amount).toFixed(2)}
                     </span>
                     <div className="flex space-x-2">
                       <Button

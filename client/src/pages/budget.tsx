@@ -304,7 +304,7 @@ export default function Budget() {
                     <Calendar className="h-5 w-5" />
                     {format(currentDate, "MMMM yyyy")}
                   </CardTitle>
-                  <CardDescription>Total budget for {format(currentDate, "MMMM yyyy")}: ${totalBudget.toFixed(2)}</CardDescription>
+                  <CardDescription>Total budget for {format(currentDate, "MMMM yyyy")}: {displayCurrency}{totalBudget.toFixed(2)}</CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={() => navigateMonth("prev")}>
@@ -420,7 +420,7 @@ export default function Budget() {
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Budget</p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  ${totalBudget.toFixed(2)}
+                  {displayCurrency}{totalBudget.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -436,7 +436,7 @@ export default function Budget() {
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Spent</p>
                 <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-                  ${totalSpent.toFixed(2)}
+                  {displayCurrency}{totalSpent.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -454,7 +454,7 @@ export default function Budget() {
                   {totalRemaining >= 0 ? 'Remaining' : 'Over Budget'}
                 </p>
                 <p className={`text-2xl font-bold ${totalRemaining >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                  ${Math.abs(totalRemaining).toFixed(2)}
+                  {displayCurrency}{Math.abs(totalRemaining).toFixed(2)}
                 </p>
               </div>
             </div>
@@ -529,15 +529,15 @@ export default function Budget() {
                       
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span>Spent: ${(budget.spent || 0).toFixed(2)}</span>
-                          <span>Budget: ${parseFloat(budget.amount.toString()).toFixed(2)}</span>
+                          <span>Spent: {displayCurrency}{(budget.spent || 0).toFixed(2)}</span>
+                          <span>Budget: {displayCurrency}{parseFloat(budget.amount.toString()).toFixed(2)}</span>
                         </div>
                         <Progress value={budget.percentage || 0} className="h-2" />
                         <div className="flex justify-between items-center">
                           <p className={`text-sm ${color}`}>
                             {budget.remaining !== undefined && budget.remaining >= 0 
-                              ? `$${budget.remaining.toFixed(2)} remaining`
-                              : `$${Math.abs(budget.remaining || 0).toFixed(2)} over budget`
+                              ? `${displayCurrency}${budget.remaining.toFixed(2)} remaining`
+                              : `${displayCurrency}${Math.abs(budget.remaining || 0).toFixed(2)} over budget`
                             }
                           </p>
                           <Badge 
