@@ -114,8 +114,18 @@ export function formatTransaction(data: any) {
   
   // Parse recurring settings
   const isRecurring = data.isRecurring === 'true' || data.isRecurring === true;
-  const recurringFrequency = isRecurring && data.recurringFrequency ? 
-    data.recurringFrequency : undefined;
+  let recurringFrequency = undefined;
+  
+  if (isRecurring && data.recurringFrequency) {
+    const frequency = data.recurringFrequency.toLowerCase();
+    const validFrequencies = ['daily', 'weekly', 'monthly', 'quarterly', 'yearly'];
+    
+    if (validFrequencies.includes(frequency)) {
+      recurringFrequency = frequency;
+    } else {
+      throw new Error(`Invalid recurring frequency: ${data.recurringFrequency}. Must be one of: daily, weekly, monthly, quarterly, yearly`);
+    }
+  }
   
   // Parse recurring end date if provided
   let recurringEndDate: Date | undefined;

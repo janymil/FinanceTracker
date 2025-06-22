@@ -112,7 +112,9 @@ goal,,,,,,,,,,30000,5000,2025-12-31,Emergency Fund
 goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
 
     // Note: The system supports both comma (,) and semicolon (;) delimited CSV files
-    // Budget periods: daily, weekly, monthly, quarterly, yearly
+    // Supported periods: daily, weekly, monthly, quarterly, yearly
+    // - Budget periods: budgetPeriod column
+    // - Recurring transactions: recurringFrequency column
 
     const blob = new Blob([exampleCSV], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);

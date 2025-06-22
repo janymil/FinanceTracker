@@ -145,6 +145,15 @@ function convertCSVToJSON(csvData: Record<string, any>[]): any {
           return;
         }
         
+        // Validate recurring frequency if provided
+        if (row.isRecurring === 'true' && row.recurringFrequency) {
+          const frequency = row.recurringFrequency.toLowerCase();
+          if (!['daily', 'weekly', 'monthly', 'quarterly', 'yearly'].includes(frequency)) {
+            errors.push(`Row ${index + 2}: recurringFrequency must be one of: daily, weekly, monthly, quarterly, yearly`);
+            return;
+          }
+        }
+        
         const transaction = formatTransaction(row);
         
         if (row.transactionType === 'income') {
