@@ -34,8 +34,7 @@ interface FinancialTip {
 export default function ContextualFinancialTips({ summary, transactions, budgets, selectedMonth }: ContextualTipsProps) {
   const [tips, setTips] = useState<FinancialTip[] | null>(null);
   const [loading, setLoading] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState<string | null>(null);
+  const [lastLoadedMonth, setLastLoadedMonth] = useState<string | null>(null);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -56,28 +55,28 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
     }
   };
 
-  // Reset loading state when month changes
   useEffect(() => {
-    const monthKey = selectedMonth || new Date().toISOString().slice(0, 7);
-    if (currentMonth !== monthKey) {
-      setCurrentMonth(monthKey);
-      setHasLoaded(false);
-      setTips(null);
-    }
-  }, [selectedMonth, currentMonth]);
+    if (!transactions || transactions.length === 0 || !summary) return;
 
-  useEffect(() => {
-    if (!transactions || transactions.length === 0 || !summary || hasLoaded) return;
+    const currentMonth = selectedMonth || new Date().toISOString().slice(0, 7);
+    
+    // If month changed, clear previous tips and reset state
+    if (lastLoadedMonth && lastLoadedMonth !== currentMonth) {
+      setTips(null);
+      setLastLoadedMonth(null);
+    }
+
+    // Skip if we already loaded tips for this month
+    if (lastLoadedMonth === currentMonth && tips) return;
 
     // Create a month-specific cache key
-    const monthKey = selectedMonth || new Date().toISOString().slice(0, 7); // YYYY-MM format
     const dataHash = JSON.stringify({
       transactionCount: transactions.length,
       totalIncome: summary?.totalIncome || 0,
       totalExpenses: summary?.totalExpenses || 0,
       budgetCount: budgets?.length || 0
     });
-    const cacheKey = `financial-tips-${monthKey}-${btoa(dataHash).slice(0, 12)}`;
+    const cacheKey = `financial-tips-${currentMonth}-${btoa(dataHash).slice(0, 12)}`;
 
     // Check localStorage for cached tips first
     const cachedData = localStorage.getItem(cacheKey);
@@ -88,7 +87,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
         
         if (!isExpired && cachedTips && cachedTips.length > 0) {
           setTips(cachedTips);
-          setHasLoaded(true);
+          setLastLoadedMonth(currentMonth);
           return; // Use cached tips, skip API call
         }
       } catch (e) {
@@ -110,7 +109,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
         
         const fetchedTips = res.data.tips || [];
         setTips(fetchedTips);
-        setHasLoaded(true);
+        setLastLoadedMonth(currentMonth);
         
         // Cache the tips with timestamp for this specific month
         if (fetchedTips.length > 0) {
@@ -122,16 +121,14 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
       } catch (error) {
         console.error('Failed to fetch AI tips:', error);
         setTips([]);
-        setHasLoaded(true);
+        setLastLoadedMonth(currentMonth);
       } finally {
         setLoading(false);
       }
     };
 
-    // Debounce the API call to prevent multiple rapid calls
-    const timeoutId = setTimeout(fetchTips, 100);
-    return () => clearTimeout(timeoutId);
-  }, [summary?.totalIncome, summary?.totalExpenses, transactions?.length, budgets?.length, selectedMonth, hasLoaded, loading]);
+    fetchTips();
+  }, [summary, transactions, budgets, selectedMonth, lastLoadedMonth, tips, loading]);
 
   return (
     <Card className="h-full">
