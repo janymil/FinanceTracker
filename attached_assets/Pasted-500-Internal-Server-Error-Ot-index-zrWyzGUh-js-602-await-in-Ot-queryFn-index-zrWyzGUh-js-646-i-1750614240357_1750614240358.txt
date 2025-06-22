@@ -1,0 +1,270 @@
+500 (Internal Server Error)
+Ot @ index-zrWyzGUh.js:602
+await in Ot
+queryFn @ index-zrWyzGUh.js:646
+i @ index-zrWyzGUh.js:56
+b @ index-zrWyzGUh.js:56
+start @ index-zrWyzGUh.js:56
+fetch @ index-zrWyzGUh.js:56
+Bh @ index-zrWyzGUh.js:56
+onSubscribe @ index-zrWyzGUh.js:56
+subscribe @ index-zrWyzGUh.js:56
+(anonymous) @ index-zrWyzGUh.js:56
+$M @ index-zrWyzGUh.js:39
+Kg @ index-zrWyzGUh.js:41
+Au @ index-zrWyzGUh.js:41
+IR @ index-zrWyzGUh.js:41
+wo @ index-zrWyzGUh.js:39
+EJ @ index-zrWyzGUh.js:41
+Kl @ index-zrWyzGUh.js:41
+DR @ index-zrWyzGUh.js:41
+k @ index-zrWyzGUh.js:26
+R @ index-zrWyzGUh.js:26
+index-zrWyzGUh.js:602 
+            
+            
+           GET https://finanzerpro.com/api/auth/user 500 (Internal Server Error)
+(anonymous) @ index-zrWyzGUh.js:602
+await in (anonymous)
+i @ index-zrWyzGUh.js:56
+b @ index-zrWyzGUh.js:56
+start @ index-zrWyzGUh.js:56
+fetch @ index-zrWyzGUh.js:56
+Bh @ index-zrWyzGUh.js:56
+onSubscribe @ index-zrWyzGUh.js:56
+subscribe @ index-zrWyzGUh.js:56
+(anonymous) @ index-zrWyzGUh.js:56
+$M @ index-zrWyzGUh.js:39
+Kg @ index-zrWyzGUh.js:41
+Au @ index-zrWyzGUh.js:41
+IR @ index-zrWyzGUh.js:41
+wo @ index-zrWyzGUh.js:39
+EJ @ index-zrWyzGUh.js:41
+Kl @ index-zrWyzGUh.js:41
+DR @ index-zrWyzGUh.js:41
+k @ index-zrWyzGUh.js:26
+R @ index-zrWyzGUh.js:26
+index-zrWyzGUh.js:602 
+            
+            
+           GET https://finanzerpro.com/api/auth/user 500 (Internal Server Error)
+Ot @ index-zrWyzGUh.js:602
+await in Ot
+queryFn @ index-zrWyzGUh.js:659
+i @ index-zrWyzGUh.js:56
+b @ index-zrWyzGUh.js:56
+start @ index-zrWyzGUh.js:56
+fetch @ index-zrWyzGUh.js:56
+Bh @ index-zrWyzGUh.js:56
+onSubscribe @ index-zrWyzGUh.js:56
+subscribe @ index-zrWyzGUh.js:56
+(anonymous) @ index-zrWyzGUh.js:56
+$M @ index-zrWyzGUh.js:39
+Kg @ index-zrWyzGUh.js:41
+Au @ index-zrWyzGUh.js:41
+IR @ index-zrWyzGUh.js:41
+wo @ index-zrWyzGUh.js:39
+EJ @ index-zrWyzGUh.js:41
+Kl @ index-zrWyzGUh.js:41
+DR @ index-zrWyzGUh.js:41
+k @ index-zrWyzGUh.js:26
+R @ index-zrWyzGUh.js:26
+index-zrWyzGUh.js:602 
+            
+            
+           GET https://finanzerpro.com/api/auth/user 500 (Internal Server Error)
+Ot @ index-zrWyzGUh.js:602
+await in Ot
+(anonymous) @ index-zrWyzGUh.js:646
+(anonymous) @ index-zrWyzGUh.js:646
+Kg @ index-zrWyzGUh.js:41
+Au @ index-zrWyzGUh.js:41
+IR @ index-zrWyzGUh.js:41
+wo @ index-zrWyzGUh.js:39
+EJ @ index-zrWyzGUh.js:41
+Kl @ index-zrWyzGUh.js:41
+DR @ index-zrWyzGUh.js:41
+k @ index-zrWyzGUh.js:26
+R @ index-zrWyzGUh.js:26
+index-zrWyzGUh.js:646 Failed to initialize currency: Error: 500: {"message":"Failed to fetch user"}
+    at jq (index-zrWyzGUh.js:602:2175)
+    at async Ot (index-zrWyzGUh.js:602:2726)
+    at async index-zrWyzGUh.js:646:6418
+(anonymous) @ index-zrWyzGUh.js:646
+await in (anonymous)
+(anonymous) @ index-zrWyzGUh.js:646
+Kg @ index-zrWyzGUh.js:41
+Au @ index-zrWyzGUh.js:41
+IR @ index-zrWyzGUh.js:41
+wo @ index-zrWyzGUh.js:39
+EJ @ index-zrWyzGUh.js:41
+Kl @ index-zrWyzGUh.js:41
+DR @ index-zrWyzGUh.js:41
+k @ index-zrWyzGUh.js:26
+R @ index-zrWyzGUh.js:26
+2index-zrWyzGUh.js:602 Clerk token available: true
+index-zrWyzGUh.js:602 
+            
+            
+           GET https://finanzerpro.com/api/transactions 500 (Internal Server Error)
+Ot @ index-zrWyzGUh.js:602
+await in Ot
+queryFn @ index-zrWyzGUh.js:646
+i @ index-zrWyzGUh.js:56
+b @ index-zrWyzGUh.js:56
+(anonymous) @ index-zrWyzGUh.js:56
+Promise.then
+(anonymous) @ index-zrWyzGUh.js:56
+Promise.catch
+b @ index-zrWyzGUh.js:56
+start @ index-zrWyzGUh.js:56
+fetch @ index-zrWyzGUh.js:56
+Bh @ index-zrWyzGUh.js:56
+onSubscribe @ index-zrWyzGUh.js:56
+subscribe @ index-zrWyzGUh.js:56
+(anonymous) @ index-zrWyzGUh.js:56
+$M @ index-zrWyzGUh.js:39
+Kg @ index-zrWyzGUh.js:41
+Au @ index-zrWyzGUh.js:41
+IR @ index-zrWyzGUh.js:41
+wo @ index-zrWyzGUh.js:39
+EJ @ index-zrWyzGUh.js:41
+Kl @ index-zrWyzGUh.js:41
+DR @ index-zrWyzGUh.js:41
+k @ index-zrWyzGUh.js:26
+R @ index-zrWyzGUh.js:26
+index-zrWyzGUh.js:602 Clerk token available: true
+index-zrWyzGUh.js:602 
+            
+            
+           GET https://finanzerpro.com/api/auth/user 500 (Internal Server Error)
+(anonymous) @ index-zrWyzGUh.js:602
+await in (anonymous)
+i @ index-zrWyzGUh.js:56
+b @ index-zrWyzGUh.js:56
+(anonymous) @ index-zrWyzGUh.js:56
+Promise.then
+(anonymous) @ index-zrWyzGUh.js:56
+Promise.catch
+b @ index-zrWyzGUh.js:56
+start @ index-zrWyzGUh.js:56
+fetch @ index-zrWyzGUh.js:56
+Bh @ index-zrWyzGUh.js:56
+onSubscribe @ index-zrWyzGUh.js:56
+subscribe @ index-zrWyzGUh.js:56
+(anonymous) @ index-zrWyzGUh.js:56
+$M @ index-zrWyzGUh.js:39
+Kg @ index-zrWyzGUh.js:41
+Au @ index-zrWyzGUh.js:41
+IR @ index-zrWyzGUh.js:41
+wo @ index-zrWyzGUh.js:39
+EJ @ index-zrWyzGUh.js:41
+Kl @ index-zrWyzGUh.js:41
+DR @ index-zrWyzGUh.js:41
+k @ index-zrWyzGUh.js:26
+R @ index-zrWyzGUh.js:26
+index-zrWyzGUh.js:602 
+            
+            
+           GET https://finanzerpro.com/api/auth/user 500 (Internal Server Error)
+Ot @ index-zrWyzGUh.js:602
+await in Ot
+queryFn @ index-zrWyzGUh.js:659
+i @ index-zrWyzGUh.js:56
+b @ index-zrWyzGUh.js:56
+(anonymous) @ index-zrWyzGUh.js:56
+Promise.then
+(anonymous) @ index-zrWyzGUh.js:56
+Promise.catch
+b @ index-zrWyzGUh.js:56
+start @ index-zrWyzGUh.js:56
+fetch @ index-zrWyzGUh.js:56
+Bh @ index-zrWyzGUh.js:56
+onSubscribe @ index-zrWyzGUh.js:56
+subscribe @ index-zrWyzGUh.js:56
+(anonymous) @ index-zrWyzGUh.js:56
+$M @ index-zrWyzGUh.js:39
+Kg @ index-zrWyzGUh.js:41
+Au @ index-zrWyzGUh.js:41
+IR @ index-zrWyzGUh.js:41
+wo @ index-zrWyzGUh.js:39
+EJ @ index-zrWyzGUh.js:41
+Kl @ index-zrWyzGUh.js:41
+DR @ index-zrWyzGUh.js:41
+k @ index-zrWyzGUh.js:26
+R @ index-zrWyzGUh.js:26
+index-zrWyzGUh.js:602 Clerk token available: true
+index-zrWyzGUh.js:602 
+            
+            
+           GET https://finanzerpro.com/api/transactions 500 (Internal Server Error)
+Ot @ index-zrWyzGUh.js:602
+await in Ot
+queryFn @ index-zrWyzGUh.js:646
+i @ index-zrWyzGUh.js:56
+b @ index-zrWyzGUh.js:56
+(anonymous) @ index-zrWyzGUh.js:56
+Promise.then
+(anonymous) @ index-zrWyzGUh.js:56
+Promise.catch
+b @ index-zrWyzGUh.js:56
+(anonymous) @ index-zrWyzGUh.js:56
+Promise.then
+(anonymous) @ index-zrWyzGUh.js:56
+Promise.catch
+b @ index-zrWyzGUh.js:56
+start @ index-zrWyzGUh.js:56
+fetch @ index-zrWyzGUh.js:56
+Bh @ index-zrWyzGUh.js:56
+onSubscribe @ index-zrWyzGUh.js:56
+subscribe @ index-zrWyzGUh.js:56
+(anonymous) @ index-zrWyzGUh.js:56
+$M @ index-zrWyzGUh.js:39
+Kg @ index-zrWyzGUh.js:41
+Au @ index-zrWyzGUh.js:41
+IR @ index-zrWyzGUh.js:41
+wo @ index-zrWyzGUh.js:39
+EJ @ index-zrWyzGUh.js:41
+Kl @ index-zrWyzGUh.js:41
+DR @ index-zrWyzGUh.js:41
+k @ index-zrWyzGUh.js:26
+R @ index-zrWyzGUh.js:26
+2index-zrWyzGUh.js:602 Clerk token available: true
+index-zrWyzGUh.js:602 
+            
+            
+           GET https://finanzerpro.com/api/auth/user 500 (Internal Server Error)
+(anonymous) @ index-zrWyzGUh.js:602
+await in (anonymous)
+i @ index-zrWyzGUh.js:56
+b @ index-zrWyzGUh.js:56
+(anonymous) @ index-zrWyzGUh.js:56
+Promise.then
+(anonymous) @ index-zrWyzGUh.js:56
+Promise.catch
+b @ index-zrWyzGUh.js:56
+(anonymous) @ index-zrWyzGUh.js:56
+Promise.then
+(anonymous) @ index-zrWyzGUh.js:56
+Promise.catch
+b @ index-zrWyzGUh.js:56
+start @ index-zrWyzGUh.js:56
+fetch @ index-zrWyzGUh.js:56
+Bh @ index-zrWyzGUh.js:56
+onSubscribe @ index-zrWyzGUh.js:56
+subscribe @ index-zrWyzGUh.js:56
+(anonymous) @ index-zrWyzGUh.js:56
+$M @ index-zrWyzGUh.js:39
+Kg @ index-zrWyzGUh.js:41
+Au @ index-zrWyzGUh.js:41
+IR @ index-zrWyzGUh.js:41
+wo @ index-zrWyzGUh.js:39
+EJ @ index-zrWyzGUh.js:41
+Kl @ index-zrWyzGUh.js:41
+DR @ index-zrWyzGUh.js:41
+k @ index-zrWyzGUh.js:26
+R @ index-zrWyzGUh.js:26
+index-zrWyzGUh.js:602 
+            
+            
+           GET https://finanzerpro.com/api/transactions 500 (Internal Server Error)
