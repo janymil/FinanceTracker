@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useToast } from '@/hooks/use-toast';
 import RequirePlan from '@/components/require-plan';
 import { useClerkUserReady } from '@/hooks/useClerkUserReady';
+import { useAuth } from '@clerk/clerk-react';
 import { 
   Download, 
   Upload, 
@@ -52,6 +53,7 @@ interface ImportOptions {
 
 export default function ExportPage() {
   const { isReady, user } = useClerkUserReady();
+  const { getToken } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -157,7 +159,12 @@ goal,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     
     setIsLoadingLogs(true);
     try {
-      const token = await user?.getToken();
+      const token = await getToken();
+      if (!token) {
+        console.error("No authentication token available");
+        return;
+      }
+      
       const response = await fetch('/api/import-logs?limit=5', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -182,7 +189,11 @@ goal,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     setImportProgress({ percentage: 0, message: "Reading file..." });
 
     try {
-      const token = await user?.getToken();
+      const token = await getToken();
+      if (!token) {
+        throw new Error("Authentication required");
+      }
+      
       const fileContent = await selectedFile.text();
       
       setImportProgress({ percentage: 30, message: "Validating data..." });
