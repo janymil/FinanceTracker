@@ -122,16 +122,29 @@ function convertCSVToJSON(csvData: Record<string, any>[]): any {
       return;
     }
 
-    // Validate required fields
-    const validation = validateRequiredFields(row, dataType);
-    if (!validation.valid) {
-      errors.push(`Row ${index + 2}: ${validation.errors.join(', ')}`);
-      return;
-    }
+    // Skip validation here - we'll handle it in the processing section for better error messages
     
     try {
       // Process transactions
       if (dataType === 'transaction') {
+        // Validate transaction fields
+        if (!row.amount || isNaN(parseFloat(row.amount))) {
+          errors.push(`Row ${index + 2}: amount is required and must be a valid number`);
+          return;
+        }
+        if (!row.description || row.description.trim() === '') {
+          errors.push(`Row ${index + 2}: description is required`);
+          return;
+        }
+        if (!row.date) {
+          errors.push(`Row ${index + 2}: date is required`);
+          return;
+        }
+        if (!row.transactionType || !['income', 'expense'].includes(row.transactionType)) {
+          errors.push(`Row ${index + 2}: transactionType must be either "income" or "expense"`);
+          return;
+        }
+        
         const transaction = formatTransaction(row);
         
         if (row.transactionType === 'income') {
@@ -143,12 +156,38 @@ function convertCSVToJSON(csvData: Record<string, any>[]): any {
       
       // Process budgets
       else if (dataType === 'budget') {
+        // Check if category exists for budget
+        if (!row.category || row.category.trim() === '') {
+          errors.push(`Row ${index + 2}: category is required for budgets`);
+          return;
+        }
+        
+        // Check if budgetAmount exists
+        if (!row.budgetAmount || isNaN(parseFloat(row.budgetAmount))) {
+          errors.push(`Row ${index + 2}: budgetAmount is required and must be a valid number`);
+          return;
+        }
+        
         const budget = formatBudget(row);
         result.budgets.push(budget);
       }
       
       // Process goals
       else if (dataType === 'goal') {
+        // Validate goal fields
+        if (!row.goalTargetAmount || isNaN(parseFloat(row.goalTargetAmount))) {
+          errors.push(`Row ${index + 2}: goalTargetAmount is required and must be a valid number`);
+          return;
+        }
+        if (!row.goalTargetDate) {
+          errors.push(`Row ${index + 2}: goalTargetDate is required`);
+          return;
+        }
+        if (!row.goalCategory || row.goalCategory.trim() === '') {
+          errors.push(`Row ${index + 2}: goalCategory is required`);
+          return;
+        }
+        
         const goal = formatGoal(row);
         result.goals.push(goal);
       }
