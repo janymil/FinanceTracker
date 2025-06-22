@@ -616,7 +616,7 @@ export default function Expenses() {
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Average Expense</p>
                   <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                    ${averageExpense.toFixed(2)}
+                    {currency || '$'}{averageExpense.toFixed(2)}
                   </p>
                 </div>
               </div>

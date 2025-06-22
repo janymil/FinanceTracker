@@ -545,7 +545,7 @@ export default function Reports() {
                       <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                      ${((financialSummary?.totalIncome || 0) / Math.max(
+                      ${currency || '$'}{((financialSummary?.totalIncome || 0) / Math.max(
                         financialSummary?.incomeTransactionCount || 1, 
                         1
                       )).toFixed(0)}
@@ -558,7 +558,7 @@ export default function Reports() {
                       <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
                     </div>
                     <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                      ${((financialSummary?.totalExpenses || 0) / Math.max(
+                      ${currency || '$'}{((financialSummary?.totalExpenses || 0) / Math.max(
                         financialSummary?.expenseTransactionCount || 1, 
                         1
                       )).toFixed(0)}
