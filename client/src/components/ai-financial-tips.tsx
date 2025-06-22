@@ -65,7 +65,7 @@ export default function AIFinancialTips({ summary, selectedMonth }: AIFinancialT
       });
       
       if (savedTip) {
-        console.log(`AI Tips: Using saved tip for ${monthName} ${year}`);
+        console.log(`AI Tips: Using saved tip for ${monthName} ${year}:`, savedTip.substring(0, 100) + '...');
         setCurrentTip(cleanAIText(savedTip));
       } else {
         // Auto-generate tips if we have financial data but no saved tip
@@ -124,7 +124,9 @@ export default function AIFinancialTips({ summary, selectedMonth }: AIFinancialT
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate AI tip");
+        const errorData = await response.json().catch(() => ({}));
+        console.error('AI Tips: Backend error:', response.status, errorData);
+        throw new Error(errorData.message || "Failed to generate AI tip");
       }
 
       const data = await response.json();
