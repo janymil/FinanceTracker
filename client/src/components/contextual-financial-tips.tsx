@@ -49,18 +49,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
       });
     }
 
-    // Low savings rate tips
-    if (savingsRate < 0.1 && summary.netBalance >= 0) {
-      tips.push({
-        id: 'low-savings',
-        title: 'Increase Your Savings Rate',
-        description: 'Aim to save at least 10-20% of your income. Try the 50/30/20 rule: 50% needs, 30% wants, 20% savings.',
-        category: 'saving',
-        priority: 'medium',
-        actionable: true,
-        icon: PiggyBank
-      });
-    }
+    // Removed hardcoded savings rate tip
 
     // Negative balance tips
     if (summary.netBalance < 0) {
@@ -138,29 +127,9 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
     }
 
     // Positive reinforcement tips
-    if (savingsRate >= 0.2) {
-      tips.push({
-        id: 'good-savings',
-        title: 'Excellent Savings Rate!',
-        description: 'You\'re saving over 20% of your income. Keep up the great work! Consider investing some of these savings for long-term growth.',
-        category: 'saving',
-        priority: 'low',
-        actionable: false,
-        icon: CheckCircle
-      });
-    }
+    // Removed hardcoded excellent savings tip
 
-    if (expenseRatio < 0.7) {
-      tips.push({
-        id: 'controlled-spending',
-        title: 'Well-Controlled Spending',
-        description: 'Your expenses are well within a healthy range. This gives you flexibility for savings and investments.',
-        category: 'spending',
-        priority: 'low',
-        actionable: false,
-        icon: CheckCircle
-      });
-    }
+    // Removed hardcoded controlled spending tip
 
     return tips.slice(0, 4); // Limit to 4 most relevant tips
   };
