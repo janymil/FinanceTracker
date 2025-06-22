@@ -76,50 +76,9 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
   // Check if we have transaction data to base predictions on
   const hasTransactionData = transactions && transactions.length > 0;
   
-  // Generate predictions only if we have data, otherwise return empty arrays
-  const predictions: Prediction[] = hasTransactionData ? [
-    {
-      category: 'Food & Dining',
-      currentMonth: 450,
-      predictedNext: 520,
-      confidence: 0.85,
-      trend: 'increasing',
-      factors: ['Holiday season', 'Recent dining out increase']
-    },
-    {
-      category: 'Transportation',
-      currentMonth: 200,
-      predictedNext: 180,
-      confidence: 0.78,
-      trend: 'decreasing',
-      factors: ['Gas price reduction', 'Less commuting']
-    },
-    {
-      category: 'Utilities',
-      currentMonth: 150,
-      predictedNext: 165,
-      confidence: 0.92,
-      trend: 'increasing',
-      factors: ['Winter heating costs']
-    },
-    {
-      category: 'Entertainment',
-      currentMonth: 120,
-      predictedNext: 140,
-      confidence: 0.73,
-      trend: 'increasing',
-      factors: ['Upcoming events', 'Holiday activities']
-    }
-  ] : [];
-
-  const monthlyPredictions: MonthlyPrediction[] = hasTransactionData ? [
-    { month: 'Jan 2025', predicted: 1200, confidence: 0.85 },
-    { month: 'Feb 2025', predicted: 1150, confidence: 0.82 },
-    { month: 'Mar 2025', predicted: 1300, confidence: 0.79 },
-    { month: 'Apr 2025', predicted: 1250, confidence: 0.76 },
-    { month: 'May 2025', predicted: 1180, confidence: 0.73 },
-    { month: 'Jun 2025', predicted: 1220, confidence: 0.70 }
-  ] : [];
+  // No hardcoded predictions - only show real AI predictions when available
+  const predictions: Prediction[] = [];
+  const monthlyPredictions: MonthlyPrediction[] = [];
 
   const totalPredicted = predictions.reduce((sum, p) => sum + p.predictedNext, 0);
 
