@@ -7,8 +7,7 @@ channel = "stable-24_05"
 packages = ["chromium", "imagemagick", "psmisc", "fly"]
 
 [deployment]
-deploymentTarget = "autoscale"
-build = ["bash", "-c", "DATABASE_URL=$DATABASE_URL_PROD npx drizzle-kit push --config=drizzle.config.ts && npm run build"]
+build = ["bash", "-c", "export DATABASE_URL=$DATABASE_URL_PROD && npx drizzle-kit push --config=drizzle.config.ts && npm run build"]
 run = ["npm", "run", "start"]
 
 [workflows]
