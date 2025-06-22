@@ -10,6 +10,11 @@ import {
   getUserFromRequest,
   validateRequiredFields 
 } from "../../lib/importHelpers";
+import { 
+  saveImportLog, 
+  createImportSummary, 
+  determineImportStatus 
+} from "../../lib/saveImportLog";
 
 // Validation schemas for import data
 const importTransactionSchema = z.object({
@@ -153,6 +158,29 @@ function convertCSVToJSON(csvData: Record<string, any>[]): any {
 }
 
 export function registerImportRoutes(app: Express) {
+  // Get import logs for a user
+  app.get('/api/import-logs', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "Data import requires Premium subscription" });
+      }
+
+      const limit = parseInt(req.query.limit as string) || 10;
+      const logs = await storage.getUserImportLogs(userId, limit);
+      
+      return res.json(logs);
+    } catch (error) {
+      console.error("Error fetching import logs:", error);
+      return res.status(500).json({ message: "Failed to fetch import logs" });
+    }
+  });
+
   app.post('/api/import-data', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
@@ -360,6 +388,22 @@ export function registerImportRoutes(app: Express) {
         }
       }
 
+      // Create import summary and log the import
+      const importSummary = createImportSummary(summary);
+      const importStatus = determineImportStatus(importSummary);
+      
+      // Extract filename from content or use default
+      const filename = `import_${new Date().toISOString().split('T')[0]}.${format}`;
+      
+      // Save import log
+      await saveImportLog(
+        userId,
+        importSummary,
+        filename,
+        format as 'csv' | 'json',
+        importStatus
+      );
+
       return res.json({
         success: true,
         message: "Data imported successfully",
@@ -368,6 +412,32 @@ export function registerImportRoutes(app: Express) {
 
     } catch (error) {
       console.error("Error importing data:", error);
+      
+      // Log failed import
+      try {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        const filename = `import_${new Date().toISOString().split('T')[0]}.${format}`;
+        
+        await saveImportLog(
+          userId,
+          createImportSummary({
+            categories: 0,
+            incomes: 0,
+            expenses: 0,
+            budgets: 0,
+            goals: 0,
+            collaborativeGoals: 0,
+            errors: [errorMessage]
+          }),
+          filename,
+          format as 'csv' | 'json',
+          'failed',
+          errorMessage
+        );
+      } catch (logError) {
+        console.error("Failed to log import error:", logError);
+      }
+      
       return res.status(500).json({ 
         message: "Failed to import data", 
         error: error instanceof Error ? error.message : "Unknown error" 

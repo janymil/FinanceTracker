@@ -273,6 +273,18 @@ export const redeemCodes = pgTable("redeem_codes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Import logs for tracking data imports
+export const importLogs = pgTable("import_logs", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  importedAt: timestamp("imported_at").defaultNow().notNull(),
+  summary: jsonb("summary").notNull(), // Contains import statistics and results
+  filename: varchar("filename", { length: 255 }),
+  type: varchar("type", { length: 10 }).notNull(), // 'csv' or 'json'
+  status: varchar("status", { length: 20 }).default("success").notNull(), // 'success', 'failed', 'partial'
+  errorMessage: text("error_message"), // Store error details if import failed
+});
+
 // Schema exports
 export type InsertUser = typeof users.$inferInsert;
 export type UpsertUser = typeof users.$inferInsert;

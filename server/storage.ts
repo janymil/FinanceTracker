@@ -15,6 +15,7 @@ import {
   milestoneAchievements,
   financialMascots,
   redeemCodes,
+  importLogs,
   type User,
   type InsertUser,
   type Transaction,
@@ -44,6 +45,8 @@ import {
   type InsertFinancialMascot,
   type RedeemCode,
   type InsertRedeemCode,
+  type ImportLog,
+  type InsertImportLog,
 } from "@shared/schema";
 import { db } from "./db";
 import { DataEncryption } from "./encryption";

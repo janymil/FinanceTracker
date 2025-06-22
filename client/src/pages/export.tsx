@@ -93,6 +93,8 @@ export default function ExportPage() {
     collaborativeGoals: number;
     errors: string[];
   } | null>(null);
+  const [importLogs, setImportLogs] = useState<any[]>([]);
+  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
 
   // Import functionality
   const handleDownloadExample = () => {
@@ -150,6 +152,29 @@ goal,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     event.preventDefault();
   };
 
+  const loadImportLogs = async () => {
+    if (!isReady || !user?.id) return;
+    
+    setIsLoadingLogs(true);
+    try {
+      const token = await user?.getToken();
+      const response = await fetch('/api/import-logs?limit=5', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      
+      if (response.ok) {
+        const logs = await response.json();
+        setImportLogs(logs);
+      }
+    } catch (error) {
+      console.error("Error loading import logs:", error);
+    } finally {
+      setIsLoadingLogs(false);
+    }
+  };
+
   const handleImportData = async () => {
     if (!selectedFile) return;
 
@@ -184,6 +209,7 @@ goal,,,,,,,,,8000,1000,2025-06-01,Vacation`;
         setTimeout(() => {
           setImportProgress(null);
           setImportResults(result.summary);
+          loadImportLogs(); // Refresh logs after successful import
         }, 500);
 
         toast({
@@ -198,6 +224,7 @@ goal,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     } catch (error) {
       console.error("Error importing data:", error);
       setImportProgress(null);
+      loadImportLogs(); // Refresh logs even after failed import
       toast({
         title: "Import Failed",
         description: error instanceof Error ? error.message : "Failed to import data",
@@ -851,6 +878,50 @@ goal,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                     )}
                   </div>
                 )}
+
+                {/* Import History */}
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-medium">Recent Imports</h3>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={loadImportLogs}
+                      disabled={isLoadingLogs}
+                    >
+                      {isLoadingLogs ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  
+                  {importLogs.length > 0 ? (
+                    <div className="space-y-2">
+                      {importLogs.map((log) => (
+                        <div key={log.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded text-sm">
+                          <div className="flex items-center gap-2">
+                            <Badge variant={log.status === 'success' ? 'default' : log.status === 'failed' ? 'destructive' : 'secondary'}>
+                              {log.status}
+                            </Badge>
+                            <span className="font-medium">{log.type}</span>
+                            <span className="text-muted-foreground">
+                              {new Date(log.importedAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <div className="text-muted-foreground">
+                            {log.summary?.totalRecords || 0} records
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-muted-foreground text-sm">
+                      No import history yet
+                    </div>
+                  )}
+                </div>
 
                 {/* Action Button */}
                 <div className="flex justify-end">
