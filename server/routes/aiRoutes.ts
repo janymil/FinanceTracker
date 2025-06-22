@@ -7,6 +7,7 @@ import {
   generateSpendingInsights, 
   generateTrendPredictions,
   generateAIFinancialHealthScore,
+  generateFinancialHealthScore,
   generateExpensePredictions,
   type ExpenseCategorizationResult 
 } from "../openai";

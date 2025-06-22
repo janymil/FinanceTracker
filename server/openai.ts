@@ -1106,4 +1106,4 @@ Analysis Requirements:
   }
 }
 
-export { categorizeExpense, generateFinancialTips, generateSpendingInsights, generateTrendPredictions, generateAIFinancialHealthScore, generateExpensePredictions };
+export { categorizeExpense, generateFinancialTips, generateSpendingInsights, generateTrendPredictions, generateAIFinancialHealthScore, generateFinancialHealthScore, generateExpensePredictions };
