@@ -15,7 +15,7 @@ class APICache {
     categorization: Number.MAX_SAFE_INTEGER, // No expiration - categories are stable
     insights: 24 * 60 * 60 * 1000,          // 24 hours - daily insights refresh
     trends: Number.MAX_SAFE_INTEGER,         // No expiration - only invalidate on data change
-    tips: 48 * 60 * 60 * 1000,              // 48 hours - tips change less frequently
+    tips: Number.MAX_SAFE_INTEGER,           // No expiration - only invalidate on data change
     financialHealth: 24 * 60 * 60 * 1000    // 24 hours - financial health cache
   };
 
