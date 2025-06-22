@@ -374,7 +374,7 @@ goal,,,,,,,,,8000,1000,2025-06-01,Vacation`;
 
     setIsCreatingBackup(true);
     try {
-      const token = await window.Clerk?.session?.getToken();
+      const token = await getToken();
       if (!token) return;
 
       const response = await fetch('/api/backup', {
@@ -416,7 +416,7 @@ goal,,,,,,,,,8000,1000,2025-06-01,Vacation`;
 
     setIsRestoring(true);
     try {
-      const token = await window.Clerk?.session?.getToken();
+      const token = await getToken();
       if (!token) return;
 
       const response = await fetch('/api/restore-backup', {
@@ -916,7 +916,7 @@ goal,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                             <Badge variant={log.status === 'success' ? 'default' : log.status === 'failed' ? 'destructive' : 'secondary'}>
                               {log.status}
                             </Badge>
-                            <span className="font-medium">{log.type}</span>
+                            <span className="font-medium">{log.type?.toUpperCase()}</span>
                             <span className="text-muted-foreground">
                               {new Date(log.importedAt).toLocaleDateString()}
                             </span>
