@@ -7,6 +7,7 @@ import {
   generateSpendingInsights, 
   generateTrendPredictions,
   generateAIFinancialHealthScore,
+  generateExpensePredictions,
   type ExpenseCategorizationResult 
 } from "../openai";
 import { aiCache } from "../cache";
@@ -696,6 +697,48 @@ Answer questions about features, subscription plans, how to use the app, trouble
     } catch (error) {
       console.error("Error in help chat:", error);
       return res.status(500).json({ message: "Failed to get help response" });
+    }
+  });
+
+  // AI Expense Prediction endpoint
+  app.post('/api/ai/expense-predictions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+
+      // Require premium plan for AI expense predictions
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "AI expense predictions require premium plan" });
+      }
+
+      const { transactions, summary } = req.body;
+
+      if (!transactions || !Array.isArray(transactions)) {
+        return res.status(400).json({ message: "Transactions data is required" });
+      }
+
+      if (transactions.length < 3) {
+        return res.json({
+          categoryPredictions: [],
+          monthlyPredictions: [],
+          totalPredicted: 0,
+          confidence: 0,
+          message: "Minimum 3 transactions required for AI predictions"
+        });
+      }
+
+      console.log(`Generating AI expense predictions for user ${userId} with ${transactions.length} transactions`);
+
+      const predictions = await generateExpensePredictions(transactions, summary);
+
+      return res.json(predictions);
+    } catch (error) {
+      console.error("Error generating AI expense predictions:", error);
+      return res.status(500).json({ message: "Failed to generate expense predictions" });
     }
   });
 }

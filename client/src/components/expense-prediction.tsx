@@ -76,72 +76,62 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
   // Check if we have transaction data to base predictions on
   const hasTransactionData = transactions && transactions.length > 0;
   
-  // Generate predictions when we have sufficient transaction data for meaningful analysis
-  const predictions: Prediction[] = hasTransactionData && transactions.length >= 3 ? 
-    generateCategoryPredictions(transactions) : [];
+  // AI-powered predictions state
+  const [aiPredictions, setAiPredictions] = useState<{
+    categoryPredictions: Prediction[];
+    monthlyPredictions: MonthlyPrediction[];
+    totalPredicted: number;
+    confidence: number;
+  }>({
+    categoryPredictions: [],
+    monthlyPredictions: [],
+    totalPredicted: 0,
+    confidence: 0
+  });
+  const [predictionsLoading, setPredictionsLoading] = useState(false);
 
-  const monthlyPredictions: MonthlyPrediction[] = hasTransactionData && transactions.length >= 3 ? 
-    generateMonthlyPredictions(transactions) : [];
+  // Fetch AI predictions when component mounts or transactions change
+  useEffect(() => {
+    if (!isPremiumUser || !hasTransactionData || transactions.length < 3) return;
 
-  // Helper function to generate category-based predictions
-  function generateCategoryPredictions(txns: any[]): Prediction[] {
-    const expenseTransactions = txns.filter(t => t.type === 'expense');
-    if (expenseTransactions.length === 0) return [];
-    
-    const categoryTotals = new Map<string, { total: number, count: number }>();
-    
-    expenseTransactions.forEach(t => {
-      const categoryName = t.categoryName || 'Uncategorized';
-      const existing = categoryTotals.get(categoryName) || { total: 0, count: 0 };
-      categoryTotals.set(categoryName, {
-        total: existing.total + parseFloat(t.amount),
-        count: existing.count + 1
-      });
-    });
+    const fetchAIPredictions = async () => {
+      setPredictionsLoading(true);
+      try {
+        const token = await window.Clerk?.session?.getToken();
+        const response = await fetch('/api/ai/expense-predictions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            transactions,
+            summary
+          })
+        });
 
-    return Array.from(categoryTotals.entries()).map(([category, data]) => {
-      // Generate realistic prediction based on historical spending
-      const baseAmount = data.total;
-      const variation = 0.1 + (Math.random() * 0.3); // 10-40% variation
-      const predictedNext = Math.round(baseAmount * (1 + variation));
-      
-      return {
-        category,
-        currentMonth: baseAmount,
-        predictedNext,
-        confidence: Math.min(95, 65 + (data.count * 10)), // Higher confidence with more transactions
-        trend: predictedNext > baseAmount ? 'increasing' : 'decreasing',
-        factors: ['Historical pattern', 'Seasonal trends']
-      };
-    }).slice(0, 5); // Top 5 categories
-  }
+        if (response.ok) {
+          const data = await response.json();
+          setAiPredictions(data);
+          console.log('AI expense predictions loaded:', data);
+        } else {
+          console.error('Failed to fetch AI predictions:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching AI predictions:', error);
+      } finally {
+        setPredictionsLoading(false);
+      }
+    };
 
-  // Helper function to generate monthly predictions
-  function generateMonthlyPredictions(txns: any[]): MonthlyPrediction[] {
-    const expenseTransactions = txns.filter(t => t.type === 'expense');
-    if (expenseTransactions.length === 0) return [];
-    
-    const totalExpenses = expenseTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
-    const avgExpense = totalExpenses / expenseTransactions.length;
-    
-    const months = ['Jul 2025', 'Aug 2025', 'Sep 2025', 'Oct 2025', 'Nov 2025', 'Dec 2025'];
-    
-    return months.map((month, index) => {
-      // Generate predictions with realistic variation
-      const baseAmount = avgExpense * 3; // Estimate monthly spending
-      const seasonalFactor = 1 + (Math.sin((index + 6) * Math.PI / 6) * 0.15); // Seasonal variation
-      const randomFactor = 0.9 + (Math.random() * 0.2); // ±10% random variation
-      const predicted = Math.round(baseAmount * seasonalFactor * randomFactor);
-      
-      return {
-        month,
-        predicted,
-        confidence: Math.max(65, 90 - (index * 4)) // Decreasing confidence over time
-      };
-    });
-  }
+    fetchAIPredictions();
+  }, [isPremiumUser, transactions, summary]);
 
-  const totalPredicted = predictions.reduce((sum, p) => sum + p.predictedNext, 0);
+  // Use AI predictions if available, otherwise show empty state
+  const predictions = aiPredictions.categoryPredictions;
+  const monthlyPredictions = aiPredictions.monthlyPredictions;
+
+  const totalPredicted = aiPredictions.totalPredicted || predictions.reduce((sum, p) => sum + p.predictedNext, 0);
 
   return (
     <Card className="h-full">
@@ -164,7 +154,12 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              {hasTransactionData && predictions.length > 0 ? (
+              {predictionsLoading ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                  <span className="ml-2">Generating AI predictions...</span>
+                </div>
+              ) : hasTransactionData && predictions.length > 0 ? (
                 <>
                   {/* Summary Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -187,7 +182,7 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                         <span className="text-sm font-medium">Confidence</span>
                       </div>
                       <div className="text-2xl font-bold text-green-600">
-                        {(predictions.reduce((sum, p) => sum + p.confidence, 0) / predictions.length * 100).toFixed(0)}%
+                        {aiPredictions.confidence ? (aiPredictions.confidence * 100).toFixed(0) : (predictions.reduce((sum, p) => sum + p.confidence, 0) / predictions.length).toFixed(0)}%
                       </div>
                       <p className="text-xs text-gray-600 dark:text-gray-300">
                         Average prediction accuracy

@@ -43,6 +43,26 @@ export interface FinancialForecast {
   riskFactors: string[];
 }
 
+export interface ExpensePrediction {
+  category: string;
+  currentMonth: number;
+  predictedNext: number;
+  confidence: number;
+  trend: 'increasing' | 'decreasing' | 'stable';
+  reasoning: string;
+  factors: string[];
+}
+
+export interface MonthlyExpensePrediction {
+  month: string;
+  predicted: number;
+  confidence: number;
+  breakdown: Array<{
+    category: string;
+    amount: number;
+  }>;
+}
+
 export interface FinancialHealthData {
   score: number;
   trend: 'improving' | 'declining' | 'stable';
