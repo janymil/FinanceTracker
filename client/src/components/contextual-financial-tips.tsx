@@ -56,13 +56,13 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
   };
 
   useEffect(() => {
-    if (!transactions || transactions.length === 0 || hasLoaded) return;
+    if (!transactions || transactions.length === 0 || !summary || hasLoaded) return;
 
     // Create a stable cache key based on financial data
     const dataHash = JSON.stringify({
       transactionCount: transactions.length,
-      totalIncome: summary.totalIncome || 0,
-      totalExpenses: summary.totalExpenses || 0,
+      totalIncome: summary?.totalIncome || 0,
+      totalExpenses: summary?.totalExpenses || 0,
       budgetCount: budgets?.length || 0,
       month: selectedMonth
     });
