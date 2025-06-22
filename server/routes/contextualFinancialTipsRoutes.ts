@@ -4,8 +4,35 @@ import { isAuthenticated, getUserId } from "../clerkAuth";
 import { openai } from "../openaiClient";
 import { storage } from "../storage";
 import crypto from "crypto";
+import { eq } from "drizzle-orm";
+import { contextualFinancialTips } from "../../shared/schema";
+import { db } from "../db";
 
 export function registerContextualFinancialTipsRoutes(app: Express) {
+  // Test endpoint to manually clear contextual tips cache
+  app.delete('/api/ai/contextual-financial-tips/cache', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // Clear database cache
+      await storage.deleteCachedDailyRecommendations(userId);
+      await db.delete(contextualFinancialTips).where(eq(contextualFinancialTips.userId, userId));
+      
+      // Clear memory cache
+      const { aiCache } = await import('../cache');
+      aiCache.clearUserCache(userId);
+      
+      console.log(`Manually cleared all AI caches for user ${userId}`);
+      return res.json({ success: true, message: "Cache cleared successfully" });
+    } catch (error) {
+      console.error("Error clearing cache:", error);
+      return res.status(500).json({ message: "Failed to clear cache" });
+    }
+  });
+
   app.post('/api/ai/contextual-financial-tips', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);

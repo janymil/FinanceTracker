@@ -222,6 +222,11 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
         const result = await response.json();
         setImportProgress({ percentage: 100, message: "Import completed!" });
         
+        // Set cache invalidation flag for AI components
+        if (result.cacheCleared) {
+          localStorage.setItem('invalidate-ai-cache', 'true');
+        }
+        
         setTimeout(() => {
           setImportProgress(null);
           setImportResults(result.summary);
@@ -231,7 +236,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
         toast({
           title: "Import Successful",
           description: `Successfully imported ${Object.values(result.summary).reduce((sum: number, val: any) => 
-            typeof val === 'number' ? sum + val : sum, 0)} items.`,
+            typeof val === 'number' ? sum + val : sum, 0)} items. AI insights will refresh automatically.`,
         });
       } else {
         const errorData = await response.json();
