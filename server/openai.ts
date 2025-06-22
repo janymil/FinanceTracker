@@ -842,6 +842,8 @@ async function generateFinancialHealthScore(financialData: {
     };
   }
 }
+
+// Remove any duplicate/corrupted function definitions below
   try {
     const { transactions, budgets, summary } = financialData;
     
