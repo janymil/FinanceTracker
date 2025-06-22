@@ -92,20 +92,25 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
     });
     const cacheKey = `financial-tips-${currentMonth}-${btoa(dataHash).slice(0, 12)}`;
 
-    // Check localStorage for cached tips first
-    const cachedData = localStorage.getItem(cacheKey);
-    if (cachedData) {
-      try {
-        const { tips: cachedTips, timestamp } = JSON.parse(cachedData);
-        const isExpired = Date.now() - timestamp > 60 * 60 * 1000; // 1 hour
-        
-        if (!isExpired && cachedTips) {
-          setTips(cachedTips);
-          setLastLoadedMonth(currentMonth);
-          return; // Use cached tips, skip API call
+    // Check for cache invalidation flag (set after data imports)
+    const shouldSkipCache = localStorage.getItem('invalidate-ai-cache') === 'true';
+    
+    // Check localStorage for cached tips first (unless cache invalidation flag is set)
+    if (!shouldSkipCache) {
+      const cachedData = localStorage.getItem(cacheKey);
+      if (cachedData) {
+        try {
+          const { tips: cachedTips, timestamp } = JSON.parse(cachedData);
+          const isExpired = Date.now() - timestamp > 30 * 60 * 1000; // 30 minutes (shorter cache)
+          
+          if (!isExpired && cachedTips) {
+            setTips(cachedTips);
+            setLastLoadedMonth(currentMonth);
+            return; // Use cached tips, skip API call
+          }
+        } catch (e) {
+          // Invalid cached data, continue to fetch
         }
-      } catch (e) {
-        // Invalid cached data, continue to fetch
       }
     }
 
@@ -130,6 +135,9 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
           tips: fetchedTips,
           timestamp: Date.now()
         }));
+        
+        // Clear cache invalidation flag after successful fetch
+        localStorage.removeItem('invalidate-ai-cache');
       } catch (error) {
         console.error('Failed to fetch AI tips:', error);
         setTips([]);

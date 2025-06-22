@@ -480,6 +480,7 @@ export function registerImportRoutes(app: Express) {
         success: true,
         message: "Data imported successfully",
         summary,
+        cacheCleared: true // Signal frontend to invalidate local cache
       });
 
     } catch (error) {

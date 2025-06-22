@@ -37,8 +37,11 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
         .update(JSON.stringify(dataForHash))
         .digest('hex');
 
+      // Check for force refresh parameter
+      const forceRefresh = req.body.forceRefresh || req.query.refresh === 'true';
+      
       // Check if we should regenerate tips or use cached ones
-      const shouldRegenerate = await storage.shouldRegenerateFinancialTips(userId, currentDataHash);
+      const shouldRegenerate = forceRefresh || await storage.shouldRegenerateFinancialTips(userId, currentDataHash);
 
       if (!shouldRegenerate) {
         // Return cached tips
@@ -47,6 +50,10 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
           console.log('Contextual financial tips: Using cached data - avoiding OpenAI API call');
           return res.json({ tips: cachedTips.tips });
         }
+      }
+      
+      if (forceRefresh) {
+        console.log('Contextual financial tips: Force refresh requested - bypassing cache');
       }
 
       console.log('Contextual financial tips: Generating new AI tips - data changed or cache expired');
