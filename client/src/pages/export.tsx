@@ -111,6 +111,8 @@ budget,,,,,Utilities,,,150,monthly,,,
 goal,,,,,,,,,,30000,5000,2025-12-31,Emergency Fund
 goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
 
+    // Note: The system supports both comma (,) and semicolon (;) delimited CSV files
+
     const blob = new Blob([exampleCSV], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');

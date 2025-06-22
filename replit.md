@@ -427,6 +427,8 @@ Changelog:
 - June 22, 2025. Fixed CSV template data alignment issue - corrected example rows to properly align with column headers, ensuring budget and goal data appears in correct columns
 - June 22, 2025. FIXED: Import system 500 errors by implementing missing createImportLog and getUserImportLogs methods in DatabaseStorage class
 - June 22, 2025. Added complete import log operations with database integration - import tracking system now fully functional
+- June 22, 2025. Enhanced CSV parser to auto-detect delimiters - now supports both comma (,) and semicolon (;) separated CSV files
+- June 22, 2025. Fixed error logging bug in import routes - properly handles userId for failed import tracking
 - June 18, 2025. Implemented real-time polling system for mobile uploads with 5-second intervals and automatic timeout handling
 - June 18, 2025. Enhanced mobile upload workflow with OCR processing, AI categorization, and automatic form population from mobile-captured receipt data
 - June 18, 2025. FIXED: Mobile upload QR code 404 errors by removing duplicate route and ensuring proper SignedOut routing configuration

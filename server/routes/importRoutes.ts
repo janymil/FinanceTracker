@@ -73,16 +73,22 @@ const importDataSchema = z.object({
   collaborativeGoals: z.array(importCollaborativeGoalSchema).optional().default([]),
 });
 
-// CSV parsing utility
+// CSV parsing utility with auto-delimiter detection
 function parseCSV(csvContent: string): Record<string, any>[] {
   const lines = csvContent.trim().split('\n');
   if (lines.length < 2) return [];
   
-  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+  // Auto-detect delimiter: check if semicolon is more common than comma in the header
+  const headerLine = lines[0];
+  const commaCount = (headerLine.match(/,/g) || []).length;
+  const semicolonCount = (headerLine.match(/;/g) || []).length;
+  const delimiter = semicolonCount > commaCount ? ';' : ',';
+  
+  const headers = headerLine.split(delimiter).map(h => h.trim().replace(/"/g, ''));
   const rows = [];
   
   for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+    const values = lines[i].split(delimiter).map(v => v.trim().replace(/"/g, ''));
     if (values.length === headers.length) {
       const row: Record<string, any> = {};
       headers.forEach((header, index) => {
@@ -420,22 +426,26 @@ export function registerImportRoutes(app: Express) {
         const { format } = req.body;
         const filename = `import_${new Date().toISOString().split('T')[0]}.${format || 'unknown'}`;
         
-        await saveImportLog(
-          userId,
-          createImportSummary({
-            categories: 0,
-            incomes: 0,
-            expenses: 0,
-            budgets: 0,
-            goals: 0,
-            collaborativeGoals: 0,
-            errors: [errorMessage]
-          }),
-          filename,
-          (format as 'csv' | 'json') || 'csv',
-          'failed',
-          errorMessage
-        );
+        // Ensure userId is available for error logging
+        const currentUserId = getUserId(req);
+        if (currentUserId) {
+          await saveImportLog(
+            currentUserId,
+            createImportSummary({
+              categories: 0,
+              incomes: 0,
+              expenses: 0,
+              budgets: 0,
+              goals: 0,
+              collaborativeGoals: 0,
+              errors: [errorMessage]
+            }),
+            filename,
+            (format as 'csv' | 'json') || 'csv',
+            'failed',
+            errorMessage
+          );
+        }
       } catch (logError) {
         console.error("Failed to log import error:", logError);
       }
