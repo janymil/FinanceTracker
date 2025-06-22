@@ -130,7 +130,7 @@ export function registerAIRoutes(app: Express) {
       // Filter transactions for the current month/year being analyzed
       const currentMonthTransactions = allTransactions.filter(t => {
         const transactionDate = new Date(t.date);
-        const transactionMonth = transactionDate.toLocaleString('default', { month: 'long' });
+        const transactionMonth = transactionDate.toLocaleString('en-US', { month: 'long' });
         const transactionYear = transactionDate.getFullYear();
         return transactionMonth === month && transactionYear === year;
       });

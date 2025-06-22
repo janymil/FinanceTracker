@@ -50,7 +50,7 @@ export default function AIFinancialTips({ summary, selectedMonth }: AIFinancialT
     if (user?.id && summary) {
       // Create a cache key based on monthly data to ensure tips match the displayed period
       const currentDate = selectedMonth || new Date();
-      const monthName = currentDate.toLocaleString('default', { month: 'long' });
+      const monthName = currentDate.toLocaleString('en-US', { month: 'long' });
       const year = currentDate.getFullYear();
       
       const monthlyKey = `ai-tip-${user.id}-${monthName}-${year}`;
@@ -101,7 +101,7 @@ export default function AIFinancialTips({ summary, selectedMonth }: AIFinancialT
       if (!summary) throw new Error("No financial summary available");
       
       const currentDate = new Date();
-      const monthName = currentDate.toLocaleString('default', { month: 'long' });
+      const monthName = currentDate.toLocaleString('en-US', { month: 'long' });
       
       const requestData = {
         financialData: {
