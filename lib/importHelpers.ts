@@ -154,8 +154,8 @@ export function formatBudget(data: any) {
   }
   
   const period = data.budgetPeriod?.toLowerCase() || 'monthly';
-  if (!['monthly', 'yearly'].includes(period)) {
-    throw new Error(`Invalid budget period: ${data.budgetPeriod}. Must be 'monthly' or 'yearly'`);
+  if (!['daily', 'weekly', 'monthly', 'quarterly', 'yearly'].includes(period)) {
+    throw new Error(`Invalid budget period: ${data.budgetPeriod}. Must be one of: daily, weekly, monthly, quarterly, yearly`);
   }
   
   // Generate start and end dates based on period
@@ -163,9 +163,25 @@ export function formatBudget(data: any) {
   let startDate: Date;
   let endDate: Date;
   
-  if (period === 'monthly') {
+  if (period === 'daily') {
+    // Current day
+    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  } else if (period === 'weekly') {
+    // Get current week (Monday to Sunday)
+    const dayOfWeek = now.getDay();
+    const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    startDate = new Date(now);
+    startDate.setDate(now.getDate() - daysFromMonday);
+    endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
+  } else if (period === 'monthly') {
     startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  } else if (period === 'quarterly') {
+    const quarter = Math.floor(now.getMonth() / 3);
+    startDate = new Date(now.getFullYear(), quarter * 3, 1);
+    endDate = new Date(now.getFullYear(), (quarter + 1) * 3, 0);
   } else { // yearly
     startDate = new Date(now.getFullYear(), 0, 1);
     endDate = new Date(now.getFullYear(), 11, 31);

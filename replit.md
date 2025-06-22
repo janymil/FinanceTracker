@@ -429,6 +429,8 @@ Changelog:
 - June 22, 2025. Added complete import log operations with database integration - import tracking system now fully functional
 - June 22, 2025. Enhanced CSV parser to auto-detect delimiters - now supports both comma (,) and semicolon (;) separated CSV files
 - June 22, 2025. Fixed error logging bug in import routes - properly handles userId for failed import tracking
+- June 22, 2025. Enhanced budget period validation - now supports daily, weekly, monthly, quarterly, and yearly budget periods
+- June 22, 2025. Fixed CSV validation logic - removed redundant validation that was causing field processing issues
 - June 18, 2025. Implemented real-time polling system for mobile uploads with 5-second intervals and automatic timeout handling
 - June 18, 2025. Enhanced mobile upload workflow with OCR processing, AI categorization, and automatic form population from mobile-captured receipt data
 - June 18, 2025. FIXED: Mobile upload QR code 404 errors by removing duplicate route and ensuring proper SignedOut routing configuration
