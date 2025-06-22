@@ -82,9 +82,9 @@ export default function DailyRecommendations({ summary, transactions = [], budge
   
   // Fetch AI recommendations from backend - force refetch
   const { data: recommendationsData, isLoading: recommendationsLoading, error: recommendationsError, refetch } = useQuery({
-    queryKey: ['daily-recommendations', user?.id, transactions?.length, summary?.totalIncome],
+    queryKey: ['daily-recommendations', user?.id, Math.floor((transactions?.length || 0) / 5) * 5], // Only change key every 5 transactions
     enabled: isUserReady && isPremiumUser && hasTransactionData,
-    staleTime: 5 * 60 * 1000, // 5 minutes cache
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours cache for session persistence
     refetchOnWindowFocus: false,
     queryFn: async () => {
       try {

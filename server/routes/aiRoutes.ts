@@ -304,13 +304,21 @@ export function registerAIRoutes(app: Express) {
         });
       }
 
-      // Create a data hash for caching (30 minutes)
+      // Create stable hash for caching - only regenerate on significant changes
+      const lastWeekTransactions = transactions?.filter(t => {
+        const transactionDate = new Date(t.date);
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        return transactionDate >= weekAgo;
+      }).length || 0;
+
       const dataForHash = {
-        transactionCount: transactions.length,
-        totalIncome: Math.round(summary?.totalIncome || 0),
-        totalExpenses: Math.round(summary?.totalExpenses || 0),
+        transactionCount: transactions?.length || 0,
+        lastWeekTransactionCount: lastWeekTransactions,
+        totalIncome: Math.round((summary?.totalIncome || 0) / 100) * 100, // Round to nearest $100
+        totalExpenses: Math.round((summary?.totalExpenses || 0) / 100) * 100,
         budgetCount: budgets?.length || 0,
-        currentDate: new Date().toDateString() // Daily cache refresh
+        currentWeek: Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000)) // Weekly refresh
       };
       const dataHash = aiCache.createDataHash(dataForHash);
 
@@ -321,15 +329,20 @@ export function registerAIRoutes(app: Express) {
         return res.json(cached);
       }
 
+      // Get categories for proper naming
+      const categories = await db.select().from(categoriesTable);
+      const categoryMap = new Map(categories.map(cat => [cat.id, cat.name]));
+
       console.log('Daily recommendations: Making new OpenAI API call');
       const recommendations = await generateDailyRecommendations({
         transactions,
         summary: summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 },
-        budgets: budgets || []
+        budgets: budgets || [],
+        categories: categoryMap
       });
 
-      // Cache for 30 minutes
-      aiCache.set(`daily_recommendations_${dataHash}`, recommendations, 1800);
+      // Cache for 24 hours for session persistence
+      aiCache.set(`daily_recommendations_${dataHash}`, recommendations, 86400);
 
       return res.json(recommendations);
     } catch (error) {

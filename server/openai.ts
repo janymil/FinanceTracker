@@ -1000,6 +1000,7 @@ export async function generateDailyRecommendations(financialData: {
     categoryId: number;
     period: string;
   }>;
+  categories: Map<number, string>;
 }) {
   try {
     // Check cache first
@@ -1027,10 +1028,10 @@ export async function generateDailyRecommendations(financialData: {
     recentTransactions.forEach(t => {
       if (t.type === 'expense') {
         const amount = parseFloat(t.amount);
-        const category = t.categoryId?.toString() || 'Other';
+        const categoryName = t.categoryId ? financialData.categories.get(t.categoryId) || 'Other' : 'Other';
         const date = new Date(t.date).toDateString();
         
-        categorySpending.set(category, (categorySpending.get(category) || 0) + amount);
+        categorySpending.set(categoryName, (categorySpending.get(categoryName) || 0) + amount);
         dailySpending.set(date, (dailySpending.get(date) || 0) + amount);
       }
     });
@@ -1052,7 +1053,7 @@ Financial Summary:
 - Average Daily Spending: $${avgDailySpending.toFixed(2)}
 
 Top Spending Categories:
-${topCategories.map(([cat, amount]) => `- Category ${cat}: $${amount.toFixed(2)}`).join('\n')}
+${topCategories.map(([cat, amount]) => `- ${cat}: $${amount.toFixed(2)}`).join('\n')}
 
 Budget Information:
 ${financialData.budgets.map(b => `- ${b.name}: $${b.amount} (${b.period})`).join('\n')}
