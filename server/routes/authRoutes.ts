@@ -62,6 +62,7 @@ export function registerAuthRoutes(app: Express) {
       return res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
+      console.error("Stack trace:", error.stack);
       return res.status(500).json({ message: "Failed to fetch user" });
     }
   });

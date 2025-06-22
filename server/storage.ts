@@ -1171,15 +1171,44 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUser(userId: string, userData: Partial<User>): Promise<User> {
-    const [updatedUser] = await db
-      .update(users)
-      .set({
-        ...userData,
+    try {
+      // Clean userData to only include valid user fields
+      const validFields = {
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        profileImageUrl: userData.profileImageUrl,
+        phone: userData.phone,
+        website: userData.website,
+        plan: userData.plan,
+        billingInterval: userData.billingInterval,
+        currency: userData.currency,
+        stripeCustomerId: userData.stripeCustomerId,
+        stripeSubscriptionId: userData.stripeSubscriptionId,
+        settings: userData.settings,
         updatedAt: new Date(),
-      })
-      .where(eq(users.id, userId))
-      .returning();
-    return updatedUser;
+      };
+
+      // Remove undefined values
+      const cleanData = Object.fromEntries(
+        Object.entries(validFields).filter(([_, value]) => value !== undefined)
+      );
+
+      const [updatedUser] = await db
+        .update(users)
+        .set(cleanData)
+        .where(eq(users.id, userId))
+        .returning();
+
+      if (!updatedUser) {
+        throw new Error('User not found');
+      }
+
+      return updatedUser;
+    } catch (error: any) {
+      console.error('Failed to update user in database:', error);
+      throw new Error('Failed to update user profile in database');
+    }
   }
 
   async deleteUserCompletely(userId: string): Promise<void> {
