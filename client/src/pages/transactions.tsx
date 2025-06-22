@@ -69,6 +69,7 @@ export default function Transactions() {
   const { isReady, user } = useClerkUserReady();
   const { toast } = useToast();
   const { currency } = useCurrency();
+  const displayCurrency = currency || '$';
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");

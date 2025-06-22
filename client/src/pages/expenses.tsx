@@ -60,6 +60,7 @@ interface Category {
 export default function Expenses() {
   const { isReady, user } = useClerkUserReady();
   const { currency } = useCurrency();
+  const displayCurrency = currency || '$';
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);

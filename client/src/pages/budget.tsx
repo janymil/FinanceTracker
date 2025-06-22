@@ -55,6 +55,8 @@ interface Category {
 export default function Budget() {
   const { isReady, user } = useClerkUserReady();
   const { toast } = useToast();
+  const { currency } = useCurrency();
+  const displayCurrency = currency || '$';
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
