@@ -443,6 +443,7 @@ Changelog:
 - June 22, 2025. Added persistent localStorage caching with monthly keys for consistent user experience across sessions
 - June 22, 2025. FIXED: Removed time-based cache expiration for AI Tips - now only invalidates when transaction data actually changes
 - June 22, 2025. FIXED: AI Financial Tips auto-generation - widget now automatically generates tips when financial data exists instead of showing placeholder
+- June 22, 2025. FIXED: AI Financial Tips request body double-stringification issue preventing proper data transmission to backend
 - June 18, 2025. Implemented real-time polling system for mobile uploads with 5-second intervals and automatic timeout handling
 - June 18, 2025. Enhanced mobile upload workflow with OCR processing, AI categorization, and automatic form population from mobile-captured receipt data
 - June 18, 2025. FIXED: Mobile upload QR code 404 errors by removing duplicate route and ensuring proper SignedOut routing configuration

@@ -19,9 +19,10 @@ interface AIFinancialTipsProps {
       type: string;
     }>;
   };
+  selectedMonth?: Date;
 }
 
-export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
+export default function AIFinancialTips({ summary, selectedMonth }: AIFinancialTipsProps) {
   const { toast } = useToast();
   const [currentTip, setCurrentTip] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -48,7 +49,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   useEffect(() => {
     if (user?.id && summary) {
       // Create a cache key based on monthly data to ensure tips match the displayed period
-      const currentDate = new Date();
+      const currentDate = selectedMonth || new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
       const year = currentDate.getFullYear();
       
@@ -102,10 +103,10 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
         }
       };
 
-      console.log('AI Tips: Sending request with data:', requestData);
+      console.log('AI Tips: Sending request for', monthName, year);
+      console.log('AI Tips: Financial data:', requestData.financialData);
 
-      const response = await apiRequest("POST", "/api/ai/tip", {
-        body: JSON.stringify(requestData),
+      const response = await apiRequest("POST", "/api/ai/tip", requestData, {
         headers: {
           'Content-Type': 'application/json'
         }
