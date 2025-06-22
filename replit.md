@@ -263,7 +263,7 @@ Changelog:
 - June 22, 2025. Fixed Daily Recommendations to require minimum 5 transactions for recommendations and 10 transactions for insights before showing any content
 - June 22, 2025. Restored AI Financial Tips widget to dashboard after accidental removal during component fixes
 - June 22, 2025. FIXED: AI Expense Prediction widget hardcoded data completely eliminated - removed fake predictions array with "Food & Dining: $520" and monthlyPredictions with "$1200, $1150, $1300"
-- June 22, 2025. Updated AI Expense Prediction to require minimum 10 transactions before showing any predictions across all three tabs (Overview, By Category, Timeline)
+- June 22, 2025. Updated AI Expense Prediction to require minimum 3 transactions before showing any predictions across all three tabs (Overview, By Category, Timeline)
 - June 22, 2025. All dashboard AI components now show authentic personalized data or proper "no data" states only - zero hardcoded content remaining
 - June 22, 2025. FIXED: Auto-Categorization widget hardcoded sample data issue (Amazon, Starbucks, Shell with fake confidence percentages)
 - June 22, 2025. Removed all mock/demo data from AI components - components now only show real personalized AI analysis when transaction data exists
@@ -438,6 +438,7 @@ Changelog:
 - June 22, 2025. FIXED: AI Financial Tips widget inconsistency - now properly analyzes monthly data matching selected period
 - June 22, 2025. Enhanced AI Tips backend to use monthly transaction scope instead of all-time data for consistent behavior
 - June 22, 2025. Added minimum transaction threshold (2 transactions) for monthly AI analysis with helpful guidance messages
+- June 22, 2025. UPDATED: Reduced AI Expense Prediction minimum transaction requirement from 10 to 3 transactions for earlier access to predictions
 - June 18, 2025. Implemented real-time polling system for mobile uploads with 5-second intervals and automatic timeout handling
 - June 18, 2025. Enhanced mobile upload workflow with OCR processing, AI categorization, and automatic form population from mobile-captured receipt data
 - June 18, 2025. FIXED: Mobile upload QR code 404 errors by removing duplicate route and ensuring proper SignedOut routing configuration

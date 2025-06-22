@@ -77,9 +77,9 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
   const hasTransactionData = transactions && transactions.length > 0;
   
   // Only generate predictions when we have sufficient transaction data for meaningful analysis
-  const predictions: Prediction[] = hasTransactionData && transactions.length >= 10 ? [] : [];
+  const predictions: Prediction[] = hasTransactionData && transactions.length >= 3 ? [] : [];
 
-  const monthlyPredictions: MonthlyPrediction[] = hasTransactionData && transactions.length >= 10 ? [] : [];
+  const monthlyPredictions: MonthlyPrediction[] = hasTransactionData && transactions.length >= 3 ? [] : [];
 
   const totalPredicted = predictions.reduce((sum, p) => sum + p.predictedNext, 0);
 
