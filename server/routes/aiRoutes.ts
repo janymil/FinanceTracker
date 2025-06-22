@@ -91,94 +91,71 @@ export function registerAIRoutes(app: Express) {
     }
   });
 
-  // AI Financial Tips endpoint - bypasses cache for fresh responses
+  // AI Financial Tips endpoint with detailed transaction data
   app.post('/api/ai/tip', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
+      
       const user = await storage.getUser(userId);
-
-      // Require premium plan for AI tips
       if (!user || user.plan !== 'premium') {
         return res.status(403).json({ message: "AI financial tips require premium plan" });
       }
 
-      // Get user's complete financial data for analysis
-      const currentDate = new Date();
-      const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
+      // Get financial data from request body (sent from frontend)
+      const { financialData } = req.body;
       
-      // Get all user transactions (no date filtering for AI analysis)
-      const allTransactions = await storage.getUserTransactions(userId, 100);
-      const categories = await storage.getCategories(userId);
-      
-      // Get financial summary for the full year
-      const financialSummary = await storage.getUserFinancialSummary(userId, startOfYear, currentDate);
+      if (!financialData || !financialData.transactions) {
+        return res.status(400).json({ message: "Financial data with transactions required" });
+      }
 
-      // Create category name mapping
-      const categoryMap = new Map();
-      categories.forEach(cat => categoryMap.set(cat.id, cat.name));
+      // Validate and process transaction data
+      const transactions = financialData.transactions;
+      if (!Array.isArray(transactions) || transactions.length === 0) {
+        return res.json({ tip: "Start by adding some transactions to get personalized financial insights." });
+      }
 
-      // Use ALL transactions for AI analysis (not date-filtered)
-      const processedTransactions = allTransactions.map(t => ({
-        description: t.description,
-        amount: parseFloat(t.amount),
-        date: t.date.toISOString(),
-        categoryName: categoryMap.get(t.categoryId) || 'Uncategorized',
-        type: t.type
+      // Format transaction data for AI analysis with detailed information
+      const formattedTransactions = transactions.map((t: any) => ({
+        id: t.id,
+        description: t.note || `${t.category} transaction`,
+        amount: t.amount,
+        date: t.date,
+        categoryName: t.category,
+        type: t.type,
+        recurring: t.recurring,
+        budgetAssigned: t.budgetAssigned
       }));
 
-      // Calculate totals from actual transactions
-      const actualTotalIncome = processedTransactions
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + t.amount, 0);
-      
-      const actualTotalExpenses = processedTransactions
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + t.amount, 0);
+      console.log(`Processing ${formattedTransactions.length} transactions for AI analysis`);
 
-      // Create category breakdown from actual transactions
-      const categoryBreakdown = new Map();
-      processedTransactions.forEach(t => {
-        const key = `${t.categoryName}_${t.type}`;
-        categoryBreakdown.set(key, (categoryBreakdown.get(key) || 0) + t.amount);
+      const tipResults = await generateFinancialTips({
+        totalIncome: financialData.totalIncome || 0,
+        totalExpenses: financialData.totalExpenses || 0,
+        transactionsByCategory: financialData.categories || [],
+        recentTransactions: formattedTransactions,
+        timestamp: financialData.timestamp
       });
 
-      const transactionsByCategory = Array.from(categoryBreakdown.entries()).map(([key, amount]) => {
-        const [categoryName, type] = key.split('_');
-        return { categoryName, amount, type };
-      });
-
-      // Prepare comprehensive financial data using ACTUAL transaction data
-      const financialData = {
-        totalIncome: actualTotalIncome,
-        totalExpenses: actualTotalExpenses,
-        transactionsByCategory,
-        recentTransactions: processedTransactions,
-        timestamp: Date.now()
-      };
-
-      console.log(`FIXED: AI processing ${allTransactions.length} total transactions for user ${getUserId(req)}`);
-      console.log(`Income: $${actualTotalIncome}, Expenses: $${actualTotalExpenses}, Net: $${actualTotalIncome - actualTotalExpenses}`);
-      console.log(`Date range spans: ${processedTransactions.length > 0 ? processedTransactions[processedTransactions.length-1].date : 'N/A'} to ${processedTransactions.length > 0 ? processedTransactions[0].date : 'N/A'}`);
-      
-      const tips = await generateFinancialTips(financialData);
-      const tip = tips.length > 0 ? tips[0] : null;
-
-      if (tip) {
+      if (tipResults && tipResults.length > 0) {
+        const tip = tipResults[0];
         return res.json({ tip: `${tip.title}: ${tip.description}` });
       } else {
         // Provide specific fallback based on actual data
-        if (transactions.length === 0) {
-          return res.json({ tip: "Start by adding some transactions to get personalized financial insights." });
-        } else {
-          const expenseCount = transactions.filter(t => t.type === 'expense').length;
-          const incomeCount = transactions.filter(t => t.type === 'income').length;
-          return res.json({ 
-            tip: `Based on your ${expenseCount} expense transactions ($${financialSummary.totalExpenses.toFixed(2)}) and ${incomeCount} income transactions ($${financialSummary.totalIncome.toFixed(2)}), consider setting up budgets for your top spending categories to better manage your finances.` 
-          });
-        }
+        const expenseCount = transactions.filter((t: any) => t.type === 'expense').length;
+        const incomeCount = transactions.filter((t: any) => t.type === 'income').length;
+        const totalExpenses = transactions
+          .filter((t: any) => t.type === 'expense')
+          .reduce((sum: number, t: any) => sum + t.amount, 0);
+        const totalIncome = transactions
+          .filter((t: any) => t.type === 'income')
+          .reduce((sum: number, t: any) => sum + t.amount, 0);
+          
+        return res.json({ 
+          tip: `Based on your ${expenseCount} expense transactions ($${totalExpenses.toFixed(2)}) and ${incomeCount} income transactions ($${totalIncome.toFixed(2)}), consider setting up budgets for your top spending categories to better manage your finances.` 
+        });
       }
     } catch (error) {
       console.error("Error generating financial tip:", error);

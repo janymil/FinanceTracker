@@ -65,13 +65,37 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     },
   });
 
+  // Get detailed transactions for AI analysis
+  const { data: transactions = [] } = useQuery({
+    queryKey: ["transactions", user?.id],
+    enabled: !!user?.id,
+    staleTime: 0,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/transactions");
+      return response.json();
+    },
+  });
+
   // React Query mutation for generating tips
   const generateTipMutation = useMutation({
     mutationFn: async () => {
       if (!summary) throw new Error("No financial summary available");
+      if (!transactions || transactions.length === 0) throw new Error("No transactions available for analysis");
       
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
+      
+      // Format transactions for AI analysis
+      const formattedTransactions = transactions.map((t: any) => ({
+        id: t.id.toString(),
+        date: t.date.split('T')[0], // YYYY-MM-DD format
+        type: t.type,
+        amount: parseFloat(t.amount),
+        category: t.categoryName || "Uncategorized",
+        note: t.description || "",
+        recurring: t.isRecurring || false,
+        budgetAssigned: !!t.categoryId
+      }));
       
       const response = await apiRequest("POST", "/api/ai/tip", {
         body: JSON.stringify({
@@ -79,6 +103,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             totalIncome: summary.totalIncome,
             totalExpenses: summary.totalExpenses,
             categories: summary.transactionsByCategory || [],
+            transactions: formattedTransactions,
             month: monthName,
             year: currentDate.getFullYear(),
             timestamp: Date.now()
