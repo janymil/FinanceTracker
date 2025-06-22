@@ -296,11 +296,11 @@ export function registerAIRoutes(app: Express) {
       }
 
       // Check minimum data requirements
-      if (transactions.length < 5) {
+      if (transactions.length < 3) {
         return res.json({
           recommendations: [],
           insights: [],
-          message: "Add at least 5 transactions to get personalized daily recommendations"
+          message: "Add at least 3 transactions to get personalized daily recommendations"
         });
       }
 

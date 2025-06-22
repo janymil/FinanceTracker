@@ -75,31 +75,30 @@ export default function DailyRecommendations({ summary, transactions = [], budge
   const isPremiumUser = databaseUser?.plan === 'premium';
 
   // Check if we have transaction data for AI analysis
-  const hasTransactionData = transactions && transactions.length > 0;
+  const hasTransactionData = transactions && transactions.length >= 3;
   
-  // Generate AI-powered daily recommendations
-  const generateDailyRecommendations = (): Recommendation[] => {
-    // Only show recommendations when we have sufficient transaction data for analysis
-    if (!hasTransactionData || transactions.length < 5) {
-      return [];
-    }
-    
-    // Real AI recommendations would come from backend API here
-    // For now, return empty until AI backend is implemented
-    return [];
-  };
+  // Fetch AI recommendations from backend
+  const { data: recommendationsData, isLoading: recommendationsLoading, error: recommendationsError } = useQuery({
+    queryKey: ['daily-recommendations', user?.id, transactions?.length],
+    enabled: !!user?.id && isPremiumUser && hasTransactionData,
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
+    queryFn: async () => {
+      try {
+        const response = await apiRequest('POST', '/api/ai/daily-recommendations', {
+          transactions,
+          summary,
+          budgets
+        });
+        return response.json();
+      } catch (error) {
+        console.error('Failed to fetch daily recommendations:', error);
+        throw error;
+      }
+    },
+  });
 
-  // Generate personalization insights
-  const generatePersonalizationInsights = (): PersonalizationInsight[] => {
-    // Only show insights when we have sufficient transaction data for meaningful analysis
-    if (!hasTransactionData || transactions.length < 10) {
-      return [];
-    }
-    
-    // Real AI insights would come from backend API here
-    // For now, return empty until AI backend is implemented
-    return [];
-  };
+  const recommendations = recommendationsData?.recommendations || [];
+  const insights = recommendationsData?.insights || [];
 
   const toggleTaskCompletion = (taskId: string) => {
     setCompletedTasks(prev => {
@@ -125,9 +124,6 @@ export default function DailyRecommendations({ summary, transactions = [], budge
         return <CheckCircle className="h-4 w-4 text-gray-500" />;
     }
   };
-
-  const recommendations = generateDailyRecommendations();
-  const insights = generatePersonalizationInsights();
 
   return (
     <Card className="h-full">
@@ -161,7 +157,22 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                 </Badge>
               </div>
 
-              <div className="space-y-3">
+              {recommendationsLoading ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600"></div>
+                </div>
+              ) : recommendationsError ? (
+                <div className="text-center py-8">
+                  <AlertTriangle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                    Failed to Load Recommendations
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Unable to generate daily recommendations. Please try again later.
+                  </p>
+                </div>
+              ) : recommendations.length > 0 ? (
+                <div className="space-y-3">
                 {recommendations.map((rec) => {
                   const isCompleted = completedTasks.has(rec.id);
                   
@@ -224,16 +235,18 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                     </Card>
                   );
                 })}
-              </div>
-
-              {recommendations.length === 0 && (
+                </div>
+              ) : (
                 <div className="text-center py-8">
                   <Lightbulb className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                     No Recommendations Available
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    Add more transactions to receive AI-powered daily recommendations
+                    {hasTransactionData 
+                      ? "No recommendations available. Check back later for new suggestions." 
+                      : "Add at least 3 transactions to receive AI-powered daily recommendations"
+                    }
                   </p>
                 </div>
               )}
@@ -278,7 +291,10 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                     No Personal Insights Available
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    Add more transactions to generate AI-powered personalized financial insights
+                    {hasTransactionData 
+                      ? "No insights available. Add more transaction data for personalized analysis." 
+                      : "Add at least 3 transactions to generate AI-powered personalized financial insights"
+                    }
                   </p>
                 </div>
               )}
