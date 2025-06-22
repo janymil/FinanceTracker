@@ -78,41 +78,34 @@ export default function DailyRecommendations({ summary, transactions = [], budge
   // Check if we have transaction data for AI analysis
   const hasTransactionData = transactions && transactions.length >= 3;
   
-  // Enhanced debug logging
-  useEffect(() => {
-    console.log('Daily Recommendations Debug:', {
-      userId: user?.id,
-      isPremiumUser,
-      hasTransactionData,
-      transactionCount: transactions?.length,
-      databaseUserPlan: databaseUser?.plan,
-      databaseUserLoaded: !!databaseUser,
-      isUserReady,
-      userLoading,
-      enabled: isUserReady && isPremiumUser && hasTransactionData,
-      transactions: transactions?.slice(0, 3) // Show sample transactions
-    });
-  }, [user?.id, isPremiumUser, hasTransactionData, transactions?.length, databaseUser]);
+
   
-  // Fetch AI recommendations from backend
-  const { data: recommendationsData, isLoading: recommendationsLoading, error: recommendationsError } = useQuery({
-    queryKey: ['daily-recommendations', user?.id, transactions?.length],
+  // Fetch AI recommendations from backend - force refetch
+  const { data: recommendationsData, isLoading: recommendationsLoading, error: recommendationsError, refetch } = useQuery({
+    queryKey: ['daily-recommendations', user?.id, transactions?.length, summary?.totalIncome],
     enabled: isUserReady && isPremiumUser && hasTransactionData,
     staleTime: 5 * 60 * 1000, // 5 minutes cache
+    refetchOnWindowFocus: false,
     queryFn: async () => {
-      console.log('Making daily recommendations API call with data:', {
-        transactionCount: transactions?.length,
-        summaryExists: !!summary,
-        budgetCount: budgets?.length
-      });
+      console.log('Making daily recommendations API call');
+      
+      if (!transactions || transactions.length < 3) {
+        throw new Error('Insufficient transaction data');
+      }
+      
       try {
         const response = await apiRequest('POST', '/api/ai/daily-recommendations', {
-          transactions,
-          summary,
-          budgets
+          transactions: transactions.slice(0, 50), // Limit for performance
+          summary: summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 },
+          budgets: budgets || []
         });
+        
+        if (!response.ok) {
+          throw new Error(`API responded with status: ${response.status}`);
+        }
+        
         const data = await response.json();
-        console.log('Daily recommendations response:', data);
+        console.log('Daily recommendations response received');
         return data;
       } catch (error) {
         console.error('Failed to fetch daily recommendations:', error);
@@ -120,6 +113,8 @@ export default function DailyRecommendations({ summary, transactions = [], budge
       }
     },
   });
+
+
 
   const recommendations = recommendationsData?.recommendations || [];
   const insights = recommendationsData?.insights || [];

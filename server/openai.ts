@@ -1045,9 +1045,9 @@ export async function generateDailyRecommendations(financialData: {
     const prompt = `You are a financial advisor analyzing a user's spending patterns. Based on their financial data, provide personalized daily recommendations and insights.
 
 Financial Summary:
-- Total Income: $${financialData.summary.totalIncome.toFixed(2)}
-- Total Expenses: $${financialData.summary.totalExpenses.toFixed(2)}
-- Net Amount: $${financialData.summary.netAmount.toFixed(2)}
+- Total Income: $${(financialData.summary?.totalIncome || 0).toFixed(2)}
+- Total Expenses: $${(financialData.summary?.totalExpenses || 0).toFixed(2)}
+- Net Amount: $${(financialData.summary?.netAmount || 0).toFixed(2)}
 - Recent Transactions: ${recentTransactions.length}
 - Average Daily Spending: $${avgDailySpending.toFixed(2)}
 
