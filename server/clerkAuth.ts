@@ -2,15 +2,29 @@ import { clerkMiddleware, requireAuth } from '@clerk/express';
 import type { Request, Response, NextFunction } from 'express';
 
 export const setupClerkAuth = (app: any) => {
+  // Use production keys in production environment
+  const isProduction = process.env.NODE_ENV === 'production';
+  const publishableKey = isProduction 
+    ? process.env.VITE_CLERK_PUBLISHABLE_KEY_PROD || process.env.VITE_CLERK_PUBLISHABLE_KEY
+    : process.env.VITE_CLERK_PUBLISHABLE_KEY;
+  const secretKey = isProduction 
+    ? process.env.CLERK_SECRET_KEY_PROD || process.env.CLERK_SECRET_KEY
+    : process.env.CLERK_SECRET_KEY;
+
   console.log('Setting up Clerk middleware with keys:', {
-    publishable: process.env.VITE_CLERK_PUBLISHABLE_KEY?.substring(0, 20) + '...',
-    secret: process.env.CLERK_SECRET_KEY?.substring(0, 20) + '...'
+    environment: isProduction ? 'production' : 'development',
+    publishable: publishableKey?.substring(0, 20) + '...',
+    secret: secretKey?.substring(0, 20) + '...'
   });
+  
+  if (!publishableKey || !secretKey) {
+    throw new Error(`Missing Clerk keys for ${isProduction ? 'production' : 'development'} environment`);
+  }
   
   // Add Clerk middleware to handle authentication
   app.use(clerkMiddleware({
-    publishableKey: process.env.VITE_CLERK_PUBLISHABLE_KEY,
-    secretKey: process.env.CLERK_SECRET_KEY,
+    publishableKey,
+    secretKey,
   }));
 };
 
