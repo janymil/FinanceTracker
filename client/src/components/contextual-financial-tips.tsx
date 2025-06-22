@@ -56,22 +56,36 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
   };
 
   useEffect(() => {
-    if (!transactions || transactions.length === 0 || !summary) return;
+    if (!transactions || !summary) return;
 
     const currentMonth = selectedMonth || new Date().toISOString().slice(0, 7);
     
+    // Filter transactions for the selected month
+    const monthTransactions = transactions.filter((transaction: any) => {
+      const transactionDate = new Date(transaction.date);
+      const transactionMonth = `${transactionDate.getFullYear()}-${String(transactionDate.getMonth() + 1).padStart(2, '0')}`;
+      return transactionMonth === currentMonth;
+    });
+
     // If month changed, clear previous tips and reset state
     if (lastLoadedMonth && lastLoadedMonth !== currentMonth) {
       setTips(null);
       setLastLoadedMonth(null);
     }
 
+    // If no transactions for this month, show no data state
+    if (monthTransactions.length === 0) {
+      setTips([]);
+      setLastLoadedMonth(currentMonth);
+      return;
+    }
+
     // Skip if we already loaded tips for this month
     if (lastLoadedMonth === currentMonth && tips) return;
 
-    // Create a month-specific cache key
+    // Create a month-specific cache key based on filtered transactions
     const dataHash = JSON.stringify({
-      transactionCount: transactions.length,
+      transactionCount: monthTransactions.length,
       totalIncome: summary?.totalIncome || 0,
       totalExpenses: summary?.totalExpenses || 0,
       budgetCount: budgets?.length || 0
@@ -85,7 +99,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
         const { tips: cachedTips, timestamp } = JSON.parse(cachedData);
         const isExpired = Date.now() - timestamp > 60 * 60 * 1000; // 1 hour
         
-        if (!isExpired && cachedTips && cachedTips.length > 0) {
+        if (!isExpired && cachedTips) {
           setTips(cachedTips);
           setLastLoadedMonth(currentMonth);
           return; // Use cached tips, skip API call
@@ -102,7 +116,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
       try {
         const res = await axios.post('/api/ai/contextual-financial-tips', {
           summary,
-          transactions,
+          transactions: monthTransactions, // Pass only filtered transactions
           budgets,
           selectedMonth
         });
@@ -112,12 +126,10 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
         setLastLoadedMonth(currentMonth);
         
         // Cache the tips with timestamp for this specific month
-        if (fetchedTips.length > 0) {
-          localStorage.setItem(cacheKey, JSON.stringify({
-            tips: fetchedTips,
-            timestamp: Date.now()
-          }));
-        }
+        localStorage.setItem(cacheKey, JSON.stringify({
+          tips: fetchedTips,
+          timestamp: Date.now()
+        }));
       } catch (error) {
         console.error('Failed to fetch AI tips:', error);
         setTips([]);
@@ -145,7 +157,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
           <div className="text-center py-8">
             <Lightbulb className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400">
-              No tips available. Add more transactions to receive personalized insights.
+              No financial data available for {selectedMonth ? new Date(selectedMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'this month'}. Add transactions to receive personalized insights.
             </p>
           </div>
         ) : (

@@ -268,6 +268,7 @@ Changelog:
 - June 22, 2025. FIXED: Auto-Categorization widget hardcoded sample data issue (Amazon, Starbucks, Shell with fake confidence percentages)
 - June 22, 2025. Removed all mock/demo data from AI components - components now only show real personalized AI analysis when transaction data exists
 - June 22, 2025. Enhanced AI component integrity - no more placeholder data that defeats personalized AI experience
+- June 22, 2025. FIXED: Contextual Financial Tips month-switching functionality - component now receives selectedMonth prop and properly displays different tips for each month
 - June 15, 2025. Updated transaction-list display limit and added proper backend validation to enforce 100-transaction limit for free users
 - June 16, 2025. Fixed deployment loading issue caused by excessive Vite icon imports - created optimized icon bundle reducing bundle size by 75%
 - June 16, 2025. Resolved Clerk JWT token mismatch errors by implementing development key configuration and browser cache clearing mechanism
