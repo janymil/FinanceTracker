@@ -26,6 +26,10 @@ export function registerAuthRoutes(app: Express) {
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
+      
+      if (!userId) {
+        return res.status(401).json({ message: "No user ID found" });
+      }
 
       let user = await storage.getUser(userId);
       

@@ -387,11 +387,6 @@ app.use((req, res, next) => {
 
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
-  // Add health check endpoint for deployment
-  app.get('/health', (_req, res) => {
-    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-  });
-
   // It is the only port that is not firewalled.
   const port = 5000;
   server.listen({
