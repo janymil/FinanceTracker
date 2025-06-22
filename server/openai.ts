@@ -43,6 +43,26 @@ export interface FinancialForecast {
   riskFactors: string[];
 }
 
+export interface ExpensePrediction {
+  category: string;
+  currentMonth: number;
+  predictedNext: number;
+  confidence: number;
+  trend: 'increasing' | 'decreasing' | 'stable';
+  reasoning: string;
+  factors: string[];
+}
+
+export interface MonthlyExpensePrediction {
+  month: string;
+  predicted: number;
+  confidence: number;
+  breakdown: Array<{
+    category: string;
+    amount: number;
+  }>;
+}
+
 export interface FinancialHealthData {
   score: number;
   trend: 'improving' | 'declining' | 'stable';
@@ -52,7 +72,7 @@ export interface FinancialHealthData {
   warnings: string[];
 }
 
-export async function categorizeExpense(description: string, amount: number): Promise<ExpenseCategorizationResult> {
+async function categorizeExpense(description: string, amount: number): Promise<ExpenseCategorizationResult> {
   try {
     // Check cache first
     const cached = aiCache.getCategorization(description, amount);
@@ -122,7 +142,7 @@ Please categorize this expense.`
   }
 }
 
-export async function generateFinancialTips(financialData: {
+async function generateFinancialTips(financialData: {
   totalIncome: number;
   totalExpenses: number;
   transactionsByCategory: Array<{
@@ -303,7 +323,7 @@ Return comprehensive analysis in JSON:
   }
 }
 
-export async function generateSpendingInsights(transactions: Array<{
+async function generateSpendingInsights(transactions: Array<{
   description: string;
   amount: number;
   date: string;
@@ -415,7 +435,7 @@ Generate financial insights based on this spending data.`
   }
 }
 
-export async function generateAIFinancialHealthScore(financialData: {
+async function generateAIFinancialHealthScore(financialData: {
   summary: {
     totalIncome: number;
     totalExpenses: number;
@@ -562,7 +582,7 @@ Provide an AI-powered financial health score that adapts to this user's specific
   }
 }
 
-export async function generateTrendPredictions(
+async function generateTrendPredictions(
   transactions: Array<{
     id: number;
     amount: string;
@@ -739,7 +759,7 @@ Analysis Requirements:
   }
 }
 
-export async function generateFinancialHealthScore(financialData: {
+async function generateFinancialHealthScore(financialData: {
   transactions: Array<{
     id: number;
     amount: string;
@@ -759,6 +779,71 @@ export async function generateFinancialHealthScore(financialData: {
     netBalance: number;
   };
 }): Promise<FinancialHealthData> {
+  try {
+    // Simple mathematical calculation for financial health score
+    const { summary } = financialData;
+    const savingsRate = summary.totalIncome > 0 ? 
+      (summary.totalIncome - summary.totalExpenses) / summary.totalIncome : 0;
+    
+    let score = 50;
+    let category: 'excellent' | 'good' | 'fair' | 'poor' = 'fair';
+    let trend: 'improving' | 'declining' | 'stable' = 'stable';
+    
+    if (savingsRate > 0.2) {
+      score = 85;
+      category = 'excellent';
+      trend = 'improving';
+    } else if (savingsRate > 0.1) {
+      score = 70;
+      category = 'good';
+      trend = 'stable';
+    } else if (savingsRate > 0) {
+      score = 55;
+      category = 'fair';
+      trend = 'stable';
+    } else {
+      score = 30;
+      category = 'poor';
+      trend = 'declining';
+    }
+    
+    const insights = [];
+    const achievements = [];
+    const warnings = [];
+    
+    if (savingsRate > 0.1) {
+      insights.push(`Good savings rate of ${(savingsRate * 100).toFixed(1)}%`);
+      achievements.push('Maintaining positive savings');
+    }
+    
+    if (summary.netBalance > 0) {
+      achievements.push('Positive net balance');
+    } else {
+      warnings.push('Expenses exceed income');
+    }
+    
+    return {
+      score,
+      trend,
+      category,
+      insights,
+      achievements,
+      warnings
+    };
+  } catch (error) {
+    console.error('Error generating financial health score:', error);
+    return {
+      score: 50,
+      trend: 'stable',
+      category: 'fair',
+      insights: ['Unable to calculate health score'],
+      achievements: [],
+      warnings: []
+    };
+  }
+}
+
+// Remove any duplicate/corrupted function definitions below
   try {
     const { transactions, budgets, summary } = financialData;
     
@@ -919,3 +1004,171 @@ Analyze this financial data and provide a comprehensive health assessment.`
     };
   }
 }
+
+// AI Expense Prediction function
+async function generateExpensePredictions(
+  transactions: Array<{
+    id: number;
+    amount: string;
+    description: string;
+    date: string;
+    type: string;
+    categoryName?: string;
+  }>,
+  summary: {
+    totalIncome: number;
+    totalExpenses: number;
+  }
+): Promise<{
+  categoryPredictions: ExpensePrediction[];
+  monthlyPredictions: MonthlyExpensePrediction[];
+  totalPredicted: number;
+  confidence: number;
+}> {
+  try {
+    // Filter expense transactions only
+    const expenseTransactions = transactions.filter(t => t.type === 'expense');
+    
+    if (expenseTransactions.length < 3) {
+      return {
+        categoryPredictions: [],
+        monthlyPredictions: [],
+        totalPredicted: 0,
+        confidence: 0
+      };
+    }
+
+    // Create cache key for predictions
+    const dataHash = aiCache.createDataHash({ transactions: expenseTransactions, summary });
+    const cached = aiCache.getInsights(dataHash);
+    
+    if (cached) {
+      console.log('Using cached expense predictions');
+      return cached;
+    }
+
+    // Prepare financial data for AI analysis
+    const categoryTotals = new Map<string, { total: number, count: number, transactions: any[] }>();
+    
+    expenseTransactions.forEach(t => {
+      const categoryName = t.categoryName || 'Uncategorized';
+      const existing = categoryTotals.get(categoryName) || { total: 0, count: 0, transactions: [] };
+      categoryTotals.set(categoryName, {
+        total: existing.total + parseFloat(t.amount),
+        count: existing.count + 1,
+        transactions: [...existing.transactions, t]
+      });
+    });
+
+    const financialAnalysis = {
+      totalIncome: summary.totalIncome,
+      totalExpenses: summary.totalExpenses,
+      savingsRate: ((summary.totalIncome - summary.totalExpenses) / summary.totalIncome * 100).toFixed(1),
+      expenseCategories: Array.from(categoryTotals.entries()).map(([category, data]) => ({
+        category,
+        totalSpent: data.total,
+        transactionCount: data.count,
+        averageAmount: data.total / data.count,
+        percentageOfExpenses: (data.total / summary.totalExpenses * 100).toFixed(1),
+        recentTransactions: data.transactions.slice(-3).map(t => ({
+          description: t.description,
+          amount: parseFloat(t.amount),
+          date: t.date
+        }))
+      })).sort((a, b) => b.totalSpent - a.totalSpent),
+      transactionPatterns: {
+        totalTransactions: expenseTransactions.length,
+        averageTransaction: summary.totalExpenses / expenseTransactions.length,
+        dateRange: {
+          earliest: expenseTransactions[expenseTransactions.length - 1]?.date,
+          latest: expenseTransactions[0]?.date
+        }
+      }
+    };
+
+    const prompt = `As an AI financial analyst, analyze this expense data and generate intelligent predictions for the next month.
+
+Financial Analysis:
+${JSON.stringify(financialAnalysis, null, 2)}
+
+Provide detailed expense predictions in this JSON format:
+{
+  "categoryPredictions": [
+    {
+      "category": "category name",
+      "currentMonth": 0,
+      "predictedNext": 0,
+      "confidence": 0.85,
+      "trend": "increasing|decreasing|stable",
+      "reasoning": "detailed explanation of prediction logic",
+      "factors": ["factor1", "factor2", "factor3"]
+    }
+  ],
+  "monthlyPredictions": [
+    {
+      "month": "Jul 2025",
+      "predicted": 0,
+      "confidence": 0.85,
+      "breakdown": [
+        {"category": "Food", "amount": 0},
+        {"category": "Housing", "amount": 0}
+      ]
+    }
+  ],
+  "totalPredicted": 0,
+  "confidence": 0.85
+}
+
+Analysis Requirements:
+- Use historical spending patterns to predict future expenses
+- Consider transaction frequency and amount variations
+- Factor in seasonal trends and spending behavior
+- Provide confidence scores based on data consistency
+- Include reasoning for each prediction
+- Generate next 6 months of predictions
+- Be realistic and avoid overestimating`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are an advanced AI financial analyst specializing in expense prediction and spending pattern analysis. Use sophisticated machine learning concepts to analyze historical data and predict future spending with high accuracy."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 2000,
+      temperature: 0.2
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+
+    const predictions = {
+      categoryPredictions: result.categoryPredictions || [],
+      monthlyPredictions: result.monthlyPredictions || [],
+      totalPredicted: result.totalPredicted || 0,
+      confidence: result.confidence || 0
+    };
+
+    // Cache the result
+    aiCache.setInsights(dataHash, predictions);
+    
+    console.log(`Generated AI expense predictions for ${expenseTransactions.length} transactions`);
+    return predictions;
+
+  } catch (error) {
+    console.error('Error generating AI expense predictions:', error);
+    return {
+      categoryPredictions: [],
+      monthlyPredictions: [],
+      totalPredicted: 0,
+      confidence: 0
+    };
+  }
+}
+
+export { categorizeExpense, generateFinancialTips, generateSpendingInsights, generateTrendPredictions, generateAIFinancialHealthScore, generateFinancialHealthScore, generateExpensePredictions };

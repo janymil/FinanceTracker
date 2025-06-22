@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Cart
 import { Calendar, TrendingUp, AlertTriangle, BarChart3, Clock, Lock, Crown, Brain } from 'lucide-react';
 import { Link } from 'wouter';
 import { useUser } from '@clerk/clerk-react';
+
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -76,12 +77,62 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
   // Check if we have transaction data to base predictions on
   const hasTransactionData = transactions && transactions.length > 0;
   
-  // Only generate predictions when we have sufficient transaction data for meaningful analysis
-  const predictions: Prediction[] = hasTransactionData && transactions.length >= 10 ? [] : [];
+  // AI-powered predictions state
+  const [aiPredictions, setAiPredictions] = useState<{
+    categoryPredictions: Prediction[];
+    monthlyPredictions: MonthlyPrediction[];
+    totalPredicted: number;
+    confidence: number;
+  }>({
+    categoryPredictions: [],
+    monthlyPredictions: [],
+    totalPredicted: 0,
+    confidence: 0
+  });
+  const [predictionsLoading, setPredictionsLoading] = useState(false);
 
-  const monthlyPredictions: MonthlyPrediction[] = hasTransactionData && transactions.length >= 10 ? [] : [];
+  // Fetch AI predictions when component mounts or transactions change
+  useEffect(() => {
+    if (!isPremiumUser || !hasTransactionData || transactions.length < 3) return;
 
-  const totalPredicted = predictions.reduce((sum, p) => sum + p.predictedNext, 0);
+    const fetchAIPredictions = async () => {
+      setPredictionsLoading(true);
+      try {
+        const token = await window.Clerk?.session?.getToken();
+        const response = await fetch('/api/ai/expense-predictions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            transactions,
+            summary
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setAiPredictions(data);
+          console.log('AI expense predictions loaded:', data);
+        } else {
+          console.error('Failed to fetch AI predictions:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching AI predictions:', error);
+      } finally {
+        setPredictionsLoading(false);
+      }
+    };
+
+    fetchAIPredictions();
+  }, [isPremiumUser, transactions, summary]);
+
+  // Use AI predictions if available, otherwise show empty state
+  const predictions = aiPredictions.categoryPredictions;
+  const monthlyPredictions = aiPredictions.monthlyPredictions;
+
+  const totalPredicted = aiPredictions.totalPredicted || predictions.reduce((sum, p) => sum + p.predictedNext, 0);
 
   return (
     <Card className="h-full">
@@ -104,7 +155,12 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              {hasTransactionData && predictions.length > 0 ? (
+              {predictionsLoading ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                  <span className="ml-2">Generating AI predictions...</span>
+                </div>
+              ) : hasTransactionData && predictions.length > 0 ? (
                 <>
                   {/* Summary Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -127,7 +183,7 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                         <span className="text-sm font-medium">Confidence</span>
                       </div>
                       <div className="text-2xl font-bold text-green-600">
-                        {(predictions.reduce((sum, p) => sum + p.confidence, 0) / predictions.length * 100).toFixed(0)}%
+                        {aiPredictions.confidence ? (aiPredictions.confidence * 100).toFixed(0) : (predictions.reduce((sum, p) => sum + p.confidence, 0) / predictions.length).toFixed(0)}%
                       </div>
                       <p className="text-xs text-gray-600 dark:text-gray-300">
                         Average prediction accuracy

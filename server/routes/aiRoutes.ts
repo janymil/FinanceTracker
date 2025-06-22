@@ -7,6 +7,8 @@ import {
   generateSpendingInsights, 
   generateTrendPredictions,
   generateAIFinancialHealthScore,
+  generateFinancialHealthScore,
+  generateExpensePredictions,
   type ExpenseCategorizationResult 
 } from "../openai";
 import { aiCache } from "../cache";
@@ -91,70 +93,107 @@ export function registerAIRoutes(app: Express) {
     }
   });
 
-  // AI Financial Tips endpoint with detailed transaction data
+  // AI Financial Tips endpoint - bypasses cache for fresh responses
   app.post('/api/ai/tip', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      
       const user = await storage.getUser(userId);
+
+      // Require premium plan for AI tips
       if (!user || user.plan !== 'premium') {
         return res.status(403).json({ message: "AI financial tips require premium plan" });
       }
 
-      // Get financial data from request body (sent from frontend)
+      // Get financial data from the request body (matches what frontend is showing)
       const { financialData } = req.body;
       
-      if (!financialData || !financialData.transactions) {
-        return res.status(400).json({ message: "Financial data with transactions required" });
+      if (!financialData) {
+        return res.status(400).json({ message: "Financial data is required" });
       }
+      
+      // Use the financial data that matches the selected month period
+      const { totalIncome, totalExpenses, categories: categoryData, month, year } = financialData;
+      
+      // Get user transactions for context (not for calculation)
+      const allTransactions = await storage.getUserTransactions(userId, 100);
+      const categoriesData = await storage.getCategories(userId);
 
-      // Validate and process transaction data
-      const transactions = financialData.transactions;
-      if (!Array.isArray(transactions) || transactions.length === 0) {
-        return res.json({ tip: "Start by adding some transactions to get personalized financial insights." });
-      }
+      // Create category name mapping
+      const categoryMap = new Map();
+      categoriesData.forEach(cat => categoryMap.set(cat.id, cat.name));
 
-      // Format transaction data for AI analysis with detailed information
-      const formattedTransactions = transactions.map((t: any) => ({
-        id: t.id,
-        description: t.note || `${t.category} transaction`,
-        amount: t.amount,
-        date: t.date,
-        categoryName: t.category,
-        type: t.type,
-        recurring: t.recurring,
-        budgetAssigned: t.budgetAssigned
-      }));
-
-      console.log(`Processing ${formattedTransactions.length} transactions for AI analysis`);
-
-      const tipResults = await generateFinancialTips({
-        totalIncome: financialData.totalIncome || 0,
-        totalExpenses: financialData.totalExpenses || 0,
-        transactionsByCategory: financialData.categories || [],
-        recentTransactions: formattedTransactions,
-        timestamp: financialData.timestamp
+      // Filter transactions for the current month/year being analyzed
+      const currentMonthTransactions = allTransactions.filter(t => {
+        const transactionDate = new Date(t.date);
+        const transactionMonth = transactionDate.toLocaleString('default', { month: 'long' });
+        const transactionYear = transactionDate.getFullYear();
+        return transactionMonth === month && transactionYear === year;
       });
 
-      if (tipResults && tipResults.length > 0) {
-        const tip = tipResults[0];
+      // Check if we have enough data for meaningful analysis
+      const monthlyExpenseCount = currentMonthTransactions.filter(t => t.type === 'expense').length;
+      const monthlyIncomeCount = currentMonthTransactions.filter(t => t.type === 'income').length;
+      const totalMonthlyTransactions = monthlyExpenseCount + monthlyIncomeCount;
+
+      // If insufficient monthly data, provide guidance message
+      if (totalMonthlyTransactions < 2) {
+        return res.json({ 
+          tip: `Add more transactions for ${month} ${year} to get personalized AI insights. Currently showing ${totalMonthlyTransactions} transaction${totalMonthlyTransactions !== 1 ? 's' : ''}.` 
+        });
+      }
+
+      // Use the provided financial data from frontend
+      const actualTotalIncome = totalIncome;
+      const actualTotalExpenses = totalExpenses;
+
+      // Process monthly transactions for AI analysis
+      const processedMonthlyTransactions = currentMonthTransactions.map(t => ({
+        description: t.description,
+        amount: parseFloat(t.amount),
+        date: t.date.toISOString(),
+        categoryName: categoryMap.get(t.categoryId) || 'Uncategorized',
+        type: t.type
+      }));
+
+      // Create category breakdown from frontend data or monthly transactions
+      const transactionsByCategory = categoryData && categoryData.length > 0 
+        ? categoryData 
+        : (() => {
+            const categoryBreakdown = new Map();
+            processedMonthlyTransactions.forEach(t => {
+              const key = `${t.categoryName}_${t.type}`;
+              categoryBreakdown.set(key, (categoryBreakdown.get(key) || 0) + t.amount);
+            });
+            return Array.from(categoryBreakdown.entries()).map(([key, amount]) => {
+              const [categoryName, type] = key.split('_');
+              return { categoryName, amount, type };
+            });
+          })();
+
+      // Prepare financial data for AI analysis using monthly scope
+      const aiFinancialData = {
+        totalIncome: actualTotalIncome,
+        totalExpenses: actualTotalExpenses,
+        transactionsByCategory,
+        recentTransactions: processedMonthlyTransactions,
+        timestamp: Date.now()
+      };
+
+      console.log(`AI analyzing ${month} ${year}: ${totalMonthlyTransactions} transactions (${monthlyIncomeCount} income, ${monthlyExpenseCount} expenses)`);
+      console.log(`Monthly totals - Income: $${actualTotalIncome}, Expenses: $${actualTotalExpenses}, Net: $${actualTotalIncome - actualTotalExpenses}`);
+      
+      const tips = await generateFinancialTips(aiFinancialData);
+      const tip = tips.length > 0 ? tips[0] : null;
+
+      if (tip) {
         return res.json({ tip: `${tip.title}: ${tip.description}` });
       } else {
-        // Provide specific fallback based on actual data
-        const expenseCount = transactions.filter((t: any) => t.type === 'expense').length;
-        const incomeCount = transactions.filter((t: any) => t.type === 'income').length;
-        const totalExpenses = transactions
-          .filter((t: any) => t.type === 'expense')
-          .reduce((sum: number, t: any) => sum + t.amount, 0);
-        const totalIncome = transactions
-          .filter((t: any) => t.type === 'income')
-          .reduce((sum: number, t: any) => sum + t.amount, 0);
-          
+        // Fallback based on monthly data
         return res.json({ 
-          tip: `Based on your ${expenseCount} expense transactions ($${totalExpenses.toFixed(2)}) and ${incomeCount} income transactions ($${totalIncome.toFixed(2)}), consider setting up budgets for your top spending categories to better manage your finances.` 
+          tip: `Based on your ${monthlyExpenseCount} expense transactions ($${actualTotalExpenses.toFixed(2)}) and ${monthlyIncomeCount} income transactions ($${actualTotalIncome.toFixed(2)}) for ${month} ${year}, consider reviewing your spending patterns and setting budgets for your top expense categories.` 
         });
       }
     } catch (error) {
@@ -362,7 +401,6 @@ export function registerAIRoutes(app: Express) {
 
       // Generate financial health score with OpenAI
       console.log('Financial health: Making new OpenAI API call - no cached data available');
-      const { generateFinancialHealthScore } = await import('../openai');
       const healthData = await generateFinancialHealthScore({
         transactions: processedTransactions,
         budgets: processedBudgets,
@@ -659,6 +697,48 @@ Answer questions about features, subscription plans, how to use the app, trouble
     } catch (error) {
       console.error("Error in help chat:", error);
       return res.status(500).json({ message: "Failed to get help response" });
+    }
+  });
+
+  // AI Expense Prediction endpoint
+  app.post('/api/ai/expense-predictions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+
+      // Require premium plan for AI expense predictions
+      if (!user || user.plan !== 'premium') {
+        return res.status(403).json({ message: "AI expense predictions require premium plan" });
+      }
+
+      const { transactions, summary } = req.body;
+
+      if (!transactions || !Array.isArray(transactions)) {
+        return res.status(400).json({ message: "Transactions data is required" });
+      }
+
+      if (transactions.length < 3) {
+        return res.json({
+          categoryPredictions: [],
+          monthlyPredictions: [],
+          totalPredicted: 0,
+          confidence: 0,
+          message: "Minimum 3 transactions required for AI predictions"
+        });
+      }
+
+      console.log(`Generating AI expense predictions for user ${userId} with ${transactions.length} transactions`);
+
+      const predictions = await generateExpensePredictions(transactions, summary);
+
+      return res.json(predictions);
+    } catch (error) {
+      console.error("Error generating AI expense predictions:", error);
+      return res.status(500).json({ message: "Failed to generate expense predictions" });
     }
   });
 }

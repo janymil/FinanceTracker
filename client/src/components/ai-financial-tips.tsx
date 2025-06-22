@@ -65,15 +65,6 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     },
   });
 
-  // Function to fetch detailed transactions for specific month/year
-  const fetchDetailedTransactions = async (month: number, year: number) => {
-    const response = await apiRequest("GET", "/api/transactions/by-month", { 
-      query: { month, year } 
-    });
-    const data = await response.json();
-    return data.transactions || [];
-  };
-
   // React Query mutation for generating tips
   const generateTipMutation = useMutation({
     mutationFn: async () => {
@@ -81,15 +72,6 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
-      const month = currentDate.getMonth() + 1;
-      const year = currentDate.getFullYear();
-      
-      // Fetch detailed transactions for current month
-      const detailedTransactions = await fetchDetailedTransactions(month, year);
-      
-      if (!detailedTransactions || detailedTransactions.length === 0) {
-        throw new Error("No transactions available for analysis");
-      }
       
       const response = await apiRequest("POST", "/api/ai/tip", {
         body: JSON.stringify({
@@ -97,9 +79,8 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             totalIncome: summary.totalIncome,
             totalExpenses: summary.totalExpenses,
             categories: summary.transactionsByCategory || [],
-            transactions: detailedTransactions || [],
             month: monthName,
-            year: year,
+            year: currentDate.getFullYear(),
             timestamp: Date.now()
           }
         }),
