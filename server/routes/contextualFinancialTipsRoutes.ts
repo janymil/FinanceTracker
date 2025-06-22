@@ -19,6 +19,38 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
         return res.status(400).json({ message: "Transactions and summary are required" });
       }
 
+      // Create a data hash to detect significant changes
+      const dataForHash = {
+        transactionCount: transactions.length,
+        totalIncome: summary.totalIncome || 0,
+        totalExpenses: summary.totalExpenses || 0,
+        budgetCount: budgets?.length || 0,
+        recentTransactions: transactions.slice(0, 5).map((t: any) => ({
+          amount: t.amount,
+          category: t.category,
+          date: t.date
+        }))
+      };
+      
+      const currentDataHash = crypto
+        .createHash('md5')
+        .update(JSON.stringify(dataForHash))
+        .digest('hex');
+
+      // Check if we should regenerate tips or use cached ones
+      const shouldRegenerate = await storage.shouldRegenerateFinancialTips(userId, currentDataHash);
+
+      if (!shouldRegenerate) {
+        // Return cached tips
+        const cachedTips = await storage.getContextualFinancialTips(userId);
+        if (cachedTips && cachedTips.tips) {
+          console.log('Contextual financial tips: Using cached data - avoiding OpenAI API call');
+          return res.json({ tips: cachedTips.tips });
+        }
+      }
+
+      console.log('Contextual financial tips: Generating new AI tips - data changed or cache expired');
+
       // Format the selected month for natural language
       const formatMonth = (selectedMonth: string) => {
         if (!selectedMonth) return 'Current Month';
@@ -107,10 +139,44 @@ Respond with JSON in this exact format:
         actionable: Boolean(tip.actionable)
       })) : [];
 
+      // Save tips to database for persistence
+      const tipsData = {
+        userId,
+        tips,
+        dataHash: currentDataHash,
+        transactionCount: transactions.length,
+        totalIncome: (summary.totalIncome || 0).toString(),
+        totalExpenses: (summary.totalExpenses || 0).toString(),
+        budgetCount: budgets?.length || 0
+      };
+
+      try {
+        const existingTips = await storage.getContextualFinancialTips(userId);
+        if (existingTips) {
+          await storage.updateContextualFinancialTips(userId, tipsData);
+        } else {
+          await storage.saveContextualFinancialTips(tipsData);
+        }
+      } catch (dbError) {
+        console.error("Error saving contextual financial tips to database:", dbError);
+        // Continue to return tips even if database save fails
+      }
+
       return res.json({ tips });
 
     } catch (error) {
       console.error("Error generating contextual financial tips:", error);
+      
+      // Try to return cached tips if available
+      try {
+        const cachedTips = await storage.getContextualFinancialTips(userId);
+        if (cachedTips && cachedTips.tips) {
+          console.log('Contextual financial tips: Returning cached tips due to error');
+          return res.json({ tips: cachedTips.tips });
+        }
+      } catch (cacheError) {
+        console.error("Error retrieving cached tips:", cacheError);
+      }
       
       // Return fallback tips based on available data
       const fallbackTips = [];
