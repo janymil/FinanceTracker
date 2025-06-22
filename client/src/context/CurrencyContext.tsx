@@ -89,6 +89,7 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
         currency: newCurrency
       });
       setCurrencyState(newCurrency);
+      setShowSetupModal(false); // Close modal after successful update
     } catch (error) {
       console.error('Failed to update currency:', error);
     }

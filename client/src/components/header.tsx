@@ -72,6 +72,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { user } = useAuth();
   const { user: clerkUser } = useUser();
   const { isReady } = useClerkUserReady();
+  const { canChangeCurrency } = useCurrency();
   const { toast } = useToast();
   const { signOut } = useClerk();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -448,8 +449,8 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
             </Link>
           )}
 
-          {/* Currency selector - only show if user hasn't set currency yet */}
-          {(!user?.currency || user?.currency.trim() === '') && <CurrencySelector variant="icon" className="mr-2" />}
+          {/* Currency selector - show until user has transactions (currency becomes locked) */}
+          {user?.currency && canChangeCurrency && <CurrencySelector variant="icon" className="mr-2" />}
 
           {/* User dropdown */}
           <DropdownMenu>
