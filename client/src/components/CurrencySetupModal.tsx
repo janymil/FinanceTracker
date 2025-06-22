@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
+// Updated currency list with unique symbols only - no duplicates
 const CURRENCY_OPTIONS = [
   // Major global currencies
   { symbol: 'USD', label: 'US Dollar ($)', code: 'USD' },
@@ -15,7 +16,7 @@ const CURRENCY_OPTIONS = [
   { symbol: 'CHF', label: 'Swiss Franc (CHF)', code: 'CHF' },
   { symbol: 'SEK', label: 'Swedish Krona (kr)', code: 'SEK' },
   
-  // Latin American currencies
+  // Latin American currencies  
   { symbol: 'BRL', label: 'Brazilian Real (R$)', code: 'BRL' },
   { symbol: 'PEN', label: 'Peruvian Sol (S/)', code: 'PEN' },
   { symbol: 'UYU', label: 'Uruguayan Peso ($U)', code: 'UYU' },
