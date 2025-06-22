@@ -113,15 +113,7 @@ function convertCSVToJSON(csvData: Record<string, any>[]): any {
       }
     }
     
-    // Process categories
-    if (row.categoryName && row.categoryType) {
-      result.categories.push({
-        name: row.categoryName,
-        type: row.categoryType,
-        icon: row.categoryIcon || 'DollarSign',
-        color: row.categoryColor || '#10B981',
-      });
-    }
+    // Process categories - removed as system will auto-create with default icons/colors
     
     // Process budgets
     if (row.budgetCategory && row.budgetAmount) {

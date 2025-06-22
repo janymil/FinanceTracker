@@ -96,15 +96,15 @@ export default function ExportPage() {
 
   // Import functionality
   const handleDownloadExample = () => {
-    const exampleCSV = `type,amount,description,date,category,categoryName,categoryType,categoryIcon,categoryColor,isRecurring,recurringFrequency,budgetCategory,budgetAmount,budgetPeriod,budgetStartDate,budgetEndDate,goalName,goalDescription,goalTargetAmount,goalCurrentAmount,goalTargetDate,goalCategory,collaborativeGoalName,collaborativeGoalDescription,collaborativeGoalTargetAmount,collaborativeGoalCurrentAmount,collaborativeGoalTargetDate,collaborativeGoalCategory,collaborativeGoalType,collaborativeGoalIsPublic
-income,5000,Monthly Salary,2025-01-01,Salary,Salary,income,DollarSign,#10B981,true,monthly,,,,,,,,,,,,,,,,,,
-income,500,Freelance Project,2025-01-15,Freelance,Freelance,income,Briefcase,#059669,false,,,,,,,,,,,,,,,,,,,
-expense,1200,Monthly Rent,2025-01-01,Housing,Housing,expense,Home,#EF4444,true,monthly,,,,,,,,,,,,,,,,,,
-expense,300,Groceries,2025-01-05,Food & Dining,Food & Dining,expense,ShoppingCart,#F59E0B,false,,,Food & Dining,500,monthly,2025-01-01,2025-01-31,,,,,,,,,,,,,
-expense,80,Electric Bill,2025-01-10,Utilities,Utilities,expense,Zap,#8B5CF6,true,monthly,Utilities,150,monthly,2025-01-01,2025-01-31,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,Emergency Fund,Build 6 month emergency fund,30000,5000,2025-12-31,Emergency Fund,,,,,,,
-,,,,,,,,,,,,,,,Vacation,Save for summer vacation,8000,1000,2025-06-01,Vacation,,,,,,,
-,,,,,,,,,,,,,,,,,,,,,Family Vacation,Save for family trip to Europe,12000,2000,2025-07-01,Vacation,collaborative,false`;
+    const exampleCSV = `type,amount,description,date,category,isRecurring,recurringFrequency,budgetCategory,budgetAmount,budgetPeriod,budgetStartDate,budgetEndDate,goalName,goalDescription,goalTargetAmount,goalCurrentAmount,goalTargetDate,goalCategory,collaborativeGoalName,collaborativeGoalDescription,collaborativeGoalTargetAmount,collaborativeGoalCurrentAmount,collaborativeGoalTargetDate,collaborativeGoalCategory,collaborativeGoalType,collaborativeGoalIsPublic
+income,5000,Monthly Salary,2025-01-01,Salary,true,monthly,,,,,,,,,,,,,,,,,,,
+income,500,Freelance Project,2025-01-15,Freelance,false,,,,,,,,,,,,,,,,,,,,
+expense,1200,Monthly Rent,2025-01-01,Housing,true,monthly,,,,,,,,,,,,,,,,,,,
+expense,300,Groceries,2025-01-05,Food & Dining,false,,Food & Dining,500,monthly,2025-01-01,2025-01-31,,,,,,,,,,,,,,
+expense,80,Electric Bill,2025-01-10,Utilities,true,monthly,Utilities,150,monthly,2025-01-01,2025-01-31,,,,,,,,,,,,,,
+,,,,,,,,,,,,Emergency Fund,Build 6 month emergency fund,30000,5000,2025-12-31,Emergency Fund,,,,,,,
+,,,,,,,,,,,,Vacation,Save for summer vacation,8000,1000,2025-06-01,Vacation,,,,,,,
+,,,,,,,,,,,,,,,,,Family Vacation,Save for family trip to Europe,12000,2000,2025-07-01,Vacation,collaborative,false`;
 
     const blob = new Blob([exampleCSV], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -595,7 +595,7 @@ expense,80,Electric Bill,2025-01-10,Utilities,Utilities,expense,Zap,#8B5CF6,true
                         Download Example Template
                       </h3>
                       <p className="text-sm text-blue-700 dark:text-blue-200 mb-3">
-                        Get the CSV template with sample data to see the exact format needed
+                        Download a simple CSV template with examples. System automatically creates category icons and colors.
                       </p>
                       <Button 
                         variant="outline" 
