@@ -305,6 +305,9 @@ Changelog:
 - June 22, 2025. FIXED PRODUCTION: Identified schema mismatch - production database missing daily_recommendations, contextual_financial_tips, and financial_mascots tables
 - June 22, 2025. Pushed complete Drizzle schema to production database using drizzle-kit push command
 - June 22, 2025. Production database now synchronized with development schema - all required tables created
+- June 22, 2025. FIXED: Drizzle configuration to automatically use DATABASE_URL_PROD during deployments
+- June 22, 2025. Modified drizzle.config.ts to check for DATABASE_URL_PROD first, then fall back to DATABASE_URL
+- June 22, 2025. Drizzle migrations will now work correctly during Replit deployments without requiring .replit file changes
 - June 15, 2025. Updated transaction-list display limit and added proper backend validation to enforce 100-transaction limit for free users
 - June 16, 2025. Fixed deployment loading issue caused by excessive Vite icon imports - created optimized icon bundle reducing bundle size by 75%
 - June 16, 2025. Resolved Clerk JWT token mismatch errors by implementing development key configuration and browser cache clearing mechanism
