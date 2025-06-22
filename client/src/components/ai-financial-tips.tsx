@@ -117,19 +117,10 @@ export default function AIFinancialTips({ summary, selectedMonth }: AIFinancialT
       console.log('AI Tips: Sending request for', monthName, year);
       console.log('AI Tips: Financial data:', requestData.financialData);
 
-      const response = await apiRequest("POST", "/api/ai/tip", requestData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('AI Tips: Backend error:', response.status, errorData);
-        throw new Error(errorData.message || "Failed to generate AI tip");
-      }
-
-      const data = await response.json();
+      const data = await apiRequest("POST", "/api/ai/tip", requestData);
+      
+      console.log('AI Tips: Received response:', data);
+      
       if (!data.tip || !data.tip.trim()) {
         throw new Error("No tip received from AI");
       }
@@ -154,10 +145,11 @@ export default function AIFinancialTips({ summary, selectedMonth }: AIFinancialT
         description: "New financial advice based on your spending data",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('AI Tips: Mutation error:', error);
       toast({
         title: "Error",
-        description: "Failed to generate AI tip. Please try again.",
+        description: error.message || "Failed to generate AI tip. Please try again.",
         variant: "destructive",
       });
     },

@@ -446,6 +446,7 @@ Changelog:
 - June 22, 2025. FIXED: AI Financial Tips request body double-stringification issue preventing proper data transmission to backend
 - June 22, 2025. FIXED: AI Financial Tips month localization issue - forced English month names to prevent Spanish "junio" vs "June" mismatch
 - June 22, 2025. FIXED: AI Financial Tips OpenAI API failure handling - added fallback tips based on actual financial data to prevent complete failures
+- June 22, 2025. FIXED: AI Financial Tips frontend-backend communication issue - corrected apiRequest usage and response handling
 - June 18, 2025. Implemented real-time polling system for mobile uploads with 5-second intervals and automatic timeout handling
 - June 18, 2025. Enhanced mobile upload workflow with OCR processing, AI categorization, and automatic form population from mobile-captured receipt data
 - June 18, 2025. FIXED: Mobile upload QR code 404 errors by removing duplicate route and ensuring proper SignedOut routing configuration
