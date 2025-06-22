@@ -415,6 +415,10 @@ Changelog:
 - June 22, 2025. Updated CSV template to use clear dataType column (transaction/budget/goal) for better data organization and user understanding
 - June 22, 2025. Created lib/importHelpers.ts with reusable functions for category management, data formatting, and validation
 - June 22, 2025. Refactored import routes to use helper functions - cleaner code with better error handling and validation
+- June 22, 2025. COMPLETED: Added import logs tracking system with database table, API endpoints, and UI integration
+- June 22, 2025. Created import_logs table to track all import attempts with summary data, status, and error logging
+- June 22, 2025. Added Recent Imports section to Data Management page showing import history with status badges and record counts
+- June 22, 2025. Implemented lib/saveImportLog.ts helper functions for import logging and status management
 - June 18, 2025. Implemented real-time polling system for mobile uploads with 5-second intervals and automatic timeout handling
 - June 18, 2025. Enhanced mobile upload workflow with OCR processing, AI categorization, and automatic form population from mobile-captured receipt data
 - June 18, 2025. FIXED: Mobile upload QR code 404 errors by removing duplicate route and ensuring proper SignedOut routing configuration

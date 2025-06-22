@@ -335,6 +335,9 @@ export type FinancialMascot = typeof financialMascots.$inferSelect;
 export type InsertRedeemCode = typeof redeemCodes.$inferInsert;
 export type RedeemCode = typeof redeemCodes.$inferSelect;
 
+export type ImportLog = typeof importLogs.$inferSelect;
+export type InsertImportLog = typeof importLogs.$inferInsert;
+
 // Insert schemas
 export const insertTransactionSchema = createInsertSchema(transactions).omit({
   id: true,
