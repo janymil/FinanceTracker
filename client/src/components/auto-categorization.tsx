@@ -171,39 +171,8 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
   };
 
   const generateMockSuggestions = () => {
-    const mockTransactions = [
-      {
-        id: "1",
-        transactionDescription: "AMAZON.COM MARKETPLACE",
-        suggestedCategory: "Shopping",
-        confidence: 0.92,
-        merchant: "Amazon",
-        amount: 49.99,
-        date: "2025-05-29",
-        currentCategory: "Uncategorized"
-      },
-      {
-        id: "2",
-        transactionDescription: "STARBUCKS COFFEE #1234",
-        suggestedCategory: "Food & Dining",
-        confidence: 0.88,
-        merchant: "Starbucks",
-        amount: 5.75,
-        date: "2025-05-28",
-        currentCategory: "Uncategorized"
-      },
-      {
-        id: "3",
-        transactionDescription: "SHELL GAS STATION",
-        suggestedCategory: "Transportation",
-        confidence: 0.95,
-        merchant: "Shell",
-        amount: 45.20,
-        date: "2025-05-27",
-        currentCategory: "Uncategorized"
-      }
-    ];
-    setSuggestions(mockTransactions);
+    // Never show mock data - only show real AI analysis of user transactions
+    setSuggestions([]);
   };
 
 
@@ -238,10 +207,15 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
                 if (transactions.length > 0) {
                   autoCategorize();
                 } else {
-                  generateMockSuggestions();
+                  toast({
+                    title: "No Transactions Available",
+                    description: "Add transactions to enable AI auto-categorization",
+                    variant: "default"
+                  });
                 }
               }}
               className="flex items-center gap-2"
+              disabled={transactions.length === 0}
             >
               <Sparkles className="h-4 w-4" />
               Auto-Categorize
