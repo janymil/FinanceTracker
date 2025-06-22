@@ -55,7 +55,17 @@ export default function AIFinancialTips({ summary, selectedMonth }: AIFinancialT
       
       const monthlyKey = `ai-tip-${user.id}-${monthName}-${year}`;
       const savedTip = localStorage.getItem(monthlyKey);
+      
+      console.log(`AI Tips: Checking ${monthName} ${year}`, {
+        monthlyKey,
+        hasSavedTip: !!savedTip,
+        hasFinancialData: !!(summary.totalIncome > 0 || summary.totalExpenses > 0),
+        totalIncome: summary.totalIncome,
+        totalExpenses: summary.totalExpenses
+      });
+      
       if (savedTip) {
+        console.log(`AI Tips: Using saved tip for ${monthName} ${year}`);
         setCurrentTip(cleanAIText(savedTip));
       } else {
         // Auto-generate tips if we have financial data but no saved tip
@@ -67,6 +77,7 @@ export default function AIFinancialTips({ summary, selectedMonth }: AIFinancialT
           });
           generateTipMutation.mutate();
         } else {
+          console.log(`AI Tips: No financial data for ${monthName} ${year}, showing placeholder`);
           setCurrentTip(null);
         }
       }
