@@ -92,8 +92,14 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
     });
     const cacheKey = `financial-tips-${currentMonth}-${btoa(dataHash).slice(0, 12)}`;
 
-    // Check for cache invalidation flag (set after data imports)
+    // Check for cache invalidation flag (set after data imports or manual refresh)
     const shouldSkipCache = localStorage.getItem('invalidate-ai-cache') === 'true';
+    
+    // Force refresh if invalidation flag is set
+    if (shouldSkipCache) {
+      setTips(null);
+      setLastLoadedMonth(null);
+    }
     
     // Check localStorage for cached tips first (unless cache invalidation flag is set)
     if (!shouldSkipCache) {

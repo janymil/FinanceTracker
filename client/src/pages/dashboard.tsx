@@ -165,11 +165,31 @@ export default function Dashboard() {
     // Set localStorage flag to bypass cache
     localStorage.setItem('invalidate-ai-cache', 'true');
     
-    // Invalidate all AI-related query cache
+    // Clear all localStorage AI cache entries
+    Object.keys(localStorage).forEach(key => {
+      if (key.includes('financial-tips') || key.includes('ai-cache') || key.includes('expense-predictions') || key.includes('daily-recommendations')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
+    // Invalidate all AI-related query cache with broader patterns
     queryClient.invalidateQueries({ queryKey: ['ai'] });
     queryClient.invalidateQueries({ queryKey: ['financial-health'] });
     queryClient.invalidateQueries({ queryKey: ['expense-predictions'] });
     queryClient.invalidateQueries({ queryKey: ['daily-recommendations'] });
+    queryClient.invalidateQueries({ predicate: (query) => 
+      query.queryKey.some(key => 
+        typeof key === 'string' && (
+          key.includes('ai') || 
+          key.includes('financial-tips') || 
+          key.includes('recommendations') ||
+          key.includes('predictions')
+        )
+      )
+    });
+    
+    // Force re-render of AI components by invalidating financial summary
+    queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
     
     // Reset the flag after a short delay
     setTimeout(() => {
@@ -179,7 +199,7 @@ export default function Dashboard() {
         title: "AI Insights Refreshed",
         description: "All AI components have been updated with fresh insights.",
       });
-    }, 3000);
+    }, 2000);
   };
 
   // Get start and end dates for the selected month

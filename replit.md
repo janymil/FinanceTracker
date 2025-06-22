@@ -265,6 +265,9 @@ Changelog:
 - June 22, 2025. COMPLETED: Added simple "Refresh AI" button to dashboard header that triggers all AI components to refresh with fresh insights
 - June 22, 2025. Combined automated cache invalidation (after CSV imports) with manual refresh button for optimal user control
 - June 22, 2025. Button uses same cache clearing mechanism as automated system - localStorage flag + React Query invalidation without touching OpenAI/API code
+- June 22, 2025. FIXED: Replaced hardcoded fallback tips with AI-based fallback system for contextual financial tips
+- June 22, 2025. Contextual tips now use simplified AI prompt as fallback instead of generic hardcoded messages inappropriate for user's financial situation
+- June 22, 2025. Emergency fallback shows dynamic financial summary rather than static text, maintaining personalization even when AI services fail
 - June 22, 2025. FIXED: AI Expense Prediction widget hardcoded data completely eliminated - removed fake predictions array with "Food & Dining: $520" and monthlyPredictions with "$1200, $1150, $1300"
 - June 22, 2025. Updated AI Expense Prediction to require minimum 10 transactions before showing any predictions across all three tabs (Overview, By Category, Timeline)
 - June 22, 2025. All dashboard AI components now show authentic personalized data or proper "no data" states only - zero hardcoded content remaining
