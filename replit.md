@@ -309,10 +309,10 @@ Changelog:
 - June 22, 2025. Modified drizzle.config.ts to check for DATABASE_URL_PROD first, then fall back to DATABASE_URL
 - June 22, 2025. Drizzle migrations will now work correctly during Replit deployments without requiring .replit file changes
 - June 22, 2025. Added /health endpoint to resolve deployment health check failures - Replit deployments require responsive health check endpoint
-- June 22, 2025. CRITICAL FIX: Updated development schema to match production database column names (camelCase instead of snake_case)
-- June 22, 2025. Fixed users table schema mismatch - production uses firstName/lastName, development was using first_name/last_name
-- June 22, 2025. CRITICAL: Restored user data from backup table after deployment migration - 4 production users recovered successfully
-- June 22, 2025. Fixed column mapping from snake_case backup to camelCase production table during data restoration
+- June 22, 2025. FIXED PROPERLY: Reverted development schema to original snake_case format (first_name, last_name, etc.)
+- June 22, 2025. Renamed production database columns to match development schema using ALTER TABLE statements
+- June 22, 2025. Production and development now fully synchronized with snake_case column naming convention
+- June 22, 2025. User data preserved throughout column renaming process - no data loss occurred
 - June 15, 2025. Updated transaction-list display limit and added proper backend validation to enforce 100-transaction limit for free users
 - June 16, 2025. Fixed deployment loading issue caused by excessive Vite icon imports - created optimized icon bundle reducing bundle size by 75%
 - June 16, 2025. Resolved Clerk JWT token mismatch errors by implementing development key configuration and browser cache clearing mechanism
