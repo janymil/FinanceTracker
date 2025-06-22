@@ -13,6 +13,7 @@ import { Calendar, TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, Fi
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from "date-fns";
 import RequirePlan from "@/components/require-plan";
 import MonthFilter from "@/components/month-filter";
+import { useCurrency } from "@/context/CurrencyContext";
 
 import InteractiveChart from "@/components/interactive-chart";
 import AIInsights from "@/components/ai-insights";
@@ -298,7 +299,7 @@ export default function Reports() {
                         {summaryLoading ? (
                           <Skeleton className="h-6 w-16" />
                         ) : (
-                          `$${financialSummary?.totalIncome?.toFixed(2) || '0.00'}`
+                          `${currency || '$'}${financialSummary?.totalIncome?.toFixed(2) || '0.00'}`
                         )}
                       </div>
                     </div>
@@ -322,7 +323,7 @@ export default function Reports() {
                         {summaryLoading ? (
                           <Skeleton className="h-6 w-16" />
                         ) : (
-                          `$${financialSummary?.totalExpenses?.toFixed(2) || '0.00'}`
+                          `${currency || '$'}${financialSummary?.totalExpenses?.toFixed(2) || '0.00'}`
                         )}
                       </div>
                     </div>
@@ -346,7 +347,7 @@ export default function Reports() {
                         {summaryLoading ? (
                           <Skeleton className="h-6 w-16" />
                         ) : (
-                          `$${((financialSummary?.totalIncome || 0) - (financialSummary?.totalExpenses || 0)).toFixed(2)}`
+                          `${currency || '$'}${((financialSummary?.totalIncome || 0) - (financialSummary?.totalExpenses || 0)).toFixed(2)}`
                         )}
                       </div>
                     </div>

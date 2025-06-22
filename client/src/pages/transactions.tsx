@@ -33,6 +33,7 @@ import RequirePlan from "@/components/require-plan";
 import { useToast } from "@/hooks/use-toast";
 import MonthFilter from "@/components/month-filter";
 import { format } from "date-fns";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface Transaction {
   id: number;
@@ -67,6 +68,7 @@ interface Category {
 export default function Transactions() {
   const { isReady, user } = useClerkUserReady();
   const { toast } = useToast();
+  const { currency } = useCurrency();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
