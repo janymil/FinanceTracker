@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -21,7 +21,9 @@ import {
   RefreshCw,
   Check,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  CheckCircle,
+  Code
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -51,6 +53,7 @@ interface ImportOptions {
 export default function ExportPage() {
   const { isReady, user } = useClerkUserReady();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [activeTab, setActiveTab] = useState("export");
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
@@ -73,6 +76,136 @@ export default function ExportPage() {
     duplicateHandling: "skip",
     validationLevel: "flexible"
   });
+
+  // Import state
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState<{
+    percentage: number;
+    message: string;
+  } | null>(null);
+  const [importResults, setImportResults] = useState<{
+    categories: number;
+    incomes: number;
+    expenses: number;
+    budgets: number;
+    goals: number;
+    collaborativeGoals: number;
+    errors: string[];
+  } | null>(null);
+
+  // Import functionality
+  const handleDownloadExample = () => {
+    const exampleCSV = `type,amount,description,date,category,categoryName,categoryType,categoryIcon,categoryColor,isRecurring,recurringFrequency,budgetCategory,budgetAmount,budgetPeriod,budgetStartDate,budgetEndDate,goalName,goalDescription,goalTargetAmount,goalCurrentAmount,goalTargetDate,goalCategory,collaborativeGoalName,collaborativeGoalDescription,collaborativeGoalTargetAmount,collaborativeGoalCurrentAmount,collaborativeGoalTargetDate,collaborativeGoalCategory,collaborativeGoalType,collaborativeGoalIsPublic
+income,5000,Monthly Salary,2025-01-01,Salary,Salary,income,DollarSign,#10B981,true,monthly,,,,,,,,,,,,,,,,,,
+income,500,Freelance Project,2025-01-15,Freelance,Freelance,income,Briefcase,#059669,false,,,,,,,,,,,,,,,,,,,
+expense,1200,Monthly Rent,2025-01-01,Housing,Housing,expense,Home,#EF4444,true,monthly,,,,,,,,,,,,,,,,,,
+expense,300,Groceries,2025-01-05,Food & Dining,Food & Dining,expense,ShoppingCart,#F59E0B,false,,,Food & Dining,500,monthly,2025-01-01,2025-01-31,,,,,,,,,,,,,
+expense,80,Electric Bill,2025-01-10,Utilities,Utilities,expense,Zap,#8B5CF6,true,monthly,Utilities,150,monthly,2025-01-01,2025-01-31,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,Emergency Fund,Build 6 month emergency fund,30000,5000,2025-12-31,Emergency Fund,,,,,,,
+,,,,,,,,,,,,,,,Vacation,Save for summer vacation,8000,1000,2025-06-01,Vacation,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,Family Vacation,Save for family trip to Europe,12000,2000,2025-07-01,Vacation,collaborative,false`;
+
+    const blob = new Blob([exampleCSV], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'financerpro-import-example.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Example Downloaded",
+      description: "Example CSV file has been downloaded to help you format your data.",
+    });
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setImportResults(null);
+    }
+  };
+
+  const handleFileDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files[0];
+    if (file && (file.type === 'text/csv' || file.type === 'application/json')) {
+      setSelectedFile(file);
+      setImportResults(null);
+    } else {
+      toast({
+        title: "Invalid File",
+        description: "Please select a CSV or JSON file.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
+
+  const handleImportData = async () => {
+    if (!selectedFile) return;
+
+    setIsImporting(true);
+    setImportProgress({ percentage: 0, message: "Reading file..." });
+
+    try {
+      const token = await user?.getToken();
+      const fileContent = await selectedFile.text();
+      
+      setImportProgress({ percentage: 30, message: "Validating data..." });
+
+      const response = await fetch('/api/import-data', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          content: fileContent,
+          format: importOptions.source,
+          options: importOptions
+        })
+      });
+
+      setImportProgress({ percentage: 70, message: "Processing import..." });
+
+      if (response.ok) {
+        const result = await response.json();
+        setImportProgress({ percentage: 100, message: "Import completed!" });
+        
+        setTimeout(() => {
+          setImportProgress(null);
+          setImportResults(result.summary);
+        }, 500);
+
+        toast({
+          title: "Import Successful",
+          description: `Successfully imported ${Object.values(result.summary).reduce((sum: number, val: any) => 
+            typeof val === 'number' ? sum + val : sum, 0)} items.`,
+        });
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Import failed');
+      }
+    } catch (error) {
+      console.error("Error importing data:", error);
+      setImportProgress(null);
+      toast({
+        title: "Import Failed",
+        description: error instanceof Error ? error.message : "Failed to import data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
 
   // Backup status state
   const [backupStatusData, setBackupStatusData] = useState<any>(null);
@@ -447,14 +580,296 @@ export default function ExportPage() {
                   Import Financial Data
                 </CardTitle>
                 <CardDescription>
-                  Import transactions and data from other financial platforms
+                  Import transactions, budgets, goals, and categories from CSV or JSON files
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Database className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Import functionality coming soon</p>
-                  <p className="text-sm">Support for CSV, Excel, Mint, QuickBooks, and more</p>
+              <CardContent className="space-y-6">
+                {/* Step 1: Download Example */}
+                <div className="border rounded-lg p-4 bg-blue-50 dark:bg-blue-950/20">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                      1
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                        Download Example Template
+                      </h3>
+                      <p className="text-sm text-blue-700 dark:text-blue-200 mb-3">
+                        Get the CSV template with sample data to see the exact format needed
+                      </p>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleDownloadExample}
+                        className="border-blue-200 hover:bg-blue-100 dark:border-blue-800 dark:hover:bg-blue-900"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download Example CSV
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step 2: Choose Format */}
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gray-500 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                      2
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium mb-3">Choose Import Format</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div 
+                          className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                            importOptions.source === 'csv' 
+                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20' 
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                          onClick={() => setImportOptions(prev => ({ ...prev, source: 'csv' }))}
+                        >
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-5 w-5 text-gray-600" />
+                            <div>
+                              <div className="font-medium">CSV File</div>
+                              <div className="text-sm text-muted-foreground">
+                                Comma-separated values format
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div 
+                          className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                            importOptions.source === 'json' 
+                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20' 
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                          onClick={() => setImportOptions(prev => ({ ...prev, source: 'json' }))}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Code className="h-5 w-5 text-gray-600" />
+                            <div>
+                              <div className="font-medium">JSON File</div>
+                              <div className="text-sm text-muted-foreground">
+                                Structured data format
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step 3: Upload File */}
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gray-500 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                      3
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium mb-3">Upload Your Data File</h3>
+                      <div 
+                        className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer"
+                        onClick={() => fileInputRef.current?.click()}
+                        onDrop={handleFileDrop}
+                        onDragOver={handleDragOver}
+                      >
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept=".csv,.json"
+                          onChange={handleFileSelect}
+                          className="hidden"
+                        />
+                        <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          {selectedFile ? (
+                            <>
+                              <span className="font-medium text-green-600">{selectedFile.name}</span>
+                              <br />
+                              <span className="text-xs">Click to change file</span>
+                            </>
+                          ) : (
+                            <>
+                              Drop your {importOptions.source.toUpperCase()} file here or click to browse
+                              <br />
+                              <span className="text-xs">Supports .csv and .json files</span>
+                            </>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step 4: Import Options */}
+                {selectedFile && (
+                  <div className="border rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 bg-gray-500 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                        4
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-medium mb-3">Import Options</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium mb-2 block">Merge Strategy</label>
+                            <Select 
+                              value={importOptions.mergeStrategy} 
+                              onValueChange={(value: any) => 
+                                setImportOptions(prev => ({ ...prev, mergeStrategy: value }))
+                              }
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="append">Add to existing data</SelectItem>
+                                <SelectItem value="replace">Replace existing data</SelectItem>
+                                <SelectItem value="merge">Merge with existing</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium mb-2 block">Duplicate Handling</label>
+                            <Select 
+                              value={importOptions.duplicateHandling} 
+                              onValueChange={(value: any) => 
+                                setImportOptions(prev => ({ ...prev, duplicateHandling: value }))
+                              }
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="skip">Skip duplicates</SelectItem>
+                                <SelectItem value="overwrite">Overwrite duplicates</SelectItem>
+                                <SelectItem value="rename">Rename duplicates</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-4 space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="skipFirstRow"
+                              checked={importOptions.skipFirstRow}
+                              onCheckedChange={(checked) => 
+                                setImportOptions(prev => ({ ...prev, skipFirstRow: !!checked }))
+                              }
+                            />
+                            <label htmlFor="skipFirstRow" className="text-sm">
+                              Skip first row (if it contains headers)
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="autoCategory"
+                              checked={importOptions.categoryMapping === 'auto'}
+                              onCheckedChange={(checked) => 
+                                setImportOptions(prev => ({ 
+                                  ...prev, 
+                                  categoryMapping: checked ? 'auto' : 'manual' 
+                                }))
+                              }
+                            />
+                            <label htmlFor="autoCategory" className="text-sm">
+                              Automatically create missing categories
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Import Progress */}
+                {importProgress && (
+                  <div className="border rounded-lg p-4 bg-blue-50 dark:bg-blue-950/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                      <span className="font-medium">Importing Data...</span>
+                    </div>
+                    <Progress value={importProgress.percentage} className="mb-2" />
+                    <p className="text-sm text-muted-foreground">
+                      {importProgress.message}
+                    </p>
+                  </div>
+                )}
+
+                {/* Import Results */}
+                {importResults && (
+                  <div className="border rounded-lg p-4 bg-green-50 dark:bg-green-950/20">
+                    <div className="flex items-center gap-2 mb-3">
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                      <span className="font-medium text-green-900 dark:text-green-100">
+                        Import Completed Successfully
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <div className="font-medium">Categories</div>
+                        <div className="text-green-600">{importResults.categories} created</div>
+                      </div>
+                      <div>
+                        <div className="font-medium">Income</div>
+                        <div className="text-green-600">{importResults.incomes} imported</div>
+                      </div>
+                      <div>
+                        <div className="font-medium">Expenses</div>
+                        <div className="text-green-600">{importResults.expenses} imported</div>
+                      </div>
+                      <div>
+                        <div className="font-medium">Budgets</div>
+                        <div className="text-green-600">{importResults.budgets} imported</div>
+                      </div>
+                      <div>
+                        <div className="font-medium">Goals</div>
+                        <div className="text-green-600">{importResults.goals} imported</div>
+                      </div>
+                      <div>
+                        <div className="font-medium">Collaborative</div>
+                        <div className="text-green-600">{importResults.collaborativeGoals} imported</div>
+                      </div>
+                    </div>
+                    {importResults.errors && importResults.errors.length > 0 && (
+                      <div className="mt-3 p-2 bg-yellow-100 dark:bg-yellow-900/20 rounded">
+                        <div className="font-medium text-yellow-800 dark:text-yellow-200 text-sm">
+                          Warnings ({importResults.errors.length}):
+                        </div>
+                        <ul className="text-xs text-yellow-700 dark:text-yellow-300 mt-1 space-y-1">
+                          {importResults.errors.slice(0, 3).map((error, index) => (
+                            <li key={index}>• {error}</li>
+                          ))}
+                          {importResults.errors.length > 3 && (
+                            <li>• ... and {importResults.errors.length - 3} more</li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Action Button */}
+                <div className="flex justify-end">
+                  <Button 
+                    onClick={handleImportData}
+                    disabled={!selectedFile || isImporting}
+                    className="min-w-32"
+                  >
+                    {isImporting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Importing...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="mr-2 h-4 w-4" />
+                        Import Data
+                      </>
+                    )}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
