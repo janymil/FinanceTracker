@@ -51,6 +51,14 @@ app.post("/execute-gpt-task", async (req, res) => {
         result = await handleTrendPredictions(payload);
         break;
 
+      case "financial-health-score":
+        result = await handleFinancialHealthScore(payload);
+        break;
+
+      case "spending-insights":
+        result = await handleSpendingInsights(payload);
+        break;
+
       default:
         return res.status(400).json({ error: `Unknown AI task: ${task}` });
     }
@@ -372,6 +380,99 @@ app.post('/generate-daily-recommendation', async (req, res) => {
     res.status(500).json({ error: 'Daily recommendation generation failed' });
   }
 });
+
+async function handleFinancialHealthScore(payload: any) {
+  const { summary, budgets, transactions, useAdvancedFactors } = payload;
+  
+  const prompt = `You are an AI financial health analyst. Calculate a comprehensive financial health score and provide improvement recommendations.
+
+Financial Data:
+- Summary: ${JSON.stringify(summary)}
+- Budgets: ${JSON.stringify(budgets)}
+- Recent Transactions: ${transactions?.length || 0} transactions
+- Advanced Analysis: ${useAdvancedFactors ? 'enabled' : 'disabled'}
+
+Return analysis in JSON format:
+{
+  "score": number_0_to_100,
+  "status": "excellent|good|fair|poor",
+  "color": "green|yellow|orange|red",
+  "factors": [
+    {
+      "name": "factor name",
+      "score": number_0_to_100,
+      "max": 100,
+      "description": "detailed explanation"
+    }
+  ],
+  "recommendations": ["recommendation1", "recommendation2"],
+  "riskFactors": ["risk1", "risk2"]
+}`;
+
+  const messages = [
+    { role: "system", content: prompt },
+    { role: "user", content: "Analyze my financial health and provide a comprehensive score." }
+  ];
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages,
+    response_format: { type: "json_object" },
+    temperature: 0.7
+  });
+
+  return JSON.parse(response.choices[0].message.content || '{"score":50,"status":"fair","color":"yellow","factors":[],"recommendations":[],"riskFactors":[]}');
+}
+
+async function handleSpendingInsights(payload: any) {
+  const { transactions } = payload;
+  
+  if (!transactions || transactions.length === 0) {
+    return [];
+  }
+
+  const prompt = `You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights.
+
+Generate 2-4 insights focusing on:
+- Unusual spending patterns
+- Budget optimization opportunities  
+- Positive financial behaviors
+- Spending trends and recommendations
+
+Transactions: ${JSON.stringify(transactions.slice(0, 30))}
+
+Return insights in JSON format:
+{
+  "insights": [
+    {
+      "id": "insight_1",
+      "type": "warning|suggestion|achievement|trend",
+      "title": "insight title",
+      "description": "detailed description",
+      "impact": "high|medium|low",
+      "category": "category name",
+      "amount": number,
+      "recommendation": "actionable recommendation",
+      "actionable": true
+    }
+  ]
+}`;
+
+  const messages = [
+    { role: "system", content: prompt },
+    { role: "user", content: "Analyze my spending patterns and provide insights." }
+  ];
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages,
+    response_format: { type: "json_object" },
+    temperature: 0.7
+  });
+
+  const result = JSON.parse(response.choices[0].message.content || '{"insights":[]}');
+  return Array.isArray(result) ? result : (result.insights || []);
+}
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`AI Processor server running on port ${port}`);
