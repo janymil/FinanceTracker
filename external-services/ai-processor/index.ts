@@ -174,12 +174,22 @@ export async function generateContextualFinancialTips(data: {
     amount: number;
     category: string;
     date: string;
+    type?: 'income' | 'expense';
+    recurring?: boolean;
   }>;
   budgets: Array<{
     category: string;
     budgetAmount: number;
     spent: number;
     remaining: number;
+    period?: string;
+  }>;
+  goals?: Array<{
+    name: string;
+    targetAmount: number;
+    currentAmount: number;
+    targetDate: string;
+    type: 'saving' | 'debt' | 'investment';
   }>;
   selectedMonth: string;
 }): Promise<{ tips: Array<{
@@ -191,7 +201,7 @@ export async function generateContextualFinancialTips(data: {
   actionable: boolean;
 }> }> {
   try {
-    const { summary, transactions, budgets, selectedMonth } = data;
+    const { summary, transactions, budgets, goals = [], selectedMonth } = data;
     
     // Return basic tip if no meaningful data
     if (transactions.length === 0 && summary.totalIncome === 0 && summary.totalExpenses === 0) {
@@ -224,43 +234,94 @@ export async function generateContextualFinancialTips(data: {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3);
 
+    // Detailed transaction analysis
+    const incomeTransactions = transactions.filter(t => t.type === 'income' || t.amount < 0);
+    const expenseTransactions = transactions.filter(t => t.type === 'expense' || t.amount > 0);
+    const recurringTransactions = transactions.filter(t => t.recurring);
+    
+    // Calculate transaction patterns
+    const transactionFrequency = new Map();
+    const dailySpending = new Map();
+    
+    expenseTransactions.forEach(t => {
+      const day = new Date(t.date).getDate();
+      dailySpending.set(day, (dailySpending.get(day) || 0) + t.amount);
+      transactionFrequency.set(t.category, (transactionFrequency.get(t.category) || 0) + 1);
+    });
+
     // Analyze specific financial scenarios for contextual insights
     const scenarios = [];
     
-    // Check for budget overruns
+    // Check for budget overruns with detailed analysis
     budgets.forEach(budget => {
       if (budget.remaining < 0) {
         const overrunPercent = Math.abs((budget.remaining / budget.budgetAmount) * 100);
-        scenarios.push(`🟥 Budget overrun: You've exceeded your ${budget.category} budget by ${overrunPercent.toFixed(0)}% this month.`);
+        const categoryTransactions = expenseTransactions.filter(t => t.category === budget.category);
+        const avgTransactionInCategory = categoryTransactions.length > 0 ? 
+          categoryTransactions.reduce((sum, t) => sum + t.amount, 0) / categoryTransactions.length : 0;
+        
+        scenarios.push(`🟥 Budget overrun: You've exceeded your ${budget.category} budget by ${overrunPercent.toFixed(0)}% this month. Average transaction: $${avgTransactionInCategory.toFixed(2)}, Total transactions: ${categoryTransactions.length}`);
+      } else if (budget.remaining < budget.budgetAmount * 0.1) {
+        // Budget almost exhausted
+        scenarios.push(`🟨 Budget warning: Only $${budget.remaining.toFixed(2)} remaining in your ${budget.category} budget (${((budget.remaining/budget.budgetAmount)*100).toFixed(0)}% left).`);
       }
     });
     
-    // Check savings rate scenarios
+    // Check savings rate scenarios with goal analysis
     if (savingsRate < 5 && summary.totalIncome > 0) {
       scenarios.push(`🟨 Low savings rate: Your savings rate is ${savingsRate.toFixed(1)}%. Consider revisiting your financial goals.`);
     } else if (savingsRate > 20) {
       scenarios.push(`🟩 Excellent savings: Great job! You're saving ${savingsRate.toFixed(1)}% of your income this month.`);
     }
     
-    // Check for spending improvements (simplified version - in real scenario you'd compare to previous month)
-    const totalSpending = summary.totalExpenses;
-    const avgTransactionAmount = transactions.length > 0 ? totalSpending / transactions.length : 0;
-    if (avgTransactionAmount < 50 && transactions.length > 10) {
-      scenarios.push(`🟩 Controlled spending: Great job! You're keeping individual transactions small and manageable.`);
-    }
-    
-    // Check for irregular income patterns (simplified - you'd need historical data for better analysis)
-    if (summary.totalIncome > 0 && transactions.filter(t => t.category === 'Income' || t.amount > 1000).length > 3) {
-      scenarios.push(`🟦 Income variability: Your income shows some fluctuation. Consider setting aside a buffer for stability.`);
-    }
-    
-    // Check for specific category improvements or concerns
-    topSpendingCategories.forEach(([category, amount]) => {
-      const categoryPercent = (amount / totalSpending) * 100;
-      if (categoryPercent > 40) {
-        scenarios.push(`🟨 High category spending: ${category} represents ${categoryPercent.toFixed(0)}% of your expenses. Consider if this aligns with your priorities.`);
+    // Analyze goals progress
+    goals.forEach(goal => {
+      const progressPercent = (goal.currentAmount / goal.targetAmount) * 100;
+      const daysToTarget = Math.ceil((new Date(goal.targetDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+      const monthlyNeeded = daysToTarget > 0 ? (goal.targetAmount - goal.currentAmount) / (daysToTarget / 30) : 0;
+      
+      if (progressPercent >= 90) {
+        scenarios.push(`🟩 Goal achievement: You're ${progressPercent.toFixed(0)}% towards your ${goal.name} goal! Only $${(goal.targetAmount - goal.currentAmount).toFixed(2)} remaining.`);
+      } else if (monthlyNeeded > netBalance) {
+        scenarios.push(`🟨 Goal at risk: Your ${goal.name} goal needs $${monthlyNeeded.toFixed(2)}/month, but current monthly surplus is $${netBalance.toFixed(2)}.`);
       }
     });
+    
+    // Check for irregular income patterns
+    if (incomeTransactions.length > 0) {
+      const incomeAmounts = incomeTransactions.map(t => Math.abs(t.amount));
+      const avgIncome = incomeAmounts.reduce((sum, amt) => sum + amt, 0) / incomeAmounts.length;
+      const incomeVariability = incomeAmounts.some(amt => Math.abs(amt - avgIncome) / avgIncome > 0.3);
+      
+      if (incomeVariability && incomeTransactions.length > 1) {
+        scenarios.push(`🟦 Income variability: Your income shows fluctuation. Largest: $${Math.max(...incomeAmounts).toFixed(2)}, Smallest: $${Math.min(...incomeAmounts).toFixed(2)}. Consider setting aside a buffer.`);
+      }
+    }
+    
+    // Check for spending concentration and patterns
+    topSpendingCategories.forEach(([category, amount]) => {
+      const categoryPercent = (amount / summary.totalExpenses) * 100;
+      const categoryFreq = transactionFrequency.get(category) || 0;
+      
+      if (categoryPercent > 40) {
+        scenarios.push(`🟨 High category spending: ${category} represents ${categoryPercent.toFixed(0)}% of expenses ($${amount.toFixed(2)} across ${categoryFreq} transactions).`);
+      }
+    });
+    
+    // Check for positive spending improvements
+    if (expenseTransactions.length > 0) {
+      const avgTransactionAmount = summary.totalExpenses / expenseTransactions.length;
+      if (avgTransactionAmount < 30 && expenseTransactions.length > 15) {
+        scenarios.push(`🟩 Controlled spending: Great job! You're averaging $${avgTransactionAmount.toFixed(2)} per transaction, showing mindful spending habits.`);
+      }
+    }
+    
+    // Check recurring transaction efficiency
+    if (recurringTransactions.length > 0) {
+      const recurringTotal = recurringTransactions.reduce((sum, t) => sum + t.amount, 0);
+      const recurringPercent = (recurringTotal / summary.totalExpenses) * 100;
+      scenarios.push(`🟦 Recurring expenses: ${recurringPercent.toFixed(0)}% of expenses are recurring ($${recurringTotal.toFixed(2)} from ${recurringTransactions.length} transactions).`);
+    }
 
     // Build detailed prompt with scenario analysis
     const prompt = `You are an expert financial advisor analyzing a user's financial data for ${selectedMonth}. Provide 2-4 specific, actionable financial tips based on their actual data and identified scenarios.
@@ -276,22 +337,35 @@ TOP SPENDING CATEGORIES:
 ${topSpendingCategories.map(([cat, amount]) => `- ${cat}: $${amount.toLocaleString()} (${((amount/summary.totalExpenses)*100).toFixed(1)}%)`).join('\n')}
 
 BUDGET STATUS:
-${budgets.length > 0 ? budgets.map(b => `- ${b.category}: $${b.spent.toLocaleString()}/$${b.budgetAmount.toLocaleString()} (${b.remaining >= 0 ? 'under' : 'over'} budget by $${Math.abs(b.remaining).toLocaleString()})`).join('\n') : '- No budgets set'}
+${budgets.length > 0 ? budgets.map(b => `- ${b.category}: $${b.spent.toLocaleString()}/$${b.budgetAmount.toLocaleString()} (${b.remaining >= 0 ? 'under' : 'over'} budget by $${Math.abs(b.remaining).toLocaleString()}) - ${b.period || 'monthly'}`).join('\n') : '- No budgets set'}
+
+FINANCIAL GOALS:
+${goals.length > 0 ? goals.map(g => `- ${g.name}: $${g.currentAmount.toLocaleString()}/$${g.targetAmount.toLocaleString()} (${((g.currentAmount/g.targetAmount)*100).toFixed(0)}% complete) - Target: ${g.targetDate}`).join('\n') : '- No goals set'}
+
+TRANSACTION ANALYSIS:
+- Total Transactions: ${transactions.length}
+- Income Transactions: ${incomeTransactions.length}
+- Expense Transactions: ${expenseTransactions.length}
+- Recurring Transactions: ${recurringTransactions.length}
+- Most Active Category: ${Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[0] || 'None'} (${Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[1] || 0} transactions)
 
 IDENTIFIED FINANCIAL SCENARIOS:
 ${scenarios.length > 0 ? scenarios.join('\n') : '- No specific scenarios identified this month'}
 
-RECENT TRANSACTIONS (last 5):
-${transactions.slice(0, 5).map(t => `- ${t.description}: $${t.amount.toLocaleString()} (${t.category})`).join('\n')}
+RECENT TRANSACTIONS (last 8):
+${transactions.slice(0, 8).map(t => `- ${t.date}: ${t.description} - $${t.amount.toLocaleString()} (${t.category})${t.recurring ? ' [Recurring]' : ''}`).join('\n')}
 
 CONTEXTUAL ANALYSIS REQUIREMENTS:
-1. Address specific scenarios identified above with targeted advice
-2. For budget overruns: Provide specific reduction strategies and alternative options
-3. For low savings rates: Suggest concrete steps to improve savings with dollar targets
-4. For positive improvements: Reinforce good habits and suggest next steps
-5. For income irregularities: Recommend buffer strategies and stability measures
-6. Include specific dollar amounts, percentages, and timeframes in recommendations
-7. Make tips actionable with clear next steps the user can take immediately
+1. Address specific scenarios identified above with targeted, data-driven advice
+2. For budget overruns: Analyze transaction patterns and suggest specific reduction strategies
+3. For goal progress: Calculate required monthly contributions and suggest optimization
+4. For savings rate issues: Provide concrete steps with dollar targets based on their income
+5. For spending patterns: Identify specific categories and transaction behaviors to modify
+6. For income irregularities: Recommend buffer strategies based on their variability patterns
+7. For positive improvements: Reinforce successful behaviors and suggest expansion strategies
+8. Use their actual transaction data, amounts, and patterns in all recommendations
+9. Provide specific dollar amounts, percentages, and realistic timeframes
+10. Make every tip immediately actionable with clear, measurable next steps
 
 Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
 {
