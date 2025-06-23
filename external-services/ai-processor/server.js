@@ -465,31 +465,53 @@ Generate response in JSON format:
 }
 
 async function handleFinancialTips(payload) {
-  const { summary } = payload;
+  const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = payload;
   
-  // Financial tips specific prompt  
-  const prompt = `You are an AI Financial Analyst providing premium-level insights. 
+  // Prepare the financial summary for AI analysis
+  const netBalance = totalIncome - totalExpenses;
+  const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100).toFixed(1) : 0;
+  
+  const categoryBreakdown = transactionsByCategory.map(cat => 
+    `${cat.categoryName}: $${cat.amount} (${cat.type})`
+  ).join(', ');
+  
+  const recentActivity = recentTransactions.slice(0, 5).map(tx => 
+    `${tx.description}: $${tx.amount} on ${tx.date}`
+  ).join(', ');
+  
+  // Financial tips specific prompt with complex analysis
+  const prompt = `You are an AI Financial Analyst providing premium-level insights.
 
-${summary}
+Financial Overview:
+- Total Income: $${totalIncome}
+- Total Expenses: $${totalExpenses}  
+- Net Balance: $${netBalance}
+- Savings Rate: ${savingsRate}%
+- Category Breakdown: ${categoryBreakdown}
+- Recent Activity: ${recentActivity}
 
-Return comprehensive analysis in JSON:
-{
-  "title": "Advanced Financial Analysis: [Specific Focus Area]",
-  "description": "DETAILED multi-paragraph analysis including: 1) Mathematical breakdown of their spending patterns with percentages, 2) Specific optimization recommendations with exact dollar targets, 3) Implementation timeline with measurable milestones, 4) Risk assessment and protection strategies. Use their exact financial numbers throughout.",
-  "category": "spending|saving|budgeting|income|education", 
-  "priority": "high|medium|low",
-  "actionable": true,
-  "estimatedSaving": [realistic_amount],
-  "educational": false
-}`;
+Provide comprehensive financial analysis and actionable recommendations. Return as JSON array:
+[
+  {
+    "id": "tip_1",
+    "title": "Advanced Financial Analysis: [Specific Focus Area]",
+    "description": "DETAILED multi-paragraph analysis including: 1) Mathematical breakdown of spending patterns with percentages, 2) Specific optimization recommendations with exact dollar targets, 3) Implementation timeline with measurable milestones, 4) Risk assessment strategies. Use exact financial numbers throughout.",
+    "category": "spending|saving|budgeting|income|education", 
+    "priority": "high|medium|low",
+    "actionable": true,
+    "estimatedSaving": [realistic_amount],
+    "educational": false
+  }
+]`;
 
   const messages = [
     { role: "system", content: prompt },
-    { role: "user", content: summary }
+    { role: "user", content: "Generate advanced financial tips based on my comprehensive financial data." }
   ];
 
   const response = await callOpenAI(messages);
-  return JSON.parse(response.choices[0].message.content || '{}');
+  const result = JSON.parse(response.choices[0].message.content || '[]');
+  return Array.isArray(result) ? result : [result];
 }
 
 async function handleContextualTips(payload) {
