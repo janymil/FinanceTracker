@@ -205,7 +205,7 @@ export class UnifiedAICache {
           .set({
             dataHash: entry.dataHash,
             result: entry.result,
-            updatedAt: new Date()
+            lastAccessed: new Date()
           })
           .where(eq(aiCache.id, existing[0].id));
       } else {

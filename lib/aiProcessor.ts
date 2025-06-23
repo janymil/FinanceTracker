@@ -20,7 +20,7 @@ async function storeCache(key: string, value: any) {
  * Handles: GPT Execution, Smart Caching, Retry/Fallback, OpenAI Key Handling
  */
 export async function runAI(task: string, userId: string, payload: Record<string, any>) {
-  const month = extractMonth(payload);
+  const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
   
   // Try to get cached result using unified cache
   const cached = await unifiedAICache.get(task, userId, month, payload);
