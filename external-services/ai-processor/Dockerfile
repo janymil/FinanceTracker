@@ -5,15 +5,15 @@ WORKDIR /app
 # Copy package files first for better layer caching
 COPY package.json ./
 
-# Install dependencies including tsx
-RUN npm install
+# Install dependencies
+RUN npm install --production
 
 # Copy the JavaScript server file and openai functions
 COPY server.js ./
 COPY openai-functions.js ./
 
-# Install tsx globally for better performance
-RUN npm install -g tsx
+# Verify required dependencies are available
+RUN node -e "require('express'); require('cors'); require('dotenv'); require('openai'); console.log('All dependencies loaded successfully')"
 
 # Create a non-root user
 RUN addgroup -g 1001 -S nodejs && \
