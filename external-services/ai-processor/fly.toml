@@ -10,7 +10,7 @@ primary_region = "lax"
   PORT = "8080"
 
 [processes]
-  app = "npx tsx index.ts"
+  app = "npm start"
 
 [http_service]
   internal_port = 8080

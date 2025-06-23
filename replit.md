@@ -318,6 +318,7 @@ Changelog:
 - June 23, 2025. DEPLOYMENT STATUS: Current Fly.io deployment still runs old code with destructive empty arrays - local fixes ready but not deployed
 - June 23, 2025. CLARIFICATION: AI processor was originally designed as API-only service without root route - never had browser access capability
 - June 23, 2025. ADDED ROOT ENDPOINT: Created GET / route for service information when accessed via browser (ready for deployment)
+- June 23, 2025. FIXED DEPLOYMENT BINDING: Changed server to bind to 0.0.0.0 instead of localhost to resolve Fly.io 503 errors
 - June 23, 2025. FIXED AI PROCESSOR DATA FLOW: Removed destructive empty array fallbacks, added proper transactionsByCategory generation from raw transactions
 - June 23, 2025. ELIMINATED DESTRUCTIVE EMPTY ARRAYS: Removed all || [] fallbacks from AI endpoints that were masking real data issues and destroying AI functionality
 - June 23, 2025. PROPER DATA VALIDATION: AI endpoints now require meaningful transaction data instead of defaulting to empty arrays
