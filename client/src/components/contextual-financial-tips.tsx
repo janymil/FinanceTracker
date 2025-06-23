@@ -103,8 +103,8 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
       return;
     }
 
-    // Skip if we already loaded tips for this month
-    if (lastLoadedMonth === currentMonth && tips) return;
+    // Skip if we already loaded tips for this month (unless forced refresh)
+    if (lastLoadedMonth === currentMonth && tips && !shouldSkipCache) return;
 
     // Create a month-specific cache key based on filtered transactions
     const dataHash = JSON.stringify({
