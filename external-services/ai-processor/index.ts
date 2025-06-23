@@ -239,14 +239,6 @@ Transaction Pattern Analysis:
 
 Generate 4 independent box analyses with exact mathematical calculations.`;
 
-Transaction Pattern Analysis:
-- Average transaction size: $${(totalIncome + totalExpenses) / transactionCount}
-- Income transactions: ${recentTransactions.filter(t => t.type === 'income').length}
-- Expense transactions: ${recentTransactions.filter(t => t.type === 'expense').length}
-- Date range: ${new Date(Math.min(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()} to ${new Date(Math.max(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()}
-
-Generate 4 independent box analyses with exact mathematical calculations.`;
-
     // Direct OpenAI call (no recursion - this IS the AI processor)
     const response = await openai.chat.completions.create({
         model: "gpt-4o",
