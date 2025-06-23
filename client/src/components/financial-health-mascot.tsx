@@ -304,19 +304,19 @@ export default function FinancialHealthMascot() {
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <CheckCircle className="h-4 w-4 text-green-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.achievements.length} Achievements
+              {healthData.achievements?.length || 0} Achievements
             </p>
           </div>
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <Target className="h-4 w-4 text-blue-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.insights.length} Insights
+              {healthData.insights?.length || 0} Insights
             </p>
           </div>
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <AlertTriangle className="h-4 w-4 text-yellow-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.warnings.length} Alerts
+              {healthData.warnings?.length || 0} Alerts
             </p>
           </div>
         </div>
