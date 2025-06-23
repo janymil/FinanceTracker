@@ -58,9 +58,12 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
   useEffect(() => {
     if (!transactions || !summary) return;
 
-    // Smart default: use selectedMonth or find the most recent transaction month
+    // Dynamic month detection: use selectedMonth or find the most recent transaction month
     const getMostRecentTransactionMonth = () => {
-      if (!transactions || transactions.length === 0) return new Date().toISOString().slice(0, 7);
+      if (!transactions || transactions.length === 0) {
+        // If no transactions, use current month
+        return new Date().toISOString().slice(0, 7);
+      }
       
       // Sort transactions by date descending and get the most recent month
       const sortedTransactions = [...transactions].sort((a, b) => 
@@ -82,11 +85,12 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
 
     console.log('Contextual tips: Month filtering debug', {
       selectedMonth: currentMonth,
+      calculatedMonth: getMostRecentTransactionMonth(),
       totalTransactions: transactions.length,
       monthTransactions: monthTransactions.length,
       firstTxDate: transactions[0]?.date,
       firstMonthTxDate: monthTransactions[0]?.date,
-      calculatedMonth: getMostRecentTransactionMonth()
+      willMakeAPICall: monthTransactions.length > 0
     });
 
     // Check for cache invalidation flag (set after data imports or manual refresh)
@@ -107,14 +111,20 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
 
     // If no transactions for this month, show no data state
     if (monthTransactions.length === 0) {
-      console.log('Contextual tips: No transactions for month', currentMonth);
+      console.log('Contextual tips: No transactions for calculated month', {
+        currentMonth,
+        allTransactionDates: transactions.map(t => t.date).slice(0, 3)
+      });
       setTips([]);
       setLastLoadedMonth(currentMonth);
       return;
     }
 
     // Skip if we already loaded tips for this month (unless forced refresh)
-    if (lastLoadedMonth === currentMonth && tips && !shouldSkipCache) return;
+    if (lastLoadedMonth === currentMonth && tips && !shouldSkipCache) {
+      console.log('Contextual tips: Skipping API call - already loaded for this month');
+      return;
+    }
 
     // Create a month-specific cache key based on filtered transactions
     const dataHash = JSON.stringify({
@@ -134,13 +144,18 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
           const isExpired = Date.now() - timestamp > 30 * 60 * 1000; // 30 minutes (shorter cache)
           
           if (!isExpired && cachedTips) {
+            console.log('Contextual tips: Using cached data, skipping API call');
             setTips(cachedTips);
             setLastLoadedMonth(currentMonth);
             return; // Use cached tips, skip API call
+          } else {
+            console.log('Contextual tips: Cache expired or invalid, will fetch fresh');
           }
         } catch (e) {
-          // Invalid cached data, continue to fetch
+          console.log('Contextual tips: Invalid cached data, will fetch fresh');
         }
+      } else {
+        console.log('Contextual tips: No cached data found, will fetch fresh');
       }
     }
 
@@ -206,7 +221,19 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
       }
     };
 
-    fetchTips();
+    // Only call fetchTips if we have data and haven't already loaded
+    console.log('Contextual tips: useEffect decision point', {
+      hasTransactions: !!transactions && transactions.length > 0,
+      hasSummary: !!summary,
+      monthTransactionCount: monthTransactions.length,
+      currentMonth,
+      lastLoadedMonth,
+      shouldCallAPI: monthTransactions.length > 0 && (!lastLoadedMonth || lastLoadedMonth !== currentMonth || shouldSkipCache)
+    });
+
+    if (monthTransactions.length > 0 && (!lastLoadedMonth || lastLoadedMonth !== currentMonth || shouldSkipCache)) {
+      fetchTips();
+    }
   }, [summary, transactions, budgets, selectedMonth]);
 
   return (
