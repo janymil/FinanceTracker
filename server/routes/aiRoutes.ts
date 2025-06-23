@@ -155,13 +155,17 @@ export function registerAIRoutes(app: Express) {
 
       console.log(`Processing ${formattedTransactions.length} transactions for AI analysis`);
 
-      const tipResults = await generateFinancialTips({
+      console.log('AI financial tips: Making Fly.io API call via centralized processor');
+      
+      const aiPayload = {
         totalIncome: financialData.totalIncome || 0,
         totalExpenses: financialData.totalExpenses || 0,
         transactionsByCategory: financialData.categories || [],
         recentTransactions: formattedTransactions,
         timestamp: financialData.timestamp
-      });
+      };
+
+      const tipResults = await runAI('financial-tips', userId, aiPayload);
 
       // Save to unified cache if not bypassing cache
       if (!financialData.timestamp && tipResults && tipResults.length > 0) {

@@ -366,7 +366,7 @@ Only provide recommendations and insights based on the actual financial data pro
     return;
 
   // Unified AI endpoint - routes all tasks through single interface
-  } else if (pathname === '/execute-gpt-task' && req.method === 'POST') {
+  } else if (path === '/execute-gpt-task' && method === 'POST') {
     try {
       const { task, userId, payload } = await parseBody(req);
       
