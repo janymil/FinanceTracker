@@ -1,4 +1,7 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.categorizeExpense = categorizeExpense;
 exports.generateFinancialTips = generateFinancialTips;
@@ -8,7 +11,7 @@ exports.generateTrendPredictions = generateTrendPredictions;
 exports.generateExpensePredictions = generateExpensePredictions;
 exports.generateDailyRecommendations = generateDailyRecommendations;
 exports.generateFinancialHealthScore = generateFinancialHealthScore;
-const openai_1 = require("openai");
+const openai_1 = __importDefault(require("openai"));
 const cache_1 = require("./cache");
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new openai_1.default({ apiKey: process.env.OPENAI_API_KEY });
@@ -122,7 +125,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ summary }),
-                timeout: 30000 // 30 second timeout
+                // timeout: 30000 // 30 second timeout - not supported in fetch
             });
             if (!aiResponse.ok) {
                 throw new Error(`AI processor error: ${aiResponse.status} ${aiResponse.statusText}`);
