@@ -49,10 +49,27 @@ export async function runAI(task: string, userId: string, payload: Record<string
     throw new Error(`Unified endpoint failed for task: ${task}`);
 
   } catch (err) {
-    console.error(`[AI ${task}] Fly.io service failed:`, err.message);
+    console.error(`[AI ${task}] CRITICAL ERROR: Task ${task} failed to reach Fly.io:`, err.message);
+    console.error(`[AI ${task}] Full error details:`, err);
     
-    // Only return empty structures for critical failures
-    // This makes problems visible instead of hiding them
+    // Import and use local functions as fallback
+    try {
+      const { generateSpendingInsights, generateExpensePredictions } = await import('../server/openai');
+      
+      if (task === 'spending-insights') {
+        console.log(`[AI ${task}] Using local fallback for spending-insights`);
+        return await generateSpendingInsights(payload.transactions || []);
+      }
+      
+      if (task === 'expense-predictions') {
+        console.log(`[AI ${task}] Using local fallback for expense-predictions`);
+        return await generateExpensePredictions(payload.transactions || []);
+      }
+    } catch (localError) {
+      console.error(`[AI ${task}] Local fallback also failed:`, localError.message);
+    }
+    
+    // For other tasks, return empty structures to make the problem visible
     switch (task) {
       case 'daily-recommendations':
         return { recommendations: [], insights: [], error: 'Fly.io service unavailable' };
