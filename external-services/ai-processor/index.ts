@@ -223,6 +223,9 @@ export async function generateContextualFinancialTips(data: {
     
     // Analyze spending by category
     const categorySpending = new Map();
+    const categorizedCount = transactions.filter(t => t.category && t.category !== 'Uncategorized').length;
+    const uncategorizedCount = transactions.filter(t => !t.category || t.category === 'Uncategorized').length;
+    
     transactions.forEach(t => {
       if (t.amount > 0) {
         const current = categorySpending.get(t.category) || 0;
@@ -251,6 +254,14 @@ export async function generateContextualFinancialTips(data: {
 
     // Analyze specific financial scenarios for contextual insights
     const scenarios = [];
+    
+    // Check categorization status
+    if (uncategorizedCount > 0 && transactions.length > 0) {
+      const uncategorizedPercent = (uncategorizedCount / transactions.length) * 100;
+      scenarios.push(`🟨 Transaction categorization: ${uncategorizedCount} of ${transactions.length} transactions (${uncategorizedPercent.toFixed(0)}%) are uncategorized. Better categorization improves spending insights.`);
+    } else if (categorizedCount === transactions.length && transactions.length > 0) {
+      scenarios.push(`🟩 Well organized: All ${transactions.length} transactions are properly categorized, enabling detailed spending analysis.`);
+    }
     
     // Check for budget overruns with detailed analysis
     budgets.forEach(budget => {
@@ -347,6 +358,7 @@ TRANSACTION ANALYSIS:
 - Income Transactions: ${incomeTransactions.length}
 - Expense Transactions: ${expenseTransactions.length}
 - Recurring Transactions: ${recurringTransactions.length}
+- Categorized Transactions: ${categorizedCount}/${transactions.length} (${transactions.length > 0 ? ((categorizedCount/transactions.length)*100).toFixed(0) : 0}%)
 - Most Active Category: ${Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[0] || 'None'} (${Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[1] || 0} transactions)
 
 IDENTIFIED FINANCIAL SCENARIOS:

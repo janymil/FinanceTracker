@@ -120,7 +120,8 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
         transactions: transactions.slice(0, 10).map((t: any) => ({
           description: t.description || t.note || 'Transaction',
           amount: t.amount,
-          category: t.category || 'Uncategorized',
+          category: t.categoryName || t.category || 'Uncategorized',
+          type: t.type || 'expense',
           date: t.date
         })),
         budgets: budgets?.map((budget: any) => ({
