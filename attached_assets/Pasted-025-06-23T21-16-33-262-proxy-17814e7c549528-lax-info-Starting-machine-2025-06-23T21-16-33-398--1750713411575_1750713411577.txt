@@ -1,0 +1,47 @@
+025-06-23T21:16:33.262 proxy[17814e7c549528] lax [info] Starting machine
+
+2025-06-23T21:16:33.398 app[17814e7c549528] lax [info] 2025-06-23T21:16:33.398878971 [01JYFA3R1E1K6P7A5NQF9EH3W6:main] Running Firecracker v1.7.0
+
+2025-06-23T21:16:34.215 app[17814e7c549528] lax [info] INFO Starting init (commit: 28e33be24)...
+
+2025-06-23T21:16:34.316 app[17814e7c549528] lax [info] INFO Preparing to run: `docker-entrypoint.sh npx tsx index.ts` as root
+
+2025-06-23T21:16:34.324 app[17814e7c549528] lax [info] INFO [fly api proxy] listening at /.fly/api
+
+2025-06-23T21:16:34.394 runner[17814e7c549528] lax [info] Machine started in 1.076s
+
+2025-06-23T21:16:34.396 proxy[17814e7c549528] lax [info] machine started in 1.134413216s
+
+2025-06-23T21:16:34.585 app[17814e7c549528] lax [info] 2025/06/23 21:16:34 INFO SSH listening listen_address=[fdaa:1e:2ace:a7b:7d16:1e28:b766:2]:22
+
+2025-06-23T21:16:36.700 app[17814e7c549528] lax [info] [esbuild Error]: Expected ";" but found "Pattern"
+
+2025-06-23T21:16:36.700 app[17814e7c549528] lax [info] at /app/index.ts:242:12
+
+2025-06-23T21:16:37.329 app[17814e7c549528] lax [info] INFO Main child exited normally with code: 1
+
+2025-06-23T21:16:37.344 app[17814e7c549528] lax [info] INFO Starting clean up.
+
+2025-06-23T21:16:37.347 app[17814e7c549528] lax [info] WARN could not unmount /rootfs: EINVAL: Invalid argument
+
+2025-06-23T21:16:37.348 app[17814e7c549528] lax [info] [ 3.887232] reboot: Restarting system
+
+2025-06-23T21:16:37.749 runner[17814e7c549528] lax [info] machine has reached its max restart count of 10
+
+2025-06-23T21:16:40.665 proxy[17814e7c549528] lax [info] waiting for machine to be reachable on 0.0.0.0:8080 (waited 6.268312239s so far)
+
+2025-06-23T21:16:43.461 proxy[17814e7c549528] lax [info] Starting machine
+
+2025-06-23T21:16:43.594 app[17814e7c549528] lax [info] 2025-06-23T21:16:43.594329098 [01JYFA3R1E1K6P7A5NQF9EH3W6:main] Running Firecracker v1.7.0
+
+2025-06-23T21:16:44.418 app[17814e7c549528] lax [info] INFO Starting init (commit: 28e33be24)...
+
+2025-06-23T21:16:44.516 app[17814e7c549528] lax [info] INFO Preparing to run: `docker-entrypoint.sh npx tsx index.ts` as root
+
+2025-06-23T21:16:44.524 app[17814e7c549528] lax [info] INFO [fly api proxy] listening at /.fly/api
+
+2025-06-23T21:16:44.584 runner[17814e7c549528] lax [info] Machine started in 1.076s
+
+2025-06-23T21:16:44.586 proxy[17814e7c549528] lax [info] machine started in 1.125057302s
+
+2025-06-23T21:16:44.778 app[17814e7c549528] lax [info] 2025/06/23 21:16:44 INFO SSH listening listen_address=[fdaa:1e:2ace:a7b:7d16:1e28:b766:2]:22
