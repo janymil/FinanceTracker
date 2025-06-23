@@ -284,12 +284,12 @@ Changelog:
 - June 23, 2025. Updated aiProcessor.ts to use unified cache with month-specific filtering and intelligent data change detection
 - June 23, 2025. MIGRATION PROGRESS: Contextual Financial Tips successfully migrated to unified cache system with session persistence
 - June 23, 2025. CREATED UNIFIED AI_CACHE TABLE: Single database table for all AI functions with month-specific filtering and data change detection
-- June 23, 2025. FACT-CHECKED UNIFIED CACHE STATUS: Successfully migrated 6 of 7 AI functions to unified cache system
-- June 23, 2025. FULLY MIGRATED: Contextual Tips, Daily Recommendations, Financial Health, Expense Predictions, Financial Tips, Trend Predictions  
-- June 23, 2025. Each function maintains individual prompts and logic while benefiting from centralized cache management
-- June 23, 2025. Unified cache provides session persistence, month-specific filtering, and smart data change detection via hashing
-- June 23, 2025. Cost optimization: 75-85% reduction in OpenAI API calls through intelligent cache invalidation
-- June 23, 2025. Only remaining function: AI Expense Categorization - intentionally kept separate for real-time auto-categorization performance
+- June 23, 2025. CACHE MIGRATION STATUS: Partial implementation - 6 of 9 AI functions using unified cache system
+- June 23, 2025. UNIFIED CACHE FUNCTIONS: Contextual Tips, Daily Recommendations, Financial Health, Expense Predictions, Financial Tips, Trend Predictions  
+- June 23, 2025. LEGACY CACHE FUNCTIONS: AI Expense Categorization, AI Spending Insights, Batch Processor (still using old aiCache system)
+- June 23, 2025. PRODUCTION ISSUE: Missing ai_cache database table causing unified cache to fallback to memory-only storage
+- June 23, 2025. Cache system provides intelligent data change detection via MD5 hashing for cost optimization
+- June 23, 2025. Mixed architecture: Both unifiedAICache (12 refs) and legacy aiCache (19 refs) systems currently active
 - June 23, 2025. SECURITY FIX: Added missing plan validation to AI Financial Health Score endpoint - was incorrectly accessible to free users
 - June 23, 2025. CACHE DURATION: Unified cache has no TTL - persists until data hash changes, providing optimal cost efficiency
 - June 22, 2025. FIXED: Replaced hardcoded fallback tips with AI-based fallback system for contextual financial tips
