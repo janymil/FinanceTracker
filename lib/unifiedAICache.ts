@@ -215,7 +215,10 @@ export class UnifiedAICache {
           functionName: entry.functionName,
           month: entry.month,
           dataHash: entry.dataHash,
-          result: entry.result
+          result: entry.result,
+          createdAt: entry.createdAt,
+          lastAccessed: entry.lastAccessed,
+          updatedAt: new Date()
         });
       }
     } catch (error) {

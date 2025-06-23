@@ -277,9 +277,11 @@ Changelog:
 - June 23, 2025. UPGRADED: Replaced Node.js HTTP server with clean Express/TypeScript implementation for better maintainability
 - June 23, 2025. Added expense-predictions task handler and maintained backward compatibility with legacy endpoints
 - June 23, 2025. DEPLOYMENT STATUS: Updated Fly.io service infrastructure with TypeScript/Express, added required dependencies for production deployment
-- June 23, 2025. COMPLETED: All major AI functions migrated to centralized Fly.io processor
+- June 23, 2025. COMPLETED: All major AI functions successfully migrated to centralized Fly.io processor with unified cache system
 - June 23, 2025. MIGRATED FUNCTIONS: Daily Recommendations ✅, Financial Tips ✅, Contextual Tips ✅, Trend Predictions ✅, Expense Predictions ✅, Financial Health Score ✅, Spending Insights ✅
-- June 23, 2025. REMAINING: Only AI Expense Categorization and Batch Processor use legacy cache (by design for performance)
+- June 23, 2025. FIXED: Database schema issues - added missing updated_at column to ai_cache table and corrected unifiedAICache insert operations
+- June 23, 2025. CENTRALIZED ARCHITECTURE: All 7 major AI functions now use runAI() interface → Fly.io processor → unified cache with smart invalidation
+- June 23, 2025. REMAINING: Only AI Expense Categorization and Batch Processor use legacy cache (by design for real-time performance requirements)
 - June 23, 2025. ENHANCED FALLBACK SYSTEM: Updated Fly.io service to use cached data as fallback instead of empty responses when OpenAI fails
 - June 23, 2025. Users now see their previous AI insights (cached) instead of empty widgets when OpenAI service is temporarily unavailable
 - June 23, 2025. UNIFIED CACHE SYSTEM: Implemented smart caching using existing database tables (contextualFinancialTips, dailyRecommendations)
