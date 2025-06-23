@@ -114,7 +114,7 @@ function registerContextualFinancialTipsRoutes(app) {
                 transactions: transactions.slice(0, 10).map((t) => ({
                     description: t.description || t.note || 'Transaction',
                     amount: t.amount,
-                    category: t.category || 'Uncategorized',
+                    category: t.categoryName || t.category || 'Uncategorized',
                     date: t.date
                 })),
                 budgets: budgets?.map((budget) => ({

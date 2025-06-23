@@ -129,10 +129,10 @@ export function registerAIRoutes(app: Express) {
       // Format transaction data for AI analysis with detailed information
       const formattedTransactions = transactions.map((t: any) => ({
         id: t.id,
-        description: t.note || `${t.category} transaction`,
+        description: t.note || `${t.categoryName || t.category || 'Transaction'}`,
         amount: t.amount,
         date: t.date,
-        categoryName: t.category,
+        categoryName: t.categoryName || t.category || 'Uncategorized',
         type: t.type,
         recurring: t.recurring,
         budgetAssigned: t.budgetAssigned
