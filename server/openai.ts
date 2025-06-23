@@ -203,15 +203,19 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
     // Call the Fly.io AI processor service with fallback to direct OpenAI
     let result;
     try {
-      const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'https://finanserpro-ai-processor.fly.dev';
-      console.log(`Calling AI processor at ${AI_PROCESSOR_URL}/generate-financial-tip`);
+      const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'https://finanzerpro.fly.dev';
+      console.log(`Calling AI processor at ${AI_PROCESSOR_URL}/execute-gpt-task`);
       
-      const aiResponse = await fetch(`${AI_PROCESSOR_URL}/generate-financial-tip`, {
+      const aiResponse = await fetch(`${AI_PROCESSOR_URL}/execute-gpt-task`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ summary }),
+        body: JSON.stringify({ 
+          task: "financial-tips",
+          userId: "system",
+          payload: financialData
+        }),
         timeout: 30000 // 30 second timeout
       });
 
@@ -221,7 +225,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
 
       const aiData = await aiResponse.json();
       console.log('AI processor response received successfully');
-      result = aiData.tip || aiData;
+      result = Array.isArray(aiData) ? aiData[0] : (aiData.tip || aiData);
       console.log('Successfully received response from AI processor');
     } catch (aiProcessorError) {
       console.warn('AI processor service unavailable, falling back to direct OpenAI:', aiProcessorError.message);
