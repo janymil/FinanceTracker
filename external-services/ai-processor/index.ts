@@ -227,19 +227,71 @@ Generate daily recommendations and insights based on my financial data.`
   }
 }
 
-async function handleFinancialTips({ summary }: any) {
-  const cacheKey = `financial_tips_${JSON.stringify(summary)}`;
+async function handleFinancialTips({ totalIncome, totalExpenses, transactionsByCategory, recentTransactions, timestamp }: any) {
+  const cacheKey = `financial_tips_${JSON.stringify({ totalIncome, totalExpenses, transactionCount: recentTransactions?.length })}`;
   
   try {
-  const messages = [
-    {
-      role: "system",
-      content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
+    // Prepare the detailed financial summary (copied from generateFinancialTips)
+    const netBalance = totalIncome - totalExpenses;
+    const transactionCount = recentTransactions?.length || 0;
+    
+    const summary = `Financial Summary:
+- Monthly Income: $${totalIncome}
+- Monthly Expenses: $${totalExpenses}
+- Net Balance: $${netBalance} ${netBalance < 0 ? '(DEFICIT)' : '(SURPLUS)'}
+- Transaction Count: ${transactionCount}
+- Raw Transactions Retrieved: ${recentTransactions?.length || 0}
+
+Spending by Category:
+${transactionsByCategory?.filter((cat: any) => cat.type === 'expense').map((cat: any) => 
+  `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalExpenses) * 100).toFixed(1)}% of expenses)`
+).join('\n') || 'No expense categories available'}
+
+Income by Category:
+${transactionsByCategory?.filter((cat: any) => cat.type === 'income').map((cat: any) => 
+  `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalIncome) * 100).toFixed(1)}% of income)`
+).join('\n') || 'No income categories available'}
+
+Recent Transactions (last 10):
+${recentTransactions?.slice(0, 10).map((t: any) => 
+  `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'}) [${t.type}] on ${new Date(t.date).toLocaleDateString()}`
+).join('\n') || 'No recent transactions available'}
+
+Transaction Pattern Analysis:
+- Average transaction size: $${transactionCount > 0 ? ((totalIncome + totalExpenses) / transactionCount).toFixed(2) : '0.00'}
+- Income transactions: ${recentTransactions?.filter((t: any) => t.type === 'income').length || 0}
+- Expense transactions: ${recentTransactions?.filter((t: any) => t.type === 'expense').length || 0}
+- Date range: ${recentTransactions?.length > 0 ? 
+  `${new Date(Math.min(...recentTransactions.map((t: any) => new Date(t.date).getTime()))).toLocaleDateString()} to ${new Date(Math.max(...recentTransactions.map((t: any) => new Date(t.date).getTime()))).toLocaleDateString()}` : 
+  'No transactions available'}
+
+Generate 4 independent box analyses with exact mathematical calculations.`;
+
+    const messages = [
+      {
+        role: "system",
+        content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
 
 1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
 2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
 3. BUDGET OPTIMIZATION SUGGESTIONS: Recommend category rebalancing with precise dollar amounts
 4. CONTEXT-AWARE FINANCIAL ADVICE: Consider their financial position, goals, and risk tolerance
+
+ANALYSIS REQUIREMENTS:
+- Use their EXACT transaction amounts and categories 
+- Calculate precise percentages and ratios from their data
+- Identify the highest-impact optimization opportunities
+- Provide specific dollar amounts for recommendations
+- Include mathematical analysis (savings rate, expense ratios, etc.)
+- Compare their spending to optimal financial benchmarks
+
+GENERATE VARIED RESPONSES by focusing on different analytical angles:
+- Detailed category spending analysis with optimization targets
+- Income-to-expense ratio analysis with improvement strategies  
+- Cash flow optimization with timing recommendations
+- Risk assessment with protection strategies
+- Wealth building analysis with investment allocation suggestions
+- Efficiency analysis identifying wasteful spending patterns
 
 Return comprehensive analysis in JSON:
 {
@@ -251,12 +303,12 @@ Return comprehensive analysis in JSON:
   "estimatedSaving": [realistic_amount],
   "educational": false
 }`
-    },
-    {
-      role: "user",
-      content: summary
-    }
-  ];
+      },
+      {
+        role: "user",
+        content: summary
+      }
+    ];
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -267,11 +319,27 @@ Return comprehensive analysis in JSON:
 
     const content = response.choices[0].message.content;
     const result = JSON.parse(content || '{}');
-    const tipData = { tip: result };
+    
+    // Handle comprehensive analysis response (copied from generateFinancialTips)
+    const processedTips = result.title && result.description ? [{
+      title: result.title,
+      description: result.description,
+      category: result.category || 'comprehensive',
+      priority: result.priority || 'high',
+      actionable: Boolean(result.actionable),
+      estimatedSaving: result.estimatedSaving || undefined,
+      educational: Boolean(result.educational)
+    }] : [{
+      title: 'Track Your Expenses',
+      description: 'Start by categorizing all your expenses to understand where your money goes each month.',
+      category: 'budgeting',
+      priority: 'high',
+      actionable: true
+    }];
     
     // Cache successful result for fallback
-    fallbackCache.set(cacheKey, tipData);
-    return tipData;
+    fallbackCache.set(cacheKey, processedTips);
+    return processedTips;
     
   } catch (error) {
     console.error('OpenAI error in financial tips:', error);
@@ -283,8 +351,14 @@ Return comprehensive analysis in JSON:
       return cached;
     }
     
-    // Only return empty if no cache available
-    return { tip: {} };
+    // Return fallback tip
+    return [{
+      title: 'Track Your Expenses',
+      description: 'Start by categorizing all your expenses to understand where your money goes each month.',
+      category: 'budgeting',
+      priority: 'high',
+      actionable: true
+    }];
   }
 }
 
