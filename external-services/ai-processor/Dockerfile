@@ -2,12 +2,15 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy application files
+# Copy package files first for better layer caching
 COPY package.json ./
-COPY index.ts ./
 
-# Install dependencies
+# Install dependencies including tsx
 RUN npm install
+
+# Copy application files
+COPY index.ts ./
+COPY openai-functions.ts ./
 
 # Create a non-root user
 RUN addgroup -g 1001 -S nodejs && \
@@ -18,5 +21,5 @@ USER nodejs
 
 EXPOSE 8080
 
-# Start the server with tsx
-CMD ["npm", "start"]
+# Start with tsx to run TypeScript directly
+CMD ["npx", "tsx", "index.ts"]

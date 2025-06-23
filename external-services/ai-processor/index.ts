@@ -10,7 +10,8 @@ import {
   generateTrendPredictions,
   generateExpensePredictions,
   generateDailyRecommendations,
-  generateFinancialHealthScore
+  generateFinancialHealthScore,
+  generateContextualTips
 } from './openai-functions';
 
 dotenv.config();
@@ -86,19 +87,39 @@ app.post("/execute-gpt-task", async (req, res) => {
 const fallbackCache = new Map();
 
 async function handleContextualTips(payload: any) {
-  return await generateFinancialTips(payload);
+  // Call the sophisticated contextual tips function from openai-functions.ts
+  const { summary, transactions, budgets, selectedMonth } = payload;
+  return await generateContextualTips(summary, transactions, budgets, selectedMonth);
 }
 
 async function handleDailyRecommendations(payload: any) {
+  // Call the sophisticated daily recommendations function from openai-functions.ts
   return await generateDailyRecommendations(payload);
 }
 
 async function handleFinancialTips(payload: any) {
+  // Call the sophisticated financial tips function from openai-functions.ts
   return await generateFinancialTips(payload);
 }
 
 async function handleExpensePredictions(payload: any) {
-  return await generateExpensePredictions(payload.transactions);
+  // Call the sophisticated expense predictions function from openai-functions.ts
+  return await generateExpensePredictions(payload);
+}
+
+async function handleTrendPredictions(payload: any) {
+  // Call the sophisticated trend predictions function from openai-functions.ts
+  return await generateTrendPredictions(payload);
+}
+
+async function handleFinancialHealthScore(payload: any) {
+  // Call the sophisticated financial health score function from openai-functions.ts
+  return await generateFinancialHealthScore(payload);
+}
+
+async function handleSpendingInsights(payload: any) {
+  // Call the sophisticated spending insights function from openai-functions.ts
+  return await generateSpendingInsights(payload);
 }
 
 // Legacy endpoints for backward compatibility
