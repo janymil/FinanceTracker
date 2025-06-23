@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
+import { processAIRequest } from "../aiOrchestrator";
 import { 
   generateFinancialTips, 
   categorizeExpense, 
@@ -84,9 +85,8 @@ export function registerAIRoutes(app: Express) {
       }
       const user = await storage.getUser(userId);
 
-      // Require standard+ plan for AI categorization
-      if (!user || !['standard', 'premium'].includes(user.plan || '')) {
-        return res.status(403).json({ message: "AI categorization requires standard or premium plan" });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
       const { description, amount } = req.body;
@@ -95,8 +95,24 @@ export function registerAIRoutes(app: Express) {
         return res.status(400).json({ message: "Description is required" });
       }
 
-      const result = await categorizeExpense(description, amount || 0);
-      return res.json({ category: result.category });
+      // Define the AI logic function
+      const categorizationAILogic = async () => {
+        const result = await categorizeExpense(description, amount || 0);
+        return { category: result.category };
+      };
+
+      // Pass through centralized AI infrastructure
+      const result = await processAIRequest({
+        taskName: 'categorization',
+        userId,
+        userPlan: user.plan || 'free',
+        dataPayload: { description, amount },
+        aiLogicFunction: categorizationAILogic,
+        flyioEndpoint: '/categorize-expense', // Future Fly.io endpoint
+        cacheDuration: 300 // 5 minutes cache
+      });
+
+      return res.json(result);
     } catch (error) {
       console.error("Error categorizing expense:", error);
       return res.status(500).json({ message: "Failed to categorize expense" });
@@ -215,24 +231,43 @@ export function registerAIRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
 
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
       const { summary, budgets, useAdvancedFactors } = req.body;
 
-      const transactions = await storage.getUserTransactions(userId, 100);
+      // Define the AI logic function
+      const financialHealthAILogic = async () => {
+        const transactions = await storage.getUserTransactions(userId, 100);
+        const aiScore = await generateAIFinancialHealthScore({
+          summary,
+          budgets,
+          transactions: transactions.map(t => ({
+            description: t.description,
+            amount: parseFloat(t.amount),
+            date: t.date.toISOString(),
+            categoryName: t.categoryId?.toString() || 'Uncategorized',
+            type: t.type
+          })),
+          useAdvancedFactors
+        });
+        return aiScore;
+      };
 
-      const aiScore = await generateAIFinancialHealthScore({
-        summary,
-        budgets,
-        transactions: transactions.map(t => ({
-          description: t.description,
-          amount: parseFloat(t.amount),
-          date: t.date.toISOString(),
-          categoryName: t.categoryId?.toString() || 'Uncategorized',
-          type: t.type
-        })),
-        useAdvancedFactors
+      // Pass through centralized AI infrastructure
+      const result = await processAIRequest({
+        taskName: 'financial-health',
+        userId,
+        userPlan: user.plan || 'free',
+        dataPayload: { summary, budgets, useAdvancedFactors },
+        aiLogicFunction: financialHealthAILogic,
+        flyioEndpoint: '/generate-financial-health', // Future Fly.io endpoint
+        cacheDuration: 1800 // 30 minutes cache
       });
 
-      return res.json(aiScore);
+      return res.json(result);
     } catch (error) {
       console.error("Error generating AI financial health score:", error);
       return res.status(500).json({ message: "Failed to generate AI financial health score" });
@@ -248,39 +283,53 @@ export function registerAIRoutes(app: Express) {
       }
 
       const user = await storage.getUser(userId);
-
-      if (!user || user.plan !== 'premium') {
-        return res.status(403).json({ message: "AI trend predictions require Premium subscription" });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
-      const transactions = await storage.getUserTransactions(userId, 200);
-      const categories = await storage.getCategories(userId);
-      const budgets = await storage.getUserBudgets(userId);
+      // Define the AI logic function
+      const trendPredictionsAILogic = async () => {
+        const transactions = await storage.getUserTransactions(userId, 200);
+        const categories = await storage.getCategories(userId);
+        const budgets = await storage.getUserBudgets(userId);
 
-      const categoryMap = new Map();
-      categories.forEach(cat => {
-        categoryMap.set(cat.id, cat.name);
+        const categoryMap = new Map();
+        categories.forEach(cat => {
+          categoryMap.set(cat.id, cat.name);
+        });
+
+        const predictions = await generateTrendPredictions(
+          transactions.map(t => ({
+            id: t.id,
+            amount: t.amount,
+            description: t.description,
+            date: t.date.toISOString(),
+            type: t.type,
+            categoryId: t.categoryId || 1 // Default to first category if null
+          })),
+          categoryMap,
+          budgets
+            .filter(b => b.categoryId !== null)
+            .map(b => ({
+              categoryId: b.categoryId as number,
+              amount: b.amount
+            }))
+        );
+        return predictions;
+      };
+
+      // Pass through centralized AI infrastructure
+      const result = await processAIRequest({
+        taskName: 'trend-analysis',
+        userId,
+        userPlan: user.plan || 'free',
+        dataPayload: { userId },
+        aiLogicFunction: trendPredictionsAILogic,
+        flyioEndpoint: '/generate-trend-predictions', // Future Fly.io endpoint
+        cacheDuration: 3600 // 1 hour cache
       });
 
-      const predictions = await generateTrendPredictions(
-        transactions.map(t => ({
-          id: t.id,
-          amount: t.amount,
-          description: t.description,
-          date: t.date.toISOString(),
-          type: t.type,
-          categoryId: t.categoryId || 1 // Default to first category if null
-        })),
-        categoryMap,
-        budgets
-          .filter(b => b.categoryId !== null)
-          .map(b => ({
-            categoryId: b.categoryId as number,
-            amount: b.amount
-          }))
-      );
-
-      return res.json(predictions);
+      return res.json(result);
     } catch (error) {
       console.error("Error generating trend predictions:", error);
       return res.status(500).json({ message: "Failed to generate trend predictions" });
