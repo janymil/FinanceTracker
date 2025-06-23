@@ -70,85 +70,24 @@ export async function runAI(task: string, userId: string, payload: Record<string
       }
     }
 
-    // If no Fly.io endpoint available, use local OpenAI for contextual-tips
-    if (task === 'contextual-tips') {
-      console.log(`[AI ${task}] Using local OpenAI fallback`);
-      return await handleContextualTipsLocally(payload);
-    }
-
-    throw new Error(`No available endpoint for task: ${task}`);
+    // No fallback for new functions - must use Fly.io
+    console.error(`[AI ${task}] No Fly.io endpoint available - migration incomplete`);
+    throw new Error(`Task ${task} requires Fly.io deployment`);
 
   } catch (err) {
-    console.error(`[AI ${task}] All endpoints failed:`, err.message);
+    console.error(`[AI ${task}] Fly.io service failed:`, err.message);
     
-    // Final fallback structures
+    // Only return empty structures for critical failures
+    // This makes problems visible instead of hiding them
     switch (task) {
       case 'daily-recommendations':
-        return { recommendations: [], insights: [] };
+        return { recommendations: [], insights: [], error: 'Fly.io service unavailable' };
       case 'financial-tips':
-        return { tip: {} };
+        return { tip: {}, error: 'Fly.io service unavailable' };
       case 'contextual-tips':
-        return { tips: [] };
+        return { tips: [], error: 'Fly.io service unavailable' };
       default:
-        return {};
+        return { error: 'Fly.io service unavailable' };
     }
   }
-}
-
-// Local OpenAI fallback for contextual tips (preserves original prompt)
-async function handleContextualTipsLocally(payload: any) {
-  const { summary, transactions, budgets, selectedMonth } = payload;
-  
-  const messages = [
-    {
-      role: "system",
-      content: `You are a financial advisor AI that provides personalized financial tips based on user data. 
-
-Generate 4 contextual financial tips that are:
-- Specific to their spending patterns and financial situation
-- Actionable with clear next steps
-- Relevant to their current month's activity
-- Focused on improvement opportunities
-
-Categories: spending, saving, budgeting, income
-Priorities: high, medium, low
-
-Respond with JSON in this exact format:
-{
-  "tips": [
-    {
-      "id": "tip_1",
-      "title": "Clear, actionable tip title",
-      "description": "Detailed explanation with specific recommendations and dollar amounts when relevant",
-      "category": "spending|saving|budgeting|income",
-      "priority": "high|medium|low",
-      "actionable": true
-    }
-  ]
-}`
-    },
-    {
-      role: "user",
-      content: `Month: ${selectedMonth}
-
-Summary: ${JSON.stringify(summary)}
-
-Recent Transactions: ${JSON.stringify(transactions?.slice(0, 10) || [])}
-
-Budgets: ${JSON.stringify(budgets || [])}
-
-Generate contextual financial tips based on this data.`
-    }
-  ];
-
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages,
-    response_format: { type: "json_object" },
-    temperature: 0.7,
-    max_tokens: 1000
-  });
-
-  const result = JSON.parse(response.choices[0].message.content || '{"tips":[]}');
-  return result;
 }
