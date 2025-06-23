@@ -51,10 +51,10 @@ export function SubscriptionSchedule() {
 
   const getPlanName = (priceId: string) => {
     const planMap: { [key: string]: string } = {
-      'price_1RbfTvCRVFBT4Nls8UqqCGf0': 'Standard Monthly',
-      'price_1RbfUxCRVFBT4Nls5o1dmGHo': 'Standard Yearly',
-      'price_1RbfW6CRVFBT4NlsFBm9Rky0': 'Premium Monthly',
-      'price_1RbfWdCRVFBT4NlsdHEtcSqt': 'Premium Yearly'
+      'price_1RcxhjFlf8efPaoOWM6JarOv': 'Standard Monthly',
+      'price_1RcxhhFlf8efPaoOoxa7StkA': 'Standard Yearly',
+      'price_1RcxhfFlf8efPaoOAYNVWEDc': 'Premium Monthly',
+      'price_1RcxhaFlf8efPaoOrkTMX7BZ': 'Premium Yearly'
     };
     return planMap[priceId] || 'Unknown Plan';
   };
