@@ -263,6 +263,7 @@ Changelog:
 - June 22, 2025. Fixed Daily Recommendations to require minimum 5 transactions for recommendations and 10 transactions for insights before showing any content
 - June 22, 2025. Restored AI Financial Tips widget to dashboard after accidental removal during component fixes
 - June 22, 2025. Removed manual "Refresh AI" button from dashboard per user request - keeping only automated cache invalidation system
+- June 22, 2025. Cleaned up environment variables - removed Stripe keys and webhook secrets after user moved them to Replit secrets
 - June 22, 2025. FIXED: Replaced hardcoded fallback tips with AI-based fallback system for contextual financial tips
 - June 22, 2025. Contextual tips now use simplified AI prompt as fallback instead of generic hardcoded messages inappropriate for user's financial situation
 - June 22, 2025. Emergency fallback shows dynamic financial summary rather than static text, maintaining personalization even when AI services fail
