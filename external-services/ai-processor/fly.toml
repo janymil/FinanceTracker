@@ -1,4 +1,4 @@
-app = "finanserpro-ai-processor"
+app = "finanzerpro"
 primary_region = "lax"
 
 [build]
