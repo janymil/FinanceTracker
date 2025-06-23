@@ -44,34 +44,9 @@ export async function runAI(task: string, userId: string, payload: Record<string
       return result;
     }
 
-    // If unified endpoint fails, try legacy endpoints
-    if (response.status === 404) {
-      console.log(`[AI ${task}] Unified endpoint not available, trying legacy`);
-      const legacyEndpoints = {
-        'daily-recommendations': '/generate-daily-recommendation',
-        'financial-tips': '/generate-financial-tip'
-      };
-      
-      const endpoint = legacyEndpoints[task];
-      if (endpoint) {
-        const legacyResponse = await fetch(`https://finanserpro-ai-processor.fly.dev${endpoint}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-        
-        if (legacyResponse.ok) {
-          const result = await legacyResponse.json();
-          await unifiedAICache.set(task, userId, month, payload, result);
-          console.log(`[AI ${task}] Success via legacy endpoint`);
-          return result;
-        }
-      }
-    }
-
-    // No fallback for new functions - must use Fly.io
-    console.error(`[AI ${task}] No Fly.io endpoint available - migration incomplete`);
-    throw new Error(`Task ${task} requires Fly.io deployment`);
+    // All tasks should use unified endpoint - no fallback to legacy  
+    console.error(`[AI ${task}] Unified endpoint failed: ${response.status} ${response.statusText}`);
+    throw new Error(`Unified endpoint failed for task: ${task}`);
 
   } catch (err) {
     console.error(`[AI ${task}] Fly.io service failed:`, err.message);

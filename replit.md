@@ -280,7 +280,7 @@ Changelog:
 - June 23, 2025. RESTORED: Financial Tips and Daily Recommendations back to Fly.io centralized processor (working endpoints verified)
 - June 23, 2025. VERIFIED: Fly.io legacy endpoints working - /generate-daily-recommendation and /generate-financial-tip return valid responses
 - June 23, 2025. TESTING: Centralized cache system architecture - will populate when AI functions are actually called by users
-- June 23, 2025. STATUS: All 7 AI functions now use centralized processing (5 via /execute-gpt-task, 2 via legacy endpoints)
+- June 23, 2025. UNIFIED ARCHITECTURE: All 7 AI functions should use single /execute-gpt-task endpoint with standardized {task, userId, payload} format
 - June 23, 2025. CACHE INFRASTRUCTURE: Complete unified cache system ready to test with actual user interactions
 - June 23, 2025. ENHANCED FALLBACK SYSTEM: Updated Fly.io service to use cached data as fallback instead of empty responses when OpenAI fails
 - June 23, 2025. Users now see their previous AI insights (cached) instead of empty widgets when OpenAI service is temporarily unavailable
