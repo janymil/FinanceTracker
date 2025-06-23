@@ -1211,78 +1211,28 @@ export async function generateFinancialHealthScore(financialData: {
       }
     });
 
-    // Optimize data processing - use essential metrics only
+    // Ultra-optimize for speed - minimal data processing
     const savingsRate = summary.totalIncome > 0 ? ((summary.totalIncome - summary.totalExpenses) / summary.totalIncome * 100) : 0;
-    const topCategories = Array.from(categorySpending.entries())
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 3);
     
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Use faster model
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
-          content: `You are an expert financial health analyst. Analyze the user's financial data and provide a comprehensive health assessment.
-
-Calculate a financial health score (0-100) based on:
-- Income vs expenses ratio
-- Budget adherence 
-- Spending patterns
-- Emergency fund adequacy
-- Debt management
-- Savings rate
-
-Categorize the score:
-- 80-100: excellent
-- 60-79: good  
-- 40-59: fair
-- 0-39: poor
-
-Determine trend based on recent spending patterns:
-- improving: positive financial trajectory
-- declining: concerning financial habits
-- stable: consistent financial behavior
-
-Provide specific insights, achievements, and actionable warnings.
-
-Respond with JSON in this exact format:
-{
-  "score": 75,
-  "trend": "improving",
-  "category": "good",
-  "insights": ["Specific financial insights"],
-  "achievements": ["Recent positive financial behaviors"],
-  "warnings": ["Areas needing attention"]
-}`
+          content: `Calculate financial health score (0-100). Return JSON: {"score": number, "trend": "improving/stable/declining", "category": "excellent/good/fair/poor", "insights": ["max 2 insights"], "achievements": ["max 1"], "warnings": ["max 1"]}`
         },
         {
           role: "user",
-          content: `Financial Summary:
-- Total Income: $${summary.totalIncome}
-- Total Expenses: $${summary.totalExpenses}
-- Net Balance: $${summary.netBalance}
-- Savings Rate: ${savingsRate.toFixed(1)}%
+          content: `Income: $${summary.totalIncome}, Expenses: $${summary.totalExpenses}, Savings: ${savingsRate.toFixed(1)}%
+Transactions: ${recentTransactions.length}
+Budgets: ${budgets.length}
 
-Recent Transactions (${recentTransactions.length}):
-${recentTransactions.slice(0, 15).map(t => 
-  `${t.date.split('T')[0]}: ${t.description} - $${t.amount} (${t.categoryName})`
-).join('\n')}
-
-Budgets (${budgets.length}):
-${budgets.map(b => {
-  const utilization = b.amount ? (b.spent / parseFloat(b.amount) * 100).toFixed(1) : 0;
-  return `Budget: $${b.amount}, Spent: $${b.spent} (${utilization}% used)`;
-}).join('\n')}
-
-Top Spending Categories:
-${topCategories.map(([cat, amount]) => `${cat}: $${amount.toFixed(2)}`).join('\n')}
-
-Analyze this financial data and provide a comprehensive health assessment.`
+Calculate health score quickly.`
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.2,
-      max_tokens: 500 // Balanced for complex analysis
+      temperature: 0.1,
+      max_tokens: 300
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
