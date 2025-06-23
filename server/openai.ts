@@ -1251,7 +1251,7 @@ export async function generateContextualFinancialTips(data: {
     budgets.forEach(budget => {
       if (budget.remaining < 0) {
         const overrunPercent = Math.abs((budget.remaining / budget.budgetAmount) * 100);
-        const categoryTransactions = expenseTransactions.filter(t => (t.categoryName || t.category) === budget.category);
+        const categoryTransactions = expenseTransactions.filter(t => (t.categoryName || t.category) === (budget.categoryName || budget.category));
         const avgTransactionInCategory = categoryTransactions.length > 0 ? 
           categoryTransactions.reduce((sum, t) => sum + t.amount, 0) / categoryTransactions.length : 0;
         
