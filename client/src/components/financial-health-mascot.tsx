@@ -105,7 +105,7 @@ export default function FinancialHealthMascot() {
 
   useEffect(() => {
     if (healthData) {
-      const config = mascotConfigs[healthData.category];
+      const config = mascotConfigs[healthData.category] || mascotConfigs.fair;
       setMascotState({
         emotion: config.emotion,
         animation: config.animation,
@@ -224,17 +224,17 @@ export default function FinancialHealthMascot() {
     );
   }
 
-  const config = mascotConfigs[healthData.category];
+  const config = mascotConfigs[healthData.category] || mascotConfigs.fair;
 
   return (
-    <Card className={`relative overflow-hidden transition-all duration-300 ${config.borderColor} border-2`}>
+    <Card className={`relative overflow-hidden transition-all duration-300 ${config?.borderColor || 'border-gray-300'} border-2`}>
       <CardContent className="p-6">
         {/* Mascot Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <motion.div
               {...getAnimationVariants(mascotState.animation)}
-              className={`p-3 rounded-full ${config.bgColor}`}
+              className={`p-3 rounded-full ${config?.bgColor || 'bg-gray-100'}`}
             >
               <MascotFace emotion={mascotState.emotion} />
             </motion.div>
@@ -269,8 +269,8 @@ export default function FinancialHealthMascot() {
         </div>
 
         {/* Mascot Message */}
-        <div className={`p-4 rounded-lg ${config.bgColor} mb-4`}>
-          <p className={`text-sm ${config.color} text-center font-medium`}>
+        <div className={`p-4 rounded-lg ${config?.bgColor || 'bg-gray-100'} mb-4`}>
+          <p className={`text-sm ${config?.color || 'text-gray-600'} text-center font-medium`}>
             {mascotState.message}
           </p>
         </div>
