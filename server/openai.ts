@@ -1197,15 +1197,22 @@ export async function generateContextualFinancialTips(data: {
     const netBalance = summary.totalIncome - summary.totalExpenses;
     const savingsRate = summary.totalIncome > 0 ? (netBalance / summary.totalIncome) * 100 : 0;
     
-    // Analyze spending by category
+    // Analyze spending by category - use the correct field mapping
     const categorySpending = new Map();
-    const categorizedCount = transactions.filter(t => t.category && t.category !== 'Uncategorized').length;
-    const uncategorizedCount = transactions.filter(t => !t.category || t.category === 'Uncategorized').length;
+    const categorizedCount = transactions.filter(t => {
+      const category = t.categoryName || t.category || 'Uncategorized';
+      return category && category !== 'Uncategorized';
+    }).length;
+    const uncategorizedCount = transactions.filter(t => {
+      const category = t.categoryName || t.category || 'Uncategorized';
+      return !category || category === 'Uncategorized';
+    }).length;
     
     transactions.forEach(t => {
       if (t.amount > 0) {
-        const current = categorySpending.get(t.category) || 0;
-        categorySpending.set(t.category, current + t.amount);
+        const category = t.categoryName || t.category || 'Uncategorized';
+        const current = categorySpending.get(category) || 0;
+        categorySpending.set(category, current + t.amount);
       }
     });
     
@@ -1224,8 +1231,9 @@ export async function generateContextualFinancialTips(data: {
     
     expenseTransactions.forEach(t => {
       const day = new Date(t.date).getDate();
+      const category = t.categoryName || t.category || 'Uncategorized';
       dailySpending.set(day, (dailySpending.get(day) || 0) + t.amount);
-      transactionFrequency.set(t.category, (transactionFrequency.get(t.category) || 0) + 1);
+      transactionFrequency.set(category, (transactionFrequency.get(category) || 0) + 1);
     });
 
     // Analyze specific financial scenarios for contextual insights
@@ -1243,7 +1251,7 @@ export async function generateContextualFinancialTips(data: {
     budgets.forEach(budget => {
       if (budget.remaining < 0) {
         const overrunPercent = Math.abs((budget.remaining / budget.budgetAmount) * 100);
-        const categoryTransactions = expenseTransactions.filter(t => t.category === budget.category);
+        const categoryTransactions = expenseTransactions.filter(t => (t.categoryName || t.category) === budget.category);
         const avgTransactionInCategory = categoryTransactions.length > 0 ? 
           categoryTransactions.reduce((sum, t) => sum + t.amount, 0) / categoryTransactions.length : 0;
         
@@ -1341,7 +1349,7 @@ IDENTIFIED FINANCIAL SCENARIOS:
 ${scenarios.length > 0 ? scenarios.join('\n') : '- No specific scenarios identified this month'}
 
 RECENT TRANSACTIONS (last 8):
-${transactions.slice(0, 8).map(t => `- ${t.date}: ${t.description} - $${t.amount.toLocaleString()} (${t.category})${t.recurring ? ' [Recurring]' : ''}`).join('\n')}
+${transactions.slice(0, 8).map(t => `- ${t.date}: ${t.description} - $${t.amount.toLocaleString()} (${t.categoryName || t.category || 'Uncategorized'})${t.recurring ? ' [Recurring]' : ''}`).join('\n')}
 
 CONTEXTUAL ANALYSIS REQUIREMENTS:
 1. Address specific scenarios identified above with targeted, data-driven advice
