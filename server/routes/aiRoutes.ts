@@ -5,11 +5,11 @@ import {
   generateFinancialTips, 
   categorizeExpense, 
   generateSpendingInsights, 
-  generateTrendPredictions,
   generateAIFinancialHealthScore,
   generateDailyRecommendations,
   type ExpenseCategorizationResult 
 } from "../openai";
+import { runAI } from "../../lib/aiProcessor";
 import { aiCache } from "../cache";
 import { unifiedAICache } from "../../lib/unifiedAICache";
 import { db } from "../db";
@@ -309,23 +309,27 @@ export function registerAIRoutes(app: Express) {
         categoryMap.set(cat.id, cat.name);
       });
 
-      const predictions = await generateTrendPredictions(
-        transactions.map(t => ({
+      console.log('AI trend predictions: Making Fly.io API call via centralized processor');
+      
+      const aiPayload = {
+        transactions: transactions.map(t => ({
           id: t.id,
           amount: t.amount,
           description: t.description,
           date: t.date.toISOString(),
           type: t.type,
-          categoryId: t.categoryId || 1 // Default to first category if null
+          categoryId: t.categoryId || 1
         })),
-        categoryMap,
-        budgets
+        categoryMap: Object.fromEntries(categoryMap),
+        budgets: budgets
           .filter(b => b.categoryId !== null)
           .map(b => ({
             categoryId: b.categoryId as number,
             amount: b.amount
           }))
-      );
+      };
+
+      const predictions = await runAI('trend-predictions', userId, aiPayload);
 
       // Save to unified cache
       try {

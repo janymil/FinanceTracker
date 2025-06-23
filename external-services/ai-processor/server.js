@@ -387,6 +387,9 @@ Only provide recommendations and insights based on the actual financial data pro
         case 'contextual-tips':
           result = await handleContextualTips(payload);
           break;
+        case 'trend-predictions':
+          result = await handleTrendPredictions(payload);
+          break;
         default:
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: `Unknown task: ${task}` }));
@@ -514,6 +517,100 @@ Respond with JSON in this exact format:
 
   const response = await callOpenAI(messages, 'gpt-4o-mini');
   return JSON.parse(response.choices[0].message.content || '{"tips":[]}');
+}
+
+async function handleTrendPredictions(payload) {
+  const { transactions, categoryMap, budgets } = payload;
+  
+  // Return zeros for empty data
+  if (!transactions || transactions.length === 0) {
+    return {
+      categoryPredictions: [],
+      financialForecast: {
+        nextMonthExpectedIncome: 0,
+        nextMonthExpectedExpenses: 0,
+        projectedSavings: 0,
+        confidenceLevel: 0,
+        trendDirection: "stable",
+        keyInsights: ["Add transactions to enable AI trend predictions"]
+      }
+    };
+  }
+
+  // Calculate category spending patterns
+  const categorySpending = new Map();
+  const monthlyData = new Map();
+  
+  transactions.forEach(t => {
+    const amount = parseFloat(t.amount);
+    const categoryName = categoryMap[t.categoryId] || 'Other';
+    const monthKey = t.date.substring(0, 7);
+    
+    if (t.type === 'expense') {
+      categorySpending.set(categoryName, (categorySpending.get(categoryName) || 0) + amount);
+      if (!monthlyData.has(monthKey)) {
+        monthlyData.set(monthKey, { income: 0, expenses: 0 });
+      }
+      monthlyData.get(monthKey).expenses += amount;
+    } else if (t.type === 'income') {
+      if (!monthlyData.has(monthKey)) {
+        monthlyData.set(monthKey, { income: 0, expenses: 0 });
+      }
+      monthlyData.get(monthKey).income += amount;
+    }
+  });
+
+  const prompt = `You are a financial forecasting AI that analyzes spending patterns to predict future trends.
+
+Analyze these financial patterns:
+
+Transactions (${transactions.length} total):
+${transactions.slice(0, 20).map(t => 
+  `${t.date}: ${t.type} $${t.amount} - ${t.description} (${categoryMap[t.categoryId] || 'Other'})`
+).join('\n')}
+
+Category Spending Summary:
+${Array.from(categorySpending.entries()).map(([cat, amount]) => 
+  `${cat}: $${amount.toFixed(2)}`
+).join('\n')}
+
+Monthly Data:
+${Array.from(monthlyData.entries()).map(([month, data]) => 
+  `${month}: Income $${data.income.toFixed(2)}, Expenses $${data.expenses.toFixed(2)}`
+).join('\n')}
+
+Budget Information:
+${budgets?.map(b => `${categoryMap[b.categoryId] || 'Other'}: $${b.amount}`).join('\n') || 'No budgets set'}
+
+Return your analysis in this exact JSON format:
+{
+  "categoryPredictions": [
+    {
+      "categoryName": "exact category name",
+      "currentMonthSpending": number,
+      "predictedNextMonth": number,
+      "trend": "increasing|decreasing|stable",
+      "confidence": number_0_to_100,
+      "insights": "specific insight about this category"
+    }
+  ],
+  "financialForecast": {
+    "nextMonthExpectedIncome": number,
+    "nextMonthExpectedExpenses": number,
+    "projectedSavings": number,
+    "confidenceLevel": number_0_to_100,
+    "trendDirection": "improving|declining|stable",
+    "keyInsights": ["insight1", "insight2", "insight3"]
+  }
+}`;
+
+  const messages = [
+    { role: "system", content: prompt },
+    { role: "user", content: "Provide accurate predictions based on the actual data patterns." }
+  ];
+
+  const response = await callOpenAI(messages);
+  return JSON.parse(response.choices[0].message.content || '{"categoryPredictions":[],"financialForecast":{"nextMonthExpectedIncome":0,"nextMonthExpectedExpenses":0,"projectedSavings":0,"confidenceLevel":0,"trendDirection":"stable","keyInsights":["Unable to generate predictions"]}}');
 }
 
 // Start server
