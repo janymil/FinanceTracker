@@ -119,7 +119,7 @@ export function registerAIRoutes(app: Express) {
     }
   });
 
-  // AI Financial Tips endpoint with detailed transaction data
+  // AI Financial Tips endpoint with detailed transaction data  
   app.post('/api/ai/tip', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
@@ -128,8 +128,8 @@ export function registerAIRoutes(app: Express) {
       }
       
       const user = await storage.getUser(userId);
-      if (!user || user.plan !== 'premium') {
-        return res.status(403).json({ message: "AI financial tips require premium plan" });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
       // Get financial data from request body (sent from frontend)
@@ -145,46 +145,63 @@ export function registerAIRoutes(app: Express) {
         return res.json({ tip: "Start by adding some transactions to get personalized financial insights." });
       }
 
-      // Format transaction data for AI analysis with detailed information
-      const formattedTransactions = transactions.map((t: any) => ({
-        id: t.id,
-        description: t.note || `${t.category} transaction`,
-        amount: t.amount,
-        date: t.date,
-        categoryName: t.category,
-        type: t.type,
-        recurring: t.recurring,
-        budgetAssigned: t.budgetAssigned
-      }));
+      // Define the AI logic function that uses the existing generateFinancialTips
+      const financialTipsAILogic = async () => {
+        // Format transaction data for AI analysis with detailed information
+        const formattedTransactions = transactions.map((t: any) => ({
+          id: t.id,
+          description: t.note || `${t.category} transaction`,
+          amount: t.amount,
+          date: t.date,
+          categoryName: t.category,
+          type: t.type,
+          recurring: t.recurring,
+          budgetAssigned: t.budgetAssigned
+        }));
 
-      console.log(`Processing ${formattedTransactions.length} transactions for AI analysis`);
+        console.log(`Processing ${formattedTransactions.length} transactions for AI analysis`);
 
-      const tipResults = await generateFinancialTips({
-        totalIncome: financialData.totalIncome || 0,
-        totalExpenses: financialData.totalExpenses || 0,
-        transactionsByCategory: financialData.categories || [],
-        recentTransactions: formattedTransactions,
-        timestamp: financialData.timestamp
+        const tipResults = await generateFinancialTips({
+          totalIncome: financialData.totalIncome || 0,
+          totalExpenses: financialData.totalExpenses || 0,
+          transactionsByCategory: financialData.categories || [],
+          recentTransactions: formattedTransactions,
+          timestamp: financialData.timestamp
+        });
+
+        if (tipResults && tipResults.length > 0) {
+          const tip = tipResults[0];
+          return { tip: `${tip.title}: ${tip.description}` };
+        } else {
+          // Provide specific fallback based on actual data
+          const expenseCount = transactions.filter((t: any) => t.type === 'expense').length;
+          const incomeCount = transactions.filter((t: any) => t.type === 'income').length;
+          const totalExpenses = transactions
+            .filter((t: any) => t.type === 'expense')
+            .reduce((sum: number, t: any) => sum + t.amount, 0);
+          const totalIncome = transactions
+            .filter((t: any) => t.type === 'income')
+            .reduce((sum: number, t: any) => sum + t.amount, 0);
+            
+          return { 
+            tip: `Based on your ${expenseCount} expense transactions ($${totalExpenses.toFixed(2)}) and ${incomeCount} income transactions ($${totalIncome.toFixed(2)}), consider setting up budgets for your top spending categories to better manage your finances.` 
+          };
+        }
+      };
+
+      // Note: This already uses sophisticated generateFinancialTips infrastructure
+      // We still wrap it for consistency and future migration capabilities
+      const result = await processAIRequest({
+        taskName: 'financial-tips',
+        userId,
+        userPlan: user.plan || 'free',
+        dataPayload: financialData,
+        aiLogicFunction: financialTipsAILogic,
+        // No flyioEndpoint - uses existing Fly.io infrastructure in generateFinancialTips
+        cacheDuration: 1800 // 30 minutes cache
       });
 
-      if (tipResults && tipResults.length > 0) {
-        const tip = tipResults[0];
-        return res.json({ tip: `${tip.title}: ${tip.description}` });
-      } else {
-        // Provide specific fallback based on actual data
-        const expenseCount = transactions.filter((t: any) => t.type === 'expense').length;
-        const incomeCount = transactions.filter((t: any) => t.type === 'income').length;
-        const totalExpenses = transactions
-          .filter((t: any) => t.type === 'expense')
-          .reduce((sum: number, t: any) => sum + t.amount, 0);
-        const totalIncome = transactions
-          .filter((t: any) => t.type === 'income')
-          .reduce((sum: number, t: any) => sum + t.amount, 0);
-          
-        return res.json({ 
-          tip: `Based on your ${expenseCount} expense transactions ($${totalExpenses.toFixed(2)}) and ${incomeCount} income transactions ($${totalIncome.toFixed(2)}), consider setting up budgets for your top spending categories to better manage your finances.` 
-        });
-      }
+      return res.json(result);
     } catch (error) {
       console.error("Error generating financial tip:", error);
       return res.status(500).json({ message: "Failed to generate financial tip" });
@@ -345,8 +362,8 @@ export function registerAIRoutes(app: Express) {
       }
 
       const user = await storage.getUser(userId);
-      if (!user || user.plan !== 'premium') {
-        return res.status(403).json({ message: "Daily recommendations require premium plan" });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
       const { transactions, summary, budgets } = req.body;
@@ -363,6 +380,9 @@ export function registerAIRoutes(app: Express) {
           message: "Add at least 3 transactions to get personalized daily recommendations"
         });
       }
+
+      // Define the AI logic function that contains the existing logic
+      const dailyRecommendationsAILogic = async () => {
 
       // Create stable hash for caching - only regenerate on significant changes
       const lastWeekTransactions = transactions?.filter(t => {
@@ -466,10 +486,21 @@ export function registerAIRoutes(app: Express) {
         console.error('Failed to save recommendations to database:', error);
       }
 
-      // Also cache in memory for fast access
-      aiCache.set(`daily_recommendations_${dataHash}`, recommendations, 86400);
+        return flyResponse.json();
+      };
 
-      return res.json(recommendations);
+      // Pass through centralized AI infrastructure  
+      const result = await processAIRequest({
+        taskName: 'daily-recommendations',
+        userId,
+        userPlan: user.plan || 'free',
+        dataPayload: { transactions, summary, budgets },
+        aiLogicFunction: dailyRecommendationsAILogic,
+        flyioEndpoint: '/generate-daily-recommendation',
+        cacheDuration: 86400 // 24 hours cache
+      });
+
+      return res.json(result);
     } catch (error) {
       console.error("Error generating daily recommendations:", error);
       return res.status(500).json({ message: "Failed to generate daily recommendations" });

@@ -90,7 +90,9 @@ async function validateUserSecurity(userId: string, userPlan: string, taskName: 
     'contextual-tips': ['free', 'standard', 'premium'],
     'expense-predictions': ['premium'],
     'trend-analysis': ['premium'],
-    'categorization': ['standard', 'premium']
+    'categorization': ['standard', 'premium'],
+    'spending-insights': ['premium'],
+    'financial-health': ['free', 'standard', 'premium']
   };
 
   const requiredPlans = planRequirements[taskName] || ['premium'];
@@ -133,7 +135,9 @@ function getCacheDuration(taskName: string): number {
     'contextual-tips': 3600, // 1 hour
     'expense-predictions': 1800, // 30 minutes
     'trend-analysis': 3600, // 1 hour
-    'categorization': 300 // 5 minutes
+    'categorization': 300, // 5 minutes
+    'spending-insights': 1800, // 30 minutes
+    'financial-health': 1800 // 30 minutes
   };
   return durations[taskName] || 1800;
 }
