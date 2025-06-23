@@ -285,6 +285,18 @@ export function registerAIRoutes(app: Express) {
       const categories = await storage.getCategories(userId);
       const budgets = await storage.getUserBudgets(userId);
 
+      // Check unified cache for trend predictions
+      const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+      const cachedResult = await unifiedAICache.get('trend-predictions', userId, month, {
+        transactions: transactions.slice(0, 100),
+        budgets: budgets.slice(0, 20)
+      });
+      
+      if (cachedResult) {
+        console.log('AI trend predictions: Using unified cache - avoiding API call');
+        return res.json(cachedResult);
+      }
+
       const categoryMap = new Map();
       categories.forEach(cat => {
         categoryMap.set(cat.id, cat.name);
@@ -307,6 +319,17 @@ export function registerAIRoutes(app: Express) {
             amount: b.amount
           }))
       );
+
+      // Save to unified cache
+      try {
+        await unifiedAICache.set('trend-predictions', userId, month, {
+          transactions: transactions.slice(0, 100),
+          budgets: budgets.slice(0, 20)
+        }, predictions);
+        console.log('AI trend predictions: Saved to unified cache');
+      } catch (cacheError) {
+        console.error("Error saving trend predictions to unified cache:", cacheError);
+      }
 
       return res.json(predictions);
     } catch (error) {

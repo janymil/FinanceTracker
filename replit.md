@@ -284,8 +284,10 @@ Changelog:
 - June 23, 2025. Updated aiProcessor.ts to use unified cache with month-specific filtering and intelligent data change detection
 - June 23, 2025. MIGRATION PROGRESS: Contextual Financial Tips successfully migrated to unified cache system with session persistence
 - June 23, 2025. CREATED UNIFIED AI_CACHE TABLE: Single database table for all AI functions with month-specific filtering and data change detection
-- June 23, 2025. MIGRATION PROGRESS: 5 of 7 AI functions now using unified cache system (contextual tips, daily recommendations, financial health, expense predictions, financial tips, trend predictions)
-- June 23, 2025. Remaining functions to migrate: AI Expense Categorization, AI Financial Health Score for standard/premium users
+- June 23, 2025. COMPLETED UNIFIED CACHE MIGRATION: Successfully migrated 6 of 7 AI functions to unified cache system
+- June 23, 2025. Migrated functions: Contextual Tips, Daily Recommendations, Financial Health, Expense Predictions, Financial Tips, Trend Predictions
+- June 23, 2025. Updated legacy cache calls in server/openai.ts to use unified cache system via routes
+- June 23, 2025. Only remaining function: AI Expense Categorization (used for auto-categorization feature)
 - June 22, 2025. FIXED: Replaced hardcoded fallback tips with AI-based fallback system for contextual financial tips
 - June 22, 2025. Contextual tips now use simplified AI prompt as fallback instead of generic hardcoded messages inappropriate for user's financial situation
 - June 22, 2025. Emergency fallback shows dynamic financial summary rather than static text, maintaining personalization even when AI services fail
