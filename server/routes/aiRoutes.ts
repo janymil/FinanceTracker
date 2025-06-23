@@ -4,8 +4,6 @@ import { storage } from "../storage";
 import { 
   generateFinancialTips, 
   categorizeExpense, 
-  generateSpendingInsights, 
-  generateAIFinancialHealthScore,
   generateDailyRecommendations,
   type ExpenseCategorizationResult 
 } from "../openai";
@@ -220,13 +218,19 @@ export function registerAIRoutes(app: Express) {
 
       const transactions = await storage.getUserTransactions(userId, 100);
 
-      const insights = await generateSpendingInsights(transactions.map(t => ({
-        description: t.description,
-        amount: parseFloat(t.amount),
-        date: t.date.toISOString(),
-        categoryName: t.categoryId?.toString() || 'Uncategorized',
-        type: t.type
-      })));
+      console.log('AI spending insights: Making Fly.io API call via centralized processor');
+      
+      const aiPayload = {
+        transactions: transactions.map(t => ({
+          description: t.description,
+          amount: parseFloat(t.amount),
+          date: t.date.toISOString(),
+          categoryName: t.categoryId?.toString() || 'Uncategorized',
+          type: t.type
+        }))
+      };
+
+      const insights = await runAI('spending-insights', userId, aiPayload);
 
       return res.json(insights);
     } catch (error) {
@@ -254,9 +258,11 @@ export function registerAIRoutes(app: Express) {
 
       const transactions = await storage.getUserTransactions(userId, 100);
 
-      const aiScore = await generateAIFinancialHealthScore({
+      console.log('AI financial health score: Making Fly.io API call via centralized processor');
+      
+      const aiPayload = {
         summary,
-        budgets,
+        budgets: budgets || [],
         transactions: transactions.map(t => ({
           description: t.description,
           amount: parseFloat(t.amount),
@@ -265,7 +271,9 @@ export function registerAIRoutes(app: Express) {
           type: t.type
         })),
         useAdvancedFactors
-      });
+      };
+
+      const aiScore = await runAI('financial-health-score', userId, aiPayload);
 
       return res.json(aiScore);
     } catch (error) {
@@ -861,9 +869,14 @@ export function registerAIRoutes(app: Express) {
         return res.json(cachedResult);
       }
 
-      // Generate predictions using OpenAI
-      const { generateExpensePredictions } = await import('../openai');
-      const predictions = await generateExpensePredictions(transactions);
+      console.log('AI expense predictions: Making Fly.io API call via centralized processor');
+      
+      const aiPayload = {
+        transactions: transactions.slice(0, 100),
+        summary: req.body.summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 }
+      };
+
+      const predictions = await runAI('expense-predictions', userId, aiPayload);
 
       // Save to unified cache
       try {
