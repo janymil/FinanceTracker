@@ -89,10 +89,20 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
       calculatedMonth: getMostRecentTransactionMonth()
     });
 
+    // Check for cache invalidation flag (set after data imports or manual refresh)
+    const shouldSkipCache = localStorage.getItem('invalidate-ai-cache') === 'true';
+
     // If month changed, clear previous tips and reset state
     if (lastLoadedMonth && lastLoadedMonth !== currentMonth) {
       setTips(null);
       setLastLoadedMonth(null);
+    }
+
+    // Force refresh if invalidation flag is set or month changed
+    if (shouldSkipCache || lastLoadedMonth !== currentMonth) {
+      setTips(null);
+      setLastLoadedMonth(null);
+      console.log('Contextual tips: Forcing refresh due to cache invalidation or month change');
     }
 
     // If no transactions for this month, show no data state
@@ -114,16 +124,6 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
       budgetCount: budgets?.length || 0
     });
     const cacheKey = `financial-tips-${currentMonth}-${btoa(dataHash).slice(0, 12)}`;
-
-    // Check for cache invalidation flag (set after data imports or manual refresh)
-    const shouldSkipCache = localStorage.getItem('invalidate-ai-cache') === 'true';
-    
-    // Force refresh if invalidation flag is set or month changed
-    if (shouldSkipCache || lastLoadedMonth !== currentMonth) {
-      setTips(null);
-      setLastLoadedMonth(null);
-      console.log('Contextual tips: Forcing refresh due to cache invalidation or month change');
-    }
     
     // Check localStorage for cached tips first (unless cache invalidation flag is set)
     if (!shouldSkipCache) {
@@ -147,6 +147,12 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
     const fetchTips = async () => {
       if (loading) return; // Prevent multiple simultaneous calls
       
+      console.log('Contextual tips: Starting API call', {
+        monthTransactions: monthTransactions.length,
+        currentMonth,
+        shouldSkipCache
+      });
+      
       setLoading(true);
       try {
         // Get auth headers for Clerk authentication
@@ -169,12 +175,17 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
           summary,
           transactions: monthTransactions, // Pass only filtered transactions
           budgets,
-          selectedMonth
+          selectedMonth: currentMonth
         }, {
           headers: authHeaders
         });
         
         const fetchedTips = res.data.tips || [];
+        console.log('Contextual tips: API response received', {
+          tipsCount: fetchedTips.length,
+          firstTip: fetchedTips[0]?.title || 'none'
+        });
+        
         setTips(fetchedTips);
         setLastLoadedMonth(currentMonth);
         
@@ -196,7 +207,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
     };
 
     fetchTips();
-  }, [summary, transactions, budgets, selectedMonth, lastLoadedMonth, tips, loading]);
+  }, [summary, transactions, budgets, selectedMonth]);
 
   return (
     <Card className="h-full">
@@ -213,7 +224,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
           <div className="text-center py-6">
             <Lightbulb className="h-10 w-10 text-gray-400 mx-auto mb-3" />
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              No transactions found for {new Date(currentMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              No transactions found for {currentMonth ? new Date(currentMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'this month'}
             </p>
             <p className="text-xs text-gray-500 mt-1">
               Switch to a month with transaction data to see AI insights

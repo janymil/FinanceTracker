@@ -43,13 +43,14 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
 
       const { transactions, summary, budgets, selectedMonth } = req.body;
 
-      console.log('Contextual tips request:', {
+      console.log('Contextual tips API request received:', {
         userId,
         selectedMonth,
         transactionCount: transactions?.length || 0,
-        summaryData: summary,
+        hasIncome: summary?.totalIncome > 0,
+        hasExpenses: summary?.totalExpenses > 0,
         budgetCount: budgets?.length || 0,
-        firstTransaction: transactions?.[0] || 'none'
+        firstTransaction: transactions?.[0]?.description || 'none'
       });
 
       if (!transactions || !summary) {
