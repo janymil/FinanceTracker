@@ -1,0 +1,65 @@
+7 proxy[28675d3fe14308] lax [info] Starting machine
+
+2025-06-23T16:20:42.748 proxy[28675d3fe14308] lax [error] [PM07] failed to change machine state: machine still active, refusing to start
+
+2025-06-23T16:20:42.818 proxy[e784016a470098] lax [error] [PR03] could not find a good candidate within 2 attempts at load balancing. last error: [PM07] failed to change machine state: machine still active, refusing to start
+
+2025-06-23T16:20:42.958 proxy[28675d3fe14308] lax [info] Starting machine
+
+2025-06-23T16:20:42.958 proxy[28675d3fe14308] lax [error] [PM01] machines API returned an error: "rate limit exceeded"
+
+2025-06-23T16:20:42.979 proxy[e784016a470098] lax [info] Starting machine
+
+2025-06-23T16:20:42.980 proxy[e784016a470098] lax [error] [PM01] machines API returned an error: "rate limit exceeded"
+
+2025-06-23T16:20:43.687 proxy[28675d3fe14308] lax [info] Starting machine
+
+2025-06-23T16:20:43.688 proxy[28675d3fe14308] lax [error] [PM07] failed to change machine state: machine still active, refusing to start
+
+2025-06-23T16:20:43.709 proxy[e784016a470098] lax [info] Starting machine
+
+2025-06-23T16:20:43.711 proxy[e784016a470098] lax [error] [PM07] failed to change machine state: machine still active, refusing to start
+
+2025-06-23T16:20:44.562 proxy[28675d3fe14308] lax [info] Starting machine
+
+2025-06-23T16:20:44.563 proxy[28675d3fe14308] lax [error] [PM07] failed to change machine state: machine still active, refusing to start
+
+2025-06-23T16:20:44.584 proxy[e784016a470098] lax [info] Starting machine
+
+2025-06-23T16:20:44.585 proxy[e784016a470098] lax [error] [PM07] failed to change machine state: machine still active, refusing to start
+
+2025-06-23T16:20:45.685 proxy[28675d3fe14308] lax [info] Starting machine
+
+2025-06-23T16:20:45.686 proxy[28675d3fe14308] lax [error] [PM07] failed to change machine state: machine still active, refusing to start
+
+2025-06-23T16:20:45.712 proxy[e784016a470098] lax [info] Starting machine
+
+2025-06-23T16:20:45.762 proxy[e784016a470098] lax [error] [PR03] could not find a good candidate within 2 attempts at load balancing. last error: [PM07] failed to change machine state: machine still active, refusing to start
+
+2025-06-23T16:20:46.826 proxy[28675d3fe14308] lax [info] Starting machine
+
+2025-06-23T16:20:46.848 proxy[e784016a470098] lax [info] Starting machine
+
+2025-06-23T16:20:46.850 proxy[e784016a470098] lax [error] [PM07] failed to change machine state: machine still active, refusing to start
+
+2025-06-23T16:20:47.659 proxy[28675d3fe14308] lax [info] Starting machine
+
+2025-06-23T16:20:47.660 proxy[28675d3fe14308] lax [error] [PM07] failed to change machine state: machine still active, refusing to start
+
+2025-06-23T16:20:47.684 proxy[e784016a470098] lax [info] Starting machine
+
+2025-06-23T16:20:47.685 proxy[e784016a470098] lax [error] [PM07] failed to change machine state: machine still active, refusing to start
+
+2025-06-23T16:20:47.818 proxy[28675d3fe14308] lax [info] Starting machine
+
+2025-06-23T16:20:47.818 proxy[28675d3fe14308] lax [error] [PM01] machines API returned an error: "rate limit exceeded"
+
+2025-06-23T16:20:47.839 proxy[e784016a470098] lax [info] Starting machine
+
+2025-06-23T16:20:47.892 proxy[e784016a470098] lax [error] [PR03] could not find a good candidate within 2 attempts at load balancing. last error: [PM01] machines API returned an error: "rate limit exceeded"
+
+2025-06-23T16:20:47.985 proxy[28675d3fe14308] lax [info] Starting machine
+
+2025-06-23T16:20:48.011 proxy[e784016a470098] lax [info] Starting machine
+
+2025-06-23T16:20:48.011 proxy[e784016a470098] lax [error] [PM01] machines API returned 
