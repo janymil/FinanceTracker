@@ -47,6 +47,10 @@ app.post("/execute-gpt-task", async (req, res) => {
         result = await handleExpensePredictions(payload);
         break;
 
+      case "trend-predictions":
+        result = await handleTrendPredictions(payload);
+        break;
+
       default:
         return res.status(400).json({ error: `Unknown AI task: ${task}` });
     }
