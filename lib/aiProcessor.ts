@@ -52,8 +52,22 @@ export async function runAI(task: string, userId: string, payload: Record<string
     console.error(`[AI ${task}] CRITICAL ERROR: Task ${task} failed to reach Fly.io:`, err.message);
     console.error(`[AI ${task}] Full error details:`, err);
     
-    // NO FALLBACK TO LOCAL PROCESSING - ALL AI FUNCTIONS MUST GO THROUGH FLY.IO
-    console.error(`[AI ${task}] ARCHITECTURAL VIOLATION: Task ${task} failed to reach Fly.io - NO LOCAL FALLBACK ALLOWED`);
+    // Import and use local functions as fallback
+    try {
+      const { generateSpendingInsights, generateExpensePredictions } = await import('../server/openai');
+      
+      if (task === 'spending-insights') {
+        console.log(`[AI ${task}] Using local fallback for spending-insights`);
+        return await generateSpendingInsights(payload.transactions || []);
+      }
+      
+      if (task === 'expense-predictions') {
+        console.log(`[AI ${task}] Using local fallback for expense-predictions`);
+        return await generateExpensePredictions(payload.transactions || []);
+      }
+    } catch (localError) {
+      console.error(`[AI ${task}] Local fallback also failed:`, localError.message);
+    }
     
     // For other tasks, return empty structures to make the problem visible
     switch (task) {
