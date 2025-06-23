@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "OpenAI API proxy service for FinanzerPro",
   "main": "index.ts",
-  "type": "module",
+
   "scripts": {
     "start": "tsx index.ts",
     "dev": "tsx index.ts", 
