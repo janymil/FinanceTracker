@@ -11,6 +11,7 @@ import {
   type ExpenseCategorizationResult 
 } from "../openai";
 import { aiCache } from "../cache";
+import { unifiedAICache } from "../../lib/unifiedAICache";
 import { db } from "../db";
 import { 
   transactions, 
@@ -333,28 +334,20 @@ export function registerAIRoutes(app: Express) {
       };
       const dataHash = aiCache.createDataHash(dataForHash);
 
-      // Check database cache first (persistent across sessions)
-      try {
-        const existingRecommendations = await db
-          .select()
-          .from(dailyRecommendations)
-          .where(and(
-            eq(dailyRecommendations.userId, userId),
-            eq(dailyRecommendations.dataHash, dataHash),
-            gt(dailyRecommendations.expiresAt, new Date())
-          ))
-          .limit(1);
-
-        if (existingRecommendations.length > 0) {
-          console.log('Daily recommendations: Using persistent cached data');
-          const cached = existingRecommendations[0];
-          return res.json({
-            recommendations: cached.recommendations,
-            insights: cached.insights
-          });
-        }
-      } catch (error) {
-        console.log('Database cache check failed, continuing with OpenAI generation');
+      // Check unified cache for recommendations
+      const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+      const cachedResult = await unifiedAICache.get('daily-recommendations', userId, month, {
+        summary,
+        transactions: transactions.slice(0, 100),
+        budgets
+      });
+      
+      if (cachedResult && cachedResult.recommendations) {
+        console.log('Daily recommendations: Using unified cache - avoiding API call');
+        return res.json({
+          recommendations: cachedResult.recommendations,
+          insights: cachedResult.insights
+        });
       }
 
       // Get categories for proper naming
@@ -525,9 +518,17 @@ export function registerAIRoutes(app: Express) {
         }
       });
 
-      // Cache the result for 24 hours
-      aiCache.setFinancialHealth(userId, dataHash, healthData);
-      console.log('Financial health: Cached new result for 24 hours');
+      // Save to unified cache
+      try {
+        await unifiedAICache.set('financial-health', userId, month, {
+          summary: stableFinancialData.summary,
+          transactions: stableFinancialData.transactions.slice(0, 50),
+          budgets: stableFinancialData.budgets
+        }, healthData);
+        console.log('Financial health: Saved to unified cache');
+      } catch (cacheError) {
+        console.error("Error saving financial health to unified cache:", cacheError);
+      }
 
       return res.json(healthData);
     } catch (error) {
