@@ -160,15 +160,8 @@ export async function generateFinancialTips(financialData: {
   timestamp?: number; // For bypassing cache
 }): Promise<FinancialTip[]> {
   try {
-    // Skip cache if timestamp is provided (for fresh responses)
-    if (!financialData.timestamp) {
-      const dataHash = aiCache.createDataHash(financialData);
-      const cached = aiCache.getTips(dataHash);
-      if (cached) {
-        console.log('Using cached financial tips result');
-        return cached;
-      }
-    } else {
+    // Note: Cache now handled by unified cache system via routes
+    if (financialData.timestamp) {
       console.log('Bypassing cache for fresh AI financial tips');
     }
     const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
@@ -302,11 +295,8 @@ Return comprehensive analysis in JSON:
       actionable: true
     }];
 
-    // Only cache if not bypassing cache
-    if (!financialData.timestamp) {
-      const dataHash = aiCache.createDataHash(financialData);
-      aiCache.setTips(dataHash, processedTips);
-    }
+    // Note: Cache now handled by unified cache system via routes
+    console.log('Financial tips generated successfully');
     
     return processedTips;
   } catch (error) {
@@ -615,15 +605,7 @@ export async function generateTrendPredictions(
       };
     }
 
-    // Create cache keys for the input data
-    const transactionsHash = aiCache.createDataHash(transactions);
-    const budgetsHash = aiCache.createDataHash(budgets);
-    const cached = aiCache.getTrends(transactionsHash, budgetsHash);
-    
-    if (cached) {
-      console.log('Using cached trend predictions result');
-      return cached;
-    }
+    // Note: Cache now handled by unified cache system via routes
 
     // Prepare comprehensive financial data for AI analysis
     const monthlyData = new Map();
@@ -737,8 +719,8 @@ Analysis Requirements:
       }
     };
 
-    // Cache the result
-    aiCache.setTrends(transactionsHash, budgetsHash, predictions);
+    // Note: Cache now handled by unified cache system via routes
+    console.log('Trend predictions generated successfully');
     
     return predictions;
 
@@ -794,13 +776,7 @@ export async function generateExpensePredictions(transactions: Array<{
       };
     }
 
-    // Check cache first
-    const dataHash = aiCache.createDataHash(expenseTransactions);
-    const cached = aiCache.get(`expense_predictions_${dataHash}`);
-    if (cached) {
-      console.log('Using cached expense predictions - avoiding OpenAI API call');
-      return cached;
-    }
+    // Note: Cache now handled by unified cache system via routes
 
     // Analyze spending patterns by month and category
     const monthlyData = new Map<string, Map<string, number>>();
@@ -964,9 +940,8 @@ ANALYSIS GUIDELINES:
       monthlyPredictions
     };
 
-    // Cache the result for 30 minutes
-    aiCache.set(`expense_predictions_${dataHash}`, finalResult, 1800);
-    console.log('Cached expense predictions for 30 minutes');
+    // Note: Cache now handled by unified cache system via routes
+    console.log('Expense predictions generated successfully');
     
     return finalResult;
 
@@ -1003,13 +978,7 @@ export async function generateDailyRecommendations(financialData: {
   categories: Map<number, string>;
 }) {
   try {
-    // Check cache first
-    const dataHash = aiCache.createDataHash(financialData);
-    const cached = aiCache.get(`daily_recommendations_${dataHash}`);
-    if (cached) {
-      console.log('Using cached daily recommendations');
-      return cached;
-    }
+    // Note: Cache now handled by unified cache system via routes
 
     console.log('Generating new daily recommendations with OpenAI');
 
@@ -1151,9 +1120,8 @@ Only provide recommendations and insights based on the actual financial data pro
       insights
     };
 
-    // Cache for 30 minutes
-    aiCache.set(`daily_recommendations_${dataHash}`, result, 1800);
-    console.log('Cached daily recommendations for 30 minutes');
+    // Note: Cache now handled by unified cache system via routes
+    console.log('Daily recommendations generated successfully');
     
     return result;
 
