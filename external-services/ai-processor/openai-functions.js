@@ -1,1031 +1,485 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.categorizeExpense = categorizeExpense;
-exports.generateFinancialTips = generateFinancialTips;
-exports.generateSpendingInsights = generateSpendingInsights;
-exports.generateAIFinancialHealthScore = generateAIFinancialHealthScore;
-exports.generateTrendPredictions = generateTrendPredictions;
-exports.generateExpensePredictions = generateExpensePredictions;
-exports.generateDailyRecommendations = generateDailyRecommendations;
-exports.generateFinancialHealthScore = generateFinancialHealthScore;
-const openai_1 = require("openai");
-const cache_1 = require("./cache");
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new openai_1.default({ apiKey: process.env.OPENAI_API_KEY });
-async function categorizeExpense(description, amount) {
-    try {
-        // Check cache first
-        const cached = cache_1.aiCache.getCategorization(description, amount);
-        if (cached) {
-            console.log('Using cached categorization result');
-            return cached;
-        }
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [
-                {
-                    role: "system",
-                    content: `You are an expert financial categorization assistant. Analyze the expense description and amount to determine the most appropriate category.
+// Converted from openai-functions.ts to JavaScript for CommonJS compatibility
+const OpenAI = require("openai");
 
-Available categories:
-- Food & Dining (restaurants, groceries, takeout)
-- Transportation (gas, public transport, parking, car maintenance)
-- Shopping (clothes, electronics, general retail)
-- Entertainment (movies, concerts, games, subscriptions)
-- Bills & Utilities (electricity, water, internet, phone)
-- Healthcare (medical, pharmacy, insurance)
-- Travel (hotels, flights, vacation expenses)
-- Education (courses, books, tuition)
-- Home & Garden (rent, mortgage, home improvement, furniture)
-- Personal Care (salon, spa, cosmetics)
-- Business (office supplies, professional services)
-- Other (miscellaneous expenses)
+// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Simple cache implementation since we can't import the full cache system
+const simpleCache = new Map();
+
+function getCacheKey(functionName, data) {
+  return `${functionName}_${JSON.stringify(data).slice(0, 100)}`;
+}
+
+async function categorizeExpense(description, amount) {
+  const cacheKey = getCacheKey('categorizeExpense', { description, amount });
+  if (simpleCache.has(cacheKey)) {
+    return simpleCache.get(cacheKey);
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are an AI financial categorization expert. Categorize the expense into one of these categories: Food & Dining, Transportation, Shopping, Entertainment, Bills & Utilities, Healthcare, Travel, Education, Personal Care, Other. Also provide a confidence score from 0 to 1."
+        },
+        {
+          role: "user",
+          content: `Categorize this expense: "${description}" for amount $${amount}`
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.3
+    });
+
+    const result = JSON.parse(response.choices[0].message.content);
+    simpleCache.set(cacheKey, result);
+    return result;
+  } catch (error) {
+    console.error('Expense categorization error:', error);
+    return { category: "Other", confidence: 0.5 };
+  }
+}
+
+async function generateFinancialTips(data) {
+  const cacheKey = getCacheKey('financialTips', data);
+  if (simpleCache.has(cacheKey)) {
+    return simpleCache.get(cacheKey);
+  }
+
+  const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = data;
+  const netBalance = totalIncome - totalExpenses;
+  const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100) : 0;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert financial analyst providing premium-level insights. Analyze this financial profile and provide sophisticated recommendations in JSON array format.
+
+FINANCIAL PROFILE:
+- Monthly Income: $${totalIncome?.toFixed(2) || 0}
+- Monthly Expenses: $${totalExpenses?.toFixed(2) || 0}
+- Net Cash Flow: $${netBalance?.toFixed(2) || 0}
+- Savings Rate: ${savingsRate?.toFixed(1) || 0}%
+- Categories: ${transactionsByCategory?.length || 0}
+- Recent Transactions: ${recentTransactions?.length || 0}
+
+Provide detailed financial analysis with actionable recommendations. Return as JSON array with this exact structure:
+[
+  {
+    "id": "tip_1",
+    "title": "Specific Financial Optimization",
+    "description": "Detailed multi-paragraph analysis with exact percentages, dollar targets, implementation steps, and expected savings. Use their actual financial numbers.",
+    "category": "spending",
+    "priority": "high",
+    "actionable": true,
+    "estimatedSaving": 150,
+    "confidence": 0.85
+  }
+]`
+        },
+        {
+          role: "user",
+          content: "Provide comprehensive financial analysis based on the data above."
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+      max_tokens: 2000
+    });
+
+    const content = response.choices[0].message.content;
+    let result = JSON.parse(content || '[]');
+    
+    if (!Array.isArray(result)) {
+      result = result.tips || [result];
+    }
+    
+    const processedTips = result.filter(tip => tip && tip.title);
+    simpleCache.set(cacheKey, processedTips);
+    return processedTips;
+  } catch (error) {
+    console.error('Financial tips generation error:', error);
+    return [];
+  }
+}
+
+async function generateDailyRecommendations(data) {
+  const cacheKey = getCacheKey('dailyRecommendations', data);
+  if (simpleCache.has(cacheKey)) {
+    return simpleCache.get(cacheKey);
+  }
+
+  const { summary, transactions, budgets, categories } = data;
+  
+  if (!transactions || transactions.length < 3) {
+    return { recommendations: [], insights: [] };
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `You are an AI financial advisor providing personalized daily recommendations. Based on this financial data, generate actionable daily tasks and insights in JSON format:
+
+Financial Overview:
+- Income: $${summary?.totalIncome || 0}
+- Expenses: $${summary?.totalExpenses || 0}  
+- Transactions: ${transactions.length}
+- Categories: ${categories?.length || 0}
 
 Respond with JSON in this exact format:
 {
-  "category": "category_name",
-  "confidence": 0.95,
-  "reasoning": "Brief explanation of why this category was chosen"
-}`
-                },
-                {
-                    role: "user",
-                    content: `Description: "${description}"
-Amount: $${amount}
-
-Please categorize this expense.`
-                }
-            ],
-            response_format: { type: "json_object" },
-            temperature: 0.1
-        });
-        const result = JSON.parse(response.choices[0].message.content || '{}');
-        const categorization = {
-            category: result.category || 'Other',
-            confidence: Math.max(0, Math.min(1, result.confidence || 0.5)),
-            reasoning: result.reasoning || 'Unable to determine category'
-        };
-        // Cache the result
-        cache_1.aiCache.setCategorization(description, amount, categorization);
-        return categorization;
-    }
-    catch (error) {
-        console.error('Error categorizing expense:', error);
-        return {
-            category: 'Other',
-            confidence: 0.1,
-            reasoning: 'Error occurred during categorization'
-        };
-    }
-}
-async function generateFinancialTips(financialData) {
-    try {
-        // Note: Cache now handled by unified cache system via routes
-        if (financialData.timestamp) {
-            console.log('Bypassing cache for fresh AI financial tips');
-        }
-        const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
-        // Prepare the financial summary for the AI processor
-        const netBalance = totalIncome - totalExpenses;
-        const transactionCount = recentTransactions.length;
-        const summary = `Financial Summary:
-- Monthly Income: $${totalIncome}
-- Monthly Expenses: $${totalExpenses}
-- Net Balance: $${netBalance} ${netBalance < 0 ? '(DEFICIT)' : '(SURPLUS)'}
-- Transaction Count: ${transactionCount}
-- Raw Transactions Retrieved: ${recentTransactions.length}
-
-Spending by Category:
-${transactionsByCategory.filter(cat => cat.type === 'expense').map(cat => `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalExpenses) * 100).toFixed(1)}% of expenses)`).join('\n')}
-
-Income by Category:
-${transactionsByCategory.filter(cat => cat.type === 'income').map(cat => `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalIncome) * 100).toFixed(1)}% of income)`).join('\n')}
-
-Recent Transactions (last 10):
-${recentTransactions.slice(0, 10).map(t => `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'}) [${t.type}] on ${new Date(t.date).toLocaleDateString()}`).join('\n')}
-
-Transaction Pattern Analysis:
-- Average transaction size: $${(totalIncome + totalExpenses) / transactionCount}
-- Income transactions: ${recentTransactions.filter(t => t.type === 'income').length}
-- Expense transactions: ${recentTransactions.filter(t => t.type === 'expense').length}
-- Date range: ${new Date(Math.min(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()} to ${new Date(Math.max(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()}
-
-Generate 4 independent box analyses with exact mathematical calculations.`;
-        // Call the Fly.io AI processor service with fallback to direct OpenAI
-        let result;
-        try {
-            const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'https://finanserpro-ai-processor.fly.dev';
-            console.log(`Calling AI processor at ${AI_PROCESSOR_URL}/generate-financial-tip`);
-            const aiResponse = await fetch(`${AI_PROCESSOR_URL}/generate-financial-tip`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ summary }),
-                timeout: 30000 // 30 second timeout
-            });
-            if (!aiResponse.ok) {
-                throw new Error(`AI processor error: ${aiResponse.status} ${aiResponse.statusText}`);
-            }
-            const aiData = await aiResponse.json();
-            console.log('AI processor response received successfully');
-            result = aiData.tip || aiData;
-            console.log('Successfully received response from AI processor');
-        }
-        catch (aiProcessorError) {
-            console.warn('AI processor service unavailable, falling back to direct OpenAI:', aiProcessorError.message);
-            // Fallback to direct OpenAI call
-            const response = await openai.chat.completions.create({
-                model: "gpt-4o",
-                messages: [
-                    {
-                        role: "system",
-                        content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
-
-1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
-2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
-3. BUDGET OPTIMIZATION SUGGESTIONS: Recommend category rebalancing with precise dollar amounts
-4. CONTEXT-AWARE FINANCIAL ADVICE: Consider their financial position, goals, and risk tolerance
-
-ANALYSIS REQUIREMENTS:
-- Use their EXACT transaction amounts and categories 
-- Calculate precise percentages and ratios from their data
-- Identify the highest-impact optimization opportunities
-- Provide specific dollar amounts for recommendations
-- Include mathematical analysis (savings rate, expense ratios, etc.)
-- Compare their spending to optimal financial benchmarks
-
-GENERATE VARIED RESPONSES by focusing on different analytical angles:
-- Detailed category spending analysis with optimization targets
-- Income-to-expense ratio analysis with improvement strategies  
-- Cash flow optimization with timing recommendations
-- Risk assessment with protection strategies
-- Wealth building analysis with investment allocation suggestions
-- Efficiency analysis identifying wasteful spending patterns
-
-Return comprehensive analysis in JSON:
-{
-  "title": "Advanced Financial Analysis: [Specific Focus Area]",
-  "description": "DETAILED multi-paragraph analysis including: 1) Mathematical breakdown of their spending patterns with percentages, 2) Specific optimization recommendations with exact dollar targets, 3) Implementation timeline with measurable milestones, 4) Risk assessment and protection strategies. Use their exact financial numbers throughout.",
-  "category": "spending|saving|budgeting|income|education", 
-  "priority": "high|medium|low",
-  "actionable": true,
-  "estimatedSaving": [realistic_amount],
-  "educational": false
-}`
-                    },
-                    {
-                        role: "user",
-                        content: summary
-                    }
-                ],
-                response_format: { type: "json_object" },
-                temperature: 0.9
-            });
-            result = JSON.parse(response.choices[0].message.content || '{}');
-        }
-        // Handle comprehensive analysis response
-        const processedTips = result.title && result.description ? [{
-                title: result.title,
-                description: result.description,
-                category: result.category || 'comprehensive',
-                priority: result.priority || 'high',
-                actionable: Boolean(result.actionable),
-                estimatedSaving: result.estimatedSaving || undefined,
-                educational: Boolean(result.educational)
-            }] : [{
-                title: 'Track Your Expenses',
-                description: 'Start by categorizing all your expenses to understand where your money goes each month.',
-                category: 'budgeting',
-                priority: 'high',
-                actionable: true
-            }];
-        // Note: Cache now handled by unified cache system via routes
-        console.log('Financial tips generated successfully');
-        return processedTips;
-    }
-    catch (error) {
-        console.error('Error generating financial tips:', error);
-        return [
-            {
-                title: 'Track Your Expenses',
-                description: 'Start by categorizing all your expenses to understand where your money goes each month.',
-                category: 'budgeting',
-                priority: 'high',
-                actionable: true
-            }
-        ];
-    }
-}
-async function generateSpendingInsights(transactions) {
-    try {
-        // Create hash for transactions to use as cache key
-        const transactionsHash = cache_1.aiCache.createDataHash(transactions);
-        const cached = cache_1.aiCache.getInsights(transactionsHash);
-        if (cached) {
-            console.log('Using cached insights result');
-            return cached;
-        }
-        const expenseTransactions = transactions.filter(t => t.type === 'expense');
-        if (expenseTransactions.length === 0) {
-            return [];
-        }
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                {
-                    role: "system",
-                    content: `You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights.
-
-Generate 2-4 insights focusing on:
-- Unusual spending patterns
-- Budget optimization opportunities  
-- Positive financial behaviors
-- Spending trends and recommendations
-
-Each insight should have:
-- Unique ID
-- Type: warning, suggestion, achievement, or trend
-- Clear title and description
-- Impact level: high, medium, low
-- Category if relevant
-- Amount if relevant
-- Actionable recommendation
-- Whether it's actionable (boolean)
-
-Respond with JSON array format:
-[
-  {
-    "id": "insight_1",
-    "type": "warning",
-    "title": "High dining expenses",
-    "description": "Your restaurant spending increased 40% this month",
-    "impact": "high",
-    "category": "Food & Dining",
-    "amount": 450,
-    "recommendation": "Consider meal planning to reduce dining out",
-    "actionable": true
-  }
-]`
-                },
-                {
-                    role: "user",
-                    content: `Analyze these expense transactions:
-
-${expenseTransactions.slice(0, 20).map(t => `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'}) on ${t.date}`).join('\n')}
-
-Total transactions: ${expenseTransactions.length}
-Date range: ${expenseTransactions[expenseTransactions.length - 1]?.date} to ${expenseTransactions[0]?.date}
-
-Generate financial insights based on this spending data.`
-                }
-            ],
-            response_format: { type: "json_object" },
-            temperature: 0.2
-        });
-        const result = JSON.parse(response.choices[0].message.content || '{"insights": []}');
-        const insights = Array.isArray(result) ? result : (result.insights || []);
-        const processedInsights = insights.map((insight, index) => ({
-            id: insight.id || `ai_insight_${index}`,
-            type: ['warning', 'suggestion', 'achievement', 'trend'].includes(insight.type) ? insight.type : 'suggestion',
-            title: insight.title || 'Financial Insight',
-            description: insight.description || 'No description available',
-            impact: ['high', 'medium', 'low'].includes(insight.impact) ? insight.impact : 'medium',
-            category: insight.category || undefined,
-            amount: insight.amount || undefined,
-            recommendation: insight.recommendation || undefined,
-            actionable: Boolean(insight.actionable)
-        }));
-        // Cache the result
-        cache_1.aiCache.setInsights(transactionsHash, processedInsights);
-        return processedInsights;
-    }
-    catch (error) {
-        console.error('Error generating spending insights:', error);
-        return [];
-    }
-}
-async function generateAIFinancialHealthScore(financialData) {
-    try {
-        const { summary, budgets, transactions, useAdvancedFactors } = financialData;
-        // Create hash for caching
-        const dataHash = cache_1.aiCache.createDataHash(financialData);
-        const cached = cache_1.aiCache.get(`ai_health_score_${dataHash}`);
-        if (cached) {
-            console.log('Using cached AI financial health score');
-            return cached;
-        }
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                {
-                    role: "system",
-                    content: `You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
-
-Your analysis should consider:
-- Spending patterns and volatility
-- Seasonal trends in expenses
-- Category distribution and priorities
-- Financial behavior consistency
-- Risk factors and resilience
-- Personalized weight adjustments based on user's situation
-
-Provide a comprehensive financial health score from 0-100 with detailed factor breakdown.
-
-Respond with JSON in this format:
-{
-  "score": 85,
-  "status": "Good",
-  "color": "blue",
-  "factors": [
+  "recommendations": [
     {
-      "name": "Adaptive Spending Control",
-      "score": 25,
-      "max": 30,
-      "status": "good",
-      "aiInsight": "Your spending shows good consistency with minor seasonal variations"
+      "id": "rec_1",
+      "task": "Specific actionable task",
+      "description": "Detailed explanation with steps",
+      "priority": "high|medium|low",
+      "timeEstimate": "X minutes",
+      "category": "budgeting|spending|saving|income"
     }
   ],
-  "icon": "TrendingUp",
-  "aiAnalysis": {
-    "personalizedFactors": ["Custom factor explanations"],
-    "riskAssessment": "Overall risk level and factors",
-    "recommendations": ["Personalized recommendations"],
-    "confidence": 0.87
-  }
-}`
-                },
-                {
-                    role: "user",
-                    content: `Analyze this financial data for a personalized health score:
-
-Financial Summary:
-- Income: $${summary.totalIncome}
-- Expenses: $${summary.totalExpenses}
-- Net Balance: $${summary.netBalance}
-
-Transaction History (${transactions.length} transactions):
-${transactions.slice(0, 20).map(t => `- ${t.description}: $${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`).join('\n')}
-
-Budgets: ${budgets.length} active budgets
-Advanced Analysis: ${useAdvancedFactors ? 'Enabled' : 'Standard'}
-
-Provide an AI-powered financial health score that adapts to this user's specific situation and spending patterns.`
-                }
-            ],
-            response_format: { type: "json_object" },
-            temperature: 0.3
-        });
-        const result = JSON.parse(response.choices[0].message.content || '{}');
-        const processedResult = {
-            score: Math.max(0, Math.min(100, result.score || 50)),
-            status: result.status || 'Fair',
-            color: result.color || 'yellow',
-            factors: result.factors || [],
-            icon: result.icon || 'Shield',
-            aiAnalysis: {
-                personalizedFactors: result.aiAnalysis?.personalizedFactors || [],
-                riskAssessment: result.aiAnalysis?.riskAssessment || 'Standard risk assessment',
-                recommendations: result.aiAnalysis?.recommendations || [],
-                confidence: Math.max(0, Math.min(1, result.aiAnalysis?.confidence || 0.7))
-            }
-        };
-        // Cache the result
-        cache_1.aiCache.set(`ai_health_score_${dataHash}`, processedResult, 3600); // Cache for 1 hour
-        return processedResult;
-    }
-    catch (error) {
-        console.error('Error generating AI financial health score:', error);
-        return {
-            score: 50,
-            status: 'Analysis Unavailable',
-            color: 'gray',
-            factors: [],
-            icon: 'AlertTriangle',
-            aiAnalysis: {
-                personalizedFactors: [],
-                riskAssessment: 'Unable to assess risk',
-                recommendations: ['Please try again later'],
-                confidence: 0
-            }
-        };
-    }
-}
-async function generateTrendPredictions(transactions, categoryMap, budgets = []) {
-    try {
-        // Return zeros for empty data instead of AI-generated examples
-        if (!transactions || transactions.length === 0) {
-            console.log('No transaction data available - returning zero predictions');
-            return {
-                categoryPredictions: [],
-                financialForecast: {
-                    nextMonthExpenses: 0,
-                    expectedSavings: 0,
-                    budgetVariance: 0,
-                    confidence: 0,
-                    keyInsights: ['Add transactions to generate AI-powered financial forecasts'],
-                    recommendations: ['Start tracking your expenses to receive personalized predictions'],
-                    riskFactors: []
-                }
-            };
-        }
-        // Note: Cache now handled by unified cache system via routes
-        // Prepare comprehensive financial data for AI analysis
-        const monthlyData = new Map();
-        const categoryTotals = new Map();
-        transactions.forEach(t => {
-            const month = t.date.slice(0, 7);
-            const category = categoryMap.get(t.categoryId) || 'Other';
-            const amount = parseFloat(t.amount);
-            if (!monthlyData.has(month)) {
-                monthlyData.set(month, { income: 0, expenses: 0, categories: new Map() });
-            }
-            const monthData = monthlyData.get(month);
-            if (t.type === 'income') {
-                monthData.income += amount;
-            }
-            else {
-                monthData.expenses += amount;
-                const catAmount = monthData.categories.get(category) || 0;
-                monthData.categories.set(category, catAmount + amount);
-            }
-            const totalAmount = categoryTotals.get(category) || 0;
-            categoryTotals.set(category, totalAmount + amount);
-        });
-        const financialSummary = {
-            monthlyTrends: Array.from(monthlyData.entries()).map(([month, data]) => ({
-                month,
-                income: data.income,
-                expenses: data.expenses,
-                netBalance: data.income - data.expenses,
-                topCategories: Array.from(data.categories.entries())
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 5)
-                    .map(([cat, amount]) => ({ category: cat, amount }))
-            })).sort((a, b) => a.month.localeCompare(b.month)),
-            categoryTotals: Array.from(categoryTotals.entries()).map(([cat, amount]) => ({ category: cat, amount })),
-            budgets: budgets.map(b => ({ category: categoryMap.get(b.categoryId) || 'Other', budgetAmount: parseFloat(b.amount) }))
-        };
-        const prompt = `Analyze this comprehensive financial data and provide AI-powered trend predictions and forecasting.
-
-Financial Data Analysis:
-${JSON.stringify(financialSummary, null, 2)}
-
-Please provide detailed predictions in this JSON format:
-{
-  "categoryPredictions": [
+  "insights": [
     {
-      "category": "category name",
-      "predictedAmount": 0,
-      "confidence": 0.95,
-      "trend": "increasing|decreasing|stable",
-      "reasoning": "explanation of prediction logic",
-      "monthlyForecast": [
-        {"month": "2025-01", "predicted": 0, "confidence": 0.9}
-      ]
-    }
-  ],
-  "financialForecast": {
-    "nextMonthExpenses": 0,
-    "expectedSavings": 0,
-    "budgetVariance": 0,
-    "confidence": 0.85,
-    "keyInsights": ["insight 1", "insight 2"],
-    "recommendations": ["recommendation 1", "recommendation 2"],
-    "riskFactors": ["risk 1", "risk 2"]
-  }
-}
-
-Analysis Requirements:
-- Use historical patterns to predict future spending
-- Identify seasonal trends and cyclical behaviors
-- Calculate confidence based on data consistency
-- Consider economic factors and spending volatility
-- Provide actionable financial recommendations
-- Include next 3 months forecast for each category
-- Analyze budget adherence and variance predictions`;
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-            messages: [
-                {
-                    role: "system",
-                    content: "You are an advanced financial forecasting AI that analyzes spending patterns and predicts future financial trends with high accuracy. Use sophisticated pattern recognition and statistical analysis to provide reliable predictions."
-                },
-                {
-                    role: "user",
-                    content: prompt
-                }
-            ],
-            response_format: { type: "json_object" },
-            max_tokens: 2000,
-            temperature: 0.3 // Lower temperature for more consistent predictions
-        });
-        const result = JSON.parse(response.choices[0].message.content || '{"categoryPredictions": [], "financialForecast": {}}');
-        const predictions = {
-            categoryPredictions: result.categoryPredictions || [],
-            financialForecast: result.financialForecast || {
-                nextMonthExpenses: 0,
-                expectedSavings: 0,
-                budgetVariance: 0,
-                confidence: 0,
-                keyInsights: [],
-                recommendations: [],
-                riskFactors: []
-            }
-        };
-        // Note: Cache now handled by unified cache system via routes
-        console.log('Trend predictions generated successfully');
-        return predictions;
-    }
-    catch (error) {
-        console.error('Error generating trend predictions:', error);
-        return {
-            categoryPredictions: [],
-            financialForecast: {
-                nextMonthExpenses: 0,
-                expectedSavings: 0,
-                budgetVariance: 0,
-                confidence: 0,
-                keyInsights: [],
-                recommendations: [],
-                riskFactors: []
-            }
-        };
-    }
-}
-async function generateExpensePredictions(transactions) {
-    try {
-        // Return empty predictions for insufficient data
-        if (!transactions || transactions.length < 5) {
-            return {
-                categoryPredictions: [],
-                monthlyPredictions: []
-            };
-        }
-        // Filter expense transactions only and limit to last 12 months for efficiency
-        const oneYearAgo = new Date();
-        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-        const expenseTransactions = transactions
-            .filter(t => t.type === 'expense' && new Date(t.date) >= oneYearAgo)
-            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-            .slice(-100); // Limit to last 100 transactions for token efficiency
-        if (expenseTransactions.length < 3) {
-            return {
-                categoryPredictions: [],
-                monthlyPredictions: []
-            };
-        }
-        // Note: Cache now handled by unified cache system via routes
-        // Analyze spending patterns by month and category
-        const monthlyData = new Map();
-        const categoryTotals = new Map();
-        expenseTransactions.forEach(t => {
-            const month = t.date.slice(0, 7); // YYYY-MM format
-            const category = t.categoryName || 'Other';
-            const amount = Math.abs(parseFloat(t.amount));
-            // Track monthly spending by category
-            if (!monthlyData.has(month)) {
-                monthlyData.set(month, new Map());
-            }
-            const monthData = monthlyData.get(month);
-            monthData.set(category, (monthData.get(category) || 0) + amount);
-            // Track category statistics
-            if (!categoryTotals.has(category)) {
-                categoryTotals.set(category, { total: 0, count: 0, recurring: 0 });
-            }
-            const catData = categoryTotals.get(category);
-            catData.total += amount;
-            catData.count += 1;
-            if (t.recurring)
-                catData.recurring += 1;
-        });
-        // Prepare data for AI analysis
-        const analysisData = {
-            totalTransactions: expenseTransactions.length,
-            timeSpan: `${expenseTransactions[0].date.slice(0, 7)} to ${expenseTransactions[expenseTransactions.length - 1].date.slice(0, 7)}`,
-            monthlyBreakdown: Array.from(monthlyData.entries()).map(([month, categories]) => ({
-                month,
-                totalSpent: Array.from(categories.values()).reduce((sum, amount) => sum + amount, 0),
-                categories: Array.from(categories.entries()).map(([cat, amount]) => ({ category: cat, amount }))
-            })),
-            categoryAnalysis: Array.from(categoryTotals.entries()).map(([category, data]) => ({
-                category,
-                totalSpent: data.total,
-                averagePerTransaction: data.total / data.count,
-                transactionCount: data.count,
-                recurringTransactions: data.recurring,
-                recurringPercentage: (data.recurring / data.count * 100).toFixed(1)
-            })),
-            recentTransactions: expenseTransactions.slice(-20).map(t => ({
-                date: t.date.slice(0, 10),
-                description: t.description,
-                amount: Math.abs(parseFloat(t.amount)),
-                category: t.categoryName || 'Other',
-                recurring: t.recurring || false
-            }))
-        };
-        const prompt = `Analyze this detailed expense data and generate accurate predictions for future spending patterns.
-
-EXPENSE ANALYSIS DATA:
-${JSON.stringify(analysisData, null, 2)}
-
-REQUIREMENTS:
-1. Identify spending trends, seasonal patterns, and recurring expenses
-2. Calculate realistic predictions based on historical data
-3. Assess confidence levels based on data consistency and patterns
-4. Consider factors like spending volatility, growth trends, and recurring expenses
-
-RESPONSE FORMAT (JSON):
-{
-  "categoryPredictions": [
-    {
-      "category": "Food & Dining",
-      "currentMonth": 450.00,
-      "predictedNext": 475.00,
+      "id": "insight_1",
+      "insight": "Financial insight with specific numbers",
       "confidence": 0.85,
-      "trend": "increasing",
-      "factors": ["Seasonal increase", "Recent dining out trend", "Grocery price inflation"]
+      "category": "spending|income|budgeting|saving",
+      "actionable": true
+    }
+  ]
+}`
+        },
+        {
+          role: "user",
+          content: "Generate personalized daily recommendations based on the financial data."
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+      max_tokens: 2000
+    });
+    
+    const result = JSON.parse(response.choices[0].message.content || '{"recommendations":[],"insights":[]}');
+    const finalResult = {
+      recommendations: result.recommendations || [],
+      insights: result.insights || []
+    };
+    
+    simpleCache.set(cacheKey, finalResult);
+    return finalResult;
+  } catch (error) {
+    console.error('Daily recommendations error:', error);
+    return { recommendations: [], insights: [] };
+  }
+}
+
+async function generateExpensePredictions(data) {
+  const cacheKey = getCacheKey('expensePredictions', data);
+  if (simpleCache.has(cacheKey)) {
+    return simpleCache.get(cacheKey);
+  }
+
+  const { summary, transactions } = data;
+  
+  if (!transactions || transactions.length < 3) {
+    return {
+      categoryPredictions: [],
+      monthlyPredictions: [],
+      overallTrend: "stable",
+      confidence: 0
+    };
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `Analyze spending patterns and predict future expenses. Return JSON in this exact format:
+{
+  "categoryPredictions": [
+    {
+      "category": "Category Name",
+      "currentMonth": 500,
+      "predictedNext": 520,
+      "confidence": 80,
+      "trend": "increasing"
     }
   ],
   "monthlyPredictions": [
     {
       "month": "2025-07",
-      "predicted": 2150.00,
-      "confidence": 0.80,
-      "breakdown": [
-        { "category": "Food & Dining", "amount": 475.00 },
-        { "category": "Transportation", "amount": 320.00 }
-      ]
-    },
-    {
-      "month": "2025-08",
-      "predicted": 2200.00,
-      "confidence": 0.75,
-      "breakdown": [
-        { "category": "Food & Dining", "amount": 480.00 },
-        { "category": "Transportation", "amount": 330.00 }
-      ]
-    },
-    {
-      "month": "2025-09",
-      "predicted": 2100.00,
-      "confidence": 0.70,
-      "breakdown": [
-        { "category": "Food & Dining", "amount": 460.00 },
-        { "category": "Transportation", "amount": 310.00 }
-      ]
-    }
-  ]
-}
-
-ANALYSIS GUIDELINES:
-- Use actual spending patterns to predict future amounts
-- Factor in recurring expenses for higher confidence
-- Consider trend direction (increasing/decreasing/stable)
-- Provide realistic confidence levels (0.6-0.95 range)
-- Include next 3-6 months in monthly predictions
-- Always include "factors" array for each category prediction
-- Explain prediction factors clearly
-- Account for seasonal variations if detectable
-- Ensure all numeric values are provided (no null/undefined)`;
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are an advanced financial forecasting AI specializing in expense prediction analysis. You analyze spending patterns, identify trends, and generate accurate predictions based on historical transaction data. Focus on realistic, data-driven predictions with appropriate confidence levels."
-                },
-                {
-                    role: "user",
-                    content: prompt
-                }
-            ],
-            response_format: { type: "json_object" },
-            max_tokens: 1500,
-            temperature: 0.2 // Low temperature for consistent financial predictions
-        });
-        const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
-        // Ensure all required fields are present with proper data types
-        const categoryPredictions = Array.isArray(aiResponse.categoryPredictions)
-            ? aiResponse.categoryPredictions.map(pred => ({
-                category: pred.category || 'Unknown',
-                currentMonth: Number(pred.currentMonth) || 0,
-                predictedNext: Number(pred.predictedNext) || 0,
-                confidence: Number(pred.confidence) || 0.5,
-                trend: pred.trend || 'stable',
-                factors: Array.isArray(pred.factors) ? pred.factors : ['No specific factors identified']
-            }))
-            : [];
-        const monthlyPredictions = Array.isArray(aiResponse.monthlyPredictions)
-            ? aiResponse.monthlyPredictions.map(month => ({
-                month: month.month || 'Unknown',
-                predicted: Number(month.predicted) || 0,
-                confidence: Number(month.confidence) || 0.5,
-                breakdown: Array.isArray(month.breakdown) ? month.breakdown : []
-            }))
-            : [];
-        const finalResult = {
-            categoryPredictions,
-            monthlyPredictions
-        };
-        // Note: Cache now handled by unified cache system via routes
-        console.log('Expense predictions generated successfully');
-        return finalResult;
-    }
-    catch (error) {
-        console.error('Error generating expense predictions:', error);
-        return {
-            categoryPredictions: [],
-            monthlyPredictions: []
-        };
-    }
-}
-async function generateDailyRecommendations(financialData) {
-    try {
-        // Note: Cache now handled by unified cache system via routes
-        console.log('Generating new daily recommendations with OpenAI');
-        // Limit data to last 3 months and 100 transactions for efficiency
-        const threeMonthsAgo = new Date();
-        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-        const recentTransactions = financialData.transactions
-            .filter(t => new Date(t.date) >= threeMonthsAgo)
-            .slice(0, 100);
-        // Calculate spending patterns
-        const categorySpending = new Map();
-        const dailySpending = new Map();
-        recentTransactions.forEach(t => {
-            if (t.type === 'expense') {
-                const amount = parseFloat(t.amount);
-                const categoryName = t.categoryId ? financialData.categories.get(t.categoryId) || 'Other' : 'Other';
-                const date = new Date(t.date).toDateString();
-                categorySpending.set(categoryName, (categorySpending.get(categoryName) || 0) + amount);
-                dailySpending.set(date, (dailySpending.get(date) || 0) + amount);
-            }
-        });
-        const topCategories = Array.from(categorySpending.entries())
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 5);
-        const avgDailySpending = Array.from(dailySpending.values())
-            .reduce((sum, amount) => sum + amount, 0) / Math.max(dailySpending.size, 1);
-        const prompt = `You are a financial advisor analyzing a user's spending patterns. Based on their financial data, provide personalized daily recommendations and insights.
-
-Financial Summary:
-- Total Income: $${(financialData.summary?.totalIncome || 0).toFixed(2)}
-- Total Expenses: $${(financialData.summary?.totalExpenses || 0).toFixed(2)}
-- Net Amount: $${(financialData.summary?.netAmount || 0).toFixed(2)}
-- Recent Transactions: ${recentTransactions.length}
-- Average Daily Spending: $${avgDailySpending.toFixed(2)}
-
-Top Spending Categories:
-${topCategories.map(([cat, amount]) => `- ${cat}: $${amount.toFixed(2)}`).join('\n')}
-
-Budget Information:
-${financialData.budgets.map(b => `- ${b.name}: $${b.amount} (${b.period})`).join('\n')}
-
-Recent Transaction Sample:
-${recentTransactions.slice(0, 10).map(t => `- ${t.date}: ${t.type} $${t.amount} - ${t.description}`).join('\n')}
-
-IMPORTANT: Use actual category names from the Top Spending Categories list above. Do NOT use "Category 1", "Category 2", etc. Use the real category names like "Transportation", "Food", "Utilities", etc.
-
-Please provide:
-1. 3-5 actionable daily task recommendations
-2. 2-3 personalized financial insights
-
-Return your response in this exact JSON format:
-{
-  "recommendations": [
-    {
-      "id": "rec-1",
-      "type": "budget_review",
-      "priority": "high",
-      "title": "Review Budget Allocation",
-      "description": "Your spending in dining exceeded budget by 20% this week",
-      "action": "Reduce dining expenses for the next 3 days",
-      "impact": "Save $50-75 this week",
-      "timeToComplete": "5 minutes"
+      "predicted": 3200,
+      "confidence": 75
     }
   ],
-  "insights": [
+  "overallTrend": "increasing",
+  "confidence": 80
+}
+
+Data: ${transactions.length} transactions, $${summary?.totalExpenses || 0} total expenses`
+        },
+        {
+          role: "user",
+          content: "Generate expense predictions based on the spending patterns."
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+      max_tokens: 1500
+    });
+    
+    const result = JSON.parse(response.choices[0].message.content || '{"categoryPredictions":[],"monthlyPredictions":[],"overallTrend":"stable","confidence":0}');
+    simpleCache.set(cacheKey, result);
+    return result;
+  } catch (error) {
+    console.error('Expense predictions error:', error);
+    return {
+      categoryPredictions: [],
+      monthlyPredictions: [],
+      overallTrend: "stable",
+      confidence: 0
+    };
+  }
+}
+
+async function generateTrendPredictions(transactions, categoryMap, budgets) {
+  const cacheKey = getCacheKey('trendPredictions', { transactions, categoryMap, budgets });
+  if (simpleCache.has(cacheKey)) {
+    return simpleCache.get(cacheKey);
+  }
+
+  if (!transactions || transactions.length === 0) {
+    return {
+      categoryPredictions: [],
+      financialForecast: {
+        nextMonthExpectedIncome: 0,
+        nextMonthExpectedExpenses: 0,
+        projectedSavings: 0,
+        confidenceLevel: 0,
+        trendDirection: "stable",
+        keyInsights: ["Add transactions to enable AI trend predictions"]
+      }
+    };
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `Analyze financial trends and predict future patterns. Return JSON in this exact format:
+{
+  "categoryPredictions": [
     {
-      "id": "insight-1", 
-      "insight": "Your weekend spending is 40% higher than weekdays",
-      "basedOn": "Transaction pattern analysis",
-      "confidence": 0.85,
-      "timeframe": "Last 30 days"
+      "categoryName": "Food & Dining",
+      "currentMonthSpending": 800,
+      "predictedNextMonth": 850,
+      "trend": "increasing",
+      "confidence": 85,
+      "insights": "Detailed reasoning for prediction"
     }
+  ],
+  "financialForecast": {
+    "nextMonthExpectedIncome": 5000,
+    "nextMonthExpectedExpenses": 3500,
+    "projectedSavings": 1500,
+    "confidenceLevel": 80,
+    "trendDirection": "improving",
+    "keyInsights": [
+      "Specific insight about trends",
+      "Prediction reasoning",
+      "Recommendation"
+    ]
+  }
+}
+
+Data: ${transactions.length} transactions across ${Object.keys(categoryMap || {}).length} categories`
+        },
+        {
+          role: "user",
+          content: "Analyze trends and provide predictions based on the financial data."
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+      max_tokens: 2000
+    });
+    
+    const result = JSON.parse(response.choices[0].message.content || '{"categoryPredictions":[],"financialForecast":{"nextMonthExpectedIncome":0,"nextMonthExpectedExpenses":0,"projectedSavings":0,"confidenceLevel":0,"trendDirection":"stable","keyInsights":[]}}');
+    simpleCache.set(cacheKey, result);
+    return result;
+  } catch (error) {
+    console.error('Trend predictions error:', error);
+    return {
+      categoryPredictions: [],
+      financialForecast: {
+        nextMonthExpectedIncome: 0,
+        nextMonthExpectedExpenses: 0,
+        projectedSavings: 0,
+        confidenceLevel: 0,
+        trendDirection: "stable",
+        keyInsights: ["Error generating predictions"]
+      }
+    };
+  }
+}
+
+async function generateFinancialHealthScore(data) {
+  const cacheKey = getCacheKey('financialHealthScore', data);
+  if (simpleCache.has(cacheKey)) {
+    return simpleCache.get(cacheKey);
+  }
+
+  const { summary, budgets, transactions, useAdvancedFactors } = data;
+  
+  if (!summary || (!transactions || transactions.length < 3)) {
+    return {
+      score: 0,
+      status: "insufficient-data",
+      color: "gray",
+      factors: [],
+      recommendations: ["Add more transactions to calculate financial health"],
+      riskFactors: ["Insufficient data for analysis"]
+    };
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `Calculate comprehensive financial health score. Return JSON in this exact format:
+{
+  "score": 75,
+  "status": "good",
+  "color": "green",
+  "factors": [
+    {
+      "name": "Cash Flow Management",
+      "score": 80,
+      "max": 100,
+      "description": "Analysis of income vs expenses"
+    }
+  ],
+  "recommendations": [
+    "Specific actionable recommendation"
+  ],
+  "riskFactors": [
+    "Identified financial risk"
   ]
 }
 
-Focus on:
-- Actionable tasks for today/this week
-- Specific spending patterns from their actual data
-- Budget optimization opportunities
-- Realistic financial improvements
-- Data-driven insights with confidence levels
-
-Only provide recommendations and insights based on the actual financial data provided. Do not include generic advice.`;
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-            messages: [
-                {
-                    role: "system",
-                    content: "You are an expert financial advisor who provides personalized, actionable recommendations based on real user data. Always return valid JSON."
-                },
-                {
-                    role: "user",
-                    content: prompt
-                }
-            ],
-            response_format: { type: "json_object" },
-            max_tokens: 1000,
-            temperature: 0.3 // Moderate creativity for personalized recommendations
-        });
-        const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
-        // Ensure proper data structure
-        const recommendations = Array.isArray(aiResponse.recommendations)
-            ? aiResponse.recommendations.map((rec, index) => ({
-                id: rec.id || `rec-${index + 1}`,
-                type: rec.type || 'general',
-                priority: rec.priority || 'medium',
-                title: rec.title || 'Financial Task',
-                description: rec.description || 'Complete this financial task',
-                action: rec.action || 'Take action on this recommendation',
-                impact: rec.impact || 'Positive financial impact',
-                timeToComplete: rec.timeToComplete || '10 minutes'
-            }))
-            : [];
-        const insights = Array.isArray(aiResponse.insights)
-            ? aiResponse.insights.map((insight, index) => ({
-                id: insight.id || `insight-${index + 1}`,
-                insight: insight.insight || 'Financial insight based on your data',
-                basedOn: insight.basedOn || 'Transaction analysis',
-                confidence: Number(insight.confidence) || 0.7,
-                timeframe: insight.timeframe || 'Recent activity'
-            }))
-            : [];
-        const result = {
-            recommendations,
-            insights
-        };
-        // Note: Cache now handled by unified cache system via routes
-        console.log('Daily recommendations generated successfully');
-        return result;
-    }
-    catch (error) {
-        console.error('Error generating daily recommendations:', error);
-        return {
-            recommendations: [],
-            insights: []
-        };
-    }
+Data: Income $${summary?.totalIncome || 0}, Expenses $${summary?.totalExpenses || 0}, ${transactions?.length || 0} transactions`
+        },
+        {
+          role: "user",
+          content: "Calculate financial health score based on the provided data."
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+      max_tokens: 1500
+    });
+    
+    const result = JSON.parse(response.choices[0].message.content || '{"score":0,"status":"insufficient-data","color":"gray","factors":[],"recommendations":[],"riskFactors":[]}');
+    simpleCache.set(cacheKey, result);
+    return result;
+  } catch (error) {
+    console.error('Financial health score error:', error);
+    return {
+      score: 0,
+      status: "error",
+      color: "red",
+      factors: [],
+      recommendations: ["Error calculating financial health"],
+      riskFactors: ["Analysis error"]
+    };
+  }
 }
-async function generateFinancialHealthScore(financialData) {
-    try {
-        const { transactions, budgets, summary } = financialData;
-        // Create a more stable hash that focuses on significant financial changes
-        // Exclude transaction IDs and exact timestamps to reduce cache misses
-        const stableData = {
-            transactionCount: transactions.length,
-            totalIncome: summary.totalIncome,
-            totalExpenses: summary.totalExpenses,
-            budgetCount: budgets.length,
-            recentTransactions: transactions
-                .slice(0, 10)
-                .map(t => ({
-                amount: Math.round(parseFloat(t.amount)),
-                type: t.type,
-                categoryName: t.categoryName
-            }))
-        };
-        const dataHash = cache_1.aiCache.createDataHash(stableData);
-        const cached = cache_1.aiCache.get(`financial_health_${dataHash}`);
-        if (cached) {
-            console.log('Using cached financial health data - avoiding OpenAI API call');
-            return cached;
+
+async function generateSpendingInsights(transactions) {
+  const cacheKey = getCacheKey('spendingInsights', { transactions });
+  if (simpleCache.has(cacheKey)) {
+    return simpleCache.get(cacheKey);
+  }
+
+  if (!transactions || transactions.length < 3) {
+    return [];
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `Analyze spending patterns and generate insights. Return JSON array in this exact format:
+[
+  {
+    "id": "insight_1",
+    "type": "trend",
+    "title": "Specific insight title",
+    "description": "Detailed analysis with dollar amounts",
+    "impact": "high",
+    "category": "Food & Dining",
+    "amount": 250,
+    "recommendation": "Actionable recommendation",
+    "actionable": true,
+    "confidence": 85
+  }
+]
+
+Data: ${transactions.length} transactions to analyze`
+        },
+        {
+          role: "user",
+          content: "Analyze spending patterns and provide insights."
         }
-        // Prepare data for AI analysis
-        const recentTransactions = transactions
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-            .slice(0, 50);
-        const categorySpending = new Map();
-        transactions.forEach(t => {
-            if (t.type === 'expense') {
-                const current = categorySpending.get(t.categoryName) || 0;
-                categorySpending.set(t.categoryName, current + parseFloat(t.amount));
-            }
-        });
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [
-                {
-                    role: "system",
-                    content: `You are an expert financial health analyst. Analyze the user's financial data and provide a comprehensive health assessment.
-
-Calculate a financial health score (0-100) based on:
-- Income vs expenses ratio
-- Budget adherence 
-- Spending patterns
-- Emergency fund adequacy
-- Debt management
-- Savings rate
-
-Categorize the score:
-- 80-100: excellent
-- 60-79: good  
-- 40-59: fair
-- 0-39: poor
-
-Determine trend based on recent spending patterns:
-- improving: positive financial trajectory
-- declining: concerning financial habits
-- stable: consistent financial behavior
-
-Provide specific insights, achievements, and actionable warnings.
-
-Respond with JSON in this exact format:
-{
-  "score": 75,
-  "trend": "improving",
-  "category": "good",
-  "insights": ["Specific financial insights"],
-  "achievements": ["Recent positive financial behaviors"],
-  "warnings": ["Areas needing attention"]
-}`
-                },
-                {
-                    role: "user",
-                    content: `Financial Summary:
-- Total Income: $${summary.totalIncome}
-- Total Expenses: $${summary.totalExpenses}
-- Net Balance: $${summary.netBalance}
-- Savings Rate: ${summary.totalIncome > 0 ? ((summary.totalIncome - summary.totalExpenses) / summary.totalIncome * 100).toFixed(1) : 0}%
-
-Recent Transactions (${recentTransactions.length}):
-${recentTransactions.slice(0, 20).map(t => `${t.date.split('T')[0]}: ${t.description} - $${t.amount} (${t.categoryName})`).join('\n')}
-
-Budgets (${budgets.length}):
-${budgets.map(b => {
-                        const utilization = b.amount ? (b.spent / parseFloat(b.amount) * 100).toFixed(1) : 0;
-                        return `Budget: $${b.amount}, Spent: $${b.spent} (${utilization}% used)`;
-                    }).join('\n')}
-
-Top Spending Categories:
-${Array.from(categorySpending.entries())
-                        .sort(([, a], [, b]) => b - a)
-                        .slice(0, 5)
-                        .map(([cat, amount]) => `${cat}: $${amount.toFixed(2)}`)
-                        .join('\n')}
-
-Analyze this financial data and provide a comprehensive health assessment.`
-                }
-            ],
-            response_format: { type: "json_object" },
-            temperature: 0.2
-        });
-        const result = JSON.parse(response.choices[0].message.content || '{}');
-        const healthData = {
-            score: Math.max(0, Math.min(100, result.score || 50)),
-            trend: result.trend || 'stable',
-            category: result.category || 'fair',
-            insights: Array.isArray(result.insights) ? result.insights : [],
-            achievements: Array.isArray(result.achievements) ? result.achievements : [],
-            warnings: Array.isArray(result.warnings) ? result.warnings : []
-        };
-        // Cache the result for 2 hours to reduce frequent API calls
-        cache_1.aiCache.set(`financial_health_${dataHash}`, healthData, 7200);
-        return healthData;
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+      max_tokens: 1500
+    });
+    
+    const content = response.choices[0].message.content;
+    let result = JSON.parse(content || '[]');
+    
+    if (!Array.isArray(result)) {
+      result = result.insights || [result];
     }
-    catch (error) {
-        console.error('Error generating financial health score:', error);
-        // Return fallback data based on simple calculations
-        const { summary } = financialData;
-        const savingsRate = summary.totalIncome > 0 ?
-            (summary.totalIncome - summary.totalExpenses) / summary.totalIncome : 0;
-        let score = 50;
-        let category = 'fair';
-        if (savingsRate > 0.2) {
-            score = 85;
-            category = 'excellent';
-        }
-        else if (savingsRate > 0.1) {
-            score = 70;
-            category = 'good';
-        }
-        else if (savingsRate > 0) {
-            score = 55;
-            category = 'fair';
-        }
-        else {
-            score = 30;
-            category = 'poor';
-        }
-        return {
-            score,
-            trend: 'stable',
-            category,
-            insights: ['Financial analysis temporarily unavailable'],
-            achievements: summary.netBalance > 0 ? ['Positive net balance'] : [],
-            warnings: summary.netBalance < 0 ? ['Expenses exceed income'] : []
-        };
-    }
+    
+    const processedInsights = result.filter(insight => insight && insight.title);
+    simpleCache.set(cacheKey, processedInsights);
+    return processedInsights;
+  } catch (error) {
+    console.error('Spending insights error:', error);
+    return [];
+  }
 }
+
+// Alias for backward compatibility
+const generateAIFinancialHealthScore = generateFinancialHealthScore;
+
+module.exports = {
+  categorizeExpense,
+  generateFinancialTips,
+  generateSpendingInsights,
+  generateAIFinancialHealthScore,
+  generateTrendPredictions,
+  generateExpensePredictions,
+  generateDailyRecommendations,
+  generateFinancialHealthScore
+};

@@ -8,8 +8,9 @@ COPY package.json ./
 # Install dependencies including tsx
 RUN npm install
 
-# Copy the JavaScript server file only
+# Copy the JavaScript server file and openai functions
 COPY server.js ./
+COPY openai-functions.js ./
 
 # Install tsx globally for better performance
 RUN npm install -g tsx
