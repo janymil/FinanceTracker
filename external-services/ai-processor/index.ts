@@ -1,4 +1,7 @@
+import express from "express";
+import cors from "cors";
 import OpenAI from "openai";
+import dotenv from "dotenv";
 // Mock cache for deployment - replaces aiCache dependency
 const mockCache = {
   getCategorization: (description: any, amount: any) => null,
