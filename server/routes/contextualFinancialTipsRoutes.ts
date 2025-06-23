@@ -50,7 +50,13 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
         hasIncome: summary?.totalIncome > 0,
         hasExpenses: summary?.totalExpenses > 0,
         budgetCount: budgets?.length || 0,
-        firstTransaction: transactions?.[0]?.description || 'none'
+        firstTransaction: transactions?.[0] ? {
+          description: transactions[0].description,
+          categoryName: transactions[0].categoryName,
+          category: transactions[0].category,
+          amount: transactions[0].amount,
+          type: transactions[0].type
+        } : 'none'
       });
 
       if (!transactions || !summary) {

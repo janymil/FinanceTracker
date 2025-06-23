@@ -108,6 +108,21 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
       console.log('Contextual tips: Forcing refresh due to cache invalidation or month change');
     }
 
+    // Debug: Log transaction data being sent to API
+    if (monthTransactions.length > 0) {
+      console.log('Contextual tips: Transaction sample being sent to AI:', {
+        firstTransaction: {
+          description: monthTransactions[0].description,
+          categoryName: monthTransactions[0].categoryName,
+          category: monthTransactions[0].category,
+          amount: monthTransactions[0].amount,
+          type: monthTransactions[0].type
+        },
+        totalTransactions: monthTransactions.length,
+        hasCategories: monthTransactions.filter(t => t.categoryName && t.categoryName !== 'Uncategorized').length
+      });
+    }
+
     // If no transactions for this month, show no data state
     if (monthTransactions.length === 0) {
       console.log('Contextual tips: No transactions for calculated month', {

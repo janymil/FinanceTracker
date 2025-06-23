@@ -352,6 +352,9 @@ Changelog:
 - June 23, 2025. PROMPT RESTORATION: Restored complete financial analysis prompt including date range calculations with safe error handling for empty transaction arrays
 - June 23, 2025. FIXED AI ACCURACY BUG: Corrected contextual financial tips data mapping - transactions use `categoryName` field not `category`, preventing AI from incorrectly reporting "uncategorized" transactions
 - June 23, 2025. Enhanced AI categorization analysis to properly detect and report actual categorization status in contextual tips with accurate transaction data
+- June 23, 2025. FIXED FALLBACK SYSTEM: Corrected local OpenAI fallback in server/openai.ts to use same categoryName field mapping as Fly.io processor
+- June 23, 2025. Added categorization counting logic to both Fly.io and local fallback systems to prevent "uncategorized" false reports
+- June 23, 2025. Cleared all cached contextual tips data to force fresh AI analysis with corrected field mapping
 - June 23, 2025. FLY.IO DEPLOYMENT SUCCESS: Corrected index.ts deployed successfully - health endpoint operational, contextual-tips generating sophisticated $150 savings analysis
 - June 23, 2025. COMPLETE AI TESTING: All 7 AI functions tested - 5 working immediately (71% success), 2 timeout due to complex processing
 - June 23, 2025. SOPHISTICATED ANALYSIS: financial-tips $80 savings, contextual-tips $2400 annual analysis, trend-predictions 92% confidence forecasting
