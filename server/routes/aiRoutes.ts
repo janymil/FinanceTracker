@@ -360,7 +360,7 @@ export function registerAIRoutes(app: Express) {
       const categoriesData = await db.select().from(categories);
       const categoryMap = new Map(categoriesData.map(cat => [cat.id, cat.name]));
 
-      console.log('Daily recommendations: Making Fly.io API call');
+      console.log('Daily recommendations: Making Fly.io API call to https://finanserpro-ai-processor.fly.dev/generate-daily-recommendation');
       
       const flyResponse = await fetch("https://finanserpro-ai-processor.fly.dev/generate-daily-recommendation", {
         method: "POST",
@@ -378,6 +378,14 @@ export function registerAIRoutes(app: Express) {
       }
       
       const recommendations = await flyResponse.json();
+      
+      console.log('Daily recommendations: Received response from Fly.io:', {
+        hasRecommendations: Array.isArray(recommendations?.recommendations),
+        recommendationCount: recommendations?.recommendations?.length || 0,
+        hasInsights: Array.isArray(recommendations?.insights),
+        insightCount: recommendations?.insights?.length || 0,
+        source: 'fly.io-external-service'
+      });
 
       // Save to database for session persistence
       try {

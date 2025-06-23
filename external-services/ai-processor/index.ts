@@ -129,7 +129,7 @@ app.post('/generate-daily-recommendation', async (req, res) => {
       });
     }
 
-    console.log('Generating new daily recommendations with OpenAI');
+    console.log('FLY.IO EXTERNAL SERVICE: Generating new daily recommendations with OpenAI GPT-4o');
 
     // Limit data to last 3 months and 100 transactions for efficiency
     const threeMonthsAgo = new Date();
@@ -269,7 +269,7 @@ Only provide recommendations and insights based on the actual financial data pro
       insights
     };
 
-    console.log('Daily recommendations generated successfully');
+    console.log('FLY.IO EXTERNAL SERVICE: Daily recommendations generated successfully via OpenAI API');
     res.json(result);
 
   } catch (error) {
