@@ -35,6 +35,23 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
   const [tips, setTips] = useState<FinancialTip[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [lastLoadedMonth, setLastLoadedMonth] = useState<string | null>(null);
+  
+  // Dynamic month detection at component level for consistent access
+  const getMostRecentTransactionMonth = () => {
+    if (!transactions || transactions.length === 0) {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    }
+    
+    const sortedTransactions = [...transactions].sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    
+    const mostRecentDate = new Date(sortedTransactions[0].date);
+    return `${mostRecentDate.getFullYear()}-${String(mostRecentDate.getMonth() + 1).padStart(2, '0')}`;
+  };
+  
+  const currentMonth = selectedMonth || getMostRecentTransactionMonth();
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -57,24 +74,6 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
 
   useEffect(() => {
     if (!transactions || !summary) return;
-
-    // Dynamic month detection: use selectedMonth or find the most recent transaction month
-    const getMostRecentTransactionMonth = () => {
-      if (!transactions || transactions.length === 0) {
-        // If no transactions, use current month
-        return new Date().toISOString().slice(0, 7);
-      }
-      
-      // Sort transactions by date descending and get the most recent month
-      const sortedTransactions = [...transactions].sort((a, b) => 
-        new Date(b.date).getTime() - new Date(a.date).getTime()
-      );
-      
-      const mostRecentDate = new Date(sortedTransactions[0].date);
-      return `${mostRecentDate.getFullYear()}-${String(mostRecentDate.getMonth() + 1).padStart(2, '0')}`;
-    };
-    
-    const currentMonth = selectedMonth || getMostRecentTransactionMonth();
     
     // Filter transactions for the selected month
     const monthTransactions = transactions.filter((transaction: any) => {
