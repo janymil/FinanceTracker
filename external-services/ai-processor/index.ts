@@ -226,34 +226,8 @@ Transaction Pattern Analysis:
 
 Generate 4 independent box analyses with exact mathematical calculations.`;
 
-    // Call the Fly.io AI processor service with fallback to direct OpenAI
-    let result;
-    try {
-      const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'https://finanzerpro.fly.dev';
-      console.log(`Calling AI processor at ${AI_PROCESSOR_URL}/execute-gpt-task`);
-
-      const aiResponse = await fetch(`${AI_PROCESSOR_URL}/execute-gpt-task`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ summary }),
-        // timeout: 30000 // 30 second timeout
-      });
-
-      if (!aiResponse.ok) {
-        throw new Error(`AI processor error: ${aiResponse.status} ${aiResponse.statusText}`);
-      }
-
-      const aiData = await aiResponse.json();
-      console.log('AI processor response received successfully');
-      result = (aiData as any).tip || aiData;
-      console.log('Successfully received response from AI processor');
-    } catch (aiProcessorError) {
-      console.warn('AI processor service unavailable, falling back to direct OpenAI:', aiProcessorError.message);
-
-      // Fallback to direct OpenAI call
-      const response = await openai.chat.completions.create({
+    // Direct OpenAI call (no recursion - this IS the AI processor)
+    const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
@@ -301,8 +275,7 @@ Return comprehensive analysis in JSON:
         temperature: 0.9
       });
 
-      result = JSON.parse(response.choices[0].message.content || '{}');
-    }
+    const result = JSON.parse(response.choices[0].message.content || '{}');
 
     // Handle comprehensive analysis response
     const processedTips = result.title && result.description ? [{

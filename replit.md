@@ -333,6 +333,8 @@ Changelog:
 - June 23, 2025. CACHE DURATION: Unified cache has no TTL - persists until data hash changes, providing optimal cost efficiency
 - June 23, 2025. CONFIGURATION VERIFIED: All 7 AI functions correctly configured for https://finanzerpro.fly.dev/execute-gpt-task endpoint
 - June 23, 2025. ENDPOINT ANALYSIS COMPLETE: Removed legacy imports, fixed all URL references, confirmed runAI() usage across all AI routes
+- June 23, 2025. RECURSION FIX: Eliminated recursive calls in Fly.io processor - removed AI_PROCESSOR_URL fetch calls from index.ts and openai-functions.ts
+- June 23, 2025. PROCESSOR CLEANUP: Deleted outdated deployment documentation files and removed openai-functions.ts (functionality moved to index.ts)
 - June 22, 2025. FIXED: Replaced hardcoded fallback tips with AI-based fallback system for contextual financial tips
 - June 22, 2025. Contextual tips now use simplified AI prompt as fallback instead of generic hardcoded messages inappropriate for user's financial situation
 - June 22, 2025. Emergency fallback shows dynamic financial summary rather than static text, maintaining personalization even when AI services fail
