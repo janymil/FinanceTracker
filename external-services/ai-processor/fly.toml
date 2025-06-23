@@ -2,9 +2,13 @@ app = "finanserpro-ai-processor"
 primary_region = "lax"
 
 [build]
+  dockerfile = "Dockerfile"
 
 [env]
   PORT = "8080"
+
+[processes]
+  app = "node index.js"
 
 [http_service]
   internal_port = 8080

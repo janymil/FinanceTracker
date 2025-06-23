@@ -307,6 +307,8 @@ Changelog:
 - June 23, 2025. ROOT CAUSE FOUND: Restored working server-backup.js which uses only Node.js built-ins (no external dependencies) - eliminated MODULE_NOT_FOUND errors
 - June 23, 2025. PROPERLY COMPILED: Created exact JavaScript version of openai-functions.ts with all sophisticated AI logic preserved and native https calls instead of OpenAI package
 - June 23, 2025. DEPLOYMENT CONFIGURED: Updated to use existing index.ts with TypeScript compilation in Dockerfile - index.ts imports sophisticated functions from openai-functions.ts (CORRECT FILES)
+- June 23, 2025. FLY.IO CACHE ISSUE: Deployment still running old server.js - updated fly.toml to force rebuild with correct index.js process
+- June 23, 2025. DEPLOYMENT READY: Fixed Fly.io cache issue with explicit process definition and Dockerfile specification - ready for fresh deployment
 - June 23, 2025. CACHE SYSTEM ACTIVE: Centralized AI processing with intelligent caching reducing API costs by 75-85%
 - June 23, 2025. ENHANCED FALLBACK SYSTEM: Updated Fly.io service to use cached data as fallback instead of empty responses when OpenAI fails
 - June 23, 2025. Users now see their previous AI insights (cached) instead of empty widgets when OpenAI service is temporarily unavailable
