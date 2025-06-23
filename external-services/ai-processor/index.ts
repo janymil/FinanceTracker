@@ -224,8 +224,46 @@ export async function generateContextualFinancialTips(data: {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3);
 
-    // Build detailed prompt
-    const prompt = `You are an expert financial advisor analyzing a user's financial data for ${selectedMonth}. Provide 2-4 specific, actionable financial tips based on their actual data.
+    // Analyze specific financial scenarios for contextual insights
+    const scenarios = [];
+    
+    // Check for budget overruns
+    budgets.forEach(budget => {
+      if (budget.remaining < 0) {
+        const overrunPercent = Math.abs((budget.remaining / budget.budgetAmount) * 100);
+        scenarios.push(`🟥 Budget overrun: You've exceeded your ${budget.category} budget by ${overrunPercent.toFixed(0)}% this month.`);
+      }
+    });
+    
+    // Check savings rate scenarios
+    if (savingsRate < 5 && summary.totalIncome > 0) {
+      scenarios.push(`🟨 Low savings rate: Your savings rate is ${savingsRate.toFixed(1)}%. Consider revisiting your financial goals.`);
+    } else if (savingsRate > 20) {
+      scenarios.push(`🟩 Excellent savings: Great job! You're saving ${savingsRate.toFixed(1)}% of your income this month.`);
+    }
+    
+    // Check for spending improvements (simplified version - in real scenario you'd compare to previous month)
+    const totalSpending = summary.totalExpenses;
+    const avgTransactionAmount = transactions.length > 0 ? totalSpending / transactions.length : 0;
+    if (avgTransactionAmount < 50 && transactions.length > 10) {
+      scenarios.push(`🟩 Controlled spending: Great job! You're keeping individual transactions small and manageable.`);
+    }
+    
+    // Check for irregular income patterns (simplified - you'd need historical data for better analysis)
+    if (summary.totalIncome > 0 && transactions.filter(t => t.category === 'Income' || t.amount > 1000).length > 3) {
+      scenarios.push(`🟦 Income variability: Your income shows some fluctuation. Consider setting aside a buffer for stability.`);
+    }
+    
+    // Check for specific category improvements or concerns
+    topSpendingCategories.forEach(([category, amount]) => {
+      const categoryPercent = (amount / totalSpending) * 100;
+      if (categoryPercent > 40) {
+        scenarios.push(`🟨 High category spending: ${category} represents ${categoryPercent.toFixed(0)}% of your expenses. Consider if this aligns with your priorities.`);
+      }
+    });
+
+    // Build detailed prompt with scenario analysis
+    const prompt = `You are an expert financial advisor analyzing a user's financial data for ${selectedMonth}. Provide 2-4 specific, actionable financial tips based on their actual data and identified scenarios.
 
 FINANCIAL OVERVIEW:
 - Total Income: $${summary.totalIncome.toLocaleString()}
@@ -235,29 +273,33 @@ FINANCIAL OVERVIEW:
 - Number of Transactions: ${summary.transactionCount}
 
 TOP SPENDING CATEGORIES:
-${topSpendingCategories.map(([cat, amount]) => `- ${cat}: $${amount.toLocaleString()}`).join('\n')}
+${topSpendingCategories.map(([cat, amount]) => `- ${cat}: $${amount.toLocaleString()} (${((amount/summary.totalExpenses)*100).toFixed(1)}%)`).join('\n')}
 
 BUDGET STATUS:
 ${budgets.length > 0 ? budgets.map(b => `- ${b.category}: $${b.spent.toLocaleString()}/$${b.budgetAmount.toLocaleString()} (${b.remaining >= 0 ? 'under' : 'over'} budget by $${Math.abs(b.remaining).toLocaleString()})`).join('\n') : '- No budgets set'}
 
+IDENTIFIED FINANCIAL SCENARIOS:
+${scenarios.length > 0 ? scenarios.join('\n') : '- No specific scenarios identified this month'}
+
 RECENT TRANSACTIONS (last 5):
 ${transactions.slice(0, 5).map(t => `- ${t.description}: $${t.amount.toLocaleString()} (${t.category})`).join('\n')}
 
-ANALYSIS REQUIREMENTS:
-1. Focus on ACTIONABLE insights based on their actual spending patterns
-2. Provide specific dollar amounts and percentages where relevant
-3. Consider their current savings rate and budget performance
-4. Address overspending if budgets are exceeded
-5. Suggest optimization opportunities in top spending categories
-6. Be encouraging for good financial habits, constructive for areas needing improvement
+CONTEXTUAL ANALYSIS REQUIREMENTS:
+1. Address specific scenarios identified above with targeted advice
+2. For budget overruns: Provide specific reduction strategies and alternative options
+3. For low savings rates: Suggest concrete steps to improve savings with dollar targets
+4. For positive improvements: Reinforce good habits and suggest next steps
+5. For income irregularities: Recommend buffer strategies and stability measures
+6. Include specific dollar amounts, percentages, and timeframes in recommendations
+7. Make tips actionable with clear next steps the user can take immediately
 
-Return 2-4 contextual tips in JSON format:
+Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
 {
   "tips": [
     {
       "id": "tip_1",
-      "title": "Specific actionable title",
-      "description": "Detailed description with specific amounts and steps",
+      "title": "Scenario-specific actionable title",
+      "description": "Detailed description addressing specific scenarios with concrete steps and amounts",
       "category": "spending|saving|budgeting|income",
       "priority": "high|medium|low",
       "actionable": true
