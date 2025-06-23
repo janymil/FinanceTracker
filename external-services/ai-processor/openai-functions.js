@@ -13,12 +13,12 @@ exports.generateDailyRecommendations = generateDailyRecommendations;
 exports.generateFinancialHealthScore = generateFinancialHealthScore;
 const openai_1 = __importDefault(require("openai"));
 const mockCache = {
-    getCategorization: () => null,
-    setCategorization: () => { },
-    getInsights: () => null,
-    setInsights: () => { },
-    get: () => null,
-    set: () => { },
+    getCategorization: (description, amount) => null,
+    setCategorization: (description, amount, result) => { },
+    getInsights: (hash) => null,
+    setInsights: (hash, result) => { },
+    get: (key) => null,
+    set: (key, value, ttl) => { },
     createDataHash: (data) => JSON.stringify(data).substring(0, 8)
 };
 const openai = new openai_1.default({ apiKey: process.env.OPENAI_API_KEY });
@@ -874,8 +874,8 @@ async function generateFinancialHealthScore(financialData) {
                 categoryName: t.categoryName
             }))
         };
-        const dataHash = aiCache.createDataHash(stableData);
-        const cached = aiCache.get(`financial_health_${dataHash}`);
+        const dataHash = mockCache.createDataHash(stableData);
+        const cached = mockCache.get(`financial_health_${dataHash}`);
         if (cached) {
             console.log('Using cached financial health data - avoiding OpenAI API call');
             return cached;
@@ -967,7 +967,7 @@ Analyze this financial data and provide a comprehensive health assessment.`
             achievements: Array.isArray(result.achievements) ? result.achievements : [],
             warnings: Array.isArray(result.warnings) ? result.warnings : []
         };
-        aiCache.set(`financial_health_${dataHash}`, healthData, 7200);
+        mockCache.set(`financial_health_${dataHash}`, healthData, 7200);
         return healthData;
     }
     catch (error) {

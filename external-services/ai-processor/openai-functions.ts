@@ -1,12 +1,12 @@
 import OpenAI from "openai";
 // Mock cache for deployment - replaces aiCache dependency
 const mockCache = {
-  getCategorization: () => null,
-  setCategorization: () => {},
-  getInsights: () => null,
-  setInsights: () => {},
-  get: () => null,
-  set: () => {},
+  getCategorization: (description: any, amount: any) => null,
+  setCategorization: (description: any, amount: any, result: any) => {},
+  getInsights: (hash: any) => null,
+  setInsights: (hash: any, result: any) => {},
+  get: (key: any) => null,
+  set: (key: any, value: any, ttl?: any) => {},
   createDataHash: (data: any) => JSON.stringify(data).substring(0, 8)
 };
 
@@ -307,7 +307,7 @@ Return comprehensive analysis in JSON:
     // Note: Cache now handled by unified cache system via routes
     console.log('Financial tips generated successfully');
     
-    return processedTips;
+    return processedTips as any; // Type assertion for deployment
   } catch (error) {
     console.error('Error generating financial tips:', error);
     return [
@@ -1182,8 +1182,8 @@ export async function generateFinancialHealthScore(financialData: {
         }))
     };
     
-    const dataHash = aiCache.createDataHash(stableData);
-    const cached = aiCache.get(`financial_health_${dataHash}`);
+    const dataHash = mockCache.createDataHash(stableData);
+    const cached = mockCache.get(`financial_health_${dataHash}`);
     if (cached) {
       console.log('Using cached financial health data - avoiding OpenAI API call');
       return cached;
@@ -1285,7 +1285,7 @@ Analyze this financial data and provide a comprehensive health assessment.`
     };
 
     // Cache the result for 2 hours to reduce frequent API calls
-    aiCache.set(`financial_health_${dataHash}`, healthData, 7200);
+    mockCache.set(`financial_health_${dataHash}`, healthData, 7200);
     
     return healthData;
   } catch (error) {
