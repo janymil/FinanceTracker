@@ -2,27 +2,24 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files first for better layer caching
+# Copy package files and install dependencies
 COPY package.json ./
+RUN npm install
 
-# Install dependencies
-RUN npm install --production
-
-# Copy the JavaScript server file and openai functions
+# Copy application files
 COPY server.js ./
 COPY openai-functions.js ./
 
-# Verify required dependencies are available
-RUN node -e "require('express'); require('cors'); require('dotenv'); require('openai'); console.log('All dependencies loaded successfully')"
+# Test that dependencies work
+RUN node -e "console.log('Testing dependencies...'); require('express'); require('cors'); require('dotenv'); require('openai'); console.log('✅ All dependencies loaded successfully')"
 
-# Create a non-root user
+# Create non-root user and set permissions
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
+    adduser -S nodejs -u 1001 && \
+    chown -R nodejs:nodejs /app
 
-# Change to non-root user
 USER nodejs
 
 EXPOSE 8080
 
-# Start with Node.js to run JavaScript
 CMD ["node", "server.js"]
