@@ -54,7 +54,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
     
     // Import and use local functions as fallback
     try {
-      const { generateSpendingInsights, generateExpensePredictions, generateContextualFinancialTips } = await import('../server/openai');
+      const { generateSpendingInsights, generateExpensePredictions, generateContextualFinancialTips, generateDailyRecommendations } = await import('../server/openai');
       
       if (task === 'spending-insights') {
         console.log(`[AI ${task}] Using local fallback for spending-insights`);
@@ -69,6 +69,11 @@ export async function runAI(task: string, userId: string, payload: Record<string
       if (task === 'contextual-tips') {
         console.log(`[AI ${task}] Using local fallback for contextual-tips`);
         return await generateContextualFinancialTips(payload);
+      }
+      
+      if (task === 'daily-recommendations') {
+        console.log(`[AI ${task}] Using local fallback for daily-recommendations`);
+        return await generateDailyRecommendations(payload);
       }
     } catch (localError) {
       console.error(`[AI ${task}] Local fallback also failed:`, localError.message);

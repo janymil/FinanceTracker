@@ -1264,8 +1264,16 @@ export async function generateDailyRecommendations(financialData: {
   categories: Map<number, string>;
 }) {
   try {
-    // Note: Cache now handled by unified cache system via routes
+    console.log('DEBUG: Daily recommendations - received data:', {
+      transactionCount: financialData.transactions?.length || 0,
+      firstTransaction: financialData.transactions?.[0] || 'none',
+      summaryData: financialData.summary,
+      budgetCount: financialData.budgets?.length || 0,
+      categoriesType: typeof financialData.categories,
+      categoriesSize: financialData.categories?.size || Object.keys(financialData.categories || {}).length
+    });
 
+    // Note: Cache now handled by unified cache system via routes
     console.log('Generating new daily recommendations with OpenAI');
 
     // Limit data to last 3 months and 100 transactions for efficiency
@@ -1275,6 +1283,13 @@ export async function generateDailyRecommendations(financialData: {
     const recentTransactions = financialData.transactions
       .filter(t => new Date(t.date) >= threeMonthsAgo)
       .slice(0, 100);
+
+    console.log('DEBUG: After filtering - transaction data:', {
+      originalCount: financialData.transactions?.length || 0,
+      afterFilter: recentTransactions.length,
+      threeMonthsAgo: threeMonthsAgo.toISOString(),
+      sampleFiltered: recentTransactions.slice(0, 2)
+    });
 
     // Calculate spending patterns
     const categorySpending = new Map();
