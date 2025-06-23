@@ -1255,10 +1255,10 @@ export async function generateContextualFinancialTips(data: {
         const avgTransactionInCategory = categoryTransactions.length > 0 ? 
           categoryTransactions.reduce((sum, t) => sum + t.amount, 0) / categoryTransactions.length : 0;
         
-        scenarios.push(`🟥 Budget overrun: You've exceeded your ${budget.category} budget by ${overrunPercent.toFixed(0)}% this month. Average transaction: $${avgTransactionInCategory.toFixed(2)}, Total transactions: ${categoryTransactions.length}`);
+        scenarios.push(`🟥 Budget overrun: You've exceeded your ${budget.categoryName || budget.category} budget by ${overrunPercent.toFixed(0)}% this month. Average transaction: $${avgTransactionInCategory.toFixed(2)}, Total transactions: ${categoryTransactions.length}`);
       } else if (budget.remaining < budget.budgetAmount * 0.1) {
         // Budget almost exhausted
-        scenarios.push(`🟨 Budget warning: Only $${budget.remaining.toFixed(2)} remaining in your ${budget.category} budget (${((budget.remaining/budget.budgetAmount)*100).toFixed(0)}% left).`);
+        scenarios.push(`🟨 Budget warning: Only $${budget.remaining.toFixed(2)} remaining in your ${budget.categoryName || budget.category} budget (${((budget.remaining/budget.budgetAmount)*100).toFixed(0)}% left).`);
       }
     });
     
