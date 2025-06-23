@@ -474,6 +474,73 @@ Return insights in JSON format:
   return Array.isArray(result) ? result : (result.insights || []);
 }
 
+async function handleTrendPredictions(payload: any) {
+  const { transactions, summary, budgets } = payload;
+  
+  if (!transactions || transactions.length === 0) {
+    return {
+      predictions: [],
+      forecast: {
+        nextMonthExpenses: 0,
+        expectedSavings: 0,
+        budgetVariance: 0,
+        confidence: 0
+      },
+      insights: [],
+      recommendations: []
+    };
+  }
+
+  const prompt = `You are an AI financial forecasting expert. Analyze spending patterns and predict future financial trends.
+
+Financial Data:
+- Summary: ${JSON.stringify(summary)}
+- Transactions: ${JSON.stringify(transactions.slice(0, 20))}
+- Budgets: ${JSON.stringify(budgets)}
+
+Generate comprehensive trend predictions in JSON format:
+{
+  "predictions": [
+    {
+      "category": "category name",
+      "predictedAmount": number,
+      "confidence": 0.8,
+      "trend": "increasing|decreasing|stable",
+      "reasoning": "explanation",
+      "monthlyForecast": [
+        {
+          "month": "2025-07",
+          "predicted": number,
+          "confidence": 0.75
+        }
+      ]
+    }
+  ],
+  "forecast": {
+    "nextMonthExpenses": number,
+    "expectedSavings": number,
+    "budgetVariance": number,
+    "confidence": 0.8
+  },
+  "insights": ["insight1", "insight2"],
+  "recommendations": ["recommendation1", "recommendation2"]
+}`;
+
+  const messages = [
+    { role: "system", content: prompt },
+    { role: "user", content: "Analyze my financial trends and provide predictions." }
+  ];
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages,
+    response_format: { type: "json_object" },
+    temperature: 0.7
+  });
+
+  return JSON.parse(response.choices[0].message.content || '{"predictions":[],"forecast":{"nextMonthExpenses":0,"expectedSavings":0,"budgetVariance":0,"confidence":0},"insights":[],"recommendations":[]}');
+}
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`AI Processor server running on port ${port}`);
 });
