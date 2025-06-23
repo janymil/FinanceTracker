@@ -157,10 +157,15 @@ export function registerAIRoutes(app: Express) {
 
       console.log('AI financial tips: Making Fly.io API call via centralized processor');
       
+      // Ensure we have proper transaction data for AI analysis
+      if (!formattedTransactions || formattedTransactions.length === 0) {
+        return res.json({ tip: "Add some transactions to get personalized financial insights." });
+      }
+
       const aiPayload = {
         totalIncome: financialData.totalIncome || 0,
         totalExpenses: financialData.totalExpenses || 0,
-        transactionsByCategory: financialData.categories || [],
+        transactionsByCategory: financialData.transactionsByCategory || financialData.categories || [],
         recentTransactions: formattedTransactions,
         timestamp: financialData.timestamp
       };

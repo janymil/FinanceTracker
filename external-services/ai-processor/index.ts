@@ -184,39 +184,83 @@ export async function generateFinancialTips(financialData: {
     if (financialData.timestamp) {
       console.log('Bypassing cache for fresh AI financial tips');
     }
-    const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions = [] } = financialData;
+    const { totalIncome, totalExpenses, recentTransactions } = financialData;
+
+    // Validate required data - reject if missing
+    if (!recentTransactions || !Array.isArray(recentTransactions)) {
+      throw new Error('recentTransactions is required and must be an array');
+    }
+
+    // Generate transactionsByCategory from transactions if not provided
+    const transactionsByCategory = [];
+    const categoryTotals = new Map();
+    
+    recentTransactions.forEach(t => {
+      const category = t.category || 'Uncategorized';
+      const amount = parseFloat(t.amount) || 0;
+      const type = t.type || (amount < 0 ? 'expense' : 'income');
+      
+      if (!categoryTotals.has(category)) {
+        categoryTotals.set(category, { expense: 0, income: 0 });
+      }
+      
+      const totals = categoryTotals.get(category);
+      if (type === 'expense') {
+        totals.expense += Math.abs(amount);
+      } else {
+        totals.income += Math.abs(amount);
+      }
+    });
+    
+    // Convert to the expected format
+    categoryTotals.forEach((totals, categoryName) => {
+      if (totals.expense > 0) {
+        transactionsByCategory.push({
+          categoryName,
+          amount: totals.expense,
+          type: 'expense'
+        });
+      }
+      if (totals.income > 0) {
+        transactionsByCategory.push({
+          categoryName,
+          amount: totals.income,
+          type: 'income'
+        });
+      }
+    });
 
     // Prepare the financial summary for the AI processor
     const netBalance = totalIncome - totalExpenses;
-    const transactionCount = recentTransactions?.length || 0;
+    const transactionCount = recentTransactions.length;
 
     const summary = `Financial Summary:
 - Monthly Income: $${totalIncome}
 - Monthly Expenses: $${totalExpenses}
 - Net Balance: $${netBalance} ${netBalance < 0 ? '(DEFICIT)' : '(SURPLUS)'}
 - Transaction Count: ${transactionCount}
-- Raw Transactions Retrieved: ${recentTransactions?.length || 0}
+- Raw Transactions Retrieved: ${recentTransactions.length}
 
 Spending by Category:
-${(transactionsByCategory || []).filter(cat => cat.type === 'expense').map(cat => 
-  `- ${cat.categoryName}: $${cat.amount} (${totalExpenses > 0 ? ((cat.amount / totalExpenses) * 100).toFixed(1) : '0.0'}% of expenses)`
+${transactionsByCategory.filter(cat => cat.type === 'expense').map(cat => 
+  `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalExpenses) * 100).toFixed(1)}% of expenses)`
 ).join('\n')}
 
 Income by Category:
-${(transactionsByCategory || []).filter(cat => cat.type === 'income').map(cat => 
-  `- ${cat.categoryName}: $${cat.amount} (${totalIncome > 0 ? ((cat.amount / totalIncome) * 100).toFixed(1) : '0.0'}% of income)`
+${transactionsByCategory.filter(cat => cat.type === 'income').map(cat => 
+  `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalIncome) * 100).toFixed(1)}% of income)`
 ).join('\n')}
 
 Recent Transactions (last 10):
-${(recentTransactions || []).slice(0, 10).map(t => 
+${recentTransactions.slice(0, 10).map(t => 
   `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'}) [${t.type}] on ${new Date(t.date).toLocaleDateString()}`
 ).join('\n')}
 
 Transaction Pattern Analysis:
-- Average transaction size: $${transactionCount > 0 ? ((totalIncome + totalExpenses) / transactionCount).toFixed(2) : '0.00'}
-- Income transactions: ${(recentTransactions || []).filter(t => t.type === 'income').length}
-- Expense transactions: ${(recentTransactions || []).filter(t => t.type === 'expense').length}
-- Date range: ${(recentTransactions || []).length > 0 ? `${new Date(Math.min(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()} to ${new Date(Math.max(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()}` : 'No transactions available'}
+- Average transaction size: $${((totalIncome + totalExpenses) / transactionCount).toFixed(2)}
+- Income transactions: ${recentTransactions.filter(t => t.type === 'income').length}
+- Expense transactions: ${recentTransactions.filter(t => t.type === 'expense').length}
+- Date range: ${new Date(Math.min(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()} to ${new Date(Math.max(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()}
 
 Generate 4 independent box analyses with exact mathematical calculations.`;
 
@@ -1353,7 +1397,13 @@ app.post("/execute-gpt-task", async (req, res) => {
 
     switch (task) {
       case "contextual-tips":
-        result = await generateFinancialTips(payload);
+        // Transform contextual-tips payload to match generateFinancialTips expectations
+        const contextualPayload = {
+          totalIncome: payload.summary?.totalIncome || 0,
+          totalExpenses: payload.summary?.totalExpenses || 0,
+          recentTransactions: payload.transactions || []
+        };
+        result = await generateFinancialTips(contextualPayload);
         break;
 
       case "daily-recommendations":
@@ -1361,6 +1411,7 @@ app.post("/execute-gpt-task", async (req, res) => {
         break;
 
       case "financial-tips":
+        // financial-tips already sends the correct format
         result = await generateFinancialTips(payload);
         break;
 
