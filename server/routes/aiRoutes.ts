@@ -227,7 +227,7 @@ export function registerAIRoutes(app: Express) {
           description: t.description,
           amount: parseFloat(t.amount),
           date: t.date.toISOString(),
-          categoryName: t.categoryId?.toString() || 'Uncategorized',
+          categoryName: t.categoryName || 'Uncategorized',
           type: t.type
         }))
       };
@@ -269,7 +269,7 @@ export function registerAIRoutes(app: Express) {
           description: t.description,
           amount: parseFloat(t.amount),
           date: t.date.toISOString(),
-          categoryName: t.categoryId?.toString() || 'Uncategorized',
+          categoryName: t.categoryName || 'Uncategorized',
           type: t.type
         })),
         useAdvancedFactors
@@ -442,16 +442,15 @@ export function registerAIRoutes(app: Express) {
           description: t.description || '',
           date: t.date || '',
           type: t.type || 'expense',
-          categoryId: t.category_id || t.categoryId || 0
+          categoryName: t.categoryName || 'Uncategorized'
         })),
         budgets: (budgets || []).map(b => ({
           id: b.id || 0,
           name: b.name || '',
           amount: String(b.amount || 0),
-          categoryId: b.category_id || b.categoryId || 0,
+          categoryName: b.categoryName || 'Uncategorized',
           period: b.period || 'monthly'
-        })),
-        categories: categoryMap
+        }))
       };
 
       console.log('DEBUG: Daily recommendations payload being sent to Fly.io:', {
@@ -594,7 +593,7 @@ export function registerAIRoutes(app: Express) {
           .slice(0, 10)
           .map(t => ({ type: t.type, amount: Math.round(parseFloat(t.amount)) })),
         budgetAllocations: budgets.map(b => ({ 
-          categoryId: b.categoryId, 
+          categoryName: b.categoryName || 'Uncategorized', 
           amount: Math.round(parseFloat(b.amount)) 
         }))
       };
