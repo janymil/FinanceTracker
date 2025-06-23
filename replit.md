@@ -313,7 +313,7 @@ Changelog:
 - June 23, 2025. DEPLOYMENT READY: Fly.io app deleted, files prepared for fresh deployment with index.ts calling openai-functions.ts, updated endpoint URL to finanserpro-ai-processor-v2.fly.dev
 - June 23, 2025. SELF-CONTAINED AI PROCESSOR: Modified index.ts to include all sophisticated prompts from openai-functions.ts with Express server and /execute-gpt-task endpoint, no external imports needed
 - June 23, 2025. FIXED HANDLER NAMES: Corrected task routing to match main app calls - financial-health-score, spending-insights, trend-predictions, contextual-tips, daily-recommendations, financial-tips, expense-predictions
-- June 23, 2025. DEPLOYMENT COMPLETE: Fly.io AI processor deployed at https://finanzerpro.fly.dev - updated main app endpoint URL, all 7 AI functions ready for production use
+- June 23, 2025. DEPLOYMENT COMPLETE: Fly.io AI processor deployed at https://finanserpro-ai-processor.fly.dev - corrected app name back to original, all 7 AI functions ready for production use
 - June 23, 2025. FIXED PAYLOAD STRUCTURE: Corrected expense-predictions handler to extract transactions array from payload, resolved "transactions.filter is not a function" error
 - June 23, 2025. TYPESCRIPT DEPLOYMENT: Reconfigured Fly.io to run index.ts directly with tsx instead of compiling to index.js, per user requirement
 - June 23, 2025. CACHE SYSTEM ACTIVE: Centralized AI processing with intelligent caching reducing API costs by 75-85%

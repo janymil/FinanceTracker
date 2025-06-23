@@ -31,7 +31,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
 
   try {
     // Try unified endpoint first
-    const response = await fetch("https://finanzerpro.fly.dev/execute-gpt-task", {
+    const response = await fetch("https://finanserpro-ai-processor.fly.dev/execute-gpt-task", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ task, userId, payload })

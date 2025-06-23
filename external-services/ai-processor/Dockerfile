@@ -1,5 +1,8 @@
 FROM node:18-alpine
 
+# Force fresh build
+ENV BUILDKIT_INLINE_CACHE=0
+
 WORKDIR /app
 
 # Copy package files

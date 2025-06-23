@@ -1,8 +1,10 @@
-app = "finanserpro-ai-processor-v2"
+app = "finanserpro-ai-processor"
 primary_region = "lax"
 
 [build]
   dockerfile = "Dockerfile"
+  [build.args]
+    BUILDKIT_INLINE_CACHE = "0"
 
 [env]
   PORT = "8080"
