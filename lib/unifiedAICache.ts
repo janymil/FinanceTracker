@@ -1,8 +1,8 @@
 import crypto from "crypto";
 import { storage } from "../server/storage";
 import { db } from "../server/db";
-import { contextualFinancialTips, dailyRecommendations } from "../shared/schema";
-import { eq } from "drizzle-orm";
+import { aiCache } from "../shared/schema";
+import { eq, and } from "drizzle-orm";
 
 /**
  * Unified AI Cache System
@@ -151,49 +151,30 @@ export class UnifiedAICache {
   }
 
   /**
-   * Get entry from database using existing tables
+   * Get entry from unified ai_cache table
    */
   private async getFromDatabase(functionName: string, userId: string, month: string, dataHash: string): Promise<CacheEntry | null> {
     try {
-      if (functionName === 'contextual-tips') {
-        const result = await db.select()
-          .from(contextualFinancialTips)
-          .where(eq(contextualFinancialTips.userId, userId))
-          .limit(1);
-        
-        if (result.length > 0 && result[0].dataHash === dataHash) {
-          return {
-            userId,
-            functionName,
-            month,
-            dataHash,
-            result: { tips: result[0].tips },
-            createdAt: result[0].createdAt,
-            lastAccessed: new Date()
-          };
-        }
-      }
+      const result = await db.select()
+        .from(aiCache)
+        .where(and(
+          eq(aiCache.userId, userId),
+          eq(aiCache.functionName, functionName),
+          eq(aiCache.month, month),
+          eq(aiCache.dataHash, dataHash)
+        ))
+        .limit(1);
       
-      if (functionName === 'daily-recommendations') {
-        const result = await db.select()
-          .from(dailyRecommendations)
-          .where(eq(dailyRecommendations.userId, userId))
-          .limit(1);
-        
-        if (result.length > 0 && result[0].dataHash === dataHash) {
-          return {
-            userId,
-            functionName,
-            month,
-            dataHash,
-            result: {
-              recommendations: result[0].recommendations,
-              insights: result[0].insights
-            },
-            createdAt: result[0].generatedAt,
-            lastAccessed: new Date()
-          };
-        }
+      if (result.length > 0) {
+        return {
+          userId,
+          functionName,
+          month,
+          dataHash,
+          result: result[0].result,
+          createdAt: result[0].createdAt,
+          lastAccessed: new Date()
+        };
       }
       
       return null;
@@ -204,39 +185,37 @@ export class UnifiedAICache {
   }
 
   /**
-   * Save entry to database using existing tables
+   * Save entry to unified ai_cache table
    */
   private async saveToDatabase(entry: CacheEntry): Promise<void> {
     try {
-      if (entry.functionName === 'contextual-tips') {
-        const existingTips = await storage.getContextualFinancialTips(entry.userId);
-        const tipsData = {
+      // Check if entry already exists
+      const existing = await db.select()
+        .from(aiCache)
+        .where(and(
+          eq(aiCache.userId, entry.userId),
+          eq(aiCache.functionName, entry.functionName),
+          eq(aiCache.month, entry.month)
+        ))
+        .limit(1);
+
+      if (existing.length > 0) {
+        // Update existing entry
+        await db.update(aiCache)
+          .set({
+            dataHash: entry.dataHash,
+            result: entry.result,
+            updatedAt: new Date()
+          })
+          .where(eq(aiCache.id, existing[0].id));
+      } else {
+        // Insert new entry
+        await db.insert(aiCache).values({
           userId: entry.userId,
-          tips: entry.result.tips || [],
+          functionName: entry.functionName,
+          month: entry.month,
           dataHash: entry.dataHash,
-          transactionCount: 0, // Will be filled by calling function
-          totalIncome: "0.00",
-          totalExpenses: "0.00", 
-          budgetCount: 0
-        };
-        
-        if (existingTips) {
-          await storage.updateContextualFinancialTips(entry.userId, tipsData);
-        } else {
-          await storage.saveContextualFinancialTips(tipsData);
-        }
-      }
-      
-      if (entry.functionName === 'daily-recommendations') {
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiration
-        
-        await storage.saveDailyRecommendations({
-          userId: entry.userId,
-          recommendations: entry.result.recommendations || [],
-          insights: entry.result.insights || [],
-          dataHash: entry.dataHash,
-          expiresAt
+          result: entry.result
         });
       }
     } catch (error) {
@@ -245,28 +224,34 @@ export class UnifiedAICache {
   }
 
   /**
-   * Clear user data from database
+   * Clear user data from unified ai_cache table
    */
   private async clearUserFromDatabase(userId: string): Promise<void> {
     try {
-      await db.delete(contextualFinancialTips).where(eq(contextualFinancialTips.userId, userId));
-      await db.delete(dailyRecommendations).where(eq(dailyRecommendations.userId, userId));
+      await db.delete(aiCache).where(eq(aiCache.userId, userId));
     } catch (error) {
       console.error('Database clear error:', error);
     }
   }
 
   /**
-   * Clear function data from database
+   * Clear function data from unified ai_cache table
    */
   private async clearFunctionFromDatabase(userId: string, functionName: string, month?: string): Promise<void> {
     try {
-      if (functionName === 'contextual-tips') {
-        await db.delete(contextualFinancialTips).where(eq(contextualFinancialTips.userId, userId));
-      }
-      
-      if (functionName === 'daily-recommendations') {
-        await db.delete(dailyRecommendations).where(eq(dailyRecommendations.userId, userId));
+      if (month) {
+        // Clear specific function and month
+        await db.delete(aiCache).where(and(
+          eq(aiCache.userId, userId),
+          eq(aiCache.functionName, functionName),
+          eq(aiCache.month, month)
+        ));
+      } else {
+        // Clear all months for this function
+        await db.delete(aiCache).where(and(
+          eq(aiCache.userId, userId),
+          eq(aiCache.functionName, functionName)
+        ));
       }
     } catch (error) {
       console.error('Database function clear error:', error);
