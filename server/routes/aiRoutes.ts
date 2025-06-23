@@ -439,13 +439,8 @@ export function registerAIRoutes(app: Express) {
         summaryData: aiPayload.summary,
         budgetCount: aiPayload.budgets.length,
         categoryCount: Object.keys(aiPayload.categories).length,
-        sampleTransactions: aiPayload.transactions.slice(0, 3).map(t => ({
-          id: t.id,
-          amount: t.amount,
-          description: t.description,
-          date: t.date,
-          type: t.type
-        }))
+        hasActualTransactions: aiPayload.transactions.length > 0,
+        firstTransaction: aiPayload.transactions[0] || 'none'
       });
 
       const recommendations = await runAI('daily-recommendations', userId, aiPayload);

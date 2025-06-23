@@ -1580,39 +1580,7 @@ app.post("/execute-gpt-task", async (req, res) => {
         break;
 
       case "daily-recommendations":
-        // Convert payload to expected format for generateDailyRecommendations
-        const dailyRecsPayload = {
-          transactions: (payload.transactions || []).map(t => ({
-            id: t.id || 0,
-            amount: String(t.amount || 0),
-            description: t.description || '',
-            date: t.date || '',
-            type: t.type || 'expense',
-            categoryId: t.categoryId || 0
-          })),
-          summary: {
-            totalIncome: payload.summary?.totalIncome || 0,
-            totalExpenses: payload.summary?.totalExpenses || 0,
-            netAmount: payload.summary?.netAmount || payload.summary?.netBalance || 0
-          },
-          budgets: (payload.budgets || []).map(b => ({
-            id: b.id || 0,
-            name: b.name || '',
-            amount: String(b.amount || 0),
-            categoryId: b.categoryId || 0,
-            period: b.period || 'monthly'
-          })),
-          categories: new Map(Object.entries(payload.categories || {}))
-        };
-        
-        console.log('DEBUG: Converted daily recommendations payload:', {
-          transactionCount: dailyRecsPayload.transactions.length,
-          hasValidTransactions: dailyRecsPayload.transactions.length > 0,
-          sampleTransaction: dailyRecsPayload.transactions[0] || 'none',
-          summaryData: dailyRecsPayload.summary
-        });
-        
-        result = await generateDailyRecommendations(dailyRecsPayload);
+        result = await generateDailyRecommendations(payload);
         break;
 
       case "expense-predictions":
