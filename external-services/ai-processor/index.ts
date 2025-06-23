@@ -184,39 +184,60 @@ export async function generateFinancialTips(financialData: {
     if (financialData.timestamp) {
       console.log('Bypassing cache for fresh AI financial tips');
     }
-    const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
+    const { 
+      totalIncome = 0, 
+      totalExpenses = 0, 
+      transactionsByCategory = [], 
+      recentTransactions = [] 
+    } = financialData || {};
 
-    // Prepare the financial summary for the AI processor
+    // Validate and prepare the financial summary
     const netBalance = totalIncome - totalExpenses;
-    const transactionCount = recentTransactions?.length || 0;
+    const transactionCount = Array.isArray(recentTransactions) ? recentTransactions.length : 0;
     
-    // Validate required data
-    if (!recentTransactions || !Array.isArray(recentTransactions)) {
-      console.error('Invalid recentTransactions data:', typeof recentTransactions);
-      return [];
+    // Return early if no meaningful data
+    if (transactionCount === 0 && totalIncome === 0 && totalExpenses === 0) {
+      console.log('No financial data provided - returning basic tip');
+      return [{
+        title: 'Start Your Financial Journey',
+        description: 'Begin by tracking your income and expenses to get personalized financial insights.',
+        category: 'budgeting',
+        priority: 'high',
+        actionable: true
+      }];
     }
+
+    // Build summary with safe data access
+    const categoryAnalysis = Array.isArray(transactionsByCategory) && transactionsByCategory.length > 0 
+      ? transactionsByCategory.map(cat => `- ${cat.categoryName || 'Unknown'}: $${cat.amount || 0} (${cat.type || 'expense'})`).join('\n')
+      : '- No category data available';
+
+    const recentAnalysis = transactionCount > 0 
+      ? recentTransactions.slice(0, 10).map(t => `- ${t.description || 'Unknown'}: $${t.amount || 0} (${new Date(t.date || Date.now()).toLocaleDateString()})`).join('\n')
+      : '- No recent transactions available';
+
+    const incomeCount = transactionCount > 0 ? recentTransactions.filter(t => t.type === 'income').length : 0;
+    const expenseCount = transactionCount > 0 ? recentTransactions.filter(t => t.type === 'expense').length : 0;
+    const avgTransaction = transactionCount > 0 ? (totalIncome + totalExpenses) / transactionCount : 0;
 
     const summary = `Financial Summary:
 - Monthly Income: $${totalIncome}
 - Monthly Expenses: $${totalExpenses}
 - Net Balance: $${netBalance} ${netBalance < 0 ? '(DEFICIT)' : '(SURPLUS)'}
 - Transaction Count: ${transactionCount}
-- Raw Transactions Retrieved: ${recentTransactions.length}
 
 Spending by Category:
-${transactionsByCategory.filter(cat => cat.type === 'expense').map(cat => 
-  `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalExpenses) * 100).toFixed(1)}% of expenses)`
-).join('\n')}
+${categoryAnalysis}
 
-Income by Category:
-${transactionsByCategory.filter(cat => cat.type === 'income').map(cat => 
-  `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalIncome) * 100).toFixed(1)}% of income)`
-).join('\n')}
+Recent Transaction Analysis:
+${recentAnalysis}
 
-Recent Transactions (last 10):
-${recentTransactions.slice(0, 10).map(t => 
-  `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'}) [${t.type}] on ${new Date(t.date).toLocaleDateString()}`
-).join('\n')}
+Transaction Pattern Analysis:
+- Average transaction size: $${avgTransaction.toFixed(2)}
+- Income transactions: ${incomeCount}
+- Expense transactions: ${expenseCount}
+
+Generate 4 independent box analyses with exact mathematical calculations.`;
 
 Transaction Pattern Analysis:
 - Average transaction size: $${(totalIncome + totalExpenses) / transactionCount}
