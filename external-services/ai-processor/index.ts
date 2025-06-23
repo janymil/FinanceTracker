@@ -1379,17 +1379,6 @@ Analyze this financial data and provide a comprehensive health assessment.`
   }
 }
 
-// Root endpoint for browser access
-app.get('/', (req, res) => {
-  res.json({ 
-    service: 'FinanzerPro AI Processor',
-    status: 'online',
-    endpoints: ['/health', '/execute-gpt-task'],
-    model: 'gpt-4o',
-    tasks: ['contextual-tips', 'financial-tips', 'daily-recommendations', 'expense-predictions', 'financial-health-score', 'spending-insights', 'trend-predictions']
-  });
-});
-
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'ai-processor', model: 'gpt-4o' });
@@ -1475,28 +1464,6 @@ app.post('/generate-daily-recommendation', async (req, res) => {
   }
 });
 
-console.log(`Starting AI Processor on port ${port}...`);
-console.log(`Environment: NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT}`);
-
-const server = app.listen(port, '0.0.0.0', () => {
-  console.log(`✅ AI Processor SUCCESSFULLY STARTED`);
-  console.log(`✅ Listening on 0.0.0.0:${port}`);
-  console.log(`✅ Health: http://0.0.0.0:${port}/health`);
-  console.log(`✅ AI Tasks: http://0.0.0.0:${port}/execute-gpt-task`);
-  console.log(`✅ Info: http://0.0.0.0:${port}/`);
-});
-
-// Handle server errors
-server.on('error', (err) => {
-  console.error('Server error:', err);
-  process.exit(1);
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    console.log('Process terminated');
-    process.exit(0);
-  });
+app.listen(port, '0.0.0.0', () => {
+  console.log(`AI Processor server running on port ${port}`);
 });
