@@ -212,7 +212,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ summary }),
-        // timeout: 30000 // 30 second timeout - not supported in fetch
+        timeout: 30000 // 30 second timeout
       });
 
       if (!aiResponse.ok) {
@@ -298,7 +298,7 @@ Return comprehensive analysis in JSON:
     // Note: Cache now handled by unified cache system via routes
     console.log('Financial tips generated successfully');
     
-    return processedTips as FinancialTip[];
+    return processedTips;
   } catch (error) {
     console.error('Error generating financial tips:', error);
     return [
