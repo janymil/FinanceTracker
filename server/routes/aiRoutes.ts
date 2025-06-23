@@ -140,18 +140,7 @@ export function registerAIRoutes(app: Express) {
         budgetAssigned: t.budgetAssigned
       }));
 
-      // Check unified cache for financial tips
-      const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      const cachedResult = await unifiedAICache.get('financial-tips', userId, month, {
-        totalIncome: financialData.totalIncome || 0,
-        totalExpenses: financialData.totalExpenses || 0,
-        transactions: formattedTransactions.slice(0, 50)
-      });
-      
-      if (cachedResult && !financialData.timestamp) {
-        console.log('AI financial tips: Using unified cache - avoiding API call');
-        return res.json({ tip: `${cachedResult[0]?.title}: ${cachedResult[0]?.description}` });
-      }
+      // Skip cache checks - go directly to AI processing for now since Fly.io isn't deployed
 
       console.log(`Processing ${formattedTransactions.length} transactions for AI analysis`);
 
@@ -165,21 +154,14 @@ export function registerAIRoutes(app: Express) {
         timestamp: financialData.timestamp
       };
 
-      const tipResults = await runAI('financial-tips', userId, aiPayload);
-
-      // Save to unified cache if not bypassing cache
-      if (!financialData.timestamp && tipResults && tipResults.length > 0) {
-        try {
-          await unifiedAICache.set('financial-tips', userId, month, {
-            totalIncome: financialData.totalIncome || 0,
-            totalExpenses: financialData.totalExpenses || 0,
-            transactions: formattedTransactions.slice(0, 50)
-          }, tipResults);
-          console.log('AI financial tips: Saved to unified cache');
-        } catch (cacheError) {
-          console.error("Error saving financial tips to unified cache:", cacheError);
-        }
-      }
+      // Use legacy function until Fly.io is deployed
+      const tipResults = await generateFinancialTips({
+        totalIncome: financialData.totalIncome || 0,
+        totalExpenses: financialData.totalExpenses || 0,
+        transactionsByCategory: financialData.categories || [],
+        recentTransactions: formattedTransactions,
+        timestamp: financialData.timestamp
+      });
 
       if (tipResults && tipResults.length > 0) {
         const tip = tipResults[0];
@@ -407,21 +389,7 @@ export function registerAIRoutes(app: Express) {
       };
       const dataHash = aiCache.createDataHash(dataForHash);
 
-      // Check unified cache for recommendations
-      const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      const cachedResult = await unifiedAICache.get('daily-recommendations', userId, month, {
-        summary,
-        transactions: transactions.slice(0, 100),
-        budgets
-      });
-      
-      if (cachedResult && cachedResult.recommendations) {
-        console.log('Daily recommendations: Using unified cache - avoiding API call');
-        return res.json({
-          recommendations: cachedResult.recommendations,
-          insights: cachedResult.insights
-        });
-      }
+      // Skip cache checks - use legacy function until Fly.io is deployed
 
       // Get categories for proper naming
       const categoriesData = await db.select().from(categories);
@@ -436,7 +404,13 @@ export function registerAIRoutes(app: Express) {
         categories: Object.fromEntries(categoryMap)
       };
 
-      const recommendations = await runAI('daily-recommendations', userId, aiPayload);
+      // Use legacy function until Fly.io is deployed
+      const recommendations = await generateDailyRecommendations({
+        summary: summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 },
+        transactions: transactions.slice(0, 100),
+        budgets: budgets || [],
+        categories: Object.fromEntries(categoryMap)
+      });
       
       console.log('Daily recommendations: Received response from Fly.io:', {
         hasRecommendations: Array.isArray(recommendations?.recommendations),

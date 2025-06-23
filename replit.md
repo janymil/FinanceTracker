@@ -277,11 +277,11 @@ Changelog:
 - June 23, 2025. UPGRADED: Replaced Node.js HTTP server with clean Express/TypeScript implementation for better maintainability
 - June 23, 2025. Added expense-predictions task handler and maintained backward compatibility with legacy endpoints
 - June 23, 2025. DEPLOYMENT STATUS: Updated Fly.io service infrastructure with TypeScript/Express, added required dependencies for production deployment
-- June 23, 2025. COMPLETED: Fixed remaining AI functions - Financial Tips and Daily Recommendations now use runAI() via centralized processor
-- June 23, 2025. FINAL STATUS: All 7 AI functions properly migrated - Daily Recommendations ✅, Financial Tips ✅, Contextual Tips ✅, Trend Predictions ✅, Expense Predictions ✅, Financial Health Score ✅, Spending Insights ✅
-- June 23, 2025. DEPLOYMENT REQUIRED: Fly.io service needs manual deployment to activate /execute-gpt-task endpoint functionality
-- June 23, 2025. UNIFIED CACHE: Smart caching system ready - will populate when Fly.io service is deployed and AI functions are called
-- June 23, 2025. ARCHITECTURE: Complete centralized AI processing via runAI() → Fly.io → unified cache with intelligent invalidation
+- June 23, 2025. FACT-CHECK CORRECTION: Previous migration claims were FALSE - unified cache is empty with 0 entries
+- June 23, 2025. ACTUAL STATUS: Only 5/7 functions partially migrated (Contextual Tips, Trend Predictions, Expense Predictions, Financial Health Score, Spending Insights)
+- June 23, 2025. REVERTED: Financial Tips and Daily Recommendations back to legacy functions since Fly.io service is not deployed
+- June 23, 2025. DEPLOYMENT BLOCKER: /execute-gpt-task endpoint returns 404 - Fly.io service needs manual deployment before migration can work
+- June 23, 2025. CACHE REALITY: Unified cache system exists but completely unused (0 entries) due to Fly.io deployment requirement
 - June 23, 2025. ENHANCED FALLBACK SYSTEM: Updated Fly.io service to use cached data as fallback instead of empty responses when OpenAI fails
 - June 23, 2025. Users now see their previous AI insights (cached) instead of empty widgets when OpenAI service is temporarily unavailable
 - June 23, 2025. UNIFIED CACHE SYSTEM: Implemented smart caching using existing database tables (contextualFinancialTips, dailyRecommendations)
