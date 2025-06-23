@@ -316,7 +316,8 @@ Changelog:
 - June 23, 2025. FIXED HANDLER NAMES: Corrected task routing to match main app calls - financial-health-score, spending-insights, trend-predictions, contextual-tips, daily-recommendations, financial-tips, expense-predictions
 - June 23, 2025. DEPLOYMENT COMPLETE: Fly.io AI processor deployed at https://finanzerpro.fly.dev with all critical bugs fixed
 - June 23, 2025. DEPLOYMENT STATUS: Current Fly.io deployment still runs old code with destructive empty arrays - local fixes ready but not deployed
-- June 23, 2025. BROWSER ACCESS FIX: Added root endpoint to AI processor to prevent "Cannot GET /" error when accessing finanzerpro.fly.dev directly
+- June 23, 2025. CLARIFICATION: AI processor was originally designed as API-only service without root route - never had browser access capability
+- June 23, 2025. ADDED ROOT ENDPOINT: Created GET / route for service information when accessed via browser (ready for deployment)
 - June 23, 2025. FIXED AI PROCESSOR DATA FLOW: Removed destructive empty array fallbacks, added proper transactionsByCategory generation from raw transactions
 - June 23, 2025. ELIMINATED DESTRUCTIVE EMPTY ARRAYS: Removed all || [] fallbacks from AI endpoints that were masking real data issues and destroying AI functionality
 - June 23, 2025. PROPER DATA VALIDATION: AI endpoints now require meaningful transaction data instead of defaulting to empty arrays
