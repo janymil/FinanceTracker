@@ -266,6 +266,7 @@ Changelog:
 - June 22, 2025. Cleaned up environment variables - removed Stripe keys and webhook secrets after user moved them to Replit secrets
 - June 22, 2025. VERIFIED: Application using LIVE Stripe configuration with live keys (sk_live_...) and live price IDs for production payments
 - June 22, 2025. Migrated daily recommendations OpenAI processing to Fly.io external service (https://finanserpro-ai-processor.fly.dev/generate-daily-recommendation)
+- June 22, 2025. Added POST /generate-daily-recommendation endpoint to external AI processor with complete logic migration from server/openai.ts
 - June 22, 2025. FIXED: Replaced hardcoded fallback tips with AI-based fallback system for contextual financial tips
 - June 22, 2025. Contextual tips now use simplified AI prompt as fallback instead of generic hardcoded messages inappropriate for user's financial situation
 - June 22, 2025. Emergency fallback shows dynamic financial summary rather than static text, maintaining personalization even when AI services fail
