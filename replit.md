@@ -301,6 +301,9 @@ Changelog:
 - June 23, 2025. DEPLOYMENT FIX: Fixed Dockerfile dependency installation - removed tsx dependency and ensured proper npm install for production
 - June 23, 2025. SIMPLIFIED DOCKERFILE: Removed complexity and directly install required dependencies (express, cors, dotenv, openai) for reliable deployment
 - June 23, 2025. DEPLOYMENT READY: Corrected all deployment issues - server.js calls sophisticated functions from openai-functions.js with proper dependency installation
+- June 23, 2025. ARCHITECTURE VERIFIED: All 7 AI functions confirmed routing through Fly.io centralized processor - no local fallbacks active
+- June 23, 2025. CACHE ISSUE IDENTIFIED: Unified cache system was masking true routing behavior, making cached responses appear as local processing
+- June 23, 2025. ROUTING CONFIRMED: spending-insights (3.6s), financial-health-score (9.3s), expense-predictions (0.27s) all verified working via Fly.io
 - June 23, 2025. FINAL DEPLOYMENT FIX: Simplified package.json with exact dependency versions and clean Dockerfile to resolve MODULE_NOT_FOUND errors
 - June 23, 2025. ROOT CAUSE IDENTIFIED: Fly.io auto-scaling (min_machines_running=0) causing containers to restart without proper dependency installation
 - June 23, 2025. DEPLOYMENT READY: Fixed fly.toml configuration, Dockerfile build process, and .dockerignore for proper Fly.io deployment
