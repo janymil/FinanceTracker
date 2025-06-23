@@ -396,10 +396,10 @@ export function registerStripeRoutes(app: Express) {
 
       // Hardcoded price weights for plan hierarchy
       const priceWeights = {
-        'price_1RbfTvCRVFBT4Nls8UqqCGf0': 1, // standard_monthly
-        'price_1RbfUxCRVFBT4Nls5o1dmGHo': 2, // standard_yearly
-        'price_1RbfW6CRVFBT4NlsFBm9Rky0': 3, // premium_monthly
-        'price_1RbfWdCRVFBT4NlsdHEtcSqt': 4, // premium_yearly
+        'price_1RcxhjFlf8efPaoOWM6JarOv': 1, // standard_monthly
+        'price_1RcxhhFlf8efPaoOoxa7StkA': 2, // standard_yearly
+        'price_1RcxhfFlf8efPaoOAYNVWEDc': 3, // premium_monthly
+        'price_1RcxhaFlf8efPaoOrkTMX7BZ': 4, // premium_yearly
       };
 
       // Validate price IDs
