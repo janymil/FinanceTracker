@@ -360,13 +360,24 @@ export function registerAIRoutes(app: Express) {
       const categoriesData = await db.select().from(categories);
       const categoryMap = new Map(categoriesData.map(cat => [cat.id, cat.name]));
 
-      console.log('Daily recommendations: Making new OpenAI API call');
-      const recommendations = await generateDailyRecommendations({
-        transactions,
-        summary: summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 },
-        budgets: budgets || [],
-        categories: categoryMap
+      console.log('Daily recommendations: Making Fly.io API call');
+      
+      const flyResponse = await fetch("https://finanserpro-ai-processor.fly.dev/generate-daily-recommendation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          summary: summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 }, 
+          transactions, 
+          budgets: budgets || [],
+          categories: Object.fromEntries(categoryMap)
+        })
       });
+      
+      if (!flyResponse.ok) {
+        throw new Error(`Fly.io API error: ${flyResponse.status}`);
+      }
+      
+      const recommendations = await flyResponse.json();
 
       // Save to database for session persistence
       try {
