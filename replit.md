@@ -315,7 +315,8 @@ Changelog:
 - June 23, 2025. SELF-CONTAINED AI PROCESSOR: Modified index.ts to include all sophisticated prompts from openai-functions.ts with Express server and /execute-gpt-task endpoint, no external imports needed
 - June 23, 2025. FIXED HANDLER NAMES: Corrected task routing to match main app calls - financial-health-score, spending-insights, trend-predictions, contextual-tips, daily-recommendations, financial-tips, expense-predictions
 - June 23, 2025. DEPLOYMENT COMPLETE: Fly.io AI processor deployed at https://finanzerpro.fly.dev with all critical bugs fixed
-- June 23, 2025. LOCAL FIXES COMPLETE: Eliminated destructive empty arrays and added proper data validation - ready for Fly.io deployment
+- June 23, 2025. DEPLOYMENT STATUS: Current Fly.io deployment still runs old code with destructive empty arrays - local fixes ready but not deployed
+- June 23, 2025. BROWSER ACCESS FIX: Added root endpoint to AI processor to prevent "Cannot GET /" error when accessing finanzerpro.fly.dev directly
 - June 23, 2025. FIXED AI PROCESSOR DATA FLOW: Removed destructive empty array fallbacks, added proper transactionsByCategory generation from raw transactions
 - June 23, 2025. ELIMINATED DESTRUCTIVE EMPTY ARRAYS: Removed all || [] fallbacks from AI endpoints that were masking real data issues and destroying AI functionality
 - June 23, 2025. PROPER DATA VALIDATION: AI endpoints now require meaningful transaction data instead of defaulting to empty arrays

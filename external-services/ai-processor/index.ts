@@ -1379,6 +1379,17 @@ Analyze this financial data and provide a comprehensive health assessment.`
   }
 }
 
+// Root endpoint for browser access
+app.get('/', (req, res) => {
+  res.json({ 
+    service: 'FinanzerPro AI Processor',
+    status: 'online',
+    endpoints: ['/health', '/execute-gpt-task'],
+    model: 'gpt-4o',
+    tasks: ['contextual-tips', 'financial-tips', 'daily-recommendations', 'expense-predictions', 'financial-health-score', 'spending-insights', 'trend-predictions']
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'ai-processor', model: 'gpt-4o' });
