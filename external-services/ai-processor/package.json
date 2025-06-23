@@ -5,10 +5,10 @@
   "main": "index.ts",
 
   "scripts": {
-    "start": "tsx index.ts",
+    "start": "node server.js",
     "dev": "tsx index.ts", 
     "build": "tsc",
-    "start:prod": "tsx index.ts"
+    "start:prod": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",

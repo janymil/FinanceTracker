@@ -8,9 +8,8 @@ COPY package.json ./
 # Install dependencies including tsx
 RUN npm install
 
-# Copy only the TypeScript files we need
-COPY index.ts ./
-COPY openai-functions.ts ./
+# Copy the JavaScript server file only
+COPY server.js ./
 
 # Install tsx globally for better performance
 RUN npm install -g tsx
@@ -24,5 +23,5 @@ USER nodejs
 
 EXPOSE 8080
 
-# Start with tsx to run TypeScript directly
-CMD ["tsx", "index.ts"]
+# Start with Node.js to run JavaScript
+CMD ["node", "server.js"]
