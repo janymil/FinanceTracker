@@ -223,18 +223,16 @@ export async function generateContextualFinancialTips(data: {
     
     // Analyze spending by category - use the correct field mapping
     const categorySpending = new Map();
-    const categorizedCount = transactions.filter(t => {
-      const category = t.categoryName || t.category || 'Uncategorized';
-      return category && category !== 'Uncategorized';
-    }).length;
-    const uncategorizedCount = transactions.filter(t => {
-      const category = t.categoryName || t.category || 'Uncategorized';
-      return !category || category === 'Uncategorized';
-    }).length;
+    const categorizedCount = transactions.filter(t => 
+      t.categoryName && t.categoryName !== 'Uncategorized'
+    ).length;
+    const uncategorizedCount = transactions.filter(t => 
+      !t.categoryName || t.categoryName === 'Uncategorized'
+    ).length;
     
     transactions.forEach(t => {
       if (t.amount > 0) {
-        const category = t.categoryName || t.category || 'Uncategorized';
+        const category = t.categoryName || 'Uncategorized';
         const current = categorySpending.get(category) || 0;
         categorySpending.set(category, current + t.amount);
       }
@@ -255,7 +253,7 @@ export async function generateContextualFinancialTips(data: {
     
     expenseTransactions.forEach(t => {
       const day = new Date(t.date).getDate();
-      const category = t.categoryName || t.category || 'Uncategorized';
+      const category = t.categoryName || 'Uncategorized';
       dailySpending.set(day, (dailySpending.get(day) || 0) + t.amount);
       transactionFrequency.set(category, (transactionFrequency.get(category) || 0) + 1);
     });
@@ -275,14 +273,14 @@ export async function generateContextualFinancialTips(data: {
     budgets.forEach(budget => {
       if (budget.remaining < 0) {
         const overrunPercent = Math.abs((budget.remaining / budget.budgetAmount) * 100);
-        const categoryTransactions = expenseTransactions.filter(t => (t.categoryName || t.category) === (budget.categoryName || budget.category));
+        const categoryTransactions = expenseTransactions.filter(t => t.categoryName === budget.categoryName);
         const avgTransactionInCategory = categoryTransactions.length > 0 ? 
           categoryTransactions.reduce((sum, t) => sum + t.amount, 0) / categoryTransactions.length : 0;
         
-        scenarios.push(`🟥 Budget overrun: You've exceeded your ${budget.categoryName || budget.category} budget by ${overrunPercent.toFixed(0)}% this month. Average transaction: $${avgTransactionInCategory.toFixed(2)}, Total transactions: ${categoryTransactions.length}`);
+        scenarios.push(`🟥 Budget overrun: You've exceeded your ${budget.categoryName} budget by ${overrunPercent.toFixed(0)}% this month. Average transaction: $${avgTransactionInCategory.toFixed(2)}, Total transactions: ${categoryTransactions.length}`);
       } else if (budget.remaining < budget.budgetAmount * 0.1) {
         // Budget almost exhausted
-        scenarios.push(`🟨 Budget warning: Only $${budget.remaining.toFixed(2)} remaining in your ${budget.categoryName || budget.category} budget (${((budget.remaining/budget.budgetAmount)*100).toFixed(0)}% left).`);
+        scenarios.push(`🟨 Budget warning: Only $${budget.remaining.toFixed(2)} remaining in your ${budget.categoryName} budget (${((budget.remaining/budget.budgetAmount)*100).toFixed(0)}% left).`);
       }
     });
     
@@ -373,7 +371,7 @@ IDENTIFIED FINANCIAL SCENARIOS:
 ${scenarios.length > 0 ? scenarios.join('\n') : '- No specific scenarios identified this month'}
 
 RECENT TRANSACTIONS (last 8):
-${transactions.slice(0, 8).map(t => `- ${t.date}: ${t.description} - $${t.amount.toLocaleString()} (${t.categoryName || t.category || 'Uncategorized'})${t.recurring ? ' [Recurring]' : ''}`).join('\n')}
+${transactions.slice(0, 8).map(t => `- ${t.date}: ${t.description} - $${t.amount.toLocaleString()} (${t.categoryName || 'Uncategorized'})${t.recurring ? ' [Recurring]' : ''}`).join('\n')}
 
 CONTEXTUAL ANALYSIS REQUIREMENTS:
 1. Address specific scenarios identified above with targeted, data-driven advice
