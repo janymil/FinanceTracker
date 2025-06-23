@@ -1,0 +1,193 @@
+5-06-23T16:41:41.023 app[28675d3fe14308] lax [info] INFO Main child exited normally with code: 1
+
+2025-06-23T16:41:41.040 app[28675d3fe14308] lax [info] INFO Starting clean up.
+
+2025-06-23T16:41:41.049 app[28675d3fe14308] lax [info] WARN could not unmount /rootfs: EINVAL: Invalid argument
+
+2025-06-23T16:41:41.050 app[28675d3fe14308] lax [info] [ 1.859766] reboot: Restarting system
+
+2025-06-23T16:41:41.115 proxy[e784016a470098] lax [info] Starting machine
+
+2025-06-23T16:41:41.117 proxy[e784016a470098] lax [error] [PM01] machines API returned an error: "machine still attempting to start"
+
+2025-06-23T16:41:41.488 app[e784016a470098] lax [info] INFO Starting init (commit: 28e33be24)...
+
+2025-06-23T16:41:41.602 app[e784016a470098] lax [info] INFO Preparing to run: `docker-entrypoint.sh node server.js` as nodejs
+
+2025-06-23T16:41:41.612 app[e784016a470098] lax [info] INFO [fly api proxy] listening at /.fly/api
+
+2025-06-23T16:41:41.622 runner[e784016a470098] lax [info] Machine started in 1.096s
+
+2025-06-23T16:41:41.886 app[e784016a470098] lax [info] 2025/06/23 16:41:41 INFO SSH listening listen_address=[fdaa:1e:2ace:a7b:7d18:1116:d47:2]:22
+
+2025-06-23T16:41:42.206 proxy[28675d3fe14308] lax [info] Starting machine
+
+2025-06-23T16:41:42.207 proxy[28675d3fe14308] lax [error] [PM07] failed to change machine state: machine still active, refusing to start
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] node:internal/modules/cjs/loader:1215
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] throw err;
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] ^
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] Error: Cannot find module 'express'
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] Require stack:
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] - /app/server.js
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] at Module._load (node:internal/modules/cjs/loader:1043:27)
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] at Module.require (node:internal/modules/cjs/loader:1298:19)
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] at require (node:internal/modules/helpers:182:18)
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] at Object.<anonymous> (/app/server.js:1:17)
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] at Module._compile (node:internal/modules/cjs/loader:1529:14)
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] at Module.load (node:internal/modules/cjs/loader:1275:32)
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] at Module._load (node:internal/modules/cjs/loader:1096:12)
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12) {
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] code: 'MODULE_NOT_FOUND',
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] requireStack: [ '/app/server.js' ]
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] }
+
+2025-06-23T16:41:42.548 app[e784016a470098] lax [info] Node.js v20.19.3
+
+2025-06-23T16:41:42.611 app[e784016a470098] lax [info] INFO Main child exited normally with code: 1
+
+2025-06-23T16:41:42.627 app[e784016a470098] lax [info] INFO Starting clean up.
+
+2025-06-23T16:41:42.637 app[e784016a470098] lax [info] WARN could not unmount /rootfs: EINVAL: Invalid argument
+
+2025-06-23T16:41:42.638 app[e784016a470098] lax [info] [ 1.920189] reboot: Restarting system
+
+2025-06-23T16:41:43.589 app[28675d3fe14308] lax [info] 2025-06-23T16:41:43.589711158 [01JYETM05JHPYH04YW6PWYDNF4:main] Running Firecracker v1.7.0
+
+2025-06-23T16:41:43.986 app[e784016a470098] lax [info] 2025-06-23T16:41:43.986731573 [01JYETM05CWWW4BQFKKG8VQ8FC:main] Running Firecracker v1.7.0
+
+2025-06-23T16:41:44.321 proxy[e784016a470098] lax [info] Starting machine
+
+2025-06-23T16:41:44.322 proxy[e784016a470098] lax [error] [PM01] machines API returned an error: "machine still attempting to start"
+
+2025-06-23T16:41:44.402 app[28675d3fe14308] lax [info] INFO Starting init (commit: 28e33be24)...
+
+2025-06-23T16:41:44.494 app[28675d3fe14308] lax [info] INFO Preparing to run: `docker-entrypoint.sh node server.js` as nodejs
+
+2025-06-23T16:41:44.496 app[28675d3fe14308] lax [info] INFO [fly api proxy] listening at /.fly/api
+
+2025-06-23T16:41:44.509 runner[28675d3fe14308] lax [info] Machine started in 994ms
+
+2025-06-23T16:41:44.761 app[28675d3fe14308] lax [info] 2025/06/23 16:41:44 INFO SSH listening listen_address=[fdaa:1e:2ace:a7b:2b5:2f65:6c22:2]:22
+
+2025-06-23T16:41:44.824 app[e784016a470098] lax [info] INFO Starting init (commit: 28e33be24)...
+
+2025-06-23T16:41:44.927 app[e784016a470098] lax [info] INFO Preparing to run: `docker-entrypoint.sh node server.js` as nodejs
+
+2025-06-23T16:41:44.930 app[e784016a470098] lax [info] INFO [fly api proxy] listening at /.fly/api
+
+2025-06-23T16:41:44.947 runner[e784016a470098] lax [info] Machine started in 1.041s
+
+2025-06-23T16:41:45.187 app[e784016a470098] lax [info] 2025/06/23 16:41:45 INFO SSH listening listen_address=[fdaa:1e:2ace:a7b:7d18:1116:d47:2]:22
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] node:internal/modules/cjs/loader:1215
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] throw err;
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] ^
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] Error: Cannot find module 'express'
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] Require stack:
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] - /app/server.js
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] at Module._load (node:internal/modules/cjs/loader:1043:27)
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] at Module.require (node:internal/modules/cjs/loader:1298:19)
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] at require (node:internal/modules/helpers:182:18)
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] at Object.<anonymous> (/app/server.js:1:17)
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] at Module._compile (node:internal/modules/cjs/loader:1529:14)
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] at Module.load (node:internal/modules/cjs/loader:1275:32)
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] at Module._load (node:internal/modules/cjs/loader:1096:12)
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12) {
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] code: 'MODULE_NOT_FOUND',
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] requireStack: [ '/app/server.js' ]
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] }
+
+2025-06-23T16:41:45.318 app[28675d3fe14308] lax [info] Node.js v20.19.3
+
+2025-06-23T16:41:45.434 proxy[e784016a470098] lax [info] Starting machine
+
+2025-06-23T16:41:45.463 proxy[e784016a470098] lax [error] [PR03] could not find a good candidate within 1 attempts at load balancing. last error: [PC01] instance refused connection. is your app listening on 0.0.0.0:8080? make sure it is not only listening on 127.0.0.1 (hint: look at your startup logs, servers often print the address they are listening on)
+
+2025-06-23T16:41:45.501 app[28675d3fe14308] lax [info] INFO Main child exited normally with code: 1
+
+2025-06-23T16:41:45.517 app[28675d3fe14308] lax [info] INFO Starting clean up.
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] node:internal/modules/cjs/loader:1215
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] throw err;
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] ^
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] Error: Cannot find module 'express'
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] Require stack:
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] - /app/server.js
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] at Module._load (node:internal/modules/cjs/loader:1043:27)
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] at Module.require (node:internal/modules/cjs/loader:1298:19)
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] at require (node:internal/modules/helpers:182:18)
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] at Object.<anonymous> (/app/server.js:1:17)
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] at Module._compile (node:internal/modules/cjs/loader:1529:14)
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] at Module.load (node:internal/modules/cjs/loader:1275:32)
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] at Module._load (node:internal/modules/cjs/loader:1096:12)
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12) {
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] code: 'MODULE_NOT_FOUND',
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] requireStack: [ '/app/server.js' ]
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] }
+
+2025-06-23T16:41:45.880 app[e784016a470098] lax [info] Node.js v20.19.3
+
+2025-06-23T16:41:45.944 app[e784016a470098] lax [info] INFO Main child exited normally with code: 1
+
+2025-06-23T16:41:45.960 app[
