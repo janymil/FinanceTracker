@@ -132,7 +132,7 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
         selectedMonth: formattedMonth
       };
 
-      // Use centralized AI processor
+      // Use centralized AI processor - fixed task name to match Fly.io processor
       const result = await runAI('contextual-tips', userId, aiPayload);
       
       // Handle centralized processor response

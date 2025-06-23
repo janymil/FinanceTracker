@@ -165,7 +165,10 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
       console.log('Contextual tips: Starting API call', {
         monthTransactions: monthTransactions.length,
         currentMonth,
-        shouldSkipCache
+        shouldSkipCache,
+        summary,
+        budgets: budgets?.length || 0,
+        hasValidData: monthTransactions.length > 0 && summary && (summary.totalIncome > 0 || summary.totalExpenses > 0)
       });
       
       setLoading(true);
