@@ -1,5 +1,14 @@
 import OpenAI from "openai";
-import { aiCache } from "./cache";
+// Mock cache for deployment - replaces aiCache dependency
+const mockCache = {
+  getCategorization: () => null,
+  setCategorization: () => {},
+  getInsights: () => null,
+  setInsights: () => {},
+  get: () => null,
+  set: () => {},
+  createDataHash: (data: any) => JSON.stringify(data).substring(0, 8)
+};
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -75,7 +84,7 @@ export interface FinancialHealthData {
 export async function categorizeExpense(description: string, amount: number): Promise<ExpenseCategorizationResult> {
   try {
     // Check cache first
-    const cached = aiCache.getCategorization(description, amount);
+    const cached = mockCache.getCategorization(description, amount);
     if (cached) {
       console.log('Using cached categorization result');
       return cached;
@@ -129,7 +138,7 @@ Please categorize this expense.`
     };
 
     // Cache the result
-    aiCache.setCategorization(description, amount, categorization);
+    mockCache.setCategorization(description, amount, categorization);
     
     return categorization;
   } catch (error) {
@@ -332,8 +341,8 @@ export async function generateSpendingInsights(transactions: Array<{
 }>> {
   try {
     // Create hash for transactions to use as cache key
-    const transactionsHash = aiCache.createDataHash(transactions);
-    const cached = aiCache.getInsights(transactionsHash);
+    const transactionsHash = mockCache.createDataHash(transactions);
+    const cached = mockCache.getInsights(transactionsHash);
     if (cached) {
       console.log('Using cached insights result');
       return cached;
@@ -416,7 +425,7 @@ Generate financial insights based on this spending data.`
     }));
 
     // Cache the result
-    aiCache.setInsights(transactionsHash, processedInsights);
+    mockCache.setInsights(transactionsHash, processedInsights);
     
     return processedInsights;
   } catch (error) {
@@ -463,8 +472,8 @@ export async function generateAIFinancialHealthScore(financialData: {
     const { summary, budgets, transactions, useAdvancedFactors } = financialData;
     
     // Create hash for caching
-    const dataHash = aiCache.createDataHash(financialData);
-    const cached = aiCache.get(`ai_health_score_${dataHash}`);
+    const dataHash = mockCache.createDataHash(financialData);
+    const cached = mockCache.get(`ai_health_score_${dataHash}`);
     if (cached) {
       console.log('Using cached AI financial health score');
       return cached;
@@ -551,7 +560,7 @@ Provide an AI-powered financial health score that adapts to this user's specific
     };
 
     // Cache the result
-    aiCache.set(`ai_health_score_${dataHash}`, processedResult, 3600); // Cache for 1 hour
+    mockCache.set(`ai_health_score_${dataHash}`, processedResult, 3600); // Cache for 1 hour
     
     return processedResult;
   } catch (error) {

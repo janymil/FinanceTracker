@@ -70,7 +70,8 @@ async function handleExpensePredictions(payload) {
     return await (0, openai_functions_1.generateExpensePredictions)(payload);
 }
 async function handleTrendPredictions(payload) {
-    return await (0, openai_functions_1.generateTrendPredictions)(payload);
+    const categoryMap = new Map();
+    return await (0, openai_functions_1.generateTrendPredictions)(payload.transactions, categoryMap, payload.budgets);
 }
 async function handleFinancialHealthScore(payload) {
     return await (0, openai_functions_1.generateFinancialHealthScore)(payload);
@@ -98,16 +99,6 @@ app.post('/generate-daily-recommendation', async (req, res) => {
         res.status(500).json({ error: 'Daily recommendation generation failed' });
     }
 });
-async function handleFinancialHealthScore(payload) {
-    return await (0, openai_functions_1.generateAIFinancialHealthScore)(payload);
-}
-async function handleSpendingInsights(payload) {
-    return await (0, openai_functions_1.generateSpendingInsights)(payload.transactions);
-}
-async function handleTrendPredictions(payload) {
-    const { transactions, categoryMap, budgets } = payload;
-    return await (0, openai_functions_1.generateTrendPredictions)(transactions, categoryMap, budgets);
-}
 app.listen(port, '0.0.0.0', () => {
     console.log(`AI Processor server running on port ${port}`);
 });

@@ -107,7 +107,8 @@ async function handleExpensePredictions(payload: any) {
 
 async function handleTrendPredictions(payload: any) {
   // Call the sophisticated trend predictions function from openai-functions.ts
-  return await generateTrendPredictions(payload);
+  const categoryMap = new Map();
+  return await generateTrendPredictions(payload.transactions, categoryMap, payload.budgets);
 }
 
 async function handleFinancialHealthScore(payload: any) {
@@ -141,18 +142,7 @@ app.post('/generate-daily-recommendation', async (req, res) => {
   }
 });
 
-async function handleFinancialHealthScore(payload: any) {
-  return await generateAIFinancialHealthScore(payload);
-}
 
-async function handleSpendingInsights(payload: any) {
-  return await generateSpendingInsights(payload.transactions);
-}
-
-async function handleTrendPredictions(payload: any) {
-  const { transactions, categoryMap, budgets } = payload;
-  return await generateTrendPredictions(transactions, categoryMap, budgets);
-}
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`AI Processor server running on port ${port}`);

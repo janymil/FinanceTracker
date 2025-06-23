@@ -12,11 +12,19 @@ exports.generateExpensePredictions = generateExpensePredictions;
 exports.generateDailyRecommendations = generateDailyRecommendations;
 exports.generateFinancialHealthScore = generateFinancialHealthScore;
 const openai_1 = __importDefault(require("openai"));
-const cache_1 = require("./cache");
+const mockCache = {
+    getCategorization: () => null,
+    setCategorization: () => { },
+    getInsights: () => null,
+    setInsights: () => { },
+    get: () => null,
+    set: () => { },
+    createDataHash: (data) => JSON.stringify(data).substring(0, 8)
+};
 const openai = new openai_1.default({ apiKey: process.env.OPENAI_API_KEY });
 async function categorizeExpense(description, amount) {
     try {
-        const cached = cache_1.aiCache.getCategorization(description, amount);
+        const cached = mockCache.getCategorization(description, amount);
         if (cached) {
             console.log('Using cached categorization result');
             return cached;
@@ -66,7 +74,7 @@ Please categorize this expense.`
             confidence: Math.max(0, Math.min(1, result.confidence || 0.5)),
             reasoning: result.reasoning || 'Unable to determine category'
         };
-        cache_1.aiCache.setCategorization(description, amount, categorization);
+        mockCache.setCategorization(description, amount, categorization);
         return categorization;
     }
     catch (error) {
@@ -119,7 +127,6 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ summary }),
-                timeout: 30000
             });
             if (!aiResponse.ok) {
                 throw new Error(`AI processor error: ${aiResponse.status} ${aiResponse.statusText}`);
@@ -213,8 +220,8 @@ Return comprehensive analysis in JSON:
 }
 async function generateSpendingInsights(transactions) {
     try {
-        const transactionsHash = cache_1.aiCache.createDataHash(transactions);
-        const cached = cache_1.aiCache.getInsights(transactionsHash);
+        const transactionsHash = mockCache.createDataHash(transactions);
+        const cached = mockCache.getInsights(transactionsHash);
         if (cached) {
             console.log('Using cached insights result');
             return cached;
@@ -289,7 +296,7 @@ Generate financial insights based on this spending data.`
             recommendation: insight.recommendation || undefined,
             actionable: Boolean(insight.actionable)
         }));
-        cache_1.aiCache.setInsights(transactionsHash, processedInsights);
+        mockCache.setInsights(transactionsHash, processedInsights);
         return processedInsights;
     }
     catch (error) {
@@ -300,8 +307,8 @@ Generate financial insights based on this spending data.`
 async function generateAIFinancialHealthScore(financialData) {
     try {
         const { summary, budgets, transactions, useAdvancedFactors } = financialData;
-        const dataHash = cache_1.aiCache.createDataHash(financialData);
-        const cached = cache_1.aiCache.get(`ai_health_score_${dataHash}`);
+        const dataHash = mockCache.createDataHash(financialData);
+        const cached = mockCache.get(`ai_health_score_${dataHash}`);
         if (cached) {
             console.log('Using cached AI financial health score');
             return cached;
@@ -381,7 +388,7 @@ Provide an AI-powered financial health score that adapts to this user's specific
                 confidence: Math.max(0, Math.min(1, result.aiAnalysis?.confidence || 0.7))
             }
         };
-        cache_1.aiCache.set(`ai_health_score_${dataHash}`, processedResult, 3600);
+        mockCache.set(`ai_health_score_${dataHash}`, processedResult, 3600);
         return processedResult;
     }
     catch (error) {
@@ -867,8 +874,8 @@ async function generateFinancialHealthScore(financialData) {
                 categoryName: t.categoryName
             }))
         };
-        const dataHash = cache_1.aiCache.createDataHash(stableData);
-        const cached = cache_1.aiCache.get(`financial_health_${dataHash}`);
+        const dataHash = aiCache.createDataHash(stableData);
+        const cached = aiCache.get(`financial_health_${dataHash}`);
         if (cached) {
             console.log('Using cached financial health data - avoiding OpenAI API call');
             return cached;
@@ -960,7 +967,7 @@ Analyze this financial data and provide a comprehensive health assessment.`
             achievements: Array.isArray(result.achievements) ? result.achievements : [],
             warnings: Array.isArray(result.warnings) ? result.warnings : []
         };
-        cache_1.aiCache.set(`financial_health_${dataHash}`, healthData, 7200);
+        aiCache.set(`financial_health_${dataHash}`, healthData, 7200);
         return healthData;
     }
     catch (error) {

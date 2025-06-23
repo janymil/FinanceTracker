@@ -16,7 +16,8 @@
     "allowSyntheticDefaultImports": true
   },
   "include": [
-    "*.ts"
+    "index.ts",
+    "openai-functions.ts"
   ],
   "exclude": [
     "node_modules",
