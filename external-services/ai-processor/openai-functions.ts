@@ -212,7 +212,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
     // Call the Fly.io AI processor service with fallback to direct OpenAI
     let result;
     try {
-      const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'https://finanserpro-ai-processor.fly.dev';
+      const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'https://finanzerpro.fly.dev';
       console.log(`Calling AI processor at ${AI_PROCESSOR_URL}/generate-financial-tip`);
       
       const aiResponse = await fetch(`${AI_PROCESSOR_URL}/generate-financial-tip`, {
