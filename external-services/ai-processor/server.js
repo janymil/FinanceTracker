@@ -34,7 +34,7 @@ async function callOpenAI(messages, model = 'gpt-4o') {
       model,
       messages,
       response_format: { type: "json_object" },
-      temperature: 0.9
+      temperature: model === 'gpt-4o' && messages.some(m => m.content.includes('daily recommendations')) ? 0.3 : 0.9
     })
   });
 
@@ -156,6 +156,193 @@ Return comprehensive analysis in JSON:
       // Return comprehensive single analysis for premium quality
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ tip: result }));
+
+    } catch (error) {
+      console.error('OpenAI API Error:', error);
+      
+      if (error.message.includes('OpenAI API error:')) {
+        const statusMatch = error.message.match(/(\d{3})/);
+        const status = statusMatch ? parseInt(statusMatch[1]) : 500;
+        res.writeHead(status, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          error: error.message,
+          type: 'api_error'
+        }));
+      } else {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          error: 'Internal server error',
+          message: error.message
+        }));
+      }
+    }
+    return;
+  }
+
+  // Generate daily recommendation endpoint
+  if (path === '/generate-daily-recommendation' && method === 'POST') {
+    try {
+      const body = await parseBody(req);
+      const { summary, transactions, budgets, categories } = body;
+
+      // Validate required fields
+      if (!transactions || !Array.isArray(transactions)) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ 
+          error: 'Invalid request: transactions array is required' 
+        }));
+        return;
+      }
+
+      // Check minimum data requirements
+      if (transactions.length < 3) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          recommendations: [],
+          insights: [],
+          message: "Add at least 3 transactions to get personalized daily recommendations"
+        }));
+        return;
+      }
+
+      console.log('FLY.IO EXTERNAL SERVICE: Generating new daily recommendations with OpenAI GPT-4o');
+
+      // Limit data to last 3 months and 100 transactions for efficiency
+      const threeMonthsAgo = new Date();
+      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+      
+      const recentTransactions = transactions
+        .filter(t => new Date(t.date) >= threeMonthsAgo)
+        .slice(0, 100);
+
+      // Calculate spending patterns
+      const categorySpending = new Map();
+      const dailySpending = new Map();
+      
+      recentTransactions.forEach(t => {
+        if (t.type === 'expense') {
+          const amount = parseFloat(t.amount);
+          const categoryName = t.categoryId && categories ? categories[t.categoryId] || 'Other' : 'Other';
+          const date = new Date(t.date).toDateString();
+          
+          categorySpending.set(categoryName, (categorySpending.get(categoryName) || 0) + amount);
+          dailySpending.set(date, (dailySpending.get(date) || 0) + amount);
+        }
+      });
+
+      const topCategories = Array.from(categorySpending.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+      const avgDailySpending = Array.from(dailySpending.values())
+        .reduce((sum, amount) => sum + amount, 0) / Math.max(dailySpending.size, 1);
+
+      const prompt = `You are a financial advisor analyzing a user's spending patterns. Based on their financial data, provide personalized daily recommendations and insights.
+
+Financial Summary:
+- Total Income: $${(summary?.totalIncome || 0).toFixed(2)}
+- Total Expenses: $${(summary?.totalExpenses || 0).toFixed(2)}
+- Net Amount: $${(summary?.netAmount || 0).toFixed(2)}
+- Recent Transactions: ${recentTransactions.length}
+- Average Daily Spending: $${avgDailySpending.toFixed(2)}
+
+Top Spending Categories:
+${topCategories.map(([cat, amount]) => `- ${cat}: $${amount.toFixed(2)}`).join('\n')}
+
+Budget Information:
+${(budgets || []).map(b => `- ${b.name}: $${b.amount} (${b.period})`).join('\n')}
+
+Recent Transaction Sample:
+${recentTransactions.slice(0, 10).map(t => 
+  `- ${t.date}: ${t.type} $${t.amount} - ${t.description}`
+).join('\n')}
+
+IMPORTANT: Use actual category names from the Top Spending Categories list above. Do NOT use "Category 1", "Category 2", etc. Use the real category names like "Transportation", "Food", "Utilities", etc.
+
+Please provide:
+1. 3-5 actionable daily task recommendations
+2. 2-3 personalized financial insights
+
+Return your response in this exact JSON format:
+{
+  "recommendations": [
+    {
+      "id": "rec-1",
+      "type": "budget_review",
+      "priority": "high",
+      "title": "Review Budget Allocation",
+      "description": "Your spending in dining exceeded budget by 20% this week",
+      "action": "Reduce dining expenses for the next 3 days",
+      "impact": "Save $50-75 this week",
+      "timeToComplete": "5 minutes"
+    }
+  ],
+  "insights": [
+    {
+      "id": "insight-1", 
+      "insight": "Your weekend spending is 40% higher than weekdays",
+      "basedOn": "Transaction pattern analysis",
+      "confidence": 0.85,
+      "timeframe": "Last 30 days"
+    }
+  ]
+}
+
+Focus on:
+- Actionable tasks for today/this week
+- Specific spending patterns from their actual data
+- Budget optimization opportunities
+- Realistic financial improvements
+- Data-driven insights with confidence levels
+
+Only provide recommendations and insights based on the actual financial data provided. Do not include generic advice.`;
+
+      const messages = [
+        {
+          role: "system",
+          content: "You are an expert financial advisor who provides personalized, actionable recommendations based on real user data. Always return valid JSON."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ];
+
+      const response = await callOpenAI(messages, 'gpt-4o');
+      const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
+      
+      // Ensure proper data structure
+      const recommendations = Array.isArray(aiResponse.recommendations) 
+        ? aiResponse.recommendations.map((rec, index) => ({
+            id: rec.id || `rec-${index + 1}`,
+            type: rec.type || 'general',
+            priority: rec.priority || 'medium',
+            title: rec.title || 'Financial Task',
+            description: rec.description || 'Complete this financial task',
+            action: rec.action || 'Take action on this recommendation',
+            impact: rec.impact || 'Positive financial impact',
+            timeToComplete: rec.timeToComplete || '10 minutes'
+          }))
+        : [];
+
+      const insights = Array.isArray(aiResponse.insights)
+        ? aiResponse.insights.map((insight, index) => ({
+            id: insight.id || `insight-${index + 1}`,
+            insight: insight.insight || 'Financial insight based on your data',
+            basedOn: insight.basedOn || 'Transaction analysis',
+            confidence: Number(insight.confidence) || 0.7,
+            timeframe: insight.timeframe || 'Recent activity'
+          }))
+        : [];
+
+      const result = {
+        recommendations,
+        insights
+      };
+
+      console.log('FLY.IO EXTERNAL SERVICE: Daily recommendations generated successfully via OpenAI API');
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(result));
 
     } catch (error) {
       console.error('OpenAI API Error:', error);
