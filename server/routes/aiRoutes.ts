@@ -427,24 +427,16 @@ export function registerAIRoutes(app: Express) {
       const categoriesData = await db.select().from(categories);
       const categoryMap = new Map(categoriesData.map(cat => [cat.id, cat.name]));
 
-      console.log('Daily recommendations: Making Fly.io API call to https://finanserpro-ai-processor.fly.dev/generate-daily-recommendation');
+      console.log('Daily recommendations: Making Fly.io API call via centralized processor');
       
-      const flyResponse = await fetch("https://finanserpro-ai-processor.fly.dev/generate-daily-recommendation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          summary: summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 }, 
-          transactions, 
-          budgets: budgets || [],
-          categories: Object.fromEntries(categoryMap)
-        })
-      });
-      
-      if (!flyResponse.ok) {
-        throw new Error(`Fly.io API error: ${flyResponse.status}`);
-      }
-      
-      const recommendations = await flyResponse.json();
+      const aiPayload = {
+        summary: summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 },
+        transactions: transactions.slice(0, 100),
+        budgets: budgets || [],
+        categories: Object.fromEntries(categoryMap)
+      };
+
+      const recommendations = await runAI('daily-recommendations', userId, aiPayload);
       
       console.log('Daily recommendations: Received response from Fly.io:', {
         hasRecommendations: Array.isArray(recommendations?.recommendations),

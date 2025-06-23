@@ -414,9 +414,10 @@ Only provide recommendations and insights based on the actual financial data pro
     }
   }
 
-  // 404 for unknown routes  
+  // Catch-all for unknown routes
+  console.log(`404 - Unknown route: ${method} ${path}`);
   res.writeHead(404, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ error: 'Not found' }));
+  res.end(JSON.stringify({ error: 'Not found', path, method }));
 });
 
 // Task handlers with preserved prompts and logic
