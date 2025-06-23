@@ -1,0 +1,87 @@
+// flyio-ai-worker/index.ts (core route)
+
+import express from "express";
+import OpenAI from "openai";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const app = express();
+const port = process.env.PORT || 3000;
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+app.use(express.json());
+
+app.post("/execute-gpt-task", async (req, res) => {
+  const { task, userId, payload } = req.body;
+
+  try {
+    let result;
+
+    switch (task) {
+      case "contextual-financial-tips":
+        result = await handleContextualTips(payload);
+        break;
+
+      case "daily-recommendations":
+        result = await handleDailyRecommendations(payload);
+        break;
+
+      // add more task cases here...
+
+      default:
+        return res.status(400).json({ error: "Unknown AI task" });
+    }
+
+    return res.json(result);
+  } catch (err) {
+    console.error(`AI task error [${task}]`, err);
+    return res.status(500).json({ error: "AI task failed" });
+  }
+});
+
+// === Task-specific handlers ===
+
+async function handleContextualTips({ summary, transactions, budgets, selectedMonth }: any) {
+  const messages = [
+    { role: "system", content: "You are an AI assistant that provides financial tips..." },
+    {
+      role: "user",
+      content: `Month: ${selectedMonth}\n\nSummary:\n${JSON.stringify(summary)}\n\nTransactions:\n${JSON.stringify(transactions)}\n\nBudgets:\n${JSON.stringify(budgets)}`
+    }
+  ];
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages,
+    temperature: 0.7
+  });
+
+  const content = response.choices[0].message.content;
+  const tips = JSON.parse(content || "[]");
+  return { tips };
+}
+
+async function handleDailyRecommendations({ summary, transactions, budgets }: any) {
+  const messages = [
+    { role: "system", content: "You are an AI coach generating daily actionable financial tasks..." },
+    {
+      role: "user",
+      content: `Based on:\n\nSummary:\n${JSON.stringify(summary)}\n\nTransactions:\n${JSON.stringify(transactions)}\n\nBudgets:\n${JSON.stringify(budgets)}\n\nGive 3–5 tasks and 2–3 insights.`
+    }
+  ];
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages,
+    temperature: 0.7
+  });
+
+  const content = response.choices[0].message.content;
+  const { recommendations, insights } = JSON.parse(content || "{}");
+  return { recommendations, insights };
+}
+
+app.listen(port, () => {
+  console.log(`Fly.io AI service running on port ${port}`);
+});
