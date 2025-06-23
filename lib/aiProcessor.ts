@@ -1,6 +1,4 @@
-import crypto from "crypto";
-import { aiCache } from "../server/cache";
-import { openai } from "../server/openaiClient";
+import { unifiedAICache } from "./unifiedAICache";
 
 function hashObject(obj: any): string {
   const json = JSON.stringify(obj);
@@ -22,11 +20,12 @@ async function storeCache(key: string, value: any) {
  * Handles: GPT Execution, Smart Caching, Retry/Fallback, OpenAI Key Handling
  */
 export async function runAI(task: string, userId: string, payload: Record<string, any>) {
-  const cacheKey = `${task}:${userId}:${hashObject(payload)}`;
-
-  const cached = await checkCache(cacheKey);
+  const month = extractMonth(payload);
+  
+  // Try to get cached result using unified cache
+  const cached = await unifiedAICache.get(task, userId, month, payload);
   if (cached) {
-    console.log(`AI [${task}]: using cached response.`);
+    console.log(`[AI ${task}] Using unified cache for ${month}`);
     return cached;
   }
 
@@ -40,7 +39,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
 
     if (response.ok) {
       const result = await response.json();
-      await storeCache(cacheKey, result);
+      await unifiedAICache.set(task, userId, month, payload, result);
       console.log(`[AI ${task}] Success via unified endpoint`);
       return result;
     }
@@ -63,7 +62,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
         
         if (legacyResponse.ok) {
           const result = await legacyResponse.json();
-          await storeCache(cacheKey, result);
+          await unifiedAICache.set(task, userId, month, payload, result);
           console.log(`[AI ${task}] Success via legacy endpoint`);
           return result;
         }

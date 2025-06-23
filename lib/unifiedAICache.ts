@@ -1,5 +1,8 @@
 import crypto from "crypto";
 import { storage } from "../server/storage";
+import { db } from "../server/db";
+import { contextualFinancialTips, dailyRecommendations } from "../shared/schema";
+import { eq } from "drizzle-orm";
 
 /**
  * Unified AI Cache System
@@ -148,34 +151,126 @@ export class UnifiedAICache {
   }
 
   /**
-   * Get entry from database
+   * Get entry from database using existing tables
    */
   private async getFromDatabase(functionName: string, userId: string, month: string, dataHash: string): Promise<CacheEntry | null> {
-    // Implementation will depend on your database schema
-    // For now, return null to indicate no database integration yet
-    return null;
+    try {
+      if (functionName === 'contextual-tips') {
+        const result = await db.select()
+          .from(contextualFinancialTips)
+          .where(eq(contextualFinancialTips.userId, userId))
+          .limit(1);
+        
+        if (result.length > 0 && result[0].dataHash === dataHash) {
+          return {
+            userId,
+            functionName,
+            month,
+            dataHash,
+            result: { tips: result[0].tips },
+            createdAt: result[0].createdAt,
+            lastAccessed: new Date()
+          };
+        }
+      }
+      
+      if (functionName === 'daily-recommendations') {
+        const result = await db.select()
+          .from(dailyRecommendations)
+          .where(eq(dailyRecommendations.userId, userId))
+          .limit(1);
+        
+        if (result.length > 0 && result[0].dataHash === dataHash) {
+          return {
+            userId,
+            functionName,
+            month,
+            dataHash,
+            result: {
+              recommendations: result[0].recommendations,
+              insights: result[0].insights
+            },
+            createdAt: result[0].generatedAt,
+            lastAccessed: new Date()
+          };
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Database read error:', error);
+      return null;
+    }
   }
 
   /**
-   * Save entry to database
+   * Save entry to database using existing tables
    */
   private async saveToDatabase(entry: CacheEntry): Promise<void> {
-    // Implementation will depend on your database schema
-    // For now, do nothing until we create the table
+    try {
+      if (entry.functionName === 'contextual-tips') {
+        const existingTips = await storage.getContextualFinancialTips(entry.userId);
+        const tipsData = {
+          userId: entry.userId,
+          tips: entry.result.tips || [],
+          dataHash: entry.dataHash,
+          transactionCount: 0, // Will be filled by calling function
+          totalIncome: "0.00",
+          totalExpenses: "0.00", 
+          budgetCount: 0
+        };
+        
+        if (existingTips) {
+          await storage.updateContextualFinancialTips(entry.userId, tipsData);
+        } else {
+          await storage.saveContextualFinancialTips(tipsData);
+        }
+      }
+      
+      if (entry.functionName === 'daily-recommendations') {
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiration
+        
+        await storage.saveDailyRecommendations({
+          userId: entry.userId,
+          recommendations: entry.result.recommendations || [],
+          insights: entry.result.insights || [],
+          dataHash: entry.dataHash,
+          expiresAt
+        });
+      }
+    } catch (error) {
+      console.error('Database save error:', error);
+    }
   }
 
   /**
    * Clear user data from database
    */
   private async clearUserFromDatabase(userId: string): Promise<void> {
-    // Implementation will depend on your database schema
+    try {
+      await db.delete(contextualFinancialTips).where(eq(contextualFinancialTips.userId, userId));
+      await db.delete(dailyRecommendations).where(eq(dailyRecommendations.userId, userId));
+    } catch (error) {
+      console.error('Database clear error:', error);
+    }
   }
 
   /**
    * Clear function data from database
    */
   private async clearFunctionFromDatabase(userId: string, functionName: string, month?: string): Promise<void> {
-    // Implementation will depend on your database schema
+    try {
+      if (functionName === 'contextual-tips') {
+        await db.delete(contextualFinancialTips).where(eq(contextualFinancialTips.userId, userId));
+      }
+      
+      if (functionName === 'daily-recommendations') {
+        await db.delete(dailyRecommendations).where(eq(dailyRecommendations.userId, userId));
+      }
+    } catch (error) {
+      console.error('Database function clear error:', error);
+    }
   }
 
   /**

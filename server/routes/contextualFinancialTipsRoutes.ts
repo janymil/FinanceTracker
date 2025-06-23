@@ -2,6 +2,7 @@
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { runAI } from "../../lib/aiProcessor";
+import { unifiedAICache } from "../../lib/unifiedAICache";
 import { storage } from "../storage";
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
@@ -67,15 +68,18 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
       // Check for force refresh parameter
       const forceRefresh = req.body.forceRefresh || req.query.refresh === 'true';
       
-      // Check if we should regenerate tips or use cached ones
-      const shouldRegenerate = forceRefresh || await storage.shouldRegenerateFinancialTips(userId, currentDataHash);
-
-      if (!shouldRegenerate) {
-        // Return cached tips
-        const cachedTips = await storage.getContextualFinancialTips(userId);
-        if (cachedTips && cachedTips.tips) {
-          console.log('Contextual financial tips: Using cached data - avoiding OpenAI API call');
-          return res.json({ tips: cachedTips.tips });
+      // Check unified cache for existing tips (unless force refresh)
+      if (!forceRefresh) {
+        const month = selectedMonth || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+        const cachedResult = await unifiedAICache.get('contextual-tips', userId, month, {
+          summary,
+          transactions: transactions.slice(0, 10),
+          budgets
+        });
+        
+        if (cachedResult && cachedResult.tips) {
+          console.log('Contextual financial tips: Using unified cache - avoiding API call');
+          return res.json({ tips: cachedResult.tips });
         }
       }
       
@@ -131,27 +135,18 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
         actionable: Boolean(tip.actionable)
       })) : [];
 
-      // Save tips to database for persistence
-      const tipsData = {
-        userId,
-        tips,
-        dataHash: currentDataHash,
-        transactionCount: transactions.length,
-        totalIncome: (summary.totalIncome || 0).toString(),
-        totalExpenses: (summary.totalExpenses || 0).toString(),
-        budgetCount: budgets?.length || 0
-      };
-
+      // Save tips using unified cache (handles database persistence)
+      const month = selectedMonth || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
       try {
-        const existingTips = await storage.getContextualFinancialTips(userId);
-        if (existingTips) {
-          await storage.updateContextualFinancialTips(userId, tipsData);
-        } else {
-          await storage.saveContextualFinancialTips(tipsData);
-        }
-      } catch (dbError) {
-        console.error("Error saving contextual financial tips to database:", dbError);
-        // Continue to return tips even if database save fails
+        await unifiedAICache.set('contextual-tips', userId, month, {
+          summary,
+          transactions: transactions.slice(0, 10),
+          budgets
+        }, { tips });
+        console.log('Contextual financial tips: Saved to unified cache');
+      } catch (cacheError) {
+        console.error("Error saving contextual financial tips to unified cache:", cacheError);
+        // Continue to return tips even if cache save fails
       }
 
       return res.json({ tips });
