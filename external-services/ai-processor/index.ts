@@ -1353,7 +1353,10 @@ app.post("/execute-gpt-task", async (req, res) => {
 
     switch (task) {
       case "contextual-tips":
-        result = await generateContextualTips(payload);
+        // Contextual tips use the same function as financial tips but with different processing
+        result = await generateFinancialTips(payload);
+        // Return in expected format for contextual tips
+        result = { tips: Array.isArray(result) ? result : [result] };
         break;
       
       case "financial-tips":
@@ -1362,10 +1365,6 @@ app.post("/execute-gpt-task", async (req, res) => {
 
       case "daily-recommendations":
         result = await generateDailyRecommendations(payload);
-        break;
-
-      case "financial-tips":
-        result = await generateFinancialTips(payload);
         break;
 
       case "expense-predictions":

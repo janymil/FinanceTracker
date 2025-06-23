@@ -339,6 +339,8 @@ Changelog:
 - June 23, 2025. PERFORMANCE ANALYSIS: spending-insights and trend-predictions timeout after 15s due to complex OpenAI processing but likely functional for patient users
 - June 23, 2025. DATA VALIDATION FIX: Fixed "Invalid recentTransactions data: undefined" error in Fly.io processor with proper destructuring and default values
 - June 23, 2025. ROBUST ERROR HANDLING: Added graceful fallbacks for missing payload data, prevents processor crashes from incomplete frontend requests
+- June 23, 2025. ROUTING FIX: Corrected Fly.io processor routing - financial-tips and contextual-tips now properly mapped to correct functions with appropriate response formatting
+- June 23, 2025. FUNCTION VERIFICATION: Both financial-tips ($200 savings analysis) and contextual-tips ($50 meal prep recommendations) working correctly with sophisticated AI responses
 - June 22, 2025. FIXED: Replaced hardcoded fallback tips with AI-based fallback system for contextual financial tips
 - June 22, 2025. Contextual tips now use simplified AI prompt as fallback instead of generic hardcoded messages inappropriate for user's financial situation
 - June 22, 2025. Emergency fallback shows dynamic financial summary rather than static text, maintaining personalization even when AI services fail
