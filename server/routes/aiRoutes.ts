@@ -270,7 +270,7 @@ export function registerAIRoutes(app: Express) {
       
       const aiPayload = {
         summary,
-        budgets: budgets || [],
+        budgets: budgets,
         transactions: transactions.map(t => ({
           description: t.description,
           amount: parseFloat(t.amount),
