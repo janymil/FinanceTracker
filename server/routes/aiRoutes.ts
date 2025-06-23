@@ -460,8 +460,17 @@ export function registerAIRoutes(app: Express) {
         console.error('Failed to save recommendations to database:', error);
       }
 
-      // Also cache in memory for fast access
-      aiCache.set(`daily_recommendations_${dataHash}`, recommendations, 86400);
+      // Save to unified cache system
+      try {
+        await unifiedAICache.set('daily-recommendations', userId, month, {
+          summary,
+          transactions: transactions.slice(0, 100),
+          budgets
+        }, recommendations);
+        console.log('Daily recommendations: Saved to unified cache');
+      } catch (cacheError) {
+        console.error("Error saving daily recommendations to unified cache:", cacheError);
+      }
 
       return res.json(recommendations);
     } catch (error) {
@@ -513,13 +522,13 @@ export function registerAIRoutes(app: Express) {
         }))
       };
 
-      const dataHash = aiCache.createDataHash(stableFinancialData);
+      // Check unified cache for financial health score
+      const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+      const cachedResult = await unifiedAICache.get('financial-health', userId, month, stableFinancialData);
       
-      // Check cache first - 24 hour expiration
-      const cachedHealth = aiCache.getFinancialHealth(userId, dataHash);
-      if (cachedHealth) {
-        console.log('Financial health: Using cached data - avoiding OpenAI API call');
-        return res.json(cachedHealth);
+      if (cachedResult) {
+        console.log('AI financial health: Using unified cache - avoiding API call');
+        return res.json(cachedResult);
       }
 
       // Create category map
@@ -570,11 +579,7 @@ export function registerAIRoutes(app: Express) {
 
       // Save to unified cache
       try {
-        await unifiedAICache.set('financial-health', userId, month, {
-          summary: stableFinancialData.summary,
-          transactions: stableFinancialData.transactions.slice(0, 50),
-          budgets: stableFinancialData.budgets
-        }, healthData);
+        await unifiedAICache.set('financial-health', userId, month, stableFinancialData, healthData);
         console.log('Financial health: Saved to unified cache');
       } catch (cacheError) {
         console.error("Error saving financial health to unified cache:", cacheError);
