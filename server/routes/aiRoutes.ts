@@ -579,10 +579,9 @@ export function registerAIRoutes(app: Express) {
           spent: budgetSpending.get(b.categoryId) || 0
         }));
 
-      // Generate financial health score with OpenAI
-      console.log('Financial health: Making new OpenAI API call - no cached data available');
-      const { generateFinancialHealthScore } = await import('../openai');
-      const healthData = await generateFinancialHealthScore({
+      // Use unified AI processor for financial health score
+      console.log('Financial health: Making Fly.io API call via centralized processor');
+      const healthData = await runAI('financial-health-score', userId, {
         transactions: processedTransactions,
         budgets: processedBudgets,
         summary: {
