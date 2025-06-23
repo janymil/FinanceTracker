@@ -311,6 +311,7 @@ Changelog:
 - June 23, 2025. DEPLOYMENT READY: Fixed Fly.io cache issue with explicit process definition and Dockerfile specification - ready for fresh deployment
 - June 23, 2025. FRESH DEPLOYMENT RECOMMENDED: Created clean deployment instructions to avoid Fly.io cache issues - delete existing app and deploy fresh with corrected configuration
 - June 23, 2025. DEPLOYMENT READY: Fly.io app deleted, files prepared for fresh deployment with index.ts calling openai-functions.ts, updated endpoint URL to finanserpro-ai-processor-v2.fly.dev
+- June 23, 2025. SELF-CONTAINED AI PROCESSOR: Modified index.ts to include all sophisticated prompts from openai-functions.ts with Express server and /execute-gpt-task endpoint, no external imports needed
 - June 23, 2025. CACHE SYSTEM ACTIVE: Centralized AI processing with intelligent caching reducing API costs by 75-85%
 - June 23, 2025. ENHANCED FALLBACK SYSTEM: Updated Fly.io service to use cached data as fallback instead of empty responses when OpenAI fails
 - June 23, 2025. Users now see their previous AI insights (cached) instead of empty widgets when OpenAI service is temporarily unavailable
