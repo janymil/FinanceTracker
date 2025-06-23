@@ -436,9 +436,22 @@ export function registerAIRoutes(app: Express) {
       
       const aiPayload = {
         summary: summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 },
-        transactions: transactions.slice(0, 100),
-        budgets: budgets || [],
-        categories: Object.fromEntries(categoryMap)
+        transactions: transactions.slice(0, 100).map(t => ({
+          id: t.id,
+          amount: String(t.amount || 0),
+          description: t.description || '',
+          date: t.date || '',
+          type: t.type || 'expense',
+          categoryId: t.category_id || t.categoryId || 0
+        })),
+        budgets: (budgets || []).map(b => ({
+          id: b.id || 0,
+          name: b.name || '',
+          amount: String(b.amount || 0),
+          categoryId: b.category_id || b.categoryId || 0,
+          period: b.period || 'monthly'
+        })),
+        categories: categoryMap
       };
 
       console.log('DEBUG: Daily recommendations payload being sent to Fly.io:', {
@@ -450,15 +463,50 @@ export function registerAIRoutes(app: Express) {
         firstTransaction: aiPayload.transactions[0] || 'none'
       });
 
-      const recommendations = await runAI('daily-recommendations', userId, aiPayload);
+      let recommendations = await runAI('daily-recommendations', userId, aiPayload);
       
       console.log('Daily recommendations: Received response from Fly.io:', {
         hasRecommendations: Array.isArray(recommendations?.recommendations),
         recommendationCount: recommendations?.recommendations?.length || 0,
         hasInsights: Array.isArray(recommendations?.insights),
         insightCount: recommendations?.insights?.length || 0,
-        source: 'fly.io-external-service'
+        source: 'fly.io-external-service',
+        actualRecommendations: recommendations?.recommendations || [],
+        actualInsights: recommendations?.insights || []
       });
+
+      // Force local fallback if Fly.io returns empty results
+      if ((!recommendations?.recommendations || recommendations.recommendations.length === 0) && 
+          (!recommendations?.insights || recommendations.insights.length === 0)) {
+        console.log('Daily recommendations: Fly.io returned empty, using local fallback');
+        console.log('Daily recommendations: Payload for local fallback:', {
+          transactionCount: aiPayload.transactions?.length || 0,
+          summaryData: aiPayload.summary,
+          budgetCount: aiPayload.budgets?.length || 0,
+          categoriesCount: Object.keys(aiPayload.categories || {}).length
+        });
+        
+        try {
+          const { generateDailyRecommendations } = await import('../../server/openai');
+          const localResult = await generateDailyRecommendations(aiPayload);
+          
+          console.log('Daily recommendations: Local fallback result:', {
+            localRecommendationCount: localResult?.recommendations?.length || 0,
+            localInsightCount: localResult?.insights?.length || 0,
+            sampleRecommendation: localResult?.recommendations?.[0] || 'none'
+          });
+          
+          if (localResult && (localResult.recommendations?.length > 0 || localResult.insights?.length > 0)) {
+            // Use local result instead of empty Fly.io result
+            recommendations = localResult;
+            console.log('Daily recommendations: Successfully using local fallback');
+          } else {
+            console.log('Daily recommendations: Local fallback also returned empty results');
+          }
+        } catch (localError) {
+          console.error('Daily recommendations: Local fallback failed:', localError);
+        }
+      }
 
       // Save to database for session persistence
       try {

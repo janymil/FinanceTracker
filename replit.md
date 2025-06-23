@@ -335,6 +335,10 @@ Changelog:
 - June 23, 2025. SECURITY FIX: Added missing plan validation to AI Financial Health Score endpoint - was incorrectly accessible to free users
 - June 23, 2025. CACHE DURATION: Unified cache has no TTL - persists until data hash changes, providing optimal cost efficiency
 - June 23, 2025. CONFIGURATION VERIFIED: All 7 AI functions correctly configured for https://finanzerpro.fly.dev/execute-gpt-task endpoint
+- June 23, 2025. FIXED CRITICAL FALLBACK SYSTEM: Added missing local fallbacks for financial-tips, trend-predictions, and financial-health-score functions
+- June 23, 2025. COMPLETE FALLBACK COVERAGE: All 7 AI functions now have local OpenAI fallbacks when Fly.io service fails or returns empty results
+- June 23, 2025. DAILY RECOMMENDATIONS DATA FIX: Corrected payload structure mismatch - fixed category_id vs categoryId, amount string conversion, and Map vs Object categories
+- June 23, 2025. ENHANCED FALLBACK DETECTION: Added automatic local fallback trigger when Fly.io returns empty recommendation arrays
 - June 23, 2025. ENDPOINT ANALYSIS COMPLETE: Removed legacy imports, fixed all URL references, confirmed runAI() usage across all AI routes
 - June 23, 2025. RECURSION FIX: Eliminated recursive calls in Fly.io processor - removed AI_PROCESSOR_URL fetch calls from index.ts and openai-functions.ts
 - June 23, 2025. PROCESSOR CLEANUP: Deleted outdated deployment documentation files and removed openai-functions.ts (functionality moved to index.ts)
