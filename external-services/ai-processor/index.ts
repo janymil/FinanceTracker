@@ -195,7 +195,7 @@ export async function generateFinancialTips(financialData: {
     const netBalance = totalIncome - totalExpenses;
     const transactionCount = Array.isArray(recentTransactions) ? recentTransactions.length : 0;
     
-    // Return early if no meaningful data
+    // Return basic tip if no meaningful data
     if (transactionCount === 0 && totalIncome === 0 && totalExpenses === 0) {
       console.log('No financial data provided - returning basic tip');
       return [{
@@ -1353,6 +1353,10 @@ app.post("/execute-gpt-task", async (req, res) => {
 
     switch (task) {
       case "contextual-tips":
+        result = await generateContextualTips(payload);
+        break;
+      
+      case "financial-tips":
         result = await generateFinancialTips(payload);
         break;
 
