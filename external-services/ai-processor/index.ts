@@ -184,51 +184,7 @@ export async function generateFinancialTips(financialData: {
     if (financialData.timestamp) {
       console.log('Bypassing cache for fresh AI financial tips');
     }
-    const { totalIncome, totalExpenses, recentTransactions } = financialData;
-
-    // Validate required data - reject if missing
-    if (!recentTransactions || !Array.isArray(recentTransactions)) {
-      throw new Error('recentTransactions is required and must be an array');
-    }
-
-    // Generate transactionsByCategory from transactions - this is critical data for AI analysis
-    const transactionsByCategory: Array<{categoryName: string, amount: number, type: string}> = [];
-    const categoryTotals = new Map();
-    
-    recentTransactions.forEach(t => {
-      const category = t.category || 'Uncategorized';
-      const amount = parseFloat(t.amount) || 0;
-      const type = t.type || (amount < 0 ? 'expense' : 'income');
-      
-      if (!categoryTotals.has(category)) {
-        categoryTotals.set(category, { expense: 0, income: 0 });
-      }
-      
-      const totals = categoryTotals.get(category);
-      if (type === 'expense') {
-        totals.expense += Math.abs(amount);
-      } else {
-        totals.income += Math.abs(amount);
-      }
-    });
-    
-    // Convert to the expected format
-    categoryTotals.forEach((totals, categoryName) => {
-      if (totals.expense > 0) {
-        transactionsByCategory.push({
-          categoryName,
-          amount: totals.expense,
-          type: 'expense'
-        });
-      }
-      if (totals.income > 0) {
-        transactionsByCategory.push({
-          categoryName,
-          amount: totals.income,
-          type: 'income'
-        });
-      }
-    });
+    const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
 
     // Prepare the financial summary for the AI processor
     const netBalance = totalIncome - totalExpenses;
@@ -257,7 +213,7 @@ ${recentTransactions.slice(0, 10).map(t =>
 ).join('\n')}
 
 Transaction Pattern Analysis:
-- Average transaction size: $${((totalIncome + totalExpenses) / transactionCount).toFixed(2)}
+- Average transaction size: $${(totalIncome + totalExpenses) / transactionCount}
 - Income transactions: ${recentTransactions.filter(t => t.type === 'income').length}
 - Expense transactions: ${recentTransactions.filter(t => t.type === 'expense').length}
 - Date range: ${new Date(Math.min(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()} to ${new Date(Math.max(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()}
@@ -646,7 +602,7 @@ export async function generateTrendPredictions(
     categoryId: number;
   }>,
   categoryMap: Map<number, string>,
-  budgets?: Array<{ categoryId: number; amount: string; }>
+  budgets: Array<{ categoryId: number; amount: string; }> = []
 ): Promise<{
   categoryPredictions: TrendPrediction[];
   financialForecast: FinancialForecast;
@@ -1397,13 +1353,7 @@ app.post("/execute-gpt-task", async (req, res) => {
 
     switch (task) {
       case "contextual-tips":
-        // Transform contextual-tips payload to match generateFinancialTips expectations
-        const contextualPayload = {
-          totalIncome: payload.summary?.totalIncome || 0,
-          totalExpenses: payload.summary?.totalExpenses || 0,
-          recentTransactions: payload.transactions || []
-        };
-        result = await generateFinancialTips(contextualPayload);
+        result = await generateFinancialTips(payload);
         break;
 
       case "daily-recommendations":
@@ -1411,7 +1361,6 @@ app.post("/execute-gpt-task", async (req, res) => {
         break;
 
       case "financial-tips":
-        // financial-tips already sends the correct format
         result = await generateFinancialTips(payload);
         break;
 

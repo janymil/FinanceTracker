@@ -118,7 +118,7 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
           budgetAmount: budget.amount,
           spent: budget.spent || 0,
           remaining: budget.remaining || budget.amount
-        })),
+        })) || [],
         selectedMonth: formattedMonth
       };
 
