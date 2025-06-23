@@ -302,6 +302,8 @@ Changelog:
 - June 23, 2025. SIMPLIFIED DOCKERFILE: Removed complexity and directly install required dependencies (express, cors, dotenv, openai) for reliable deployment
 - June 23, 2025. DEPLOYMENT READY: Corrected all deployment issues - server.js calls sophisticated functions from openai-functions.js with proper dependency installation
 - June 23, 2025. FINAL DEPLOYMENT FIX: Simplified package.json with exact dependency versions and clean Dockerfile to resolve MODULE_NOT_FOUND errors
+- June 23, 2025. ROOT CAUSE IDENTIFIED: Fly.io auto-scaling (min_machines_running=0) causing containers to restart without proper dependency installation
+- June 23, 2025. DEPLOYMENT READY: Fixed fly.toml configuration, Dockerfile build process, and .dockerignore for proper Fly.io deployment
 - June 23, 2025. CACHE SYSTEM ACTIVE: Centralized AI processing with intelligent caching reducing API costs by 75-85%
 - June 23, 2025. ENHANCED FALLBACK SYSTEM: Updated Fly.io service to use cached data as fallback instead of empty responses when OpenAI fails
 - June 23, 2025. Users now see their previous AI insights (cached) instead of empty widgets when OpenAI service is temporarily unavailable

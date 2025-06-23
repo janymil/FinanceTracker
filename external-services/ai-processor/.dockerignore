@@ -11,4 +11,3 @@ test_request.json
 deploy.sh
 deploy-update.sh
 DEPLOYMENT.md
-.dockerignore
