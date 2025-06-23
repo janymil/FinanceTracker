@@ -7,7 +7,6 @@ import crypto from "crypto";
 import { eq } from "drizzle-orm";
 import { contextualFinancialTips } from "../../shared/schema";
 import { db } from "../db";
-import { processAIRequest } from "../aiOrchestrator";
 
 export function registerContextualFinancialTipsRoutes(app: Express) {
   // Test endpoint to manually clear contextual tips cache
@@ -41,19 +40,50 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
       const { transactions, summary, budgets, selectedMonth } = req.body;
 
       if (!transactions || !summary) {
         return res.status(400).json({ message: "Transactions and summary are required" });
       }
 
-      // Define the AI logic function that contains the existing OpenAI logic
-      const contextualTipsAILogic = async () => {
+      // Create a data hash to detect significant changes
+      const dataForHash = {
+        transactionCount: transactions.length,
+        totalIncome: summary.totalIncome || 0,
+        totalExpenses: summary.totalExpenses || 0,
+        budgetCount: budgets?.length || 0,
+        recentTransactions: transactions.slice(0, 5).map((t: any) => ({
+          amount: t.amount,
+          category: t.category,
+          date: t.date
+        }))
+      };
+      
+      const currentDataHash = crypto
+        .createHash('md5')
+        .update(JSON.stringify(dataForHash))
+        .digest('hex');
+
+      // Check for force refresh parameter
+      const forceRefresh = req.body.forceRefresh || req.query.refresh === 'true';
+      
+      // Check if we should regenerate tips or use cached ones
+      const shouldRegenerate = forceRefresh || await storage.shouldRegenerateFinancialTips(userId, currentDataHash);
+
+      if (!shouldRegenerate) {
+        // Return cached tips
+        const cachedTips = await storage.getContextualFinancialTips(userId);
+        if (cachedTips && cachedTips.tips) {
+          console.log('Contextual financial tips: Using cached data - avoiding OpenAI API call');
+          return res.json({ tips: cachedTips.tips });
+        }
+      }
+      
+      if (forceRefresh) {
+        console.log('Contextual financial tips: Force refresh requested - bypassing cache');
+      }
+
+      console.log('Contextual financial tips: Generating new AI tips - data changed or cache expired');
 
       // Format the selected month for natural language
       const formatMonth = (selectedMonth: string) => {
@@ -143,21 +173,31 @@ Respond with JSON in this exact format:
         actionable: Boolean(tip.actionable)
       })) : [];
 
-        return { tips };
+      // Save tips to database for persistence
+      const tipsData = {
+        userId,
+        tips,
+        dataHash: currentDataHash,
+        transactionCount: transactions.length,
+        totalIncome: (summary.totalIncome || 0).toString(),
+        totalExpenses: (summary.totalExpenses || 0).toString(),
+        budgetCount: budgets?.length || 0
       };
 
-      // Pass through centralized AI infrastructure
-      const result = await processAIRequest({
-        taskName: 'contextual-tips',
-        userId,
-        userPlan: user.plan || 'free',
-        dataPayload: { transactions, summary, budgets, selectedMonth },
-        aiLogicFunction: contextualTipsAILogic,
-        flyioEndpoint: '/generate-contextual-tips',
-        cacheDuration: 3600
-      });
+      try {
+        const existingTips = await storage.getContextualFinancialTips(userId);
+        if (existingTips) {
+          await storage.updateContextualFinancialTips(userId, tipsData);
+        } else {
+          await storage.saveContextualFinancialTips(tipsData);
+        }
+      } catch (dbError) {
+        console.error("Error saving contextual financial tips to database:", dbError);
+        // Continue to return tips even if database save fails
+      }
 
-      return res.json(result);
+      return res.json({ tips });
+
     } catch (error) {
       console.error("Error generating contextual financial tips:", error);
       
