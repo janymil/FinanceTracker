@@ -191,8 +191,8 @@ export async function generateFinancialTips(financialData: {
       throw new Error('recentTransactions is required and must be an array');
     }
 
-    // Generate transactionsByCategory from transactions if not provided
-    const transactionsByCategory = [];
+    // Generate transactionsByCategory from transactions - this is critical data for AI analysis
+    const transactionsByCategory: Array<{categoryName: string, amount: number, type: string}> = [];
     const categoryTotals = new Map();
     
     recentTransactions.forEach(t => {
@@ -646,7 +646,7 @@ export async function generateTrendPredictions(
     categoryId: number;
   }>,
   categoryMap: Map<number, string>,
-  budgets: Array<{ categoryId: number; amount: string; }> = []
+  budgets?: Array<{ categoryId: number; amount: string; }>
 ): Promise<{
   categoryPredictions: TrendPrediction[];
   financialForecast: FinancialForecast;

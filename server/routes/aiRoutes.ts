@@ -157,7 +157,7 @@ export function registerAIRoutes(app: Express) {
 
       console.log('AI financial tips: Making Fly.io API call via centralized processor');
       
-      // Ensure we have proper transaction data for AI analysis
+      // Validate that we have meaningful data for AI analysis
       if (!formattedTransactions || formattedTransactions.length === 0) {
         return res.json({ tip: "Add some transactions to get personalized financial insights." });
       }
@@ -165,7 +165,6 @@ export function registerAIRoutes(app: Express) {
       const aiPayload = {
         totalIncome: financialData.totalIncome || 0,
         totalExpenses: financialData.totalExpenses || 0,
-        transactionsByCategory: financialData.transactionsByCategory || financialData.categories || [],
         recentTransactions: formattedTransactions,
         timestamp: financialData.timestamp
       };
@@ -437,7 +436,7 @@ export function registerAIRoutes(app: Express) {
       const aiPayload = {
         summary: summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 },
         transactions: transactions.slice(0, 100),
-        budgets: budgets || [],
+        budgets: budgets,
         categories: Object.fromEntries(categoryMap)
       };
 
