@@ -10,7 +10,7 @@ primary_region = "lax"
   PORT = "8080"
 
 [processes]
-  app = "npm start"
+  app = "npx tsx index.ts"
 
 [http_service]
   internal_port = 8080
@@ -21,13 +21,13 @@ primary_region = "lax"
   processes = ["app"]
 
 [[http_service.checks]]
-  grace_period = "10s"
-  interval = "30s"
+  grace_period = "30s"
+  interval = "60s"
   method = "GET"
-  timeout = "5s"
+  timeout = "10s"
   path = "/health"
 
 [vm]
   cpu_kind = "shared"
   cpus = 1
-  memory_mb = 256
+  memory_mb = 512

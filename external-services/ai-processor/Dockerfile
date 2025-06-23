@@ -1,22 +1,20 @@
-FROM node:18-alpine
-
-# Force fresh build
-ENV BUILDKIT_INLINE_CACHE=0
+FROM node:20-alpine
 
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-COPY tsconfig.json ./
 
-# Install dependencies
+# Install dependencies including tsx
 RUN npm install
 
-# Copy source code
+# Copy all source files
 COPY . .
 
-# Expose port
+# Create a simple startup script
+RUN echo '#!/bin/sh\necho "Starting AI Processor..."\necho "Port: $PORT"\necho "Environment: $(env | grep -E "PORT|NODE_ENV")"\nnpx tsx index.ts' > start.sh
+RUN chmod +x start.sh
+
 EXPOSE 8080
 
-# Start the application directly with TypeScript
-CMD ["npx", "tsx", "index.ts"]
+CMD ["./start.sh"]

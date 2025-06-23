@@ -1,8 +1,9 @@
 node_modules
-*.js
-*.js.map
+npm-debug.log
 .git
 .gitignore
 README.md
 .env
-.env.local
+.nyc_output
+coverage
+.docker
