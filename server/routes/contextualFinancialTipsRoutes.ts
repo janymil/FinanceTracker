@@ -1,7 +1,7 @@
 
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
-import { openai } from "../openaiClient";
+import { runAI } from "../../lib/aiProcessor";
 import { storage } from "../storage";
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
@@ -95,76 +95,34 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
 
       const formattedMonth = formatMonth(selectedMonth);
 
-      // Prepare natural language prompt for AI analysis
-      const financialPrompt = `Given the following financial data for the user in ${formattedMonth}:
+      // Prepare payload for centralized AI processor
+      const aiPayload = {
+        summary: {
+          totalIncome: summary.totalIncome || 0,
+          totalExpenses: summary.totalExpenses || 0,
+          netBalance: summary.netBalance || 0,
+          transactionCount: transactions.length || 0
+        },
+        transactions: transactions.slice(0, 10).map((t: any) => ({
+          description: t.description || t.note || 'Transaction',
+          amount: t.amount,
+          category: t.category || 'Uncategorized',
+          date: t.date
+        })),
+        budgets: budgets?.map((budget: any) => ({
+          category: budget.categoryName,
+          budgetAmount: budget.amount,
+          spent: budget.spent || 0,
+          remaining: budget.remaining || budget.amount
+        })) || [],
+        selectedMonth: formattedMonth
+      };
 
-Summary: ${JSON.stringify({
-        totalIncome: summary.totalIncome || 0,
-        totalExpenses: summary.totalExpenses || 0,
-        netBalance: summary.netBalance || 0,
-        transactionCount: transactions.length || 0
-      })}
-
-Budgets: ${JSON.stringify(budgets?.map((budget: any) => ({
-        category: budget.categoryName,
-        budgetAmount: budget.amount,
-        spent: budget.spent || 0,
-        remaining: budget.remaining || budget.amount
-      })) || [])}
-
-Transactions: ${JSON.stringify(transactions.slice(0, 10).map((t: any) => ({
-        description: t.description || t.note || 'Transaction',
-        amount: t.amount,
-        category: t.category || 'Uncategorized',
-        date: t.date
-      })))}
-
-Analyze this data and return 4 personalized financial improvement tips in JSON format with keys: id, title, description, category, priority (high|medium|low), actionable (true|false). Tips must be clear, direct, and relevant to the data. Output only a valid JSON.`;
-
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: `You are a financial advisor AI that provides personalized financial tips based on user data. 
-
-Generate 4 contextual financial tips that are:
-- Specific to their spending patterns and financial situation
-- Actionable with clear next steps
-- Relevant to their current month's activity
-- Focused on improvement opportunities
-
-Categories: spending, saving, budgeting, income
-Priorities: high, medium, low
-
-Respond with JSON in this exact format:
-{
-  "tips": [
-    {
-      "id": "tip_1",
-      "title": "Clear, actionable tip title",
-      "description": "Detailed explanation with specific recommendations and dollar amounts when relevant",
-      "category": "spending|saving|budgeting|income",
-      "priority": "high|medium|low",
-      "actionable": true
-    }
-  ]
-}`
-          },
-          {
-            role: "user",
-            content: financialPrompt
-          }
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.7,
-        max_tokens: 1000
-      });
-
-      const result = JSON.parse(response.choices[0].message.content || '{"tips": []}');
+      // Use centralized AI processor
+      const result = await runAI('contextual-tips', userId, aiPayload);
       
-      // Ensure proper response format
-      const tips = Array.isArray(result.tips) ? result.tips.map((tip: any, index: number) => ({
+      // Handle centralized processor response
+      const tips = Array.isArray(result?.tips) ? result.tips.map((tip: any, index: number) => ({
         id: tip.id || `tip_${Date.now()}_${index}`,
         title: tip.title || 'Financial Tip',
         description: tip.description || 'No description available',
