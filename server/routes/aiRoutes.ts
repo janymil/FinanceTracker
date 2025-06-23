@@ -434,6 +434,20 @@ export function registerAIRoutes(app: Express) {
         categories: Object.fromEntries(categoryMap)
       };
 
+      console.log('DEBUG: Daily recommendations payload being sent to Fly.io:', {
+        transactionCount: aiPayload.transactions.length,
+        summaryData: aiPayload.summary,
+        budgetCount: aiPayload.budgets.length,
+        categoryCount: Object.keys(aiPayload.categories).length,
+        sampleTransactions: aiPayload.transactions.slice(0, 3).map(t => ({
+          id: t.id,
+          amount: t.amount,
+          description: t.description,
+          date: t.date,
+          type: t.type
+        }))
+      });
+
       const recommendations = await runAI('daily-recommendations', userId, aiPayload);
       
       console.log('Daily recommendations: Received response from Fly.io:', {
