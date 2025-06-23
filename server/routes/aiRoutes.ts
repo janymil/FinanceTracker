@@ -21,6 +21,7 @@ import {
   users,
   dailyRecommendations
 } from "../../shared/schema";
+import { eq, desc, lt, gte, sql, and } from "drizzle-orm";
 
 export function registerAIRoutes(app: Express) {
   // Auto-categorization endpoint for bulk processing
