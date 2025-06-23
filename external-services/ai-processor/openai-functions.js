@@ -1,4 +1,8 @@
 const https = require('https');
+const OpenAI = require('openai');
+
+// For compatibility with index.ts imports
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 // Using native https instead of OpenAI package to avoid external dependencies
@@ -58,7 +62,7 @@ async function categorizeExpense(description, amount) {
   }
 
   try {
-    const response = await callOpenAI({
+    const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -122,7 +126,7 @@ async function generateFinancialTips(totalIncome, totalExpenses, transactionsByC
       `${t.description}: $${t.amount}`
     ).join(', ');
 
-    const response = await callOpenAI({
+    const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -211,7 +215,7 @@ async function generateSpendingInsights(transactions, budgets, categories) {
       .map(([cat, amount]) => `${cat}: $${amount.toFixed(2)}`)
       .join(', ');
 
-    const response = await callOpenAI({
+    const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -276,7 +280,7 @@ async function generateAIFinancialHealthScore(summary, budgets, transactions, us
     const budgetUtilization = budgets.length > 0 ? 
       budgets.reduce((sum, b) => sum + (b.spent / b.amount), 0) / budgets.length * 100 : 0;
 
-    const response = await callOpenAI({
+    const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -346,7 +350,7 @@ async function generateDailyRecommendations(summary, transactions, budgets, cate
     const recentTransactions = transactions.slice(0, 10);
     const totalSpent = recentTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
     
-    const response = await callOpenAI({
+    const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -424,7 +428,7 @@ async function generateExpensePredictions(summary, transactions) {
       categorySpending[category] = (categorySpending[category] || 0) + Math.abs(t.amount);
     });
 
-    const response = await callOpenAI({
+    const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -487,7 +491,7 @@ async function generateTrendPredictions(transactions, categoryMap, budgets) {
   }
 
   try {
-    const response = await callOpenAI({
+    const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
