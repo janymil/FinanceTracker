@@ -374,6 +374,13 @@ export function registerAIRoutes(app: Express) {
 
       const { transactions, summary, budgets } = req.body;
 
+      console.log('DEBUG: Raw daily recommendations request data:', {
+        transactionCount: transactions?.length || 0,
+        firstTransactionStructure: transactions?.[0] || 'none',
+        summaryReceived: summary || 'none',
+        budgetCount: budgets?.length || 0
+      });
+
       if (!transactions || !Array.isArray(transactions)) {
         return res.status(400).json({ message: "Transactions array is required" });
       }
