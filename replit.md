@@ -290,6 +290,8 @@ Changelog:
 - June 23, 2025. Unified cache provides session persistence, month-specific filtering, and smart data change detection via hashing
 - June 23, 2025. Cost optimization: 75-85% reduction in OpenAI API calls through intelligent cache invalidation
 - June 23, 2025. Only remaining function: AI Expense Categorization - intentionally kept separate for real-time auto-categorization performance
+- June 23, 2025. SECURITY FIX: Added missing plan validation to AI Financial Health Score endpoint - was incorrectly accessible to free users
+- June 23, 2025. CACHE DURATION: Unified cache has no TTL - persists until data hash changes, providing optimal cost efficiency
 - June 22, 2025. FIXED: Replaced hardcoded fallback tips with AI-based fallback system for contextual financial tips
 - June 22, 2025. Contextual tips now use simplified AI prompt as fallback instead of generic hardcoded messages inappropriate for user's financial situation
 - June 22, 2025. Emergency fallback shows dynamic financial summary rather than static text, maintaining personalization even when AI services fail

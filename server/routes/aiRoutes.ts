@@ -235,12 +235,19 @@ export function registerAIRoutes(app: Express) {
     }
   });
 
-  // AI Financial Health Score
+  // AI Financial Health Score (Standard+ required)
   app.post('/api/ai/financial-health-score', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const user = await storage.getUser(userId);
+      
+      // Require standard+ plan for AI financial health score
+      if (!user || !['standard', 'premium'].includes(user.plan || '')) {
+        return res.status(403).json({ message: "AI financial health score requires standard or premium plan" });
       }
 
       const { summary, budgets, useAdvancedFactors } = req.body;
