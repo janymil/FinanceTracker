@@ -1034,7 +1034,7 @@ app.post("/execute-gpt-task", async (req, res) => {
             case "expense-predictions":
                 result = await generateExpensePredictions(payload);
                 break;
-            case "financial-health":
+            case "financial-health-score":
                 result = await generateAIFinancialHealthScore(payload);
                 break;
             case "spending-insights":
