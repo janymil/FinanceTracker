@@ -366,19 +366,56 @@ export async function generateSpendingInsights(transactions: Array<{
       messages: [
         {
           role: "system",
-          content: `Analyze spending data and provide 2-3 key insights. Focus on actionable patterns. Return JSON array with: id, type, title, description, impact, actionable.`
+          content: `You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights.
+
+Generate 2-4 insights focusing on:
+- Unusual spending patterns
+- Budget optimization opportunities  
+- Positive financial behaviors
+- Spending trends and recommendations
+
+Each insight should have:
+- Unique ID
+- Type: warning, suggestion, achievement, or trend
+- Clear title and description
+- Impact level: high, medium, low
+- Category if relevant
+- Amount if relevant
+- Actionable recommendation
+- Whether it's actionable (boolean)
+
+Respond with JSON array format:
+[
+  {
+    "id": "insight_1",
+    "type": "warning",
+    "title": "High dining expenses",
+    "description": "Your restaurant spending increased 40% this month",
+    "impact": "high",
+    "category": "Food & Dining",
+    "amount": 450,
+    "recommendation": "Consider meal planning to reduce dining out",
+    "actionable": true
+  }
+]`
         },
         {
           role: "user",
-          content: `Recent expenses ($${totalAmount.toFixed(2)} total):
-${recentTransactions.map(t => `${t.description}: $${t.amount} (${t.categoryName})`).join('\n')}
+          content: `Analyze these expense transactions:
 
-Provide 2-3 spending insights.`
+${recentTransactions.map(t => 
+  `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'}) on ${t.date}`
+).join('\n')}
+
+Total transactions: ${recentTransactions.length}
+Date range: ${recentTransactions[recentTransactions.length - 1]?.date} to ${recentTransactions[0]?.date}
+
+Generate financial insights based on this spending data.`
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.1,
-      max_tokens: 500 // Limit response length for speed
+      temperature: 0.2,
+      max_tokens: 600 // Slightly higher for complex analysis
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{"insights": []}');
@@ -1181,24 +1218,71 @@ export async function generateFinancialHealthScore(financialData: {
       .slice(0, 3);
     
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Already using fast model
+      model: "gpt-4o-mini", // Use faster model
       messages: [
         {
           role: "system",
-          content: `Calculate financial health score (0-100) based on savings rate and spending patterns. Return JSON: {"score": number, "trend": "improving/stable/declining", "category": "excellent/good/fair/poor", "insights": [max 2], "achievements": [max 2], "warnings": [max 2]}`
+          content: `You are an expert financial health analyst. Analyze the user's financial data and provide a comprehensive health assessment.
+
+Calculate a financial health score (0-100) based on:
+- Income vs expenses ratio
+- Budget adherence 
+- Spending patterns
+- Emergency fund adequacy
+- Debt management
+- Savings rate
+
+Categorize the score:
+- 80-100: excellent
+- 60-79: good  
+- 40-59: fair
+- 0-39: poor
+
+Determine trend based on recent spending patterns:
+- improving: positive financial trajectory
+- declining: concerning financial habits
+- stable: consistent financial behavior
+
+Provide specific insights, achievements, and actionable warnings.
+
+Respond with JSON in this exact format:
+{
+  "score": 75,
+  "trend": "improving",
+  "category": "good",
+  "insights": ["Specific financial insights"],
+  "achievements": ["Recent positive financial behaviors"],
+  "warnings": ["Areas needing attention"]
+}`
         },
         {
           role: "user",
-          content: `Income: $${summary.totalIncome}, Expenses: $${summary.totalExpenses}, Savings Rate: ${savingsRate.toFixed(1)}%
-Top Categories: ${topCategories.map(([cat, amt]) => `${cat}: $${amt.toFixed(0)}`).join(', ')}
-Recent Transactions: ${recentTransactions.length}
+          content: `Financial Summary:
+- Total Income: $${summary.totalIncome}
+- Total Expenses: $${summary.totalExpenses}
+- Net Balance: $${summary.netBalance}
+- Savings Rate: ${savingsRate.toFixed(1)}%
 
-Analyze health score.`
+Recent Transactions (${recentTransactions.length}):
+${recentTransactions.slice(0, 15).map(t => 
+  `${t.date.split('T')[0]}: ${t.description} - $${t.amount} (${t.categoryName})`
+).join('\n')}
+
+Budgets (${budgets.length}):
+${budgets.map(b => {
+  const utilization = b.amount ? (b.spent / parseFloat(b.amount) * 100).toFixed(1) : 0;
+  return `Budget: $${b.amount}, Spent: $${b.spent} (${utilization}% used)`;
+}).join('\n')}
+
+Top Spending Categories:
+${topCategories.map(([cat, amount]) => `${cat}: $${amount.toFixed(2)}`).join('\n')}
+
+Analyze this financial data and provide a comprehensive health assessment.`
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.1,
-      max_tokens: 400 // Limit response for speed
+      temperature: 0.2,
+      max_tokens: 500 // Balanced for complex analysis
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
