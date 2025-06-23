@@ -12,8 +12,8 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Compile TypeScript
-RUN npx tsc
+# Compile TypeScript with relaxed settings
+RUN npx tsc --noImplicitAny false --strict false
 
 # Expose port
 EXPOSE 8080

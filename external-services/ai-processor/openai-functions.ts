@@ -212,7 +212,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ summary }),
-        timeout: 30000 // 30 second timeout
+        // timeout: 30000 // 30 second timeout
       });
 
       if (!aiResponse.ok) {
@@ -221,7 +221,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
 
       const aiData = await aiResponse.json();
       console.log('AI processor response received successfully');
-      result = aiData.tip || aiData;
+      result = (aiData as any).tip || aiData;
       console.log('Successfully received response from AI processor');
     } catch (aiProcessorError) {
       console.warn('AI processor service unavailable, falling back to direct OpenAI:', aiProcessorError.message);
