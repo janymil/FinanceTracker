@@ -39,6 +39,13 @@ export async function runAI(task: string, userId: string, payload: Record<string
 
     if (response.ok) {
       const result = await response.json();
+      
+      // Check if daily-recommendations returned empty results and force fallback
+      if (task === 'daily-recommendations' && (!result.recommendations || result.recommendations.length === 0) && (!result.insights || result.insights.length === 0)) {
+        console.log(`[AI ${task}] Fly.io returned empty results, forcing local fallback`);
+        throw new Error('Empty results from Fly.io, using local fallback');
+      }
+      
       await unifiedAICache.set(task, userId, month, payload, result);
       console.log(`[AI ${task}] Success via unified endpoint`);
       return result;
