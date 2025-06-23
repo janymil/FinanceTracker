@@ -143,31 +143,21 @@ Respond with JSON in this exact format:
         actionable: Boolean(tip.actionable)
       })) : [];
 
-      // Save tips to database for persistence
-      const tipsData = {
-        userId,
-        tips,
-        dataHash: currentDataHash,
-        transactionCount: transactions.length,
-        totalIncome: (summary.totalIncome || 0).toString(),
-        totalExpenses: (summary.totalExpenses || 0).toString(),
-        budgetCount: budgets?.length || 0
+        return { tips };
       };
 
-      try {
-        const existingTips = await storage.getContextualFinancialTips(userId);
-        if (existingTips) {
-          await storage.updateContextualFinancialTips(userId, tipsData);
-        } else {
-          await storage.saveContextualFinancialTips(tipsData);
-        }
-      } catch (dbError) {
-        console.error("Error saving contextual financial tips to database:", dbError);
-        // Continue to return tips even if database save fails
-      }
+      // Pass through centralized AI infrastructure
+      const result = await processAIRequest({
+        taskName: 'contextual-tips',
+        userId,
+        userPlan: user.plan || 'free',
+        dataPayload: { transactions, summary, budgets, selectedMonth },
+        aiLogicFunction: contextualTipsAILogic,
+        flyioEndpoint: '/generate-contextual-tips',
+        cacheDuration: 3600
+      });
 
-      return res.json({ tips });
-
+      return res.json(result);
     } catch (error) {
       console.error("Error generating contextual financial tips:", error);
       
