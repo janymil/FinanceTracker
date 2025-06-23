@@ -395,10 +395,12 @@ export function registerAIRoutes(app: Express) {
         // Clean up old recommendations first
         await db
           .delete(dailyRecommendations)
-          .where(and(
-            eq(dailyRecommendations.userId, userId),
-            lt(dailyRecommendations.expiresAt, new Date())
-          ));
+          .where(
+            and(
+              eq(dailyRecommendations.userId, userId),
+              lt(dailyRecommendations.expiresAt, new Date())
+            )
+          );
 
         // Insert new recommendations
         await db.insert(dailyRecommendations).values({
