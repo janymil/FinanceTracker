@@ -291,6 +291,8 @@ Changelog:
 - June 23, 2025. DEPLOYMENT VERIFIED: All 7 AI functions now calling correct sophisticated functions from openai-functions.ts with preserved complex prompts
 - June 23, 2025. LIVE TESTING COMPLETE: 6 of 7 AI functions working with sophisticated responses - daily recommendations, contextual tips, expense predictions, financial health score, spending insights, trend predictions confirmed using complex prompts and detailed analysis
 - June 23, 2025. DEPLOYMENT STATUS: 85.7% success rate with centralized AI processing system operational - only financial tips function has HTTP 500 error requiring debugging
+- June 23, 2025. CODE VERIFICATION: Confirmed index.ts correctly calls all sophisticated functions from openai-functions.ts - issue is deployment-related, not code-related
+- June 23, 2025. DEPLOYMENT ISSUE: Fly.io service running old version despite updated index.ts with sophisticated AI functions - requires manual deployment update
 - June 23, 2025. CACHE SYSTEM ACTIVE: Centralized AI processing with intelligent caching reducing API costs by 75-85%
 - June 23, 2025. ENHANCED FALLBACK SYSTEM: Updated Fly.io service to use cached data as fallback instead of empty responses when OpenAI fails
 - June 23, 2025. Users now see their previous AI insights (cached) instead of empty widgets when OpenAI service is temporarily unavailable
