@@ -189,6 +189,12 @@ export async function generateFinancialTips(financialData: {
     // Prepare the financial summary for the AI processor
     const netBalance = totalIncome - totalExpenses;
     const transactionCount = recentTransactions?.length || 0;
+    
+    // Validate required data
+    if (!recentTransactions || !Array.isArray(recentTransactions)) {
+      console.error('Invalid recentTransactions data:', typeof recentTransactions);
+      return [];
+    }
 
     const summary = `Financial Summary:
 - Monthly Income: $${totalIncome}
@@ -224,9 +230,9 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
     let result;
     try {
       const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'https://finanzerpro.fly.dev';
-      console.log(`Calling AI processor at ${AI_PROCESSOR_URL}/generate-financial-tip`);
+      console.log(`Calling AI processor at ${AI_PROCESSOR_URL}/execute-gpt-task`);
 
-      const aiResponse = await fetch(`${AI_PROCESSOR_URL}/generate-financial-tip`, {
+      const aiResponse = await fetch(`${AI_PROCESSOR_URL}/execute-gpt-task`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
