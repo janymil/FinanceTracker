@@ -8,9 +8,12 @@ COPY package.json ./
 # Install dependencies including tsx
 RUN npm install
 
-# Copy application files
+# Copy only the TypeScript files we need
 COPY index.ts ./
 COPY openai-functions.ts ./
+
+# Install tsx globally for better performance
+RUN npm install -g tsx
 
 # Create a non-root user
 RUN addgroup -g 1001 -S nodejs && \
@@ -22,4 +25,4 @@ USER nodejs
 EXPOSE 8080
 
 # Start with tsx to run TypeScript directly
-CMD ["npx", "tsx", "index.ts"]
+CMD ["tsx", "index.ts"]

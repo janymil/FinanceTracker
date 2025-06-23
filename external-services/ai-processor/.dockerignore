@@ -1,0 +1,14 @@
+node_modules
+npm-debug.log
+.git
+.env
+README.md
+server-backup.js
+server-new.js
+contextualFinancialTips-functions.ts
+index-old.ts
+test_request.json
+deploy.sh
+deploy-update.sh
+DEPLOYMENT.md
+.dockerignore

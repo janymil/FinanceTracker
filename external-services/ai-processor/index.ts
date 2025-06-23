@@ -10,8 +10,7 @@ import {
   generateTrendPredictions,
   generateExpensePredictions,
   generateDailyRecommendations,
-  generateFinancialHealthScore,
-  generateContextualTips
+  generateFinancialHealthScore
 } from './openai-functions';
 
 dotenv.config();
@@ -87,9 +86,8 @@ app.post("/execute-gpt-task", async (req, res) => {
 const fallbackCache = new Map();
 
 async function handleContextualTips(payload: any) {
-  // Call the sophisticated contextual tips function from openai-functions.ts
-  const { summary, transactions, budgets, selectedMonth } = payload;
-  return await generateContextualTips(summary, transactions, budgets, selectedMonth);
+  // Call the sophisticated financial tips function from openai-functions.ts
+  return await generateFinancialTips(payload);
 }
 
 async function handleDailyRecommendations(payload: any) {
