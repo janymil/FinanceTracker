@@ -271,6 +271,9 @@ Changelog:
 - June 23, 2025. CREATED: Centralized AI Processor (lib/aiProcessor.ts) for unified Fly.io integration across all AI functions
 - June 23, 2025. Simplified architecture: AI processor handles only GPT execution, smart caching, retry/fallback, and OpenAI key handling via Fly.io
 - June 23, 2025. Each AI function keeps its own authentication, plan verification, and unique prompts - only Fly.io processing is centralized
+- June 23, 2025. IMPLEMENTED: Unified `/execute-gpt-task` endpoint in Fly.io service that routes tasks while preserving each function's unique prompts
+- June 23, 2025. Simple interface: `runAI(task, userId, payload)` - each AI function maintains its own data collection and logic
+- June 23, 2025. Task routing: daily-recommendations, financial-tips, contextual-tips each have dedicated handlers with preserved prompts and OpenAI models
 - June 22, 2025. FIXED: Replaced hardcoded fallback tips with AI-based fallback system for contextual financial tips
 - June 22, 2025. Contextual tips now use simplified AI prompt as fallback instead of generic hardcoded messages inappropriate for user's financial situation
 - June 22, 2025. Emergency fallback shows dynamic financial summary rather than static text, maintaining personalization even when AI services fail

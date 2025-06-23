@@ -364,12 +364,157 @@ Only provide recommendations and insights based on the actual financial data pro
       }
     }
     return;
+
+  // Unified AI endpoint - routes all tasks through single interface
+  } else if (pathname === '/execute-gpt-task' && req.method === 'POST') {
+    try {
+      const { task, userId, payload } = await parseBody(req);
+      
+      if (!task || !userId || !payload) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Missing required fields: task, userId, payload' }));
+        return;
+      }
+
+      let result;
+      switch(task) {
+        case 'daily-recommendations':
+          result = await handleDailyRecommendations(payload);
+          break;
+        case 'financial-tips':
+          result = await handleFinancialTips(payload);
+          break;
+        case 'contextual-tips':
+          result = await handleContextualTips(payload);
+          break;
+        default:
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: `Unknown task: ${task}` }));
+          return;
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(result));
+    } catch (error) {
+      console.error('Unified endpoint error:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Internal server error' }));
+    }
   }
 
-  // 404 for unknown routes
+  // 404 for unknown routes  
   res.writeHead(404, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ error: 'Not found' }));
 });
+
+// Task handlers with preserved prompts and logic
+async function handleDailyRecommendations(payload) {
+  const { summary, transactions, budgets, categories } = payload;
+  
+  // Daily recommendations specific prompt
+  const prompt = `You are a daily financial task manager. Generate personalized daily financial recommendations and insights.
+
+Based on the user's financial data:
+- Summary: ${JSON.stringify(summary)}
+- Recent transactions: ${transactions.length} transactions
+- Active budgets: ${budgets.length} budgets
+
+Generate response in JSON format:
+{
+  "recommendations": [
+    {
+      "id": "rec_1",
+      "task": "Clear, actionable daily task",
+      "description": "Detailed explanation with specific steps",
+      "priority": "high|medium|low",
+      "timeEstimate": "5 minutes",
+      "category": "budgeting|spending|saving|income"
+    }
+  ],
+  "insights": [
+    {
+      "id": "insight_1", 
+      "insight": "Personalized financial insight",
+      "basedOn": "What data this insight comes from",
+      "confidence": 0.8,
+      "timeframe": "This week"
+    }
+  ]
+}`;
+
+  const messages = [
+    { role: "system", content: prompt },
+    { role: "user", content: "Generate daily recommendations based on my financial data." }
+  ];
+
+  const response = await callOpenAI(messages);
+  return JSON.parse(response.choices[0].message.content || '{"recommendations":[],"insights":[]}');
+}
+
+async function handleFinancialTips(payload) {
+  const { summary } = payload;
+  
+  // Financial tips specific prompt  
+  const prompt = `You are an AI Financial Analyst providing premium-level insights. 
+
+${summary}
+
+Return comprehensive analysis in JSON:
+{
+  "title": "Advanced Financial Analysis: [Specific Focus Area]",
+  "description": "DETAILED multi-paragraph analysis including: 1) Mathematical breakdown of their spending patterns with percentages, 2) Specific optimization recommendations with exact dollar targets, 3) Implementation timeline with measurable milestones, 4) Risk assessment and protection strategies. Use their exact financial numbers throughout.",
+  "category": "spending|saving|budgeting|income|education", 
+  "priority": "high|medium|low",
+  "actionable": true,
+  "estimatedSaving": [realistic_amount],
+  "educational": false
+}`;
+
+  const messages = [
+    { role: "system", content: prompt },
+    { role: "user", content: summary }
+  ];
+
+  const response = await callOpenAI(messages);
+  return JSON.parse(response.choices[0].message.content || '{}');
+}
+
+async function handleContextualTips(payload) {
+  const { summary, transactions, budgets, selectedMonth } = payload;
+  
+  // Contextual tips specific prompt
+  const prompt = `You are a financial advisor AI that provides personalized financial tips based on user data. 
+
+Generate 4 contextual financial tips that are:
+- Specific to their spending patterns and financial situation
+- Actionable with clear next steps  
+- Relevant to their current month's activity
+- Focused on improvement opportunities
+
+Financial data: ${JSON.stringify({ summary, transactions: transactions.slice(0, 10), budgets, selectedMonth })}
+
+Respond with JSON in this exact format:
+{
+  "tips": [
+    {
+      "id": "tip_1",
+      "title": "Clear, actionable tip title", 
+      "description": "Detailed explanation with specific recommendations and dollar amounts when relevant",
+      "category": "spending|saving|budgeting|income",
+      "priority": "high|medium|low",
+      "actionable": true
+    }
+  ]
+}`;
+
+  const messages = [
+    { role: "system", content: prompt },
+    { role: "user", content: "Generate contextual financial tips based on my data." }
+  ];
+
+  const response = await callOpenAI(messages, 'gpt-4o-mini');
+  return JSON.parse(response.choices[0].message.content || '{"tips":[]}');
+}
 
 // Start server
 server.listen(port, '0.0.0.0', () => {
