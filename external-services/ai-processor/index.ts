@@ -236,6 +236,7 @@ Transaction Pattern Analysis:
 - Average transaction size: $${avgTransaction.toFixed(2)}
 - Income transactions: ${incomeCount}
 - Expense transactions: ${expenseCount}
+- Date range: ${transactionCount > 0 ? new Date(Math.min(...recentTransactions.map(t => new Date(t.date || Date.now()).getTime()))).toLocaleDateString() : 'No data'} to ${transactionCount > 0 ? new Date(Math.max(...recentTransactions.map(t => new Date(t.date || Date.now()).getTime()))).toLocaleDateString() : 'No data'}
 
 Generate 4 independent box analyses with exact mathematical calculations.`;
 

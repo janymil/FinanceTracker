@@ -342,6 +342,7 @@ Changelog:
 - June 23, 2025. ROUTING FIX: Corrected Fly.io processor routing - financial-tips and contextual-tips now properly mapped to correct functions with appropriate response formatting
 - June 23, 2025. FUNCTION VERIFICATION: Both financial-tips ($200 savings analysis) and contextual-tips ($50 meal prep recommendations) working correctly with sophisticated AI responses
 - June 23, 2025. SYNTAX FIX: Corrected duplicate template string code in index.ts causing "Expected ';' but found 'Pattern'" ESBuild error preventing Fly.io deployment
+- June 23, 2025. PROMPT RESTORATION: Restored complete financial analysis prompt including date range calculations with safe error handling for empty transaction arrays
 - June 22, 2025. FIXED: Replaced hardcoded fallback tips with AI-based fallback system for contextual financial tips
 - June 22, 2025. Contextual tips now use simplified AI prompt as fallback instead of generic hardcoded messages inappropriate for user's financial situation
 - June 22, 2025. Emergency fallback shows dynamic financial summary rather than static text, maintaining personalization even when AI services fail
