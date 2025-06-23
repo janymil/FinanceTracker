@@ -8,7 +8,7 @@ primary_region = "lax"
   PORT = "8080"
 
 [processes]
-  app = "node index.js"
+  app = "npx tsx index.ts"
 
 [http_service]
   internal_port = 8080
