@@ -162,6 +162,158 @@ Please categorize this expense.`
   }
 }
 
+export async function generateContextualFinancialTips(data: {
+  summary: {
+    totalIncome: number;
+    totalExpenses: number;
+    netBalance: number;
+    transactionCount: number;
+  };
+  transactions: Array<{
+    description: string;
+    amount: number;
+    category: string;
+    date: string;
+  }>;
+  budgets: Array<{
+    category: string;
+    budgetAmount: number;
+    spent: number;
+    remaining: number;
+  }>;
+  selectedMonth: string;
+}): Promise<{ tips: Array<{
+  id: string;
+  title: string;
+  description: string;
+  category: 'spending' | 'saving' | 'budgeting' | 'income';
+  priority: 'high' | 'medium' | 'low';
+  actionable: boolean;
+}> }> {
+  try {
+    const { summary, transactions, budgets, selectedMonth } = data;
+    
+    // Return basic tip if no meaningful data
+    if (transactions.length === 0 && summary.totalIncome === 0 && summary.totalExpenses === 0) {
+      return {
+        tips: [{
+          id: 'basic_tip',
+          title: 'Start Your Financial Journey',
+          description: 'Begin by tracking your income and expenses to get personalized financial insights.',
+          category: 'budgeting',
+          priority: 'high',
+          actionable: true
+        }]
+      };
+    }
+
+    // Build comprehensive prompt based on contextual tips routes logic
+    const netBalance = summary.totalIncome - summary.totalExpenses;
+    const savingsRate = summary.totalIncome > 0 ? (netBalance / summary.totalIncome) * 100 : 0;
+    
+    // Analyze spending by category
+    const categorySpending = new Map();
+    transactions.forEach(t => {
+      if (t.amount > 0) {
+        const current = categorySpending.get(t.category) || 0;
+        categorySpending.set(t.category, current + t.amount);
+      }
+    });
+    
+    const topSpendingCategories = Array.from(categorySpending.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
+
+    // Build detailed prompt
+    const prompt = `You are an expert financial advisor analyzing a user's financial data for ${selectedMonth}. Provide 2-4 specific, actionable financial tips based on their actual data.
+
+FINANCIAL OVERVIEW:
+- Total Income: $${summary.totalIncome.toLocaleString()}
+- Total Expenses: $${summary.totalExpenses.toLocaleString()}
+- Net Balance: $${netBalance.toLocaleString()}
+- Savings Rate: ${savingsRate.toFixed(1)}%
+- Number of Transactions: ${summary.transactionCount}
+
+TOP SPENDING CATEGORIES:
+${topSpendingCategories.map(([cat, amount]) => `- ${cat}: $${amount.toLocaleString()}`).join('\n')}
+
+BUDGET STATUS:
+${budgets.length > 0 ? budgets.map(b => `- ${b.category}: $${b.spent.toLocaleString()}/$${b.budgetAmount.toLocaleString()} (${b.remaining >= 0 ? 'under' : 'over'} budget by $${Math.abs(b.remaining).toLocaleString()})`).join('\n') : '- No budgets set'}
+
+RECENT TRANSACTIONS (last 5):
+${transactions.slice(0, 5).map(t => `- ${t.description}: $${t.amount.toLocaleString()} (${t.category})`).join('\n')}
+
+ANALYSIS REQUIREMENTS:
+1. Focus on ACTIONABLE insights based on their actual spending patterns
+2. Provide specific dollar amounts and percentages where relevant
+3. Consider their current savings rate and budget performance
+4. Address overspending if budgets are exceeded
+5. Suggest optimization opportunities in top spending categories
+6. Be encouraging for good financial habits, constructive for areas needing improvement
+
+Return 2-4 contextual tips in JSON format:
+{
+  "tips": [
+    {
+      "id": "tip_1",
+      "title": "Specific actionable title",
+      "description": "Detailed description with specific amounts and steps",
+      "category": "spending|saving|budgeting|income",
+      "priority": "high|medium|low",
+      "actionable": true
+    }
+  ]
+}`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 1200,
+      temperature: 0.3 // Moderate creativity for personalized recommendations
+    });
+
+    const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
+    
+    // Ensure proper data structure
+    const tips = Array.isArray(aiResponse.tips) 
+      ? aiResponse.tips.map((tip: any, index: number) => ({
+          id: tip.id || `tip_${Date.now()}_${index}`,
+          title: tip.title || 'Financial Tip',
+          description: tip.description || 'No description available',
+          category: ['spending', 'saving', 'budgeting', 'income'].includes(tip.category) ? tip.category : 'budgeting',
+          priority: ['high', 'medium', 'low'].includes(tip.priority) ? tip.priority : 'medium',
+          actionable: Boolean(tip.actionable)
+        }))
+      : [];
+
+    console.log('Contextual financial tips generated successfully');
+    return { tips };
+
+  } catch (error) {
+    console.error('Error generating contextual financial tips:', error);
+    return {
+      tips: [{
+        id: 'fallback_tip',
+        title: 'Track Your Progress',
+        description: 'Continue monitoring your financial transactions to identify spending patterns and optimization opportunities.',
+        category: 'budgeting',
+        priority: 'medium',
+        actionable: true
+      }]
+    };
+  }
+}
+
 export async function generateFinancialTips(financialData: {
   totalIncome: number;
   totalExpenses: number;
@@ -1304,10 +1456,7 @@ app.post("/execute-gpt-task", async (req, res) => {
 
     switch (task) {
       case "contextual-tips":
-        // Contextual tips use the same function as financial tips but with different processing
-        result = await generateFinancialTips(payload);
-        // Return in expected format for contextual tips
-        result = { tips: Array.isArray(result) ? result : [result] };
+        result = await generateContextualFinancialTips(payload);
         break;
       
       case "financial-tips":
