@@ -58,13 +58,35 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
   useEffect(() => {
     if (!transactions || !summary) return;
 
-    const currentMonth = selectedMonth || new Date().toISOString().slice(0, 7);
+    // Smart default: use selectedMonth or find the most recent transaction month
+    const getMostRecentTransactionMonth = () => {
+      if (!transactions || transactions.length === 0) return new Date().toISOString().slice(0, 7);
+      
+      // Sort transactions by date descending and get the most recent month
+      const sortedTransactions = [...transactions].sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      
+      const mostRecentDate = new Date(sortedTransactions[0].date);
+      return `${mostRecentDate.getFullYear()}-${String(mostRecentDate.getMonth() + 1).padStart(2, '0')}`;
+    };
+    
+    const currentMonth = selectedMonth || getMostRecentTransactionMonth();
     
     // Filter transactions for the selected month
     const monthTransactions = transactions.filter((transaction: any) => {
       const transactionDate = new Date(transaction.date);
       const transactionMonth = `${transactionDate.getFullYear()}-${String(transactionDate.getMonth() + 1).padStart(2, '0')}`;
       return transactionMonth === currentMonth;
+    });
+
+    console.log('Contextual tips: Month filtering debug', {
+      selectedMonth: currentMonth,
+      totalTransactions: transactions.length,
+      monthTransactions: monthTransactions.length,
+      firstTxDate: transactions[0]?.date,
+      firstMonthTxDate: monthTransactions[0]?.date,
+      calculatedMonth: getMostRecentTransactionMonth()
     });
 
     // If month changed, clear previous tips and reset state
@@ -75,6 +97,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
 
     // If no transactions for this month, show no data state
     if (monthTransactions.length === 0) {
+      console.log('Contextual tips: No transactions for month', currentMonth);
       setTips([]);
       setLastLoadedMonth(currentMonth);
       return;
@@ -95,10 +118,11 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
     // Check for cache invalidation flag (set after data imports or manual refresh)
     const shouldSkipCache = localStorage.getItem('invalidate-ai-cache') === 'true';
     
-    // Force refresh if invalidation flag is set
-    if (shouldSkipCache) {
+    // Force refresh if invalidation flag is set or month changed
+    if (shouldSkipCache || lastLoadedMonth !== currentMonth) {
       setTips(null);
       setLastLoadedMonth(null);
+      console.log('Contextual tips: Forcing refresh due to cache invalidation or month change');
     }
     
     // Check localStorage for cached tips first (unless cache invalidation flag is set)
@@ -186,10 +210,13 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
         {loading ? (
           <p className="text-sm text-gray-500">Generating AI insights...</p>
         ) : tips && tips.length === 0 ? (
-          <div className="text-center py-8">
-            <Lightbulb className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">
-              No financial data available for {selectedMonth ? new Date(selectedMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'this month'}. Add transactions to receive personalized insights.
+          <div className="text-center py-6">
+            <Lightbulb className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              No transactions found for {new Date(currentMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Switch to a month with transaction data to see AI insights
             </p>
           </div>
         ) : (

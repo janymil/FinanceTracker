@@ -43,6 +43,15 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
 
       const { transactions, summary, budgets, selectedMonth } = req.body;
 
+      console.log('Contextual tips request:', {
+        userId,
+        selectedMonth,
+        transactionCount: transactions?.length || 0,
+        summaryData: summary,
+        budgetCount: budgets?.length || 0,
+        firstTransaction: transactions?.[0] || 'none'
+      });
+
       if (!transactions || !summary) {
         return res.status(400).json({ message: "Transactions and summary are required" });
       }
