@@ -583,10 +583,9 @@ export async function generateTrendPredictions(
     description: string;
     date: string;
     type: string;
-    categoryId: number;
+    categoryName: string;
   }>,
-  categoryMap: Map<number, string>,
-  budgets: Array<{ categoryId: number; amount: string; }> = []
+  budgets: Array<{ categoryName: string; amount: string; }> = []
 ): Promise<{
   categoryPredictions: TrendPrediction[];
   financialForecast: FinancialForecast;
@@ -617,7 +616,7 @@ export async function generateTrendPredictions(
 
     transactions.forEach(t => {
       const month = t.date.slice(0, 7);
-      const category = categoryMap.get(t.categoryId) || 'Other';
+      const category = t.categoryName || 'Other';
       const amount = parseFloat(t.amount);
 
       if (!monthlyData.has(month)) {
@@ -649,7 +648,7 @@ export async function generateTrendPredictions(
           .map(([cat, amount]) => ({ category: cat, amount }))
       })).sort((a, b) => a.month.localeCompare(b.month)),
       categoryTotals: Array.from(categoryTotals.entries()).map(([cat, amount]) => ({ category: cat, amount })),
-      budgets: budgets.map(b => ({ category: categoryMap.get(b.categoryId) || 'Other', budgetAmount: parseFloat(b.amount) }))
+      budgets: budgets.map(b => ({ category: b.categoryName || 'Other', budgetAmount: parseFloat(b.amount) }))
     };
 
     const prompt = `Analyze this comprehensive financial data and provide AI-powered trend predictions and forecasting.
@@ -751,7 +750,6 @@ export async function generateExpensePredictions(transactions: Array<{
   description: string;
   date: string;
   type: string;
-  categoryId?: number;
   categoryName?: string;
   recurring?: boolean;
 }>): Promise<ExpensePrediction> {
@@ -965,7 +963,7 @@ export async function generateDailyRecommendations(financialData: {
     description: string;
     date: string;
     type: 'income' | 'expense';
-    categoryId?: number;
+    categoryName?: string;
   }>;
   summary: {
     totalIncome: number;
@@ -976,10 +974,9 @@ export async function generateDailyRecommendations(financialData: {
     id: number;
     name: string;
     amount: string;
-    categoryId: number;
+    categoryName: string;
     period: string;
   }>;
-  categories: Map<number, string>;
 }) {
   try {
     // Note: Cache now handled by unified cache system via routes
@@ -1001,7 +998,7 @@ export async function generateDailyRecommendations(financialData: {
     recentTransactions.forEach(t => {
       if (t.type === 'expense') {
         const amount = parseFloat(t.amount);
-        const categoryName = t.categoryId ? financialData.categories.get(t.categoryId) || 'Other' : 'Other';
+        const categoryName = t.categoryName || 'Other';
         const date = new Date(t.date).toDateString();
         
         categorySpending.set(categoryName, (categorySpending.get(categoryName) || 0) + amount);
@@ -1434,7 +1431,7 @@ export async function generateFinancialHealthScore(financialData: {
     categoryName: string;
   }>;
   budgets: Array<{
-    categoryId: number;
+    categoryName: string;
     amount: string;
     spent: number;
   }>;
