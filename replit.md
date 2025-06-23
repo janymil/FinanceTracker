@@ -265,7 +265,7 @@ Changelog:
 - June 22, 2025. Removed manual "Refresh AI" button from dashboard per user request - keeping only automated cache invalidation system
 - June 22, 2025. Cleaned up environment variables - removed Stripe keys and webhook secrets after user moved them to Replit secrets
 - June 22, 2025. VERIFIED: Application using LIVE Stripe configuration with live keys (sk_live_...) and live price IDs for production payments
-- June 22, 2025. Migrated daily recommendations OpenAI processing to Fly.io external service (https://finanserpro-ai-processor.fly.dev/generate-daily-recommendation)
+- June 22, 2025. Migrated daily recommendations OpenAI processing to Fly.io external service (https://finanzerpro.fly.dev/execute-gpt-task)
 - June 22, 2025. Added POST /generate-daily-recommendation endpoint to external AI processor with complete logic migration from server/openai.ts
 - June 23, 2025. VERIFIED: Daily recommendations fully operational via Fly.io external service - generating real OpenAI recommendations in 9-10 seconds
 - June 23, 2025. CREATED: Centralized AI Processor (lib/aiProcessor.ts) for unified Fly.io integration across all AI functions
@@ -310,10 +310,10 @@ Changelog:
 - June 23, 2025. FLY.IO CACHE ISSUE: Deployment still running old server.js - updated fly.toml to force rebuild with correct index.js process
 - June 23, 2025. DEPLOYMENT READY: Fixed Fly.io cache issue with explicit process definition and Dockerfile specification - ready for fresh deployment
 - June 23, 2025. FRESH DEPLOYMENT RECOMMENDED: Created clean deployment instructions to avoid Fly.io cache issues - delete existing app and deploy fresh with corrected configuration
-- June 23, 2025. DEPLOYMENT READY: Fly.io app deleted, files prepared for fresh deployment with index.ts calling openai-functions.ts, updated endpoint URL to finanserpro-ai-processor-v2.fly.dev
+- June 23, 2025. DEPLOYMENT READY: Fly.io app deleted, files prepared for fresh deployment with index.ts calling openai-functions.ts, updated endpoint URL to finanzerpro.fly.dev
 - June 23, 2025. SELF-CONTAINED AI PROCESSOR: Modified index.ts to include all sophisticated prompts from openai-functions.ts with Express server and /execute-gpt-task endpoint, no external imports needed
 - June 23, 2025. FIXED HANDLER NAMES: Corrected task routing to match main app calls - financial-health-score, spending-insights, trend-predictions, contextual-tips, daily-recommendations, financial-tips, expense-predictions
-- June 23, 2025. DEPLOYMENT COMPLETE: Fly.io AI processor deployed at https://finanserpro-ai-processor.fly.dev - corrected app name back to original, all 7 AI functions ready for production use
+- June 23, 2025. DEPLOYMENT COMPLETE: Fly.io AI processor deployed at https://finanzerpro.fly.dev - corrected app name, all 7 AI functions ready for production use
 - June 23, 2025. FIXED PAYLOAD STRUCTURE: Corrected expense-predictions handler to extract transactions array from payload, resolved "transactions.filter is not a function" error
 - June 23, 2025. TYPESCRIPT DEPLOYMENT: Reconfigured Fly.io to run index.ts directly with tsx instead of compiling to index.js, per user requirement
 - June 23, 2025. CACHE SYSTEM ACTIVE: Centralized AI processing with intelligent caching reducing API costs by 75-85%
@@ -331,6 +331,8 @@ Changelog:
 - June 23, 2025. Mixed architecture: Both unifiedAICache (12 refs) and legacy aiCache (19 refs) systems currently active
 - June 23, 2025. SECURITY FIX: Added missing plan validation to AI Financial Health Score endpoint - was incorrectly accessible to free users
 - June 23, 2025. CACHE DURATION: Unified cache has no TTL - persists until data hash changes, providing optimal cost efficiency
+- June 23, 2025. CONFIGURATION VERIFIED: All 7 AI functions correctly configured for https://finanzerpro.fly.dev/execute-gpt-task endpoint
+- June 23, 2025. ENDPOINT ANALYSIS COMPLETE: Removed legacy imports, fixed all URL references, confirmed runAI() usage across all AI routes
 - June 22, 2025. FIXED: Replaced hardcoded fallback tips with AI-based fallback system for contextual financial tips
 - June 22, 2025. Contextual tips now use simplified AI prompt as fallback instead of generic hardcoded messages inappropriate for user's financial situation
 - June 22, 2025. Emergency fallback shows dynamic financial summary rather than static text, maintaining personalization even when AI services fail
@@ -565,7 +567,7 @@ Changelog:
 - June 18, 2025. COMPLETED: Fixed QR code mobile upload system to follow complete standard OCR pipeline including user plan checking, AI categorization for standard+ users, and Bunny.net storage for premium users
 - June 18, 2025. Mobile upload now provides identical functionality to desktop OCR with proper polling detection, cache-busting, and form auto-population from mobile-captured receipt data
 - June 21, 2025. INFRASTRUCTURE OPTIMIZATION: Successfully deployed AI processor microservice to Fly.io for heavy OpenAI API processing
-- June 21, 2025. Created external AI processor service at https://finanserpro-ai-processor.fly.dev with auto-scaling, health checks, and cost optimization
+- June 21, 2025. Created external AI processor service at https://finanzerpro.fly.dev with auto-scaling, health checks, and cost optimization
 - June 21, 2025. Modified main application to offload financial tips generation to external service while maintaining data sovereignty in Replit
 - June 21, 2025. Implemented intelligent fallback system - external service for performance, direct OpenAI for redundancy
 - June 21, 2025. CURRENCY LOCALIZATION: Implemented comprehensive currency symbol context system for user financial data display

@@ -2,9 +2,7 @@ import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { 
-  generateFinancialTips, 
-  categorizeExpense, 
-  generateDailyRecommendations,
+  categorizeExpense,
   type ExpenseCategorizationResult 
 } from "../openai";
 import { runAI } from "../../lib/aiProcessor";
