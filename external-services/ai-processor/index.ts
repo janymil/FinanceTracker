@@ -60,7 +60,13 @@ app.post("/execute-gpt-task", async (req, res) => {
 
 // === Task-specific handlers ===
 
+// Simple in-memory cache for fallback data
+const fallbackCache = new Map();
+
 async function handleContextualTips({ summary, transactions, budgets, selectedMonth }: any) {
+  const cacheKey = `contextual_tips_${JSON.stringify({ summary, selectedMonth })}`;
+  
+  try {
   const messages = [
     {
       role: "system",
@@ -103,19 +109,39 @@ Generate contextual financial tips based on this data.`
     }
   ];
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages,
-    response_format: { type: "json_object" },
-    temperature: 0.7
-  });
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages,
+      response_format: { type: "json_object" },
+      temperature: 0.7
+    });
 
-  const content = response.choices[0].message.content;
-  const result = JSON.parse(content || '{"tips":[]}');
-  return result;
+    const content = response.choices[0].message.content;
+    const result = JSON.parse(content || '{"tips":[]}');
+    
+    // Cache successful result for fallback
+    fallbackCache.set(cacheKey, result);
+    return result;
+    
+  } catch (error) {
+    console.error('OpenAI error in contextual tips:', error);
+    
+    // Return cached data if available
+    const cached = fallbackCache.get(cacheKey);
+    if (cached) {
+      console.log('Using cached contextual tips as fallback');
+      return cached;
+    }
+    
+    // Only return empty if no cache available
+    return { tips: [] };
+  }
 }
 
 async function handleDailyRecommendations({ summary, transactions, budgets, categories }: any) {
+  const cacheKey = `daily_recommendations_${JSON.stringify({ summary, transactionCount: transactions?.length })}`;
+  
+  try {
   const messages = [
     {
       role: "system",
@@ -160,19 +186,39 @@ Generate daily recommendations and insights based on my financial data.`
     }
   ];
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages,
-    response_format: { type: "json_object" },
-    temperature: 0.3
-  });
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages,
+      response_format: { type: "json_object" },
+      temperature: 0.3
+    });
 
-  const content = response.choices[0].message.content;
-  const result = JSON.parse(content || '{"recommendations":[],"insights":[]}');
-  return result;
+    const content = response.choices[0].message.content;
+    const result = JSON.parse(content || '{"recommendations":[],"insights":[]}');
+    
+    // Cache successful result for fallback
+    fallbackCache.set(cacheKey, result);
+    return result;
+    
+  } catch (error) {
+    console.error('OpenAI error in daily recommendations:', error);
+    
+    // Return cached data if available
+    const cached = fallbackCache.get(cacheKey);
+    if (cached) {
+      console.log('Using cached daily recommendations as fallback');
+      return cached;
+    }
+    
+    // Only return empty if no cache available
+    return { recommendations: [], insights: [] };
+  }
 }
 
 async function handleFinancialTips({ summary }: any) {
+  const cacheKey = `financial_tips_${JSON.stringify(summary)}`;
+  
+  try {
   const messages = [
     {
       role: "system",
@@ -200,19 +246,40 @@ Return comprehensive analysis in JSON:
     }
   ];
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages,
-    response_format: { type: "json_object" },
-    temperature: 0.9
-  });
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages,
+      response_format: { type: "json_object" },
+      temperature: 0.9
+    });
 
-  const content = response.choices[0].message.content;
-  const result = JSON.parse(content || '{}');
-  return { tip: result };
+    const content = response.choices[0].message.content;
+    const result = JSON.parse(content || '{}');
+    const tipData = { tip: result };
+    
+    // Cache successful result for fallback
+    fallbackCache.set(cacheKey, tipData);
+    return tipData;
+    
+  } catch (error) {
+    console.error('OpenAI error in financial tips:', error);
+    
+    // Return cached data if available
+    const cached = fallbackCache.get(cacheKey);
+    if (cached) {
+      console.log('Using cached financial tips as fallback');
+      return cached;
+    }
+    
+    // Only return empty if no cache available
+    return { tip: {} };
+  }
 }
 
 async function handleExpensePredictions({ transactions, summary }: any) {
+  const cacheKey = `expense_predictions_${JSON.stringify({ summary, transactionCount: transactions?.length })}`;
+  
+  try {
   const messages = [
     {
       role: "system",
@@ -252,16 +319,33 @@ Predict future expenses based on these patterns.`
     }
   ];
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages,
-    response_format: { type: "json_object" },
-    temperature: 0.7
-  });
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages,
+      response_format: { type: "json_object" },
+      temperature: 0.7
+    });
 
-  const content = response.choices[0].message.content;
-  const result = JSON.parse(content || '{"categoryPredictions":[],"monthlyPredictions":[]}');
-  return result;
+    const content = response.choices[0].message.content;
+    const result = JSON.parse(content || '{"categoryPredictions":[],"monthlyPredictions":[]}');
+    
+    // Cache successful result for fallback
+    fallbackCache.set(cacheKey, result);
+    return result;
+    
+  } catch (error) {
+    console.error('OpenAI error in expense predictions:', error);
+    
+    // Return cached data if available
+    const cached = fallbackCache.get(cacheKey);
+    if (cached) {
+      console.log('Using cached expense predictions as fallback');
+      return cached;
+    }
+    
+    // Only return empty if no cache available
+    return { categoryPredictions: [], monthlyPredictions: [] };
+  }
 }
 
 // Legacy endpoints for backward compatibility

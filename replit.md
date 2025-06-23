@@ -278,6 +278,8 @@ Changelog:
 - June 23, 2025. Added expense-predictions task handler and maintained backward compatibility with legacy endpoints
 - June 23, 2025. DEPLOYMENT STATUS: Updated Fly.io service infrastructure with TypeScript/Express, added required dependencies for production deployment
 - June 23, 2025. CURRENT AI FUNCTION STATUS: Daily Recommendations ✅ (Fly.io), AI Financial Tips ✅ (Fly.io), 5+ functions pending migration to centralized processor
+- June 23, 2025. ENHANCED FALLBACK SYSTEM: Updated Fly.io service to use cached data as fallback instead of empty responses when OpenAI fails
+- June 23, 2025. Users now see their previous AI insights (cached) instead of empty widgets when OpenAI service is temporarily unavailable
 - June 22, 2025. FIXED: Replaced hardcoded fallback tips with AI-based fallback system for contextual financial tips
 - June 22, 2025. Contextual tips now use simplified AI prompt as fallback instead of generic hardcoded messages inappropriate for user's financial situation
 - June 22, 2025. Emergency fallback shows dynamic financial summary rather than static text, maintaining personalization even when AI services fail
