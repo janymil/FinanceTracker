@@ -4,7 +4,10 @@ WORKDIR /app
 
 # Copy application files
 COPY package.json ./
-COPY server.js ./
+COPY index.ts ./
+
+# Install dependencies
+RUN npm install
 
 # Create a non-root user
 RUN addgroup -g 1001 -S nodejs && \
@@ -15,5 +18,5 @@ USER nodejs
 
 EXPOSE 8080
 
-# Start the server
-CMD ["node", "server.js"]
+# Start the server with tsx
+CMD ["npm", "start"]
