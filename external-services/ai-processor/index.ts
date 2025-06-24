@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import OpenAI from "openai";
 import dotenv from "dotenv";
+import crypto from "crypto";
+import { Client } from "pg";
 
 dotenv.config();
 
@@ -10,16 +12,125 @@ const port = parseInt(process.env.PORT || '8080', 10);
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
-// Mock cache for deployment - replaces aiCache dependency
-const mockCache = {
-  getCategorization: (description: any, amount: any) => null,
-  setCategorization: (description: any, amount: any, result: any) => {},
-  getInsights: (hash: any) => null,
-  setInsights: (hash: any, result: any) => {},
-  get: (key: any) => null,
-  set: (key: any, value: any, ttl?: any) => {},
-  createDataHash: (data: any) => JSON.stringify(data).substring(0, 8)
-};
+
+// Unified AI Cache implementation for Fly.io
+class UnifiedAICacheFlyio {
+  private memoryCache = new Map<string, any>();
+
+  private generateKey(functionName: string, userId: string, month: string, dataHash: string): string {
+    return `${functionName}:${userId}:${month}:${dataHash}`;
+  }
+
+  createDataHash(data: any): string {
+    const json = JSON.stringify(data, Object.keys(data).sort());
+    return crypto.createHash('md5').update(json).digest('hex');
+  }
+
+  async get(functionName: string, userId: string, month: string, userData: any): Promise<any | null> {
+    const dataHash = this.createDataHash(userData);
+    const key = this.generateKey(functionName, userId, month, dataHash);
+    
+    // Check memory cache first
+    if (this.memoryCache.has(key)) {
+      console.log(`[Cache HIT] Memory cache for ${functionName}`);
+      return this.memoryCache.get(key);
+    }
+
+    // Check database cache
+    try {
+      const client = new Client({
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+      });
+      
+      await client.connect();
+      
+      const result = await client.query(
+        'SELECT result, last_accessed FROM ai_cache WHERE user_id = $1 AND function_name = $2 AND month = $3 AND data_hash = $4 LIMIT 1',
+        [userId, functionName, month, dataHash]
+      );
+      
+      if (result.rows.length > 0) {
+        const cachedResult = result.rows[0].result;
+        
+        // Update last_accessed
+        await client.query(
+          'UPDATE ai_cache SET last_accessed = NOW() WHERE user_id = $1 AND function_name = $2 AND month = $3 AND data_hash = $4',
+          [userId, functionName, month, dataHash]
+        );
+        
+        // Store in memory cache
+        this.memoryCache.set(key, cachedResult);
+        
+        await client.end();
+        console.log(`[Cache HIT] Database cache for ${functionName}`);
+        return cachedResult;
+      }
+      
+      await client.end();
+    } catch (error) {
+      console.error('Database cache error:', error);
+    }
+    
+    return null;
+  }
+
+  async set(functionName: string, userId: string, month: string, userData: any, result: any): Promise<void> {
+    const dataHash = this.createDataHash(userData);
+    const key = this.generateKey(functionName, userId, month, dataHash);
+    
+    // Store in memory cache
+    this.memoryCache.set(key, result);
+    
+    // Store in database cache
+    try {
+      const client = new Client({
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+      });
+      
+      await client.connect();
+      
+      // Check if entry exists
+      const existing = await client.query(
+        'SELECT id FROM ai_cache WHERE user_id = $1 AND function_name = $2 AND month = $3 AND data_hash = $4 LIMIT 1',
+        [userId, functionName, month, dataHash]
+      );
+      
+      if (existing.rows.length > 0) {
+        // Update existing entry
+        await client.query(
+          'UPDATE ai_cache SET result = $1, last_accessed = NOW(), updated_at = NOW() WHERE user_id = $2 AND function_name = $3 AND month = $4 AND data_hash = $5',
+          [JSON.stringify(result), userId, functionName, month, dataHash]
+        );
+      } else {
+        // Insert new entry
+        await client.query(
+          'INSERT INTO ai_cache (user_id, function_name, month, data_hash, result, created_at, last_accessed, updated_at) VALUES ($1, $2, $3, $4, $5, NOW(), NOW(), NOW())',
+          [userId, functionName, month, dataHash, JSON.stringify(result)]
+        );
+      }
+      
+      await client.end();
+      console.log(`[Cache SET] Stored ${functionName} result in unified cache`);
+    } catch (error) {
+      console.error('Database cache save error:', error);
+    }
+  }
+
+  cleanup(): void {
+    const now = Date.now();
+    const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+    
+    for (const [key, entry] of this.memoryCache.entries()) {
+      if (entry.lastAccessed && (now - entry.lastAccessed) > maxAge) {
+        this.memoryCache.delete(key);
+      }
+    }
+  }
+}
+
+const unifiedAICache = new UnifiedAICacheFlyio();
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -94,8 +205,8 @@ export interface FinancialHealthData {
 
 export async function categorizeExpense(description: string, amount: number): Promise<ExpenseCategorizationResult> {
   try {
-    // Check cache first
-    const cached = mockCache.getCategorization(description, amount);
+    // Check cache first (legacy function - not using unified cache due to different interface)
+    const cached = null;
     if (cached) {
       console.log('Using cached categorization result');
       return cached;
@@ -148,8 +259,8 @@ Please categorize this expense.`
       reasoning: result.reasoning || 'Unable to determine category'
     };
 
-    // Cache the result
-    mockCache.setCategorization(description, amount, categorization);
+    // Cache the result (legacy function - not using unified cache due to different interface)
+    // categorization caching handled by main application
 
     return categorization;
   } catch (error) {
@@ -719,8 +830,7 @@ Generate financial insights based on this spending data.`
       actionable: Boolean(insight.actionable)
     }));
 
-    // Cache the result
-    mockCache.setInsights(transactionsHash, processedInsights);
+    // Cache handled by unified cache system via /execute-gpt-task endpoint
 
     return processedInsights;
   } catch (error) {
@@ -854,8 +964,7 @@ Provide an AI-powered financial health score that adapts to this user's specific
       }
     };
 
-    // Cache the result
-    mockCache.set(`ai_health_score_${dataHash}`, processedResult, 3600); // Cache for 1 hour
+    // Cache handled by unified cache system via /execute-gpt-task endpoint
 
     return processedResult;
   } catch (error) {
@@ -1589,7 +1698,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'ai-processor', model: 'gpt-4o' });
 });
 
-// Unified AI endpoint - routes all tasks through single interface
+// Unified AI endpoint - routes all tasks through single interface with cache integration
 app.post("/execute-gpt-task", async (req, res) => {
   const { task, userId, payload } = req.body;
 
@@ -1598,6 +1707,15 @@ app.post("/execute-gpt-task", async (req, res) => {
   }
 
   try {
+    const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+    
+    // Check unified cache first
+    const cached = await unifiedAICache.get(task, userId, month, payload);
+    if (cached) {
+      console.log(`[AI ${task}] Using unified cache for ${month}`);
+      return res.json(cached);
+    }
+
     let result;
 
     switch (task) {
@@ -1632,6 +1750,10 @@ app.post("/execute-gpt-task", async (req, res) => {
       default:
         return res.status(400).json({ error: `Unknown task: ${task}` });
     }
+
+    // Store result in unified cache
+    await unifiedAICache.set(task, userId, month, payload, result);
+    console.log(`[AI ${task}] Processed and cached via Fly.io`);
 
     res.json(result);
   } catch (error: any) {

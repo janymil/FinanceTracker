@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { aiCache } from "./cache";
+import { unifiedAICache } from "../lib/unifiedAICache";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -467,10 +468,10 @@ export async function generateAIFinancialHealthScore(financialData: {
     const { summary, budgets, transactions, useAdvancedFactors } = financialData;
     
     // Create hash for caching
-    const dataHash = aiCache.createDataHash(financialData);
-    const cached = aiCache.get(`ai_health_score_${dataHash}`);
+    const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+    const cached = await unifiedAICache.get('financial-health-score', 'local-fallback', month, financialData);
     if (cached) {
-      console.log('Using cached AI financial health score');
+      console.log('Using unified cache for AI financial health score (local fallback)');
       return cached;
     }
 
@@ -554,8 +555,8 @@ Provide an AI-powered financial health score that adapts to this user's specific
       }
     };
 
-    // Cache the result
-    aiCache.set(`ai_health_score_${dataHash}`, processedResult, 3600); // Cache for 1 hour
+    // Cache the result in unified cache system
+    await unifiedAICache.set('financial-health-score', 'local-fallback', month, financialData, processedResult);
     
     return processedResult;
   } catch (error) {
@@ -1460,10 +1461,10 @@ export async function generateFinancialHealthScore(financialData: {
         }))
     };
     
-    const dataHash = aiCache.createDataHash(stableData);
-    const cached = aiCache.get(`financial_health_${dataHash}`);
+    const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+    const cached = await unifiedAICache.get('financial-health', 'local-fallback', month, stableData);
     if (cached) {
-      console.log('Using cached financial health data - avoiding OpenAI API call');
+      console.log('Using unified cache for financial health data (local fallback) - avoiding OpenAI API call');
       return cached;
     }
 
@@ -1562,8 +1563,8 @@ Analyze this financial data and provide a comprehensive health assessment.`
       warnings: Array.isArray(result.warnings) ? result.warnings : []
     };
 
-    // Cache the result for 2 hours to reduce frequent API calls
-    aiCache.set(`financial_health_${dataHash}`, healthData, 7200);
+    // Cache the result in unified cache system
+    await unifiedAICache.set('financial-health', 'local-fallback', month, stableData, healthData);
     
     return healthData;
   } catch (error) {
