@@ -256,6 +256,11 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                         </>
                       )}
                     </div>
+                    {transaction.referenceNote && (
+                      <div className="text-sm text-gray-600 dark:text-gray-300 mt-1 italic">
+                        Note: {transaction.referenceNote}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">

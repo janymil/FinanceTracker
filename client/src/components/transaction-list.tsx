@@ -247,6 +247,11 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                             </>
                           )}
                         </div>
+                        {transaction.referenceNote && (
+                          <div className="text-sm text-gray-600 dark:text-gray-300 mt-1 italic">
+                            Note: {transaction.referenceNote}
+                          </div>
+                        )}
                       </div>
                     </div>
                     

@@ -941,6 +941,11 @@ export default function Transactions() {
                             </>
                           )}
                         </div>
+                        {transaction.referenceNote && (
+                          <div className="text-sm text-gray-600 dark:text-gray-300 mt-1 italic">
+                            Note: {transaction.referenceNote}
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 shrink-0">
