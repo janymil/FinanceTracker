@@ -241,6 +241,14 @@ export class UnifiedAICache {
       }
     } catch (error) {
       console.error('Database save error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        detail: error.detail,
+        constraint: error.constraint,
+        column: error.column
+      });
+      throw error;
     }
   }
 
