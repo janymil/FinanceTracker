@@ -164,13 +164,13 @@ export async function generateContextualFinancialTips(data: {
   transactions: Array<{
     description: string;
     amount: number;
-    category: string;
+    categoryName: string;
     date: string;
     type?: 'income' | 'expense';
     recurring?: boolean;
   }>;
   budgets: Array<{
-    category: string;
+    categoryName: string;
     budgetAmount: number;
     spent: number;
     remaining: number;
@@ -346,7 +346,7 @@ TOP SPENDING CATEGORIES:
 ${topSpendingCategories.map(([cat, amount]) => `- ${cat}: $${amount.toLocaleString()} (${((amount/summary.totalExpenses)*100).toFixed(1)}%)`).join('\n')}
 
 BUDGET STATUS:
-${budgets.length > 0 ? budgets.map(b => `- ${b.category}: $${b.spent.toLocaleString()}/$${b.budgetAmount.toLocaleString()} (${b.remaining >= 0 ? 'under' : 'over'} budget by $${Math.abs(b.remaining).toLocaleString()}) - ${b.period || 'monthly'}`).join('\n') : '- No budgets set'}
+${budgets.length > 0 ? budgets.map(b => `- ${b.categoryName}: $${b.spent.toLocaleString()}/$${b.budgetAmount.toLocaleString()} (${b.remaining >= 0 ? 'under' : 'over'} budget by $${Math.abs(b.remaining).toLocaleString()}) - ${b.period || 'monthly'}`).join('\n') : '- No budgets set'}
 
 FINANCIAL GOALS:
 ${goals.length > 0 ? goals.map(g => `- ${g.name}: $${g.currentAmount.toLocaleString()}/$${g.targetAmount.toLocaleString()} (${((g.currentAmount/g.targetAmount)*100).toFixed(0)}% complete) - Target: ${g.targetDate}`).join('\n') : '- No goals set'}
@@ -928,7 +928,7 @@ export async function generateTrendPredictions(
           .map(([cat, amount]) => ({ category: cat, amount }))
       })).sort((a, b) => a.month.localeCompare(b.month)),
       categoryTotals: Array.from(categoryTotals.entries()).map(([cat, amount]) => ({ category: cat, amount })),
-      budgets: budgets.map(b => ({ category: b.categoryName || 'Other', budgetAmount: parseFloat(b.amount) }))
+      budgets: budgets.map(b => ({ categoryName: b.categoryName || 'Other', budgetAmount: parseFloat(b.amount) }))
     };
 
     const prompt = `Analyze this comprehensive financial data and provide AI-powered trend predictions and forecasting.

@@ -365,7 +365,9 @@ Changelog:
 - June 24, 2025. Cleaned up debug logging in Fly.io service to reduce production log pollution
 - June 24, 2025. CRITICAL FIX: Contextual financial tips field mapping issue - AI was receiving 'category' instead of 'categoryName' causing all transactions to appear uncategorized
 - June 24, 2025. Fixed transaction data structure in contextualFinancialTipsRoutes.ts - AI now receives proper categoryName field for accurate analysis
+- June 24, 2025. Fixed external AI processor (index.ts) TypeScript interfaces and budget references to use categoryName field consistently
 - June 24, 2025. Cleared contextual tips cache to force fresh AI analysis with corrected transaction categorization data
+- June 24, 2025. DEPLOYMENT REQUIRED: External AI processor needs redeployment to Fly.io with corrected field mapping
 - June 23, 2025. Fixed field mapping in: contextualFinancialTips-functions.js, contextualFinancialTipsRoutes.ts, aiRoutes.ts
 - June 23, 2025. Cleared unified cache database to force fresh analysis with correct categorization logic
 - June 23, 2025. DEPLOYMENT REQUIRED: Created deployment instructions for Fly.io AI processor with corrected field mapping
