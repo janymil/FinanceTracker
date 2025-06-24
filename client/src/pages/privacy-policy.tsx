@@ -2,6 +2,9 @@ import { useEffect } from "react";
 import { TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SEO } from "@/components/SEO";
+import { AnonymousHeader } from "@/components/anonymous-header";
 
 export default function PrivacyPolicy() {
   const [, setLocation] = useLocation();

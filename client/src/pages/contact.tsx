@@ -7,6 +7,8 @@ import { Mail, MapPin, Clock, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
+import { SEO } from "@/components/SEO";
+import { AnonymousHeader } from "@/components/anonymous-header";
 
 export default function Contact() {
   const { user } = useAuth();
@@ -80,13 +82,6 @@ export default function Contact() {
       {/* Header for anonymous users */}
       {!user && (
         <AnonymousHeader />
-                <Button onClick={handleLogin} className="bg-primary hover:bg-primary/90">
-                  Sign In
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
       )}
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
