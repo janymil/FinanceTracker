@@ -40,15 +40,16 @@ export default function Landing() {
               <span className="text-xl font-bold text-gray-900 dark:text-white">FinanzerPro</span>
             </div>
             <div className="flex items-center space-x-4">
+              {/* Help and Contact links hidden on mobile - available in footer */}
               <button 
                 onClick={() => setLocation('/help')} 
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                className="hidden sm:block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
               >
                 Help
               </button>
               <button 
                 onClick={() => setLocation('/contact')} 
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                className="hidden sm:block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
               >
                 Contact
               </button>
