@@ -224,7 +224,7 @@ export class UnifiedAICache {
           .set({
             dataHash: entry.dataHash,
             result: entry.result,
-            lastAccessed: new Date()
+            updatedAt: new Date()
           })
           .where(eq(aiCache.id, existing[0].id));
       } else {
@@ -236,7 +236,6 @@ export class UnifiedAICache {
           dataHash: entry.dataHash,
           result: entry.result,
           createdAt: entry.createdAt,
-          lastAccessed: entry.lastAccessed,
           updatedAt: new Date()
         });
       }
