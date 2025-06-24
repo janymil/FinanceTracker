@@ -426,7 +426,19 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
 
         {/* Right side - User menu and premium status */}
         <div className="flex items-center space-x-3">
-
+          {/* Theme toggle */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleTheme}
+            className="hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            {theme === 'light' ? (
+              <Moon className="h-4 w-4" />
+            ) : (
+              <Sun className="h-4 w-4" />
+            )}
+          </Button>
 
           {/* Premium status */}
           {user?.plan === 'premium' ? (
