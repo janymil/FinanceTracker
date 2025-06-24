@@ -12,7 +12,7 @@ import {
   validateDataSecurity
 } from "../../lib/importHelpers";
 import { eq } from "drizzle-orm";
-import { contextualFinancialTips, dailyRecommendations } from "../../shared/schema";
+import { dailyRecommendations } from "../../shared/schema";
 import { db } from "../db";
 import { 
   saveImportLog, 
@@ -472,7 +472,7 @@ export function registerImportRoutes(app: Express) {
       await storage.deleteCachedDailyRecommendations(userId);
       
       // Clear contextual financial tips cache
-      await db.delete(contextualFinancialTips).where(eq(contextualFinancialTips.userId, userId));
+      // Legacy contextualFinancialTips table removed - using unified ai_cache system
       
       console.log(`Cleared all AI caches for user ${userId} after data import`);
 

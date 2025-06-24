@@ -399,6 +399,9 @@ Changelog:
 - June 24, 2025. UNIFIED CACHE SYSTEM COMPLETE: Both Fly.io and fallback OpenAI systems now share single ai_cache database table
 - June 24, 2025. All 7 AI functions guarantee unified cache usage across both primary and fallback execution paths
 - June 24, 2025. Fixed architectural isolation that was preventing true cost optimization and cache efficiency
+- June 24, 2025. REMOVED LEGACY CACHE TABLES: Deleted contextual_financial_tips table and all references
+- June 24, 2025. TRUE UNIFIED CACHE: All AI functions now use single ai_cache table with no legacy fragmentation
+- June 24, 2025. Fixed cache invalidation to use unifiedAICache.invalidateUser() for consistent clearing across all functions
 - June 24, 2025. DARK THEME IMPLEMENTATION: Added complete dark theme system with toggle button in header
 - June 24, 2025. Created ThemeContext with localStorage persistence, system preference detection, and moon/sun toggle icons
 - June 24, 2025. Dark theme integrates with existing CSS variables and maintains professional design consistency

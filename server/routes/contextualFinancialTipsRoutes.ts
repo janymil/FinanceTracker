@@ -6,7 +6,7 @@ import { unifiedAICache } from "../../lib/unifiedAICache";
 import { storage } from "../storage";
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
-import { contextualFinancialTips } from "../../shared/schema";
+// Removed contextualFinancialTips import - using unified ai_cache system
 import { db } from "../db";
 
 export function registerContextualFinancialTipsRoutes(app: Express) {
@@ -20,7 +20,10 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
 
       // Clear database cache
       await storage.deleteCachedDailyRecommendations(userId);
-      await db.delete(contextualFinancialTips).where(eq(contextualFinancialTips.userId, userId));
+      // Legacy table removed - unified cache handles clearing via unifiedAICache.invalidateUser()
+      
+      // Clear unified cache system
+      await unifiedAICache.invalidateUser(userId);
       
       // Clear memory cache
       const { aiCache } = await import('../cache');

@@ -16,7 +16,7 @@ import {
   financialMascots,
   redeemCodes,
   importLogs,
-  contextualFinancialTips,
+  // contextualFinancialTips, // Removed - using unified ai_cache
   type User,
   type InsertUser,
   type Transaction,
@@ -2110,28 +2110,7 @@ export class DatabaseStorage implements IStorage {
     return results[0] || null;
   }
 
-  // Contextual Financial Tips operations
-  async getContextualFinancialTips(userId: string): Promise<SelectContextualFinancialTips | undefined> {
-    const [result] = await db
-      .select()
-      .from(contextualFinancialTips)
-      .where(eq(contextualFinancialTips.userId, userId))
-      .orderBy(desc(contextualFinancialTips.updatedAt))
-      .limit(1);
-    return result;
-  }
-
-  async saveContextualFinancialTips(tips: InsertContextualFinancialTips): Promise<SelectContextualFinancialTips> {
-    const [result] = await db
-      .insert(contextualFinancialTips)
-      .values({
-        ...tips,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .returning();
-    return result;
-  }
+  // Removed: Contextual Financial Tips operations - using unified ai_cache system
 
   async updateContextualFinancialTips(userId: string, tips: InsertContextualFinancialTips): Promise<SelectContextualFinancialTips> {
     const [result] = await db
