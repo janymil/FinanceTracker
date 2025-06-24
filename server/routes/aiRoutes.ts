@@ -433,18 +433,13 @@ export function registerAIRoutes(app: Express) {
         transactions: transactions.slice(0, 100),
         budgets
       };
-      const debugHash = unifiedAICache.createDataHash(cacheData);
-      console.log(`DEBUG: Cache lookup - hash: ${debugHash}, month: ${month}`);
       
       const cachedResult = await unifiedAICache.get('daily-recommendations', userId, month, cacheData);
       
       if (cachedResult) {
-        console.log('✅ Daily recommendations: Using CACHED data - AVOIDING Fly.io API call');
-        console.log(`✅ Cache hit prevented expensive API call to Fly.io`);
+        console.log('Daily recommendations: Using cached data');
         return res.json(cachedResult);
       }
-      
-      console.log('❌ Cache MISS - will call expensive Fly.io API');
 
       console.log('Making Fly.io API call via centralized processor');
       
@@ -533,19 +528,10 @@ export function registerAIRoutes(app: Express) {
 
       // Save to unified cache system
       try {
-        console.log('🔄 Attempting to save daily-recommendations to unified cache...');
-        await unifiedAICache.set('daily-recommendations', userId, month, {
-          summary,
-          transactions: transactions.slice(0, 100),
-          budgets
-        }, recommendations);
-        console.log('✅ Daily recommendations: Successfully saved to unified cache');
+        await unifiedAICache.set('daily-recommendations', userId, month, cacheData, recommendations);
+        console.log('Daily recommendations: Saved to cache');
       } catch (cacheError) {
-        console.error("❌ Error saving daily recommendations to unified cache:", cacheError);
-        console.error("Cache error details:", {
-          message: cacheError.message,
-          stack: cacheError.stack?.split('\n')[0]
-        });
+        console.error("Error saving daily recommendations to cache:", cacheError);
       }
 
       return res.json(recommendations);
