@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { storage } from "../server/storage";
 import { db } from "../server/db";
 import { aiCache } from "../shared/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 
 /**
  * Unified AI Cache System
@@ -155,7 +155,8 @@ export class UnifiedAICache {
    */
   private async getFromDatabase(functionName: string, userId: string, month: string, dataHash: string): Promise<CacheEntry | null> {
     try {
-      const result = await db.select()
+      // First try exact hash match
+      let result = await db.select()
         .from(aiCache)
         .where(and(
           eq(aiCache.userId, userId),
@@ -164,13 +165,31 @@ export class UnifiedAICache {
           eq(aiCache.dataHash, dataHash)
         ))
         .limit(1);
+
+      // If no exact match, try fallback to most recent entry for same function/month
+      if (result.length === 0) {
+        console.log(`[UnifiedCache] No exact hash match (${dataHash}), trying recent fallback`);
+        result = await db.select()
+          .from(aiCache)
+          .where(and(
+            eq(aiCache.userId, userId),
+            eq(aiCache.functionName, functionName),
+            eq(aiCache.month, month)
+          ))
+          .orderBy(desc(aiCache.createdAt))
+          .limit(1);
+        
+        if (result.length > 0) {
+          console.log(`[UnifiedCache] Using fallback cache entry with hash: ${result[0].dataHash}`);
+        }
+      }
       
       if (result.length > 0) {
         return {
           userId,
           functionName,
           month,
-          dataHash,
+          dataHash: result[0].dataHash,
           result: result[0].result,
           createdAt: result[0].createdAt,
           lastAccessed: new Date()
