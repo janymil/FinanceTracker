@@ -1050,7 +1050,6 @@ export async function generateExpensePredictions(transactions: Array<{
   description: string;
   date: string;
   type: string;
-  categoryId?: number;
   categoryName?: string;
   recurring?: boolean;
 }>): Promise<ExpensePrediction> {
