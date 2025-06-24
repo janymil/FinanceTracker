@@ -38,7 +38,8 @@ import {
   LogOut, 
   Menu,
   Plus,
-
+  Moon,
+  Sun,
   Repeat,
   HelpCircle,
   Gift
@@ -52,6 +53,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useTheme } from "@/context/ThemeContext";
 
 interface Category {
   id: number;
@@ -75,6 +77,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { canChangeCurrency } = useCurrency();
   const { toast } = useToast();
   const { signOut } = useClerk();
+  const { theme, toggleTheme } = useTheme();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newTransaction, setNewTransaction] = useState({
     amount: "",

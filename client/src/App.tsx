@@ -9,6 +9,7 @@ import { initGA } from "@/lib/analytics";
 import { useAnalytics } from "@/hooks/use-analytics";
 import { detectIncognito, showIncognitoWarning } from "@/utils/incognito-detection";
 import { CurrencyProvider } from "@/context/CurrencyContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 // Core components loaded immediately
 import Header from "@/components/header";
@@ -193,9 +194,11 @@ export default function App() {
   }, []);
 
   return (
-    <CurrencyProvider>
-      <AppContent />
-      <Toaster />
-    </CurrencyProvider>
+    <ThemeProvider>
+      <CurrencyProvider>
+        <AppContent />
+        <Toaster />
+      </CurrencyProvider>
+    </ThemeProvider>
   );
 }
