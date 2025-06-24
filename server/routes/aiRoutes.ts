@@ -437,9 +437,11 @@ export function registerAIRoutes(app: Express) {
       const cachedResult = await unifiedAICache.get('daily-recommendations', userId, month, cacheData);
       
       if (cachedResult) {
-        console.log('Daily recommendations: Using cached data');
+        console.log('CACHE HIT: Daily recommendations served from unified cache - NO Fly.io call');
         return res.json(cachedResult);
       }
+      
+      console.log('CACHE MISS: Calling Fly.io for fresh daily recommendations');
 
       console.log('Making Fly.io API call via centralized processor');
       
@@ -529,7 +531,7 @@ export function registerAIRoutes(app: Express) {
       // Save to unified cache system
       try {
         await unifiedAICache.set('daily-recommendations', userId, month, cacheData, recommendations);
-        console.log('Daily recommendations: Saved to cache');
+        console.log('CACHE SAVE: Daily recommendations cached for future requests');
       } catch (cacheError) {
         console.error("Error saving daily recommendations to cache:", cacheError);
       }
