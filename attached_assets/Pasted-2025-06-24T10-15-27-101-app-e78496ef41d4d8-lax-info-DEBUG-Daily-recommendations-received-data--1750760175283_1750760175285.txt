@@ -1,0 +1,79 @@
+2025-06-24T10:15:27.101 app[e78496ef41d4d8] lax [info] DEBUG: Daily recommendations - received data: {
+
+2025-06-24T10:15:27.101 app[e78496ef41d4d8] lax [info] transactionCount: 15,
+
+2025-06-24T10:15:27.101 app[e78496ef41d4d8] lax [info] firstTransaction: {
+
+2025-06-24T10:15:27.101 app[e78496ef41d4d8] lax [info] id: 142,
+
+2025-06-24T10:15:27.101 app[e78496ef41d4d8] lax [info] amount: '50.00',
+
+2025-06-24T10:15:27.101 app[e78496ef41d4d8] lax [info] description: 'test expens 2',
+
+2025-06-24T10:15:27.101 app[e78496ef41d4d8] lax [info] date: '2025-06-19T00:00:00.000Z',
+
+2025-06-24T10:15:27.101 app[e78496ef41d4d8] lax [info] type: 'expense',
+
+2025-06-24T10:15:27.101 app[e78496ef41d4d8] lax [info] categoryName: 'Healthcare'
+
+2025-06-24T10:15:27.101 app[e78496ef41d4d8] lax [info] },
+
+2025-06-24T10:15:27.101 app[e78496ef41d4d8] lax [info] summaryData: { totalIncome: 0, totalExpenses: 0, netAmount: 0 },
+
+2025-06-24T10:15:27.101 app[e78496ef41d4d8] lax [info] budgetCount: 0,
+
+2025-06-24T10:15:27.101 app[e78496ef41d4d8] lax [info] categoriesType: 'object',
+
+2025-06-24T10:15:27.101 app[e78496ef41d4d8] lax [info] categoriesSize: 22
+
+2025-06-24T10:15:27.101 app[e78496ef41d4d8] lax [info] }
+
+2025-06-24T10:15:27.101 app[e78496ef41d4d8] lax [info] Generating new daily recommendations with OpenAI
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] DEBUG: After filtering - transaction data: {
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] originalCount: 15,
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] afterFilter: 15,
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] threeMonthsAgo: '2025-03-24T10:15:27.101Z',
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] sampleFiltered: [
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] {
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] id: 142,
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] amount: '50.00',
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] description: 'test expens 2',
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] date: '2025-06-19T00:00:00.000Z',
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] type: 'expense',
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] categoryName: 'Healthcare'
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] },
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] {
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] id: 145,
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] amount: '500.00',
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] description: 'test 4',
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] date: '2025-06-19T00:00:00.000Z',
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] type: 'income',
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] categoryName: 'Investments'
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] }
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] ]
+
+2025-06-24T10:15:27.102 app[e78496ef41d4d8] lax [info] }
+
+2025-06-24T10:15:36.702 app[e78496ef41d4d8] lax [info] Daily recommendations generated successfully

@@ -38,7 +38,7 @@ export class UnifiedAICache {
   /**
    * Create hash from user data to detect significant changes
    */
-  private createDataHash(data: any): string {
+  createDataHash(data: any): string {
     return crypto
       .createHash('md5')
       .update(JSON.stringify(data))

@@ -407,11 +407,15 @@ export function registerAIRoutes(app: Express) {
 
       // Check unified cache for recommendations
       const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      const cachedResult = await unifiedAICache.get('daily-recommendations', userId, month, {
+      const cacheData = {
         summary,
         transactions: transactions.slice(0, 100),
         budgets
-      });
+      };
+      const debugHash = unifiedAICache.createDataHash(cacheData);
+      console.log(`DEBUG: Cache lookup - hash: ${debugHash}, month: ${month}`);
+      
+      const cachedResult = await unifiedAICache.get('daily-recommendations', userId, month, cacheData);
       
       if (cachedResult && cachedResult.recommendations) {
         console.log('Daily recommendations: Using unified cache - avoiding API call');
