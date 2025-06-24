@@ -1520,7 +1520,7 @@ Calculate health score quickly.`
     };
 
     // Cache the result for 2 hours to reduce frequent API calls
-    mockCache.set(`financial_health_${dataHash}`, healthData, 7200);
+    // No caching in Fly.io - handled by main application
 
     return healthData;
   } catch (error) {
@@ -1564,7 +1564,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'ai-processor', model: 'gpt-4o' });
 });
 
-// Unified AI endpoint - routes all tasks through single interface with cache integration
+// Unified AI endpoint - stateless OpenAI processing only (no caching)
 app.post("/execute-gpt-task", async (req, res) => {
   const { task, userId, payload } = req.body;
 
@@ -1573,15 +1573,6 @@ app.post("/execute-gpt-task", async (req, res) => {
   }
 
   try {
-    const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-    
-    // Check unified cache first
-    const cached = await unifiedAICache.get(task, userId, month, payload);
-    if (cached) {
-      console.log(`[AI ${task}] Using unified cache for ${month}`);
-      return res.json(cached);
-    }
-
     let result;
 
     switch (task) {
@@ -1617,10 +1608,7 @@ app.post("/execute-gpt-task", async (req, res) => {
         return res.status(400).json({ error: `Unknown task: ${task}` });
     }
 
-    // Store result in unified cache
-    await unifiedAICache.set(task, userId, month, payload, result);
-    console.log(`[AI ${task}] Processed and cached via Fly.io`);
-
+    console.log(`[AI ${task}] Processed via Fly.io`);
     res.json(result);
   } catch (error: any) {
     console.error(`Error processing ${task}:`, error);
