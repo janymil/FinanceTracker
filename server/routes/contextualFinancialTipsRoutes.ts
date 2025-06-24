@@ -56,7 +56,6 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
         firstTransaction: transactions?.[0] ? {
           description: transactions[0].description,
           categoryName: transactions[0].categoryName,
-          category: transactions[0].category,
           amount: transactions[0].amount,
           type: transactions[0].type
         } : 'none'

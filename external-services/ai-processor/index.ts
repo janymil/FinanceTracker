@@ -925,9 +925,9 @@ export async function generateTrendPredictions(
         topCategories: Array.from(data.categories.entries())
           .sort((a, b) => b[1] - a[1])
           .slice(0, 5)
-          .map(([cat, amount]) => ({ category: cat, amount }))
+          .map(([cat, amount]) => ({ categoryName: cat, amount }))
       })).sort((a, b) => a.month.localeCompare(b.month)),
-      categoryTotals: Array.from(categoryTotals.entries()).map(([cat, amount]) => ({ category: cat, amount })),
+      categoryTotals: Array.from(categoryTotals.entries()).map(([cat, amount]) => ({ categoryName: cat, amount })),
       budgets: budgets.map(b => ({ categoryName: b.categoryName || 'Other', budgetAmount: parseFloat(b.amount) }))
     };
 
