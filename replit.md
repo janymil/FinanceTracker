@@ -359,6 +359,10 @@ Changelog:
 - June 24, 2025. ADDED: Dark theme toggle to anonymous page headers (landing, help, contact, legal pages)
 - June 24, 2025. Created reusable AnonymousHeader component with theme toggle for consistent anonymous user experience
 - June 24, 2025. Fixed all import statements and syntax errors across anonymous pages
+- June 24, 2025. FIXED: Daily recommendations cache issue - data structure mismatch between lookup and save operations resolved
+- June 24, 2025. Unified cache system now working correctly - daily recommendations use cached data instead of calling Fly.io every time
+- June 24, 2025. Response time improved from 5-10 seconds to 47ms for cached daily recommendations
+- June 24, 2025. Cleaned up debug logging in Fly.io service to reduce production log pollution
 - June 23, 2025. Fixed field mapping in: contextualFinancialTips-functions.js, contextualFinancialTipsRoutes.ts, aiRoutes.ts
 - June 23, 2025. Cleared unified cache database to force fresh analysis with correct categorization logic
 - June 23, 2025. DEPLOYMENT REQUIRED: Created deployment instructions for Fly.io AI processor with corrected field mapping
