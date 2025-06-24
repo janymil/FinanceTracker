@@ -219,6 +219,19 @@ export function registerAIRoutes(app: Express) {
 
       const transactions = await storage.getUserTransactions(userId, 100);
 
+      // Check unified cache for spending insights
+      const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+      const cacheData = {
+        transactions: transactions.slice(0, 100)
+      };
+      
+      const cachedResult = await unifiedAICache.get('spending-insights', userId, month, cacheData);
+      
+      if (cachedResult) {
+        console.log('AI spending insights: Using unified cache - avoiding API call');
+        return res.json(cachedResult);
+      }
+
       console.log('AI spending insights: Making Fly.io API call via centralized processor');
       
       const aiPayload = {
@@ -232,6 +245,14 @@ export function registerAIRoutes(app: Express) {
       };
 
       const insights = await runAI('spending-insights', userId, aiPayload);
+      
+      // Save to unified cache
+      try {
+        await unifiedAICache.set('spending-insights', userId, month, cacheData, insights);
+        console.log('AI spending insights: Saved to unified cache');
+      } catch (cacheError) {
+        console.error("Error saving spending insights to unified cache:", cacheError);
+      }
 
       return res.json(insights);
     } catch (error) {
@@ -512,14 +533,19 @@ export function registerAIRoutes(app: Express) {
 
       // Save to unified cache system
       try {
+        console.log('🔄 Attempting to save daily-recommendations to unified cache...');
         await unifiedAICache.set('daily-recommendations', userId, month, {
           summary,
           transactions: transactions.slice(0, 100),
           budgets
         }, recommendations);
-        console.log('Daily recommendations: Saved to unified cache');
+        console.log('✅ Daily recommendations: Successfully saved to unified cache');
       } catch (cacheError) {
-        console.error("Error saving daily recommendations to unified cache:", cacheError);
+        console.error("❌ Error saving daily recommendations to unified cache:", cacheError);
+        console.error("Cache error details:", {
+          message: cacheError.message,
+          stack: cacheError.stack?.split('\n')[0]
+        });
       }
 
       return res.json(recommendations);
