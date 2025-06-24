@@ -363,6 +363,9 @@ Changelog:
 - June 24, 2025. Unified cache system now working correctly - daily recommendations use cached data instead of calling Fly.io every time
 - June 24, 2025. Response time improved from 5-10 seconds to 47ms for cached daily recommendations
 - June 24, 2025. Cleaned up debug logging in Fly.io service to reduce production log pollution
+- June 24, 2025. CRITICAL FIX: Contextual financial tips field mapping issue - AI was receiving 'category' instead of 'categoryName' causing all transactions to appear uncategorized
+- June 24, 2025. Fixed transaction data structure in contextualFinancialTipsRoutes.ts - AI now receives proper categoryName field for accurate analysis
+- June 24, 2025. Cleared contextual tips cache to force fresh AI analysis with corrected transaction categorization data
 - June 23, 2025. Fixed field mapping in: contextualFinancialTips-functions.js, contextualFinancialTipsRoutes.ts, aiRoutes.ts
 - June 23, 2025. Cleared unified cache database to force fresh analysis with correct categorization logic
 - June 23, 2025. DEPLOYMENT REQUIRED: Created deployment instructions for Fly.io AI processor with corrected field mapping
