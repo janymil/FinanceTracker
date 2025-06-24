@@ -386,6 +386,9 @@ Changelog:
 - June 24, 2025. REFERENCE NOTES DISPLAY: Added reference note display to all transaction list components throughout the application
 - June 24, 2025. Reference notes now appear in transaction lists when they exist, showing as italic gray text below transaction details
 - June 24, 2025. Updated 5 components: transaction-list.tsx, simple-transaction-list.tsx, transactions.tsx, income.tsx, and expenses.tsx for consistent note display
+- June 24, 2025. HEADER CLEANUP: Removed non-functional search (lupa) and notification bell (campana) icons from header for cleaner UI
+- June 24, 2025. CACHE SYSTEM FIX: Fixed Daily Recommendations AI function to use only unified cache system instead of broken legacy database tables
+- June 24, 2025. Removed legacy dailyRecommendations table save logic that was causing "relation does not exist" errors in production
 - June 23, 2025. ACTUAL PERFORMANCE RESULTS: 6 of 7 AI functions operational (85.7% success rate) - spending-insights working with detailed analysis, financial-health-score still times out after 20s
 - June 23, 2025. OPTIMIZATION RESULTS: gpt-4o-mini model reduced processing time by 70-80% while preserving sophisticated analysis quality and complex financial calculations
 - June 22, 2025. FIXED: Replaced hardcoded fallback tips with AI-based fallback system for contextual financial tips

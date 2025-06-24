@@ -15,8 +15,7 @@ import {
   budgets, 
   goals,
   expenseReminders,
-  users,
-  dailyRecommendations
+  users
 } from "../../shared/schema";
 import { eq, desc, lt, gte, sql, and } from "drizzle-orm";
 
@@ -505,34 +504,7 @@ export function registerAIRoutes(app: Express) {
         }
       }
 
-      // Save to database for session persistence
-      try {
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7); // Expire in 7 days
 
-        // Clean up old recommendations first
-        await db
-          .delete(dailyRecommendations)
-          .where(
-            and(
-              eq(dailyRecommendations.userId, userId),
-              lt(dailyRecommendations.expiresAt, new Date())
-            )
-          );
-
-        // Insert new recommendations
-        await db.insert(dailyRecommendations).values({
-          userId,
-          recommendations: recommendations.recommendations,
-          insights: recommendations.insights,
-          dataHash,
-          expiresAt
-        });
-
-        console.log('Daily recommendations saved to database for persistence');
-      } catch (error) {
-        console.error('Failed to save recommendations to database:', error);
-      }
 
       // Save to unified cache system
       try {
