@@ -696,7 +696,11 @@ export default function Dashboard() {
 
               {/* <LazyRemindersStreaks /> - Hidden until functionality is complete */}
 
-              <LazyAutoCategorization transactions={transactions as any} />
+              <LazyDailyRecommendations 
+                summary={financialSummary}
+                transactions={transactions as any}
+                budgets={budgets as any}
+              />
             </div>
 
             {/* Premium Features - Show widgets with internal upgrade prompts */}
@@ -706,11 +710,7 @@ export default function Dashboard() {
                 summary={financialSummary}
               />
               
-              <LazyDailyRecommendations 
-                summary={financialSummary}
-                transactions={transactions as any}
-                budgets={budgets as any}
-              />
+              <LazyAutoCategorization transactions={transactions as any} />
             </div>
 
             <LazyAIFinancialTips 
