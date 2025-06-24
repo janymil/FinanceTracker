@@ -441,12 +441,4 @@ export const insertRedeemCodeSchema = createInsertSchema(redeemCodes).omit({
   redeemedAt: true,
 });
 
-export const insertContextualFinancialTipsSchema = createInsertSchema(contextualFinancialTips).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-// Types
-export type InsertContextualFinancialTips = z.infer<typeof insertContextualFinancialTipsSchema>;
-export type SelectContextualFinancialTips = typeof contextualFinancialTips.$inferSelect;
+// Removed: contextualFinancialTips schemas - using unified ai_cache system

@@ -48,8 +48,7 @@ import {
   type InsertRedeemCode,
   type ImportLog,
   type InsertImportLog,
-  type SelectContextualFinancialTips,
-  type InsertContextualFinancialTips,
+  // Removed: contextualFinancialTips types - using unified ai_cache
 } from "@shared/schema";
 import { db } from "./db";
 import { DataEncryption } from "./encryption";
@@ -175,9 +174,7 @@ export interface IStorage {
   getImportLogById(id: number): Promise<ImportLog | null>;
 
   // Contextual Financial Tips operations
-  getContextualFinancialTips(userId: string): Promise<SelectContextualFinancialTips | undefined>;
-  saveContextualFinancialTips(tips: InsertContextualFinancialTips): Promise<SelectContextualFinancialTips>;
-  updateContextualFinancialTips(userId: string, tips: InsertContextualFinancialTips): Promise<SelectContextualFinancialTips>;
+  // Removed: contextualFinancialTips interface methods - using unified ai_cache
   shouldRegenerateFinancialTips(userId: string, currentDataHash: string): Promise<boolean>;
   
   // Daily recommendations cache management
@@ -2112,17 +2109,7 @@ export class DatabaseStorage implements IStorage {
 
   // Removed: Contextual Financial Tips operations - using unified ai_cache system
 
-  async updateContextualFinancialTips(userId: string, tips: InsertContextualFinancialTips): Promise<SelectContextualFinancialTips> {
-    const [result] = await db
-      .update(contextualFinancialTips)
-      .set({
-        ...tips,
-        updatedAt: new Date(),
-      })
-      .where(eq(contextualFinancialTips.userId, userId))
-      .returning();
-    return result;
-  }
+  // Removed: updateContextualFinancialTips method - using unified ai_cache system
 
   async shouldRegenerateFinancialTips(userId: string, currentDataHash: string): Promise<boolean> {
     const existingTips = await this.getContextualFinancialTips(userId);
