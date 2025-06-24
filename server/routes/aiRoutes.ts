@@ -422,9 +422,14 @@ export function registerAIRoutes(app: Express) {
         });
       }
 
-      // Categories already provided via storage layer joins
-
       console.log('Daily recommendations: Making Fly.io API call via centralized processor');
+      
+      // Create categories object for the payload
+      const categoriesData = await storage.getCategories(userId);
+      const categories = {};
+      categoriesData.forEach(cat => {
+        categories[cat.id] = cat.name;
+      });
       
       const aiPayload = {
         summary: summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 },
@@ -442,14 +447,15 @@ export function registerAIRoutes(app: Express) {
           amount: String(b.amount || 0),
           categoryName: b.categoryName || 'Uncategorized',
           period: b.period || 'monthly'
-        }))
+        })),
+        categories: categories
       };
 
       console.log('DEBUG: Daily recommendations payload being sent to Fly.io:', {
         transactionCount: aiPayload.transactions.length,
         summaryData: aiPayload.summary,
         budgetCount: aiPayload.budgets.length,
-        categoryCount: Object.keys(aiPayload.categories).length,
+        categoryCount: Object.keys(aiPayload.categories || {}).length,
         hasActualTransactions: aiPayload.transactions.length > 0,
         firstTransaction: aiPayload.transactions[0] || 'none'
       });
