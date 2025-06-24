@@ -24,9 +24,10 @@ curl https://finanzerpro.fly.dev/execute-gpt-task -X POST -H "Content-Type: appl
 
 ## Expected Result After Deployment
 - Contextual financial tips will correctly show categorized transactions instead of "100% uncategorized"
-- All 7 AI functions will receive proper transaction category data
-- Budget analysis will work correctly with category names
-- AI insights will be accurate based on actual transaction categories
+- All 7 AI functions will receive proper transaction category data with consistent categoryName field mapping
+- Budget analysis will work correctly with category names in both prompts and data structures
+- Trend predictions will properly map category totals and top spending categories
+- AI insights will be accurate based on actual transaction categories across all functions
 
 ## Files Modified
 - index.ts: TypeScript interfaces, budget field references, trend prediction mapping
