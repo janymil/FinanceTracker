@@ -727,6 +727,11 @@ export default function Income() {
                           </>
                         )}
                       </div>
+                      {transaction.referenceNote && (
+                        <div className="text-sm text-gray-600 dark:text-gray-300 mt-1 italic">
+                          Note: {transaction.referenceNote}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
