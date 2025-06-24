@@ -2,8 +2,6 @@ import express from "express";
 import cors from "cors";
 import OpenAI from "openai";
 import dotenv from "dotenv";
-import crypto from "crypto";
-import { Client } from "pg";
 
 dotenv.config();
 
@@ -13,124 +11,7 @@ const port = parseInt(process.env.PORT || '8080', 10);
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// Unified AI Cache implementation for Fly.io
-class UnifiedAICacheFlyio {
-  private memoryCache = new Map<string, any>();
-
-  private generateKey(functionName: string, userId: string, month: string, dataHash: string): string {
-    return `${functionName}:${userId}:${month}:${dataHash}`;
-  }
-
-  createDataHash(data: any): string {
-    const json = JSON.stringify(data, Object.keys(data).sort());
-    return crypto.createHash('md5').update(json).digest('hex');
-  }
-
-  async get(functionName: string, userId: string, month: string, userData: any): Promise<any | null> {
-    const dataHash = this.createDataHash(userData);
-    const key = this.generateKey(functionName, userId, month, dataHash);
-    
-    // Check memory cache first
-    if (this.memoryCache.has(key)) {
-      console.log(`[Cache HIT] Memory cache for ${functionName}`);
-      return this.memoryCache.get(key);
-    }
-
-    // Check database cache
-    try {
-      const client = new Client({
-        connectionString: process.env.DATABASE_URL,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-      });
-      
-      await client.connect();
-      
-      const result = await client.query(
-        'SELECT result, last_accessed FROM ai_cache WHERE user_id = $1 AND function_name = $2 AND month = $3 AND data_hash = $4 LIMIT 1',
-        [userId, functionName, month, dataHash]
-      );
-      
-      if (result.rows.length > 0) {
-        const cachedResult = result.rows[0].result;
-        
-        // Update last_accessed
-        await client.query(
-          'UPDATE ai_cache SET last_accessed = NOW() WHERE user_id = $1 AND function_name = $2 AND month = $3 AND data_hash = $4',
-          [userId, functionName, month, dataHash]
-        );
-        
-        // Store in memory cache
-        this.memoryCache.set(key, cachedResult);
-        
-        await client.end();
-        console.log(`[Cache HIT] Database cache for ${functionName}`);
-        return cachedResult;
-      }
-      
-      await client.end();
-    } catch (error) {
-      console.error('Database cache error:', error);
-    }
-    
-    return null;
-  }
-
-  async set(functionName: string, userId: string, month: string, userData: any, result: any): Promise<void> {
-    const dataHash = this.createDataHash(userData);
-    const key = this.generateKey(functionName, userId, month, dataHash);
-    
-    // Store in memory cache
-    this.memoryCache.set(key, result);
-    
-    // Store in database cache
-    try {
-      const client = new Client({
-        connectionString: process.env.DATABASE_URL,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-      });
-      
-      await client.connect();
-      
-      // Check if entry exists
-      const existing = await client.query(
-        'SELECT id FROM ai_cache WHERE user_id = $1 AND function_name = $2 AND month = $3 AND data_hash = $4 LIMIT 1',
-        [userId, functionName, month, dataHash]
-      );
-      
-      if (existing.rows.length > 0) {
-        // Update existing entry
-        await client.query(
-          'UPDATE ai_cache SET result = $1, last_accessed = NOW(), updated_at = NOW() WHERE user_id = $2 AND function_name = $3 AND month = $4 AND data_hash = $5',
-          [JSON.stringify(result), userId, functionName, month, dataHash]
-        );
-      } else {
-        // Insert new entry
-        await client.query(
-          'INSERT INTO ai_cache (user_id, function_name, month, data_hash, result, created_at, last_accessed, updated_at) VALUES ($1, $2, $3, $4, $5, NOW(), NOW(), NOW())',
-          [userId, functionName, month, dataHash, JSON.stringify(result)]
-        );
-      }
-      
-      await client.end();
-      console.log(`[Cache SET] Stored ${functionName} result in unified cache`);
-    } catch (error) {
-      console.error('Database cache save error:', error);
-    }
-  }
-
-  cleanup(): void {
-    const now = Date.now();
-    const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-    
-    for (const [key, entry] of this.memoryCache.entries()) {
-      if (entry.lastAccessed && (now - entry.lastAccessed) > maxAge) {
-        this.memoryCache.delete(key);
-      }
-    }
-  }
-}
-
-const unifiedAICache = new UnifiedAICacheFlyio();
+// Fly.io is stateless - no caching here, only OpenAI processing
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -742,12 +623,7 @@ export async function generateSpendingInsights(transactions: Array<{
 }>> {
   try {
     // Create hash for transactions to use as cache key
-    const transactionsHash = mockCache.createDataHash(transactions);
-    const cached = mockCache.getInsights(transactionsHash);
-    if (cached) {
-      console.log('Using cached insights result');
-      return cached;
-    }
+    // No caching in Fly.io - caching handled by main application
     const expenseTransactions = transactions.filter(t => t.type === 'expense');
 
     if (expenseTransactions.length === 0) {
@@ -877,12 +753,7 @@ export async function generateAIFinancialHealthScore(financialData: {
     const { summary, budgets, transactions, useAdvancedFactors } = financialData;
 
     // Create hash for caching
-    const dataHash = mockCache.createDataHash(financialData);
-    const cached = mockCache.get(`ai_health_score_${dataHash}`);
-    if (cached) {
-      console.log('Using cached AI financial health score');
-      return cached;
-    }
+    // No caching in Fly.io - caching handled by main application
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -1598,12 +1469,7 @@ export async function generateFinancialHealthScore(financialData: {
         }))
     };
 
-    const dataHash = mockCache.createDataHash(stableData);
-    const cached = mockCache.get(`financial_health_${dataHash}`);
-    if (cached) {
-      console.log('Using cached financial health data - avoiding OpenAI API call');
-      return cached;
-    }
+    // No caching in Fly.io - caching handled by main application
 
     // Prepare data for AI analysis
     const recentTransactions = transactions
