@@ -417,15 +417,15 @@ export function registerAIRoutes(app: Express) {
       
       const cachedResult = await unifiedAICache.get('daily-recommendations', userId, month, cacheData);
       
-      if (cachedResult && cachedResult.recommendations) {
-        console.log('Daily recommendations: Using unified cache - avoiding API call');
-        return res.json({
-          recommendations: cachedResult.recommendations,
-          insights: cachedResult.insights
-        });
+      if (cachedResult) {
+        console.log('✅ Daily recommendations: Using CACHED data - AVOIDING Fly.io API call');
+        console.log(`✅ Cache hit prevented expensive API call to Fly.io`);
+        return res.json(cachedResult);
       }
+      
+      console.log('❌ Cache MISS - will call expensive Fly.io API');
 
-      console.log('Daily recommendations: Making Fly.io API call via centralized processor');
+      console.log('Making Fly.io API call via centralized processor');
       
       // Create categories object for the payload
       const categoriesData = await storage.getCategories(userId);
