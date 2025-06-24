@@ -298,6 +298,7 @@ export const aiCache = pgTable("ai_cache", {
   result: jsonb("result").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  lastAccessed: timestamp("last_accessed").defaultNow(),
 });
 
 // Legacy daily recommendations table (will be migrated to ai_cache)
