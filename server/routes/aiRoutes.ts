@@ -37,7 +37,7 @@ export function registerAIRoutes(app: Express) {
 
       // Get uncategorized transactions
       const transactions = await storage.getUserTransactions(userId);
-      const uncategorized = transactions.filter(t => !t.categoryId);
+      const uncategorized = transactions.filter(t => !t.categoryName || t.categoryName === 'Uncategorized');
 
       if (uncategorized.length === 0) {
         return res.json({ suggestions: [] });
@@ -314,11 +314,6 @@ export function registerAIRoutes(app: Express) {
         return res.json(cachedResult);
       }
 
-      const categoryMap = new Map();
-      categories.forEach(cat => {
-        categoryMap.set(cat.id, cat.name);
-      });
-
       console.log('AI trend predictions: Making Fly.io API call via centralized processor');
       
       const aiPayload = {
@@ -328,13 +323,12 @@ export function registerAIRoutes(app: Express) {
           description: t.description,
           date: t.date.toISOString(),
           type: t.type,
-          categoryId: t.categoryId || 1
+          categoryName: t.categoryName || 'Uncategorized'
         })),
-        categoryMap: Object.fromEntries(categoryMap),
         budgets: budgets
-          .filter(b => b.categoryId !== null)
+          .filter(b => b.categoryName)
           .map(b => ({
-            categoryId: b.categoryId as number,
+            categoryName: b.categoryName,
             amount: b.amount
           }))
       };
@@ -428,9 +422,7 @@ export function registerAIRoutes(app: Express) {
         });
       }
 
-      // Get categories for proper naming
-      const categoriesData = await db.select().from(categories);
-      const categoryMap = new Map(categoriesData.map(cat => [cat.id, cat.name]));
+      // Categories already provided via storage layer joins
 
       console.log('Daily recommendations: Making Fly.io API call via centralized processor');
       
@@ -607,11 +599,7 @@ export function registerAIRoutes(app: Express) {
         return res.json(cachedResult);
       }
 
-      // Create category map
-      const categoryMap = new Map();
-      categories.forEach(cat => {
-        categoryMap.set(cat.id, cat.name);
-      });
+      // Categories already provided via storage layer joins
 
       // Process transactions with category names
       const processedTransactions = transactions.map(t => ({
@@ -620,24 +608,24 @@ export function registerAIRoutes(app: Express) {
         description: t.description,
         date: t.date.toISOString(),
         type: t.type,
-        categoryName: categoryMap.get(t.categoryId) || 'Other'
+        categoryName: t.categoryName || 'Other'
       }));
 
       // Calculate budget spending
       const budgetSpending = new Map();
       transactions.forEach(t => {
-        if (t.type === 'expense' && t.categoryId) {
-          const current = budgetSpending.get(t.categoryId) || 0;
-          budgetSpending.set(t.categoryId, current + parseFloat(t.amount));
+        if (t.type === 'expense' && t.categoryName) {
+          const current = budgetSpending.get(t.categoryName) || 0;
+          budgetSpending.set(t.categoryName, current + parseFloat(t.amount));
         }
       });
 
       const processedBudgets = budgets
-        .filter(b => b.categoryId !== null)
+        .filter(b => b.categoryName)
         .map(b => ({
-          categoryId: b.categoryId as number,
+          categoryName: b.categoryName,
           amount: b.amount,
-          spent: budgetSpending.get(b.categoryId) || 0
+          spent: budgetSpending.get(b.categoryName) || 0
         }));
 
       // Use unified AI processor for financial health score
