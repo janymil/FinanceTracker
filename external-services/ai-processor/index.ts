@@ -422,7 +422,7 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
         }))
       : [];
 
-    console.log('Contextual financial tips generated successfully');
+    // Success logging removed for production
     return { tips };
 
   } catch (error) {
@@ -587,7 +587,7 @@ Return comprehensive analysis in JSON:
     }];
 
     // Note: Cache now handled by unified cache system via routes
-    console.log('Financial tips generated successfully');
+    // Success logging removed for production
 
     return processedTips as any; // Type assertion for deployment
   } catch (error) {
@@ -1003,7 +1003,7 @@ Analysis Requirements:
     };
 
     // Note: Cache now handled by unified cache system via routes
-    console.log('Trend predictions generated successfully');
+    // Success logging removed for production
 
     return predictions;
 
@@ -1223,7 +1223,7 @@ ANALYSIS GUIDELINES:
     };
 
     // Note: Cache now handled by unified cache system via routes
-    console.log('Expense predictions generated successfully');
+    // Success logging removed for production
 
     return finalResult;
 
@@ -1417,7 +1417,7 @@ Only provide recommendations and insights based on the actual financial data pro
     };
 
     // Note: Cache now handled by unified cache system via routes
-    console.log('Daily recommendations generated successfully');
+    // Success logging removed for production
 
     return result;
 
@@ -1608,7 +1608,7 @@ app.post("/execute-gpt-task", async (req, res) => {
         return res.status(400).json({ error: `Unknown task: ${task}` });
     }
 
-    console.log(`[AI ${task}] Processed via Fly.io`);
+    // Task completion logging removed for production
     res.json(result);
   } catch (error: any) {
     console.error(`Error processing ${task}:`, error);
