@@ -379,6 +379,7 @@ Changelog:
 - June 23, 2025. AI now correctly recognizes transaction categories instead of reporting "100% uncategorized" - major user experience improvement
 - June 24, 2025. DASHBOARD WIDGET OPTIMIZATION: Switched positions of Daily Recommendations and AI Categorization widgets for better UX
 - June 24, 2025. Daily Recommendations widget moved to top-right position due to rich, actionable content vs AI Categorization's utility-focused empty space
+- June 24, 2025. FIXED: Daily Recommendations widget error caused by missing categories field in aiPayload after widget position switch - added safe fallbacks for Object.keys()
 - June 23, 2025. ACTUAL PERFORMANCE RESULTS: 6 of 7 AI functions operational (85.7% success rate) - spending-insights working with detailed analysis, financial-health-score still times out after 20s
 - June 23, 2025. OPTIMIZATION RESULTS: gpt-4o-mini model reduced processing time by 70-80% while preserving sophisticated analysis quality and complex financial calculations
 - June 22, 2025. FIXED: Replaced hardcoded fallback tips with AI-based fallback system for contextual financial tips
