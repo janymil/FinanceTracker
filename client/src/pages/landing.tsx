@@ -3,12 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrendingUp, Shield, DollarSign, BarChart3, Crown, Check, X, Star } from "lucide-react";
+import { TrendingUp, Shield, DollarSign, BarChart3, Crown, Check, X, Star, Sun, Moon } from "lucide-react";
 import { useLocation } from "wouter";
 import { SEO } from "@/components/SEO";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
+  const { theme, toggleTheme } = useTheme();
   
   const handleLogin = () => {
     setLocation('/auth#sign-in');
@@ -52,6 +54,17 @@ export default function Landing() {
                 className="hidden sm:block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
               >
                 Contact
+              </button>
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
               </button>
               <Button onClick={handleLogin} className="bg-primary hover:bg-primary/90">
                 Sign In

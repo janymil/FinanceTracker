@@ -35,6 +35,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
+import { AnonymousHeader } from "@/components/anonymous-header";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -296,6 +297,11 @@ export default function Help() {
       <div className="min-h-screen bg-background">
       {/* Header for anonymous users */}
       {!user && (
+        <AnonymousHeader />
+      )}
+      
+      {/* Header for authenticated users */}
+      {user && (
         <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
