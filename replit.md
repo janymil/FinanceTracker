@@ -356,6 +356,9 @@ Changelog:
 - June 23, 2025. Added categorization counting logic to both Fly.io and local fallback systems to prevent "uncategorized" false reports
 - June 23, 2025. Cleared all cached contextual tips data to force fresh AI analysis with corrected field mapping
 - June 23, 2025. SYSTEMATIC FIX: Corrected ALL files using incorrect transaction field mapping (t.category → t.categoryName)
+- June 24, 2025. ADDED: Dark theme toggle to anonymous page headers (landing, help, contact, legal pages)
+- June 24, 2025. Created reusable AnonymousHeader component with theme toggle for consistent anonymous user experience
+- June 24, 2025. Fixed all import statements and syntax errors across anonymous pages
 - June 23, 2025. Fixed field mapping in: contextualFinancialTips-functions.js, contextualFinancialTipsRoutes.ts, aiRoutes.ts
 - June 23, 2025. Cleared unified cache database to force fresh analysis with correct categorization logic
 - June 23, 2025. DEPLOYMENT REQUIRED: Created deployment instructions for Fly.io AI processor with corrected field mapping
