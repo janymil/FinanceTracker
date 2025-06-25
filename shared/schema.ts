@@ -276,9 +276,20 @@ export const redeemCodes = pgTable("redeem_codes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// AI cache system completely removed - direct Fly.io calls only
-
-// Cache system completely destroyed - direct Fly.io calls only
+// Centralized AI Cache System
+export const aiCache = pgTable("ai_cache", {
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: text("user_id").notNull().references(() => users.id),
+  functionKey: text("function_key").notNull(),
+  inputHash: text("input_hash").notNull(),
+  inputJson: jsonb("input_json"),
+  outputJson: jsonb("output_json"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  // Unique constraint on (user_id, function_key, input_hash)
+  index("ai_cache_user_function_hash_idx").on(table.userId, table.functionKey, table.inputHash),
+]);
 
 export const importLogs = pgTable("import_logs", {
   id: serial("id").primaryKey(),
@@ -343,6 +354,10 @@ export type RedeemCode = typeof redeemCodes.$inferSelect;
 
 export type ImportLog = typeof importLogs.$inferSelect;
 export type InsertImportLog = typeof importLogs.$inferInsert;
+
+// AI Cache types
+export type AiCacheEntry = typeof aiCache.$inferSelect;
+export type InsertAiCacheEntry = typeof aiCache.$inferInsert;
 
 // Insert schemas
 export const insertTransactionSchema = createInsertSchema(transactions).omit({
