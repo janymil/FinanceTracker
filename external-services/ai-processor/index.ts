@@ -2,8 +2,7 @@ import express from "express";
 import cors from "cors";
 import OpenAI from "openai";
 import dotenv from "dotenv";
-import { Pool } from 'pg';
-import crypto from 'crypto';
+
 
 dotenv.config();
 
@@ -13,136 +12,9 @@ const port = parseInt(process.env.PORT || '8080', 10);
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// PostgreSQL connection for unified cache
-console.log('Database connection setup:', {
-  hasUrl: !!process.env.DATABASE_URL,
-  nodeEnv: process.env.NODE_ENV,
-  urlPrefix: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 20) + '...' : 'none'
-});
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  // Add connection timeout and retry settings
-  connectionTimeoutMillis: 5000,
-  idleTimeoutMillis: 30000,
-  max: 10
-});
 
-// Unified AI Cache class for Fly.io processor
-class UnifiedAICacheFlyio {
-  private functionKey: string;
-  private userId: string;
-  private month?: string;
 
-  constructor(functionKey: string, userId: string, month?: string) {
-    this.functionKey = functionKey;
-    this.userId = userId;
-    this.month = this.validateMonth(month);
-  }
-
-  private validateMonth(month?: string): string | undefined {
-    if (!month) return undefined;
-    const monthRegex = /^\d{4}-\d{2}$/;
-    return monthRegex.test(month) ? month : undefined;
-  }
-
-  private hashInput(input: any): string {
-    const json = JSON.stringify(input);
-    return crypto.createHash('sha256').update(json).digest('hex');
-  }
-
-  async get(input: any): Promise<any | null> {
-    try {
-      const inputHash = this.hashInput(input);
-      
-      let query = `
-        SELECT output, created_at, ttl_hours 
-        FROM ai_cache 
-        WHERE user_id = $1 AND function_key = $2 AND input_hash = $3
-      `;
-      let params = [this.userId, this.functionKey, inputHash];
-
-      if (this.month) {
-        query += ` AND month = $4`;
-        params.push(this.month);
-      } else {
-        query += ` AND month IS NULL`;
-      }
-
-      const result = await pool.query(query, params);
-      
-      if (result.rows.length === 0) {
-        return null;
-      }
-
-      const row = result.rows[0];
-      const createdAt = new Date(row.created_at);
-      const ttlMs = row.ttl_hours * 60 * 60 * 1000;
-      const expiresAt = new Date(createdAt.getTime() + ttlMs);
-
-      if (new Date() > expiresAt) {
-        // Cache expired, delete it
-        await pool.query(
-          `DELETE FROM ai_cache WHERE user_id = $1 AND function_key = $2 AND input_hash = $3`,
-          [this.userId, this.functionKey, inputHash]
-        );
-        return null;
-      }
-
-      // Update last accessed
-      await pool.query(
-        `UPDATE ai_cache SET last_accessed = NOW(), hit_count = hit_count + 1 WHERE user_id = $1 AND function_key = $2 AND input_hash = $3`,
-        [this.userId, this.functionKey, inputHash]
-      );
-
-      return JSON.parse(row.output);
-    } catch (error) {
-      console.error('Cache get error:', error);
-      return null;
-    }
-  }
-
-  async set(input: any, output: any, isError = false, ttlHours?: number): Promise<void> {
-    try {
-      const inputHash = this.hashInput(input);
-      const defaultTTL = this.getDefaultTTL();
-      const finalTTL = ttlHours || defaultTTL;
-
-      await pool.query(
-        `INSERT INTO ai_cache (user_id, function_key, month, input_hash, input_data, output, is_error, ttl_hours, created_at, last_accessed, hit_count)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW(), 0)
-         ON CONFLICT (user_id, function_key, month, input_hash)
-         DO UPDATE SET output = $6, is_error = $7, ttl_hours = $8, created_at = NOW(), last_accessed = NOW(), hit_count = 0`,
-        [
-          this.userId,
-          this.functionKey,
-          this.month,
-          inputHash,
-          JSON.stringify(input),
-          JSON.stringify(output),
-          isError,
-          finalTTL
-        ]
-      );
-    } catch (error) {
-      console.error('Cache set error:', error);
-    }
-  }
-
-  private getDefaultTTL(): number {
-    const ttlMap: Record<string, number> = {
-      'daily-recommendations': 24,
-      'expense-predictions': 48,
-      'financial-health-score': 24,
-      'trend-predictions': 48,
-      'contextual-tips': 72,
-      'financial-tips': 168,
-      'spending-insights': 72
-    };
-    return ttlMap[this.functionKey] || 24;
-  }
-}
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -1748,7 +1620,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'ai-processor', model: 'gpt-4o' });
 });
 
-// Unified AI endpoint with integrated caching
+// Unified AI endpoint - stateless processing only
 app.post("/execute-gpt-task", async (req, res) => {
   const { task, userId, payload } = req.body;
 
@@ -1757,15 +1629,7 @@ app.post("/execute-gpt-task", async (req, res) => {
   }
 
   try {
-    // Initialize unified cache for this task
-    const cache = new UnifiedAICacheFlyio(task, userId);
-
-    // Try to get cached result first
-    const cachedResult = await cache.get(payload);
-    if (cachedResult) {
-      return res.json(cachedResult);
-    }
-
+    console.log(`Processing ${task} for user ${userId}`);
     let result;
 
     switch (task) {
@@ -1850,19 +1714,11 @@ app.post("/execute-gpt-task", async (req, res) => {
         return res.status(400).json({ error: `Unknown task: ${task}` });
     }
 
-    // Cache the result after successful OpenAI processing
-    await cache.set(payload, result);
-
+    // Return result directly - no caching on Fly.io
     res.json(result);
   } catch (error: any) {
     console.error(`Error processing ${task}:`, error);
-    
-    // Cache error responses to prevent repeated failed calls
-    const cache = new UnifiedAICacheFlyio(task, userId);
-    const errorResult = { error: error.message || 'Internal server error' };
-    await cache.set(payload, errorResult, true, 1); // Cache errors for 1 hour only
-    
-    res.status(500).json(errorResult);
+    res.status(500).json({ error: error.message || 'Internal server error' });
   }
 });
 
