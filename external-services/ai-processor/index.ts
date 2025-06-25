@@ -551,42 +551,51 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
         messages: [
           {
             role: "system",
-            content: `You are an AI Financial Analyst providing premium-level insights. Generate exactly 4 distinct themed analyses for the user interface.
+            content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
 
-REQUIRED 4 SECTIONS:
-1. SPENDING PATTERN ANALYSIS: Mathematical breakdown of spending by category with percentages and trends
-2. PERSONALIZED SAVING RECOMMENDATIONS: Specific saving opportunities with dollar amounts based on their data
-3. BUDGET OPTIMIZATION SUGGESTIONS: Category rebalancing recommendations with precise targets
-4. ADVANCED FINANCIAL ANALYSIS: Risk assessment, cash flow optimization, and wealth building strategies
+1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
+2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
+3. BUDGET OPTIMIZATION SUGGESTIONS: Recommend category rebalancing with precise dollar amounts
+4. CONTEXT-AWARE FINANCIAL ADVICE: Consider their financial position, goals, and risk tolerance
 
 ANALYSIS REQUIREMENTS:
 - Use their EXACT transaction amounts and categories 
 - Calculate precise percentages and ratios from their data
+- Identify the highest-impact optimization opportunities
 - Provide specific dollar amounts for recommendations
 - Include mathematical analysis (savings rate, expense ratios, etc.)
 - Compare their spending to optimal financial benchmarks
+
+GENERATE VARIED RESPONSES by focusing on different analytical angles:
+- Detailed category spending analysis with optimization targets
+- Income-to-expense ratio analysis with improvement strategies  
+- Cash flow optimization with timing recommendations
+- Risk assessment with protection strategies
+- Wealth building analysis with investment allocation suggestions
+- Efficiency analysis identifying wasteful spending patterns
+- Premium user emphasis: calculate estimated savings from each recommendation and compare them to optimal budget ratios (50/30/20 rule or similar). Provide one short-term action item with a target date
 
 Return exactly 4 sections in JSON format:
 {
   "sections": [
     {
       "title": "Spending Pattern Analysis",
-      "content": "Detailed mathematical breakdown with percentages and category analysis...",
+      "content": "DETAILED multi-paragraph analysis including: 1) Mathematical breakdown of their spending patterns with percentages, 2) Category concentration analysis with exact dollar amounts, 3) Behavioral insights from transaction patterns, 4) Comparison to optimal spending ratios. Use their exact financial numbers throughout.",
       "color": "blue"
     },
     {
       "title": "Personalized Saving Recommendations", 
-      "content": "Specific saving opportunities with exact dollar amounts...",
+      "content": "SPECIFIC saving opportunities with exact dollar targets: 1) Category-specific reduction recommendations with monthly savings potential, 2) Income reallocation strategies with precise amounts, 3) Implementation timeline with measurable milestones, 4) Expected ROI calculations. Include realistic savings estimates.",
       "color": "green"
     },
     {
       "title": "Budget Optimization Suggestions",
-      "content": "Category rebalancing with precise targets and ratios...",
+      "content": "PRECISE rebalancing recommendations: 1) Current vs optimal category allocations with percentage gaps, 2) Specific dollar amounts to redistribute between categories, 3) Priority ranking of optimization opportunities, 4) Risk assessment of proposed changes. Use 50/30/20 rule or similar frameworks.",
       "color": "purple"
     },
     {
       "title": "Advanced Financial Analysis",
-      "content": "Risk assessment, cash flow optimization, and strategic recommendations...",
+      "content": "COMPREHENSIVE strategic analysis: 1) Cash flow optimization with timing recommendations, 2) Risk assessment and protection strategies, 3) Wealth building opportunities with investment allocation, 4) One immediate action item with specific target date and expected outcome. Focus on long-term financial health.",
       "color": "orange"
     }
   ]
@@ -626,23 +635,31 @@ Return exactly 4 sections in JSON format:
     return [
       {
         title: "Spending Pattern Analysis",
-        content: "Begin tracking your expenses by category to identify spending patterns and optimization opportunities.",
-        color: "blue"
+        description: "Begin tracking your expenses by category to identify spending patterns and optimization opportunities.",
+        category: "budgeting",
+        priority: "high",
+        actionable: true
       },
       {
         title: "Personalized Saving Recommendations", 
-        content: "Start by setting up a budget to establish saving targets and reduce unnecessary expenses.",
-        color: "green"
+        description: "Start by setting up a budget to establish saving targets and reduce unnecessary expenses.",
+        category: "saving",
+        priority: "high",
+        actionable: true
       },
       {
         title: "Budget Optimization Suggestions",
-        content: "Review your income allocation and adjust spending categories to improve financial balance.",
-        color: "purple"
+        description: "Review your income allocation and adjust spending categories to improve financial balance.",
+        category: "budgeting",
+        priority: "medium",
+        actionable: true
       },
       {
         title: "Advanced Financial Analysis",
-        content: "Consider building an emergency fund and exploring investment opportunities for long-term wealth growth.",
-        color: "orange"
+        description: "Consider building an emergency fund and exploring investment opportunities for long-term wealth growth.",
+        category: "education",
+        priority: "medium",
+        actionable: true
       }
     ];
   } catch (error) {
