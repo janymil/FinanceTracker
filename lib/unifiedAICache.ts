@@ -1,7 +1,5 @@
 import crypto from 'crypto';
-import { db } from '../server/db';
-import { aiCache } from '../shared/schema';
-import { eq, and, lt, isNotNull, count, desc } from 'drizzle-orm';
+import { storage } from '../server/storage';
 
 // Default TTL configurations for different AI functions (in hours)
 const DEFAULT_TTL_CONFIG = {
@@ -64,44 +62,21 @@ export class UnifiedAICache {
     try {
       const inputHash = this.hashInput(input);
       
-      // Build query conditions
-      const conditions = [
-        eq(aiCache.userId, this.userId),
-        eq(aiCache.functionKey, this.functionKey),
-        eq(aiCache.inputHash, inputHash)
-      ];
-
-      // Add month condition if specified
-      if (this.month) {
-        conditions.push(eq(aiCache.month, this.month));
-      }
-
-      const cached = await db
-        .select()
-        .from(aiCache)
-        .where(and(...conditions))
-        .limit(1);
-
-      if (cached.length === 0) {
+      const entry = await storage.getAICacheEntry(this.userId, this.functionKey, inputHash);
+      
+      if (!entry) {
         return null;
       }
-
-      const entry = cached[0];
 
       // Check if expired
       if (entry.expiresAt && new Date() > entry.expiresAt) {
         return null;
       }
 
-      // Update lastAccessed and increment hitCount
-      await db
-        .update(aiCache)
-        .set({
-          lastAccessed: new Date(),
-          hitCount: entry.hitCount + 1,
-          updatedAt: new Date()
-        })
-        .where(eq(aiCache.id, entry.id));
+      // Check month filter if specified
+      if (this.month && entry.month !== this.month) {
+        return null;
+      }
 
       return entry.outputJson;
     } catch (error) {

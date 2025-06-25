@@ -2165,35 +2165,7 @@ export class DatabaseStorage implements IStorage {
 
   // Removed: Contextual Financial Tips operations - using unified ai_cache system
 
-  // Removed: updateContextualFinancialTips method - using unified ai_cache system
-
-  async shouldRegenerateFinancialTips(userId: string, currentDataHash: string): Promise<boolean> {
-    const existingTips = await this.getContextualFinancialTips(userId);
-    
-    if (!existingTips) {
-      return true; // No existing tips, generate new ones
-    }
-
-    // Check if data has changed significantly
-    if (existingTips.dataHash !== currentDataHash) {
-      return true; // Financial data has changed
-    }
-
-    // Check if tips are older than 24 hours (more frequent refresh)
-    const oneDayAgo = new Date();
-    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-    if (existingTips.updatedAt < oneDayAgo) {
-      return true; // Tips are too old
-    }
-
-    return false; // Use existing tips
-  }
-
-  // Daily recommendations cache management
-  async deleteCachedDailyRecommendations(userId: string): Promise<void> {
-    await db.delete(dailyRecommendations).where(eq(dailyRecommendations.userId, userId));
-    console.log(`Deleted cached daily recommendations for user ${userId}`);
-  }
+  // Removed: Legacy cache methods - using unified ai_cache system
 }
 
 export const storage = new DatabaseStorage();
