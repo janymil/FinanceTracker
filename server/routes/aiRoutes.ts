@@ -956,4 +956,116 @@ Answer questions about features, subscription plans, how to use the app, trouble
       return res.status(500).json({ message: "Failed to get help response" });
     }
   });
+
+  // Contextual Financial Tips endpoint (moved from contextualFinancialTipsRoutes.ts)
+  app.post('/api/ai/contextual-financial-tips', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { transactions, summary, budgets, selectedMonth } = req.body;
+
+      console.log('🔥 Contextual tips API request received:', {
+        userId: userId?.substring(0, 8) + '...',
+        selectedMonth,
+        transactionCount: transactions?.length || 0,
+        hasIncome: summary?.totalIncome > 0,
+        hasExpenses: summary?.totalExpenses > 0,
+        budgetCount: budgets?.length || 0,
+        firstTransaction: transactions?.[0] ? {
+          description: transactions[0].description,
+          categoryName: transactions[0].categoryName,
+          amount: transactions[0].amount,
+          type: transactions[0].type
+        } : 'none'
+      });
+
+      if (!transactions || !summary) {
+        return res.status(400).json({ message: "Transactions and summary are required" });
+      }
+
+      // Standardize cache payload to match unified cache system
+      const cachePayload = {
+        summary,
+        transactions: transactions.slice(0, 10),
+        budgets
+      };
+
+      // CACHE COMPLETELY DISABLED FOR TESTING
+      console.log('[AI contextual-tips] Cache check bypassed - forcing Fly.io call');
+      
+      console.log('Contextual financial tips: Generating new AI tips - data changed or cache expired');
+
+      // Format the selected month for natural language
+      const formatMonth = (selectedMonth: string) => {
+        if (!selectedMonth) return 'Current Month';
+        const [year, month] = selectedMonth.split('-');
+        const date = new Date(parseInt(year), parseInt(month) - 1);
+        return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      };
+
+      const formattedMonth = formatMonth(selectedMonth);
+
+      // Prepare payload for centralized AI processor
+      const aiPayload = {
+        summary: {
+          totalIncome: summary.totalIncome || 0,
+          totalExpenses: summary.totalExpenses || 0,
+          netBalance: summary.netBalance || 0,
+          transactionCount: transactions.length || 0
+        },
+        transactions: transactions.slice(0, 10).map((t: any) => ({
+          description: t.description || t.note || 'Transaction',
+          amount: t.amount,
+          categoryName: t.categoryName || t.category || 'Uncategorized',
+          type: t.type || 'expense',
+          date: t.date
+        })),
+        budgets: budgets?.map((budget: any) => ({
+          category: budget.categoryName,
+          budgetAmount: budget.amount,
+          spent: budget.spent || 0,
+          remaining: budget.remaining || budget.amount
+        })) || [],
+        selectedMonth: formattedMonth
+      };
+
+      // Use centralized AI processor - fixed task name to match Fly.io processor
+      console.log('[AI contextual-tips] Cache bypassed - testing Fly.io processor directly');
+      const result = await runAI('contextual-tips', userId, aiPayload);
+      console.log('[AI contextual-tips] Received result from processor:', result ? 'SUCCESS' : 'FAILED');
+      
+      // Handle centralized processor response
+      const tips = Array.isArray(result?.tips) ? result.tips.map((tip: any, index: number) => ({
+        id: tip.id || `tip_${Date.now()}_${index}`,
+        title: tip.title || 'Financial Tip',
+        description: tip.description || 'No description available',
+        category: ['spending', 'saving', 'budgeting', 'income'].includes(tip.category) ? tip.category : 'budgeting',
+        priority: ['high', 'medium', 'low'].includes(tip.priority) ? tip.priority : 'medium',
+        actionable: Boolean(tip.actionable)
+      })) : [];
+
+      // No caching system
+
+      // Add cache-busting headers
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+
+      console.log('Contextual financial tips: Returning tips', {
+        tipsCount: tips.length,
+        source: 'ai-processor',
+        firstTipTitle: tips[0]?.title || 'none'
+      });
+
+      return res.json({ tips });
+    } catch (error) {
+      console.error("Error generating contextual financial tips:", error);
+      return res.status(500).json({ message: "Failed to generate contextual financial tips" });
+    }
+  });
 }
