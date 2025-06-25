@@ -234,89 +234,73 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             {/* Current Tip Display */}
             {currentTip && (
               <div className="space-y-4">
-                {/* Parse the AI analysis into sections */}
+                {/* Display AI tips properly without complex parsing */}
                 {(() => {
-                  // Clean the content but preserve structure
-                  const cleanedContent = currentTip;
-
-                  // Define the 4 thematic sections with their patterns
-                  const sectionPatterns = [
-                    {
-                      title: "📊 Spending Pattern Analysis",
-                      icon: TrendingUp,
-                      keywords: ["spending", "pattern", "analysis", "breakdown", "category", "expenses", "mathematical", "reveals", "bulk"],
-                      color: "blue"
-                    },
-                    {
-                      title: "💡 Personalized Saving Recommendations", 
-                      icon: Lightbulb,
-                      keywords: ["saving", "recommend", "rebalancing", "budget", "limiting", "redirect", "sustainable", "implementation"],
-                      color: "green"
-                    },
-                    {
-                      title: "📋 Budget Optimization Suggestions",
-                      icon: GraduationCap, 
-                      keywords: ["budget", "optimization", "income-to-expense", "ratio", "financial", "strategies", "protection", "realigning"],
-                      color: "purple"
-                    },
-                    {
-                      title: "🎯 Advanced Financial Analysis",
-                      icon: Sparkles,
-                      keywords: ["advanced", "analysis", "necessitates", "action", "focus", "balanced", "cash flow", "immediate"],
-                      color: "orange"
+                  // Check if we have structured tips from the API
+                  try {
+                    // Handle structured format (array of tips with titles and descriptions)
+                    if (currentTip.includes('**') && currentTip.includes('\n\n')) {
+                      // Parse structured format: **Title**\n\nDescription
+                      const parts = currentTip.split('\n\n');
+                      const title = parts[0]?.replace(/\*\*/g, '').trim() || 'AI Financial Analysis';
+                      const description = parts.slice(1).join('\n\n').trim();
+                      
+                      return (
+                        <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 mt-1">
+                              <Sparkles className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-purple-900 dark:text-purple-100 mb-2">
+                                {title}
+                              </h4>
+                              <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                {cleanAIText(description)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
                     }
-                  ];
-
-                  // Split content into sentences and paragraphs
-                  const sentences = cleanedContent.split(/[.!?]+/).filter(s => s.trim().length > 10);
-                  const sections = [];
-
-                  // Try to match sentences to sections based on keywords
-                  sectionPatterns.forEach(pattern => {
-                    const matchedSentences = sentences.filter(sentence => {
-                      const lowerSentence = sentence.toLowerCase();
-                      return pattern.keywords.some(keyword => lowerSentence.includes(keyword.toLowerCase()));
-                    });
-
-                    if (matchedSentences.length > 0) {
-                      sections.push({
-                        ...pattern,
-                        content: cleanAIText(matchedSentences.join('. ').trim() + '.')
-                      });
-
-                      // Remove matched sentences from the pool
-                      matchedSentences.forEach(matched => {
-                        const index = sentences.indexOf(matched);
-                        if (index > -1) sentences.splice(index, 1);
-                      });
-                    }
-                  });
-
-                  // If we have remaining sentences or didn't get 4 sections, distribute them
-                  if (sentences.length > 0 || sections.length < 4) {
-                    const remainingText = sentences.join('. ').trim();
-
-                    // If we have less than 4 sections, add the remaining patterns with remaining content
-                    const missingSections = sectionPatterns.filter(pattern => 
-                      !sections.some(section => section.title === pattern.title)
+                    
+                    // Handle plain text format
+                    return (
+                      <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 mt-1">
+                            <Lightbulb className="h-5 w-5 text-purple-600" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-purple-900 dark:text-purple-100 mb-2">
+                              Personalized Financial Analysis
+                            </h4>
+                            <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                              {cleanAIText(currentTip)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     );
-
-                    if (remainingText && missingSections.length > 0) {
-                      // Split remaining text evenly among missing sections
-                      const chunks = remainingText.split(/(?:[.!?]+\s+)/).filter(chunk => chunk.trim());
-                      missingSections.forEach((pattern, index) => {
-                        const chunkStart = Math.floor((chunks.length / missingSections.length) * index);
-                        const chunkEnd = Math.floor((chunks.length / missingSections.length) * (index + 1));
-                        const content = chunks.slice(chunkStart, chunkEnd).join('. ').trim();
-
-                        if (content) {
-                          sections.push({
-                            ...pattern,
-                            content: cleanAIText(content + '.')
-                          });
-                        }
-                      });
-                    }
+                  } catch (error) {
+                    // Fallback for any parsing errors
+                    return (
+                      <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 mt-1">
+                            <Lightbulb className="h-5 w-5 text-purple-600" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-purple-900 dark:text-purple-100 mb-2">
+                              AI Financial Tips
+                            </h4>
+                            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                              {cleanAIText(currentTip)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
                   }
 
                   // Ensure we have at least one section

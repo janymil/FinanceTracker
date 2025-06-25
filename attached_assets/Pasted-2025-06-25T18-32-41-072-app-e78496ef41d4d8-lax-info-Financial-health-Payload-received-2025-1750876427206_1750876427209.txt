@@ -1,0 +1,1197 @@
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] Financial health: Payload received: {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "transactions": [
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "id": 142,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "50.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "description": "test expens 2",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Healthcare"
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "id": 145,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "500.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "description": "test 4",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Investments"
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "id": 139,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "60.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "description": "test 5 janymil",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Investments"
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "id": 140,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "200.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "description": "test 6 janymil",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Freelance"
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "id": 143,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "900.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "description": "test income 1",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Freelance"
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "id": 141,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "100.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "description": "test expens 1",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Healthcare"
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "id": 137,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "50.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "description": "test janymil 3",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "date": "2025-06-18T00:00:00.000Z",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Investments"
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "id": 138,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "50.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "description": "test 4 janymil",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "date": "2025-06-18T00:00:00.000Z",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "janymil-test2"
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "id": 136,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "100.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "description": "test 2 - janymil",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "date": "2025-06-18T00:00:00.000Z",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Freelance"
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "id": 128,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "5500.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "description": "test111",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "date": "2025-06-17T00:00:00.000Z",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Housing"
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "id": 134,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "18.90",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "description": "ALDI SUISSE AG",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "date": "2025-06-17T00:00:00.000Z",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Food"
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "id": 130,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "4000.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "description": "3test",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "date": "2025-06-16T00:00:00.000Z",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Salary"
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "id": 129,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "2000.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "description": "3test",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "date": "2025-06-16T00:00:00.000Z",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Shopping"
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "id": 131,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "1000.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "description": "Coop",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "date": "2025-05-16T00:00:00.000Z",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Housing"
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "id": 132,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "1500.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "description": "123",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "date": "2025-05-05T00:00:00.000Z",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Freelance"
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] ],
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "budgets": [
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Entertainment",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "100.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "spent": 0
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Transportation",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "200.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "spent": 0
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "categoryName": "Healthcare",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "amount": "150.00",
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "spent": 150
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] ],
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "summary": {
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "totalIncome": 7360,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "totalExpenses": 8668.9,
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] "netBalance": -1308.8999999999996
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T18:32:41.072 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] Financial health: Payload received: {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "transactions": [
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "id": 142,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "50.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "description": "test expens 2",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Healthcare"
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "id": 145,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "500.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "description": "test 4",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Investments"
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "id": 139,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "60.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "description": "test 5 janymil",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Investments"
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "id": 140,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "200.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "description": "test 6 janymil",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Freelance"
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "id": 143,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "900.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "description": "test income 1",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Freelance"
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "id": 141,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "100.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "description": "test expens 1",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Healthcare"
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "id": 137,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "50.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "description": "test janymil 3",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "date": "2025-06-18T00:00:00.000Z",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Investments"
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "id": 138,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "50.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "description": "test 4 janymil",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "date": "2025-06-18T00:00:00.000Z",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "janymil-test2"
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "id": 136,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "100.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "description": "test 2 - janymil",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "date": "2025-06-18T00:00:00.000Z",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Freelance"
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "id": 128,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "5500.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "description": "test111",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "date": "2025-06-17T00:00:00.000Z",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Housing"
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "id": 134,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "18.90",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "description": "ALDI SUISSE AG",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "date": "2025-06-17T00:00:00.000Z",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Food"
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "id": 130,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "4000.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "description": "3test",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "date": "2025-06-16T00:00:00.000Z",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Salary"
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "id": 129,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "2000.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "description": "3test",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "date": "2025-06-16T00:00:00.000Z",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Shopping"
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "id": 131,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "1000.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "description": "Coop",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "date": "2025-05-16T00:00:00.000Z",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Housing"
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "id": 132,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "1500.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "description": "123",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "date": "2025-05-05T00:00:00.000Z",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Freelance"
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] ],
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "budgets": [
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Entertainment",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "100.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "spent": 0
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Transportation",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "200.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "spent": 0
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "categoryName": "Healthcare",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "amount": "150.00",
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "spent": 150
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] ],
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "summary": {
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "totalIncome": 7360,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "totalExpenses": 8668.9,
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] "netBalance": -1308.8999999999996
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T18:32:47.582 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T18:32:49.282 app[e78496ef41d4d8] lax [info] Daily recommendations: Fixed payload structure [ 'summary', 'transactions', 'budgets', 'categories' ]
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] Financial health: Payload received: {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "transactions": [
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "id": 142,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "50.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "description": "test expens 2",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Healthcare"
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "id": 145,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "500.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "description": "test 4",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Investments"
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "id": 139,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "60.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "description": "test 5 janymil",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Investments"
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "id": 140,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "200.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "description": "test 6 janymil",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Freelance"
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "id": 143,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "900.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "description": "test income 1",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Freelance"
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "id": 141,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "100.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "description": "test expens 1",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Healthcare"
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "id": 137,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "50.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "description": "test janymil 3",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "date": "2025-06-18T00:00:00.000Z",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Investments"
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "id": 138,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "50.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "description": "test 4 janymil",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "date": "2025-06-18T00:00:00.000Z",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "janymil-test2"
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "id": 136,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "100.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "description": "test 2 - janymil",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "date": "2025-06-18T00:00:00.000Z",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Freelance"
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "id": 128,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "5500.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "description": "test111",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "date": "2025-06-17T00:00:00.000Z",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Housing"
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "id": 134,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "18.90",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "description": "ALDI SUISSE AG",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "date": "2025-06-17T00:00:00.000Z",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Food"
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "id": 130,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "4000.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "description": "3test",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "date": "2025-06-16T00:00:00.000Z",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Salary"
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "id": 129,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "2000.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "description": "3test",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "date": "2025-06-16T00:00:00.000Z",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Shopping"
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "id": 131,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "1000.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "description": "Coop",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "date": "2025-05-16T00:00:00.000Z",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Housing"
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "id": 132,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "1500.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "description": "123",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "date": "2025-05-05T00:00:00.000Z",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Freelance"
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] ],
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "budgets": [
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Entertainment",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "100.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "spent": 0
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Transportation",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "200.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "spent": 0
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "categoryName": "Healthcare",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "amount": "150.00",
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "spent": 150
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] ],
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "summary": {
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "totalIncome": 7360,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "totalExpenses": 8668.9,
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] "netBalance": -1308.8999999999996
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T18:32:57.458 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T18:32:58.868 app[e78496ef41d4d8] lax [info] [contextual-tips] OpenAI response received: {
+
+2025-06-25T18:32:58.868 app[e78496ef41d4d8] lax [info] "tips": [
+
+2025-06-25T18:32:58.868 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:32:58.868 app[e78496ef41d4d8] lax [info] "id": "tip_1",
+
+2025-06-25T18:32:58.868 app[e78496ef41d4d8] lax [info] "title": "Reduce Housing Expenses",
+
+2025-06-25T18:32:58.868 app[e78496ef41d4d8] lax [info] "description": "Housing expenses account for 72% of your total expenses, which is significantly high. Consider
+
+2025-06-25T18:32:58.869 app[e78496ef41d4d8] lax [info] [contextual-tips] Generated tips count: 4
+
+2025-06-25T18:33:03.804 app[e78496ef41d4d8] lax [info] [contextual-tips] OpenAI response received: {
+
+2025-06-25T18:33:03.804 app[e78496ef41d4d8] lax [info] "tips": [
+
+2025-06-25T18:33:03.804 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:03.804 app[e78496ef41d4d8] lax [info] "id": "tip_1",
+
+2025-06-25T18:33:03.804 app[e78496ef41d4d8] lax [info] "title": "Reduce Housing Expenses",
+
+2025-06-25T18:33:03.804 app[e78496ef41d4d8] lax [info] "description": "Housing expenses account for 71.7% of your total spending. Consider finding a more affordable l
+
+2025-06-25T18:33:03.804 app[e78496ef41d4d8] lax [info] [contextual-tips] Generated tips count: 4
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] Financial health: Payload received: {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "transactions": [
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "id": 142,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "50.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "description": "test expens 2",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Healthcare"
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "id": 145,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "500.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "description": "test 4",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Investments"
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "id": 139,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "60.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "description": "test 5 janymil",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Investments"
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "id": 140,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "200.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "description": "test 6 janymil",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Freelance"
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "id": 143,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "900.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "description": "test income 1",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Freelance"
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "id": 141,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "100.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "description": "test expens 1",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "date": "2025-06-19T00:00:00.000Z",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Healthcare"
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "id": 137,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "50.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "description": "test janymil 3",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "date": "2025-06-18T00:00:00.000Z",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Investments"
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "id": 138,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "50.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "description": "test 4 janymil",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "date": "2025-06-18T00:00:00.000Z",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "janymil-test2"
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "id": 136,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "100.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "description": "test 2 - janymil",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "date": "2025-06-18T00:00:00.000Z",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Freelance"
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "id": 128,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "5500.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "description": "test111",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "date": "2025-06-17T00:00:00.000Z",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Housing"
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "id": 134,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "18.90",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "description": "ALDI SUISSE AG",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "date": "2025-06-17T00:00:00.000Z",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Food"
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "id": 130,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "4000.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "description": "3test",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "date": "2025-06-16T00:00:00.000Z",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Salary"
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "id": 129,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "2000.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "description": "3test",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "date": "2025-06-16T00:00:00.000Z",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Shopping"
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "id": 131,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "1000.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "description": "Coop",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "date": "2025-05-16T00:00:00.000Z",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "type": "expense",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Housing"
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "id": 132,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "1500.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "description": "123",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "date": "2025-05-05T00:00:00.000Z",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "type": "income",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Freelance"
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] ],
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "budgets": [
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Entertainment",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "100.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "spent": 0
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Transportation",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "200.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "spent": 0
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] },
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "categoryName": "Healthcare",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "amount": "150.00",
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "spent": 150
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] ],
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "summary": {
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "totalIncome": 7360,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "totalExpenses": 8668.9,
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] "netBalance": -1308.8999999999996
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T18:33:05.379 app[e78496ef41d4d8] lax [info] }

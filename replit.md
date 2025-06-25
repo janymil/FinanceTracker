@@ -159,6 +159,7 @@ LATEST FIXES:
 - June 25, 2025. GET/HEAD METHOD ERROR FIXED: Replaced apiRequest with direct fetch call to resolve "Request with GET/HEAD method cannot have body" error in financial tips feature
 - June 25, 2025. DETAILED TRANSACTIONS RESTORED: Fixed financial tips quality by restoring detailed transaction data from summary.recentTransactions instead of sending empty array - matches June 22, 2025 behavior for sophisticated AI analysis
 - June 25, 2025. CRITICAL RULE ESTABLISHED: NEVER EVER use empty arrays (goals: [], budgets: [], etc.) to "solve" problems when this blocks real user data from reaching AI processing. Empty arrays must ONLY be used when user genuinely has no data, not as defensive programming to avoid errors. Real user data collection and transmission to AI is sacred and must never be blocked by fake empty arrays.
+- June 25, 2025. CODE MODIFICATION RULE: Simplification is NOT permitted without explicit permission. Before rewriting, simplifying, or removing existing code logic, ALWAYS ask the user first and explain exactly what the simplification means and what functionality would be changed or removed. Only make changes after receiving explicit approval.
 
 Changelog:
 - June 13, 2025. Initial setup
