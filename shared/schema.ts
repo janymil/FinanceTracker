@@ -276,18 +276,7 @@ export const redeemCodes = pgTable("redeem_codes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Unified AI Cache for all AI functions
-export const aiCache = pgTable("ai_cache", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  functionName: varchar("function_name", { length: 50 }).notNull(),
-  month: varchar("month", { length: 7 }).notNull(), // "2025-06"
-  dataHash: varchar("data_hash", { length: 32 }).notNull(),
-  result: jsonb("result").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-  lastAccessed: timestamp("last_accessed").defaultNow(),
-});
+// AI cache system completely removed - direct Fly.io calls only
 
 // Legacy daily recommendations table (will be migrated to ai_cache)
 export const dailyRecommendations = pgTable("daily_recommendations", {

@@ -39,7 +39,13 @@ export interface FinancialForecast {
   budgetVariance: number;
   confidence: number;
   keyInsights: string[];
-  recommendations: string[];
+  recommendations: Array<{
+    id: string;
+    title: string;
+    description: string;
+    priority: 'high' | 'medium' | 'low';
+    actionable: boolean;
+  }>;
   riskFactors: string[];
 }
 

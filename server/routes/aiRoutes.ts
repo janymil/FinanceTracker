@@ -6,8 +6,7 @@ import {
   type ExpenseCategorizationResult 
 } from "../openai";
 import { runAI } from "../../lib/aiProcessor";
-// Cache system completely removed
-import { db } from "../db";
+// Cache system completely removed - direct Fly.io calls only
 import { 
   transactions, 
   categories, 
@@ -128,8 +127,8 @@ export function registerAIRoutes(app: Express) {
       // Validate and process transaction data
       const transactions = financialData.transactions;
       if (!Array.isArray(transactions) || transactions.length === 0) {
-        console.log('TIP ENDPOINT: Empty transactions, but calling Fly.io anyway for testing');
-        // Still call Fly.io even with empty data to test the connection
+        console.log('TIP ENDPOINT: Empty transactions - calling Fly.io with authentic empty data');
+        // Send authentic empty data instead of fallbacks
       }
 
       console.log('TIP ENDPOINT: Processing', transactions.length, 'transactions');
@@ -146,24 +145,10 @@ export function registerAIRoutes(app: Express) {
         budgetAssigned: t.budgetAssigned
       }));
 
-      // Check unified cache for financial tips
-      const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      // CACHE DISABLED FOR TESTING
-      // Cache system completely removed
-      //   totalIncome: financialData.totalIncome || 0,
-      //   totalExpenses: financialData.totalExpenses || 0,
-      //   transactions: formattedTransactions.slice(0, 50)
-      // });
+      // Cache system completely removed - direct Fly.io calls only
+      console.log('Making direct Fly.io call with authentic user data');
       
-      // CACHE CHECK DISABLED - FORCING FRESH CALLS
-      console.log('Cache disabled - calling Fly.io processor directly');
-      
-      // Add cache-busting headers for all AI responses
-      res.set({
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      });
+      // Direct AI processing - no cache interference
 
       console.log(`Processing ${formattedTransactions.length} transactions for AI analysis`);
 
