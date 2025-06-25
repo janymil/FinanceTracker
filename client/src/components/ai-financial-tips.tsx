@@ -81,20 +81,31 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       
       // Remove blocking validation - let AI decide if data is sufficient
       
+      console.log('AI Tips: About to make API call with data:', {
+        totalIncome: summary.totalIncome,
+        totalExpenses: summary.totalExpenses,
+        transactionCount: detailedTransactions?.length || 0,
+        categoriesCount: summary.transactionsByCategory?.length || 0
+      });
+
       const response = await apiRequest("POST", "/api/ai/tip", {
         financialData: {
           totalIncome: summary.totalIncome,
           totalExpenses: summary.totalExpenses,
-          categories: summary.transactionsByCategory || [],
-          transactions: detailedTransactions || [],
+          categories: summary.transactionsByCategory,
+          transactions: detailedTransactions,
           month: monthName,
           year: year,
           timestamp: Date.now()
         }
       });
 
+      console.log('AI Tips: Response received:', response.status, response.ok);
+
       if (!response.ok) {
-        throw new Error("Failed to generate AI tip");
+        const errorText = await response.text();
+        console.error('AI Tips: Server error:', errorText);
+        throw new Error(`API Error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
@@ -115,10 +126,11 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
         description: "New financial advice based on your spending data",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('AI Tips: Mutation error:', error);
       toast({
         title: "Error",
-        description: "Failed to generate AI tip. Please try again.",
+        description: error.message || "Failed to generate AI tip. Please try again.",
         variant: "destructive",
       });
     },

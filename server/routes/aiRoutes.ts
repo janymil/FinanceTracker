@@ -99,6 +99,7 @@ export function registerAIRoutes(app: Express) {
 
   // AI Financial Tips endpoint with detailed transaction data
   app.post('/api/ai/tip', isAuthenticated, async (req: any, res) => {
+    console.log('TIP ENDPOINT: Request received - starting processing');
     try {
       const userId = getUserId(req);
       if (!userId) {
