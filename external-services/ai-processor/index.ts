@@ -1584,22 +1584,29 @@ app.post("/execute-gpt-task", async (req, res) => {
 
     switch (task) {
       case "contextual-tips":
-        // Handle missing summary by calculating from transactions if needed
-        let contextualPayload = payload;
+        // Validate and fix payload structure for contextual tips
+        const contextualPayload = {
+          summary: payload.summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 },
+          transactions: Array.isArray(payload.transactions) ? payload.transactions : [],
+          budgets: Array.isArray(payload.budgets) ? payload.budgets : [],
+          goals: Array.isArray(payload.goals) ? payload.goals : [],
+          selectedMonth: payload.selectedMonth || 'Current Month'
+        };
+        
+        // Generate summary from transactions if missing or incomplete
         if (!payload.summary || payload.summary.totalIncome === undefined) {
-          const transactions = payload.transactions || [];
-          const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-          const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-          contextualPayload = {
-            ...payload,
-            summary: {
-              totalIncome,
-              totalExpenses,
-              netAmount: totalIncome - totalExpenses
-            }
+          const validTransactions = contextualPayload.transactions;
+          const totalIncome = validTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+          const totalExpenses = validTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+          contextualPayload.summary = {
+            totalIncome,
+            totalExpenses,
+            netBalance: totalIncome - totalExpenses,
+            transactionCount: validTransactions.length
           };
           console.log('Contextual tips: Generated summary from transactions', contextualPayload.summary);
         }
+        
         result = await generateContextualFinancialTips(contextualPayload);
         break;
       
@@ -1608,7 +1615,15 @@ app.post("/execute-gpt-task", async (req, res) => {
         break;
 
       case "daily-recommendations":
-        result = await generateDailyRecommendations(payload);
+        // Fix payload structure for daily recommendations
+        const dailyPayload = {
+          summary: payload.summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 },
+          transactions: payload.transactions || [],
+          budgets: payload.budgets || [],
+          categories: payload.categories || {}
+        };
+        console.log('Daily recommendations: Fixed payload structure', Object.keys(dailyPayload));
+        result = await generateDailyRecommendations(dailyPayload);
         break;
 
       case "expense-predictions":
