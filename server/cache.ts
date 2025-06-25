@@ -30,16 +30,9 @@ class APICache {
   }
 
   get<T>(key: string): T | null {
-    const entry = this.cache.get(key);
-    
-    if (!entry || this.isExpired(entry)) {
-      if (entry) {
-        this.cache.delete(key);
-      }
-      return null;
-    }
-    
-    return entry.data;
+    // CACHE COMPLETELY DISABLED FOR TESTING
+    console.log(`[APICache] Cache disabled - returning null for key: ${key}`);
+    return null;
   }
 
   set<T>(key: string, data: T, ttl?: number): void {
