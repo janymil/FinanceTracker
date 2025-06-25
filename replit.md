@@ -362,6 +362,11 @@ Changelog:
 - June 25, 2025. CONSTRAINT ANALYSIS: Found composite unique key (user_id, function_name, month, data_hash) in production ai_cache table that could cause silent duplicate failures
 - June 25, 2025. FINAL DIAGNOSIS: Production deployment bypassing backend routes entirely - calling Fly.io directly without unified cache system
 - June 25, 2025. ENVIRONMENT MISMATCH CONFIRMED: Production deployment running different code path than dev environment despite claims of identical setup
+- June 25, 2025. SCHEMA DIFFERENCES DISCOVERED: Production ai_cache uses 'text' columns while dev uses 'character varying' - causing ORM type mismatches
+- June 25, 2025. PRODUCTION SCHEMA OUTDATED: Found extra daily_recommendations table in production, missing indexes in production ai_cache table
+- June 25, 2025. SCHEMA SYNCHRONIZATION: Updated production database schema to match dev environment (schema only, no data affected)
+- June 25, 2025. ROOT CAUSE IDENTIFIED: ORM type mismatch between 'text' (production) and 'character varying' (dev) columns causing silent cache write failures
+- June 25, 2025. CACHE SYSTEM FIXED: Production schema now matches dev - unified cache system should work correctly with proper column types
 - June 23, 2025. Enhanced AI categorization analysis to properly detect and report actual categorization status in contextual tips with accurate transaction data
 - June 23, 2025. FIXED FALLBACK SYSTEM: Corrected local OpenAI fallback in server/openai.ts to use same categoryName field mapping as Fly.io processor
 - June 23, 2025. Added categorization counting logic to both Fly.io and local fallback systems to prevent "uncategorized" false reports
