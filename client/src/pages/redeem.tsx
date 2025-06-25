@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useLocation } from "wouter";
 import { useAuth } from "@clerk/clerk-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,9 +33,10 @@ interface RedeemStatus {
 }
 
 export default function RedeemPage() {
-  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const { getToken, isLoaded, isSignedIn, userId } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [redeemStatus, setRedeemStatus] = useState<RedeemStatus | null>(null);
   const [statusLoading, setStatusLoading] = useState(true);
@@ -123,6 +125,12 @@ export default function RedeemPage() {
           const newStatus = await statusResponse.json();
           setRedeemStatus(newStatus);
         }
+        
+        // Critical: Invalidate user plan cache so the entire app reflects the new plan immediately
+        if (userId) {
+          queryClient.invalidateQueries({ queryKey: ["auth-user", userId] });
+        }
+        
         form.reset();
       } else {
         throw new Error("No valid codes provided");
