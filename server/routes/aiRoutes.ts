@@ -164,17 +164,18 @@ export function registerAIRoutes(app: Express) {
 
       const tipResults = await runAI('financial-tips', userId, aiPayload);
 
-      // Save to unified cache if not bypassing cache
-      if (!financialData.timestamp && tipResults && tipResults.length > 0) {
+      // Always save to unified cache (remove timestamp bypass condition)
+      if (tipResults && tipResults.length > 0) {
         try {
           await unifiedAICache.set('financial-tips', userId, month, {
             totalIncome: financialData.totalIncome || 0,
             totalExpenses: financialData.totalExpenses || 0,
             transactions: formattedTransactions.slice(0, 50)
           }, tipResults);
-          console.log('AI financial tips: Saved to unified cache');
+          console.log('✅ Financial tips: Successfully saved to unified cache');
         } catch (cacheError) {
-          console.error("Error saving financial tips to unified cache:", cacheError);
+          console.error("❌ CRITICAL: Failed to save financial tips to unified cache:", cacheError);
+          console.error("Cache save details:", { userId: userId.substring(0, 8) + '...', month, error: cacheError.message });
         }
       }
 
@@ -246,12 +247,13 @@ export function registerAIRoutes(app: Express) {
 
       const insights = await runAI('spending-insights', userId, aiPayload);
       
-      // Save to unified cache
+      // Save to unified cache with enhanced error logging
       try {
         await unifiedAICache.set('spending-insights', userId, month, cachePayload, insights);
-        console.log('AI spending insights: Saved to unified cache');
+        console.log('✅ Spending insights: Successfully saved to unified cache');
       } catch (cacheError) {
-        console.error("Error saving spending insights to unified cache:", cacheError);
+        console.error("❌ CRITICAL: Failed to save spending insights to unified cache:", cacheError);
+        console.error("Cache save details:", { userId: userId.substring(0, 8) + '...', month, error: cacheError.message });
       }
 
       return res.json(insights);
