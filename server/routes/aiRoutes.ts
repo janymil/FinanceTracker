@@ -536,7 +536,8 @@ export function registerAIRoutes(app: Express) {
         return res.json(cachedResult);
       }
 
-      // Generate new AI response
+      // Use unified AI processor for financial health score
+      console.log('Financial health: Making Fly.io API call via centralized processor');
       const healthData = await runAI('financial-health-score', userId, aiPayload);
 
       // Cache the result for 24 hours
