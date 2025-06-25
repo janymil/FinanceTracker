@@ -120,6 +120,7 @@ export function clearUserSession() {
       const key = localStorage.key(i);
       if (key && (
         // App preferences (theme, language, user experience)
+        key === 'theme' ||
         key.startsWith('theme-') ||
         key.startsWith('language-') ||
         key.startsWith('app-preference-') ||

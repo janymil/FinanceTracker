@@ -12,12 +12,15 @@ import {
 import { TrendingUp, Crown, ChevronDown, User, Settings, LogOut } from "lucide-react";
 import { Link } from "wouter";
 import { useClerk } from "@clerk/clerk-react";
+import { clearUserSession } from "@/lib/queryClient";
 
 export default function Navigation() {
   const { user, clerkUser } = useAuth();
   const { signOut } = useClerk();
 
   const handleLogout = async () => {
+    // Clear user session data while preserving AI tips and theme
+    clearUserSession();
     await signOut({ redirectUrl: '/' });
   };
 

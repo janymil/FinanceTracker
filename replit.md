@@ -128,6 +128,8 @@ FinanzerPro is a comprehensive personal finance management application built wit
 - June 25, 2025: Fixed critical production ai_cache table schema mismatch - column order now matches development database exactly
 - June 25, 2025: Fixed AI financial tips security issue - added user-specific localStorage keys to prevent cross-user data exposure
 - June 25, 2025: Fixed AI financial tips persistence across logout/login sessions by updating session cleanup preservation rules
+- June 25, 2025: Fixed theme persistence across logout/login sessions by preserving 'theme' localStorage key during session cleanup
+- June 25, 2025: Fixed logout function to properly call clearUserSession() with preservation logic before Clerk signOut
 
 ## Architecture Decision: AI Cache System
 
