@@ -19,12 +19,11 @@ interface AIFinancialTipsProps {
       type: string;
     }>;
     recentTransactions?: Array<{
-      id: number;
-      amount: string;
       description: string;
-      date: string;
+      amount: string;
       categoryName: string;
       type: string;
+      date: string;
     }>;
   };
 }
@@ -76,31 +75,9 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     summaryExpenses: summary?.totalExpenses
   });
 
-  // Function to fetch detailed transactions for specific month/year
-  const fetchDetailedTransactions = async (month: number, year: number) => {
-    const response = await fetch(`/api/transactions/by-month?month=${month}&year=${year}`, {
-      method: "GET",
-      headers: {
-        ...(await getAuthHeaders())
-      }
-    });
-    const data = await response.json();
-    return data.transactions || [];
-  };
 
-  async function getAuthHeaders(): Promise<Record<string, string>> {
-    try {
-      if (typeof window !== 'undefined' && window.Clerk?.session) {
-        const token = await window.Clerk.session.getToken();
-        if (token) {
-          return { Authorization: `Bearer ${token}` };
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to get Clerk token:', error);
-    }
-    return {};
-  }
+
+
 
   // React Query mutation for generating tips
   const generateTipMutation = useMutation({
@@ -114,7 +91,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
 
       // Fetch detailed transactions for current month
       // Get detailed transactions for current month using summary data
-      const detailedTransactions = summary.recentTransactions || [];
+      const detailedTransactions = summary?.recentTransactions || [];
 
       // Remove blocking validation - let AI decide if data is sufficient
 
@@ -148,13 +125,9 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
 
       let tipContent = '';
 
-      // Handle structured 4-section format from API
-      if (data.sections && Array.isArray(data.sections) && data.sections.length === 4) {
-        // New 4-section structured format
-        const structuredSections = data.sections;
-        setCurrentTip(JSON.stringify(structuredSections)); // Store as JSON for parsing
-      } else if (data.tips && Array.isArray(data.tips) && data.tips.length > 0) {
-        // Legacy structured format with detailed analysis
+      // Handle both new structured format and legacy format
+      if (data.tips && Array.isArray(data.tips) && data.tips.length > 0) {
+        // New structured format with detailed analysis
         const detailedTip = data.tips[0];
         const formattedTip = `**${detailedTip.title}**\n\n${detailedTip.description}`;
         tipContent = formattedTip;
@@ -246,152 +219,148 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             {/* Current Tip Display */}
             {currentTip && (
               <div className="space-y-4">
-                {/* Display 4 themed sections */}
+                {/* Parse the AI analysis into sections */}
                 {(() => {
-                  try {
-                    // Check if we have structured 4-section format
-                    if (currentTip.startsWith('[') && currentTip.includes('"title"')) {
-                      const sections = JSON.parse(currentTip);
-                      
-                      // Define the 4 thematic sections with their styling
-                      const sectionConfig = [
-                        {
-                          icon: TrendingUp,
-                          color: "blue",
-                          expectedTitle: "Spending Pattern Analysis"
-                        },
-                        {
-                          icon: Lightbulb,
-                          color: "green", 
-                          expectedTitle: "Personalized Saving Recommendations"
-                        },
-                        {
-                          icon: GraduationCap,
-                          color: "purple",
-                          expectedTitle: "Budget Optimization Suggestions"
-                        },
-                        {
-                          icon: Sparkles,
-                          color: "orange",
-                          expectedTitle: "Advanced Financial Analysis"
-                        }
-                      ];
+                  // Clean the content but preserve structure
+                  const cleanedContent = currentTip;
 
-                      return sections.map((section: any, index: number) => {
-                        const config = sectionConfig[index] || sectionConfig[0];
-                        const IconComponent = config.icon;
-                        
-                        const colorClasses = {
-                          blue: "from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700",
-                          green: "from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700", 
-                          purple: "from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700",
-                          orange: "from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700"
-                        };
+                  // Define the 4 thematic sections with their patterns
+                  const sectionPatterns = [
+                    {
+                      title: "📊 Spending Pattern Analysis",
+                      icon: TrendingUp,
+                      keywords: ["spending", "pattern", "analysis", "breakdown", "category", "expenses", "mathematical", "reveals", "bulk"],
+                      color: "blue"
+                    },
+                    {
+                      title: "💡 Personalized Saving Recommendations", 
+                      icon: Lightbulb,
+                      keywords: ["saving", "recommend", "rebalancing", "budget", "limiting", "redirect", "sustainable", "implementation"],
+                      color: "green"
+                    },
+                    {
+                      title: "📋 Budget Optimization Suggestions",
+                      icon: GraduationCap, 
+                      keywords: ["budget", "optimization", "income-to-expense", "ratio", "financial", "strategies", "protection", "realigning"],
+                      color: "purple"
+                    },
+                    {
+                      title: "🎯 Advanced Financial Analysis",
+                      icon: Sparkles,
+                      keywords: ["advanced", "analysis", "necessitates", "action", "focus", "balanced", "cash flow", "immediate"],
+                      color: "orange"
+                    }
+                  ];
 
-                        return (
-                          <div key={index} className={`p-4 bg-gradient-to-r ${colorClasses[config.color as keyof typeof colorClasses]} rounded-lg border`}>
-                            <div className="flex items-start gap-3">
-                              <div className={`p-2 rounded-full ${
-                                config.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900' :
-                                config.color === 'green' ? 'bg-green-100 dark:bg-green-900' :
-                                config.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900' :
-                                'bg-orange-100 dark:bg-orange-900'
-                              }`}>
-                                <IconComponent className={`h-4 w-4 ${
-                                  config.color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
-                                  config.color === 'green' ? 'text-green-600 dark:text-green-400' :
-                                  config.color === 'purple' ? 'text-purple-600 dark:text-purple-400' :
-                                  'text-orange-600 dark:text-orange-400'
-                                }`} />
-                              </div>
-                              <div className="flex-1">
-                                <h4 className={`font-medium mb-2 ${
-                                  config.color === 'blue' ? 'text-blue-900 dark:text-blue-100' :
-                                  config.color === 'green' ? 'text-green-900 dark:text-green-100' :
-                                  config.color === 'purple' ? 'text-purple-900 dark:text-purple-100' :
-                                  'text-orange-900 dark:text-orange-100'
-                                }`}>
-                                  📊 {section.title || config.expectedTitle}
-                                </h4>
-                                <p className={`text-sm leading-relaxed ${
-                                  config.color === 'blue' ? 'text-blue-800 dark:text-blue-200' :
-                                  config.color === 'green' ? 'text-green-800 dark:text-green-200' :
-                                  config.color === 'purple' ? 'text-purple-800 dark:text-purple-200' :
-                                  'text-orange-800 dark:text-orange-200'
-                                }`}>
-                                  {cleanAIText(section.content || section.description)}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        );
+                  // Split content into sentences and paragraphs
+                  const sentences = cleanedContent.split(/[.!?]+/).filter(s => s.trim().length > 10);
+                  const sections = [];
+
+                  // Try to match sentences to sections based on keywords
+                  sectionPatterns.forEach(pattern => {
+                    const matchedSentences = sentences.filter(sentence => {
+                      const lowerSentence = sentence.toLowerCase();
+                      return pattern.keywords.some(keyword => lowerSentence.includes(keyword.toLowerCase()));
+                    });
+
+                    if (matchedSentences.length > 0) {
+                      sections.push({
+                        ...pattern,
+                        content: cleanAIText(matchedSentences.join('. ').trim() + '.')
+                      });
+
+                      // Remove matched sentences from the pool
+                      matchedSentences.forEach(matched => {
+                        const index = sentences.indexOf(matched);
+                        if (index > -1) sentences.splice(index, 1);
                       });
                     }
+                  });
 
-                    // Handle legacy structured format (array of tips with titles and descriptions)
-                    if (currentTip.includes('**') && currentTip.includes('\n\n')) {
-                      // Parse structured format: **Title**\n\nDescription
-                      const parts = currentTip.split('\n\n');
-                      const title = parts[0]?.replace(/\*\*/g, '').trim() || 'AI Financial Analysis';
-                      const description = parts.slice(1).join('\n\n').trim();
-                      
-                      return (
-                        <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
-                          <div className="flex items-start gap-3">
-                            <div className="flex-shrink-0 mt-1">
-                              <Sparkles className="h-5 w-5 text-purple-600" />
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-purple-900 dark:text-purple-100 mb-2">
-                                {title}
-                              </h4>
-                              <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                                {cleanAIText(description)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      );
+                  // If we have remaining sentences or didn't get 4 sections, distribute them
+                  if (sentences.length > 0 || sections.length < 4) {
+                    const remainingText = sentences.join('. ').trim();
+
+                    // If we have less than 4 sections, add the remaining patterns with remaining content
+                    const missingSections = sectionPatterns.filter(pattern => 
+                      !sections.some(section => section.title === pattern.title)
+                    );
+
+                    if (remainingText && missingSections.length > 0) {
+                      // Split remaining text evenly among missing sections
+                      const chunks = remainingText.split(/(?:[.!?]+\s+)/).filter(chunk => chunk.trim());
+                      missingSections.forEach((pattern, index) => {
+                        const chunkStart = Math.floor((chunks.length / missingSections.length) * index);
+                        const chunkEnd = Math.floor((chunks.length / missingSections.length) * (index + 1));
+                        const content = chunks.slice(chunkStart, chunkEnd).join('. ').trim();
+
+                        if (content) {
+                          sections.push({
+                            ...pattern,
+                            content: cleanAIText(content + '.')
+                          });
+                        }
+                      });
                     }
-                    
-                    // Handle plain text format
-                    return (
-                      <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0 mt-1">
-                            <Lightbulb className="h-5 w-5 text-purple-600" />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-purple-900 dark:text-purple-100 mb-2">
-                              Personalized Financial Analysis
-                            </h4>
-                            <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                              {cleanAIText(currentTip)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  } catch (error) {
-                    // Fallback for any parsing errors
-                    return (
-                      <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0 mt-1">
-                            <Lightbulb className="h-5 w-5 text-purple-600" />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-purple-900 dark:text-purple-100 mb-2">
-                              AI Financial Tips
-                            </h4>
-                            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                              {cleanAIText(currentTip)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    );
                   }
+
+                  // Ensure we have at least one section
+                  if (sections.length === 0) {
+                    sections.push({
+                      title: "📊 AI Financial Analysis",
+                      icon: TrendingUp,
+                      content: cleanAIText(cleanedContent),
+                      color: "blue"
+                    });
+                  }
+
+                  return sections.map((section, index) => {
+                    const IconComponent = section.icon;
+                    const colorClasses = {
+                      blue: "from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700",
+                      green: "from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700", 
+                      purple: "from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700",
+                      orange: "from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700"
+                    };
+
+                    return (
+                      <div key={index} className={`p-4 bg-gradient-to-r ${colorClasses[section.color] || colorClasses.blue} rounded-lg border`}>
+                        <div className="flex items-start gap-3">
+                          <div className={`p-2 rounded-full ${
+                            section.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900' :
+                            section.color === 'green' ? 'bg-green-100 dark:bg-green-900' :
+                            section.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900' :
+                            'bg-orange-100 dark:bg-orange-900'
+                          }`}>
+                            <IconComponent className={`h-4 w-4 ${
+                              section.color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
+                              section.color === 'green' ? 'text-green-600 dark:text-green-400' :
+                              section.color === 'purple' ? 'text-purple-600 dark:text-purple-400' :
+                              'text-orange-600 dark:text-orange-400'
+                            }`} />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className={`font-medium mb-2 ${
+                              section.color === 'blue' ? 'text-blue-900 dark:text-blue-100' :
+                              section.color === 'green' ? 'text-green-900 dark:text-green-100' :
+                              section.color === 'purple' ? 'text-purple-900 dark:text-purple-100' :
+                              'text-orange-900 dark:text-orange-100'
+                            }`}>
+                              {section.title}
+                            </h4>
+                            <p className={`text-sm leading-relaxed ${
+                              section.color === 'blue' ? 'text-blue-800 dark:text-blue-200' :
+                              section.color === 'green' ? 'text-green-800 dark:text-green-200' :
+                              section.color === 'purple' ? 'text-purple-800 dark:text-purple-200' :
+                              'text-orange-800 dark:text-orange-200'
+                            }`}>
+                              {section.content}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  });
                 })()}
               </div>
             )}
