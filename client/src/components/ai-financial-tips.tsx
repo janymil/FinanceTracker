@@ -128,8 +128,10 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       // Handle both new 4-section structured format and legacy formats
       if (data.tips && Array.isArray(data.tips) && data.tips.length === 4) {
         // New 4-section structured format - store the sections directly
-        setCurrentTip(JSON.stringify({ sections: data.tips }));
-        tipContent = 'Structured 4-section analysis loaded';
+        const structuredData = JSON.stringify({ sections: data.tips });
+        setCurrentTip(structuredData);
+        tipContent = structuredData;
+        console.log('4-section format detected:', data.tips);
       } else if (data.tips && Array.isArray(data.tips) && data.tips.length > 0) {
         // Legacy structured format with detailed analysis
         const detailedTip = data.tips[0];
@@ -234,10 +236,11 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                       // Use the structured sections from the AI processor
                       sections = parsedData.sections.map((section: any, index: number) => {
                         const iconMap = [TrendingUp, Lightbulb, GraduationCap, Sparkles];
+                        const emojis = ['📊', '💡', '📋', '🎯'];
                         return {
-                          title: `📊 ${section.title}`,
+                          title: `${emojis[index]} ${section.title}`,
                           icon: iconMap[index] || TrendingUp,
-                          content: cleanAIText(section.content),
+                          content: cleanAIText(section.content || section.description || 'Analysis in progress...'),
                           color: section.color || ['blue', 'green', 'purple', 'orange'][index]
                         };
                       });
