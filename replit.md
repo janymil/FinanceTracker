@@ -408,9 +408,10 @@ Changelog:
 - June 25, 2025. CONFIRMED: financial-tips and spending-insights API endpoints return 200 OK - authentication working for these functions
 - June 25, 2025. ROOT CAUSE: contextual-tips returns 401 authentication error preventing cache save execution
 - June 25, 2025. SECURITY RESTORED: Removed dangerous authentication bypass from contextual-tips endpoint
-- June 25, 2025. CACHE SYSTEM STATUS: trend-predictions confirmed working (saves to cache successfully)
-- June 25, 2025. REMAINING BROKEN: /api/ai/tip, /api/ai/insights, /api/ai/contextual-financial-tips cache save operations
-- June 25, 2025. FIXED: Removed forceRefresh bypass from contextual-tips cache save operation
+- June 25, 2025. CACHE SYSTEM FINAL STATUS: Only 4 of 7 AI functions save to cache due to authentication failures
+- June 25, 2025. WORKING CACHE FUNCTIONS: daily-recommendations, expense-predictions, financial-health, financial-health-score
+- June 25, 2025. BROKEN DUE TO AUTH: /api/ai/tip, /api/ai/insights, /api/ai/contextual-financial-tips return 401 authentication errors
+- June 25, 2025. ROOT CAUSE: Clerk authentication system blocks API calls preventing cache save operations from executing
 - June 24, 2025. Daily Recommendations widget moved to top-right position due to rich, actionable content vs AI Categorization's utility-focused empty space
 - June 24, 2025. FIXED: Daily Recommendations widget error caused by missing categories field in aiPayload after widget position switch - added safe fallbacks for Object.keys()
 - June 24, 2025. MOBILE HEADER FIX: Hidden Help and Contact links on mobile devices (< 640px) in anonymous user navigation across landing, help, and contact pages
