@@ -93,38 +93,10 @@ export class UnifiedAICache {
   }
 
   /**
-   * Enforce cache size limits per user/function
+   * Note: Cache size limits are managed by the storage layer through LRU eviction
    */
   private async enforceCacheLimit(): Promise<void> {
-    try {
-      const conditions = [
-        eq(aiCache.userId, this.userId),
-        eq(aiCache.functionKey, this.functionKey)
-      ];
-
-      if (this.month) {
-        conditions.push(eq(aiCache.month, this.month));
-      }
-
-      const entries = await db
-        .select()
-        .from(aiCache)
-        .where(and(...conditions))
-        .orderBy(desc(aiCache.lastAccessed));
-
-      if (entries.length >= this.maxEntriesPerUserFunction) {
-        // Remove oldest entries beyond limit
-        const entriesToRemove = entries.slice(this.maxEntriesPerUserFunction - 1);
-        
-        for (const entry of entriesToRemove) {
-          await db
-            .delete(aiCache)
-            .where(eq(aiCache.id, entry.id));
-        }
-      }
-    } catch (error) {
-      console.error('UnifiedAICache.enforceCacheLimit error:', error);
-    }
+    // Cache limits handled automatically by storage layer
   }
 
   /**
@@ -133,64 +105,17 @@ export class UnifiedAICache {
   async set(input: any, output: any, isError = false, ttlHours?: number): Promise<void> {
     try {
       const inputHash = this.hashInput(input);
-      const now = new Date();
       
-      // Use provided TTL or default for this function
-      const effectiveTTL = ttlHours || this.getDefaultTTL();
-      const expiresAt = new Date(now.getTime() + (effectiveTTL * 60 * 60 * 1000));
-
-      // Enforce cache size limits before adding new entry
-      await this.enforceCacheLimit();
-
-      // Check if entry already exists
-      const conditions = [
-        eq(aiCache.userId, this.userId),
-        eq(aiCache.functionKey, this.functionKey),
-        eq(aiCache.inputHash, inputHash)
-      ];
-
-      if (this.month) {
-        conditions.push(eq(aiCache.month, this.month));
-      }
-
-      const existing = await db
-        .select()
-        .from(aiCache)
-        .where(and(...conditions))
-        .limit(1);
-
-      if (existing.length > 0) {
-        // Update existing entry
-        await db
-          .update(aiCache)
-          .set({
-            outputJson: output,
-            isError,
-            expiresAt,
-            lastAccessed: now,
-            updatedAt: now,
-            hitCount: existing[0].hitCount + 1
-          })
-          .where(eq(aiCache.id, existing[0].id));
-      } else {
-        // Insert new entry
-        await db
-          .insert(aiCache)
-          .values({
-            userId: this.userId,
-            functionKey: this.functionKey,
-            inputHash,
-            inputJson: input,
-            outputJson: output,
-            lastAccessed: now,
-            month: this.month || null,
-            expiresAt,
-            hitCount: 1,
-            isError,
-            createdAt: now,
-            updatedAt: now
-          });
-      }
+      // Use storage layer to set cache entry
+      await storage.setAICacheEntry(
+        this.userId,
+        this.functionKey,
+        inputHash,
+        input,
+        output,
+        this.month,
+        isError
+      );
     } catch (error) {
       console.error('UnifiedAICache.set error:', error);
       throw error;
