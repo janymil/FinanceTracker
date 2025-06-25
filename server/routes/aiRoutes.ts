@@ -497,38 +497,8 @@ export function registerAIRoutes(app: Express) {
         fullResponse: recommendations
       });
 
-      // Force local fallback if Fly.io returns empty results
-      if ((!recommendations?.recommendations || recommendations.recommendations.length === 0) && 
-          (!recommendations?.insights || recommendations.insights.length === 0)) {
-        console.log('Daily recommendations: Fly.io returned empty, using local fallback');
-        console.log('Daily recommendations: Payload for local fallback:', {
-          transactionCount: aiPayload.transactions?.length || 0,
-          summaryData: aiPayload.summary,
-          budgetCount: aiPayload.budgets?.length || 0,
-          categoriesCount: Object.keys(aiPayload.categories || {}).length
-        });
-        
-        try {
-          const { generateDailyRecommendations } = await import('../../server/openai');
-          const localResult = await generateDailyRecommendations(aiPayload);
-          
-          console.log('Daily recommendations: Local fallback result:', {
-            localRecommendationCount: localResult?.recommendations?.length || 0,
-            localInsightCount: localResult?.insights?.length || 0,
-            sampleRecommendation: localResult?.recommendations?.[0] || 'none'
-          });
-          
-          if (localResult && (localResult.recommendations?.length > 0 || localResult.insights?.length > 0)) {
-            // Use local result instead of empty Fly.io result
-            recommendations = localResult;
-            console.log('Daily recommendations: Successfully using local fallback');
-          } else {
-            console.log('Daily recommendations: Local fallback also returned empty results');
-          }
-        } catch (localError) {
-          console.error('Daily recommendations: Local fallback failed:', localError);
-        }
-      }
+      // NO FALLBACK - Force Fly.io only for testing
+      console.log('Daily recommendations: Using Fly.io response directly (no fallback):', recommendations);
 
 
 
