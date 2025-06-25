@@ -352,7 +352,7 @@ Changelog:
 - June 23, 2025. PROMPT RESTORATION: Restored complete financial analysis prompt including date range calculations with safe error handling for empty transaction arrays
 - June 23, 2025. FIXED AI ACCURACY BUG: Corrected contextual financial tips data mapping - transactions use `categoryName` field not `category`, preventing AI from incorrectly reporting "uncategorized" transactions
 - June 25, 2025. VERIFIED AI SYSTEM FUNCTIONALITY: Confirmed all 7 AI functions working correctly with intelligent caching system preventing unnecessary OpenAI API calls when cached data exists
-- June 25, 2025. FIXED PRODUCTION CACHE SYSTEM: Corrected database connection logic to properly connect to production Neon database instead of local dev database when NODE_ENV is unset
+- June 25, 2025. IDENTIFIED PRODUCTION CACHE ISSUE: Found that production deployment has empty ai_cache table (0 entries) indicating unified cache system not working in live environment
 - June 25, 2025. FIXED CONTEXTUAL FINANCIAL TIPS BUG: Fixed 'actualSummary is not defined' error in Fly.io processor (external-services/ai-processor/index.ts line 214)
 - June 25, 2025. CLEARED PRODUCTION CACHE: Removed stale cached data from production database for demo user (janymil@gmail.com) to force fresh AI generation
 - June 23, 2025. Enhanced AI categorization analysis to properly detect and report actual categorization status in contextual tips with accurate transaction data

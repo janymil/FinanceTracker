@@ -6,10 +6,7 @@ import ws from "ws";
 import * as schema from "@shared/schema";
 
 // Determine which database to use based on environment
-// Force production database usage when DATABASE_URL_PROD is available
-// This ensures live users connect to production database regardless of NODE_ENV
-const forceProduction = !!process.env.DATABASE_URL_PROD;
-const isProduction = forceProduction || process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'production';
 const databaseUrl = isProduction 
   ? process.env.DATABASE_URL_PROD 
   : process.env.DATABASE_URL;
