@@ -13,6 +13,7 @@ function hashObject(obj: any): string {
  */
 export async function runAI(task: string, userId: string, payload: Record<string, any>) {
   console.log(`[AI ${task}] Direct Fly.io call - NO CACHE`);
+  console.log(`[AI ${task}] PAYLOAD BEING SENT TO FLY.IO:`, JSON.stringify(payload, null, 2));
 
   try {
     console.log(`[AI ${task}] Calling Fly.io processor...`);

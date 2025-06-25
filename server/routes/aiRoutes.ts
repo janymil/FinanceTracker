@@ -103,26 +103,36 @@ export function registerAIRoutes(app: Express) {
     try {
       const userId = getUserId(req);
       if (!userId) {
+        console.log('TIP ENDPOINT: No user ID found');
         return res.status(401).json({ message: "Authentication required" });
       }
       
       const user = await storage.getUser(userId);
       if (!user || user.plan !== 'premium') {
+        console.log('TIP ENDPOINT: Plan check failed:', { userPlan: user?.plan });
         return res.status(403).json({ message: "AI financial tips require premium plan" });
       }
+
+      console.log('TIP ENDPOINT: Authentication passed, checking financial data');
 
       // Get financial data from request body (sent from frontend)
       const { financialData } = req.body;
       
+      console.log('TIP ENDPOINT: Request body:', JSON.stringify(req.body, null, 2));
+      
       if (!financialData || !financialData.transactions) {
+        console.log('TIP ENDPOINT: No financial data or transactions found');
         return res.status(400).json({ message: "Financial data with transactions required" });
       }
 
       // Validate and process transaction data
       const transactions = financialData.transactions;
       if (!Array.isArray(transactions) || transactions.length === 0) {
+        console.log('TIP ENDPOINT: Empty transactions array, returning early');
         return res.json({ tip: "Start by adding some transactions to get personalized financial insights." });
       }
+
+      console.log('TIP ENDPOINT: Processing', transactions.length, 'transactions');
 
       // Format transaction data for AI analysis with detailed information
       const formattedTransactions = transactions.map((t: any) => ({
