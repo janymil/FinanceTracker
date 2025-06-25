@@ -6,8 +6,7 @@ import {
   type ExpenseCategorizationResult 
 } from "../openai";
 import { runAI } from "../../lib/aiProcessor";
-import { aiCache } from "../cache";
-import { unifiedAICache } from "../../lib/unifiedAICache";
+// Cache system completely removed
 import { db } from "../db";
 import { 
   transactions, 

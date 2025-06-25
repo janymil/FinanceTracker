@@ -74,12 +74,7 @@ export interface FinancialHealthData {
 
 export async function categorizeExpense(description: string, amount: number): Promise<ExpenseCategorizationResult> {
   try {
-    // Check cache first
-    const cached = aiCache.getCategorization(description, amount);
-    if (cached) {
-      console.log('Using cached categorization result');
-      return cached;
-    }
+    // Cache removed - direct OpenAI call
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
