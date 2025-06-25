@@ -94,6 +94,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
 
     // Check for cache invalidation flag (set after data imports or manual refresh)
     const shouldSkipCache = localStorage.getItem('invalidate-ai-cache') === 'true';
+    console.log('Contextual tips: Cache invalidation check', { shouldSkipCache });
 
     // If month changed, clear previous tips and reset state
     if (lastLoadedMonth && lastLoadedMonth !== currentMonth) {
@@ -125,9 +126,11 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
 
     // If no transactions for this month, show no data state
     if (monthTransactions.length === 0) {
-      console.log('Contextual tips: No transactions for calculated month', {
+      console.log('🚫 Contextual tips: No transactions for calculated month', {
         currentMonth,
-        allTransactionDates: transactions.map(t => t.date).slice(0, 3)
+        allTransactionDates: transactions.map(t => t.date).slice(0, 3),
+        totalTransactions: transactions.length,
+        monthFilter: currentMonth
       });
       setTips([]);
       setLastLoadedMonth(currentMonth);
