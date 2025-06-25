@@ -276,9 +276,22 @@ export const redeemCodes = pgTable("redeem_codes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// AI cache system completely removed - direct Fly.io calls only
-
-// Cache system completely destroyed - direct Fly.io calls only
+// AI Cache table for storing AI-generated outputs per user and function
+export const aiCache = pgTable("ai_cache", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id), // Clerk user ID
+  functionKey: varchar("function_key", { length: 100 }).notNull(), // e.g. 'financial-tips'
+  inputHash: varchar("input_hash", { length: 64 }).notNull(), // SHA-256 hash of input
+  inputJson: jsonb("input_json").notNull(), // Input data for the AI function
+  outputJson: jsonb("output_json").notNull(), // AI response data
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  // Index for fast lookups by user and function
+  index("ai_cache_user_function_idx").on(table.userId, table.functionKey),
+  // Index for cache hit detection
+  index("ai_cache_hash_idx").on(table.inputHash),
+]);
 
 export const importLogs = pgTable("import_logs", {
   id: serial("id").primaryKey(),
