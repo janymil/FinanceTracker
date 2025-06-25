@@ -116,7 +116,9 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
       };
 
       // Use centralized AI processor - fixed task name to match Fly.io processor
+      console.log('[AI contextual-tips] Cache bypassed - testing Fly.io processor directly');
       const result = await runAI('contextual-tips', userId, aiPayload);
+      console.log('[AI contextual-tips] Received result from processor:', result ? 'SUCCESS' : 'FAILED');
       
       // Handle centralized processor response
       const tips = Array.isArray(result?.tips) ? result.tips.map((tip: any, index: number) => ({
