@@ -1287,11 +1287,7 @@ export async function generateDailyRecommendations(financialData: {
     const threeMonthsAgo = new Date();
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-    // Validate transactions array before processing
-    if (!Array.isArray(financialData.transactions)) {
-      console.error('Daily recommendations: transactions is not an array:', typeof financialData.transactions);
-      return { recommendations: [], insights: [] };
-    }
+
 
     const recentTransactions = financialData.transactions
       .filter(t => new Date(t.date) >= threeMonthsAgo)
@@ -1318,11 +1314,7 @@ export async function generateDailyRecommendations(financialData: {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5);
 
-    // Validate topCategories to prevent map error at line 1323
-    if (!Array.isArray(topCategories)) {
-      console.error('Daily recommendations: topCategories is not an array');
-      return { recommendations: [], insights: [] };
-    }
+
 
     const avgDailySpending = Array.from(dailySpending.values())
       .reduce((sum, amount) => sum + amount, 0) / Math.max(dailySpending.size, 1);
@@ -1337,10 +1329,10 @@ Financial Summary:
 - Average Daily Spending: $${avgDailySpending.toFixed(2)}
 
 Top Spending Categories:
-${topCategories.length > 0 ? topCategories.map(([cat, amount]) => `- ${cat}: $${amount.toFixed(2)}`).join('\n') : '- No spending data available'}
+${topCategories.map(([cat, amount]) => `- ${cat}: $${amount.toFixed(2)}`).join('\n')}
 
 Budget Information:
-${Array.isArray(financialData.budgets) && financialData.budgets.length > 0 ? financialData.budgets.map(b => `- ${b.name}: $${b.amount} (${b.period})`).join('\n') : '- No budget data available'}
+${financialData.budgets.map(b => `- ${b.name}: $${b.amount} (${b.period})`).join('\n')}
 
 Recent Transaction Sample:
 ${recentTransactions.slice(0, 10).map(t => 

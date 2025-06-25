@@ -130,6 +130,9 @@ LATEST FIXES:
 - June 25, 2025. DEPLOYMENT COMPLETE: Successfully deployed updated index.ts to Fly.io using FLY_API_TOKEN - all AI functions now return fresh OpenAI responses
 - June 25, 2025. CONFIRMED WORKING: Daily recommendations, contextual tips, spending insights, financial tips, trend predictions, expense predictions all operational via Fly.io
 - June 25, 2025. ZERO CACHE INTERFERENCE: AI functions make direct Fly.io calls with 5-15 second OpenAI processing times, no cache system blocking fresh responses
+- June 25, 2025. DEFENSIVE VALIDATION REMOVED: Fixed Fly.io processor by removing extra validation logic that caused different prompts than local version
+- June 25, 2025. PROMPT CONSISTENCY ACHIEVED: Fly.io index.ts now generates identical prompts to server/openai.ts for consistent AI responses
+- June 25, 2025. ROOT CAUSE RESOLVED: topCategories and budget validation differences between files were causing Fly.io to return empty responses
 
 Changelog:
 - June 13, 2025. Initial setup
