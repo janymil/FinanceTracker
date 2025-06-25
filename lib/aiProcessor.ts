@@ -88,7 +88,15 @@ export async function runAI(task: string, userId: string, payload: Record<string
       
       if (task === 'daily-recommendations') {
         console.log(`[AI ${task}] Using local fallback for daily-recommendations`);
-        return await generateDailyRecommendations(payload);
+        const result = await generateDailyRecommendations(payload);
+        // CRITICAL: Save fallback result to cache
+        try {
+          await unifiedAICache.set(task, userId, month, payload, result);
+          console.log(`[AI ${task}] Local fallback result saved to cache`);
+        } catch (cacheError) {
+          console.error(`[AI ${task}] Failed to save fallback to cache:`, cacheError);
+        }
+        return result;
       }
       
       if (task === 'financial-tips') {
