@@ -211,7 +211,7 @@ export async function generateContextualFinancialTips(data: {
 
     // Build comprehensive prompt based on contextual tips routes logic
     const netBalance = summary.totalIncome - summary.totalExpenses;
-    const savingsRate = actualSummary.totalIncome > 0 ? (netBalance / actualSummary.totalIncome) * 100 : 0;
+    const savingsRate = summary.totalIncome > 0 ? (netBalance / summary.totalIncome) * 100 : 0;
     
     // Analyze spending by category - use the correct field mapping
     const categorySpending = new Map();
