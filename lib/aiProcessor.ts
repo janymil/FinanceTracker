@@ -9,25 +9,24 @@ function hashObject(obj: any): string {
 /**
  * Centralized AI Processor for Fly.io Integration
  * Simple interface: runAI(task, userId, payload)
- * Handles: GPT Execution, Smart Caching, Retry/Fallback, OpenAI Key Handling
+ * Handles: GPT Execution, Retry/Fallback, OpenAI Key Handling
  */
 export async function runAI(task: string, userId: string, payload: Record<string, any>) {
-  // CACHE DISABLED - FORCE FRESH CALLS
-  console.log(`[AI ${task}] Cache bypassed - testing Fly.io processor directly`);
+  console.log(`[AI ${task}] Direct Fly.io call - NO CACHE`);
 
   try {
-    console.log(`[AI ${task}] Testing Fly.io connectivity...`);
-    // Try unified endpoint first
+    console.log(`[AI ${task}] Calling Fly.io processor...`);
     const response = await fetch("https://finanzerpro.fly.dev/execute-gpt-task", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ task, userId, payload }),
-      signal: AbortSignal.timeout(30000) // 30 second timeout
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        task,
+        userId,
+        payload
+      })
     });
-    
-    console.log(`[AI ${task}] Fly.io fetch completed, status: ${response.status}`);
-
-    console.log(`[AI ${task}] Fly.io response status: ${response.status}`);
 
     if (!response.ok) {
       console.error(`[AI ${task}] Fly.io error:`, response.status, response.statusText);
@@ -36,135 +35,31 @@ export async function runAI(task: string, userId: string, payload: Record<string
       throw new Error(`Fly.io processor failed: ${response.status}`);
     }
 
-    if (response.ok) {
-      const result = await response.json();
-      
-      // Only force fallback for actual error responses, not empty data
-      console.log(`[AI ${task}] SUCCESS: Fly.io returned valid response (may be empty due to insufficient data)`);
-      
-      // Don't fall back on empty results - that's valid when user has no data
-      // if (task === 'daily-recommendations' && (!result.recommendations || result.recommendations.length === 0) && (!result.insights || result.insights.length === 0)) {
-      //   console.log(`[AI ${task}] Fly.io returned empty results, forcing local fallback`);
-      //   throw new Error('Empty results from Fly.io, using local fallback');
-      // }
-      
-      // Only force fallback for explicit fallback markers, not empty data
-      // if (task === 'contextual-tips' && result.tips && result.tips.length === 1 && result.tips[0].id === 'fallback_tip') {
-      //   console.log(`[AI ${task}] Fly.io returned fallback tip, forcing local fallback`);
-      //   throw new Error('Fallback response from Fly.io, using local fallback');
-      // }
-      
-      console.log(`[AI ${task}] SUCCESS: Using Fly.io response (direct call, no caching)`);
-      return result;
-    }
+    const result = await response.json();
+    console.log(`[AI ${task}] SUCCESS: Fly.io response received (direct call, no caching)`);
+    return result;
 
-    // If Fly.io returns error status, throw to trigger fallback
-    console.error(`[AI ${task}] Fly.io endpoint failed: ${response.status} ${response.statusText}`);
-    throw new Error(`Fly.io endpoint failed with status ${response.status} for task: ${task}`);
-
-  } catch (err) {
-    console.error(`[AI ${task}] CRITICAL ERROR: Fly.io completely unreachable:`, err.message);
-    console.error(`[AI ${task}] Network/timeout error - falling back to local OpenAI`);
-    console.error(`[AI ${task}] Full error details:`, err);
+  } catch (error: any) {
+    console.error(`[AI ${task}] Fly.io error - returning empty result:`, error.message);
     
-    // Import and use local functions as fallback
-    try {
-      const { 
-        generateSpendingInsights, 
-        generateExpensePredictions, 
-        generateContextualFinancialTips, 
-        generateDailyRecommendations,
-        generateFinancialTips,
-        generateTrendPredictions,
-        generateAIFinancialHealthScore
-      } = await import('../server/openai');
-      
-      if (task === 'spending-insights') {
-        console.log(`[AI ${task}] FALLBACK: Network/timeout error - using local OpenAI`);
-        const result = await generateSpendingInsights(payload.transactions || []);
-        return result;
-      }
-      
-      if (task === 'expense-predictions') {
-        console.log(`[AI ${task}] Using local fallback for expense-predictions`);
-        const result = await generateExpensePredictions(payload.transactions || []);
-        try {
-          await unifiedAICache.set(task, userId, month, payload, result);
-          console.log(`[AI ${task}] Local fallback result saved to cache`);
-        } catch (cacheError) {
-          console.error(`[AI ${task}] Failed to save fallback to cache:`, cacheError);
-        }
-        return result;
-      }
-      
-      if (task === 'contextual-tips') {
-        console.log(`[AI ${task}] FALLBACK: Network/timeout error - using local OpenAI`);
-        const result = await generateContextualFinancialTips(payload);
-        return result;
-      }
-      
-      if (task === 'daily-recommendations') {
-        console.log(`[AI ${task}] Using local fallback for daily-recommendations`);
-        const result = await generateDailyRecommendations(payload);
-        // CRITICAL: Save fallback result to cache
-        try {
-          await unifiedAICache.set(task, userId, month, payload, result);
-          console.log(`[AI ${task}] Local fallback result saved to cache`);
-        } catch (cacheError) {
-          console.error(`[AI ${task}] Failed to save fallback to cache:`, cacheError);
-        }
-        return result;
-      }
-      
-      if (task === 'financial-tips') {
-        console.log(`[AI ${task}] Using local fallback for financial-tips`);
-        const result = await generateFinancialTips(payload);
-        try {
-          await unifiedAICache.set(task, userId, month, payload, result);
-          console.log(`[AI ${task}] Local fallback result saved to cache`);
-        } catch (cacheError) {
-          console.error(`[AI ${task}] Failed to save fallback to cache:`, cacheError);
-        }
-        return result;
-      }
-      
-      if (task === 'trend-predictions') {
-        console.log(`[AI ${task}] Using local fallback for trend-predictions`);
-        const result = await generateTrendPredictions(payload.transactions || [], payload.budgets || []);
-        try {
-          await unifiedAICache.set(task, userId, month, payload, result);
-          console.log(`[AI ${task}] Local fallback result saved to cache`);
-        } catch (cacheError) {
-          console.error(`[AI ${task}] Failed to save fallback to cache:`, cacheError);
-        }
-        return result;
-      }
-      
-      if (task === 'financial-health-score') {
-        console.log(`[AI ${task}] Using local fallback for financial-health-score`);
-        const result = await generateAIFinancialHealthScore(payload);
-        try {
-          await unifiedAICache.set(task, userId, month, payload, result);
-          console.log(`[AI ${task}] Local fallback result saved to cache`);
-        } catch (cacheError) {
-          console.error(`[AI ${task}] Failed to save fallback to cache:`, cacheError);
-        }
-        return result;
-      }
-    } catch (localError) {
-      console.error(`[AI ${task}] Local fallback also failed:`, localError.message);
-    }
-    
-    // For other tasks, return empty structures to make the problem visible
+    // Return proper error structures without fallbacks or cache
     switch (task) {
       case 'daily-recommendations':
-        return { recommendations: [], insights: [], error: 'Fly.io service unavailable' };
+        return { recommendations: [], insights: [], error: 'AI service temporarily unavailable' };
       case 'financial-tips':
-        return { tip: {}, error: 'Fly.io service unavailable' };
+        return { tips: [], error: 'AI service temporarily unavailable' };
       case 'contextual-tips':
-        return { tips: [], error: 'Fly.io service unavailable' };
+        return { tips: [], error: 'AI service temporarily unavailable' };
+      case 'expense-predictions':
+        return { categoryPredictions: [], monthlyPredictions: [], error: 'AI service temporarily unavailable' };
+      case 'spending-insights':
+        return { insights: [], trends: [], error: 'AI service temporarily unavailable' };
+      case 'trend-predictions':
+        return { predictions: [], error: 'AI service temporarily unavailable' };
+      case 'financial-health-score':
+        return { score: 0, trend: 'stable', error: 'AI service temporarily unavailable' };
       default:
-        return { error: 'Fly.io service unavailable' };
+        return { error: 'AI service temporarily unavailable' };
     }
   }
 }

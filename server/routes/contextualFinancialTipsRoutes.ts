@@ -2,7 +2,6 @@
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { runAI } from "../../lib/aiProcessor";
-// Cache system removed
 import { storage } from "../storage";
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
@@ -22,7 +21,7 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
       await storage.deleteCachedDailyRecommendations(userId);
       // Legacy table removed - unified cache handles clearing via unifiedAICache.invalidateUser()
       
-      // Cache system removed - no cache to clear
+      // No cache to clear
       
       console.log(`Manually cleared all AI caches for user ${userId}`);
       return res.json({ success: true, message: "Cache cleared successfully" });
@@ -125,7 +124,7 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
         actionable: Boolean(tip.actionable)
       })) : [];
 
-      // Cache system removed - no caching
+      // No caching system
 
       // Add cache-busting headers
       res.set({
