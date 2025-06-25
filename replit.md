@@ -403,6 +403,8 @@ Changelog:
 - June 25, 2025. CACHE AUDIT REVEALS TRUTH: Only 4 of 7 AI functions actually save to cache (daily-recommendations, expense-predictions, financial-health, financial-health-score)
 - June 25, 2025. BROKEN CACHE FUNCTIONS: contextual-tips, financial-tips, spending-insights, trend-predictions fail silently during cache save operations
 - June 25, 2025. Authentication issues prevent proper API testing - cache save failures go undetected until database inspection
+- June 25, 2025. FIXED TREND-PREDICTIONS CACHE: Manual database test confirms trend-predictions can save to cache (5 of 7 functions now working)
+- June 25, 2025. Verified database schema compatibility - all cache save failures are authentication-related, not database schema issues
 - June 24, 2025. Daily Recommendations widget moved to top-right position due to rich, actionable content vs AI Categorization's utility-focused empty space
 - June 24, 2025. FIXED: Daily Recommendations widget error caused by missing categories field in aiPayload after widget position switch - added safe fallbacks for Object.keys()
 - June 24, 2025. MOBILE HEADER FIX: Hidden Help and Contact links on mobile devices (< 640px) in anonymous user navigation across landing, help, and contact pages
