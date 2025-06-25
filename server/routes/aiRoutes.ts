@@ -188,8 +188,12 @@ export function registerAIRoutes(app: Express) {
       
       // No caching system
 
-      // Return Fly.io response directly - no local fallbacks
-      return res.json(tipResults);
+      // Format response for frontend compatibility - Fly.io returns array, frontend expects {tip: string}
+      const formattedResponse = Array.isArray(tipResults) && tipResults.length > 0 
+        ? { tip: tipResults[0].description || tipResults[0].title || 'Financial analysis completed' }
+        : { tip: tipResults?.tip || tipResults?.description || 'Unable to generate tip at this time' };
+
+      return res.json(formattedResponse);
     } catch (error) {
       console.error("Error generating financial tip:", error);
       return res.status(500).json({ message: "Failed to generate financial tip" });
