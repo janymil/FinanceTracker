@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-// Cache system removed - direct OpenAI calls only
+import { UnifiedAICache } from "../lib/unifiedAICache";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -142,26 +142,38 @@ Please categorize this expense.`
   }
 }
 
-export async function generateFinancialTips(financialData: {
-  totalIncome: number;
-  totalExpenses: number;
-  transactionsByCategory: Array<{
-    categoryName: string;
-    amount: number;
-    type: string;
-  }>;
-  recentTransactions: Array<{
-    description: string;
-    amount: number;
-    date: string;
-    categoryName?: string;
-    type?: string;
-  }>;
-  timestamp?: number; // For bypassing cache
-}): Promise<FinancialTip[]> {
+export async function generateFinancialTips(
+  userId: string,
+  financialData: {
+    totalIncome: number;
+    totalExpenses: number;
+    transactionsByCategory: Array<{
+      categoryName: string;
+      amount: number;
+      type: string;
+    }>;
+    recentTransactions: Array<{
+      description: string;
+      amount: number;
+      date: string;
+      categoryName?: string;
+      type?: string;
+    }>;
+    timestamp?: number; // For bypassing cache
+  }
+): Promise<FinancialTip[]> {
   try {
-    // Note: Cache now handled by unified cache system via routes
-    if (financialData.timestamp) {
+    // Initialize UnifiedAICache with 168 hours (7 days) TTL
+    const cache = new UnifiedAICache('financial-tips', userId);
+
+    // Check cache first (unless bypassing with timestamp)
+    if (!financialData.timestamp) {
+      const cachedResult = await cache.get(financialData);
+      if (cachedResult) {
+        console.log('Financial tips: Using cached result');
+        return cachedResult;
+      }
+    } else {
       console.log('Bypassing cache for fresh AI financial tips');
     }
     const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
@@ -299,8 +311,9 @@ Return comprehensive analysis in JSON:
       actionable: true
     }];
 
-    // Note: Cache now handled by unified cache system via routes
-    console.log('Financial tips generated successfully');
+    // Cache the result with 168 hours (7 days) TTL
+    await cache.set(financialData, processedTips, false, 168);
+    console.log('Financial tips generated successfully and cached');
     
     return processedTips;
   } catch (error) {
@@ -594,6 +607,7 @@ Provide an AI-powered financial health score that adapts to this user's specific
 }
 
 export async function generateTrendPredictions(
+  userId: string,
   transactions: Array<{
     id: number;
     amount: string;
@@ -625,7 +639,16 @@ export async function generateTrendPredictions(
       };
     }
 
-    // Note: Cache now handled by unified cache system via routes
+    // Initialize UnifiedAICache with 48 hours TTL
+    const cache = new UnifiedAICache('trend-predictions', userId);
+    const inputData = { transactions, budgets };
+
+    // Check cache first
+    const cachedResult = await cache.get(inputData);
+    if (cachedResult) {
+      console.log('Trend predictions: Using cached result');
+      return cachedResult;
+    }
 
     // Prepare comprehensive financial data for AI analysis
     const monthlyData = new Map();
@@ -973,30 +996,41 @@ ANALYSIS GUIDELINES:
   }
 }
 
-export async function generateDailyRecommendations(financialData: {
-  transactions: Array<{
-    id: number;
-    amount: string;
-    description: string;
-    date: string;
-    type: 'income' | 'expense';
-    categoryName?: string;
-  }>;
-  summary: {
-    totalIncome: number;
-    totalExpenses: number;
-    netAmount: number;
-  };
-  budgets: Array<{
-    id: number;
-    name: string;
-    amount: string;
-    categoryName: string;
-    period: string;
-  }>;
-}) {
+export async function generateDailyRecommendations(
+  userId: string,
+  financialData: {
+    transactions: Array<{
+      id: number;
+      amount: string;
+      description: string;
+      date: string;
+      type: 'income' | 'expense';
+      categoryName?: string;
+    }>;
+    summary: {
+      totalIncome: number;
+      totalExpenses: number;
+      netAmount: number;
+    };
+    budgets: Array<{
+      id: number;
+      name: string;
+      amount: string;
+      categoryName: string;
+      period: string;
+    }>;
+  }
+) {
   try {
-    // Note: Cache now handled by unified cache system via routes
+    // Initialize UnifiedAICache with 24 hours TTL
+    const cache = new UnifiedAICache('daily-recommendations', userId);
+
+    // Check cache first
+    const cachedResult = await cache.get(financialData);
+    if (cachedResult) {
+      console.log('Daily recommendations: Using cached result');
+      return cachedResult;
+    }
 
     console.log('Generating new daily recommendations with OpenAI');
 
@@ -1138,8 +1172,9 @@ Only provide recommendations and insights based on the actual financial data pro
       insights
     };
 
-    // Note: Cache now handled by unified cache system via routes
-    console.log('Daily recommendations generated successfully');
+    // Cache the result with 24 hours TTL
+    await cache.set(financialData, result, false, 24);
+    console.log('Daily recommendations generated successfully and cached');
     
     return result;
 
