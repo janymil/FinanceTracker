@@ -18,6 +18,13 @@ interface AIFinancialTipsProps {
       amount: number;
       type: string;
     }>;
+    recentTransactions?: Array<{
+      description: string;
+      amount: string;
+      categoryName: string;
+      type: string;
+      date: string;
+    }>;
   };
 }
 
@@ -68,39 +75,9 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     summaryExpenses: summary?.totalExpenses
   });
 
-  // Function to fetch detailed transactions for specific month/year
-  const fetchDetailedTransactions = async (month: number, year: number) => {
-    const response = await fetch(`/api/transactions/by-month?month=${month}&year=${year}`, {
-      method: "GET",
-      headers: {
-        ...(await getAuthHeaders())
-      }
-    });
-    const data = await response.json();
-    return data.transactions || [];
-  };
 
-  async function getAuthHeaders(): Promise<Record<string, string>> {
-    try {
-      if (typeof window !== 'undefined' && window.Clerk?.session) {
-        const token = await window.Clerk.session.getToken();
-        if (token) {
-          return { Authorization: `Bearer ${token}` };
-        }
-      }
-      
-      // Fallback: try to get token from user object
-      if (user && typeof user.getToken === 'function') {
-        const token = await user.getToken();
-        if (token) {
-          return { Authorization: `Bearer ${token}` };
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to get Clerk token:', error);
-    }
-    return {};
-  }
+
+
 
   // React Query mutation for generating tips
   const generateTipMutation = useMutation({
@@ -114,17 +91,17 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
 
       // Fetch detailed transactions for current month
       // Get detailed transactions for current month using summary data
-      const detailedTransactions = summary.recentTransactions || [];
+      const detailedTransactions = summary?.recentTransactions || [];
 
       // Remove blocking validation - let AI decide if data is sufficient
 
       // Direct fetch to avoid GET/HEAD method issues
-      const authHeaders = await getAuthHeaders();
+      const token = await window.Clerk?.session?.getToken();
       const response = await fetch("/api/ai/tip", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...authHeaders
+          ...(token && { Authorization: `Bearer ${token}` })
         },
         body: JSON.stringify({
           financialData: {
