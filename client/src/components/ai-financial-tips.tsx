@@ -246,90 +246,80 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             {/* Current Tip Display */}
             {currentTip && (
               <div className="space-y-4">
-                {/* Display complete AI analysis in 4 themed boxes */}
+                {/* Display 4 themed sections */}
                 {(() => {
                   try {
-                    // Parse structured tips format (working system)
-                    if (currentTip.includes('**') && currentTip.includes('\n\n')) {
-                      // Parse: **Title**\n\nDescription format
-                      const parts = currentTip.split('\n\n');
-                      const title = parts[0]?.replace(/\*\*/g, '').trim() || 'AI Financial Analysis';
-                      const fullDescription = parts.slice(1).join('\n\n').trim();
+                    // Check if we have structured 4-section format
+                    if (currentTip.startsWith('[') && currentTip.includes('"title"')) {
+                      const sections = JSON.parse(currentTip);
                       
-                      // Split the complete analysis into 4 logical sections while preserving content
-                      const sentences = fullDescription.split(/(?<=[.!?])\s+/);
-                      const totalSentences = sentences.length;
-                      const sentencesPerBox = Math.max(1, Math.floor(totalSentences / 4));
-                      
-                      const sections = [
+                      // Define the 4 thematic sections with their styling
+                      const sectionConfig = [
                         {
-                          title: "📊 Spending Pattern Analysis",
-                          content: sentences.slice(0, sentencesPerBox).join(' '),
+                          icon: TrendingUp,
                           color: "blue",
-                          icon: TrendingUp
+                          expectedTitle: "Spending Pattern Analysis"
                         },
                         {
-                          title: "💡 Personalized Saving Recommendations", 
-                          content: sentences.slice(sentencesPerBox, sentencesPerBox * 2).join(' '),
-                          color: "green",
-                          icon: Lightbulb
+                          icon: Lightbulb,
+                          color: "green", 
+                          expectedTitle: "Personalized Saving Recommendations"
                         },
                         {
-                          title: "🎓 Budget Optimization Suggestions",
-                          content: sentences.slice(sentencesPerBox * 2, sentencesPerBox * 3).join(' '),
-                          color: "purple", 
-                          icon: GraduationCap
+                          icon: GraduationCap,
+                          color: "purple",
+                          expectedTitle: "Budget Optimization Suggestions"
                         },
                         {
-                          title: "✨ Advanced Financial Analysis",
-                          content: sentences.slice(sentencesPerBox * 3).join(' '),
+                          icon: Sparkles,
                           color: "orange",
-                          icon: Sparkles
+                          expectedTitle: "Advanced Financial Analysis"
                         }
                       ];
 
-                      const colorClasses = {
-                        blue: "from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700",
-                        green: "from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700", 
-                        purple: "from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700",
-                        orange: "from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700"
-                      };
-
-                      return sections.map((section, index) => {
-                        const IconComponent = section.icon;
+                      return sections.map((section: any, index: number) => {
+                        const config = sectionConfig[index] || sectionConfig[0];
+                        const IconComponent = config.icon;
                         
+                        const colorClasses = {
+                          blue: "from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700",
+                          green: "from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700", 
+                          purple: "from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700",
+                          orange: "from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700"
+                        };
+
                         return (
-                          <div key={index} className={`p-4 bg-gradient-to-r ${colorClasses[section.color as keyof typeof colorClasses]} rounded-lg border`}>
+                          <div key={index} className={`p-4 bg-gradient-to-r ${colorClasses[config.color as keyof typeof colorClasses]} rounded-lg border`}>
                             <div className="flex items-start gap-3">
                               <div className={`p-2 rounded-full ${
-                                section.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900' :
-                                section.color === 'green' ? 'bg-green-100 dark:bg-green-900' :
-                                section.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900' :
+                                config.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900' :
+                                config.color === 'green' ? 'bg-green-100 dark:bg-green-900' :
+                                config.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900' :
                                 'bg-orange-100 dark:bg-orange-900'
                               }`}>
                                 <IconComponent className={`h-4 w-4 ${
-                                  section.color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
-                                  section.color === 'green' ? 'text-green-600 dark:text-green-400' :
-                                  section.color === 'purple' ? 'text-purple-600 dark:text-purple-400' :
+                                  config.color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
+                                  config.color === 'green' ? 'text-green-600 dark:text-green-400' :
+                                  config.color === 'purple' ? 'text-purple-600 dark:text-purple-400' :
                                   'text-orange-600 dark:text-orange-400'
                                 }`} />
                               </div>
                               <div className="flex-1">
                                 <h4 className={`font-medium mb-2 ${
-                                  section.color === 'blue' ? 'text-blue-900 dark:text-blue-100' :
-                                  section.color === 'green' ? 'text-green-900 dark:text-green-100' :
-                                  section.color === 'purple' ? 'text-purple-900 dark:text-purple-100' :
+                                  config.color === 'blue' ? 'text-blue-900 dark:text-blue-100' :
+                                  config.color === 'green' ? 'text-green-900 dark:text-green-100' :
+                                  config.color === 'purple' ? 'text-purple-900 dark:text-purple-100' :
                                   'text-orange-900 dark:text-orange-100'
                                 }`}>
-                                  {section.title}
+                                  📊 {section.title || config.expectedTitle}
                                 </h4>
                                 <p className={`text-sm leading-relaxed ${
-                                  section.color === 'blue' ? 'text-blue-800 dark:text-blue-200' :
-                                  section.color === 'green' ? 'text-green-800 dark:text-green-200' :
-                                  section.color === 'purple' ? 'text-purple-800 dark:text-purple-200' :
+                                  config.color === 'blue' ? 'text-blue-800 dark:text-blue-200' :
+                                  config.color === 'green' ? 'text-green-800 dark:text-green-200' :
+                                  config.color === 'purple' ? 'text-purple-800 dark:text-purple-200' :
                                   'text-orange-800 dark:text-orange-200'
                                 }`}>
-                                  {cleanAIText(section.content)}
+                                  {cleanAIText(section.content || section.description)}
                                 </p>
                               </div>
                             </div>
