@@ -1215,37 +1215,40 @@ Only provide recommendations and insights based on the actual financial data pro
   }
 }
 
-export async function generateContextualFinancialTips(data: {
-  summary: {
-    totalIncome: number;
-    totalExpenses: number;
-    netBalance: number;
-    transactionCount: number;
-  };
-  transactions: Array<{
-    description: string;
-    amount: number;
-    category: string;
-    date: string;
-    type?: 'income' | 'expense';
-    recurring?: boolean;
-  }>;
-  budgets: Array<{
-    category: string;
-    budgetAmount: number;
-    spent: number;
-    remaining: number;
-    period?: string;
-  }>;
-  goals?: Array<{
-    name: string;
-    targetAmount: number;
-    currentAmount: number;
-    targetDate: string;
-    type: 'saving' | 'debt' | 'investment';
-  }>;
-  selectedMonth: string;
-}): Promise<{ tips: Array<{
+export async function generateContextualFinancialTips(
+  userId: string,
+  data: {
+    summary: {
+      totalIncome: number;
+      totalExpenses: number;
+      netBalance: number;
+      transactionCount: number;
+    };
+    transactions: Array<{
+      description: string;
+      amount: number;
+      category: string;
+      date: string;
+      type?: 'income' | 'expense';
+      recurring?: boolean;
+    }>;
+    budgets: Array<{
+      category: string;
+      budgetAmount: number;
+      spent: number;
+      remaining: number;
+      period?: string;
+    }>;
+    goals?: Array<{
+      name: string;
+      targetAmount: number;
+      currentAmount: number;
+      targetDate: string;
+      type: 'saving' | 'debt' | 'investment';
+    }>;
+    selectedMonth: string;
+  }
+): Promise<{ tips: Array<{
   id: string;
   title: string;
   description: string;
@@ -1255,6 +1258,16 @@ export async function generateContextualFinancialTips(data: {
 }> }> {
   try {
     const { summary, transactions, budgets, goals = [], selectedMonth } = data;
+    
+    // Initialize UnifiedAICache with 72 hours TTL
+    const cache = new UnifiedAICache('contextual-tips', userId, selectedMonth);
+
+    // Check cache first
+    const cachedResult = await cache.get(data);
+    if (cachedResult) {
+      console.log('Contextual financial tips: Using cached result (local fallback)');
+      return cachedResult;
+    }
     
     // Return basic tip if no meaningful data
     if (transactions.length === 0 && summary.totalIncome === 0 && summary.totalExpenses === 0) {
