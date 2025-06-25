@@ -136,7 +136,7 @@ Please categorize this expense.`
 
     const categorization = {
       category: result.category || 'Other',
-      confidence: Math.max(0, Math.min(1, result.confidence)),
+      confidence: Math.max(0, Math.min(1, result.confidence || 0.5)),
       reasoning: result.reasoning || 'Unable to determine category'
     };
 
@@ -225,10 +225,10 @@ export async function generateContextualFinancialTips(data: {
     }).length;
     
     transactions.forEach(t => {
-      const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : t.amount;
+      const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : (t.amount || 0);
       if (amount > 0) {
         const category = t.category || t.categoryName || 'Uncategorized';
-        const current = categorySpending.get(category);
+        const current = categorySpending.get(category) || 0;
         categorySpending.set(category, current + amount);
       }
     });
@@ -249,9 +249,9 @@ export async function generateContextualFinancialTips(data: {
     expenseTransactions.forEach(t => {
       const day = new Date(t.date).getDate();
       const category = t.category || t.categoryName || 'Uncategorized';
-      const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : t.amount;
-      dailySpending.set(day, dailySpending.get(day) + amount);
-      transactionFrequency.set(category, transactionFrequency.get(category) + 1);
+      const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : (t.amount || 0);
+      dailySpending.set(day, (dailySpending.get(day) || 0) + amount);
+      transactionFrequency.set(category, (transactionFrequency.get(category) || 0) + 1);
     });
 
     // Analyze specific financial scenarios for contextual insights
@@ -317,7 +317,7 @@ export async function generateContextualFinancialTips(data: {
     // Check for spending concentration and patterns
     topSpendingCategories.forEach(([category, amount]) => {
       const categoryPercent = (amount / summary.totalExpenses) * 100;
-      const categoryFreq = transactionFrequency.get(category);
+      const categoryFreq = transactionFrequency.get(category) || 0;
       
       if (categoryPercent > 40) {
         scenarios.push(`🟨 High category spending: ${category} represents ${categoryPercent.toFixed(0)}% of expenses ($${amount.toFixed(2)} across ${categoryFreq} transactions).`);
@@ -367,7 +367,7 @@ TRANSACTION ANALYSIS:
 - Expense Transactions: ${expenseTransactions.length}
 - Recurring Transactions: ${recurringTransactions.length}
 - Categorized Transactions: ${categorizedCount}/${transactions.length} (${transactions.length > 0 ? ((categorizedCount/transactions.length)*100).toFixed(0) : 0}%)
-- Most Active Category: ${Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[0]} (${Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[1]} transactions)
+- Most Active Category: ${Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[0] || 'None'} (${Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[1] || 0} transactions)
 
 IDENTIFIED FINANCIAL SCENARIOS:
 ${scenarios.length > 0 ? scenarios.join('\n') : '- No specific scenarios identified this month'}
@@ -711,7 +711,7 @@ Generate financial insights based on this spending data.`
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{"insights": []}');
-    const insights = Array.isArray(result) ? result : result.insights;
+    const insights = Array.isArray(result) ? result : (result.insights || result.data || []);
 
     const processedInsights = insights.map((insight: any, index: number) => ({
       id: insight.id || `ai_insight_${index}`,
@@ -844,13 +844,13 @@ Provide an AI-powered financial health score that adapts to this user's specific
       score: Math.max(0, Math.min(100, result.score || 50)),
       status: result.status || 'Fair',
       color: result.color || 'yellow',
-      factors: result.factors,
+      factors: result.factors || [],
       icon: result.icon || 'Shield',
       aiAnalysis: {
-        personalizedFactors: result.aiAnalysis?.personalizedFactors,
-        riskAssessment: result.aiAnalysis?.riskAssessment,
-        recommendations: result.aiAnalysis?.recommendations,
-        confidence: Math.max(0, Math.min(1, result.aiAnalysis?.confidence))
+        personalizedFactors: result.aiAnalysis?.personalizedFactors || [],
+        riskAssessment: result.aiAnalysis?.riskAssessment || 'Standard risk assessment',
+        recommendations: result.aiAnalysis?.recommendations || [],
+        confidence: Math.max(0, Math.min(1, result.aiAnalysis?.confidence || 0.7))
       }
     };
 
@@ -927,11 +927,11 @@ export async function generateTrendPredictions(
         monthData.income += amount;
       } else {
         monthData.expenses += amount;
-        const catAmount = monthData.categories.get(category);
+        const catAmount = monthData.categories.get(category) || 0;
         monthData.categories.set(category, catAmount + amount);
       }
 
-      const totalAmount = categoryTotals.get(category);
+      const totalAmount = categoryTotals.get(category) || 0;
       categoryTotals.set(category, totalAmount + amount);
     });
 
@@ -1009,7 +1009,7 @@ Analysis Requirements:
     const result = JSON.parse(response.choices[0].message.content || '{"categoryPredictions": [], "financialForecast": {}}');
 
     const predictions = {
-      categoryPredictions: result.categoryPredictions,
+      categoryPredictions: result.categoryPredictions || [],
       financialForecast: result.financialForecast || {
         nextMonthExpenses: 0,
         expectedSavings: 0,
@@ -1093,7 +1093,7 @@ export async function generateExpensePredictions(transactions: Array<{
         monthlyData.set(month, new Map());
       }
       const monthData = monthlyData.get(month)!;
-      monthData.set(category, monthData.get(category) + amount);
+      monthData.set(category, (monthData.get(category) || 0) + amount);
 
       // Track category statistics
       if (!categoryTotals.has(category)) {
@@ -1219,9 +1219,9 @@ ANALYSIS GUIDELINES:
     const categoryPredictions = Array.isArray(aiResponse.categoryPredictions) 
       ? aiResponse.categoryPredictions.map(pred => ({
           category: pred.category || 'Unknown',
-          currentMonth: Number(pred.currentMonth),
-          predictedNext: Number(pred.predictedNext),
-          confidence: Number(pred.confidence),
+          currentMonth: Number(pred.currentMonth) || 0,
+          predictedNext: Number(pred.predictedNext) || 0,
+          confidence: Number(pred.confidence) || 0.5,
           trend: pred.trend || 'stable',
           factors: Array.isArray(pred.factors) ? pred.factors : ['No specific factors identified']
         }))
@@ -1230,9 +1230,9 @@ ANALYSIS GUIDELINES:
     const monthlyPredictions = Array.isArray(aiResponse.monthlyPredictions)
       ? aiResponse.monthlyPredictions.map(month => ({
           month: month.month || 'Unknown',
-          predicted: Number(month.predicted),
-          confidence: Number(month.confidence),
-          breakdown: month.breakdown
+          predicted: Number(month.predicted) || 0,
+          confidence: Number(month.confidence) || 0.5,
+          breakdown: Array.isArray(month.breakdown) ? month.breakdown : []
         }))
       : [];
 
@@ -1417,7 +1417,7 @@ Only provide recommendations and insights based on the actual financial data pro
           id: insight.id || `insight-${index + 1}`,
           insight: insight.insight || 'Financial insight based on your data',
           basedOn: insight.basedOn || 'Transaction analysis',
-          confidence: Number(insight.confidence),
+          confidence: Number(insight.confidence) || 0.7,
           timeframe: insight.timeframe || 'Recent activity'
         }))
       : [];
@@ -1525,9 +1525,9 @@ Calculate health score quickly.`
       score: Math.max(0, Math.min(100, result.score || 50)),
       trend: result.trend || 'stable',
       category: result.category || 'fair',
-      insights: result.insights,
-      achievements: result.achievements,
-      warnings: result.warnings
+      insights: Array.isArray(result.insights) ? result.insights : [],
+      achievements: Array.isArray(result.achievements) ? result.achievements : [],
+      warnings: Array.isArray(result.warnings) ? result.warnings : []
     };
 
     // Cache the result for 2 hours to reduce frequent API calls
@@ -1590,11 +1590,11 @@ app.post("/execute-gpt-task", async (req, res) => {
       case "contextual-tips":
         // Validate and fix payload structure for contextual tips
         const contextualPayload = {
-          summary: payload.summary,
-          transactions: payload.transactions, 
-          budgets: payload.budgets,
-          goals: payload.goals,
-          selectedMonth: payload.selectedMonth
+          summary: payload.summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 },
+          transactions: Array.isArray(payload.transactions) ? payload.transactions : [],
+          budgets: Array.isArray(payload.budgets) ? payload.budgets : [],
+          goals: Array.isArray(payload.goals) ? payload.goals : [],
+          selectedMonth: payload.selectedMonth || 'Current Month'
         };
         
         // Generate summary from transactions if missing or incomplete
@@ -1621,17 +1621,17 @@ app.post("/execute-gpt-task", async (req, res) => {
       case "daily-recommendations":
         // Fix payload structure for daily recommendations
         const dailyPayload = {
-          summary: payload.summary,
-          transactions: payload.transactions,
-          budgets: payload.budgets,
-          categories: payload.categories
+          summary: payload.summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 },
+          transactions: payload.transactions || [],
+          budgets: payload.budgets || [],
+          categories: payload.categories || {}
         };
         console.log('Daily recommendations: Fixed payload structure', Object.keys(dailyPayload));
         result = await generateDailyRecommendations(dailyPayload);
         break;
 
       case "expense-predictions":
-        result = await generateExpensePredictions(payload.transactions);
+        result = await generateExpensePredictions(payload.transactions || []);
         break;
 
       case "financial-health-score":
