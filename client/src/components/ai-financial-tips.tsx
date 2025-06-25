@@ -139,7 +139,12 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       });
     },
     onError: (error: any) => {
-      console.error('AI Tips: Mutation error:', error);
+      console.error('AI Tips: Mutation error details:', {
+        error: error,
+        message: error?.message,
+        stack: error?.stack,
+        cause: error?.cause
+      });
       toast({
         title: "Error",
         description: error.message || "Failed to generate AI tip. Please try again.",
@@ -176,8 +181,60 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                 </p>
               </div>
               <Button 
-                onClick={() => {
+                onClick={async () => {
                   console.log('AI Tips: Button clicked, summary:', !!summary, 'generating:', isGenerating);
+                  console.log('AI Tips: User plan:', databaseUser?.plan);
+                  console.log('AI Tips: Summary data:', summary);
+                  
+                  // Test API call directly without mutation system
+                  try {
+                    const token = await window.Clerk?.session?.getToken();
+                    console.log('AI Tips: Token available:', !!token);
+                    
+                    const testResponse = await fetch('/api/ai/tip', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                      },
+                      body: JSON.stringify({
+                        financialData: {
+                          totalIncome: summary?.totalIncome || 0,
+                          totalExpenses: summary?.totalExpenses || 0,
+                          categories: summary?.transactionsByCategory || [],
+                          transactions: [{
+                            description: "test transaction",
+                            amount: "100.00",
+                            categoryName: "Test",
+                            date: "2025-06-25",
+                            type: "expense",
+                            id: 1
+                          }],
+                          month: new Date().toLocaleString('default', { month: 'long' }),
+                          year: new Date().getFullYear(),
+                          timestamp: Date.now()
+                        }
+                      })
+                    });
+                    console.log('AI Tips: Direct test response:', testResponse.status, testResponse.statusText);
+                    const testData = await testResponse.text();
+                    console.log('AI Tips: Direct test data:', testData);
+                    
+                    if (testResponse.ok) {
+                      const jsonData = JSON.parse(testData);
+                      if (jsonData.tip) {
+                        setCurrentTip(jsonData.tip);
+                        toast({
+                          title: "AI Tip Generated",
+                          description: "Direct API call successful",
+                        });
+                        return;
+                      }
+                    }
+                  } catch (testError) {
+                    console.error('AI Tips: Direct test failed:', testError);
+                  }
+                  
                   generateTipMutation.mutate();
                 }}
                 disabled={!summary || isGenerating}

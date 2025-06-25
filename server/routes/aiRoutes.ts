@@ -108,6 +108,7 @@ export function registerAIRoutes(app: Express) {
       }
       
       const user = await storage.getUser(userId);
+      console.log('TIP ENDPOINT: User found:', { userExists: !!user, userPlan: user?.plan });
       if (!user || user.plan !== 'premium') {
         console.log('TIP ENDPOINT: Plan check failed:', { userPlan: user?.plan });
         return res.status(403).json({ message: "AI financial tips require premium plan" });
