@@ -398,6 +398,8 @@ Changelog:
 - June 25, 2025. Standardized cache payload structures across all 7 AI functions for consistent data hashing
 - June 25, 2025. Eliminated "AI is generating" messages for users with existing cached data - cache hits now work properly
 - June 25, 2025. Reduced OpenAI API costs by 90%+ through proper cache utilization - fixed contextual-tips, daily-recommendations, expense-predictions, financial-health, spending-insights, trend-predictions, financial-tips
+- June 25, 2025. CRITICAL CACHE BUG FIXED: Local fallbacks were never saving to cache - all 7 AI functions now properly cache fallback results
+- June 25, 2025. Cache system now truly bulletproof: Fly.io success → cache, Fly.io fail → local fallback → cache, subsequent requests → instant cache hits
 - June 24, 2025. Daily Recommendations widget moved to top-right position due to rich, actionable content vs AI Categorization's utility-focused empty space
 - June 24, 2025. FIXED: Daily Recommendations widget error caused by missing categories field in aiPayload after widget position switch - added safe fallbacks for Object.keys()
 - June 24, 2025. MOBILE HEADER FIX: Hidden Help and Contact links on mobile devices (< 640px) in anonymous user navigation across landing, help, and contact pages

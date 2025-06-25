@@ -73,17 +73,38 @@ export async function runAI(task: string, userId: string, payload: Record<string
       
       if (task === 'spending-insights') {
         console.log(`[AI ${task}] Using local fallback for spending-insights`);
-        return await generateSpendingInsights(payload.transactions || []);
+        const result = await generateSpendingInsights(payload.transactions || []);
+        try {
+          await unifiedAICache.set(task, userId, month, payload, result);
+          console.log(`[AI ${task}] Local fallback result saved to cache`);
+        } catch (cacheError) {
+          console.error(`[AI ${task}] Failed to save fallback to cache:`, cacheError);
+        }
+        return result;
       }
       
       if (task === 'expense-predictions') {
         console.log(`[AI ${task}] Using local fallback for expense-predictions`);
-        return await generateExpensePredictions(payload.transactions || []);
+        const result = await generateExpensePredictions(payload.transactions || []);
+        try {
+          await unifiedAICache.set(task, userId, month, payload, result);
+          console.log(`[AI ${task}] Local fallback result saved to cache`);
+        } catch (cacheError) {
+          console.error(`[AI ${task}] Failed to save fallback to cache:`, cacheError);
+        }
+        return result;
       }
       
       if (task === 'contextual-tips') {
         console.log(`[AI ${task}] Using local fallback for contextual-tips`);
-        return await generateContextualFinancialTips(payload);
+        const result = await generateContextualFinancialTips(payload);
+        try {
+          await unifiedAICache.set(task, userId, month, payload, result);
+          console.log(`[AI ${task}] Local fallback result saved to cache`);
+        } catch (cacheError) {
+          console.error(`[AI ${task}] Failed to save fallback to cache:`, cacheError);
+        }
+        return result;
       }
       
       if (task === 'daily-recommendations') {
@@ -101,17 +122,38 @@ export async function runAI(task: string, userId: string, payload: Record<string
       
       if (task === 'financial-tips') {
         console.log(`[AI ${task}] Using local fallback for financial-tips`);
-        return await generateFinancialTips(payload);
+        const result = await generateFinancialTips(payload);
+        try {
+          await unifiedAICache.set(task, userId, month, payload, result);
+          console.log(`[AI ${task}] Local fallback result saved to cache`);
+        } catch (cacheError) {
+          console.error(`[AI ${task}] Failed to save fallback to cache:`, cacheError);
+        }
+        return result;
       }
       
       if (task === 'trend-predictions') {
         console.log(`[AI ${task}] Using local fallback for trend-predictions`);
-        return await generateTrendPredictions(payload.transactions || [], payload.budgets || []);
+        const result = await generateTrendPredictions(payload.transactions || [], payload.budgets || []);
+        try {
+          await unifiedAICache.set(task, userId, month, payload, result);
+          console.log(`[AI ${task}] Local fallback result saved to cache`);
+        } catch (cacheError) {
+          console.error(`[AI ${task}] Failed to save fallback to cache:`, cacheError);
+        }
+        return result;
       }
       
       if (task === 'financial-health-score') {
         console.log(`[AI ${task}] Using local fallback for financial-health-score`);
-        return await generateAIFinancialHealthScore(payload);
+        const result = await generateAIFinancialHealthScore(payload);
+        try {
+          await unifiedAICache.set(task, userId, month, payload, result);
+          console.log(`[AI ${task}] Local fallback result saved to cache`);
+        } catch (cacheError) {
+          console.error(`[AI ${task}] Failed to save fallback to cache:`, cacheError);
+        }
+        return result;
       }
     } catch (localError) {
       console.error(`[AI ${task}] Local fallback also failed:`, localError.message);
