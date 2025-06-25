@@ -150,3 +150,4 @@ FinanzerPro is a comprehensive personal finance management application built wit
 
 Preferred communication style: Simple, everyday language.
 Do not provide summaries after completing tasks - user explicitly requests no summaries.
+Do not take actions unless explicitly asked by the user.
