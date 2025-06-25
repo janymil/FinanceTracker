@@ -26,6 +26,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
   console.log(`[AI ${task}] Cache bypassed - testing Fly.io processor directly`);
 
   try {
+    console.log(`[AI ${task}] Testing Fly.io connectivity...`);
     // Try unified endpoint first
     const response = await fetch("https://finanzerpro.fly.dev/execute-gpt-task", {
       method: "POST",
@@ -33,6 +34,8 @@ export async function runAI(task: string, userId: string, payload: Record<string
       body: JSON.stringify({ task, userId, payload }),
       signal: AbortSignal.timeout(30000) // 30 second timeout
     });
+    
+    console.log(`[AI ${task}] Fly.io fetch completed, status: ${response.status}`);
 
     console.log(`[AI ${task}] Fly.io response status: ${response.status}`);
 
@@ -81,7 +84,8 @@ export async function runAI(task: string, userId: string, payload: Record<string
     throw new Error(`Fly.io endpoint failed with status ${response.status} for task: ${task}`);
 
   } catch (err) {
-    console.error(`[AI ${task}] CRITICAL ERROR: Task ${task} failed to reach Fly.io:`, err.message);
+    console.error(`[AI ${task}] CRITICAL ERROR: Fly.io completely unreachable:`, err.message);
+    console.error(`[AI ${task}] Network/timeout error - falling back to local OpenAI`);
     console.error(`[AI ${task}] Full error details:`, err);
     
     // Import and use local functions as fallback
@@ -97,14 +101,9 @@ export async function runAI(task: string, userId: string, payload: Record<string
       } = await import('../server/openai');
       
       if (task === 'spending-insights') {
-        console.log(`[AI ${task}] Using local fallback for spending-insights`);
+        console.log(`[AI ${task}] ERROR: Should not be using local fallback - Fly.io failed`);
         const result = await generateSpendingInsights(payload.transactions || []);
-        try {
-          await unifiedAICache.set(task, userId, month, payload, result);
-          console.log(`[AI ${task}] Local fallback result saved to cache`);
-        } catch (cacheError) {
-          console.error(`[AI ${task}] Failed to save fallback to cache:`, cacheError);
-        }
+        console.log(`[AI ${task}] WARNING: Using local OpenAI instead of Fly.io processor`);
         return result;
       }
       
@@ -121,16 +120,10 @@ export async function runAI(task: string, userId: string, payload: Record<string
       }
       
       if (task === 'contextual-tips') {
-        console.log(`[AI ${task}] Using local OpenAI fallback for contextual-tips`);
-        console.log(`[AI ${task}] Fallback payload:`, JSON.stringify(payload).substring(0, 200));
+        console.log(`[AI ${task}] ERROR: Fly.io failed, using local OpenAI fallback`);
+        console.log(`[AI ${task}] WARNING: This should be calling Fly.io processor`);
         const result = await generateContextualFinancialTips(payload);
         console.log(`[AI ${task}] Local fallback generated ${result?.tips?.length || 0} tips`);
-        try {
-          await unifiedAICache.set(task, userId, month, payload, result);
-          console.log(`[AI ${task}] Local fallback result saved to unified cache`);
-        } catch (cacheError) {
-          console.error(`[AI ${task}] Failed to save fallback to cache:`, cacheError);
-        }
         return result;
       }
       
