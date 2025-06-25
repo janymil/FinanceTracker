@@ -1,13 +1,15 @@
-# URGENT: AI Processor Deployment Required
+# CRITICAL: AI Processor Deployment Required
 
-## Critical Fix Applied
-Fixed transaction field mapping issue where AI functions were receiving `category` instead of `categoryName`, causing all transactions to appear uncategorized (100% uncategorized showing in UI).
+## Critical Issues Fixed
+1. **Missing `pg` dependency** causing service crashes with "Cannot find module 'pg'" error
+2. Fixed transaction field mapping issue where AI functions were receiving `category` instead of `categoryName`
 
 ## Changes Made
-1. Updated TypeScript interfaces in index.ts to expect `categoryName` field
-2. Fixed budget field references from `b.category` to `b.categoryName` 
-3. Fixed trend predictions budget mapping to use `categoryName`
-4. Ensured consistency with main application data structure
+1. Added `pg: "8.11.3"` dependency to package.json to fix crash loop
+2. Updated TypeScript interfaces in index.ts to expect `categoryName` field
+3. Fixed budget field references from `b.category` to `b.categoryName` 
+4. Fixed trend predictions budget mapping to use `categoryName`
+5. Ensured consistency with main application data structure
 
 ## Deployment Steps (Run from external-services/ai-processor directory)
 ```bash

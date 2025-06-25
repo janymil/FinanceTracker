@@ -1,0 +1,195 @@
+2025-06-25T22:07:58.999 app[17814e7c549528] lax [info] WARN could not unmount /rootfs: EINVAL: Invalid argument
+
+2025-06-25T22:07:59.000 app[17814e7c549528] lax [info] [ 29.963824] reboot: Restarting system
+
+2025-06-25T22:07:59.855 app[17814e7c549528] lax [info] 2025-06-25T22:07:59.855679314 [01JYMGMFAQPVTBM7FX5PM78D3J:main] Running Firecracker v1.7.0
+
+2025-06-25T22:08:00.685 app[17814e7c549528] lax [info] INFO Starting init (commit: 28e33be24)...
+
+2025-06-25T22:08:00.793 app[17814e7c549528] lax [info] INFO Preparing to run: `docker-entrypoint.sh npx tsx index.ts` as root
+
+2025-06-25T22:08:00.801 app[17814e7c549528] lax [info] INFO [fly api proxy] listening at /.fly/api
+
+2025-06-25T22:08:00.879 runner[17814e7c549528] lax [info] Machine started in 1.087s
+
+2025-06-25T22:08:01.115 app[17814e7c549528] lax [info] 2025/06/25 22:08:01 INFO SSH listening listen_address=[fdaa:1e:2ace:a7b:7d16:1e28:b766:2]:22
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] node:internal/modules/cjs/loader:1140
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] const err = new Error(message);
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] ^
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] Error: Cannot find module 'pg'
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] Require stack:
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] - /app/index.ts
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] at a._resolveFilename (/app/node_modules/tsx/dist/cjs/index.cjs:1:1729)
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] at Module._load (node:internal/modules/cjs/loader:981:27)
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] at Module.require (node:internal/modules/cjs/loader:1231:19)
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] at require (node:internal/modules/helpers:177:18)
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] at OpenAI (/app/index.ts:5:22)
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] at Object.<anonymous> (/app/index.ts:1882:2)
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] at Module._compile (node:internal/modules/cjs/loader:1364:14)
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] at Object.S (/app/node_modules/tsx/dist/cjs/index.cjs:1:1292)
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] at Module.load (node:internal/modules/cjs/loader:1203:32) {
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] code: 'MODULE_NOT_FOUND',
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] requireStack: [ '/app/index.ts' ]
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T22:08:03.307 app[e78496ef41d4d8] lax [info] Node.js v18.20.8
+
+2025-06-25T22:08:04.627 app[e78496ef41d4d8] lax [info] INFO Main child exited normally with code: 1
+
+2025-06-25T22:08:04.645 app[e78496ef41d4d8] lax [info] INFO Starting clean up.
+
+2025-06-25T22:08:04.647 app[e78496ef41d4d8] lax [info] WARN could not unmount /rootfs: EINVAL: Invalid argument
+
+2025-06-25T22:08:04.648 app[e78496ef41d4d8] lax [info] [ 36.310978] reboot: Restarting system
+
+2025-06-25T22:08:05.341 app[e78496ef41d4d8] lax [info] 2025-06-25T22:08:05.341288105 [01JYMGMFF4X9XPBJZWQZY7RAPV:main] Running Firecracker v1.7.0
+
+2025-06-25T22:08:06.171 app[e78496ef41d4d8] lax [info] INFO Starting init (commit: 28e33be24)...
+
+2025-06-25T22:08:06.265 app[e78496ef41d4d8] lax [info] INFO Preparing to run: `docker-entrypoint.sh npx tsx index.ts` as root
+
+2025-06-25T22:08:06.273 app[e78496ef41d4d8] lax [info] INFO [fly api proxy] listening at /.fly/api
+
+2025-06-25T22:08:06.309 runner[e78496ef41d4d8] lax [info] Machine started in 1.053s
+
+2025-06-25T22:08:06.563 app[e78496ef41d4d8] lax [info] 2025/06/25 22:08:06 INFO SSH listening listen_address=[fdaa:1e:2ace:a7b:c0da:e16a:9117:2]:22
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] node:internal/modules/cjs/loader:1140
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] const err = new Error(message);
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] ^
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] Error: Cannot find module 'pg'
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] Require stack:
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] - /app/index.ts
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] at a._resolveFilename (/app/node_modules/tsx/dist/cjs/index.cjs:1:1729)
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] at Module._load (node:internal/modules/cjs/loader:981:27)
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] at Module.require (node:internal/modules/cjs/loader:1231:19)
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] at require (node:internal/modules/helpers:177:18)
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] at OpenAI (/app/index.ts:5:22)
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] at Object.<anonymous> (/app/index.ts:1882:2)
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] at Module._compile (node:internal/modules/cjs/loader:1364:14)
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] at Object.S (/app/node_modules/tsx/dist/cjs/index.cjs:1:1292)
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] at Module.load (node:internal/modules/cjs/loader:1203:32) {
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] code: 'MODULE_NOT_FOUND',
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] requireStack: [ '/app/index.ts' ]
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] }
+
+2025-06-25T22:08:32.834 app[e78496ef41d4d8] lax [info] Node.js v18.20.8
+
+2025-06-25T22:08:33.268 app[e78496ef41d4d8] lax [info] INFO Main child exited normally with code: 1
+
+2025-06-25T22:08:33.317 app[e78496ef41d4d8] lax [info] INFO Starting clean up.
+
+2025-06-25T22:08:33.385 app[e78496ef41d4d8] lax [info] WARN could not unmount /rootfs: EINVAL: Invalid argument
+
+2025-06-25T22:08:33.386 app[e78496ef41d4d8] lax [info] [ 27.974128] reboot: Restarting system
+
+2025-06-25T22:08:34.295 app[e78496ef41d4d8] lax [info] 2025-06-25T22:08:34.295047559 [01JYMGMFF4X9XPBJZWQZY7RAPV:main] Running Firecracker v1.7.0
+
+2025-06-25T22:08:35.128 app[e78496ef41d4d8] lax [info] INFO Starting init (commit: 28e33be24)...
+
+2025-06-25T22:08:35.233 app[e78496ef41d4d8] lax [info] INFO Preparing to run: `docker-entrypoint.sh npx tsx index.ts` as root
+
+2025-06-25T22:08:35.241 app[e78496ef41d4d8] lax [info] INFO [fly api proxy] listening at /.fly/api
+
+2025-06-25T22:08:35.250 runner[e78496ef41d4d8] lax [info] Machine started in 1.032s
+
+2025-06-25T22:08:35.550 app[e78496ef41d4d8] lax [info] 2025/06/25 22:08:35 INFO SSH listening listen_address=[fdaa:1e:2ace:a7b:c0da:e16a:9117:2]:22
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] node:internal/modules/cjs/loader:1140
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] const err = new Error(message);
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] ^
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] Error: Cannot find module 'pg'
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] Require stack:
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] - /app/index.ts
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] at a._resolveFilename (/app/node_modules/tsx/dist/cjs/index.cjs:1:1729)
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] at Module._load (node:internal/modules/cjs/loader:981:27)
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] at Module.require (node:internal/modules/cjs/loader:1231:19)
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] at require (node:internal/modules/helpers:177:18)
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] at OpenAI (/app/index.ts:5:22)
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] at Object.<anonymous> (/app/index.ts:1882:2)
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] at Module._compile (node:internal/modules/cjs/loader:1364:14)
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] at Object.S (/app/node_modules/tsx/dist/cjs/index.cjs:1:1292)
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] at Module.load (node:internal/modules/cjs/loader:1203:32) {
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] code: 'MODULE_NOT_FOUND',
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] requireStack: [ '/app/index.ts' ]
+
+2025-06-25T22:08:35.584 app[17814e7c549528] lax [info] }
+
+2025-06-25T22:08:35.661 app[17814e7c549528] lax [info] Node.js v18.20.8
+
+2025-06-25T22:08:37.141 app[17814e7c549528] lax [info] INFO Main child exited normally with code: 1
+
+2025-06-25T22:08:37.159 app[17814e7c549528] lax [info] INFO Starting clean up.
+
+2025-06-25T22:08:37.161 app[17814e7c549528] lax [info] WARN could not unmount /rootfs: EINVAL: Invalid argument
+
+2025-06-25T22:08:37.163 app[17814e7c549528] lax [info] [ 37.239980] reboot: Restarting system
+
+2025-06-25T22:08:38.191 app[17814e7c549528] lax [info] 2025-06-25T22:08:38.191782609 [01JYMGMFAQPVTBM7FX5PM78D3J:main] Running Firecracker v1.7.0
+
+2025-06-25T22:08:39.053 app[17814e7c549528] lax [info] INFO Starting init (commit: 28e33be24)...
+
+2025-06-25T22:08:39.151 app[17814e7c549528] lax [info] INFO Preparing to run: `docker-entrypoint.sh npx tsx index.ts` as root
+
+2025-06-25T22:08:39.160 app[17814e7c549528] lax [info] INFO [fly api proxy] listening at /.fly/api
+
+2025-06-25T22:08:39.259 runner[17814e7c549528] lax [info] Machine started in 1.153s
+
+2025-06-25T22:08:39.455 app[17814e7c549528] lax [info] 2025/06/25 22:08:39 INFO SSH listening listen_address=[fdaa:1e:2ace:a7b:7d16:1e28:b766:2]:22
