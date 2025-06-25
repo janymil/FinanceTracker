@@ -19,6 +19,7 @@ interface ContextualTipsProps {
   };
   transactions: any[];
   budgets: any[];
+  goals?: any[];
   selectedMonth: string; // e.g. '2025-06'
 }
 
@@ -31,7 +32,7 @@ interface FinancialTip {
   actionable: boolean;
 }
 
-export default function ContextualFinancialTips({ summary, transactions, budgets, selectedMonth }: ContextualTipsProps) {
+export default function ContextualFinancialTips({ summary, transactions, budgets, goals = [], selectedMonth }: ContextualTipsProps) {
   const [tips, setTips] = useState<FinancialTip[] | null>(null);
   const [loading, setLoading] = useState(false);
   

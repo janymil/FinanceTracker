@@ -1009,7 +1009,14 @@ Answer questions about features, subscription plans, how to use the app, trouble
           budgetAmount: budget.amount,
           spent: budget.spent,
           remaining: budget.remaining
-        })),
+        })) || [],
+        goals: goals?.map((goal: any) => ({
+          name: goal.name,
+          targetAmount: goal.targetAmount,
+          currentAmount: goal.currentAmount,
+          targetDate: goal.targetDate,
+          progress: goal.progress || ((goal.currentAmount / goal.targetAmount) * 100)
+        })) || [],
         selectedMonth: formattedMonth
       };
 
