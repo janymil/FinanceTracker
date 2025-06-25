@@ -37,11 +37,12 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
     }
   });
 
-  // Temporary bypass auth for testing cache
-  app.post('/api/ai/contextual-financial-tips', async (req: any, res) => {
+  app.post('/api/ai/contextual-financial-tips', isAuthenticated, async (req: any, res) => {
     try {
-      // Temporary hardcode for testing cache
-      const userId = 'user_2yYgmUlJG1EBLQqYEg7d64Ex2Zc';
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
 
       const { transactions, summary, budgets, selectedMonth } = req.body;
 
