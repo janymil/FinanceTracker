@@ -857,7 +857,7 @@ export function registerAIRoutes(app: Express) {
       
       const aiPayload = {
         transactions: transactions.slice(0, 100),
-        summary: req.body.summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 }
+        summary: req.body.summary
       };
 
       const predictions = await runAI('expense-predictions', userId, aiPayload);

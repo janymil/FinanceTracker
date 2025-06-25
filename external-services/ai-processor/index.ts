@@ -136,7 +136,7 @@ Please categorize this expense.`
 
     const categorization = {
       category: result.category || 'Other',
-      confidence: Math.max(0, Math.min(1, result.confidence || 0.5)),
+      confidence: Math.max(0, Math.min(1, result.confidence)),
       reasoning: result.reasoning || 'Unable to determine category'
     };
 
@@ -228,7 +228,7 @@ export async function generateContextualFinancialTips(data: {
       const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : (t.amount || 0);
       if (amount > 0) {
         const category = t.category || t.categoryName || 'Uncategorized';
-        const current = categorySpending.get(category) || 0;
+        const current = categorySpending.get(category);
         categorySpending.set(category, current + amount);
       }
     });
@@ -249,9 +249,9 @@ export async function generateContextualFinancialTips(data: {
     expenseTransactions.forEach(t => {
       const day = new Date(t.date).getDate();
       const category = t.category || t.categoryName || 'Uncategorized';
-      const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : (t.amount || 0);
-      dailySpending.set(day, (dailySpending.get(day) || 0) + amount);
-      transactionFrequency.set(category, (transactionFrequency.get(category) || 0) + 1);
+      const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : t.amount;
+      dailySpending.set(day, dailySpending.get(day) + amount);
+      transactionFrequency.set(category, transactionFrequency.get(category) + 1);
     });
 
     // Analyze specific financial scenarios for contextual insights
@@ -317,7 +317,7 @@ export async function generateContextualFinancialTips(data: {
     // Check for spending concentration and patterns
     topSpendingCategories.forEach(([category, amount]) => {
       const categoryPercent = (amount / summary.totalExpenses) * 100;
-      const categoryFreq = transactionFrequency.get(category) || 0;
+      const categoryFreq = transactionFrequency.get(category);
       
       if (categoryPercent > 40) {
         scenarios.push(`🟨 High category spending: ${category} represents ${categoryPercent.toFixed(0)}% of expenses ($${amount.toFixed(2)} across ${categoryFreq} transactions).`);
@@ -711,7 +711,7 @@ Generate financial insights based on this spending data.`
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{"insights": []}');
-    const insights = Array.isArray(result) ? result : (result.insights || result.data || []);
+    const insights = Array.isArray(result) ? result : result.insights;
 
     const processedInsights = insights.map((insight: any, index: number) => ({
       id: insight.id || `ai_insight_${index}`,
@@ -844,13 +844,13 @@ Provide an AI-powered financial health score that adapts to this user's specific
       score: Math.max(0, Math.min(100, result.score || 50)),
       status: result.status || 'Fair',
       color: result.color || 'yellow',
-      factors: result.factors || [],
+      factors: result.factors,
       icon: result.icon || 'Shield',
       aiAnalysis: {
-        personalizedFactors: result.aiAnalysis?.personalizedFactors || [],
-        riskAssessment: result.aiAnalysis?.riskAssessment || 'Standard risk assessment',
-        recommendations: result.aiAnalysis?.recommendations || [],
-        confidence: Math.max(0, Math.min(1, result.aiAnalysis?.confidence || 0.7))
+        personalizedFactors: result.aiAnalysis?.personalizedFactors,
+        riskAssessment: result.aiAnalysis?.riskAssessment,
+        recommendations: result.aiAnalysis?.recommendations,
+        confidence: Math.max(0, Math.min(1, result.aiAnalysis?.confidence))
       }
     };
 
@@ -1009,7 +1009,7 @@ Analysis Requirements:
     const result = JSON.parse(response.choices[0].message.content || '{"categoryPredictions": [], "financialForecast": {}}');
 
     const predictions = {
-      categoryPredictions: result.categoryPredictions || [],
+      categoryPredictions: result.categoryPredictions,
       financialForecast: result.financialForecast || {
         nextMonthExpenses: 0,
         expectedSavings: 0,
