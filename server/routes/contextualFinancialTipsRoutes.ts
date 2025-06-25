@@ -65,23 +65,12 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
         return res.status(400).json({ message: "Transactions and summary are required" });
       }
 
-      // Create a data hash to detect significant changes
-      const dataForHash = {
-        transactionCount: transactions.length,
-        totalIncome: summary.totalIncome || 0,
-        totalExpenses: summary.totalExpenses || 0,
-        budgetCount: budgets?.length || 0,
-        recentTransactions: transactions.slice(0, 5).map((t: any) => ({
-          amount: t.amount,
-          category: t.categoryName || t.category || 'Uncategorized',
-          date: t.date
-        }))
+      // Standardize cache payload to match unified cache system
+      const cachePayload = {
+        summary,
+        transactions: transactions.slice(0, 10),
+        budgets
       };
-      
-      const currentDataHash = crypto
-        .createHash('md5')
-        .update(JSON.stringify(dataForHash))
-        .digest('hex');
 
       // Check for force refresh parameter
       const forceRefresh = req.body.forceRefresh || req.query.refresh === 'true';
@@ -89,11 +78,7 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
       // Check unified cache for existing tips (unless force refresh)
       if (!forceRefresh) {
         const month = selectedMonth || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-        const cachedResult = await unifiedAICache.get('contextual-tips', userId, month, {
-          summary,
-          transactions: transactions.slice(0, 10),
-          budgets
-        });
+        const cachedResult = await unifiedAICache.get('contextual-tips', userId, month, cachePayload);
         
         if (cachedResult && cachedResult.tips) {
           console.log('Contextual financial tips: Using unified cache - avoiding API call');
@@ -157,11 +142,7 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
       // Save tips using unified cache (handles database persistence)
       const month = selectedMonth || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
       try {
-        await unifiedAICache.set('contextual-tips', userId, month, {
-          summary,
-          transactions: transactions.slice(0, 10),
-          budgets
-        }, { tips });
+        await unifiedAICache.set('contextual-tips', userId, month, cachePayload, { tips });
         console.log('Contextual financial tips: Saved to unified cache');
       } catch (cacheError) {
         console.error("Error saving contextual financial tips to unified cache:", cacheError);
