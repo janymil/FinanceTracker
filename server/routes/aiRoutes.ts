@@ -158,7 +158,7 @@ export function registerAIRoutes(app: Express) {
       const aiPayload = {
         totalIncome: financialData.totalIncome,
         totalExpenses: financialData.totalExpenses,
-        transactionsByCategory: financialData.categories,
+        transactionsByCategory: financialData.categories || [],
         recentTransactions: formattedTransactions,
         timestamp: financialData.timestamp
       };
