@@ -272,20 +272,22 @@ export async function generateContextualFinancialTips(data: {
       scenarios.push(`🟩 Well organized: All ${transactions.length} transactions are properly categorized, enabling detailed spending analysis.`);
     }
     
-    // Check for budget overruns with detailed analysis
-    budgets.forEach(budget => {
-      if (budget.remaining < 0) {
-        const overrunPercent = Math.abs((budget.remaining / budget.budgetAmount) * 100);
-        const categoryTransactions = expenseTransactions.filter(t => t.categoryName === budget.categoryName);
-        const avgTransactionInCategory = categoryTransactions.length > 0 ? 
-          categoryTransactions.reduce((sum, t) => sum + t.amount, 0) / categoryTransactions.length : 0;
-        
-        scenarios.push(`🟥 Budget overrun: You've exceeded your ${budget.categoryName} budget by ${overrunPercent.toFixed(0)}% this month. Average transaction: $${avgTransactionInCategory.toFixed(2)}, Total transactions: ${categoryTransactions.length}`);
-      } else if (budget.remaining < budget.budgetAmount * 0.1) {
-        // Budget almost exhausted
-        scenarios.push(`🟨 Budget warning: Only $${budget.remaining.toFixed(2)} remaining in your ${budget.categoryName} budget (${((budget.remaining/budget.budgetAmount)*100).toFixed(0)}% left).`);
-      }
-    });
+    // Check for budget overruns with detailed analysis (with null check)
+    if (budgets && Array.isArray(budgets)) {
+      budgets.forEach(budget => {
+        if (budget.remaining < 0) {
+          const overrunPercent = Math.abs((budget.remaining / budget.budgetAmount) * 100);
+          const categoryTransactions = expenseTransactions.filter(t => t.categoryName === budget.categoryName);
+          const avgTransactionInCategory = categoryTransactions.length > 0 ? 
+            categoryTransactions.reduce((sum, t) => sum + t.amount, 0) / categoryTransactions.length : 0;
+          
+          scenarios.push(`🟥 Budget overrun: You've exceeded your ${budget.categoryName} budget by ${overrunPercent.toFixed(0)}% this month. Average transaction: $${avgTransactionInCategory.toFixed(2)}, Total transactions: ${categoryTransactions.length}`);
+        } else if (budget.remaining < budget.budgetAmount * 0.1) {
+          // Budget almost exhausted
+          scenarios.push(`🟨 Budget warning: Only $${budget.remaining.toFixed(2)} remaining in your ${budget.categoryName} budget (${((budget.remaining/budget.budgetAmount)*100).toFixed(0)}% left).`);
+        }
+      });
+    }
     
     // Check savings rate scenarios with goal analysis
     if (savingsRate < 5 && summary.totalIncome > 0) {
@@ -294,18 +296,20 @@ export async function generateContextualFinancialTips(data: {
       scenarios.push(`🟩 Excellent savings: Great job! You're saving ${savingsRate.toFixed(1)}% of your income this month.`);
     }
     
-    // Analyze goals progress
-    goals.forEach(goal => {
-      const progressPercent = (goal.currentAmount / goal.targetAmount) * 100;
-      const daysToTarget = Math.ceil((new Date(goal.targetDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-      const monthlyNeeded = daysToTarget > 0 ? (goal.targetAmount - goal.currentAmount) / (daysToTarget / 30) : 0;
-      
-      if (progressPercent >= 90) {
-        scenarios.push(`🟩 Goal achievement: You're ${progressPercent.toFixed(0)}% towards your ${goal.name} goal! Only $${(goal.targetAmount - goal.currentAmount).toFixed(2)} remaining.`);
-      } else if (monthlyNeeded > netBalance) {
-        scenarios.push(`🟨 Goal at risk: Your ${goal.name} goal needs $${monthlyNeeded.toFixed(2)}/month, but current monthly surplus is $${netBalance.toFixed(2)}.`);
-      }
-    });
+    // Analyze goals progress (with null check)
+    if (goals && Array.isArray(goals)) {
+      goals.forEach(goal => {
+        const progressPercent = (goal.currentAmount / goal.targetAmount) * 100;
+        const daysToTarget = Math.ceil((new Date(goal.targetDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+        const monthlyNeeded = daysToTarget > 0 ? (goal.targetAmount - goal.currentAmount) / (daysToTarget / 30) : 0;
+        
+        if (progressPercent >= 90) {
+          scenarios.push(`🟩 Goal achievement: You're ${progressPercent.toFixed(0)}% towards your ${goal.name} goal! Only $${(goal.targetAmount - goal.currentAmount).toFixed(2)} remaining.`);
+        } else if (monthlyNeeded > netBalance) {
+          scenarios.push(`🟨 Goal at risk: Your ${goal.name} goal needs $${monthlyNeeded.toFixed(2)}/month, but current monthly surplus is $${netBalance.toFixed(2)}.`);
+        }
+      });
+    }
     
     // Check for irregular income patterns
     if (incomeTransactions.length > 0) {

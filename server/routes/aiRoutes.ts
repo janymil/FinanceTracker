@@ -944,7 +944,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      const { transactions, summary, budgets, selectedMonth } = req.body;
+      const { transactions, summary, budgets, goals, selectedMonth } = req.body;
 
       console.log('🔥 Contextual tips API request received:', {
         userId: userId?.substring(0, 8) + '...',
@@ -953,6 +953,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
         hasIncome: summary?.totalIncome > 0,
         hasExpenses: summary?.totalExpenses > 0,
         budgetCount: budgets?.length || 0,
+        goalsCount: goals?.length || 0,
         firstTransaction: transactions?.[0] ? {
           description: transactions[0].description,
           categoryName: transactions[0].categoryName,
@@ -969,7 +970,8 @@ Answer questions about features, subscription plans, how to use the app, trouble
       const cachePayload = {
         summary,
         transactions: transactions.slice(0, 10),
-        budgets
+        budgets,
+        goals
       };
 
       // CACHE COMPLETELY DISABLED FOR TESTING
