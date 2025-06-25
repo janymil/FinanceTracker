@@ -85,7 +85,17 @@ export default function Trends() {
         }
 
         // Fetch AI predictions for premium users
-        const predictionsRes = await fetch('/api/trend-predictions', { headers });
+        const predictionsRes = await fetch('/api/ai/trend-predictions', { 
+          method: 'POST',
+          headers: {
+            ...headers,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            transactions: Array.isArray(transactionsData) ? transactionsData : [],
+            summary: summaryData || {}
+          })
+        });
         if (predictionsRes.ok) {
           const predictionsData = await predictionsRes.json();
           setAiPredictions(predictionsData);

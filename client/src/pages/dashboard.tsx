@@ -31,6 +31,7 @@ import {
   LazyDailyRecommendations,
   LazyAutoCategorization,
   LazyAIFinancialTips,
+  LazyAIInsights,
   LazyTransactionRemindersWidget
 } from "@/components/dashboard/lazy-components";
 import { 
@@ -713,9 +714,16 @@ export default function Dashboard() {
               <LazyAutoCategorization transactions={transactions as any} />
             </div>
 
-            <LazyAIFinancialTips 
-              summary={financialSummary}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <LazyAIFinancialTips 
+                summary={financialSummary}
+              />
+              
+              <LazyAIInsights 
+                transactions={transactions as any}
+                data={{ transactions: transactions as any }}
+              />
+            </div>
 
           </div>
         )}
