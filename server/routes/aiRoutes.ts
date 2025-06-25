@@ -158,7 +158,7 @@ export function registerAIRoutes(app: Express) {
       const aiPayload = {
         totalIncome: financialData.totalIncome,
         totalExpenses: financialData.totalExpenses,
-        transactionsByCategory: financialData.categories || [],
+        transactionsByCategory: financialData.categories,
         recentTransactions: formattedTransactions,
         timestamp: financialData.timestamp
       };
@@ -468,7 +468,7 @@ export function registerAIRoutes(app: Express) {
         transactionCount: aiPayload.transactions.length,
         summaryData: aiPayload.summary,
         budgetCount: aiPayload.budgets.length,
-        categoryCount: Object.keys(aiPayload.categories || {}).length,
+        categoryCount: Object.keys(aiPayload.categories).length,
         hasActualTransactions: aiPayload.transactions.length > 0,
         firstTransaction: aiPayload.transactions[0] || 'none'
       });

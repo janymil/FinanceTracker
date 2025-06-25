@@ -1602,10 +1602,10 @@ app.post("/execute-gpt-task", async (req, res) => {
       case "financial-tips":
         // Fix payload structure for financial tips
         const tipsPayload = {
-          totalIncome: payload.totalIncome || 0,
-          totalExpenses: payload.totalExpenses || 0,
-          transactionsByCategory: payload.transactionsByCategory || [],
-          recentTransactions: payload.recentTransactions || [],
+          totalIncome: payload.totalIncome,
+          totalExpenses: payload.totalExpenses,
+          transactionsByCategory: payload.transactionsByCategory,
+          recentTransactions: payload.recentTransactions,
           timestamp: payload.timestamp
         };
         console.log('Financial tips: Fixed payload structure', Object.keys(tipsPayload));
