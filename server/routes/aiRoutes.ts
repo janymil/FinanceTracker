@@ -564,13 +564,7 @@ export function registerAIRoutes(app: Express) {
 
 
 
-      // Save to unified cache system
-      try {
-        await unifiedAICache.set('daily-recommendations', userId, month, cachePayload, recommendations);
-        console.log('Daily recommendations: Saved to cache');
-      } catch (cacheError) {
-        console.error("Error saving daily recommendations to cache:", cacheError);
-      }
+      // No caching system
 
       return res.json(recommendations);
     } catch (error) {
@@ -673,13 +667,7 @@ export function registerAIRoutes(app: Express) {
         }
       });
 
-      // Save to unified cache
-      try {
-        await unifiedAICache.set('financial-health', userId, month, stableFinancialData, healthData);
-        console.log('Financial health: Saved to unified cache');
-      } catch (cacheError) {
-        console.error("Error saving financial health to unified cache:", cacheError);
-      }
+      // No caching system
 
       return res.json(healthData);
     } catch (error) {
