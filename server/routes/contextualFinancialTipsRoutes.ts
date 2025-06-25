@@ -72,19 +72,8 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
         budgets
       };
 
-      // Check for force refresh parameter
-      const forceRefresh = req.body.forceRefresh || req.query.refresh === 'true';
-      
-      // Check unified cache for existing tips (unless force refresh)
-      if (!forceRefresh) {
-        const month = selectedMonth || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-        const cachedResult = await unifiedAICache.get('contextual-tips', userId, month, cachePayload);
-        
-        if (cachedResult && cachedResult.tips) {
-          console.log('Contextual financial tips: Using unified cache - avoiding API call');
-          return res.json({ tips: cachedResult.tips });
-        }
-      }
+      // CACHE COMPLETELY DISABLED FOR TESTING
+      console.log('CACHE DISABLED - forcing fresh AI call to Fly.io');
       
       if (forceRefresh) {
         console.log('Contextual financial tips: Force refresh requested - bypassing cache');

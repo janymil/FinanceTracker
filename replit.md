@@ -379,6 +379,7 @@ Changelog:
 - June 25, 2025. ENHANCED FALLBACK DETECTION: Added timeout handling and empty result detection to trigger local OpenAI processing automatically
 - June 25, 2025. FLY.IO PROCESSOR FIXED: Corrected field mapping issues (category vs categoryName) causing real AI processor to return fallback responses
 - June 25, 2025. PRODUCTION AI VERIFIED: All 7 AI functions now generating real OpenAI responses instead of generic fallbacks - contextual tips showing sophisticated analysis
+- June 25, 2025. CODE CLEANUP: Removed duplicate .js files (unifiedAICache.js, aiProcessor.js) - only TypeScript versions should exist in codebase
 - June 23, 2025. Enhanced AI categorization analysis to properly detect and report actual categorization status in contextual tips with accurate transaction data
 - June 23, 2025. FIXED FALLBACK SYSTEM: Corrected local OpenAI fallback in server/openai.ts to use same categoryName field mapping as Fly.io processor
 - June 23, 2025. Added categorization counting logic to both Fly.io and local fallback systems to prevent "uncategorized" false reports

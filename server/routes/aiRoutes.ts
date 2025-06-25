@@ -139,7 +139,8 @@ export function registerAIRoutes(app: Express) {
 
       // Check unified cache for financial tips
       const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      const cachedResult = await unifiedAICache.get('financial-tips', userId, month, {
+      // CACHE DISABLED FOR TESTING
+      const cachedResult = null; // await unifiedAICache.get('financial-tips', userId, month, {
         totalIncome: financialData.totalIncome || 0,
         totalExpenses: financialData.totalExpenses || 0,
         transactions: formattedTransactions.slice(0, 50)
@@ -235,7 +236,8 @@ export function registerAIRoutes(app: Express) {
         transactions: transactions.slice(0, 100)
       };
       
-      const cachedResult = await unifiedAICache.get('spending-insights', userId, month, cachePayload);
+      // CACHE DISABLED FOR TESTING
+      const cachedResult = null; // await unifiedAICache.get('spending-insights', userId, month, cachePayload);
       
       if (cachedResult) {
         console.log('AI spending insights: Using unified cache - avoiding API call');
@@ -346,7 +348,8 @@ export function registerAIRoutes(app: Express) {
         budgets: budgets.slice(0, 20)
       };
       
-      const cachedResult = await unifiedAICache.get('trend-predictions', userId, month, cachePayload);
+      // CACHE DISABLED FOR TESTING
+      const cachedResult = null; // await unifiedAICache.get('trend-predictions', userId, month, cachePayload);
       
       if (cachedResult) {
         console.log('AI trend predictions: Using unified cache - avoiding API call');
@@ -457,7 +460,8 @@ export function registerAIRoutes(app: Express) {
         budgets
       };
       
-      const cachedResult = await unifiedAICache.get('daily-recommendations', userId, month, cachePayload);
+      // CACHE DISABLED FOR TESTING
+      const cachedResult = null; // await unifiedAICache.get('daily-recommendations', userId, month, cachePayload);
       
       if (cachedResult) {
         console.log('Daily recommendations: Using cached data');
@@ -609,7 +613,8 @@ export function registerAIRoutes(app: Express) {
 
       // Check unified cache for financial health score
       const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      const cachedResult = await unifiedAICache.get('financial-health', userId, month, stableFinancialData);
+      // CACHE DISABLED FOR TESTING
+      const cachedResult = null; // await unifiedAICache.get('financial-health', userId, month, stableFinancialData);
       
       if (cachedResult) {
         console.log('AI financial health: Using unified cache - avoiding API call');
@@ -925,7 +930,8 @@ export function registerAIRoutes(app: Express) {
         transactions: transactions.slice(0, 100)
       };
       
-      const cachedResult = await unifiedAICache.get('expense-predictions', userId, month, cachePayload);
+      // CACHE DISABLED FOR TESTING
+      const cachedResult = null; // await unifiedAICache.get('expense-predictions', userId, month, cachePayload);
       
       if (cachedResult) {
         console.log('AI expense predictions: Using unified cache - avoiding API call');
