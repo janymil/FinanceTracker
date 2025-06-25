@@ -6,10 +6,8 @@ import ws from "ws";
 import * as schema from "@shared/schema";
 
 // Determine which database to use based on environment
-// Check for Replit deployment context or explicit production flag
-const isProduction = process.env.NODE_ENV === 'production' || 
-                     process.env.REPLIT_DEPLOYMENT === 'true' ||
-                     process.env.DATABASE_URL_PROD && !process.env.DATABASE_URL.includes('replit');
+const isProduction = process.env.REPLIT_ENVIRONMENT === 'production' || 
+                     process.env.NODE_ENV === 'production';
 const databaseUrl = isProduction 
   ? process.env.DATABASE_URL_PROD 
   : process.env.DATABASE_URL;
