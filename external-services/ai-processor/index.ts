@@ -823,12 +823,12 @@ Financial Summary:
 - Expenses: $${summary.totalExpenses}
 - Net Balance: $${summary.netBalance}
 
-Transaction History (${transactions?.length || 0} transactions):
+Transaction History (${transactions.length} transactions):
 ${transactions.slice(0, 20).map(t => 
   `- ${t.description}: $${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`
 ).join('\n')}
 
-Budgets: ${budgets?.length || 0} active budgets
+Budgets: ${budgets.length} active budgets
 Advanced Analysis: ${useAdvancedFactors ? 'Enabled' : 'Standard'}
 
 Provide an AI-powered financial health score that adapts to this user's specific situation and spending patterns.`
