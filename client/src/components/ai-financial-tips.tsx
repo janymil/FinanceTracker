@@ -28,7 +28,10 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const { user } = useUser();
 
   // Function to clean AI-generated text
-  const cleanAIText = (text: string): string => {
+  const cleanAIText = (text: string | undefined): string => {
+    if (!text || typeof text !== 'string') {
+      return 'No content available';
+    }
     return text
       // Remove asterisks used for emphasis
       .replace(/\*\*/g, '')
@@ -135,18 +138,26 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
 
       const data = await response.json();
 
+      let tipContent = '';
+
       // Handle both new structured format and legacy format
       if (data.tips && Array.isArray(data.tips) && data.tips.length > 0) {
         // New structured format with detailed analysis
         const detailedTip = data.tips[0];
         const formattedTip = `**${detailedTip.title}**\n\n${detailedTip.description}`;
+        tipContent = formattedTip;
         setCurrentTip(formattedTip);
-      } else {
+      } else if (data.tip) {
         // Legacy format
-        setCurrentTip(data.tip || 'Unable to generate tip at this time.');
+        tipContent = data.tip;
+        setCurrentTip(data.tip);
+      } else {
+        // Fallback
+        tipContent = 'Unable to generate tip at this time.';
+        setCurrentTip(tipContent);
       }
 
-      return cleanAIText(data.tip);
+      return cleanAIText(tipContent);
     },
     onMutate: () => {
       setIsGenerating(true);
