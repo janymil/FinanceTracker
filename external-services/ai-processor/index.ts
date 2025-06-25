@@ -1232,7 +1232,7 @@ ANALYSIS GUIDELINES:
           month: month.month || 'Unknown',
           predicted: Number(month.predicted),
           confidence: Number(month.confidence),
-          breakdown: Array.isArray(month.breakdown) ? month.breakdown : []
+          breakdown: month.breakdown
         }))
       : [];
 
@@ -1525,9 +1525,9 @@ Calculate health score quickly.`
       score: Math.max(0, Math.min(100, result.score || 50)),
       trend: result.trend || 'stable',
       category: result.category || 'fair',
-      insights: Array.isArray(result.insights) ? result.insights : [],
-      achievements: Array.isArray(result.achievements) ? result.achievements : [],
-      warnings: Array.isArray(result.warnings) ? result.warnings : []
+      insights: result.insights,
+      achievements: result.achievements,
+      warnings: result.warnings
     };
 
     // Cache the result for 2 hours to reduce frequent API calls
