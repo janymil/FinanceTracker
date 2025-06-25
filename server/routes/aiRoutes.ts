@@ -128,11 +128,11 @@ export function registerAIRoutes(app: Express) {
       // Validate and process transaction data
       const transactions = financialData.transactions;
       if (!Array.isArray(transactions) || transactions.length === 0) {
-        console.log('TIP ENDPOINT: Empty transactions array, returning early');
-        return res.json({ tip: "Start by adding some transactions to get personalized financial insights." });
+        console.log('TIP ENDPOINT: Empty transactions, but calling Fly.io anyway for testing');
+        // Still call Fly.io even with empty data to test the connection
       }
 
-      console.log('TIP ENDPOINT: Processing', transactions.length, 'transactions');
+      console.log('TIP ENDPOINT: Processing', transactions?.length || 0, 'transactions');
 
       // Format transaction data for AI analysis with detailed information
       const formattedTransactions = transactions.map((t: any) => ({
