@@ -142,11 +142,12 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
       // Save tips using unified cache (handles database persistence)
       const month = selectedMonth || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
       try {
+        console.log('Contextual tips: Attempting cache save', { userId, month, tipCount: tips.length, cachePayloadSize: JSON.stringify(cachePayload).length });
         await unifiedAICache.set('contextual-tips', userId, month, cachePayload, { tips });
-        console.log('Contextual financial tips: Saved to unified cache');
+        console.log('Contextual financial tips: Successfully saved to unified cache');
       } catch (cacheError) {
-        console.error("Error saving contextual financial tips to unified cache:", cacheError);
-        // Continue to return tips even if cache save fails
+        console.error("CRITICAL: Failed to save contextual tips to unified cache:", cacheError);
+        console.error("Cache save details:", { userId, month, cachePayload });
       }
 
       return res.json({ tips });

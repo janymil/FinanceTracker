@@ -46,8 +46,12 @@ export async function runAI(task: string, userId: string, payload: Record<string
         throw new Error('Empty results from Fly.io, using local fallback');
       }
       
-      await unifiedAICache.set(task, userId, month, payload, result);
-      console.log(`[AI ${task}] Success via unified endpoint`);
+      try {
+        await unifiedAICache.set(task, userId, month, payload, result);
+        console.log(`[AI ${task}] Success via unified endpoint - cached result`);
+      } catch (cacheError) {
+        console.error(`[AI ${task}] CRITICAL: Failed to cache Fly.io result:`, cacheError);
+      }
       return result;
     }
 
