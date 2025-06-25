@@ -18,6 +18,14 @@ interface AIFinancialTipsProps {
       amount: number;
       type: string;
     }>;
+    recentTransactions?: Array<{
+      id: number;
+      amount: string;
+      description: string;
+      date: string;
+      categoryName: string;
+      type: string;
+    }>;
   };
 }
 
@@ -140,9 +148,13 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
 
       let tipContent = '';
 
-      // Handle both new structured format and legacy format
-      if (data.tips && Array.isArray(data.tips) && data.tips.length > 0) {
-        // New structured format with detailed analysis
+      // Handle structured 4-section format from API
+      if (data.sections && Array.isArray(data.sections) && data.sections.length === 4) {
+        // New 4-section structured format
+        const structuredSections = data.sections;
+        setCurrentTip(JSON.stringify(structuredSections)); // Store as JSON for parsing
+      } else if (data.tips && Array.isArray(data.tips) && data.tips.length > 0) {
+        // Legacy structured format with detailed analysis
         const detailedTip = data.tips[0];
         const formattedTip = `**${detailedTip.title}**\n\n${detailedTip.description}`;
         tipContent = formattedTip;
@@ -234,11 +246,89 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             {/* Current Tip Display */}
             {currentTip && (
               <div className="space-y-4">
-                {/* Display AI tips properly without complex parsing */}
+                {/* Display 4 themed sections */}
                 {(() => {
-                  // Check if we have structured tips from the API
                   try {
-                    // Handle structured format (array of tips with titles and descriptions)
+                    // Check if we have structured 4-section format
+                    if (currentTip.startsWith('[') && currentTip.includes('"title"')) {
+                      const sections = JSON.parse(currentTip);
+                      
+                      // Define the 4 thematic sections with their styling
+                      const sectionConfig = [
+                        {
+                          icon: TrendingUp,
+                          color: "blue",
+                          expectedTitle: "Spending Pattern Analysis"
+                        },
+                        {
+                          icon: Lightbulb,
+                          color: "green", 
+                          expectedTitle: "Personalized Saving Recommendations"
+                        },
+                        {
+                          icon: GraduationCap,
+                          color: "purple",
+                          expectedTitle: "Budget Optimization Suggestions"
+                        },
+                        {
+                          icon: Sparkles,
+                          color: "orange",
+                          expectedTitle: "Advanced Financial Analysis"
+                        }
+                      ];
+
+                      return sections.map((section: any, index: number) => {
+                        const config = sectionConfig[index] || sectionConfig[0];
+                        const IconComponent = config.icon;
+                        
+                        const colorClasses = {
+                          blue: "from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700",
+                          green: "from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700", 
+                          purple: "from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700",
+                          orange: "from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700"
+                        };
+
+                        return (
+                          <div key={index} className={`p-4 bg-gradient-to-r ${colorClasses[config.color as keyof typeof colorClasses]} rounded-lg border`}>
+                            <div className="flex items-start gap-3">
+                              <div className={`p-2 rounded-full ${
+                                config.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900' :
+                                config.color === 'green' ? 'bg-green-100 dark:bg-green-900' :
+                                config.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900' :
+                                'bg-orange-100 dark:bg-orange-900'
+                              }`}>
+                                <IconComponent className={`h-4 w-4 ${
+                                  config.color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
+                                  config.color === 'green' ? 'text-green-600 dark:text-green-400' :
+                                  config.color === 'purple' ? 'text-purple-600 dark:text-purple-400' :
+                                  'text-orange-600 dark:text-orange-400'
+                                }`} />
+                              </div>
+                              <div className="flex-1">
+                                <h4 className={`font-medium mb-2 ${
+                                  config.color === 'blue' ? 'text-blue-900 dark:text-blue-100' :
+                                  config.color === 'green' ? 'text-green-900 dark:text-green-100' :
+                                  config.color === 'purple' ? 'text-purple-900 dark:text-purple-100' :
+                                  'text-orange-900 dark:text-orange-100'
+                                }`}>
+                                  📊 {section.title || config.expectedTitle}
+                                </h4>
+                                <p className={`text-sm leading-relaxed ${
+                                  config.color === 'blue' ? 'text-blue-800 dark:text-blue-200' :
+                                  config.color === 'green' ? 'text-green-800 dark:text-green-200' :
+                                  config.color === 'purple' ? 'text-purple-800 dark:text-purple-200' :
+                                  'text-orange-800 dark:text-orange-200'
+                                }`}>
+                                  {cleanAIText(section.content || section.description)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      });
+                    }
+
+                    // Handle legacy structured format (array of tips with titles and descriptions)
                     if (currentTip.includes('**') && currentTip.includes('\n\n')) {
                       // Parse structured format: **Title**\n\nDescription
                       const parts = currentTip.split('\n\n');
@@ -302,64 +392,6 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                       </div>
                     );
                   }
-
-                  // Ensure we have at least one section
-                  if (sections.length === 0) {
-                    sections.push({
-                      title: "📊 AI Financial Analysis",
-                      icon: TrendingUp,
-                      content: cleanAIText(cleanedContent),
-                      color: "blue"
-                    });
-                  }
-
-                  return sections.map((section, index) => {
-                    const IconComponent = section.icon;
-                    const colorClasses = {
-                      blue: "from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700",
-                      green: "from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700", 
-                      purple: "from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700",
-                      orange: "from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700"
-                    };
-
-                    return (
-                      <div key={index} className={`p-4 bg-gradient-to-r ${colorClasses[section.color] || colorClasses.blue} rounded-lg border`}>
-                        <div className="flex items-start gap-3">
-                          <div className={`p-2 rounded-full ${
-                            section.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900' :
-                            section.color === 'green' ? 'bg-green-100 dark:bg-green-900' :
-                            section.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900' :
-                            'bg-orange-100 dark:bg-orange-900'
-                          }`}>
-                            <IconComponent className={`h-4 w-4 ${
-                              section.color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
-                              section.color === 'green' ? 'text-green-600 dark:text-green-400' :
-                              section.color === 'purple' ? 'text-purple-600 dark:text-purple-400' :
-                              'text-orange-600 dark:text-orange-400'
-                            }`} />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className={`font-medium mb-2 ${
-                              section.color === 'blue' ? 'text-blue-900 dark:text-blue-100' :
-                              section.color === 'green' ? 'text-green-900 dark:text-green-100' :
-                              section.color === 'purple' ? 'text-purple-900 dark:text-purple-100' :
-                              'text-orange-900 dark:text-orange-100'
-                            }`}>
-                              {section.title}
-                            </h4>
-                            <p className={`text-sm leading-relaxed ${
-                              section.color === 'blue' ? 'text-blue-800 dark:text-blue-200' :
-                              section.color === 'green' ? 'text-green-800 dark:text-green-200' :
-                              section.color === 'purple' ? 'text-purple-800 dark:text-purple-200' :
-                              'text-orange-800 dark:text-orange-200'
-                            }`}>
-                              {section.content}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  });
                 })()}
               </div>
             )}
