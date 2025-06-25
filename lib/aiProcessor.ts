@@ -47,10 +47,18 @@ export async function runAI(task: string, userId: string, payload: Record<string
       }
       
       try {
+        console.log(`[AI ${task}] ATTEMPTING to cache result for user ${userId.substring(0, 8)}... in month ${month}`);
         await unifiedAICache.set(task, userId, month, payload, result);
-        console.log(`[AI ${task}] Success via unified endpoint - cached result`);
+        console.log(`[AI ${task}] SUCCESS: Cached result via unified endpoint`);
       } catch (cacheError) {
         console.error(`[AI ${task}] CRITICAL: Failed to cache Fly.io result:`, cacheError);
+        console.error(`[AI ${task}] Cache error details:`, {
+          message: cacheError.message,
+          stack: cacheError.stack,
+          task,
+          userId: userId.substring(0, 8) + '...',
+          month
+        });
       }
       return result;
     }

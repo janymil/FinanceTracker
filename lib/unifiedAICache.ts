@@ -100,10 +100,17 @@ export class UnifiedAICache {
     
     // Store in database for persistence
     try {
+      console.log(`[UnifiedCache] ATTEMPTING to save ${functionName}:${month} for user ${userId.substring(0, 8)}...`);
       await this.saveToDatabase(entry);
-      console.log(`[UnifiedCache] Cached ${functionName}:${month} (hash: ${dataHash})`);
+      console.log(`[UnifiedCache] SUCCESS: Cached ${functionName}:${month} (hash: ${dataHash})`);
     } catch (error) {
-      console.error('[UnifiedCache] Database write error:', error);
+      console.error(`[UnifiedCache] CRITICAL ERROR saving ${functionName}:${month}:`, error);
+      console.error('[UnifiedCache] Error details:', {
+        message: error.message,
+        code: error.code,
+        constraint: error.constraint,
+        detail: error.detail
+      });
     }
   }
 
@@ -230,6 +237,13 @@ export class UnifiedAICache {
           .where(eq(aiCache.id, existing[0].id));
       } else {
         // Insert new entry
+        console.log(`[UnifiedCache] Inserting new cache entry:`, {
+          userId: entry.userId.substring(0, 8) + '...',
+          functionName: entry.functionName,
+          month: entry.month,
+          dataHash: entry.dataHash.substring(0, 8) + '...',
+          resultSize: JSON.stringify(entry.result).length
+        });
         await db.insert(aiCache).values({
           userId: entry.userId,
           functionName: entry.functionName,
