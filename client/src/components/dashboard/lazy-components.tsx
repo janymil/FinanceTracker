@@ -12,7 +12,6 @@ const ExpensePrediction = lazy(() => import("@/components/expense-prediction"));
 const DailyRecommendations = lazy(() => import("@/components/daily-recommendations"));
 const AutoCategorization = lazy(() => import("@/components/auto-categorization"));
 const AIFinancialTips = lazy(() => import("@/components/ai-financial-tips"));
-const AIInsights = lazy(() => import("@/components/ai-insights"));
 const TransactionRemindersWidget = lazy(() => import("@/components/transaction-reminders-widget"));
 const UnifiedRemindersWidget = lazy(() => import("@/components/unified-reminders-widget"));
 
@@ -139,14 +138,6 @@ export function LazyAIFinancialTips(props: any) {
   return (
     <LazyComponentWrapper>
       <AIFinancialTips {...props} />
-    </LazyComponentWrapper>
-  );
-}
-
-export function LazyAIInsights(props: any) {
-  return (
-    <LazyComponentWrapper>
-      <AIInsights {...props} />
     </LazyComponentWrapper>
   );
 }
