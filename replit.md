@@ -372,7 +372,7 @@ Changelog:
 - June 25, 2025. CACHE SYSTEM OPERATIONAL: Schema fix successful - unified cache system now working correctly in production with proper ORM compatibility
 - June 25, 2025. DEPLOYMENT CONFIGURATION VERIFIED: NODE_ENV correctly set to production in deployment, proper environment variable handling for dev/prod separation
 - June 25, 2025. DATABASE CONNECTION REVERTED: Restored original dual-database configuration (Neon for production, PostgreSQL for development) - configuration was correct
-- June 25, 2025. ROOT CAUSE ANALYSIS: Schema mismatch occurred due to incomplete/failed deployments not completing drizzle-kit push step, causing production schema to fall behind dev schema over time
+- June 25, 2025. FINAL ROOT CAUSE: Production database created with older column type definitions (text vs character varying) - drizzle push syncs table structure but won't automatically alter existing column types for safety
 - June 23, 2025. Enhanced AI categorization analysis to properly detect and report actual categorization status in contextual tips with accurate transaction data
 - June 23, 2025. FIXED FALLBACK SYSTEM: Corrected local OpenAI fallback in server/openai.ts to use same categoryName field mapping as Fly.io processor
 - June 23, 2025. Added categorization counting logic to both Fly.io and local fallback systems to prevent "uncategorized" false reports
