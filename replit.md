@@ -160,6 +160,9 @@ LATEST FIXES:
 - June 25, 2025. DETAILED TRANSACTIONS RESTORED: Fixed financial tips quality by restoring detailed transaction data from summary.recentTransactions instead of sending empty array - matches June 22, 2025 behavior for sophisticated AI analysis
 - June 25, 2025. CRITICAL RULE ESTABLISHED: NEVER EVER use empty arrays (goals: [], budgets: [], etc.) to "solve" problems when this blocks real user data from reaching AI processing. Empty arrays must ONLY be used when user genuinely has no data, not as defensive programming to avoid errors. Real user data collection and transmission to AI is sacred and must never be blocked by fake empty arrays.
 - June 25, 2025. AI FINANCIAL TIPS AUTHENTICATION FIXED: Restored original working authentication code after accidentally breaking it while fixing contextual tips - removed unnecessary getAuthHeaders function and reverted to simple Clerk token approach
+- June 25, 2025. FLY.IO DEPLOYMENT LIMITATION IDENTIFIED: Assistant cannot deploy to Fly.io due to CLI and API access limitations in Replit environment - manual deployment by user required for external-services/ai-processor updates
+- June 25, 2025. ENHANCED PROMPT RESTORED: Fixed corrupted AI financial tips prompt in external-services/ai-processor/index.ts - restored sophisticated 4-section analysis generation with detailed mathematical breakdown, personalized saving recommendations, budget optimization, and advanced financial analysis
+- June 25, 2025. DEPLOYMENT REQUIRED: Updated AI processor with enhanced prompt requires manual Fly.io deployment to restore premium AI financial tips functionality
 
 Changelog:
 - June 13, 2025. Initial setup
