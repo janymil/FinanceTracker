@@ -1197,16 +1197,18 @@ export async function generateContextualFinancialTips(data: {
     
     // Analyze spending by category - use the correct field mapping
     const categorySpending = new Map();
-    const categorizedCount = transactions.filter(t => 
-      t.categoryName && t.categoryName !== 'Uncategorized'
-    ).length;
-    const uncategorizedCount = transactions.filter(t => 
-      !t.categoryName || t.categoryName === 'Uncategorized'
-    ).length;
+    const categorizedCount = transactions.filter(t => {
+      const category = t.category || t.categoryName;
+      return category && category !== 'Uncategorized';
+    }).length;
+    const uncategorizedCount = transactions.filter(t => {
+      const category = t.category || t.categoryName;
+      return !category || category === 'Uncategorized';
+    }).length;
     
     transactions.forEach(t => {
       if (t.amount > 0) {
-        const category = t.categoryName || 'Uncategorized';
+        const category = t.category || t.categoryName || 'Uncategorized';
         const current = categorySpending.get(category) || 0;
         categorySpending.set(category, current + t.amount);
       }
@@ -1227,7 +1229,7 @@ export async function generateContextualFinancialTips(data: {
     
     expenseTransactions.forEach(t => {
       const day = new Date(t.date).getDate();
-      const category = t.categoryName || 'Uncategorized';
+      const category = t.category || t.categoryName || 'Uncategorized';
       dailySpending.set(day, (dailySpending.get(day) || 0) + t.amount);
       transactionFrequency.set(category, (transactionFrequency.get(category) || 0) + 1);
     });

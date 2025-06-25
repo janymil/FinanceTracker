@@ -31,7 +31,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
 
   try {
     // Try unified endpoint first
-    const response = await fetch("https://broken-url-test.fly.dev/execute-gpt-task", {
+    const response = await fetch("https://finanzerpro.fly.dev/execute-gpt-task", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ task, userId, payload }),
@@ -116,11 +116,13 @@ export async function runAI(task: string, userId: string, payload: Record<string
       }
       
       if (task === 'contextual-tips') {
-        console.log(`[AI ${task}] Using local fallback for contextual-tips`);
+        console.log(`[AI ${task}] Using local OpenAI fallback for contextual-tips`);
+        console.log(`[AI ${task}] Fallback payload:`, JSON.stringify(payload).substring(0, 200));
         const result = await generateContextualFinancialTips(payload);
+        console.log(`[AI ${task}] Local fallback generated ${result?.tips?.length || 0} tips`);
         try {
           await unifiedAICache.set(task, userId, month, payload, result);
-          console.log(`[AI ${task}] Local fallback result saved to cache`);
+          console.log(`[AI ${task}] Local fallback result saved to unified cache`);
         } catch (cacheError) {
           console.error(`[AI ${task}] Failed to save fallback to cache:`, cacheError);
         }
