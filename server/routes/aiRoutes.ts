@@ -149,19 +149,34 @@ export function registerAIRoutes(app: Express) {
       // Generate new AI response
       const tipResults = await runAI('financial-tips', userId, aiPayload);
 
-      // Handle Fly.io response format - check for error conditions first
+      // Handle AI processor response format
+      console.log('TIP ENDPOINT: AI processor response type:', typeof tipResults, 'isArray:', Array.isArray(tipResults));
+      
       if (tipResults?.error) {
-        console.error('TIP ENDPOINT: Fly.io returned error:', tipResults.error);
+        console.error('TIP ENDPOINT: AI processor returned error:', tipResults.error);
         return res.status(500).json({ message: "AI service temporarily unavailable" });
       }
 
       let responseData;
       if (Array.isArray(tipResults) && tipResults.length > 0) {
+        // AI processor returns array of tips directly
         responseData = { tips: tipResults };
+        console.log('TIP ENDPOINT: Using array format, tips count:', tipResults.length);
       } else if (tipResults && typeof tipResults === 'object' && tipResults.tip) {
+        // Legacy single tip format
         responseData = { tip: tipResults.tip };
+        console.log('TIP ENDPOINT: Using legacy tip format');
+      } else if (tipResults && typeof tipResults === 'object' && tipResults.tips) {
+        // Wrapped tips format
+        responseData = tipResults;
+        console.log('TIP ENDPOINT: Using wrapped tips format');
       } else {
-        console.error('TIP ENDPOINT: Unexpected response format:', tipResults);
+        console.error('TIP ENDPOINT: Unexpected response format:', {
+          type: typeof tipResults,
+          isArray: Array.isArray(tipResults),
+          keys: tipResults ? Object.keys(tipResults) : 'null',
+          content: tipResults
+        });
         return res.status(500).json({ message: "Failed to generate financial tip" });
       }
 
