@@ -465,13 +465,7 @@ export function registerImportRoutes(app: Express) {
       );
 
       // Clear all AI caches after successful import to trigger fresh AI insights
-      // Cache system removed
-      
-      // Delete cached daily recommendations from database
-      await storage.deleteCachedDailyRecommendations(userId);
-      
-      // Clear contextual financial tips cache
-      // Legacy contextualFinancialTips table removed - using unified ai_cache system
+      // Cache system removed - direct Fly.io calls only
       
       console.log(`Cleared all AI caches for user ${userId} after data import`);
 

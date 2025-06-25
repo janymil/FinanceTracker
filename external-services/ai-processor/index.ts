@@ -93,12 +93,7 @@ export interface FinancialHealthData {
 
 export async function categorizeExpense(description: string, amount: number): Promise<ExpenseCategorizationResult> {
   try {
-    // Check cache first (legacy function - not using unified cache due to different interface)
-    const cached = null;
-    if (cached) {
-      console.log('Using cached categorization result');
-      return cached;
-    }
+    // Direct OpenAI processing only - no cache in Fly.io processor
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
