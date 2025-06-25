@@ -38,7 +38,7 @@ export function registerAIRoutes(app: Express) {
       const uncategorized = transactions.filter(t => !t.categoryName || t.categoryName === 'Uncategorized');
 
       if (uncategorized.length === 0) {
-        return res.json({ suggestions: [] });
+        return res.json({ suggestions: null });
       }
 
       // Process up to 10 transactions at a time to avoid rate limits
@@ -998,7 +998,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
           budgetAmount: budget.amount,
           spent: budget.spent || 0,
           remaining: budget.remaining || budget.amount
-        })) || [],
+        })),
         selectedMonth: formattedMonth
       };
 

@@ -193,7 +193,7 @@ export async function generateContextualFinancialTips(data: {
   actionable: boolean;
 }> }> {
   try {
-    const { summary, transactions, budgets, goals = [], selectedMonth } = data;
+    const { summary, transactions, budgets, goals, selectedMonth } = data;
     
     // Return basic tip if no meaningful data
     if (transactions.length === 0 && summary.totalIncome === 0 && summary.totalExpenses === 0) {
@@ -484,7 +484,7 @@ export async function generateFinancialTips(financialData: {
     const { 
       totalIncome = 0, 
       totalExpenses = 0, 
-      transactionsByCategory = [], 
+      transactionsByCategory, 
       recentTransactions = [] 
     } = financialData || {};
 
@@ -710,7 +710,7 @@ Generate financial insights based on this spending data.`
       max_tokens: 600 // Slightly higher for complex analysis
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{"insights": []}');
+    const result = JSON.parse(response.choices[0].message.content || '{"insights": null}');
     const insights = Array.isArray(result) ? result : (result.insights || result.data);
 
     const processedInsights = insights.map((insight: any, index: number) => ({
@@ -884,7 +884,7 @@ export async function generateTrendPredictions(
     type: string;
     categoryName: string;
   }>,
-  budgets: Array<{ categoryName: string; amount: string; }> = []
+  budgets: Array<{ categoryName: string; amount: string; }>
 ): Promise<{
   categoryPredictions: TrendPrediction[];
   financialForecast: FinancialForecast;
@@ -1435,8 +1435,8 @@ Only provide recommendations and insights based on the actual financial data pro
   } catch (error) {
     console.error('Error generating daily recommendations:', error);
     return {
-      recommendations: [],
-      insights: []
+      recommendations: null,
+      insights: null
     };
   }
 }
@@ -1525,9 +1525,9 @@ Calculate health score quickly.`
       score: Math.max(0, Math.min(100, result.score || 50)),
       trend: result.trend || 'stable',
       category: result.category || 'fair',
-      insights: Array.isArray(result.insights) ? result.insights : [],
-      achievements: Array.isArray(result.achievements) ? result.achievements : [],
-      warnings: Array.isArray(result.warnings) ? result.warnings : []
+      insights: Array.isArray(result.insights) ? result.insights : null,
+      achievements: Array.isArray(result.achievements) ? result.achievements : null,
+      warnings: Array.isArray(result.warnings) ? result.warnings : null
     };
 
     // Cache the result for 2 hours to reduce frequent API calls
@@ -1591,9 +1591,9 @@ app.post("/execute-gpt-task", async (req, res) => {
         // Validate and fix payload structure for contextual tips
         const contextualPayload = {
           summary: payload.summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 },
-          transactions: Array.isArray(payload.transactions) ? payload.transactions : [],
-          budgets: Array.isArray(payload.budgets) ? payload.budgets : [],
-          goals: Array.isArray(payload.goals) ? payload.goals : [],
+          transactions: Array.isArray(payload.transactions) ? payload.transactions : null,
+          budgets: Array.isArray(payload.budgets) ? payload.budgets : null,
+          goals: Array.isArray(payload.goals) ? payload.goals : null,
           selectedMonth: payload.selectedMonth || 'Current Month'
         };
         
