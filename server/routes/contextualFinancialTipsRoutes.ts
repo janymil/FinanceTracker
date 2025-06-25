@@ -47,7 +47,7 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
       const { transactions, summary, budgets, selectedMonth } = req.body;
 
       console.log('Contextual tips API request received:', {
-        userId,
+        userId: userId?.substring(0, 8) + '...',
         selectedMonth,
         transactionCount: transactions?.length || 0,
         hasIncome: summary?.totalIncome > 0,

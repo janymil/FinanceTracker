@@ -164,6 +164,13 @@ export function registerAIRoutes(app: Express) {
 
       const tipResults = await runAI('financial-tips', userId, aiPayload);
 
+      // Debug authentication and save to unified cache
+      console.log('Financial tips endpoint called:', { 
+        userId: userId?.substring(0, 8) + '...', 
+        hasFinancialData: !!financialData,
+        tipResultsLength: tipResults?.length || 0 
+      });
+      
       // Always save to unified cache (remove timestamp bypass condition)
       if (tipResults && tipResults.length > 0) {
         try {
@@ -177,6 +184,8 @@ export function registerAIRoutes(app: Express) {
           console.error("❌ CRITICAL: Failed to save financial tips to unified cache:", cacheError);
           console.error("Cache save details:", { userId: userId.substring(0, 8) + '...', month, error: cacheError.message });
         }
+      } else {
+        console.log('No financial tips results to cache - skipping cache save');
       }
 
       if (tipResults && tipResults.length > 0) {
@@ -245,6 +254,12 @@ export function registerAIRoutes(app: Express) {
         }))
       };
 
+      // Debug authentication and AI processing
+      console.log('Spending insights endpoint called:', { 
+        userId: userId?.substring(0, 8) + '...', 
+        transactionCount: transactions?.length || 0 
+      });
+      
       const insights = await runAI('spending-insights', userId, aiPayload);
       
       // Save to unified cache with enhanced error logging
