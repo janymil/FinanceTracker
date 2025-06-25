@@ -198,11 +198,17 @@ export default function AIInsights({ data }: AIInsightsProps) {
   const { data: insightsData } = useQuery({
     queryKey: ["/api/ai/insights"],
     enabled: !!user && user.plan === 'premium',
+    queryFn: async () => {
+      const response = await apiRequest('POST', '/api/ai/insights', {
+        transactions: transactions || []
+      });
+      return response.json();
+    },
   });
 
   const insights = Array.isArray(insightsData) && insightsData.length > 0 
     ? insightsData 
-    : generateInsights(data);
+    : [];
 
   const getInsightIcon = (type: string) => {
     switch (type) {

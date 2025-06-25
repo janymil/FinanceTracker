@@ -59,7 +59,7 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
   // Use React Query for predictions with premium check and caching
   const { data: predictionsData, isLoading: predictionsLoading, error: predictionsError } = useQuery({
     queryKey: ['expense-predictions', user?.id, expenseTransactions.length],
-    enabled: isReady && isPremiumUser && hasTransactionData,
+    enabled: isReady && isPremiumUser, // Let AI decide if data is sufficient
     staleTime: 5 * 60 * 1000, // 5 minutes cache
     queryFn: async () => {
       try {

@@ -79,9 +79,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       // Fetch detailed transactions for current month
       const detailedTransactions = await fetchDetailedTransactions(month, year);
       
-      if (!detailedTransactions || detailedTransactions.length === 0) {
-        throw new Error("No transactions available for analysis");
-      }
+      // Remove blocking validation - let AI decide if data is sufficient
       
       const response = await apiRequest("POST", "/api/ai/tip", {
         body: JSON.stringify({
