@@ -36,18 +36,20 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
 
   // Load cached tip on component mount
   useEffect(() => {
-    const cachedTip = localStorage.getItem('ai-financial-tip');
-    if (cachedTip && !currentTip) {
-      setCurrentTip(cachedTip);
+    if (user?.id) {
+      const cachedTip = localStorage.getItem(`ai-financial-tip-${user.id}`);
+      if (cachedTip && !currentTip) {
+        setCurrentTip(cachedTip);
+      }
     }
-  }, []);
+  }, [user?.id]);
 
   // Save tip to localStorage whenever it changes
   useEffect(() => {
-    if (currentTip) {
-      localStorage.setItem('ai-financial-tip', currentTip);
+    if (currentTip && user?.id) {
+      localStorage.setItem(`ai-financial-tip-${user.id}`, currentTip);
     }
-  }, [currentTip]);
+  }, [currentTip, user?.id]);
 
   // Function to clean AI-generated text
   const cleanAIText = (text: string | undefined): string => {
