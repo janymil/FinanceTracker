@@ -1635,7 +1635,21 @@ app.post("/execute-gpt-task", async (req, res) => {
         break;
 
       case "financial-health-score":
-        result = await generateAIFinancialHealthScore(payload);
+        // Add defensive checks for payload structure
+        console.log('Financial health: Payload received:', JSON.stringify(payload, null, 2));
+        if (!payload.transactions || !Array.isArray(payload.transactions)) {
+          console.error('Financial health: Invalid transactions array');
+          result = {
+            score: 50,
+            trend: 'stable',
+            category: 'fair',
+            insights: ['Unable to analyze - insufficient transaction data'],
+            achievements: [],
+            warnings: ['Please add more transaction data for accurate analysis']
+          };
+        } else {
+          result = await generateAIFinancialHealthScore(payload);
+        }
         break;
 
       case "spending-insights":
