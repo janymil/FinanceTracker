@@ -51,7 +51,14 @@ export interface FinancialForecast {
   budgetVariance: number;
   confidence: number;
   keyInsights: string[];
-  recommendations: string[];
+  recommendations: Array<{
+    id: string;
+    title: string;
+    description: string;
+    priority: 'high' | 'medium' | 'low';
+    actionable: boolean;
+    estimatedSaving?: number;
+  }>;
   riskFactors: string[];
 }
 
@@ -764,7 +771,11 @@ export async function generateAIFinancialHealthScore(financialData: {
   aiAnalysis: {
     personalizedFactors: string[];
     riskAssessment: string;
-    recommendations: string[];
+    recommendations: Array<{
+      action: string;
+      impact: string;
+      priority: 'high' | 'medium' | 'low';
+    }>;
     confidence: number;
   };
 }> {

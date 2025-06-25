@@ -452,7 +452,11 @@ export async function generateAIFinancialHealthScore(financialData: {
   aiAnalysis: {
     personalizedFactors: string[];
     riskAssessment: string;
-    recommendations: string[];
+    recommendations: Array<{
+      action: string;
+      impact: string;
+      priority: 'high' | 'medium' | 'low';
+    }>;
     confidence: number;
   };
 }> {
@@ -542,7 +546,13 @@ Provide an AI-powered financial health score that adapts to this user's specific
       aiAnalysis: {
         personalizedFactors: result.aiAnalysis?.personalizedFactors || [],
         riskAssessment: result.aiAnalysis?.riskAssessment || 'Standard risk assessment',
-        recommendations: result.aiAnalysis?.recommendations || [],
+        recommendations: Array.isArray(result.aiAnalysis?.recommendations) 
+          ? result.aiAnalysis.recommendations.map((rec: any, index: number) => ({
+              action: rec.action || rec.title || `Recommendation ${index + 1}`,
+              impact: rec.impact || rec.description || 'Positive financial impact',
+              priority: rec.priority || 'medium'
+            }))
+          : [],
         confidence: Math.max(0, Math.min(1, result.aiAnalysis?.confidence || 0.7))
       }
     };
