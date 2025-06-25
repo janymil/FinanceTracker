@@ -53,9 +53,13 @@ export class UnifiedAICache {
     const dataHash = this.createDataHash(userData);
     const key = this.generateKey(functionName, userId, month, dataHash);
 
-    // CACHE COMPLETELY DISABLED FOR TESTING
-    console.log(`[UnifiedCache] Cache disabled - returning null for ${functionName}:${month}`);
-    return null;
+    // Check memory cache first
+    const memoryEntry = this.memoryCache.get(key);
+    if (memoryEntry && !this.isExpired(memoryEntry)) {
+      memoryEntry.lastAccessed = new Date();
+      console.log(`[UnifiedCache] Memory hit for ${functionName}:${month}`);
+      return memoryEntry.result;
+    }
 
     // Try database cache
     try {
