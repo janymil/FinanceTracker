@@ -278,16 +278,7 @@ export const redeemCodes = pgTable("redeem_codes", {
 
 // AI cache system completely removed - direct Fly.io calls only
 
-// Legacy daily recommendations table (will be migrated to ai_cache)
-export const dailyRecommendations = pgTable("daily_recommendations", {
-  id: serial("id").primaryKey(),
-  userId: text("user_id").notNull(),
-  recommendations: json("recommendations").notNull(),
-  insights: json("insights").notNull(),
-  dataHash: text("data_hash").notNull(),
-  generatedAt: timestamp("generated_at").defaultNow().notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-});
+// Cache system completely destroyed - direct Fly.io calls only
 
 export const importLogs = pgTable("import_logs", {
   id: serial("id").primaryKey(),
