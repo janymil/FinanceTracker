@@ -1,7 +1,7 @@
 
 import { storage } from "./storage";
 import { generateSpendingInsights, generateFinancialTips } from "./openai";
-import { aiCache } from "./cache";
+// Cache system removed
 
 // Track users who need batch processing
 const batchQueue = new Set<string>();
@@ -80,8 +80,7 @@ async function processBatchedOperations() {
           };
           
           const tips = await generateFinancialTips(financialData);
-          const dataHash = aiCache.createDataHash(financialData);
-          aiCache.setTips(dataHash, tips);
+          // Cache system removed
         }
         
         console.log(`Batch processing completed for user ${userId}`);

@@ -128,8 +128,7 @@ Please categorize this expense.`
       reasoning: result.reasoning || 'Unable to determine category'
     };
 
-    // Cache the result
-    aiCache.setCategorization(description, amount, categorization);
+    // Cache system removed
     
     return categorization;
   } catch (error) {
