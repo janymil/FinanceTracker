@@ -543,62 +543,47 @@ Transaction Pattern Analysis:
 - Expense transactions: ${recentTransactions.filter(t => t.type === 'expense').length}
 - Date range: ${new Date(Math.min(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()} to ${new Date(Math.max(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()}
 
-Generate 4 independent box analyses with exact mathematical calculations.`;
+Generate comprehensive financial analysis with exact mathematical calculations.`;
 
-    // Direct OpenAI call for structured 4-section output
+    // Direct OpenAI call (no recursion - this IS the AI processor)
     const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
             role: "system",
-            content: `You are an AI Financial Analyst providing premium-level insights in 4 themed sections. Generate exactly 4 independent analyses for display in themed boxes:
+            content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
 
-SECTION 1 - SPENDING PATTERN ANALYSIS (Blue Box):
-- Analyze spending trends, category concentrations, and behavioral patterns
-- Calculate exact percentages and identify the top spending categories
-- Highlight any concerning patterns or optimization opportunities
+1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
+2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
+3. BUDGET OPTIMIZATION SUGGESTIONS: Recommend category rebalancing with precise dollar amounts
+4. CONTEXT-AWARE FINANCIAL ADVICE: Consider their financial position, goals, and risk tolerance
 
-SECTION 2 - PERSONALIZED SAVING RECOMMENDATIONS (Green Box):  
-- Calculate specific saving opportunities based on their income/expense ratios
-- Provide actionable recommendations with exact dollar amounts
-- Focus on highest-impact areas for immediate savings
-
-SECTION 3 - BUDGET OPTIMIZATION SUGGESTIONS (Purple Box):
-- Recommend category rebalancing with precise dollar amounts
-- Compare to optimal budget ratios (50/30/20 rule)
-- Suggest realistic budget adjustments
-
-SECTION 4 - ADVANCED FINANCIAL ANALYSIS (Orange Box):
-- Context-aware advice considering their financial position
-- Risk assessment and wealth building strategies
-- Long-term financial planning recommendations
-
-REQUIREMENTS:
-- Use their EXACT transaction amounts and categories
-- Calculate precise percentages and ratios
+ANALYSIS REQUIREMENTS:
+- Use their EXACT transaction amounts and categories 
+- Calculate precise percentages and ratios from their data
+- Identify the highest-impact optimization opportunities
 - Provide specific dollar amounts for recommendations
-- Each section should be 2-3 sentences of complete, actionable advice
+- Include mathematical analysis (savings rate, expense ratios, etc.)
+- Compare their spending to optimal financial benchmarks
 
-Return JSON with exactly 4 sections:
+GENERATE VARIED RESPONSES by focusing on different analytical angles:
+- Detailed category spending analysis with optimization targets
+- Income-to-expense ratio analysis with improvement strategies  
+- Cash flow optimization with timing recommendations
+- Risk assessment with protection strategies
+- Wealth building analysis with investment allocation suggestions
+- Efficiency analysis identifying wasteful spending patterns
+- Premium user emphasis: calculate estimated savings from each recommendation and compare them to optimal budget ratios (50/30/20 rule or similar). Provide one short-term action item with a target date
+
+Return comprehensive analysis in JSON:
 {
-  "sections": [
-    {
-      "title": "Spending Pattern Analysis",
-      "content": "Complete analysis with exact percentages and spending insights..."
-    },
-    {
-      "title": "Personalized Saving Recommendations", 
-      "content": "Specific saving opportunities with dollar amounts..."
-    },
-    {
-      "title": "Budget Optimization Suggestions",
-      "content": "Budget rebalancing recommendations with targets..."
-    },
-    {
-      "title": "Advanced Financial Analysis",
-      "content": "Strategic financial planning and wealth building advice..."
-    }
-  ]
+  "title": "Advanced Financial Analysis: [Specific Focus Area]",
+  "description": "DETAILED multi-paragraph analysis including: 1) Mathematical breakdown of their spending patterns with percentages, 2) Specific optimization recommendations with exact dollar targets, 3) Implementation timeline with measurable milestones, 4) Risk assessment and protection strategies. Use their exact financial numbers throughout.",
+  "category": "spending|saving|budgeting|income|education", 
+  "priority": "high|medium|low",
+  "actionable": true,
+  "estimatedSaving": [realistic_amount],
+  "educational": false
 }`
           },
           {
@@ -612,33 +597,28 @@ Return JSON with exactly 4 sections:
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
 
-    // Handle structured 4-section response
-    if (result.sections && Array.isArray(result.sections) && result.sections.length === 4) {
-      console.log('[financial-tips] Generated 4-section structured response');
-      return { sections: result.sections };
+    // Handle comprehensive analysis response - return the full detailed analysis
+    if (result.title && result.description) {
+      // Return the comprehensive analysis as a single detailed tip
+      return [{
+        title: result.title,
+        description: result.description,
+        category: result.category || 'comprehensive',
+        priority: result.priority || 'high',
+        actionable: Boolean(result.actionable),
+        estimatedSaving: result.estimatedSaving || undefined,
+        educational: Boolean(result.educational)
+      }];
     }
     
-    // Fallback if structured response fails - return basic 4 sections
-    return {
-      sections: [
-        {
-          title: "Spending Pattern Analysis",
-          content: "Track your expenses by category to identify spending patterns and optimization opportunities."
-        },
-        {
-          title: "Personalized Saving Recommendations", 
-          content: "Start by setting aside 10% of your income for savings and reduce discretionary spending."
-        },
-        {
-          title: "Budget Optimization Suggestions",
-          content: "Follow the 50/30/20 rule: 50% for needs, 30% for wants, and 20% for savings and debt repayment."
-        },
-        {
-          title: "Advanced Financial Analysis",
-          content: "Build an emergency fund covering 3-6 months of expenses and consider long-term investment strategies."
-        }
-      ]
-    };
+    // Fallback if no comprehensive analysis received
+    return [{
+      title: 'Track Your Expenses',
+      description: 'Start by categorizing all your expenses to understand where your money goes each month.',
+      category: 'budgeting',
+      priority: 'high',
+      actionable: true
+    }];
   } catch (error) {
     console.error('Error generating financial tips:', error);
     return [
