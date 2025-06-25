@@ -44,15 +44,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       .trim();
   };
 
-  // Load saved tip from localStorage on component mount
-  useEffect(() => {
-    if (user?.id) {
-      // Cache system removed
-      if (savedTip) {
-        setCurrentTip(cleanAIText(savedTip));
-      }
-    }
-  }, [user?.id]);
+  // Cache system removed - no localStorage loading
 
   // Get user's plan from database
   const { data: databaseUser } = useQuery({
@@ -124,9 +116,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     },
     onSuccess: (cleanedTip: string) => {
       setCurrentTip(cleanedTip);
-      if (user?.id) {
-        // Cache system removed
-      }
+      // Cache system removed
       toast({
         title: "AI Tip Generated",
         description: "New financial advice based on your spending data",
