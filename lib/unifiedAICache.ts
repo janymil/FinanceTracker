@@ -109,7 +109,10 @@ export class UnifiedAICache {
     try {
       const inputHash = this.hashInput(input);
       
-      // Use storage layer to set cache entry
+      // Use default TTL if not provided
+      const finalTtlHours = ttlHours || this.getDefaultTTL();
+      
+      // Use storage layer to set cache entry with TTL
       await storage.setAICacheEntry(
         this.userId,
         this.functionKey,
@@ -117,7 +120,8 @@ export class UnifiedAICache {
         input,
         output,
         this.month,
-        isError
+        isError,
+        finalTtlHours
       );
     } catch (error) {
       console.error('UnifiedAICache.set error:', error);

@@ -2135,8 +2135,28 @@ export class DatabaseStorage implements IStorage {
     return results[0];
   }
 
-  async setAICacheEntry(userId: string, functionKey: string, inputHash: string, input: any, output: any, month?: string, isError: boolean = false): Promise<void> {
+  async setAICacheEntry(userId: string, functionKey: string, inputHash: string, input: any, output: any, month?: string, isError: boolean = false, ttlHours?: number): Promise<void> {
     const now = new Date();
+    
+    // Calculate expiration time based on TTL or default function TTL
+    let expiresAt: Date | undefined;
+    if (ttlHours) {
+      expiresAt = new Date(now.getTime() + (ttlHours * 60 * 60 * 1000));
+    } else {
+      // Default TTL configurations for different AI functions (in hours)
+      const defaultTTL: Record<string, number> = {
+        'financial-tips': 168, // 7 days
+        'daily-recommendations': 24, // 1 day
+        'contextual-tips': 72, // 3 days
+        'expense-predictions': 48, // 2 days
+        'financial-health-score': 24, // 1 day
+        'spending-insights': 72, // 3 days
+        'trend-predictions': 48, // 2 days
+      };
+      
+      const defaultHours = defaultTTL[functionKey] || 24; // Default to 24 hours
+      expiresAt = new Date(now.getTime() + (defaultHours * 60 * 60 * 1000));
+    }
     
     await db
       .insert(aiCache)
@@ -2150,6 +2170,7 @@ export class DatabaseStorage implements IStorage {
         isError,
         hitCount: 0,
         lastAccessed: now,
+        expiresAt,
         createdAt: now,
         updatedAt: now
       })
