@@ -225,10 +225,11 @@ export async function generateContextualFinancialTips(data: {
     }).length;
     
     transactions.forEach(t => {
-      if (t.amount > 0) {
+      const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : (t.amount || 0);
+      if (amount > 0) {
         const category = t.category || t.categoryName || 'Uncategorized';
         const current = categorySpending.get(category) || 0;
-        categorySpending.set(category, current + t.amount);
+        categorySpending.set(category, current + amount);
       }
     });
     
@@ -236,9 +237,9 @@ export async function generateContextualFinancialTips(data: {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3);
 
-    // Detailed transaction analysis
-    const incomeTransactions = transactions.filter(t => t.type === 'income' || t.amount < 0);
-    const expenseTransactions = transactions.filter(t => t.type === 'expense' || t.amount > 0);
+    // Detailed transaction analysis with proper amount parsing
+    const incomeTransactions = transactions.filter(t => t.type === 'income');
+    const expenseTransactions = transactions.filter(t => t.type === 'expense');
     const recurringTransactions = transactions.filter(t => t.recurring);
     
     // Calculate transaction patterns
@@ -248,7 +249,8 @@ export async function generateContextualFinancialTips(data: {
     expenseTransactions.forEach(t => {
       const day = new Date(t.date).getDate();
       const category = t.category || t.categoryName || 'Uncategorized';
-      dailySpending.set(day, (dailySpending.get(day) || 0) + t.amount);
+      const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : (t.amount || 0);
+      dailySpending.set(day, (dailySpending.get(day) || 0) + amount);
       transactionFrequency.set(category, (transactionFrequency.get(category) || 0) + 1);
     });
 
@@ -300,7 +302,10 @@ export async function generateContextualFinancialTips(data: {
     
     // Check for irregular income patterns
     if (incomeTransactions.length > 0) {
-      const incomeAmounts = incomeTransactions.map(t => Math.abs(t.amount));
+      const incomeAmounts = incomeTransactions.map(t => {
+        const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : (t.amount || 0);
+        return Math.abs(amount);
+      });
       const avgIncome = incomeAmounts.reduce((sum, amt) => sum + amt, 0) / incomeAmounts.length;
       const incomeVariability = incomeAmounts.some(amt => Math.abs(amt - avgIncome) / avgIncome > 0.3);
       
@@ -327,9 +332,12 @@ export async function generateContextualFinancialTips(data: {
       }
     }
     
-    // Check recurring transaction efficiency
+    // Check recurring transaction efficiency with proper amount parsing
     if (recurringTransactions.length > 0) {
-      const recurringTotal = recurringTransactions.reduce((sum, t) => sum + t.amount, 0);
+      const recurringTotal = recurringTransactions.reduce((sum, t) => {
+        const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : (t.amount || 0);
+        return sum + amount;
+      }, 0);
       const recurringPercent = (recurringTotal / summary.totalExpenses) * 100;
       scenarios.push(`🟦 Recurring expenses: ${recurringPercent.toFixed(0)}% of expenses are recurring ($${recurringTotal.toFixed(2)} from ${recurringTransactions.length} transactions).`);
     }

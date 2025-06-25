@@ -141,9 +141,9 @@ export function registerAIRoutes(app: Express) {
       const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
       // CACHE DISABLED FOR TESTING
       const cachedResult = null; // await unifiedAICache.get('financial-tips', userId, month, {
-        totalIncome: financialData.totalIncome || 0,
-        totalExpenses: financialData.totalExpenses || 0,
-        transactions: formattedTransactions.slice(0, 50)
+      //   totalIncome: financialData.totalIncome || 0,
+      //   totalExpenses: financialData.totalExpenses || 0,
+      //   transactions: formattedTransactions.slice(0, 50)
       // });
       
       // CACHE CHECK DISABLED - FORCING FRESH CALLS
