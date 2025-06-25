@@ -19,7 +19,6 @@ interface ContextualTipsProps {
   };
   transactions: any[];
   budgets: any[];
-  goals?: any[];
   selectedMonth: string; // e.g. '2025-06'
 }
 
@@ -32,7 +31,7 @@ interface FinancialTip {
   actionable: boolean;
 }
 
-export default function ContextualFinancialTips({ summary, transactions, budgets, goals = [], selectedMonth }: ContextualTipsProps) {
+export default function ContextualFinancialTips({ summary, transactions, budgets, selectedMonth }: ContextualTipsProps) {
   const [tips, setTips] = useState<FinancialTip[] | null>(null);
   const [loading, setLoading] = useState(false);
   
@@ -116,7 +115,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
           summary,
           transactions: monthTransactions, // Pass only filtered transactions
           budgets,
-          goals, // Include goals data for AI analysis
+          // goals data handled by backend when available
           selectedMonth: currentMonth
         }, {
           headers: authHeaders
@@ -139,7 +138,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
     };
 
     fetchTips();
-  }, [summary, transactions, budgets, goals, selectedMonth]);
+  }, [summary, transactions, budgets, selectedMonth]);
 
   return (
     <Card className="h-full">
