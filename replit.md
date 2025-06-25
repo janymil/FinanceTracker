@@ -140,6 +140,8 @@ LATEST FIXES:
 - June 25, 2025. DIRECT FLY.IO CALLS: All 7 AI functions now make direct external processor calls with no caching interference
 - June 25, 2025. COMPLETE SUCCESS: All 7 AI functions confirmed working via Fly.io OpenAI with sophisticated responses
 - June 25, 2025. FINAL STATUS: financial-health-score (92/100 score), financial-tips ($20 savings), spending-insights (bulk buying), contextual-tips, daily-recommendations, trend-predictions, expense-predictions all operational
+- June 25, 2025. TASK CLARIFIED: Removing only empty array fallbacks that intentionally send empty data to OpenAI APIs, not legitimate null-checking fallbacks
+- June 25, 2025. TARGET: Fallbacks like `payload.transactions || []` that prevent real user transaction data from reaching OpenAI processing
 
 Changelog:
 - June 13, 2025. Initial setup

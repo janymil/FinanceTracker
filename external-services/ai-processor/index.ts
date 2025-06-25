@@ -1591,7 +1591,7 @@ app.post("/execute-gpt-task", async (req, res) => {
         // Validate and fix payload structure for contextual tips
         const contextualPayload = {
           summary: payload.summary,
-          transactions: payload.transactions,
+          transactions: payload.transactions, 
           budgets: payload.budgets,
           goals: payload.goals,
           selectedMonth: payload.selectedMonth
