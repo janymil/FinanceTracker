@@ -128,16 +128,15 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
         actionable: Boolean(tip.actionable)
       })) : [];
 
-      // Always save to unified cache
-      const month = selectedMonth || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      try {
-        console.log('Contextual tips: Attempting cache save', { userId: userId.substring(0, 8) + '...', month, tipCount: tips.length });
-        await unifiedAICache.set('contextual-tips', userId, month, cachePayload, { tips });
-        console.log('✅ Contextual financial tips: Successfully saved to unified cache');
-      } catch (cacheError) {
-        console.error("❌ CRITICAL: Failed to save contextual tips to unified cache:", cacheError);
-        console.error("Cache save details:", { userId: userId.substring(0, 8) + '...', month, error: cacheError.message });
-      }
+      // CACHE SAVE DISABLED FOR TESTING
+      console.log('Cache save disabled - not saving tips to cache');
+
+      // Add cache-busting headers
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
 
       return res.json({ tips });
 

@@ -144,12 +144,17 @@ export function registerAIRoutes(app: Express) {
         totalIncome: financialData.totalIncome || 0,
         totalExpenses: financialData.totalExpenses || 0,
         transactions: formattedTransactions.slice(0, 50)
-      });
+      // });
       
-      if (cachedResult && !financialData.timestamp) {
-        console.log('AI financial tips: Using unified cache - avoiding API call');
-        return res.json({ tip: `${cachedResult[0]?.title}: ${cachedResult[0]?.description}` });
-      }
+      // CACHE CHECK DISABLED - FORCING FRESH CALLS
+      console.log('Cache disabled - calling Fly.io processor directly');
+      
+      // Add cache-busting headers for all AI responses
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
 
       console.log(`Processing ${formattedTransactions.length} transactions for AI analysis`);
 
@@ -462,6 +467,13 @@ export function registerAIRoutes(app: Express) {
       
       // CACHE DISABLED FOR TESTING
       const cachedResult = null; // await unifiedAICache.get('daily-recommendations', userId, month, cachePayload);
+      
+      // Add cache-busting headers
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
       
       if (cachedResult) {
         console.log('Daily recommendations: Using cached data');
