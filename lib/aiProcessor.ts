@@ -1,5 +1,14 @@
-// Cache system completely removed - direct Fly.io calls only
+// Centralized AI Processor with Fly.io Primary + Local Fallback
 import crypto from 'crypto';
+import { 
+  generateContextualFinancialTips,
+  generateFinancialTips,
+  generateDailyRecommendations,
+  generateSpendingInsights,
+  generateAIFinancialHealthScore,
+  generateTrendPredictions,
+  generateExpensePredictions
+} from '../server/openai.js';
 
 function hashObject(obj: any): string {
   const json = JSON.stringify(obj);
@@ -12,8 +21,7 @@ function hashObject(obj: any): string {
  * Handles: GPT Execution, Retry/Fallback, OpenAI Key Handling
  */
 export async function runAI(task: string, userId: string, payload: Record<string, any>) {
-  console.log(`[AI ${task}] Direct Fly.io call - NO CACHE`);
-  console.log(`[AI ${task}] PAYLOAD BEING SENT TO FLY.IO:`, JSON.stringify(payload, null, 2));
+  console.log(`[AI ${task}] Direct Fly.io call with local fallback`);
 
   try {
     console.log(`[AI ${task}] Calling Fly.io processor...`);
@@ -31,22 +39,60 @@ export async function runAI(task: string, userId: string, payload: Record<string
 
     if (!response.ok) {
       console.error(`[AI ${task}] Fly.io error:`, response.status, response.statusText);
-      const errorText = await response.text();
-      console.error(`[AI ${task}] Fly.io error details:`, errorText);
       throw new Error(`Fly.io processor failed: ${response.status}`);
     }
 
     const result = await response.json();
-    console.log(`[AI ${task}] SUCCESS: Fly.io response received (direct call, no caching)`);
+    
+    // Check if result is empty or error
+    if (result?.error || !result || (Array.isArray(result) && result.length === 0)) {
+      console.log(`[AI ${task}] Fly.io returned empty/error result, triggering local fallback`);
+      throw new Error('Empty or error response from Fly.io');
+    }
+
+    console.log(`[AI ${task}] SUCCESS: Fly.io response received`);
     return result;
 
   } catch (error: any) {
-    console.error(`[AI ${task}] Fly.io error - returning empty result:`, error.message);
+    console.error(`[AI ${task}] Fly.io failed, attempting local fallback:`, error.message);
     
-    // Return proper error structures - no fallback data
-    return { 
-      error: 'AI service temporarily unavailable', 
-      message: 'Unable to process request at this time' 
-    };
+    try {
+      let fallbackResult;
+      
+      switch (task) {
+        case 'contextual-tips':
+          fallbackResult = await generateContextualFinancialTips(userId, payload);
+          break;
+        case 'financial-tips':
+          fallbackResult = await generateFinancialTips(userId, payload);
+          break;
+        case 'daily-recommendations':
+          fallbackResult = await generateDailyRecommendations(userId, payload);
+          break;
+        case 'spending-insights':
+          fallbackResult = await generateSpendingInsights(userId, payload.transactions);
+          break;
+        case 'financial-health-score':
+          fallbackResult = await generateAIFinancialHealthScore(userId, payload);
+          break;
+        case 'trend-predictions':
+          fallbackResult = await generateTrendPredictions(userId, payload.transactions, payload.budgets);
+          break;
+        case 'expense-predictions':
+          fallbackResult = await generateExpensePredictions(userId, payload.transactions);
+          break;
+        default:
+          throw new Error(`No local fallback available for task: ${task}`);
+      }
+      
+      console.log(`[AI ${task}] SUCCESS: Local fallback completed`);
+      return fallbackResult;
+    } catch (fallbackError: any) {
+      console.error(`[AI ${task}] Local fallback also failed:`, fallbackError.message);
+      return { 
+        error: 'AI service temporarily unavailable', 
+        message: 'Unable to process request at this time' 
+      };
+    }
   }
 }
