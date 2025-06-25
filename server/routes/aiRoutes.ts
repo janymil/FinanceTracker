@@ -166,18 +166,36 @@ export function registerAIRoutes(app: Express) {
       const tipResults = await runAI('financial-tips', userId, aiPayload);
 
       // Debug authentication and save to unified cache
-      console.log('🔥 Financial tips endpoint called:', { 
+      console.log('TIP ENDPOINT: Fly.io response received:', { 
         userId: userId?.substring(0, 8) + '...', 
         hasFinancialData: !!financialData,
-        tipResultsLength: tipResults?.length 
+        responseType: typeof tipResults,
+        isArray: Array.isArray(tipResults),
+        tipResultsLength: Array.isArray(tipResults) ? tipResults.length : 'not array',
+        actualResponse: JSON.stringify(tipResults).substring(0, 200) + '...'
       });
       
       // No caching system
 
+      // Handle Fly.io response format - check for error conditions first
+      if (tipResults?.error) {
+        console.error('TIP ENDPOINT: Fly.io returned error:', tipResults.error);
+        return res.status(500).json({ message: "AI service temporarily unavailable" });
+      }
+
       // Format response for frontend compatibility - Fly.io returns array, frontend expects {tip: string}
-      const formattedResponse = Array.isArray(tipResults) && tipResults.length > 0 
-        ? { tip: tipResults[0].description || tipResults[0].title || 'Financial analysis completed' }
-        : { tip: tipResults?.tip || tipResults?.description || 'Unable to generate tip at this time' };
+      let formattedResponse;
+      if (Array.isArray(tipResults) && tipResults.length > 0) {
+        const firstTip = tipResults[0];
+        formattedResponse = { 
+          tip: firstTip.description || firstTip.title || 'Financial analysis completed' 
+        };
+      } else if (tipResults && typeof tipResults === 'object' && tipResults.tip) {
+        formattedResponse = { tip: tipResults.tip };
+      } else {
+        console.error('TIP ENDPOINT: Unexpected response format:', tipResults);
+        return res.status(500).json({ message: "Failed to generate financial tip" });
+      }
 
       return res.json(formattedResponse);
     } catch (error) {
