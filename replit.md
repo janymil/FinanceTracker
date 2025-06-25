@@ -145,14 +145,12 @@ LATEST FIXES:
 - June 25, 2025. DIRECT FLY.IO CALLS: All 7 AI functions now make direct external processor calls with no caching interference
 - June 25, 2025. FRESH RESPONSES ONLY: AI functions return fresh OpenAI responses with 5-15 second processing times
 - June 25, 2025. EMPTY ARRAY FALLBACKS REMOVED: Eliminated all defensive programming that sends fake empty data to OpenAI instead of real user data or proper failures
-- June 25, 2025. CENTRALIZED CACHE SYSTEM FULLY OPERATIONAL: Successfully implemented and tested UnifiedAICache across all 7 AI functions with verified cache hits
-- June 25, 2025. CACHE PERFORMANCE CONFIRMED: System reducing OpenAI API costs by 80-90% with response times dropping from 60+ seconds to 67ms for cached results
-- June 25, 2025. TTL SYSTEM VERIFIED: Function-specific TTL values working correctly - daily-recommendations (24h), expense-predictions (48h), financial-health-score (24h), trend-predictions (48h), contextual-tips (72h), financial-tips (168h), spending-insights (72h)
-- June 25, 2025. CACHE HIT TRACKING: Database monitoring confirms cache retrieval working with hit_count increments and proper cache utilization
-- June 25, 2025. UNIFIED CACHE ARCHITECTURE: Single ai_cache table with secure per-user isolation using Clerk authentication, SHA-256 input hashing, and intelligent TTL management
-- June 25, 2025. FALLBACK SYSTEM OPERATIONAL: Fly.io primary processor with local OpenAI fallback working seamlessly, both paths properly cache results
-- June 25, 2025. COMPREHENSIVE AI PROCESSOR: All 7 AI functions integrated with centralized cache system ensuring cost optimization while maintaining fresh responses when needed
-- June 25, 2025. SECURE USER ISOLATION: Complete per-user cache isolation verified - no cross-user data access possible with Clerk user.id authentication
+- June 25, 2025. CACHE INCONSISTENCY FIXED: Expense predictions cache bug resolved - standardized input filtering to use only expense transactions for consistent SHA-256 hashing
+- June 25, 2025. CACHE INPUT STANDARDIZATION: Fixed cache key mismatch between route and fallback functions by using filtered expenseTransactions as consistent cache input
+- June 25, 2025. CACHE SYSTEM OPERATIONAL: UnifiedAICache working across all 7 AI functions with proper TTL values and fallback integration
+- June 25, 2025. TTL SYSTEM VERIFIED: Function-specific TTL values - daily-recommendations (24h), expense-predictions (48h), financial-health-score (24h), trend-predictions (48h), contextual-tips (72h), financial-tips (168h), spending-insights (72h)
+- June 25, 2025. UNIFIED CACHE ARCHITECTURE: Single ai_cache table with secure per-user isolation using Clerk authentication and consistent input hashing
+- June 25, 2025. FALLBACK SYSTEM OPERATIONAL: Fly.io primary processor with local OpenAI fallback, both paths use unified cache system
 
 Changelog:
 - June 13, 2025. Initial setup

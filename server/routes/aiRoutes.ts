@@ -793,25 +793,41 @@ export function registerAIRoutes(app: Express) {
       // Always call Fly.io even with empty data for testing
       console.log('EXPENSE PREDICTIONS: Processing with', transactions.length, 'transactions');
 
-      const aiPayload = {
-        transactions: transactions.slice(0, 100),
-        summary: req.body.summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 }
-      };
+      // Filter expense transactions for consistent cache hashing
+      const expenseTransactions = transactions
+        .filter(t => t.type === 'expense')
+        .slice(0, 100)
+        .map(t => ({
+          id: t.id,
+          amount: t.amount,
+          description: t.description,
+          date: t.date,
+          type: t.type,
+          categoryName: t.categoryName,
+          recurring: t.recurring
+        }));
+
+      // Use only filtered transactions for consistent cache key
+      const cacheInput = { transactions: expenseTransactions };
 
       // Initialize UnifiedAICache with 48 hours TTL
       const cache = new UnifiedAICache('expense-predictions', userId);
 
       // Try to get cached result
-      const cachedResult = await cache.get(aiPayload);
+      const cachedResult = await cache.get(cacheInput);
       if (cachedResult) {
         return res.json(cachedResult);
       }
 
-      // Generate new AI response
+      // Generate new AI response with full payload
+      const aiPayload = {
+        transactions: transactions.slice(0, 100),
+        summary: req.body.summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 }
+      };
       const predictions = await runAI('expense-predictions', userId, aiPayload);
 
-      // Cache the result for 48 hours
-      await cache.set(aiPayload, predictions, false, 48);
+      // Cache the result for 48 hours using consistent input
+      await cache.set(cacheInput, predictions, false, 48);
 
       return res.json(predictions);
     } catch (error) {
