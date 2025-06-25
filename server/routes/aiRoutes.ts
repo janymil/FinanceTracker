@@ -6,7 +6,7 @@ import {
   type ExpenseCategorizationResult 
 } from "../openai";
 import { runAI } from "../../lib/aiProcessor";
-// Cache system completely removed - direct Fly.io calls only
+import { UnifiedAICache } from "../../lib/unifiedAICache";
 import { 
   transactions, 
   categories, 
@@ -99,48 +99,26 @@ export function registerAIRoutes(app: Express) {
 
   // AI Financial Tips endpoint with detailed transaction data
   app.post('/api/ai/tip', isAuthenticated, async (req: any, res) => {
-    console.log('TIP ENDPOINT: Request received - starting processing');
-    console.log('TIP ENDPOINT: Headers:', Object.keys(req.headers));
-    console.log('TIP ENDPOINT: Body keys:', Object.keys(req.body || {}));
     try {
       const userId = getUserId(req);
-      console.log('TIP ENDPOINT: User ID extracted:', userId ? 'YES' : 'NO');
       if (!userId) {
-        console.log('TIP ENDPOINT: No user ID found');
         return res.status(401).json({ message: "Authentication required" });
       }
       
       const user = await storage.getUser(userId);
-      console.log('TIP ENDPOINT: User found:', { userExists: !!user, userPlan: user?.plan });
       if (!user || user.plan !== 'premium') {
-        console.log('TIP ENDPOINT: Plan check failed:', { userPlan: user?.plan });
         return res.status(403).json({ message: "AI financial tips require premium plan" });
       }
-
-      console.log('TIP ENDPOINT: Authentication passed, checking financial data');
 
       // Get financial data from request body (sent from frontend)
       const { financialData } = req.body;
       
-      console.log('TIP ENDPOINT: Request body:', JSON.stringify(req.body, null, 2));
-      
       if (!financialData || !financialData.transactions) {
-        console.log('TIP ENDPOINT: No financial data or transactions found');
         return res.status(400).json({ message: "Financial data with transactions required" });
       }
 
-      // Validate and process transaction data
-      const transactions = financialData.transactions;
-      // Always call Fly.io with authentic user data - no defensive fallbacks
-      console.log('TIP ENDPOINT: Processing authentic user data:', { 
-        transactionCount: transactions.length,
-        hasFinancialData: !!financialData 
-      });
-
-      console.log('TIP ENDPOINT: Processing', transactions.length, 'transactions');
-
       // Format transaction data for AI analysis with detailed information
-      const formattedTransactions = transactions.map((t: any) => ({
+      const formattedTransactions = financialData.transactions.map((t: any) => ({
         id: t.id,
         description: t.note || `${t.categoryName || 'Transaction'}`,
         amount: t.amount,
@@ -151,15 +129,6 @@ export function registerAIRoutes(app: Express) {
         budgetAssigned: t.budgetAssigned
       }));
 
-      // Cache system completely removed - direct Fly.io calls only
-      console.log('Making direct Fly.io call with authentic user data');
-      
-      // Direct AI processing - no cache interference
-
-      console.log(`Processing ${formattedTransactions.length} transactions for AI analysis`);
-
-      console.log('AI financial tips: Making Fly.io API call via centralized processor');
-      
       const aiPayload = {
         totalIncome: financialData.totalIncome,
         totalExpenses: financialData.totalExpenses,
@@ -168,19 +137,17 @@ export function registerAIRoutes(app: Express) {
         timestamp: financialData.timestamp
       };
 
-      const tipResults = await runAI('financial-tips', userId, aiPayload);
+      // Initialize UnifiedAICache with 168 hours TTL (7 days)
+      const cache = new UnifiedAICache('financial-tips', userId);
 
-      // Debug authentication and save to unified cache
-      console.log('TIP ENDPOINT: Fly.io response received:', { 
-        userId: userId?.substring(0, 8) + '...', 
-        hasFinancialData: !!financialData,
-        responseType: typeof tipResults,
-        isArray: Array.isArray(tipResults),
-        tipResultsLength: Array.isArray(tipResults) ? tipResults.length : 'not array',
-        actualResponse: JSON.stringify(tipResults).substring(0, 200) + '...'
-      });
-      
-      // No caching system
+      // Try to get cached result
+      const cachedResult = await cache.get(aiPayload);
+      if (cachedResult) {
+        return res.json(cachedResult);
+      }
+
+      // Generate new AI response
+      const tipResults = await runAI('financial-tips', userId, aiPayload);
 
       // Handle Fly.io response format - check for error conditions first
       if (tipResults?.error) {
@@ -188,17 +155,20 @@ export function registerAIRoutes(app: Express) {
         return res.status(500).json({ message: "AI service temporarily unavailable" });
       }
 
-      // Return the full detailed analysis from Fly.io processor
+      let responseData;
       if (Array.isArray(tipResults) && tipResults.length > 0) {
-        // Return the complete structured response for rich display
-        return res.json({ tips: tipResults });
+        responseData = { tips: tipResults };
       } else if (tipResults && typeof tipResults === 'object' && tipResults.tip) {
-        // Handle legacy single tip format
-        return res.json({ tip: tipResults.tip });
+        responseData = { tip: tipResults.tip };
       } else {
         console.error('TIP ENDPOINT: Unexpected response format:', tipResults);
         return res.status(500).json({ message: "Failed to generate financial tip" });
       }
+
+      // Cache the successful result for 168 hours (7 days)
+      await cache.set(aiPayload, responseData, false, 168);
+
+      return res.json(responseData);
     } catch (error) {
       console.error("Error generating financial tip:", error);
       return res.status(500).json({ message: "Failed to generate financial tip" });
@@ -222,19 +192,6 @@ export function registerAIRoutes(app: Express) {
 
       const transactions = await storage.getUserTransactions(userId, 100);
 
-      // Standardize cache payload for spending insights
-      const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      const cachePayload = {
-        transactions: transactions.slice(0, 100)
-      };
-      
-      // CACHE DISABLED FOR TESTING
-      // Cache system completely removed
-      
-      // Cache system removed
-
-      console.log('AI spending insights: Making Fly.io API call via centralized processor');
-      
       const aiPayload = {
         transactions: transactions.map(t => ({
           description: t.description,
@@ -245,16 +202,20 @@ export function registerAIRoutes(app: Express) {
         }))
       };
 
-      // Debug authentication and AI processing
-      console.log('🔥 Spending insights endpoint called:', { 
-        userId: userId?.substring(0, 8) + '...', 
-        transactionCount: transactions?.length || 0 
-      });
-      
+      // Initialize UnifiedAICache with 72 hours TTL
+      const cache = new UnifiedAICache('spending-insights', userId);
+
+      // Try to get cached result
+      const cachedResult = await cache.get(aiPayload);
+      if (cachedResult) {
+        return res.json(cachedResult);
+      }
+
+      // Generate new AI response
       const insights = await runAI('spending-insights', userId, aiPayload);
-      
-      // Save to unified cache with enhanced error logging
-      // No caching system
+
+      // Cache the result for 72 hours
+      await cache.set(aiPayload, insights, false, 72);
 
       return res.json(insights);
     } catch (error) {
