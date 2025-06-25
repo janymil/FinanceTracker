@@ -593,27 +593,28 @@ Return comprehensive analysis in JSON:
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
 
-    // Handle comprehensive analysis response
-    const processedTips = result.title && result.description ? [{
-      title: result.title,
-      description: result.description,
-      category: result.category || 'comprehensive',
-      priority: result.priority || 'high',
-      actionable: Boolean(result.actionable),
-      estimatedSaving: result.estimatedSaving || undefined,
-      educational: Boolean(result.educational)
-    }] : [{
+    // Handle comprehensive analysis response - return the full detailed analysis
+    if (result.title && result.description) {
+      // Return the comprehensive analysis as a single detailed tip
+      return [{
+        title: result.title,
+        description: result.description,
+        category: result.category || 'comprehensive',
+        priority: result.priority || 'high',
+        actionable: Boolean(result.actionable),
+        estimatedSaving: result.estimatedSaving || undefined,
+        educational: Boolean(result.educational)
+      }];
+    }
+    
+    // Fallback if no comprehensive analysis received
+    return [{
       title: 'Track Your Expenses',
       description: 'Start by categorizing all your expenses to understand where your money goes each month.',
       category: 'budgeting',
       priority: 'high',
       actionable: true
     }];
-
-    // Note: Cache now handled by unified cache system via routes
-    // Success logging removed for production
-
-    return processedTips as any; // Type assertion for deployment
   } catch (error) {
     console.error('Error generating financial tips:', error);
     return [

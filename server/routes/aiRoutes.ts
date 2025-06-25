@@ -188,23 +188,17 @@ export function registerAIRoutes(app: Express) {
         return res.status(500).json({ message: "AI service temporarily unavailable" });
       }
 
-      // Format response for frontend compatibility - Fly.io returns array, frontend expects {tip: string}
-      let formattedResponse;
+      // Return the full detailed analysis from Fly.io processor
       if (Array.isArray(tipResults) && tipResults.length > 0) {
-        const firstTip = tipResults[0];
-        // Combine title and description for comprehensive tip
-        const tipContent = firstTip.title && firstTip.description 
-          ? `${firstTip.title}: ${firstTip.description}`
-          : firstTip.description || firstTip.title || 'Financial analysis completed';
-        formattedResponse = { tip: tipContent };
+        // Return the complete structured response for rich display
+        return res.json({ tips: tipResults });
       } else if (tipResults && typeof tipResults === 'object' && tipResults.tip) {
-        formattedResponse = { tip: tipResults.tip };
+        // Handle legacy single tip format
+        return res.json({ tip: tipResults.tip });
       } else {
         console.error('TIP ENDPOINT: Unexpected response format:', tipResults);
         return res.status(500).json({ message: "Failed to generate financial tip" });
       }
-
-      return res.json(formattedResponse);
     } catch (error) {
       console.error("Error generating financial tip:", error);
       return res.status(500).json({ message: "Failed to generate financial tip" });

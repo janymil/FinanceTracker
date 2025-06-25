@@ -95,18 +95,18 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const generateTipMutation = useMutation({
     mutationFn: async () => {
       if (!summary) throw new Error("No financial summary available");
-      
+
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
       const month = currentDate.getMonth() + 1;
       const year = currentDate.getFullYear();
-      
+
       // Fetch detailed transactions for current month
       // Get detailed transactions for current month using summary data
       const detailedTransactions = summary.recentTransactions || [];
-      
+
       // Remove blocking validation - let AI decide if data is sufficient
-      
+
       // Direct fetch to avoid GET/HEAD method issues
       const token = await window.Clerk?.session?.getToken();
       const response = await fetch("/api/ai/tip", {
@@ -134,8 +134,16 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       }
 
       const data = await response.json();
-      if (!data.tip || !data.tip.trim()) {
-        throw new Error("No tip received from AI");
+
+      // Handle both new structured format and legacy format
+      if (data.tips && Array.isArray(data.tips) && data.tips.length > 0) {
+        // New structured format with detailed analysis
+        const detailedTip = data.tips[0];
+        const formattedTip = `**${detailedTip.title}**\n\n${detailedTip.description}`;
+        setCurrentTip(formattedTip);
+      } else {
+        // Legacy format
+        setCurrentTip(data.tip || 'Unable to generate tip at this time.');
       }
 
       return cleanAIText(data.tip);
@@ -219,7 +227,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                 {(() => {
                   // Clean the content but preserve structure
                   const cleanedContent = currentTip;
-                  
+
                   // Define the 4 thematic sections with their patterns
                   const sectionPatterns = [
                     {
@@ -264,7 +272,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                         ...pattern,
                         content: cleanAIText(matchedSentences.join('. ').trim() + '.')
                       });
-                      
+
                       // Remove matched sentences from the pool
                       matchedSentences.forEach(matched => {
                         const index = sentences.indexOf(matched);
@@ -276,7 +284,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                   // If we have remaining sentences or didn't get 4 sections, distribute them
                   if (sentences.length > 0 || sections.length < 4) {
                     const remainingText = sentences.join('. ').trim();
-                    
+
                     // If we have less than 4 sections, add the remaining patterns with remaining content
                     const missingSections = sectionPatterns.filter(pattern => 
                       !sections.some(section => section.title === pattern.title)
@@ -289,7 +297,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                         const chunkStart = Math.floor((chunks.length / missingSections.length) * index);
                         const chunkEnd = Math.floor((chunks.length / missingSections.length) * (index + 1));
                         const content = chunks.slice(chunkStart, chunkEnd).join('. ').trim();
-                        
+
                         if (content) {
                           sections.push({
                             ...pattern,
