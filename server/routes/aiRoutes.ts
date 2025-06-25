@@ -219,13 +219,13 @@ export function registerAIRoutes(app: Express) {
 
       const transactions = await storage.getUserTransactions(userId, 100);
 
-      // Check unified cache for spending insights
+      // Standardize cache payload for spending insights
       const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      const cacheData = {
+      const cachePayload = {
         transactions: transactions.slice(0, 100)
       };
       
-      const cachedResult = await unifiedAICache.get('spending-insights', userId, month, cacheData);
+      const cachedResult = await unifiedAICache.get('spending-insights', userId, month, cachePayload);
       
       if (cachedResult) {
         console.log('AI spending insights: Using unified cache - avoiding API call');
@@ -248,7 +248,7 @@ export function registerAIRoutes(app: Express) {
       
       // Save to unified cache
       try {
-        await unifiedAICache.set('spending-insights', userId, month, cacheData, insights);
+        await unifiedAICache.set('spending-insights', userId, month, cachePayload, insights);
         console.log('AI spending insights: Saved to unified cache');
       } catch (cacheError) {
         console.error("Error saving spending insights to unified cache:", cacheError);
@@ -426,15 +426,15 @@ export function registerAIRoutes(app: Express) {
       };
       const dataHash = aiCache.createDataHash(dataForHash);
 
-      // Check unified cache for recommendations
+      // Standardize cache payload for daily recommendations
       const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      const cacheData = {
+      const cachePayload = {
         summary,
         transactions: transactions.slice(0, 100),
         budgets
       };
       
-      const cachedResult = await unifiedAICache.get('daily-recommendations', userId, month, cacheData);
+      const cachedResult = await unifiedAICache.get('daily-recommendations', userId, month, cachePayload);
       
       if (cachedResult) {
         console.log('Daily recommendations: Using cached data');
@@ -528,7 +528,7 @@ export function registerAIRoutes(app: Express) {
 
       // Save to unified cache system
       try {
-        await unifiedAICache.set('daily-recommendations', userId, month, cacheData, recommendations);
+        await unifiedAICache.set('daily-recommendations', userId, month, cachePayload, recommendations);
         console.log('Daily recommendations: Saved to cache');
       } catch (cacheError) {
         console.error("Error saving daily recommendations to cache:", cacheError);
@@ -896,11 +896,13 @@ export function registerAIRoutes(app: Express) {
         });
       }
 
-      // Check unified cache for expense predictions
+      // Standardize cache payload for expense predictions  
       const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      const cachedResult = await unifiedAICache.get('expense-predictions', userId, month, {
+      const cachePayload = {
         transactions: transactions.slice(0, 100)
-      });
+      };
+      
+      const cachedResult = await unifiedAICache.get('expense-predictions', userId, month, cachePayload);
       
       if (cachedResult) {
         console.log('AI expense predictions: Using unified cache - avoiding API call');
@@ -918,9 +920,7 @@ export function registerAIRoutes(app: Express) {
 
       // Save to unified cache
       try {
-        await unifiedAICache.set('expense-predictions', userId, month, {
-          transactions: transactions.slice(0, 100)
-        }, predictions);
+        await unifiedAICache.set('expense-predictions', userId, month, cachePayload, predictions);
         console.log('AI expense predictions: Saved to unified cache');
       } catch (cacheError) {
         console.error("Error saving expense predictions to unified cache:", cacheError);
