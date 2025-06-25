@@ -34,6 +34,21 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const { user } = useUser();
 
+  // Load cached tip on component mount
+  useEffect(() => {
+    const cachedTip = localStorage.getItem('ai-financial-tip');
+    if (cachedTip && !currentTip) {
+      setCurrentTip(cachedTip);
+    }
+  }, []);
+
+  // Save tip to localStorage whenever it changes
+  useEffect(() => {
+    if (currentTip) {
+      localStorage.setItem('ai-financial-tip', currentTip);
+    }
+  }, [currentTip]);
+
   // Function to clean AI-generated text
   const cleanAIText = (text: string | undefined): string => {
     if (!text || typeof text !== 'string') {

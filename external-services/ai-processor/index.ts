@@ -14,9 +14,19 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
 // PostgreSQL connection for unified cache
+console.log('Database connection setup:', {
+  hasUrl: !!process.env.DATABASE_URL,
+  nodeEnv: process.env.NODE_ENV,
+  urlPrefix: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 20) + '...' : 'none'
+});
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  // Add connection timeout and retry settings
+  connectionTimeoutMillis: 5000,
+  idleTimeoutMillis: 30000,
+  max: 10
 });
 
 // Unified AI Cache class for Fly.io processor
