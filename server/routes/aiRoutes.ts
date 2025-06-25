@@ -306,20 +306,6 @@ export function registerAIRoutes(app: Express) {
       const categories = await storage.getCategories(userId);
       const budgets = await storage.getUserBudgets(userId);
 
-      // Standardize cache payload for trend predictions
-      const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      const cachePayload = {
-        transactions: transactions.slice(0, 100),
-        budgets: budgets.slice(0, 20)
-      };
-      
-      // CACHE DISABLED FOR TESTING
-      // Cache system completely removed
-      
-      // Cache system removed
-
-      console.log('AI trend predictions: Making Fly.io API call via centralized processor');
-      
       const aiPayload = {
         transactions: transactions.map(t => ({
           id: t.id,
@@ -337,9 +323,20 @@ export function registerAIRoutes(app: Express) {
           }))
       };
 
+      // Initialize UnifiedAICache with 48 hours TTL
+      const cache = new UnifiedAICache('trend-predictions', userId);
+
+      // Try to get cached result
+      const cachedResult = await cache.get(aiPayload);
+      if (cachedResult) {
+        return res.json(cachedResult);
+      }
+
+      // Generate new AI response
       const predictions = await runAI('trend-predictions', userId, aiPayload);
 
-      // No caching system
+      // Cache the result for 48 hours
+      await cache.set(aiPayload, predictions, false, 48);
 
       return res.json(predictions);
     } catch (error) {
@@ -520,9 +517,7 @@ export function registerAIRoutes(app: Express) {
           spent: budgetSpending.get(b.categoryName) || 0
         }));
 
-      // Use unified AI processor for financial health score
-      console.log('Financial health: Making Fly.io API call via centralized processor');
-      const healthData = await runAI('financial-health-score', userId, {
+      const aiPayload = {
         transactions: processedTransactions,
         budgets: processedBudgets,
         summary: {
@@ -530,9 +525,22 @@ export function registerAIRoutes(app: Express) {
           totalExpenses: summary.totalExpenses,
           netBalance: summary.totalIncome - summary.totalExpenses
         }
-      });
+      };
 
-      // No caching system
+      // Initialize UnifiedAICache with 24 hours TTL
+      const cache = new UnifiedAICache('financial-health-score', userId);
+
+      // Try to get cached result
+      const cachedResult = await cache.get(aiPayload);
+      if (cachedResult) {
+        return res.json(cachedResult);
+      }
+
+      // Generate new AI response
+      const healthData = await runAI('financial-health-score', userId, aiPayload);
+
+      // Cache the result for 24 hours
+      await cache.set(aiPayload, healthData, false, 24);
 
       return res.json(healthData);
     } catch (error) {
@@ -784,28 +792,25 @@ export function registerAIRoutes(app: Express) {
       // Always call Fly.io even with empty data for testing
       console.log('EXPENSE PREDICTIONS: Processing with', transactions.length, 'transactions');
 
-      // Standardize cache payload for expense predictions  
-      const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      const cachePayload = {
-        transactions: transactions.slice(0, 100)
-      };
-      
-      // CACHE DISABLED FOR TESTING
-      // Cache system completely removed
-      
-      // Cache system removed
-
-      console.log('AI expense predictions: Making Fly.io API call via centralized processor');
-      
       const aiPayload = {
         transactions: transactions.slice(0, 100),
         summary: req.body.summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 }
       };
 
+      // Initialize UnifiedAICache with 48 hours TTL
+      const cache = new UnifiedAICache('expense-predictions', userId);
+
+      // Try to get cached result
+      const cachedResult = await cache.get(aiPayload);
+      if (cachedResult) {
+        return res.json(cachedResult);
+      }
+
+      // Generate new AI response
       const predictions = await runAI('expense-predictions', userId, aiPayload);
 
-      // Save to unified cache
-      // No caching system
+      // Cache the result for 48 hours
+      await cache.set(aiPayload, predictions, false, 48);
 
       return res.json(predictions);
     } catch (error) {
@@ -899,19 +904,6 @@ Answer questions about features, subscription plans, how to use the app, trouble
         return res.status(400).json({ message: "Transactions and summary are required" });
       }
 
-      // Standardize cache payload to match unified cache system
-      const cachePayload = {
-        summary,
-        transactions: transactions.slice(0, 10),
-        budgets,
-        goals
-      };
-
-      // CACHE COMPLETELY DISABLED FOR TESTING
-      console.log('[AI contextual-tips] Cache check bypassed - forcing Fly.io call');
-      
-      console.log('Contextual financial tips: Generating new AI tips - data changed or cache expired');
-
       // Format the selected month for natural language
       const formatMonth = (selectedMonth: string) => {
         if (!selectedMonth) return 'Current Month';
@@ -953,10 +945,27 @@ Answer questions about features, subscription plans, how to use the app, trouble
         selectedMonth: formattedMonth
       };
 
-      // Use centralized AI processor - fixed task name to match Fly.io processor
-      console.log('[AI contextual-tips] Cache bypassed - testing Fly.io processor directly');
+      // Initialize UnifiedAICache with 72 hours TTL
+      const cache = new UnifiedAICache('contextual-tips', userId);
+
+      // Try to get cached result
+      const cachedResult = await cache.get(aiPayload);
+      if (cachedResult) {
+        // Return cached tips with proper formatting
+        const tips = Array.isArray(cachedResult?.tips) ? cachedResult.tips.map((tip: any, index: number) => ({
+          id: tip.id || `tip_${Date.now()}_${index}`,
+          title: tip.title || 'Financial Tip',
+          description: tip.description || 'No description available',
+          category: ['spending', 'saving', 'budgeting', 'income'].includes(tip.category) ? tip.category : 'budgeting',
+          priority: ['high', 'medium', 'low'].includes(tip.priority) ? tip.priority : 'medium',
+          actionable: Boolean(tip.actionable)
+        })) : [];
+        
+        return res.json({ tips });
+      }
+
+      // Generate new AI response
       const result = await runAI('contextual-tips', userId, aiPayload);
-      console.log('[AI contextual-tips] Received result from processor:', result ? 'SUCCESS' : 'FAILED');
       
       // Handle centralized processor response
       const tips = Array.isArray(result?.tips) ? result.tips.map((tip: any, index: number) => ({
@@ -968,20 +977,8 @@ Answer questions about features, subscription plans, how to use the app, trouble
         actionable: Boolean(tip.actionable)
       })) : [];
 
-      // No caching system
-
-      // Add cache-busting headers
-      res.set({
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      });
-
-      console.log('Contextual financial tips: Returning tips', {
-        tipsCount: tips.length,
-        source: 'ai-processor',
-        firstTipTitle: tips[0]?.title || 'none'
-      });
+      // Cache the result for 72 hours
+      await cache.set(aiPayload, { tips }, false, 72);
 
       return res.json({ tips });
     } catch (error) {
