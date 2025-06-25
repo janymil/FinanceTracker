@@ -391,14 +391,8 @@ export function registerAIRoutes(app: Express) {
         return res.status(400).json({ message: "Transactions array is required" });
       }
 
-      // Check minimum data requirements
-      if (transactions.length < 3) {
-        return res.json({
-          recommendations: [],
-          insights: [],
-          message: "Add at least 3 transactions to get personalized daily recommendations"
-        });
-      }
+      // Always call Fly.io even with minimal data for testing
+      console.log('DAILY RECOMMENDATIONS: Processing with', transactions?.length || 0, 'transactions');
 
       // Create stable hash for caching - only regenerate on significant changes
       const lastWeekTransactions = transactions?.filter(t => {
@@ -845,12 +839,8 @@ export function registerAIRoutes(app: Express) {
 
       const { transactions } = req.body;
 
-      if (!transactions || !Array.isArray(transactions) || transactions.length === 0) {
-        return res.json({ 
-          categoryPredictions: [],
-          monthlyPredictions: []
-        });
-      }
+      // Always call Fly.io even with empty data for testing
+      console.log('EXPENSE PREDICTIONS: Processing with', transactions?.length || 0, 'transactions');
 
       // Standardize cache payload for expense predictions  
       const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;

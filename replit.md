@@ -135,6 +135,9 @@ LATEST FIXES:
 - June 25, 2025. ROOT CAUSE RESOLVED: topCategories and budget validation differences between files were causing Fly.io to return empty responses
 - June 25, 2025. VERIFIED STATUS: 4 of 7 AI functions working via Fly.io OpenAI (contextual-tips, daily-recommendations, trend-predictions, financial-tips)
 - June 25, 2025. REMAINING ISSUES: financial-health-score crashes with undefined.length error, spending-insights intermittent, expense-predictions needs verification
+- June 25, 2025. ROOT CAUSE FOUND: Early validation checks in aiRoutes.ts were preventing AI functions from reaching runAI() calls
+- June 25, 2025. VALIDATION REMOVED: Fixed daily-recommendations and expense-predictions to always call Fly.io regardless of data quantity
+- June 25, 2025. DIRECT FLY.IO CALLS: All 7 AI functions now make direct external processor calls with no caching interference
 
 Changelog:
 - June 13, 2025. Initial setup
