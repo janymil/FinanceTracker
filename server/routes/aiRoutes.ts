@@ -357,12 +357,19 @@ export function registerAIRoutes(app: Express) {
 
       const predictions = await runAI('trend-predictions', userId, aiPayload);
 
-      // Save to unified cache
+      // Save to unified cache with detailed logging
       try {
+        console.log('Trend predictions: Attempting cache save', { 
+          userId: userId.substring(0, 8) + '...', 
+          month, 
+          payloadSize: JSON.stringify(cachePayload).length,
+          predictionKeys: Object.keys(predictions || {})
+        });
         await unifiedAICache.set('trend-predictions', userId, month, cachePayload, predictions);
-        console.log('AI trend predictions: Saved to unified cache');
+        console.log('AI trend predictions: Successfully saved to unified cache');
       } catch (cacheError) {
-        console.error("Error saving trend predictions to unified cache:", cacheError);
+        console.error("CRITICAL: Failed to save trend predictions to cache:", cacheError);
+        console.error("Cache save details:", { userId, month, cacheError: cacheError.message });
       }
 
       return res.json(predictions);

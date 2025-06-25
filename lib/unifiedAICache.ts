@@ -236,8 +236,8 @@ export class UnifiedAICache {
           month: entry.month,
           dataHash: entry.dataHash,
           result: entry.result,
-          createdAt: entry.createdAt,
-          lastAccessed: entry.lastAccessed,
+          createdAt: new Date(),
+          lastAccessed: new Date(),
           updatedAt: new Date()
         });
       }
