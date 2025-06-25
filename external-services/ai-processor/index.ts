@@ -897,10 +897,28 @@ Provide an AI-powered financial health score that adapts to this user's specific
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
 
+    // Ensure score is properly bounded
+    const score = Math.max(0, Math.min(100, result.score || 50));
+    
+    // Determine category based on score (this ensures consistency)
+    let category: 'excellent' | 'good' | 'fair' | 'poor' = 'fair';
+    if (score >= 90) {
+      category = 'excellent';
+    } else if (score >= 80) {
+      category = 'excellent';
+    } else if (score >= 60) {
+      category = 'good';
+    } else if (score >= 40) {
+      category = 'fair';
+    } else {
+      category = 'poor';
+    }
+
     const processedResult = {
-      score: Math.max(0, Math.min(100, result.score || 50)),
+      score,
       status: result.status || 'Fair',
       color: result.color || 'yellow',
+      category, // Add the calculated category
       factors: result.factors,
       icon: result.icon || 'Shield',
       aiAnalysis: {
