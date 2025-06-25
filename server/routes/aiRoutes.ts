@@ -38,7 +38,7 @@ export function registerAIRoutes(app: Express) {
       const uncategorized = transactions.filter(t => !t.categoryName || t.categoryName === 'Uncategorized');
 
       if (uncategorized.length === 0) {
-        return res.json({ suggestions: null });
+        return res.json({ message: "No uncategorized transactions found" });
       }
 
       // Process up to 10 transactions at a time to avoid rate limits
@@ -170,8 +170,8 @@ export function registerAIRoutes(app: Express) {
       console.log('AI financial tips: Making Fly.io API call via centralized processor');
       
       const aiPayload = {
-        totalIncome: financialData.totalIncome || 0,
-        totalExpenses: financialData.totalExpenses || 0,
+        totalIncome: financialData.totalIncome,
+        totalExpenses: financialData.totalExpenses,
         transactionsByCategory: financialData.categories,
         recentTransactions: formattedTransactions,
         timestamp: financialData.timestamp

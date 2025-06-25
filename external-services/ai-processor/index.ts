@@ -482,11 +482,11 @@ export async function generateFinancialTips(financialData: {
       console.log('Bypassing cache for fresh AI financial tips');
     }
     const { 
-      totalIncome = 0, 
-      totalExpenses = 0, 
+      totalIncome, 
+      totalExpenses, 
       transactionsByCategory, 
       recentTransactions 
-    } = financialData || {};
+    } = financialData;
 
     // Validate and prepare the financial summary
     const netBalance = totalIncome - totalExpenses;
@@ -646,7 +646,7 @@ export async function generateSpendingInsights(transactions: Array<{
     const expenseTransactions = transactions.filter(t => t.type === 'expense');
 
     if (expenseTransactions.length === 0) {
-      return null;
+      throw new Error('No expense transactions available for analysis');
     }
 
     // Optimize data processing - limit to 10 most recent transactions
@@ -730,7 +730,7 @@ Generate financial insights based on this spending data.`
     return processedInsights;
   } catch (error) {
     console.error('Error generating spending insights:', error);
-    return null;
+    throw error;
   }
 }
 
@@ -859,19 +859,7 @@ Provide an AI-powered financial health score that adapts to this user's specific
     return processedResult;
   } catch (error) {
     console.error('Error generating AI financial health score:', error);
-    return {
-      score: 50,
-      status: 'Analysis Unavailable',
-      color: 'gray',
-      factors: null,
-      icon: 'AlertTriangle',
-      aiAnalysis: {
-        personalizedFactors: null,
-        riskAssessment: 'Unable to assess risk',
-        recommendations: ['Please try again later'],
-        confidence: 0
-      }
-    };
+    throw error;
   }
 }
 
@@ -893,18 +881,7 @@ export async function generateTrendPredictions(
     // Return zeros for empty data instead of AI-generated examples
     if (!transactions || transactions.length === 0) {
       console.log('No transaction data available - returning zero predictions');
-      return {
-        categoryPredictions: [],
-        financialForecast: {
-          nextMonthExpenses: 0,
-          expectedSavings: 0,
-          budgetVariance: 0,
-          confidence: 0,
-          keyInsights: ['Add transactions to generate AI-powered financial forecasts'],
-          recommendations: ['Start tracking your expenses to receive personalized predictions'],
-          riskFactors: []
-        }
-      };
+      throw new Error('No transaction data available for predictions');
     }
 
     // Note: Cache now handled by unified cache system via routes
@@ -1434,10 +1411,7 @@ Only provide recommendations and insights based on the actual financial data pro
 
   } catch (error) {
     console.error('Error generating daily recommendations:', error);
-    return {
-      recommendations: null,
-      insights: null
-    };
+    throw error;
   }
 }
 
@@ -1591,10 +1565,10 @@ app.post("/execute-gpt-task", async (req, res) => {
         // Validate and fix payload structure for contextual tips
         const contextualPayload = {
           summary: payload.summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 },
-          transactions: Array.isArray(payload.transactions) ? payload.transactions : null,
-          budgets: Array.isArray(payload.budgets) ? payload.budgets : null,
-          goals: Array.isArray(payload.goals) ? payload.goals : null,
-          selectedMonth: payload.selectedMonth || 'Current Month'
+          transactions: payload.transactions,
+          budgets: payload.budgets,
+          goals: payload.goals,
+          selectedMonth: payload.selectedMonth
         };
         
         // Generate summary from transactions if missing or incomplete
@@ -1624,7 +1598,7 @@ app.post("/execute-gpt-task", async (req, res) => {
           summary: payload.summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 },
           transactions: payload.transactions,
           budgets: payload.budgets,
-          categories: payload.categories || {}
+          categories: payload.categories
         };
         console.log('Daily recommendations: Fixed payload structure', Object.keys(dailyPayload));
         result = await generateDailyRecommendations(dailyPayload);
