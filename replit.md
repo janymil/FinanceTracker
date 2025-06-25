@@ -371,7 +371,7 @@ Changelog:
 - June 25, 2025. PRODUCTION SCHEMA VERIFIED: ai_cache table now identical to dev with proper ORM compatibility  
 - June 25, 2025. CACHE SYSTEM OPERATIONAL: Schema fix successful - unified cache system now working correctly in production with proper ORM compatibility
 - June 25, 2025. DEPLOYMENT CONFIGURATION VERIFIED: NODE_ENV correctly set to production in deployment, proper environment variable handling for dev/prod separation
-- June 25, 2025. DATABASE CONNECTION FIX: Removed Neon serverless configuration causing production deployment issues - simplified to use standard PostgreSQL for all environments
+- June 25, 2025. DATABASE CONNECTION REVERTED: Restored original dual-database configuration (Neon for production, PostgreSQL for development) - configuration was correct
 - June 23, 2025. Enhanced AI categorization analysis to properly detect and report actual categorization status in contextual tips with accurate transaction data
 - June 23, 2025. FIXED FALLBACK SYSTEM: Corrected local OpenAI fallback in server/openai.ts to use same categoryName field mapping as Fly.io processor
 - June 23, 2025. Added categorization counting logic to both Fly.io and local fallback systems to prevent "uncategorized" false reports
