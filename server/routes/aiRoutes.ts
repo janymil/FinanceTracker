@@ -188,9 +188,12 @@ export function registerAIRoutes(app: Express) {
         return res.status(500).json({ message: "AI service temporarily unavailable" });
       }
 
-      // Return the full detailed analysis from Fly.io processor
-      if (Array.isArray(tipResults) && tipResults.length > 0) {
-        // Return the complete structured response for rich display
+      // Handle new structured 4-section response format
+      if (tipResults && tipResults.sections && Array.isArray(tipResults.sections) && tipResults.sections.length === 4) {
+        // Return the structured 4-section response
+        return res.json({ sections: tipResults.sections });
+      } else if (Array.isArray(tipResults) && tipResults.length > 0) {
+        // Handle legacy tips array format
         return res.json({ tips: tipResults });
       } else if (tipResults && typeof tipResults === 'object' && tipResults.tip) {
         // Handle legacy single tip format
