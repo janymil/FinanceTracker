@@ -485,7 +485,7 @@ export async function generateFinancialTips(financialData: {
       totalIncome = 0, 
       totalExpenses = 0, 
       transactionsByCategory, 
-      recentTransactions = [] 
+      recentTransactions 
     } = financialData || {};
 
     // Validate and prepare the financial summary
@@ -646,7 +646,7 @@ export async function generateSpendingInsights(transactions: Array<{
     const expenseTransactions = transactions.filter(t => t.type === 'expense');
 
     if (expenseTransactions.length === 0) {
-      return [];
+      return null;
     }
 
     // Optimize data processing - limit to 10 most recent transactions
@@ -730,7 +730,7 @@ Generate financial insights based on this spending data.`
     return processedInsights;
   } catch (error) {
     console.error('Error generating spending insights:', error);
-    return [];
+    return null;
   }
 }
 
@@ -863,10 +863,10 @@ Provide an AI-powered financial health score that adapts to this user's specific
       score: 50,
       status: 'Analysis Unavailable',
       color: 'gray',
-      factors: [],
+      factors: null,
       icon: 'AlertTriangle',
       aiAnalysis: {
-        personalizedFactors: [],
+        personalizedFactors: null,
         riskAssessment: 'Unable to assess risk',
         recommendations: ['Please try again later'],
         confidence: 0
