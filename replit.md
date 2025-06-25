@@ -133,6 +133,8 @@ LATEST FIXES:
 - June 25, 2025. DEFENSIVE VALIDATION REMOVED: Fixed Fly.io processor by removing extra validation logic that caused different prompts than local version
 - June 25, 2025. PROMPT CONSISTENCY ACHIEVED: Fly.io index.ts now generates identical prompts to server/openai.ts for consistent AI responses
 - June 25, 2025. ROOT CAUSE RESOLVED: topCategories and budget validation differences between files were causing Fly.io to return empty responses
+- June 25, 2025. VERIFIED STATUS: 4 of 7 AI functions working via Fly.io OpenAI (contextual-tips, daily-recommendations, trend-predictions, financial-tips)
+- June 25, 2025. REMAINING ISSUES: financial-health-score crashes with undefined.length error, spending-insights intermittent, expense-predictions needs verification
 
 Changelog:
 - June 13, 2025. Initial setup
