@@ -31,19 +31,27 @@ export async function runAI(task: string, userId: string, payload: Record<string
 
   try {
     // Try unified endpoint first
-    const response = await fetch("https://finanzerpro.fly.dev/execute-gpt-task", {
+    const response = await fetch("https://broken-url-test.fly.dev/execute-gpt-task", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ task, userId, payload })
+      body: JSON.stringify({ task, userId, payload }),
+      signal: AbortSignal.timeout(30000) // 30 second timeout
     });
+
+    console.log(`[AI ${task}] Fly.io response status: ${response.status}`);
 
     if (response.ok) {
       const result = await response.json();
       
-      // Check if daily-recommendations returned empty results and force fallback
+      // Check if any task returned empty or fallback results and force local fallback
       if (task === 'daily-recommendations' && (!result.recommendations || result.recommendations.length === 0) && (!result.insights || result.insights.length === 0)) {
         console.log(`[AI ${task}] Fly.io returned empty results, forcing local fallback`);
         throw new Error('Empty results from Fly.io, using local fallback');
+      }
+      
+      if (task === 'contextual-tips' && result.tips && result.tips.length === 1 && result.tips[0].id === 'fallback_tip') {
+        console.log(`[AI ${task}] Fly.io returned fallback tip, forcing local fallback`);
+        throw new Error('Fallback response from Fly.io, using local fallback');
       }
       
       try {
@@ -63,9 +71,9 @@ export async function runAI(task: string, userId: string, payload: Record<string
       return result;
     }
 
-    // All tasks should use unified endpoint - no fallback to legacy  
-    console.error(`[AI ${task}] Unified endpoint failed: ${response.status} ${response.statusText}`);
-    throw new Error(`Unified endpoint failed for task: ${task}`);
+    // If Fly.io returns error status, throw to trigger fallback
+    console.error(`[AI ${task}] Fly.io endpoint failed: ${response.status} ${response.statusText}`);
+    throw new Error(`Fly.io endpoint failed with status ${response.status} for task: ${task}`);
 
   } catch (err) {
     console.error(`[AI ${task}] CRITICAL ERROR: Task ${task} failed to reach Fly.io:`, err.message);
