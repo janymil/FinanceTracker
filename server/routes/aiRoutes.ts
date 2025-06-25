@@ -807,17 +807,7 @@ export function registerAIRoutes(app: Express) {
           recurring: t.recurring
         }));
 
-      // Use only filtered transactions for consistent cache key
-      const cacheInput = { transactions: expenseTransactions };
-
-      // Initialize UnifiedAICache with 48 hours TTL
-      const cache = new UnifiedAICache('expense-predictions', userId);
-
-      // Try to get cached result
-      const cachedResult = await cache.get(cacheInput);
-      if (cachedResult) {
-        return res.json(cachedResult);
-      }
+      // Remove all caching - direct calls only
 
       // Generate new AI response with full payload
       const aiPayload = {
@@ -825,9 +815,6 @@ export function registerAIRoutes(app: Express) {
         summary: req.body.summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 }
       };
       const predictions = await runAI('expense-predictions', userId, aiPayload);
-
-      // Cache the result for 48 hours using consistent input
-      await cache.set(cacheInput, predictions, false, 48);
 
       return res.json(predictions);
     } catch (error) {
