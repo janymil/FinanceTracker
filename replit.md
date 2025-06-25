@@ -122,6 +122,22 @@ FinanzerPro is a comprehensive personal finance management application built wit
 
 - June 25, 2025: Initial setup
 - June 25, 2025: Implemented unified AI cache system across all 7 AI functions with proper TTL values, user isolation, and database integration
+- June 25, 2025: Fixed AI financial tips persistence with localStorage caching between sessions
+- June 25, 2025: Corrected Fly.io AI processor architecture - removed database connections to make it stateless, cache handling moved to main application
+
+## Architecture Decision: AI Cache System
+
+**Decision**: Fly.io AI processor is stateless and handles only OpenAI API calls. All caching is managed by the main application.
+
+**Rationale**: 
+- Fly.io should not connect to databases - it's a pure OpenAI proxy service
+- Main app handles cache operations using appropriate database (Replit DB for dev, Neon for prod)
+- Cleaner separation of concerns and eliminates cross-environment database connection issues
+
+**Implementation**:
+- Main app checks cache before calling Fly.io
+- Main app saves results to cache after Fly.io returns data
+- Fly.io processor removed all pg dependencies and database connection code
 
 ## User Preferences
 

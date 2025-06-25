@@ -1,15 +1,17 @@
 # CRITICAL: AI Processor Deployment Required
 
-## Critical Issues Fixed
-1. **Missing `pg` dependency** causing service crashes with "Cannot find module 'pg'" error
-2. Fixed transaction field mapping issue where AI functions were receiving `category` instead of `categoryName`
+## Architecture Changes
+1. **Removed all database connections** - AI processor is now stateless
+2. **Removed `pg` dependency** - no longer needed for database operations
+3. **Cache operations moved to main app** - Fly.io only handles OpenAI API calls
+4. Fixed transaction field mapping for consistent data structure
 
 ## Changes Made
-1. Added `pg: "8.11.3"` dependency to package.json to fix crash loop
-2. Updated TypeScript interfaces in index.ts to expect `categoryName` field
-3. Fixed budget field references from `b.category` to `b.categoryName` 
-4. Fixed trend predictions budget mapping to use `categoryName`
-5. Ensured consistency with main application data structure
+1. Removed `pg: "8.11.3"` dependency from package.json - stateless architecture
+2. Removed all UnifiedAICacheFlyio references and database connection code
+3. Updated AI processor to be pure OpenAI proxy service
+4. Main application now handles all caching operations before/after Fly.io calls
+5. Cleaner separation of concerns between cache layer and AI processing
 
 ## Deployment Steps (Run from external-services/ai-processor directory)
 ```bash
@@ -25,19 +27,20 @@ curl https://finanzerpro.fly.dev/execute-gpt-task -X POST -H "Content-Type: appl
 ```
 
 ## Expected Result After Deployment
-- Contextual financial tips will correctly show categorized transactions instead of "100% uncategorized"
-- All 7 AI functions will receive proper transaction category data with consistent categoryName field mapping
-- Budget analysis will work correctly with category names in both prompts and data structures
-- Trend predictions will properly map category totals and top spending categories
-- AI insights will be accurate based on actual transaction categories across all functions
+- AI processor will be fully stateless with no database connection issues
+- All caching operations handled by main application for better performance
+- Clean separation between AI processing and data persistence layers
+- Faster response times due to simplified architecture
+- No more "Cannot find module 'pg'" errors or database connection timeouts
 
 ## Files Modified
-- index.ts: TypeScript interfaces, budget field references, trend prediction mapping
+- index.ts: Removed all cache operations and database connections
+- package.json: Removed pg dependency for stateless operation
 
 ## Current Status
-- Server routes fixed ✓
-- AI processor code fixed ✓ 
-- Cache cleared ✓
+- Architecture redesigned ✓
+- Database connections removed ✓ 
+- Cache operations moved to main app ✓
 - **DEPLOYMENT PENDING** ⚠️
 
-Date: June 24, 2025
+Date: June 25, 2025
