@@ -165,7 +165,7 @@ export function registerAIRoutes(app: Express) {
       const tipResults = await runAI('financial-tips', userId, aiPayload);
 
       // Debug authentication and save to unified cache
-      console.log('Financial tips endpoint called:', { 
+      console.log('🔥 Financial tips endpoint called:', { 
         userId: userId?.substring(0, 8) + '...', 
         hasFinancialData: !!financialData,
         tipResultsLength: tipResults?.length || 0 
@@ -255,7 +255,7 @@ export function registerAIRoutes(app: Express) {
       };
 
       // Debug authentication and AI processing
-      console.log('Spending insights endpoint called:', { 
+      console.log('🔥 Spending insights endpoint called:', { 
         userId: userId?.substring(0, 8) + '...', 
         transactionCount: transactions?.length || 0 
       });
