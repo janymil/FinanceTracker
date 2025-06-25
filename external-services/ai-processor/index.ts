@@ -427,6 +427,12 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
 
   } catch (error) {
     console.error('Error generating contextual financial tips:', error);
+    console.error('OpenAI Error details:', {
+      message: error.message,
+      type: error.type,
+      code: error.code,
+      status: error.status
+    });
     return {
       tips: [{
         id: 'fallback_tip',
