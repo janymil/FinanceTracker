@@ -102,8 +102,8 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       const year = currentDate.getFullYear();
       
       // Fetch detailed transactions for current month
-      // Skip detailed transactions fetch to avoid GET/HEAD error
-      const detailedTransactions = [];
+      // Get detailed transactions for current month using summary data
+      const detailedTransactions = summary.recentTransactions || [];
       
       // Remove blocking validation - let AI decide if data is sufficient
       
@@ -120,7 +120,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             totalIncome: summary.totalIncome,
             totalExpenses: summary.totalExpenses,
             categories: summary.transactionsByCategory,
-            transactions: [],
+            transactions: detailedTransactions,
             month: monthName,
             year: year,
             timestamp: Date.now()

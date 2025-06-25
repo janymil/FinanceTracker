@@ -157,6 +157,7 @@ LATEST FIXES:
 - June 25, 2025. FINANCIAL TIPS FIXED: Restored React Query mutation system with proper apiRequest integration - bypassing auth issues while maintaining state management
 - June 25, 2025. MUTATION SYSTEM PRESERVED: Maintained proper error handling, loading states, and caching while fixing underlying API call structure
 - June 25, 2025. GET/HEAD METHOD ERROR FIXED: Replaced apiRequest with direct fetch call to resolve "Request with GET/HEAD method cannot have body" error in financial tips feature
+- June 25, 2025. DETAILED TRANSACTIONS RESTORED: Fixed financial tips quality by restoring detailed transaction data from summary.recentTransactions instead of sending empty array - matches June 22, 2025 behavior for sophisticated AI analysis
 
 Changelog:
 - June 13, 2025. Initial setup
