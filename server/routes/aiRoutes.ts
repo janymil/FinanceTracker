@@ -172,7 +172,7 @@ export function registerAIRoutes(app: Express) {
       const aiPayload = {
         totalIncome: financialData.totalIncome || 0,
         totalExpenses: financialData.totalExpenses || 0,
-        transactionsByCategory: financialData.categories || [],
+        transactionsByCategory: financialData.categories,
         recentTransactions: formattedTransactions,
         timestamp: financialData.timestamp
       };
@@ -473,8 +473,8 @@ export function registerAIRoutes(app: Express) {
         hasInsights: Array.isArray(recommendations?.insights),
         insightCount: recommendations?.insights?.length || 0,
         source: 'fly.io-external-service',
-        actualRecommendations: recommendations?.recommendations || [],
-        actualInsights: recommendations?.insights || []
+        actualRecommendations: recommendations?.recommendations,
+        actualInsights: recommendations?.insights
       });
 
       console.log('Daily recommendations: Fly.io response structure:', {

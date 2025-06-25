@@ -711,7 +711,7 @@ Generate financial insights based on this spending data.`
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{"insights": []}');
-    const insights = Array.isArray(result) ? result : (result.insights || result.data || []);
+    const insights = Array.isArray(result) ? result : (result.insights || result.data);
 
     const processedInsights = insights.map((insight: any, index: number) => ({
       id: insight.id || `ai_insight_${index}`,
@@ -844,12 +844,12 @@ Provide an AI-powered financial health score that adapts to this user's specific
       score: Math.max(0, Math.min(100, result.score || 50)),
       status: result.status || 'Fair',
       color: result.color || 'yellow',
-      factors: result.factors || [],
+      factors: result.factors,
       icon: result.icon || 'Shield',
       aiAnalysis: {
-        personalizedFactors: result.aiAnalysis?.personalizedFactors || [],
+        personalizedFactors: result.aiAnalysis?.personalizedFactors,
         riskAssessment: result.aiAnalysis?.riskAssessment || 'Standard risk assessment',
-        recommendations: result.aiAnalysis?.recommendations || [],
+        recommendations: result.aiAnalysis?.recommendations,
         confidence: Math.max(0, Math.min(1, result.aiAnalysis?.confidence || 0.7))
       }
     };
@@ -1009,7 +1009,7 @@ Analysis Requirements:
     const result = JSON.parse(response.choices[0].message.content || '{"categoryPredictions": [], "financialForecast": {}}');
 
     const predictions = {
-      categoryPredictions: result.categoryPredictions || [],
+      categoryPredictions: result.categoryPredictions,
       financialForecast: result.financialForecast || {
         nextMonthExpenses: 0,
         expectedSavings: 0,
@@ -1622,8 +1622,8 @@ app.post("/execute-gpt-task", async (req, res) => {
         // Fix payload structure for daily recommendations
         const dailyPayload = {
           summary: payload.summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 },
-          transactions: payload.transactions || [],
-          budgets: payload.budgets || [],
+          transactions: payload.transactions,
+          budgets: payload.budgets,
           categories: payload.categories || {}
         };
         console.log('Daily recommendations: Fixed payload structure', Object.keys(dailyPayload));
@@ -1631,7 +1631,7 @@ app.post("/execute-gpt-task", async (req, res) => {
         break;
 
       case "expense-predictions":
-        result = await generateExpensePredictions(payload.transactions || []);
+        result = await generateExpensePredictions(payload.transactions);
         break;
 
       case "financial-health-score":
