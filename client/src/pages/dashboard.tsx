@@ -212,6 +212,8 @@ export default function Dashboard() {
 
   const [budgets, setBudgets] = useState<any[]>([]);
   const [budgetsLoading, setBudgetsLoading] = useState(false);
+  const [goals, setGoals] = useState<any[]>([]);
+  const [goalsLoading, setGoalsLoading] = useState(false);
 
   // Get auth headers for Clerk authentication
   const getAuthHeaders = async (): Promise<Record<string, string>> => {
@@ -253,9 +255,35 @@ export default function Dashboard() {
     }
   };
 
+  // Fetch goals with proper authentication
+  const fetchGoals = async () => {
+    if (!isReady) return;
+    
+    setGoalsLoading(true);
+    try {
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch('/api/goals', {
+        headers: authHeaders,
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setGoals(data);
+        console.log('Dashboard goals fetched:', data);
+      } else {
+        console.log('Dashboard goals fetch failed:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching goals:', error);
+    } finally {
+      setGoalsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (isReady && transactions) {
       fetchBudgets();
+      fetchGoals();
     }
   }, [isReady, transactions]);
 
@@ -660,6 +688,7 @@ export default function Dashboard() {
                 summary={financialSummary}
                 transactions={transactions as any}
                 budgets={budgets as any}
+                goals={goals as any}
                 selectedMonth={selectedMonth}
               />
             </div>
