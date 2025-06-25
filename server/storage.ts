@@ -16,6 +16,7 @@ import {
   financialMascots,
   redeemCodes,
   importLogs,
+  aiCache,
   // contextualFinancialTips, // Removed - using unified ai_cache
   type User,
   type InsertUser,
@@ -48,6 +49,8 @@ import {
   type InsertRedeemCode,
   type ImportLog,
   type InsertImportLog,
+  type AiCache,
+  type InsertAiCache,
   // Removed: contextualFinancialTips types - using unified ai_cache
 } from "@shared/schema";
 import { db } from "./db";
@@ -172,6 +175,10 @@ export interface IStorage {
   createImportLog(importLog: InsertImportLog): Promise<ImportLog>;
   getUserImportLogs(userId: string, limit?: number): Promise<ImportLog[]>;
   getImportLogById(id: number): Promise<ImportLog | null>;
+
+  // AI Cache operations for unified cache system
+  getAICacheEntry(userId: string, functionKey: string, inputHash: string): Promise<AiCache | null>;
+  setAICacheEntry(userId: string, functionKey: string, inputHash: string, input: any, output: any, month?: string, isError?: boolean): Promise<void>;
 
   // Contextual Financial Tips operations
   // Removed: contextualFinancialTips interface methods - using unified ai_cache
@@ -2105,6 +2112,55 @@ export class DatabaseStorage implements IStorage {
       .where(eq(importLogs.id, id))
       .limit(1);
     return results[0] || null;
+  }
+
+  // AI Cache operations for unified cache system
+  async getAICacheEntry(userId: string, functionKey: string, inputHash: string): Promise<AiCache | null> {
+    const results = await db
+      .select()
+      .from(aiCache)
+      .where(and(
+        eq(aiCache.userId, userId),
+        eq(aiCache.functionKey, functionKey),
+        eq(aiCache.inputHash, inputHash)
+      ))
+      .limit(1);
+    
+    if (results.length === 0) {
+      return null;
+    }
+    
+    // Update hit count and last accessed
+    await db
+      .update(aiCache)
+      .set({ 
+        hitCount: sql`${aiCache.hitCount} + 1`,
+        lastAccessed: new Date()
+      })
+      .where(eq(aiCache.id, results[0].id));
+    
+    return results[0];
+  }
+
+  async setAICacheEntry(userId: string, functionKey: string, inputHash: string, input: any, output: any, month?: string, isError: boolean = false): Promise<void> {
+    const now = new Date();
+    
+    await db
+      .insert(aiCache)
+      .values({
+        userId,
+        functionKey,
+        inputHash,
+        inputJson: input,
+        outputJson: output,
+        month,
+        isError,
+        hitCount: 0,
+        lastAccessed: now,
+        createdAt: now,
+        updatedAt: now
+      })
+      .onConflictDoNothing();
   }
 
   // Removed: Contextual Financial Tips operations - using unified ai_cache system

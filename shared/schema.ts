@@ -368,6 +368,9 @@ export type RedeemCode = typeof redeemCodes.$inferSelect;
 export type ImportLog = typeof importLogs.$inferSelect;
 export type InsertImportLog = typeof importLogs.$inferInsert;
 
+export type AiCache = typeof aiCache.$inferSelect;
+export type InsertAiCache = typeof aiCache.$inferInsert;
+
 // Insert schemas
 export const insertTransactionSchema = createInsertSchema(transactions).omit({
   id: true,
