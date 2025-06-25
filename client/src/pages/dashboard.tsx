@@ -253,8 +253,6 @@ export default function Dashboard() {
     }
   };
 
-
-
   useEffect(() => {
     if (isReady && transactions) {
       fetchBudgets();
