@@ -132,7 +132,7 @@ export function registerAIRoutes(app: Express) {
         // Still call Fly.io even with empty data to test the connection
       }
 
-      console.log('TIP ENDPOINT: Processing', transactions?.length || 0, 'transactions');
+      console.log('TIP ENDPOINT: Processing', transactions.length, 'transactions');
 
       // Format transaction data for AI analysis with detailed information
       const formattedTransactions = transactions.map((t: any) => ({
@@ -277,7 +277,7 @@ export function registerAIRoutes(app: Express) {
       
       const aiPayload = {
         summary,
-        budgets: budgets || [],
+        budgets: budgets,
         transactions: transactions.map(t => ({
           description: t.description,
           amount: parseFloat(t.amount),
@@ -392,7 +392,7 @@ export function registerAIRoutes(app: Express) {
       }
 
       // Always call Fly.io even with minimal data for testing
-      console.log('DAILY RECOMMENDATIONS: Processing with', transactions?.length || 0, 'transactions');
+      console.log('DAILY RECOMMENDATIONS: Processing with', transactions.length, 'transactions');
 
       // Create stable hash for caching - only regenerate on significant changes
       const lastWeekTransactions = transactions?.filter(t => {
@@ -446,7 +446,7 @@ export function registerAIRoutes(app: Express) {
           type: t.type || 'expense',
           categoryName: t.categoryName || 'Uncategorized'
         })),
-        budgets: (budgets || []).map(b => ({
+        budgets: budgets.map(b => ({
           id: b.id || 0,
           name: b.name || '',
           amount: String(b.amount || 0),
@@ -840,7 +840,7 @@ export function registerAIRoutes(app: Express) {
       const { transactions } = req.body;
 
       // Always call Fly.io even with empty data for testing
-      console.log('EXPENSE PREDICTIONS: Processing with', transactions?.length || 0, 'transactions');
+      console.log('EXPENSE PREDICTIONS: Processing with', transactions.length, 'transactions');
 
       // Standardize cache payload for expense predictions  
       const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
