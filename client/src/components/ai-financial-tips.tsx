@@ -88,6 +88,14 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
           return { Authorization: `Bearer ${token}` };
         }
       }
+      
+      // Fallback: try to get token from user object
+      if (user && typeof user.getToken === 'function') {
+        const token = await user.getToken();
+        if (token) {
+          return { Authorization: `Bearer ${token}` };
+        }
+      }
     } catch (error) {
       console.warn('Failed to get Clerk token:', error);
     }
@@ -111,12 +119,12 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       // Remove blocking validation - let AI decide if data is sufficient
 
       // Direct fetch to avoid GET/HEAD method issues
-      const token = await window.Clerk?.session?.getToken();
+      const authHeaders = await getAuthHeaders();
       const response = await fetch("/api/ai/tip", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` })
+          ...authHeaders
         },
         body: JSON.stringify({
           financialData: {
