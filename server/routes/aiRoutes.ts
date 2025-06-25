@@ -354,15 +354,7 @@ export function registerAIRoutes(app: Express) {
 
       const predictions = await runAI('trend-predictions', userId, aiPayload);
 
-      // Save to unified cache with detailed logging
-      try {
-        console.log('Trend predictions: Attempting cache save', { 
-          userId: userId.substring(0, 8) + '...', 
-          month, 
-          payloadSize: JSON.stringify(cachePayload).length,
-          predictionKeys: Object.keys(predictions || {})
-        });
-        // No caching system
+      // No caching system
 
       return res.json(predictions);
     } catch (error) {
@@ -437,10 +429,7 @@ export function registerAIRoutes(app: Express) {
       
       // Cache system removed
       
-      if (cachedResult) {
-        console.log('Daily recommendations: Using cached data');
-        return res.json(cachedResult);
-      }
+      // Cache system removed
 
       console.log('Making Fly.io API call via centralized processor');
       
