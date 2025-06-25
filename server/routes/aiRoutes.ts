@@ -178,24 +178,8 @@ export function registerAIRoutes(app: Express) {
       
       // No caching system
 
-      if (tipResults && tipResults.length > 0) {
-        const tip = tipResults[0];
-        return res.json({ tip: `${tip.title}: ${tip.description}` });
-      } else {
-        // Provide specific fallback based on actual data
-        const expenseCount = transactions.filter((t: any) => t.type === 'expense').length;
-        const incomeCount = transactions.filter((t: any) => t.type === 'income').length;
-        const totalExpenses = transactions
-          .filter((t: any) => t.type === 'expense')
-          .reduce((sum: number, t: any) => sum + t.amount, 0);
-        const totalIncome = transactions
-          .filter((t: any) => t.type === 'income')
-          .reduce((sum: number, t: any) => sum + t.amount, 0);
-          
-        return res.json({ 
-          tip: `Based on your ${expenseCount} expense transactions ($${totalExpenses.toFixed(2)}) and ${incomeCount} income transactions ($${totalIncome.toFixed(2)}), consider setting up budgets for your top spending categories to better manage your finances.` 
-        });
-      }
+      // Return Fly.io response directly - no local fallbacks
+      return res.json(tipResults);
     } catch (error) {
       console.error("Error generating financial tip:", error);
       return res.status(500).json({ message: "Failed to generate financial tip" });

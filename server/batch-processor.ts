@@ -1,6 +1,6 @@
 
 import { storage } from "./storage";
-import { generateSpendingInsights, generateFinancialTips } from "./openai";
+import { runAI } from "../lib/aiProcessor";
 // Cache system removed
 
 // Track users who need batch processing
@@ -46,13 +46,15 @@ async function processBatchedOperations() {
         
         // Pre-generate and cache insights for faster dashboard loading
         if (user.plan === 'premium') {
-          const insights = await generateSpendingInsights(transactions.map(t => ({
-            description: t.description,
-            amount: parseFloat(t.amount),
-            date: t.date.toISOString(),
-            categoryName: t.categoryId?.toString() || 'Uncategorized',
-            type: t.type
-          })));
+          const insights = await runAI('spending-insights', userId, {
+            transactions: transactions.map(t => ({
+              description: t.description,
+              amount: parseFloat(t.amount),
+              date: t.date.toISOString(),
+              categoryName: t.categoryId?.toString() || 'Uncategorized',
+              type: t.type
+            }))
+          });
           
           // Cache insights with transaction hash
           // Cache system removed
@@ -78,7 +80,7 @@ async function processBatchedOperations() {
             }))
           };
           
-          const tips = await generateFinancialTips(financialData);
+          const tips = await runAI('financial-tips', userId, financialData);
           // Cache system removed
         }
         
