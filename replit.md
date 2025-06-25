@@ -355,7 +355,9 @@ Changelog:
 - June 25, 2025. IDENTIFIED PRODUCTION CACHE ISSUE: Found that production deployment has empty ai_cache table (0 entries) indicating unified cache system not working in live environment
 - June 25, 2025. FIXED CONTEXTUAL FINANCIAL TIPS BUG: Fixed 'actualSummary is not defined' error in Fly.io processor (external-services/ai-processor/index.ts line 214)
 - June 25, 2025. PRODUCTION CACHE DIAGNOSIS: Found production database HAS cache entries for demo user - unified cache system IS working in production
-- June 25, 2025. REAL ISSUE IDENTIFIED: Contextual tips showing identical content because cache system is working TOO well - same cached response used across different months
+- June 25, 2025. PRODUCTION CACHE ANALYSIS COMPLETE: Only daily-recommendations cached (1 entry) - all other AI functions failing to cache results in production
+- June 25, 2025. DELETED USER: Removed jan.milata@gmail.com from production database including all related data (transactions, budgets, categories, financial_mascots)
+- June 25, 2025. CACHE SYSTEM DIAGNOSIS: Production unified cache accepts writes but only 1 of 7 AI functions successfully caching - indicates code execution failure in production deployment
 - June 23, 2025. Enhanced AI categorization analysis to properly detect and report actual categorization status in contextual tips with accurate transaction data
 - June 23, 2025. FIXED FALLBACK SYSTEM: Corrected local OpenAI fallback in server/openai.ts to use same categoryName field mapping as Fly.io processor
 - June 23, 2025. Added categorization counting logic to both Fly.io and local fallback systems to prevent "uncategorized" false reports
