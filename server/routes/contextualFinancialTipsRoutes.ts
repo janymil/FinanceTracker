@@ -2,7 +2,7 @@
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { runAI } from "../../lib/aiProcessor";
-import { unifiedAICache } from "../../lib/unifiedAICache";
+// Cache system removed
 import { storage } from "../storage";
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
@@ -22,12 +22,7 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
       await storage.deleteCachedDailyRecommendations(userId);
       // Legacy table removed - unified cache handles clearing via unifiedAICache.invalidateUser()
       
-      // Clear unified cache system
-      await unifiedAICache.invalidateUser(userId);
-      
-      // Clear memory cache
-      const { aiCache } = await import('../cache');
-      aiCache.clearUserCache(userId);
+      // Cache system removed - no cache to clear
       
       console.log(`Manually cleared all AI caches for user ${userId}`);
       return res.json({ success: true, message: "Cache cleared successfully" });
@@ -130,8 +125,7 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
         actionable: Boolean(tip.actionable)
       })) : [];
 
-      // CACHE SAVE DISABLED FOR TESTING
-      console.log('Cache save disabled - not saving tips to cache');
+      // Cache system removed - no caching
 
       // Add cache-busting headers
       res.set({

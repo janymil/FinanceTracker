@@ -1,17 +1,9 @@
-import { unifiedAICache } from "./unifiedAICache";
+// Cache system completely removed - direct Fly.io calls only
+import crypto from 'crypto';
 
 function hashObject(obj: any): string {
   const json = JSON.stringify(obj);
   return crypto.createHash("sha256").update(json).digest("hex");
-}
-
-async function checkCache(key: string) {
-  return aiCache.get(key);
-}
-
-async function storeCache(key: string, value: any) {
-  // Use default 30 minute cache for most AI tasks
-  aiCache.set(key, value, 1800);
 }
 
 /**
@@ -62,22 +54,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
       //   throw new Error('Fallback response from Fly.io, using local fallback');
       // }
       
-      console.log(`[AI ${task}] SUCCESS: Using Fly.io response (not local fallback)`);
-      
-      try {
-        console.log(`[AI ${task}] ATTEMPTING to cache result for user ${userId.substring(0, 8)}... in month ${month}`);
-        await unifiedAICache.set(task, userId, month, payload, result);
-        console.log(`[AI ${task}] SUCCESS: Cached result via unified endpoint`);
-      } catch (cacheError) {
-        console.error(`[AI ${task}] CRITICAL: Failed to cache Fly.io result:`, cacheError);
-        console.error(`[AI ${task}] Cache error details:`, {
-          message: cacheError.message,
-          stack: cacheError.stack,
-          task,
-          userId: userId.substring(0, 8) + '...',
-          month
-        });
-      }
+      console.log(`[AI ${task}] SUCCESS: Using Fly.io response (direct call, no caching)`);
       return result;
     }
 
