@@ -335,12 +335,7 @@ export async function generateSpendingInsights(transactions: Array<{
   actionable: boolean;
 }>> {
   try {
-    // Create hash for transactions to use as cache key
-    // Cache system removed
-    if (cached) {
-      console.log('Using cached insights result');
-      return cached;
-    }
+    // Cache system removed - direct processing only
     const expenseTransactions = transactions.filter(t => t.type === 'expense');
 
     if (expenseTransactions.length === 0) {
@@ -472,10 +467,7 @@ export async function generateAIFinancialHealthScore(financialData: {
     // Create hash for caching
     const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
     // Cache system removed
-    if (cached) {
-      console.log('Using unified cache for AI financial health score (local fallback)');
-      return cached;
-    }
+    // Cache system removed - direct processing only
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -1488,11 +1480,7 @@ export async function generateFinancialHealthScore(financialData: {
     };
     
     const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-    // Cache system removed
-    if (cached) {
-      console.log('Using unified cache for financial health data (local fallback) - avoiding OpenAI API call');
-      return cached;
-    }
+    // Cache system removed - direct processing only
 
     // Prepare data for AI analysis
     const recentTransactions = transactions

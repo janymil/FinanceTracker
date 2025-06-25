@@ -179,13 +179,6 @@ export interface IStorage {
   // AI Cache operations for unified cache system
   getAICacheEntry(userId: string, functionKey: string, inputHash: string): Promise<AiCache | null>;
   setAICacheEntry(userId: string, functionKey: string, inputHash: string, input: any, output: any, month?: string, isError?: boolean): Promise<void>;
-
-  // Contextual Financial Tips operations
-  // Removed: contextualFinancialTips interface methods - using unified ai_cache
-  shouldRegenerateFinancialTips(userId: string, currentDataHash: string): Promise<boolean>;
-  
-  // Daily recommendations cache management
-  deleteCachedDailyRecommendations(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
