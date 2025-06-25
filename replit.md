@@ -126,6 +126,8 @@ FinanzerPro is a comprehensive personal finance management application built wit
 - June 25, 2025: Corrected Fly.io AI processor architecture - removed database connections to make it stateless, cache handling moved to main application
 - June 25, 2025: Updated production database schema to match development - added missing ai_cache columns for unified caching system
 - June 25, 2025: Fixed critical production ai_cache table schema mismatch - column order now matches development database exactly
+- June 25, 2025: Fixed AI financial tips security issue - added user-specific localStorage keys to prevent cross-user data exposure
+- June 25, 2025: Fixed AI financial tips persistence across logout/login sessions by updating session cleanup preservation rules
 
 ## Architecture Decision: AI Cache System
 

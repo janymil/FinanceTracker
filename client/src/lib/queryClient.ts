@@ -129,6 +129,7 @@ export function clearUserSession() {
         key.includes('non-sensitive-cache') ||
         // AI-generated content
         key.startsWith('ai-tip-') ||
+        key.startsWith('ai-financial-tip-') ||
         key.startsWith('daily-rec-') ||
         key.startsWith('expense-pred-') ||
         key.startsWith('ai-insights-') ||
