@@ -176,22 +176,7 @@ export function registerAIRoutes(app: Express) {
         tipResultsLength: tipResults?.length || 0 
       });
       
-      // Always save to unified cache (remove timestamp bypass condition)
-      if (tipResults && tipResults.length > 0) {
-        try {
-          // No caching system
-            totalIncome: financialData.totalIncome || 0,
-            totalExpenses: financialData.totalExpenses || 0,
-            transactions: formattedTransactions.slice(0, 50)
-          }, tipResults);
-          console.log('✅ Financial tips: Successfully saved to unified cache');
-        } catch (cacheError) {
-          console.error("❌ CRITICAL: Failed to save financial tips to unified cache:", cacheError);
-          console.error("Cache save details:", { userId: userId.substring(0, 8) + '...', month, error: cacheError.message });
-        }
-      } else {
-        console.log('No financial tips results to cache - skipping cache save');
-      }
+      // No caching system
 
       if (tipResults && tipResults.length > 0) {
         const tip = tipResults[0];
@@ -243,10 +228,7 @@ export function registerAIRoutes(app: Express) {
       // CACHE DISABLED FOR TESTING
       // Cache system completely removed
       
-      if (cachedResult) {
-        console.log('AI spending insights: Using unified cache - avoiding API call');
-        return res.json(cachedResult);
-      }
+      // Cache system removed
 
       console.log('AI spending insights: Making Fly.io API call via centralized processor');
       
@@ -269,13 +251,7 @@ export function registerAIRoutes(app: Express) {
       const insights = await runAI('spending-insights', userId, aiPayload);
       
       // Save to unified cache with enhanced error logging
-      try {
-        // No caching system
-        console.log('✅ Spending insights: Successfully saved to unified cache');
-      } catch (cacheError) {
-        console.error("❌ CRITICAL: Failed to save spending insights to unified cache:", cacheError);
-        console.error("Cache save details:", { userId: userId.substring(0, 8) + '...', month, error: cacheError.message });
-      }
+      // No caching system
 
       return res.json(insights);
     } catch (error) {
@@ -355,10 +331,7 @@ export function registerAIRoutes(app: Express) {
       // CACHE DISABLED FOR TESTING
       // Cache system completely removed
       
-      if (cachedResult) {
-        console.log('AI trend predictions: Using unified cache - avoiding API call');
-        return res.json(cachedResult);
-      }
+      // Cache system removed
 
       console.log('AI trend predictions: Making Fly.io API call via centralized processor');
       
@@ -390,11 +363,6 @@ export function registerAIRoutes(app: Express) {
           predictionKeys: Object.keys(predictions || {})
         });
         // No caching system
-        console.log('AI trend predictions: Successfully saved to unified cache');
-      } catch (cacheError) {
-        console.error("CRITICAL: Failed to save trend predictions to cache:", cacheError);
-        console.error("Cache save details:", { userId, month, cacheError: cacheError.message });
-      }
 
       return res.json(predictions);
     } catch (error) {
@@ -467,12 +435,7 @@ export function registerAIRoutes(app: Express) {
       // CACHE DISABLED FOR TESTING
       // Cache system completely removed
       
-      // Add cache-busting headers
-      res.set({
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      });
+      // Cache system removed
       
       if (cachedResult) {
         console.log('Daily recommendations: Using cached data');
@@ -621,10 +584,7 @@ export function registerAIRoutes(app: Express) {
       // CACHE DISABLED FOR TESTING
       // Cache system completely removed
       
-      if (cachedResult) {
-        console.log('AI financial health: Using unified cache - avoiding API call');
-        return res.json(cachedResult);
-      }
+      // Cache system removed
 
       // Categories already provided via storage layer joins
 
@@ -932,10 +892,7 @@ export function registerAIRoutes(app: Express) {
       // CACHE DISABLED FOR TESTING
       // Cache system completely removed
       
-      if (cachedResult) {
-        console.log('AI expense predictions: Using unified cache - avoiding API call');
-        return res.json(cachedResult);
-      }
+      // Cache system removed
 
       console.log('AI expense predictions: Making Fly.io API call via centralized processor');
       
@@ -947,12 +904,7 @@ export function registerAIRoutes(app: Express) {
       const predictions = await runAI('expense-predictions', userId, aiPayload);
 
       // Save to unified cache
-      try {
-        // No caching system
-        console.log('AI expense predictions: Saved to unified cache');
-      } catch (cacheError) {
-        console.error("Error saving expense predictions to unified cache:", cacheError);
-      }
+      // No caching system
 
       return res.json(predictions);
     } catch (error) {
