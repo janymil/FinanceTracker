@@ -73,7 +73,7 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
       };
 
       // CACHE COMPLETELY DISABLED FOR TESTING
-      console.log('CACHE DISABLED - forcing fresh AI call to Fly.io');
+      console.log('[AI contextual-tips] Cache check bypassed - forcing Fly.io call');
       
       if (forceRefresh) {
         console.log('Contextual financial tips: Force refresh requested - bypassing cache');

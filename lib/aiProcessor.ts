@@ -36,6 +36,13 @@ export async function runAI(task: string, userId: string, payload: Record<string
 
     console.log(`[AI ${task}] Fly.io response status: ${response.status}`);
 
+    if (!response.ok) {
+      console.error(`[AI ${task}] Fly.io error:`, response.status, response.statusText);
+      const errorText = await response.text();
+      console.error(`[AI ${task}] Fly.io error details:`, errorText);
+      throw new Error(`Fly.io processor failed: ${response.status}`);
+    }
+
     if (response.ok) {
       const result = await response.json();
       
@@ -49,6 +56,8 @@ export async function runAI(task: string, userId: string, payload: Record<string
         console.log(`[AI ${task}] Fly.io returned fallback tip, forcing local fallback`);
         throw new Error('Fallback response from Fly.io, using local fallback');
       }
+      
+      console.log(`[AI ${task}] SUCCESS: Using Fly.io response (not local fallback)`);
       
       try {
         console.log(`[AI ${task}] ATTEMPTING to cache result for user ${userId.substring(0, 8)}... in month ${month}`);
