@@ -225,7 +225,7 @@ export async function generateContextualFinancialTips(data: {
     }).length;
     
     transactions.forEach(t => {
-      const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : (t.amount || 0);
+      const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : t.amount;
       if (amount > 0) {
         const category = t.category || t.categoryName || 'Uncategorized';
         const current = categorySpending.get(category);
@@ -367,7 +367,7 @@ TRANSACTION ANALYSIS:
 - Expense Transactions: ${expenseTransactions.length}
 - Recurring Transactions: ${recurringTransactions.length}
 - Categorized Transactions: ${categorizedCount}/${transactions.length} (${transactions.length > 0 ? ((categorizedCount/transactions.length)*100).toFixed(0) : 0}%)
-- Most Active Category: ${Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[0] || 'None'} (${Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[1] || 0} transactions)
+- Most Active Category: ${Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[0]} (${Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[1]} transactions)
 
 IDENTIFIED FINANCIAL SCENARIOS:
 ${scenarios.length > 0 ? scenarios.join('\n') : '- No specific scenarios identified this month'}
@@ -927,11 +927,11 @@ export async function generateTrendPredictions(
         monthData.income += amount;
       } else {
         monthData.expenses += amount;
-        const catAmount = monthData.categories.get(category) || 0;
+        const catAmount = monthData.categories.get(category);
         monthData.categories.set(category, catAmount + amount);
       }
 
-      const totalAmount = categoryTotals.get(category) || 0;
+      const totalAmount = categoryTotals.get(category);
       categoryTotals.set(category, totalAmount + amount);
     });
 
@@ -1093,7 +1093,7 @@ export async function generateExpensePredictions(transactions: Array<{
         monthlyData.set(month, new Map());
       }
       const monthData = monthlyData.get(month)!;
-      monthData.set(category, (monthData.get(category) || 0) + amount);
+      monthData.set(category, monthData.get(category) + amount);
 
       // Track category statistics
       if (!categoryTotals.has(category)) {
@@ -1219,9 +1219,9 @@ ANALYSIS GUIDELINES:
     const categoryPredictions = Array.isArray(aiResponse.categoryPredictions) 
       ? aiResponse.categoryPredictions.map(pred => ({
           category: pred.category || 'Unknown',
-          currentMonth: Number(pred.currentMonth) || 0,
-          predictedNext: Number(pred.predictedNext) || 0,
-          confidence: Number(pred.confidence) || 0.5,
+          currentMonth: Number(pred.currentMonth),
+          predictedNext: Number(pred.predictedNext),
+          confidence: Number(pred.confidence),
           trend: pred.trend || 'stable',
           factors: Array.isArray(pred.factors) ? pred.factors : ['No specific factors identified']
         }))
@@ -1230,8 +1230,8 @@ ANALYSIS GUIDELINES:
     const monthlyPredictions = Array.isArray(aiResponse.monthlyPredictions)
       ? aiResponse.monthlyPredictions.map(month => ({
           month: month.month || 'Unknown',
-          predicted: Number(month.predicted) || 0,
-          confidence: Number(month.confidence) || 0.5,
+          predicted: Number(month.predicted),
+          confidence: Number(month.confidence),
           breakdown: Array.isArray(month.breakdown) ? month.breakdown : []
         }))
       : [];
@@ -1622,8 +1622,8 @@ app.post("/execute-gpt-task", async (req, res) => {
         // Fix payload structure for daily recommendations
         const dailyPayload = {
           summary: payload.summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 },
-          transactions: payload.transactions || [],
-          budgets: payload.budgets || [],
+          transactions: payload.transactions,
+          budgets: payload.budgets,
           categories: payload.categories || {}
         };
         console.log('Daily recommendations: Fixed payload structure', Object.keys(dailyPayload));
@@ -1631,7 +1631,7 @@ app.post("/execute-gpt-task", async (req, res) => {
         break;
 
       case "expense-predictions":
-        result = await generateExpensePredictions(payload.transactions || []);
+        result = await generateExpensePredictions(payload.transactions);
         break;
 
       case "financial-health-score":

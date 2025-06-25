@@ -998,7 +998,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
           budgetAmount: budget.amount,
           spent: budget.spent,
           remaining: budget.remaining
-        }),
+        })),
         selectedMonth: formattedMonth
       };
 
