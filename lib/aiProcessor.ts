@@ -22,12 +22,8 @@ async function storeCache(key: string, value: any) {
 export async function runAI(task: string, userId: string, payload: Record<string, any>) {
   const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
   
-  // Check unified cache first
-  const cached = await unifiedAICache.get(task, userId, month, payload);
-  if (cached) {
-    console.log(`[AI ${task}] Using unified cache for ${month}`);
-    return cached;
-  }
+  // CACHE DISABLED FOR TESTING ALL 7 AI FUNCTIONS
+  console.log(`[AI ${task}] Cache bypassed - testing Fly.io processor directly`);
 
   try {
     // Try unified endpoint first
