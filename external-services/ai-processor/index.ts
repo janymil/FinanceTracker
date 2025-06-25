@@ -408,7 +408,10 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
       temperature: 0.3 // Moderate creativity for personalized recommendations
     });
 
-    const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
+    const responseText = response.choices[0].message.content || '{}';
+    console.log('[contextual-tips] OpenAI response received:', responseText.substring(0, 200));
+    
+    const aiResponse = JSON.parse(responseText);
     
     // Ensure proper data structure
     const tips = Array.isArray(aiResponse.tips) 
@@ -422,7 +425,7 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
         }))
       : [];
 
-    // Success logging removed for production
+    console.log('[contextual-tips] Generated tips count:', tips.length);
     return { tips };
 
   } catch (error) {
