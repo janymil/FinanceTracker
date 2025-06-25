@@ -200,7 +200,7 @@ export default function AIInsights({ data }: AIInsightsProps) {
     enabled: !!user && user.plan === 'premium',
     queryFn: async () => {
       const response = await apiRequest('POST', '/api/ai/insights', {
-        transactions: transactions || []
+        transactions: data?.transactions || []
       });
       return response.json();
     },
