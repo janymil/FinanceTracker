@@ -187,9 +187,11 @@ export function registerAIRoutes(app: Express) {
       let formattedResponse;
       if (Array.isArray(tipResults) && tipResults.length > 0) {
         const firstTip = tipResults[0];
-        formattedResponse = { 
-          tip: firstTip.description || firstTip.title || 'Financial analysis completed' 
-        };
+        // Combine title and description for comprehensive tip
+        const tipContent = firstTip.title && firstTip.description 
+          ? `${firstTip.title}: ${firstTip.description}`
+          : firstTip.description || firstTip.title || 'Financial analysis completed';
+        formattedResponse = { tip: tipContent };
       } else if (tipResults && typeof tipResults === 'object' && tipResults.tip) {
         formattedResponse = { tip: tipResults.tip };
       } else {
