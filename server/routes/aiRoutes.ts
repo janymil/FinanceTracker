@@ -454,7 +454,7 @@ export function registerAIRoutes(app: Express) {
         budgetCount: budgets?.length || 0,
         currentWeek: Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000)) // Weekly refresh
       };
-      const dataHash = aiCache.createDataHash(dataForHash);
+      // Cache system removed
 
       // Standardize cache payload for daily recommendations
       const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
