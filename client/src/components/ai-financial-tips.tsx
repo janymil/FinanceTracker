@@ -69,7 +69,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   // React Query mutation for generating tips
   const generateTipMutation = useMutation({
     mutationFn: async () => {
-      // Allow AI tip generation even without summary data
+      if (!summary) throw new Error("No financial summary available");
       
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
@@ -83,9 +83,9 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       
       const response = await apiRequest("POST", "/api/ai/tip", {
         financialData: {
-          totalIncome: summary?.totalIncome || 0,
-          totalExpenses: summary?.totalExpenses || 0,
-          categories: summary?.transactionsByCategory || [],
+          totalIncome: summary.totalIncome,
+          totalExpenses: summary.totalExpenses,
+          categories: summary.transactionsByCategory || [],
           transactions: detailedTransactions || [],
           month: monthName,
           year: year,
@@ -153,7 +153,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
               </div>
               <Button 
                 onClick={() => generateTipMutation.mutate()}
-                disabled={isGenerating}
+                disabled={!summary || isGenerating}
                 className="flex items-center gap-2"
               >
                 {isGenerating ? (

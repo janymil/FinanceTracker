@@ -714,8 +714,9 @@ export default function Dashboard() {
             </div>
 
             <LazyAIFinancialTips 
-              summary={financialSummary}
+              summary={!summaryLoading ? financialSummary : undefined}
             />
+
 
           </div>
         )}
