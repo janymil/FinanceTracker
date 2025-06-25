@@ -569,6 +569,7 @@ GENERATE VARIED RESPONSES by focusing on different analytical angles:
 - Risk assessment with protection strategies
 - Wealth building analysis with investment allocation suggestions
 - Efficiency analysis identifying wasteful spending patterns
+- Premium user emphasis: calculate estimated savings from each recommendation and compare them to optimal budget ratios (50/30/20 rule or similar). Provide one short-term action item with a target date
 
 Return comprehensive analysis in JSON:
 {
