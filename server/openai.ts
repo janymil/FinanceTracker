@@ -330,13 +330,16 @@ Return comprehensive analysis in JSON:
   }
 }
 
-export async function generateSpendingInsights(transactions: Array<{
-  description: string;
-  amount: number;
-  date: string;
-  categoryName?: string;
-  type: string;
-}>): Promise<Array<{
+export async function generateSpendingInsights(
+  userId: string,
+  transactions: Array<{
+    description: string;
+    amount: number;
+    date: string;
+    categoryName?: string;
+    type: string;
+  }>
+): Promise<Array<{
   id: string;
   type: "warning" | "suggestion" | "achievement" | "trend";
   title: string;
@@ -348,7 +351,17 @@ export async function generateSpendingInsights(transactions: Array<{
   actionable: boolean;
 }>> {
   try {
-    // Cache system removed - direct processing only
+    // Initialize UnifiedAICache with 72 hours TTL
+    const cache = new UnifiedAICache('spending-insights', userId);
+    const inputData = { transactions };
+
+    // Check cache first
+    const cachedResult = await cache.get(inputData);
+    if (cachedResult) {
+      console.log('Spending insights: Using cached result');
+      return cachedResult;
+    }
+
     const expenseTransactions = transactions.filter(t => t.type === 'expense');
 
     if (expenseTransactions.length === 0) {
@@ -426,8 +439,9 @@ Generate financial insights based on this spending data.`
       actionable: Boolean(insight.actionable)
     }));
 
-    // Cache the result
-    // Cache system removed
+    // Cache the result with 72 hours TTL
+    await cache.set(inputData, processedInsights, false, 72);
+    console.log('Spending insights generated successfully and cached');
     
     return processedInsights;
   } catch (error) {
@@ -762,8 +776,9 @@ Analysis Requirements:
       }
     };
 
-    // Note: Cache now handled by unified cache system via routes
-    console.log('Trend predictions generated successfully');
+    // Cache the result with 48 hours TTL
+    await cache.set(inputData, predictions, false, 48);
+    console.log('Trend predictions generated successfully and cached');
     
     return predictions;
 
@@ -784,15 +799,18 @@ Analysis Requirements:
   }
 }
 
-export async function generateExpensePredictions(transactions: Array<{
-  id: number;
-  amount: string;
-  description: string;
-  date: string;
-  type: string;
-  categoryName?: string;
-  recurring?: boolean;
-}>): Promise<ExpensePrediction> {
+export async function generateExpensePredictions(
+  userId: string,
+  transactions: Array<{
+    id: number;
+    amount: string;
+    description: string;
+    date: string;
+    type: string;
+    categoryName?: string;
+    recurring?: boolean;
+  }>
+): Promise<ExpensePrediction> {
   try {
     // Return empty predictions for insufficient data
     if (!transactions || transactions.length < 5) {
@@ -818,7 +836,16 @@ export async function generateExpensePredictions(transactions: Array<{
       };
     }
 
-    // Note: Cache now handled by unified cache system via routes
+    // Initialize UnifiedAICache with 48 hours TTL
+    const cache = new UnifiedAICache('expense-predictions', userId);
+    const inputData = { transactions: expenseTransactions };
+
+    // Check cache first
+    const cachedResult = await cache.get(inputData);
+    if (cachedResult) {
+      console.log('Expense predictions: Using cached result');
+      return cachedResult;
+    }
 
     // Analyze spending patterns by month and category
     const monthlyData = new Map<string, Map<string, number>>();
@@ -982,8 +1009,9 @@ ANALYSIS GUIDELINES:
       monthlyPredictions
     };
 
-    // Note: Cache now handled by unified cache system via routes
-    console.log('Expense predictions generated successfully');
+    // Cache the result with 48 hours TTL
+    await cache.set(inputData, finalResult, false, 48);
+    console.log('Expense predictions generated successfully and cached');
     
     return finalResult;
 
@@ -1475,28 +1503,34 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
   }
 }
 
-export async function generateFinancialHealthScore(financialData: {
-  transactions: Array<{
-    id: number;
-    amount: string;
-    description: string;
-    date: string;
-    type: string;
-    categoryName: string;
-  }>;
-  budgets: Array<{
-    categoryName: string;
-    amount: string;
-    spent: number;
-  }>;
-  summary: {
-    totalIncome: number;
-    totalExpenses: number;
-    netBalance: number;
-  };
-}): Promise<FinancialHealthData> {
+export async function generateFinancialHealthScore(
+  userId: string,
+  financialData: {
+    transactions: Array<{
+      id: number;
+      amount: string;
+      description: string;
+      date: string;
+      type: string;
+      categoryName: string;
+    }>;
+    budgets: Array<{
+      categoryName: string;
+      amount: string;
+      spent: number;
+    }>;
+    summary: {
+      totalIncome: number;
+      totalExpenses: number;
+      netBalance: number;
+    };
+  }
+): Promise<FinancialHealthData> {
   try {
     const { transactions, budgets, summary } = financialData;
+    
+    // Initialize UnifiedAICache with 24 hours TTL
+    const cache = new UnifiedAICache('financial-health-score', userId);
     
     // Create a more stable hash that focuses on significant financial changes
     // Exclude transaction IDs and exact timestamps to reduce cache misses
@@ -1514,8 +1548,12 @@ export async function generateFinancialHealthScore(financialData: {
         }))
     };
     
-    const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-    // Cache system removed - direct processing only
+    // Check cache first
+    const cachedResult = await cache.get(stableData);
+    if (cachedResult) {
+      console.log('Financial health score: Using cached result');
+      return cachedResult;
+    }
 
     // Prepare data for AI analysis
     const recentTransactions = transactions
@@ -1612,8 +1650,9 @@ Analyze this financial data and provide a comprehensive health assessment.`
       warnings: Array.isArray(result.warnings) ? result.warnings : []
     };
 
-    // Cache the result in unified cache system
-    // Cache system removed
+    // Cache the result with 24 hours TTL
+    await cache.set(stableData, healthData, false, 24);
+    console.log('Financial health score generated successfully and cached');
     
     return healthData;
   } catch (error) {
