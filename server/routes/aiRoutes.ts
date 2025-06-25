@@ -295,6 +295,14 @@ export function registerAIRoutes(app: Express) {
       };
 
       const aiScore = await runAI('financial-health-score', userId, aiPayload);
+      
+      console.log('Financial health: Fly.io response structure:', {
+        hasScore: typeof aiScore?.score === 'number',
+        score: aiScore?.score,
+        hasStatus: !!aiScore?.status,
+        status: aiScore?.status,
+        fullResponse: aiScore
+      });
 
       return res.json(aiScore);
     } catch (error) {
@@ -479,6 +487,14 @@ export function registerAIRoutes(app: Express) {
         source: 'fly.io-external-service',
         actualRecommendations: recommendations?.recommendations || [],
         actualInsights: recommendations?.insights || []
+      });
+
+      console.log('Daily recommendations: Fly.io response structure:', {
+        hasRecommendations: !!recommendations?.recommendations,
+        recommendationCount: recommendations?.recommendations?.length || 0,
+        hasInsights: !!recommendations?.insights,
+        insightCount: recommendations?.insights?.length || 0,
+        fullResponse: recommendations
       });
 
       // Force local fallback if Fly.io returns empty results
