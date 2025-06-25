@@ -375,6 +375,8 @@ Changelog:
 - June 25, 2025. FINAL ROOT CAUSE: Production database created with older column type definitions (text vs character varying) - drizzle push syncs table structure but won't automatically alter existing column types for safety
 - June 25, 2025. CONTEXTUAL TIPS FIXED: Fly.io AI processor now generating sophisticated personalized financial advice instead of fallback responses
 - June 25, 2025. PRODUCTION CACHE CLEARED: Removed cached fallback responses - new AI-generated tips will be properly cached and displayed
+- June 25, 2025. FALLBACK SYSTEM VERIFIED: Confirmed proper workflow - Fly.io primary, local OpenAI fallback when network fails or returns empty results
+- June 25, 2025. ENHANCED FALLBACK DETECTION: Added timeout handling and empty result detection to trigger local OpenAI processing automatically
 - June 23, 2025. Enhanced AI categorization analysis to properly detect and report actual categorization status in contextual tips with accurate transaction data
 - June 23, 2025. FIXED FALLBACK SYSTEM: Corrected local OpenAI fallback in server/openai.ts to use same categoryName field mapping as Fly.io processor
 - June 23, 2025. Added categorization counting logic to both Fly.io and local fallback systems to prevent "uncategorized" false reports
