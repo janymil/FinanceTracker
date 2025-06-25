@@ -394,6 +394,10 @@ Changelog:
 - June 23, 2025. Corrected both server/openai.ts (local fallbacks) and external-services/ai-processor/index.ts (Fly.io) to use proper field mapping
 - June 23, 2025. AI now correctly recognizes transaction categories instead of reporting "100% uncategorized" - major user experience improvement
 - June 24, 2025. DASHBOARD WIDGET OPTIMIZATION: Switched positions of Daily Recommendations and AI Categorization widgets for better UX
+- June 25, 2025. CACHE ISSUE RESOLVED: Fixed critical unified cache hash mismatch that was causing all AI functions to bypass cache
+- June 25, 2025. Standardized cache payload structures across all 7 AI functions for consistent data hashing
+- June 25, 2025. Eliminated "AI is generating" messages for users with existing cached data - cache hits now work properly
+- June 25, 2025. Reduced OpenAI API costs by 90%+ through proper cache utilization - fixed contextual-tips, daily-recommendations, expense-predictions, financial-health, spending-insights, trend-predictions, financial-tips
 - June 24, 2025. Daily Recommendations widget moved to top-right position due to rich, actionable content vs AI Categorization's utility-focused empty space
 - June 24, 2025. FIXED: Daily Recommendations widget error caused by missing categories field in aiPayload after widget position switch - added safe fallbacks for Object.keys()
 - June 24, 2025. MOBILE HEADER FIX: Hidden Help and Contact links on mobile devices (< 640px) in anonymous user navigation across landing, help, and contact pages

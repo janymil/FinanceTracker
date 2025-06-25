@@ -322,12 +322,14 @@ export function registerAIRoutes(app: Express) {
       const categories = await storage.getCategories(userId);
       const budgets = await storage.getUserBudgets(userId);
 
-      // Check unified cache for trend predictions
+      // Standardize cache payload for trend predictions
       const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      const cachedResult = await unifiedAICache.get('trend-predictions', userId, month, {
+      const cachePayload = {
         transactions: transactions.slice(0, 100),
         budgets: budgets.slice(0, 20)
-      });
+      };
+      
+      const cachedResult = await unifiedAICache.get('trend-predictions', userId, month, cachePayload);
       
       if (cachedResult) {
         console.log('AI trend predictions: Using unified cache - avoiding API call');
@@ -357,10 +359,7 @@ export function registerAIRoutes(app: Express) {
 
       // Save to unified cache
       try {
-        await unifiedAICache.set('trend-predictions', userId, month, {
-          transactions: transactions.slice(0, 100),
-          budgets: budgets.slice(0, 20)
-        }, predictions);
+        await unifiedAICache.set('trend-predictions', userId, month, cachePayload, predictions);
         console.log('AI trend predictions: Saved to unified cache');
       } catch (cacheError) {
         console.error("Error saving trend predictions to unified cache:", cacheError);
