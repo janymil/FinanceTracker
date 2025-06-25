@@ -90,7 +90,7 @@ export function registerAIRoutes(app: Express) {
         return res.status(400).json({ message: "Description is required" });
       }
 
-      const result = await categorizeExpense(description, amount || 0);
+      const result = await categorizeExpense(description, amount);
       return res.json({ category: result.category });
     } catch (error) {
       console.error("Error categorizing expense:", error);
@@ -183,7 +183,7 @@ export function registerAIRoutes(app: Express) {
       console.log('🔥 Financial tips endpoint called:', { 
         userId: userId?.substring(0, 8) + '...', 
         hasFinancialData: !!financialData,
-        tipResultsLength: tipResults?.length || 0 
+        tipResultsLength: tipResults?.length 
       });
       
       // No caching system
@@ -400,13 +400,13 @@ export function registerAIRoutes(app: Express) {
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
         return transactionDate >= weekAgo;
-      }).length || 0;
+      }).length;
 
       const dataForHash = {
         transactionCount: transactions?.length || 0,
         lastWeekTransactionCount: lastWeekTransactions,
-        totalIncome: Math.round((summary?.totalIncome || 0) / 100) * 100, // Round to nearest $100
-        totalExpenses: Math.round((summary?.totalExpenses || 0) / 100) * 100,
+        totalIncome: Math.round((summary?.totalIncome) / 100) * 100, // Round to nearest $100
+        totalExpenses: Math.round((summary?.totalExpenses) / 100) * 100,
         budgetCount: budgets?.length || 0,
         currentWeek: Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000)) // Weekly refresh
       };
@@ -437,21 +437,21 @@ export function registerAIRoutes(app: Express) {
       });
       
       const aiPayload = {
-        summary: summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 },
+        summary: summary,
         transactions: transactions.slice(0, 100).map(t => ({
           id: t.id,
-          amount: String(t.amount || 0),
-          description: t.description || '',
-          date: t.date || '',
-          type: t.type || 'expense',
-          categoryName: t.categoryName || 'Uncategorized'
+          amount: String(t.amount),
+          description: t.description,
+          date: t.date,
+          type: t.type,
+          categoryName: t.categoryName
         })),
         budgets: budgets.map(b => ({
-          id: b.id || 0,
-          name: b.name || '',
-          amount: String(b.amount || 0),
-          categoryName: b.categoryName || 'Uncategorized',
-          period: b.period || 'monthly'
+          id: b.id,
+          name: b.name,
+          amount: String(b.amount),
+          categoryName: b.categoryName,
+          period: b.period
         })),
         categories: categories
       };
@@ -996,8 +996,8 @@ Answer questions about features, subscription plans, how to use the app, trouble
         budgets: budgets?.map((budget: any) => ({
           category: budget.categoryName,
           budgetAmount: budget.amount,
-          spent: budget.spent || 0,
-          remaining: budget.remaining || budget.amount
+          spent: budget.spent,
+          remaining: budget.remaining
         })),
         selectedMonth: formattedMonth
       };

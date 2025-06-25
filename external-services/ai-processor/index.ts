@@ -1564,7 +1564,7 @@ app.post("/execute-gpt-task", async (req, res) => {
       case "contextual-tips":
         // Validate and fix payload structure for contextual tips
         const contextualPayload = {
-          summary: payload.summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 },
+          summary: payload.summary,
           transactions: payload.transactions,
           budgets: payload.budgets,
           goals: payload.goals,
@@ -1595,7 +1595,7 @@ app.post("/execute-gpt-task", async (req, res) => {
       case "daily-recommendations":
         // Fix payload structure for daily recommendations
         const dailyPayload = {
-          summary: payload.summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 },
+          summary: payload.summary,
           transactions: payload.transactions,
           budgets: payload.budgets,
           categories: payload.categories
