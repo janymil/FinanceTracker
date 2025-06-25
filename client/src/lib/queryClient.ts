@@ -136,6 +136,7 @@ export function clearUserSession() {
         key.startsWith('ai-insights-') ||
         key.startsWith('financial-health-') ||
         key.startsWith('trend-pred-') ||
+        key.startsWith('mascot_') ||
         key.includes('ai-generated') ||
         key.includes('openai-cache')
       )) {
