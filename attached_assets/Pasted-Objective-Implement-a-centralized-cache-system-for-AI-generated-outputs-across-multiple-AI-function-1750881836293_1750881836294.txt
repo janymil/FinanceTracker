@@ -1,0 +1,61 @@
+Objective:
+Implement a centralized cache system for AI-generated outputs across multiple AI functions within the app. The goal is to optimize performance, avoid redundant calls to OpenAI, and persist user-specific AI results.
+
+🧩 Requirements
+1. Centralized Orchestrator
+Acts as the single point of control for managing AI caches.
+
+Handles storing, retrieving, updating, and invalidating cached results for all AI-related functions.
+
+2. Per-AI Function Cache Structure
+Each AI function (e.g., categorizeExpenses, financialTips, trendAnalysis, etc.) maintains its own cache entry but uses the shared infrastructure.
+
+Cached content should be distinguishable by AI function name and user ID.
+
+3. User-Specific Caching
+Cache results are stored per user, so multiple users can run the same AI function and get different results.
+
+This requires linking cache entries to a user_id or email from authentication.
+
+4. Schema & Tables
+Create a unified database schema for the AI cache:
+
+Table: ai_cache
+Column	Type	Description
+id	UUID (PK)	Unique identifier for the cache entry
+user_id	String	ID or email of the user
+function_key	String	Unique name of the AI function (e.g., tips_v1)
+input_hash	String	Hash of the input payload
+input_json	JSONB	Raw input to the AI function
+output_json	JSONB	AI-generated output
+created_at	Timestamp	Time of creation
+updated_at	Timestamp	Time of last update (if used for refresh logic)
+
+input_hash ensures the same input doesn't generate multiple cache rows.
+
+⚙️ How It Works
+On AI function call:
+
+Compute a hash of the input (e.g., SHA256(JSON.stringify(input))).
+
+Query ai_cache using: user_id, function_key, and input_hash.
+
+If cache hit:
+
+Return the cached output_json.
+
+If cache miss:
+
+Call the OpenAI function.
+
+Store the result in ai_cache with the full input and output.
+
+🧠 Benefits
+🔄 Avoid duplicate OpenAI calls for repeated inputs.
+
+⚡ Speed up user experience with instant cached responses.
+
+🧩 Easily scalable to any number of AI functions.
+
+🧍 User-specific data security and relevance.
+

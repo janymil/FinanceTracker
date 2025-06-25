@@ -276,9 +276,23 @@ export const redeemCodes = pgTable("redeem_codes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// AI cache system completely removed - direct Fly.io calls only
-
-// Cache system completely destroyed - direct Fly.io calls only
+// Unified AI Cache System for OpenAI response optimization
+export const aiCache = pgTable("ai_cache", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id), // Secure per-user isolation via Clerk
+  functionName: varchar("function_name", { length: 100 }).notNull(), // e.g. 'financial-tips', 'daily-recommendations'
+  month: varchar("month", { length: 7 }).notNull(), // YYYY-MM format for month-specific caching
+  dataHash: varchar("data_hash", { length: 64 }).notNull(), // SHA-256 hash of input data for change detection
+  response: jsonb("response").notNull(), // Cached AI response data
+  lastAccessed: timestamp("last_accessed").defaultNow(), // For LRU cache management
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  // Composite unique key ensures one cache entry per user/function/month/data combination
+  index("ai_cache_user_function_month_hash_idx").on(table.userId, table.functionName, table.month, table.dataHash),
+  // Performance indexes for cache lookups and cleanup
+  index("ai_cache_user_function_idx").on(table.userId, table.functionName),
+  index("ai_cache_last_accessed_idx").on(table.lastAccessed),
+]);
 
 export const importLogs = pgTable("import_logs", {
   id: serial("id").primaryKey(),
