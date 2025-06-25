@@ -228,7 +228,7 @@ export async function generateContextualFinancialTips(data: {
       const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : t.amount;
       if (amount > 0) {
         const category = t.category || t.categoryName || 'Uncategorized';
-        const current = categorySpending.get(category) || 0;
+        const current = categorySpending.get(category);
         categorySpending.set(category, current + amount);
       }
     });
@@ -250,8 +250,8 @@ export async function generateContextualFinancialTips(data: {
       const day = new Date(t.date).getDate();
       const category = t.category || t.categoryName || 'Uncategorized';
       const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : t.amount;
-      dailySpending.set(day, (dailySpending.get(day) || 0) + amount);
-      transactionFrequency.set(category, (transactionFrequency.get(category) || 0) + 1);
+      dailySpending.set(day, dailySpending.get(day) + amount);
+      transactionFrequency.set(category, transactionFrequency.get(category) + 1);
     });
 
     // Analyze specific financial scenarios for contextual insights
@@ -317,7 +317,7 @@ export async function generateContextualFinancialTips(data: {
     // Check for spending concentration and patterns
     topSpendingCategories.forEach(([category, amount]) => {
       const categoryPercent = (amount / summary.totalExpenses) * 100;
-      const categoryFreq = transactionFrequency.get(category) || 0;
+      const categoryFreq = transactionFrequency.get(category);
       
       if (categoryPercent > 40) {
         scenarios.push(`🟨 High category spending: ${category} represents ${categoryPercent.toFixed(0)}% of expenses ($${amount.toFixed(2)} across ${categoryFreq} transactions).`);
@@ -1590,11 +1590,11 @@ app.post("/execute-gpt-task", async (req, res) => {
       case "contextual-tips":
         // Validate and fix payload structure for contextual tips
         const contextualPayload = {
-          summary: payload.summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 },
-          transactions: Array.isArray(payload.transactions) ? payload.transactions : [],
-          budgets: Array.isArray(payload.budgets) ? payload.budgets : [],
-          goals: Array.isArray(payload.goals) ? payload.goals : [],
-          selectedMonth: payload.selectedMonth || 'Current Month'
+          summary: payload.summary,
+          transactions: payload.transactions,
+          budgets: payload.budgets,
+          goals: payload.goals,
+          selectedMonth: payload.selectedMonth
         };
         
         // Generate summary from transactions if missing or incomplete
@@ -1621,17 +1621,17 @@ app.post("/execute-gpt-task", async (req, res) => {
       case "daily-recommendations":
         // Fix payload structure for daily recommendations
         const dailyPayload = {
-          summary: payload.summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 },
+          summary: payload.summary,
           transactions: payload.transactions,
           budgets: payload.budgets,
-          categories: payload.categories || {}
+          categories: payload.categories
         };
         console.log('Daily recommendations: Fixed payload structure', Object.keys(dailyPayload));
         result = await generateDailyRecommendations(dailyPayload);
         break;
 
       case "expense-predictions":
-        result = await generateExpensePredictions(payload.transactions || []);
+        result = await generateExpensePredictions(payload.transactions);
         break;
 
       case "financial-health-score":
