@@ -22,7 +22,7 @@ async function storeCache(key: string, value: any) {
 export async function runAI(task: string, userId: string, payload: Record<string, any>) {
   const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
   
-  // Try to get cached result using unified cache
+  // Check unified cache first
   const cached = await unifiedAICache.get(task, userId, month, payload);
   if (cached) {
     console.log(`[AI ${task}] Using unified cache for ${month}`);
