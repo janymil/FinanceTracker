@@ -89,20 +89,30 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       
       // Remove blocking validation - let AI decide if data is sufficient
       
-      const response = await apiRequest("POST", "/api/ai/tip", {
-        financialData: {
-          totalIncome: summary.totalIncome,
-          totalExpenses: summary.totalExpenses,
-          categories: summary.transactionsByCategory,
-          transactions: detailedTransactions,
-          month: monthName,
-          year: year,
-          timestamp: Date.now()
-        }
+      // Direct fetch to avoid GET/HEAD method issues
+      const token = await window.Clerk?.session?.getToken();
+      const response = await fetch("/api/ai/tip", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
+        body: JSON.stringify({
+          financialData: {
+            totalIncome: summary.totalIncome,
+            totalExpenses: summary.totalExpenses,
+            categories: summary.transactionsByCategory,
+            transactions: detailedTransactions,
+            month: monthName,
+            year: year,
+            timestamp: Date.now()
+          }
+        })
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate AI tip");
+        const errorText = await response.text();
+        throw new Error(`${response.status}: ${errorText}`);
       }
 
       const data = await response.json();

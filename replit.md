@@ -156,6 +156,7 @@ LATEST FIXES:
 - June 25, 2025. CONFIRMED WORKING: Fly.io processor now returns sophisticated financial analysis with $1,104 savings recommendations based on authentic user spending data
 - June 25, 2025. FINANCIAL TIPS FIXED: Restored React Query mutation system with proper apiRequest integration - bypassing auth issues while maintaining state management
 - June 25, 2025. MUTATION SYSTEM PRESERVED: Maintained proper error handling, loading states, and caching while fixing underlying API call structure
+- June 25, 2025. GET/HEAD METHOD ERROR FIXED: Replaced apiRequest with direct fetch call to resolve "Request with GET/HEAD method cannot have body" error in financial tips feature
 
 Changelog:
 - June 13, 2025. Initial setup
