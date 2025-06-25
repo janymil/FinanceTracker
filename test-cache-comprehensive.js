@@ -13,17 +13,15 @@ const BASE_URL = 'http://localhost:5000';
 const TEST_USER_ID = 'user_test_cache_verification'; // Test user ID
 const TEST_USER_ID_2 = 'user_test_cache_verification_2'; // Second user for isolation testing
 
-// Mock Clerk authentication header
+// Test authentication headers - will use session-based auth
 const AUTH_HEADERS = {
   'Content-Type': 'application/json',
-  'Authorization': `Bearer test-token`,
-  'x-clerk-user-id': TEST_USER_ID
+  'Cookie': 'test-session=active-user-session'
 };
 
 const AUTH_HEADERS_USER2 = {
-  'Content-Type': 'application/json', 
-  'Authorization': `Bearer test-token-2`,
-  'x-clerk-user-id': TEST_USER_ID_2
+  'Content-Type': 'application/json',
+  'Cookie': 'test-session=active-user-session-2'
 };
 
 // Test data for each AI function

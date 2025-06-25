@@ -18,6 +18,99 @@ import {
 import { eq, desc, lt, gte, sql, and } from "drizzle-orm";
 
 export function registerAIRoutes(app: Express) {
+  // Test endpoints for cache verification (bypass auth in development)
+  if (process.env.NODE_ENV === 'development') {
+    app.post('/api/test/ai/:function', async (req: any, res) => {
+      try {
+        const functionName = req.params.function;
+        const testUserId = req.body.testUserId || 'user_test_cache_verification';
+        const payload = req.body.payload || req.body;
+        
+        // Mock the auth for testing
+        req.auth = () => ({ userId: testUserId });
+        
+        // Route to appropriate AI function
+        switch (functionName) {
+          case 'financial-tips': {
+            const cache = new UnifiedAICache('financial-tips', testUserId);
+            const cachedResult = await cache.get(payload);
+            if (cachedResult) {
+              return res.json(cachedResult);
+            }
+            const result = await runAI('financial-tips', testUserId, payload);
+            await cache.set(payload, result, false, 168);
+            return res.json(result);
+          }
+          case 'daily-recommendations': {
+            const cache = new UnifiedAICache('daily-recommendations', testUserId);
+            const cachedResult = await cache.get(payload);
+            if (cachedResult) {
+              return res.json(cachedResult);
+            }
+            const result = await runAI('daily-recommendations', testUserId, payload);
+            await cache.set(payload, result, false, 24);
+            return res.json(result);
+          }
+          case 'contextual-tips': {
+            const cache = new UnifiedAICache('contextual-tips', testUserId);
+            const cachedResult = await cache.get(payload);
+            if (cachedResult) {
+              return res.json(cachedResult);
+            }
+            const result = await runAI('contextual-tips', testUserId, payload);
+            await cache.set(payload, result, false, 72);
+            return res.json(result);
+          }
+          case 'expense-predictions': {
+            const cache = new UnifiedAICache('expense-predictions', testUserId);
+            const cachedResult = await cache.get(payload);
+            if (cachedResult) {
+              return res.json(cachedResult);
+            }
+            const result = await runAI('expense-predictions', testUserId, payload);
+            await cache.set(payload, result, false, 48);
+            return res.json(result);
+          }
+          case 'financial-health-score': {
+            const cache = new UnifiedAICache('financial-health-score', testUserId);
+            const cachedResult = await cache.get(payload);
+            if (cachedResult) {
+              return res.json(cachedResult);
+            }
+            const result = await runAI('financial-health-score', testUserId, payload);
+            await cache.set(payload, result, false, 24);
+            return res.json(result);
+          }
+          case 'spending-insights': {
+            const cache = new UnifiedAICache('spending-insights', testUserId);
+            const cachedResult = await cache.get(payload);
+            if (cachedResult) {
+              return res.json(cachedResult);
+            }
+            const result = await runAI('spending-insights', testUserId, payload);
+            await cache.set(payload, result, false, 72);
+            return res.json(result);
+          }
+          case 'trend-predictions': {
+            const cache = new UnifiedAICache('trend-predictions', testUserId);
+            const cachedResult = await cache.get(payload);
+            if (cachedResult) {
+              return res.json(cachedResult);
+            }
+            const result = await runAI('trend-predictions', testUserId, payload);
+            await cache.set(payload, result, false, 48);
+            return res.json(result);
+          }
+          default:
+            return res.status(404).json({ message: 'AI function not found' });
+        }
+      } catch (error) {
+        console.error('Test AI endpoint error:', error);
+        res.status(500).json({ message: 'Test endpoint error', error: error.message });
+      }
+    });
+  }
+
   // Auto-categorization endpoint for bulk processing
   app.post('/api/auto-categorize', isAuthenticated, async (req: any, res) => {
     try {
