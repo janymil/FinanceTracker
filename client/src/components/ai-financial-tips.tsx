@@ -82,19 +82,14 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       // Remove blocking validation - let AI decide if data is sufficient
       
       const response = await apiRequest("POST", "/api/ai/tip", {
-        body: JSON.stringify({
-          financialData: {
-            totalIncome: summary.totalIncome,
-            totalExpenses: summary.totalExpenses,
-            categories: summary.transactionsByCategory || [],
-            transactions: detailedTransactions || [],
-            month: monthName,
-            year: year,
-            timestamp: Date.now()
-          }
-        }),
-        headers: {
-          'Content-Type': 'application/json'
+        financialData: {
+          totalIncome: summary.totalIncome,
+          totalExpenses: summary.totalExpenses,
+          categories: summary.transactionsByCategory || [],
+          transactions: detailedTransactions || [],
+          month: monthName,
+          year: year,
+          timestamp: Date.now()
         }
       });
 

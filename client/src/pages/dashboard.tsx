@@ -717,6 +717,17 @@ export default function Dashboard() {
               summary={financialSummary}
             />
 
+            {/* AI Insights Component for Premium Users */}
+            <RequirePlan plan="premium">
+              <LazyAIInsights 
+                data={{
+                  transactions: transactions as any,
+                  budgets: budgets as any,
+                  goals: []
+                }}
+              />
+            </RequirePlan>
+
           </div>
         )}
       </div>

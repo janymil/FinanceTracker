@@ -84,8 +84,19 @@ export default function Trends() {
           console.error('Failed to fetch financial summary:', summaryRes.status);
         }
 
-        // Fetch AI predictions for premium users
-        const predictionsRes = await fetch('/api/trend-predictions', { headers });
+        // Fetch AI predictions for premium users - use correct endpoint
+        const predictionsRes = await fetch('/api/ai/trend-predictions', { 
+          method: 'POST',
+          headers: {
+            ...headers,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            transactions: [],
+            budgets: [],
+            summary: {}
+          })
+        });
         if (predictionsRes.ok) {
           const predictionsData = await predictionsRes.json();
           setAiPredictions(predictionsData);
