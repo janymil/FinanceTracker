@@ -90,7 +90,7 @@ export function registerAIRoutes(app: Express) {
         return res.status(400).json({ message: "Description is required" });
       }
 
-      const result = await categorizeExpense(description, amount || 0);
+      const result = await categorizeExpense(description, amount);
       return res.json({ category: result.category });
     } catch (error) {
       console.error("Error categorizing expense:", error);
@@ -170,9 +170,9 @@ export function registerAIRoutes(app: Express) {
       console.log('AI financial tips: Making Fly.io API call via centralized processor');
       
       const aiPayload = {
-        totalIncome: financialData.totalIncome || 0,
-        totalExpenses: financialData.totalExpenses || 0,
-        transactionsByCategory: financialData.categories || [],
+        totalIncome: financialData.totalIncome,
+        totalExpenses: financialData.totalExpenses,
+        transactionsByCategory: financialData.categories,
         recentTransactions: formattedTransactions,
         timestamp: financialData.timestamp
       };
@@ -400,14 +400,14 @@ export function registerAIRoutes(app: Express) {
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
         return transactionDate >= weekAgo;
-      }).length || 0;
+      }).length;
 
       const dataForHash = {
-        transactionCount: transactions?.length || 0,
+        transactionCount: transactions.length,
         lastWeekTransactionCount: lastWeekTransactions,
-        totalIncome: Math.round((summary?.totalIncome || 0) / 100) * 100, // Round to nearest $100
-        totalExpenses: Math.round((summary?.totalExpenses || 0) / 100) * 100,
-        budgetCount: budgets?.length || 0,
+        totalIncome: Math.round(summary.totalIncome / 100) * 100, // Round to nearest $100
+        totalExpenses: Math.round(summary.totalExpenses / 100) * 100,
+        budgetCount: budgets.length,
         currentWeek: Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000)) // Weekly refresh
       };
       // Cache system removed
@@ -437,21 +437,21 @@ export function registerAIRoutes(app: Express) {
       });
       
       const aiPayload = {
-        summary: summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 },
+        summary: summary,
         transactions: transactions.slice(0, 100).map(t => ({
           id: t.id,
-          amount: String(t.amount || 0),
-          description: t.description || '',
-          date: t.date || '',
-          type: t.type || 'expense',
-          categoryName: t.categoryName || 'Uncategorized'
+          amount: String(t.amount),
+          description: t.description,
+          date: t.date,
+          type: t.type,
+          categoryName: t.categoryName
         })),
         budgets: budgets.map(b => ({
-          id: b.id || 0,
-          name: b.name || '',
-          amount: String(b.amount || 0),
-          categoryName: b.categoryName || 'Uncategorized',
-          period: b.period || 'monthly'
+          id: b.id,
+          name: b.name,
+          amount: String(b.amount),
+          categoryName: b.categoryName,
+          period: b.period
         })),
         categories: categories
       };
@@ -469,19 +469,19 @@ export function registerAIRoutes(app: Express) {
       
       console.log('Daily recommendations: Received response from Fly.io:', {
         hasRecommendations: Array.isArray(recommendations?.recommendations),
-        recommendationCount: recommendations?.recommendations?.length || 0,
+        recommendationCount: recommendations?.recommendations?.length,
         hasInsights: Array.isArray(recommendations?.insights),
-        insightCount: recommendations?.insights?.length || 0,
+        insightCount: recommendations?.insights?.length,
         source: 'fly.io-external-service',
-        actualRecommendations: recommendations?.recommendations || [],
-        actualInsights: recommendations?.insights || []
+        actualRecommendations: recommendations?.recommendations,
+        actualInsights: recommendations?.insights
       });
 
       console.log('Daily recommendations: Fly.io response structure:', {
         hasRecommendations: !!recommendations?.recommendations,
-        recommendationCount: recommendations?.recommendations?.length || 0,
+        recommendationCount: recommendations?.recommendations?.length,
         hasInsights: !!recommendations?.insights,
-        insightCount: recommendations?.insights?.length || 0,
+        insightCount: recommendations?.insights?.length,
         fullResponse: recommendations
       });
 
@@ -565,7 +565,7 @@ export function registerAIRoutes(app: Express) {
       const budgetSpending = new Map();
       transactions.forEach(t => {
         if (t.type === 'expense' && t.categoryName) {
-          const current = budgetSpending.get(t.categoryName) || 0;
+          const current = budgetSpending.get(t.categoryName);
           budgetSpending.set(t.categoryName, current + parseFloat(t.amount));
         }
       });
@@ -575,7 +575,7 @@ export function registerAIRoutes(app: Express) {
         .map(b => ({
           categoryName: b.categoryName,
           amount: b.amount,
-          spent: budgetSpending.get(b.categoryName) || 0
+          spent: budgetSpending.get(b.categoryName)
         }));
 
       // Use unified AI processor for financial health score
@@ -648,8 +648,8 @@ export function registerAIRoutes(app: Express) {
       );
 
       // Calculate financial health score
-      const totalIncome = financialSummary.totalIncome || 0;
-      const totalExpenses = financialSummary.totalExpenses || 0;
+      const totalIncome = financialSummary.totalIncome;
+      const totalExpenses = financialSummary.totalExpenses;
       const netAmount = totalIncome - totalExpenses;
       
       // Simple health score calculation (0-100)
@@ -981,10 +981,10 @@ Answer questions about features, subscription plans, how to use the app, trouble
       // Prepare payload for centralized AI processor
       const aiPayload = {
         summary: {
-          totalIncome: summary.totalIncome || 0,
-          totalExpenses: summary.totalExpenses || 0,
-          netBalance: summary.netBalance || 0,
-          transactionCount: transactions.length || 0
+          totalIncome: summary.totalIncome,
+          totalExpenses: summary.totalExpenses,
+          netBalance: summary.netBalance,
+          transactionCount: transactions.length
         },
         transactions: transactions.slice(0, 10).map((t: any) => ({
           description: t.description || t.note || 'Transaction',
@@ -996,9 +996,9 @@ Answer questions about features, subscription plans, how to use the app, trouble
         budgets: budgets?.map((budget: any) => ({
           category: budget.categoryName,
           budgetAmount: budget.amount,
-          spent: budget.spent || 0,
-          remaining: budget.remaining || budget.amount
-        })) || [],
+          spent: budget.spent,
+          remaining: budget.remaining
+        }),
         selectedMonth: formattedMonth
       };
 
