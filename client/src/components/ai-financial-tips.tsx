@@ -125,15 +125,19 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
 
       let tipContent = '';
 
-      // Handle both new structured format and legacy format
-      if (data.tips && Array.isArray(data.tips) && data.tips.length > 0) {
-        // New structured format with detailed analysis
+      // Handle both new 4-section structured format and legacy formats
+      if (data.tips && Array.isArray(data.tips) && data.tips.length === 4) {
+        // New 4-section structured format - store the sections directly
+        setCurrentTip(JSON.stringify({ sections: data.tips }));
+        tipContent = 'Structured 4-section analysis loaded';
+      } else if (data.tips && Array.isArray(data.tips) && data.tips.length > 0) {
+        // Legacy structured format with detailed analysis
         const detailedTip = data.tips[0];
         const formattedTip = `**${detailedTip.title}**\n\n${detailedTip.description}`;
         tipContent = formattedTip;
         setCurrentTip(formattedTip);
       } else if (data.tip) {
-        // Legacy format
+        // Legacy single tip format
         tipContent = data.tip;
         setCurrentTip(data.tip);
       } else {
@@ -221,97 +225,119 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
               <div className="space-y-4">
                 {/* Parse the AI analysis into sections */}
                 {(() => {
-                  // Clean the content but preserve structure
-                  const cleanedContent = currentTip;
+                  let sections: any[] = [];
 
-                  // Define the 4 thematic sections with their patterns
-                  const sectionPatterns = [
-                    {
-                      title: "📊 Spending Pattern Analysis",
-                      icon: TrendingUp,
-                      keywords: ["spending", "pattern", "analysis", "breakdown", "category", "expenses", "mathematical", "reveals", "bulk"],
-                      color: "blue"
-                    },
-                    {
-                      title: "💡 Personalized Saving Recommendations", 
-                      icon: Lightbulb,
-                      keywords: ["saving", "recommend", "rebalancing", "budget", "limiting", "redirect", "sustainable", "implementation"],
-                      color: "green"
-                    },
-                    {
-                      title: "📋 Budget Optimization Suggestions",
-                      icon: GraduationCap, 
-                      keywords: ["budget", "optimization", "income-to-expense", "ratio", "financial", "strategies", "protection", "realigning"],
-                      color: "purple"
-                    },
-                    {
-                      title: "🎯 Advanced Financial Analysis",
-                      icon: Sparkles,
-                      keywords: ["advanced", "analysis", "necessitates", "action", "focus", "balanced", "cash flow", "immediate"],
-                      color: "orange"
-                    }
-                  ];
-
-                  // Split content into sentences and paragraphs
-                  const sentences = cleanedContent.split(/[.!?]+/).filter(s => s.trim().length > 10);
-                  const sections = [];
-
-                  // Try to match sentences to sections based on keywords
-                  sectionPatterns.forEach(pattern => {
-                    const matchedSentences = sentences.filter(sentence => {
-                      const lowerSentence = sentence.toLowerCase();
-                      return pattern.keywords.some(keyword => lowerSentence.includes(keyword.toLowerCase()));
-                    });
-
-                    if (matchedSentences.length > 0) {
-                      sections.push({
-                        ...pattern,
-                        content: cleanAIText(matchedSentences.join('. ').trim() + '.')
-                      });
-
-                      // Remove matched sentences from the pool
-                      matchedSentences.forEach(matched => {
-                        const index = sentences.indexOf(matched);
-                        if (index > -1) sentences.splice(index, 1);
+                  // Check if this is the new 4-section structured format
+                  try {
+                    const parsedData = JSON.parse(currentTip);
+                    if (parsedData.sections && Array.isArray(parsedData.sections) && parsedData.sections.length === 4) {
+                      // Use the structured sections from the AI processor
+                      sections = parsedData.sections.map((section: any, index: number) => {
+                        const iconMap = [TrendingUp, Lightbulb, GraduationCap, Sparkles];
+                        return {
+                          title: `📊 ${section.title}`,
+                          icon: iconMap[index] || TrendingUp,
+                          content: cleanAIText(section.content),
+                          color: section.color || ['blue', 'green', 'purple', 'orange'][index]
+                        };
                       });
                     }
-                  });
-
-                  // If we have remaining sentences or didn't get 4 sections, distribute them
-                  if (sentences.length > 0 || sections.length < 4) {
-                    const remainingText = sentences.join('. ').trim();
-
-                    // If we have less than 4 sections, add the remaining patterns with remaining content
-                    const missingSections = sectionPatterns.filter(pattern => 
-                      !sections.some(section => section.title === pattern.title)
-                    );
-
-                    if (remainingText && missingSections.length > 0) {
-                      // Split remaining text evenly among missing sections
-                      const chunks = remainingText.split(/(?:[.!?]+\s+)/).filter(chunk => chunk.trim());
-                      missingSections.forEach((pattern, index) => {
-                        const chunkStart = Math.floor((chunks.length / missingSections.length) * index);
-                        const chunkEnd = Math.floor((chunks.length / missingSections.length) * (index + 1));
-                        const content = chunks.slice(chunkStart, chunkEnd).join('. ').trim();
-
-                        if (content) {
-                          sections.push({
-                            ...pattern,
-                            content: cleanAIText(content + '.')
-                          });
-                        }
-                      });
-                    }
+                  } catch (e) {
+                    // Not JSON, continue with legacy parsing
                   }
 
-                  // Ensure we have at least one section
+                  // Legacy parsing for non-structured responses
                   if (sections.length === 0) {
-                    sections.push({
-                      title: "📊 AI Financial Analysis",
-                      icon: TrendingUp,
-                      content: cleanAIText(cleanedContent),
-                      color: "blue"
+                    const cleanedContent = currentTip;
+
+                    // Define the 4 thematic sections with their patterns
+                    const sectionPatterns = [
+                      {
+                        title: "📊 Spending Pattern Analysis",
+                        icon: TrendingUp,
+                        keywords: ["spending", "pattern", "analysis", "breakdown", "category", "expenses", "mathematical", "reveals", "bulk"],
+                        color: "blue"
+                      },
+                      {
+                        title: "💡 Personalized Saving Recommendations", 
+                        icon: Lightbulb,
+                        keywords: ["saving", "recommend", "rebalancing", "budget", "limiting", "redirect", "sustainable", "implementation"],
+                        color: "green"
+                      },
+                      {
+                        title: "📋 Budget Optimization Suggestions",
+                        icon: GraduationCap, 
+                        keywords: ["budget", "optimization", "income-to-expense", "ratio", "financial", "strategies", "protection", "realigning"],
+                        color: "purple"
+                      },
+                      {
+                        title: "🎯 Advanced Financial Analysis",
+                        icon: Sparkles,
+                        keywords: ["advanced", "analysis", "necessitates", "action", "focus", "balanced", "cash flow", "immediate"],
+                        color: "orange"
+                      }
+                    ];
+
+                    // Split content into sentences and paragraphs
+                    const sentences = cleanedContent.split(/[.!?]+/).filter(s => s.trim().length > 10);
+
+                    // Try to match sentences to sections based on keywords
+                    sectionPatterns.forEach(pattern => {
+                      const matchedSentences = sentences.filter(sentence => {
+                        const lowerSentence = sentence.toLowerCase();
+                        return pattern.keywords.some(keyword => lowerSentence.includes(keyword.toLowerCase()));
+                      });
+
+                      if (matchedSentences.length > 0) {
+                        sections.push({
+                          ...pattern,
+                          content: cleanAIText(matchedSentences.join('. ').trim() + '.')
+                        });
+
+                        // Remove matched sentences from the pool
+                        matchedSentences.forEach(matched => {
+                          const index = sentences.indexOf(matched);
+                          if (index > -1) sentences.splice(index, 1);
+                        });
+                      }
                     });
+
+                    // If we have remaining sentences or didn't get 4 sections, distribute them
+                    if (sentences.length > 0 || sections.length < 4) {
+                      const remainingText = sentences.join('. ').trim();
+
+                      // If we have less than 4 sections, add the remaining patterns with remaining content
+                      const missingSections = sectionPatterns.filter(pattern => 
+                        !sections.some(section => section.title === pattern.title)
+                      );
+
+                      if (remainingText && missingSections.length > 0) {
+                        // Split remaining text evenly among missing sections
+                        const chunks = remainingText.split(/(?:[.!?]+\s+)/).filter(chunk => chunk.trim());
+                        missingSections.forEach((pattern, index) => {
+                          const chunkStart = Math.floor((chunks.length / missingSections.length) * index);
+                          const chunkEnd = Math.floor((chunks.length / missingSections.length) * (index + 1));
+                          const content = chunks.slice(chunkStart, chunkEnd).join('. ').trim();
+
+                          if (content) {
+                            sections.push({
+                              ...pattern,
+                              content: cleanAIText(content + '.')
+                            });
+                          }
+                        });
+                      }
+                    }
+
+                    // Ensure we have at least one section
+                    if (sections.length === 0) {
+                      sections.push({
+                        title: "📊 AI Financial Analysis",
+                        icon: TrendingUp,
+                        content: cleanAIText(cleanedContent),
+                        color: "blue"
+                      });
+                    }
                   }
 
                   return sections.map((section, index) => {
