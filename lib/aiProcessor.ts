@@ -20,16 +20,8 @@ async function storeCache(key: string, value: any) {
  * Handles: GPT Execution, Smart Caching, Retry/Fallback, OpenAI Key Handling
  */
 export async function runAI(task: string, userId: string, payload: Record<string, any>) {
-  // Check unified cache first
-  const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-  const cachedResult = await unifiedAICache.get(task, userId, month, payload);
-  
-  if (cachedResult) {
-    console.log(`[AI ${task}] Using cached result - avoiding API call`);
-    return cachedResult;
-  }
-  
-  console.log(`[AI ${task}] Cache miss - calling Fly.io processor`);
+  // CACHE DISABLED - FORCE FRESH CALLS
+  console.log(`[AI ${task}] Cache bypassed - testing Fly.io processor directly`);
 
   try {
     console.log(`[AI ${task}] Testing Fly.io connectivity...`);

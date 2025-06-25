@@ -53,13 +53,9 @@ export class UnifiedAICache {
     const dataHash = this.createDataHash(userData);
     const key = this.generateKey(functionName, userId, month, dataHash);
 
-    // Check memory cache first
-    const memoryEntry = this.memoryCache.get(key);
-    if (memoryEntry && !this.isExpired(memoryEntry)) {
-      memoryEntry.lastAccessed = new Date();
-      console.log(`[UnifiedCache] Memory hit for ${functionName}:${month}`);
-      return memoryEntry.result;
-    }
+    // CACHE DISABLED - FORCE FRESH CALLS TO FLY.IO
+    console.log(`[UnifiedCache] Cache bypassed for ${functionName}:${month} - forcing Fly.io call`);
+    return null;
 
     // Try database cache
     try {
