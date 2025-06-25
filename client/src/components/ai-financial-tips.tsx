@@ -57,6 +57,14 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     },
   });
 
+  console.log('AI Tips: Component state:', {
+    hasUser: !!user,
+    userPlan: databaseUser?.plan,
+    hasSummary: !!summary,
+    summaryIncome: summary?.totalIncome,
+    summaryExpenses: summary?.totalExpenses
+  });
+
   // Function to fetch detailed transactions for specific month/year
   const fetchDetailedTransactions = async (month: number, year: number) => {
     const response = await apiRequest("GET", "/api/transactions/by-month", { 
@@ -69,7 +77,11 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   // React Query mutation for generating tips
   const generateTipMutation = useMutation({
     mutationFn: async () => {
-      if (!summary) throw new Error("No financial summary available");
+      console.log('AI Tips: Starting mutation function');
+      if (!summary) {
+        console.error('AI Tips: No summary provided');
+        throw new Error("No financial summary available");
+      }
       
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
@@ -164,7 +176,10 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                 </p>
               </div>
               <Button 
-                onClick={() => generateTipMutation.mutate()}
+                onClick={() => {
+                  console.log('AI Tips: Button clicked, summary:', !!summary, 'generating:', isGenerating);
+                  generateTipMutation.mutate();
+                }}
                 disabled={!summary || isGenerating}
                 className="flex items-center gap-2"
               >
