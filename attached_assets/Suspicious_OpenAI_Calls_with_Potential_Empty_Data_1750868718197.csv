@@ -1,0 +1,679 @@
+Variable,OpenAI Call Context
+recommendations,"openai.chat.completions.create({
+      model: ""gpt-4o"", // the newest OpenAI model is ""gpt-4o"" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: ""system"",
+          content: ""You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.""
+        },
+        {
+          role: ""user"",
+          content: prompt
+        }
+      ],
+      response_format: { type: ""json_object"" },
+      max_tokens: 1200,
+      temperature: 0.3 // Moderate creativity for personalized recommendations
+    })"
+recommendations,"openai.chat.completions.create({
+      model: ""gpt-4o"", // the newest OpenAI model is ""gpt-4o"" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: ""system"",
+          content: ""You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.""
+        },
+        {
+          role: ""user"",
+          content: prompt
+        }
+      ],
+      response_format: { type: ""json_object"" },
+      max_tokens: 1200,
+      temperature: 0.3 // Moderate creativity for personalized recommendations
+    })"
+recommendations,"openai.chat.completions.create({
+      model: ""gpt-4o"", // the newest OpenAI model is ""gpt-4o"" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: ""system"",
+          content: ""You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.""
+        },
+        {
+          role: ""user"",
+          content: prompt
+        }
+      ],
+      response_format: { type: ""json_object"" },
+      max_tokens: 1200,
+      temperature: 0.3 // Moderate creativity for personalized recommendations
+    })"
+recommendations,"openai.chat.completions.create({
+      model: ""gpt-4o"", // the newest OpenAI model is ""gpt-4o"" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: ""system"",
+          content: ""You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.""
+        },
+        {
+          role: ""user"",
+          content: prompt
+        }
+      ],
+      response_format: { type: ""json_object"" },
+      max_tokens: 1200,
+      temperature: 0.3 // Moderate creativity for personalized recommendations
+    })"
+recommendations,"openai.chat.completions.create({
+        model: ""gpt-4o"",
+        messages: [
+          {
+            role: ""system"",
+            content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
+
+1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
+2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
+3. BUDGET OPTIMIZATION SUGGESTIONS: Recommend category rebalancing with precise dollar amounts
+4. CONTEXT-AWARE FINANCIAL ADVICE: Consider their financial position, goals, and risk tolerance
+
+ANALYSIS REQUIREMENTS:
+- Use their EXACT transaction amounts and categories 
+- Calculate precise percentages and ratios from their data
+- Identify the highest-impact optimization opportunities
+- Provide specific dollar amounts for recommendations
+- Include mathematical analysis (savings rate, expense ratios, etc.)"
+insights,"openai.chat.completions.create({
+        model: ""gpt-4o"",
+        messages: [
+          {
+            role: ""system"",
+            content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
+
+1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
+2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
+3. BUDGET OPTIMIZATION SUGGESTIONS: Recommend category rebalancing with precise dollar amounts
+4. CONTEXT-AWARE FINANCIAL ADVICE: Consider their financial position, goals, and risk tolerance
+
+ANALYSIS REQUIREMENTS:
+- Use their EXACT transaction amounts and categories 
+- Calculate precise percentages and ratios from their data
+- Identify the highest-impact optimization opportunities
+- Provide specific dollar amounts for recommendations
+- Include mathematical analysis (savings rate, expense ratios, etc.)"
+recommendations,"openai.chat.completions.create({
+        model: ""gpt-4o"",
+        messages: [
+          {
+            role: ""system"",
+            content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
+
+1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
+2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
+3. BUDGET OPTIMIZATION SUGGESTIONS: Recommend category rebalancing with precise dollar amounts
+4. CONTEXT-AWARE FINANCIAL ADVICE: Consider their financial position, goals, and risk tolerance
+
+ANALYSIS REQUIREMENTS:
+- Use their EXACT transaction amounts and categories 
+- Calculate precise percentages and ratios from their data
+- Identify the highest-impact optimization opportunities
+- Provide specific dollar amounts for recommendations
+- Include mathematical analysis (savings rate, expense ratios, etc.)"
+recommendations,"openai.chat.completions.create({
+        model: ""gpt-4o"",
+        messages: [
+          {
+            role: ""system"",
+            content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
+
+1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
+2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
+3. BUDGET OPTIMIZATION SUGGESTIONS: Recommend category rebalancing with precise dollar amounts
+4. CONTEXT-AWARE FINANCIAL ADVICE: Consider their financial position, goals, and risk tolerance
+
+ANALYSIS REQUIREMENTS:
+- Use their EXACT transaction amounts and categories 
+- Calculate precise percentages and ratios from their data
+- Identify the highest-impact optimization opportunities
+- Provide specific dollar amounts for recommendations
+- Include mathematical analysis (savings rate, expense ratios, etc.)"
+recommendations,"openai.chat.completions.create({
+        model: ""gpt-4o"",
+        messages: [
+          {
+            role: ""system"",
+            content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
+
+1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
+2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
+3. BUDGET OPTIMIZATION SUGGESTIONS: Recommend category rebalancing with precise dollar amounts
+4. CONTEXT-AWARE FINANCIAL ADVICE: Consider their financial position, goals, and risk tolerance
+
+ANALYSIS REQUIREMENTS:
+- Use their EXACT transaction amounts and categories 
+- Calculate precise percentages and ratios from their data
+- Identify the highest-impact optimization opportunities
+- Provide specific dollar amounts for recommendations
+- Include mathematical analysis (savings rate, expense ratios, etc.)"
+recommendations,"openai.chat.completions.create({
+      model: ""gpt-4o-mini"", // Use faster model for spending insights
+      messages: [
+        {
+          role: ""system"",
+          content: `You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights.
+
+Generate 2-4 insights focusing on:
+- Unusual spending patterns
+- Budget optimization opportunities  
+- Positive financial behaviors
+- Spending trends and recommendations
+
+Each insight should have:
+- Unique ID
+- Type: warning, suggestion, achievement, or trend
+- Clear title and description
+- Impact level: high, medium, low
+- Category if relevant
+- Amount if relevant
+- Actionable recommendation
+- Whether it's actionable (boolean)"
+insights,"openai.chat.completions.create({
+      model: ""gpt-4o-mini"", // Use faster model for spending insights
+      messages: [
+        {
+          role: ""system"",
+          content: `You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights.
+
+Generate 2-4 insights focusing on:
+- Unusual spending patterns
+- Budget optimization opportunities  
+- Positive financial behaviors
+- Spending trends and recommendations
+
+Each insight should have:
+- Unique ID
+- Type: warning, suggestion, achievement, or trend
+- Clear title and description
+- Impact level: high, medium, low
+- Category if relevant
+- Amount if relevant
+- Actionable recommendation
+- Whether it's actionable (boolean)"
+recommendations,"openai.chat.completions.create({
+      model: ""gpt-4o-mini"", // Use faster model for spending insights
+      messages: [
+        {
+          role: ""system"",
+          content: `You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights.
+
+Generate 2-4 insights focusing on:
+- Unusual spending patterns
+- Budget optimization opportunities  
+- Positive financial behaviors
+- Spending trends and recommendations
+
+Each insight should have:
+- Unique ID
+- Type: warning, suggestion, achievement, or trend
+- Clear title and description
+- Impact level: high, medium, low
+- Category if relevant
+- Amount if relevant
+- Actionable recommendation
+- Whether it's actionable (boolean)"
+recommendations,"openai.chat.completions.create({
+      model: ""gpt-4o-mini"", // Use faster model for spending insights
+      messages: [
+        {
+          role: ""system"",
+          content: `You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights.
+
+Generate 2-4 insights focusing on:
+- Unusual spending patterns
+- Budget optimization opportunities  
+- Positive financial behaviors
+- Spending trends and recommendations
+
+Each insight should have:
+- Unique ID
+- Type: warning, suggestion, achievement, or trend
+- Clear title and description
+- Impact level: high, medium, low
+- Category if relevant
+- Amount if relevant
+- Actionable recommendation
+- Whether it's actionable (boolean)"
+recommendations,"openai.chat.completions.create({
+      model: ""gpt-4o-mini"", // Use faster model for spending insights
+      messages: [
+        {
+          role: ""system"",
+          content: `You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights.
+
+Generate 2-4 insights focusing on:
+- Unusual spending patterns
+- Budget optimization opportunities  
+- Positive financial behaviors
+- Spending trends and recommendations
+
+Each insight should have:
+- Unique ID
+- Type: warning, suggestion, achievement, or trend
+- Clear title and description
+- Impact level: high, medium, low
+- Category if relevant
+- Amount if relevant
+- Actionable recommendation
+- Whether it's actionable (boolean)"
+recommendations,"openai.chat.completions.create({
+      model: ""gpt-4o"",
+      messages: [
+        {
+          role: ""system"",
+          content: `You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
+
+Your analysis should consider:
+- Spending patterns and volatility
+- Seasonal trends in expenses
+- Category distribution and priorities
+- Financial behavior consistency
+- Risk factors and resilience
+- Personalized weight adjustments based on user's situation
+
+Provide a comprehensive financial health score from 0-100 with detailed factor breakdown.
+
+Respond with JSON in this format:
+{
+  ""score"": 85,
+  ""status"": ""Good"",
+  ""color"": ""blue"",
+  ""factors"": [
+    {
+      ""name"": ""Adaptive Spending Control"",
+      ""score"": 25,
+      ""max"": 30,
+      ""status"": ""good"",
+      ""aiInsight"": ""Your spending shows good consistency with minor seasonal variations""
+    }
+  ],
+  ""icon"": ""TrendingUp"",
+  ""aiAnalysis"": {
+    ""personalizedFactors"": [""Custom factor explanations""],
+    ""riskAssessment"": ""Overall risk level and factors"",
+    ""recommendations"": [""Personalized recommendations""],
+    ""confidence"": 0.87
+  }
+}`
+        },
+        {
+          role: ""user"",
+          content: `Analyze this financial data for a personalized health score:
+
+Financial Summary:
+- Income: $${summary.totalIncome}
+- Expenses: $${summary.totalExpenses}
+- Net Balance: $${summary.netBalance}
+
+Transaction History (${transactions.length} transactions)"
+factors,"openai.chat.completions.create({
+      model: ""gpt-4o"",
+      messages: [
+        {
+          role: ""system"",
+          content: `You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
+
+Your analysis should consider:
+- Spending patterns and volatility
+- Seasonal trends in expenses
+- Category distribution and priorities
+- Financial behavior consistency
+- Risk factors and resilience
+- Personalized weight adjustments based on user's situation
+
+Provide a comprehensive financial health score from 0-100 with detailed factor breakdown.
+
+Respond with JSON in this format:
+{
+  ""score"": 85,
+  ""status"": ""Good"",
+  ""color"": ""blue"",
+  ""factors"": [
+    {
+      ""name"": ""Adaptive Spending Control"",
+      ""score"": 25,
+      ""max"": 30,
+      ""status"": ""good"",
+      ""aiInsight"": ""Your spending shows good consistency with minor seasonal variations""
+    }
+  ],
+  ""icon"": ""TrendingUp"",
+  ""aiAnalysis"": {
+    ""personalizedFactors"": [""Custom factor explanations""],
+    ""riskAssessment"": ""Overall risk level and factors"",
+    ""recommendations"": [""Personalized recommendations""],
+    ""confidence"": 0.87
+  }
+}`
+        },
+        {
+          role: ""user"",
+          content: `Analyze this financial data for a personalized health score:
+
+Financial Summary:
+- Income: $${summary.totalIncome}
+- Expenses: $${summary.totalExpenses}
+- Net Balance: $${summary.netBalance}
+
+Transaction History (${transactions.length} transactions)"
+personalizedFactors,"openai.chat.completions.create({
+      model: ""gpt-4o"",
+      messages: [
+        {
+          role: ""system"",
+          content: `You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
+
+Your analysis should consider:
+- Spending patterns and volatility
+- Seasonal trends in expenses
+- Category distribution and priorities
+- Financial behavior consistency
+- Risk factors and resilience
+- Personalized weight adjustments based on user's situation
+
+Provide a comprehensive financial health score from 0-100 with detailed factor breakdown.
+
+Respond with JSON in this format:
+{
+  ""score"": 85,
+  ""status"": ""Good"",
+  ""color"": ""blue"",
+  ""factors"": [
+    {
+      ""name"": ""Adaptive Spending Control"",
+      ""score"": 25,
+      ""max"": 30,
+      ""status"": ""good"",
+      ""aiInsight"": ""Your spending shows good consistency with minor seasonal variations""
+    }
+  ],
+  ""icon"": ""TrendingUp"",
+  ""aiAnalysis"": {
+    ""personalizedFactors"": [""Custom factor explanations""],
+    ""riskAssessment"": ""Overall risk level and factors"",
+    ""recommendations"": [""Personalized recommendations""],
+    ""confidence"": 0.87
+  }
+}`
+        },
+        {
+          role: ""user"",
+          content: `Analyze this financial data for a personalized health score:
+
+Financial Summary:
+- Income: $${summary.totalIncome}
+- Expenses: $${summary.totalExpenses}
+- Net Balance: $${summary.netBalance}
+
+Transaction History (${transactions.length} transactions)"
+recommendations,"openai.chat.completions.create({
+      model: ""gpt-4o"",
+      messages: [
+        {
+          role: ""system"",
+          content: `You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
+
+Your analysis should consider:
+- Spending patterns and volatility
+- Seasonal trends in expenses
+- Category distribution and priorities
+- Financial behavior consistency
+- Risk factors and resilience
+- Personalized weight adjustments based on user's situation
+
+Provide a comprehensive financial health score from 0-100 with detailed factor breakdown.
+
+Respond with JSON in this format:
+{
+  ""score"": 85,
+  ""status"": ""Good"",
+  ""color"": ""blue"",
+  ""factors"": [
+    {
+      ""name"": ""Adaptive Spending Control"",
+      ""score"": 25,
+      ""max"": 30,
+      ""status"": ""good"",
+      ""aiInsight"": ""Your spending shows good consistency with minor seasonal variations""
+    }
+  ],
+  ""icon"": ""TrendingUp"",
+  ""aiAnalysis"": {
+    ""personalizedFactors"": [""Custom factor explanations""],
+    ""riskAssessment"": ""Overall risk level and factors"",
+    ""recommendations"": [""Personalized recommendations""],
+    ""confidence"": 0.87
+  }
+}`
+        },
+        {
+          role: ""user"",
+          content: `Analyze this financial data for a personalized health score:
+
+Financial Summary:
+- Income: $${summary.totalIncome}
+- Expenses: $${summary.totalExpenses}
+- Net Balance: $${summary.netBalance}
+
+Transaction History (${transactions.length} transactions)"
+recommendations,"openai.chat.completions.create({
+      model: ""gpt-4o"",
+      messages: [
+        {
+          role: ""system"",
+          content: `You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
+
+Your analysis should consider:
+- Spending patterns and volatility
+- Seasonal trends in expenses
+- Category distribution and priorities
+- Financial behavior consistency
+- Risk factors and resilience
+- Personalized weight adjustments based on user's situation
+
+Provide a comprehensive financial health score from 0-100 with detailed factor breakdown.
+
+Respond with JSON in this format:
+{
+  ""score"": 85,
+  ""status"": ""Good"",
+  ""color"": ""blue"",
+  ""factors"": [
+    {
+      ""name"": ""Adaptive Spending Control"",
+      ""score"": 25,
+      ""max"": 30,
+      ""status"": ""good"",
+      ""aiInsight"": ""Your spending shows good consistency with minor seasonal variations""
+    }
+  ],
+  ""icon"": ""TrendingUp"",
+  ""aiAnalysis"": {
+    ""personalizedFactors"": [""Custom factor explanations""],
+    ""riskAssessment"": ""Overall risk level and factors"",
+    ""recommendations"": [""Personalized recommendations""],
+    ""confidence"": 0.87
+  }
+}`
+        },
+        {
+          role: ""user"",
+          content: `Analyze this financial data for a personalized health score:
+
+Financial Summary:
+- Income: $${summary.totalIncome}
+- Expenses: $${summary.totalExpenses}
+- Net Balance: $${summary.netBalance}
+
+Transaction History (${transactions.length} transactions)"
+recommendations,"openai.chat.completions.create({
+      model: ""gpt-4o"",
+      messages: [
+        {
+          role: ""system"",
+          content: `You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
+
+Your analysis should consider:
+- Spending patterns and volatility
+- Seasonal trends in expenses
+- Category distribution and priorities
+- Financial behavior consistency
+- Risk factors and resilience
+- Personalized weight adjustments based on user's situation
+
+Provide a comprehensive financial health score from 0-100 with detailed factor breakdown.
+
+Respond with JSON in this format:
+{
+  ""score"": 85,
+  ""status"": ""Good"",
+  ""color"": ""blue"",
+  ""factors"": [
+    {
+      ""name"": ""Adaptive Spending Control"",
+      ""score"": 25,
+      ""max"": 30,
+      ""status"": ""good"",
+      ""aiInsight"": ""Your spending shows good consistency with minor seasonal variations""
+    }
+  ],
+  ""icon"": ""TrendingUp"",
+  ""aiAnalysis"": {
+    ""personalizedFactors"": [""Custom factor explanations""],
+    ""riskAssessment"": ""Overall risk level and factors"",
+    ""recommendations"": [""Personalized recommendations""],
+    ""confidence"": 0.87
+  }
+}`
+        },
+        {
+          role: ""user"",
+          content: `Analyze this financial data for a personalized health score:
+
+Financial Summary:
+- Income: $${summary.totalIncome}
+- Expenses: $${summary.totalExpenses}
+- Net Balance: $${summary.netBalance}
+
+Transaction History (${transactions.length} transactions)"
+breakdown,"openai.chat.completions.create({
+      model: ""gpt-4o"",
+      messages: [
+        {
+          role: ""system"",
+          content: `You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
+
+Your analysis should consider:
+- Spending patterns and volatility
+- Seasonal trends in expenses
+- Category distribution and priorities
+- Financial behavior consistency
+- Risk factors and resilience
+- Personalized weight adjustments based on user's situation
+
+Provide a comprehensive financial health score from 0-100 with detailed factor breakdown.
+
+Respond with JSON in this format:
+{
+  ""score"": 85,
+  ""status"": ""Good"",
+  ""color"": ""blue"",
+  ""factors"": [
+    {
+      ""name"": ""Adaptive Spending Control"",
+      ""score"": 25,
+      ""max"": 30,
+      ""status"": ""good"",
+      ""aiInsight"": ""Your spending shows good consistency with minor seasonal variations""
+    }
+  ],
+  ""icon"": ""TrendingUp"",
+  ""aiAnalysis"": {
+    ""personalizedFactors"": [""Custom factor explanations""],
+    ""riskAssessment"": ""Overall risk level and factors"",
+    ""recommendations"": [""Personalized recommendations""],
+    ""confidence"": 0.87
+  }
+}`
+        },
+        {
+          role: ""user"",
+          content: `Analyze this financial data for a personalized health score:
+
+Financial Summary:
+- Income: $${summary.totalIncome}
+- Expenses: $${summary.totalExpenses}
+- Net Balance: $${summary.netBalance}
+
+Transaction History (${transactions.length} transactions)"
+recommendations,"openai.chat.completions.create({
+      model: ""gpt-4o"", // the newest OpenAI model is ""gpt-4o"" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: ""system"",
+          content: ""You are an expert financial advisor who provides personalized, actionable recommendations based on real user data. Always return valid JSON.""
+        },
+        {
+          role: ""user"",
+          content: prompt
+        }
+      ],
+      response_format: { type: ""json_object"" },
+      max_tokens: 1000,
+      temperature: 0.3 // Moderate creativity for personalized recommendations
+    })"
+recommendations,"openai.chat.completions.create({
+      model: ""gpt-4o"", // the newest OpenAI model is ""gpt-4o"" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: ""system"",
+          content: ""You are an expert financial advisor who provides personalized, actionable recommendations based on real user data. Always return valid JSON.""
+        },
+        {
+          role: ""user"",
+          content: prompt
+        }
+      ],
+      response_format: { type: ""json_object"" },
+      max_tokens: 1000,
+      temperature: 0.3 // Moderate creativity for personalized recommendations
+    })"
+recommendations,"openai.chat.completions.create({
+      model: ""gpt-4o"", // the newest OpenAI model is ""gpt-4o"" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: ""system"",
+          content: ""You are an expert financial advisor who provides personalized, actionable recommendations based on real user data. Always return valid JSON.""
+        },
+        {
+          role: ""user"",
+          content: prompt
+        }
+      ],
+      response_format: { type: ""json_object"" },
+      max_tokens: 1000,
+      temperature: 0.3 // Moderate creativity for personalized recommendations
+    })"
+recommendations,"openai.chat.completions.create({
+      model: ""gpt-4o"", // the newest OpenAI model is ""gpt-4o"" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: ""system"",
+          content: ""You are an expert financial advisor who provides personalized, actionable recommendations based on real user data. Always return valid JSON.""
+        },
+        {
+          role: ""user"",
+          content: prompt
+        }
+      ],
+      response_format: { type: ""json_object"" },
+      max_tokens: 1000,
+      temperature: 0.3 // Moderate creativity for personalized recommendations
+    })"
