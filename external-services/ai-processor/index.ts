@@ -1565,7 +1565,23 @@ app.post("/execute-gpt-task", async (req, res) => {
 
     switch (task) {
       case "contextual-tips":
-        result = await generateContextualFinancialTips(payload);
+        // Handle missing summary by calculating from transactions if needed
+        let contextualPayload = payload;
+        if (!payload.summary || payload.summary.totalIncome === undefined) {
+          const transactions = payload.transactions || [];
+          const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+          const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+          contextualPayload = {
+            ...payload,
+            summary: {
+              totalIncome,
+              totalExpenses,
+              netAmount: totalIncome - totalExpenses
+            }
+          };
+          console.log('Contextual tips: Generated summary from transactions', contextualPayload.summary);
+        }
+        result = await generateContextualFinancialTips(contextualPayload);
         break;
       
       case "financial-tips":
