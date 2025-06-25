@@ -904,9 +904,7 @@ Provide an AI-powered financial health score that adapts to this user's specific
     let category: 'excellent' | 'good' | 'fair' | 'poor' = 'fair';
     if (score >= 90) {
       category = 'excellent';
-    } else if (score >= 80) {
-      category = 'excellent';
-    } else if (score >= 60) {
+    } else if (score >= 70) {
       category = 'good';
     } else if (score >= 40) {
       category = 'fair';

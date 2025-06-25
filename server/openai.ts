@@ -550,9 +550,7 @@ Provide an AI-powered financial health score that adapts to this user's specific
     let category: 'excellent' | 'good' | 'fair' | 'poor' = 'fair';
     if (score >= 90) {
       category = 'excellent';
-    } else if (score >= 80) {
-      category = 'excellent';
-    } else if (score >= 60) {
+    } else if (score >= 70) {
       category = 'good';
     } else if (score >= 40) {
       category = 'fair';
@@ -1606,11 +1604,12 @@ Analyze this financial data and provide a comprehensive health assessment.`
     let score = 50;
     let category: 'excellent' | 'good' | 'fair' | 'poor' = 'fair';
     
+    // Use proper score-based thresholds for category determination
     if (savingsRate > 0.2) {
-      score = 85;
+      score = 92; // Set to 92 for excellent savings rate
       category = 'excellent';
     } else if (savingsRate > 0.1) {
-      score = 70;
+      score = 75;
       category = 'good';
     } else if (savingsRate > 0) {
       score = 55;
