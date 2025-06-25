@@ -836,7 +836,26 @@ export async function generateExpensePredictions(
       };
     }
 
-    // Remove all caching - direct calls only
+    // Initialize UnifiedAICache with 48 hours TTL
+    const cache = new UnifiedAICache('expense-predictions', userId);
+    const cacheInput = { 
+      transactions: expenseTransactions.map(t => ({
+        id: t.id,
+        amount: t.amount,
+        description: t.description,
+        date: t.date,
+        type: t.type,
+        categoryName: t.categoryName,
+        recurring: t.recurring
+      }))
+    };
+
+    // Check cache first
+    const cachedResult = await cache.get(cacheInput);
+    if (cachedResult) {
+      console.log('Expense predictions: Using cached result');
+      return cachedResult;
+    }
 
     // Analyze spending patterns by month and category
     const monthlyData = new Map<string, Map<string, number>>();
@@ -1000,7 +1019,9 @@ ANALYSIS GUIDELINES:
       monthlyPredictions
     };
 
-    console.log('Expense predictions generated successfully');
+    // Cache the result with 48 hours TTL
+    await cache.set(cacheInput, finalResult, false, 48);
+    console.log('Expense predictions generated successfully and cached');
     
     return finalResult;
 
