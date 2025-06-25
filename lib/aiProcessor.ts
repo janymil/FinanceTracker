@@ -49,16 +49,20 @@ export async function runAI(task: string, userId: string, payload: Record<string
     if (response.ok) {
       const result = await response.json();
       
-      // Check if any task returned empty or fallback results and force local fallback
-      if (task === 'daily-recommendations' && (!result.recommendations || result.recommendations.length === 0) && (!result.insights || result.insights.length === 0)) {
-        console.log(`[AI ${task}] Fly.io returned empty results, forcing local fallback`);
-        throw new Error('Empty results from Fly.io, using local fallback');
-      }
+      // Only force fallback for actual error responses, not empty data
+      console.log(`[AI ${task}] SUCCESS: Fly.io returned valid response (may be empty due to insufficient data)`);
       
-      if (task === 'contextual-tips' && result.tips && result.tips.length === 1 && result.tips[0].id === 'fallback_tip') {
-        console.log(`[AI ${task}] Fly.io returned fallback tip, forcing local fallback`);
-        throw new Error('Fallback response from Fly.io, using local fallback');
-      }
+      // Don't fall back on empty results - that's valid when user has no data
+      // if (task === 'daily-recommendations' && (!result.recommendations || result.recommendations.length === 0) && (!result.insights || result.insights.length === 0)) {
+      //   console.log(`[AI ${task}] Fly.io returned empty results, forcing local fallback`);
+      //   throw new Error('Empty results from Fly.io, using local fallback');
+      // }
+      
+      // Only force fallback for explicit fallback markers, not empty data
+      // if (task === 'contextual-tips' && result.tips && result.tips.length === 1 && result.tips[0].id === 'fallback_tip') {
+      //   console.log(`[AI ${task}] Fly.io returned fallback tip, forcing local fallback`);
+      //   throw new Error('Fallback response from Fly.io, using local fallback');
+      // }
       
       console.log(`[AI ${task}] SUCCESS: Using Fly.io response (not local fallback)`);
       
@@ -101,9 +105,8 @@ export async function runAI(task: string, userId: string, payload: Record<string
       } = await import('../server/openai');
       
       if (task === 'spending-insights') {
-        console.log(`[AI ${task}] ERROR: Should not be using local fallback - Fly.io failed`);
+        console.log(`[AI ${task}] FALLBACK: Network/timeout error - using local OpenAI`);
         const result = await generateSpendingInsights(payload.transactions || []);
-        console.log(`[AI ${task}] WARNING: Using local OpenAI instead of Fly.io processor`);
         return result;
       }
       
@@ -120,10 +123,8 @@ export async function runAI(task: string, userId: string, payload: Record<string
       }
       
       if (task === 'contextual-tips') {
-        console.log(`[AI ${task}] ERROR: Fly.io failed, using local OpenAI fallback`);
-        console.log(`[AI ${task}] WARNING: This should be calling Fly.io processor`);
+        console.log(`[AI ${task}] FALLBACK: Network/timeout error - using local OpenAI`);
         const result = await generateContextualFinancialTips(payload);
-        console.log(`[AI ${task}] Local fallback generated ${result?.tips?.length || 0} tips`);
         return result;
       }
       
