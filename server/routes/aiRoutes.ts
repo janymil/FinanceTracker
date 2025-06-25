@@ -197,7 +197,7 @@ export function registerAIRoutes(app: Express) {
   });
 
   // AI Spending Insights endpoint
-  app.post('/api/ai/insights', isAuthenticated, async (req: any, res) => {
+  app.get('/api/ai/insights', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
       if (!userId) {

@@ -41,7 +41,6 @@ interface AIInsightsProps {
 
 export default function AIInsights({ data }: AIInsightsProps) {
   const { user } = useAuth();
-  const transactions = data?.transactions || [];
   const [, setLocation] = useLocation();
 
   const handleTakeAction = (insight: SpendingInsight) => {
@@ -201,7 +200,7 @@ export default function AIInsights({ data }: AIInsightsProps) {
     enabled: !!user && user.plan === 'premium',
     queryFn: async () => {
       const response = await apiRequest('POST', '/api/ai/insights', {
-        transactions: transactions
+        transactions: transactions || []
       });
       return response.json();
     },
