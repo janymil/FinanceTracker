@@ -77,11 +77,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   // React Query mutation for generating tips
   const generateTipMutation = useMutation({
     mutationFn: async () => {
-      console.log('AI Tips: Starting mutation function');
-      if (!summary) {
-        console.error('AI Tips: No summary provided');
-        throw new Error("No financial summary available");
-      }
+      if (!summary) throw new Error("No financial summary available");
       
       const currentDate = new Date();
       const monthName = currentDate.toLocaleString('default', { month: 'long' });
@@ -93,13 +89,6 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       
       // Remove blocking validation - let AI decide if data is sufficient
       
-      console.log('AI Tips: About to make API call with data:', {
-        totalIncome: summary.totalIncome,
-        totalExpenses: summary.totalExpenses,
-        transactionCount: detailedTransactions?.length || 0,
-        categoriesCount: summary.transactionsByCategory?.length || 0
-      });
-
       const response = await apiRequest("POST", "/api/ai/tip", {
         financialData: {
           totalIncome: summary.totalIncome,
@@ -112,12 +101,8 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
         }
       });
 
-      console.log('AI Tips: Response received:', response.status, response.ok);
-
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('AI Tips: Server error:', errorText);
-        throw new Error(`API Error: ${response.status} - ${errorText}`);
+        throw new Error("Failed to generate AI tip");
       }
 
       const data = await response.json();
@@ -181,62 +166,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                 </p>
               </div>
               <Button 
-                onClick={async () => {
-                  console.log('AI Tips: Button clicked, summary:', !!summary, 'generating:', isGenerating);
-                  console.log('AI Tips: User plan:', databaseUser?.plan);
-                  console.log('AI Tips: Summary data:', summary);
-                  
-                  // Test API call directly without mutation system
-                  try {
-                    const token = await window.Clerk?.session?.getToken();
-                    console.log('AI Tips: Token available:', !!token);
-                    
-                    const testResponse = await fetch('/api/ai/tip', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                      },
-                      body: JSON.stringify({
-                        financialData: {
-                          totalIncome: summary?.totalIncome || 0,
-                          totalExpenses: summary?.totalExpenses || 0,
-                          categories: summary?.transactionsByCategory || [],
-                          transactions: [{
-                            description: "test transaction",
-                            amount: "100.00",
-                            categoryName: "Test",
-                            date: "2025-06-25",
-                            type: "expense",
-                            id: 1
-                          }],
-                          month: new Date().toLocaleString('default', { month: 'long' }),
-                          year: new Date().getFullYear(),
-                          timestamp: Date.now()
-                        }
-                      })
-                    });
-                    console.log('AI Tips: Direct test response:', testResponse.status, testResponse.statusText);
-                    const testData = await testResponse.text();
-                    console.log('AI Tips: Direct test data:', testData);
-                    
-                    if (testResponse.ok) {
-                      const jsonData = JSON.parse(testData);
-                      if (jsonData.tip) {
-                        setCurrentTip(jsonData.tip);
-                        toast({
-                          title: "AI Tip Generated",
-                          description: "Direct API call successful",
-                        });
-                        return;
-                      }
-                    }
-                  } catch (testError) {
-                    console.error('AI Tips: Direct test failed:', testError);
-                  }
-                  
-                  generateTipMutation.mutate();
-                }}
+                onClick={() => generateTipMutation.mutate()}
                 disabled={!summary || isGenerating}
                 className="flex items-center gap-2"
               >

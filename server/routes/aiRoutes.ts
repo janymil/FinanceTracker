@@ -100,8 +100,11 @@ export function registerAIRoutes(app: Express) {
   // AI Financial Tips endpoint with detailed transaction data
   app.post('/api/ai/tip', isAuthenticated, async (req: any, res) => {
     console.log('TIP ENDPOINT: Request received - starting processing');
+    console.log('TIP ENDPOINT: Headers:', Object.keys(req.headers));
+    console.log('TIP ENDPOINT: Body keys:', Object.keys(req.body || {}));
     try {
       const userId = getUserId(req);
+      console.log('TIP ENDPOINT: User ID extracted:', userId ? 'YES' : 'NO');
       if (!userId) {
         console.log('TIP ENDPOINT: No user ID found');
         return res.status(401).json({ message: "Authentication required" });
