@@ -1499,11 +1499,15 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
       : [];
 
     console.log('Contextual financial tips generated successfully (local fallback)');
+    
+    // Cache the result for 72 hours
+    await cache.set(data, { tips }, false, 72);
+    
     return { tips };
 
   } catch (error) {
     console.error('Error generating contextual financial tips (local fallback):', error);
-    return {
+    const fallbackResult = {
       tips: [{
         id: 'fallback_tip',
         title: 'Track Your Progress',
@@ -1513,6 +1517,15 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
         actionable: true
       }]
     };
+    
+    // Cache even the fallback result to prevent repeated failures
+    try {
+      await cache.set(data, fallbackResult, true, 72);
+    } catch (cacheError) {
+      console.error('Failed to cache fallback result:', cacheError);
+    }
+    
+    return fallbackResult;
   }
 }
 
