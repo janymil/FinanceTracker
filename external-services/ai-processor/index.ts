@@ -202,10 +202,8 @@ export async function generateContextualFinancialTips(data: {
   try {
     const { summary, transactions, budgets, goals, selectedMonth } = data;
     
-    // Only return fallback if NO data exists at all
-    if ((!transactions || transactions.length === 0) && 
-        (!summary || (summary.totalIncome === 0 && summary.totalExpenses === 0))) {
-      console.log('Contextual tips: No financial data available - returning fallback');
+    // Return basic tip if no meaningful data
+    if (transactions.length === 0 && summary.totalIncome === 0 && summary.totalExpenses === 0) {
       return {
         tips: [{
           id: 'basic_tip',
@@ -217,12 +215,6 @@ export async function generateContextualFinancialTips(data: {
         }]
       };
     }
-    
-    console.log('Contextual tips: Processing with data:', {
-      transactionCount: transactions?.length || 0,
-      totalIncome: summary?.totalIncome || 0,
-      totalExpenses: summary?.totalExpenses || 0
-    });
 
     // Build comprehensive prompt based on contextual tips routes logic
     const netBalance = summary.totalIncome - summary.totalExpenses;
