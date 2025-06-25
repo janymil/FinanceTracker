@@ -889,6 +889,14 @@ Changelog:
 ```
 
 ## User Preferences
+
+### Critical Data Integrity Rules
+- **NEVER replace real data with empty arrays or placeholder data**
+- **NEVER use mock/synthetic data instead of authentic user data**
+- **Always preserve real transaction data for AI analysis**
+- **When fixing errors, maintain data integrity - find alternative solutions that preserve real data**
+
+## User Preferences
 ```
 Preferred communication style: Simple, everyday language.
 ```
