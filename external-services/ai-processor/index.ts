@@ -96,7 +96,7 @@ export interface FinancialHealthData {
 
 export async function categorizeExpense(description: string, amount: number): Promise<ExpenseCategorizationResult> {
   try {
-    // Direct OpenAI processing only - no cache in Fly.io processor
+    // Direct OpenAI processing only
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -145,8 +145,8 @@ Please categorize this expense.`
       reasoning: result.reasoning || 'Unable to determine category'
     };
 
-    // Cache the result (legacy function - not using unified cache due to different interface)
-    // categorization caching handled by main application
+
+
 
     return categorization;
   } catch (error) {
@@ -483,13 +483,9 @@ export async function generateFinancialTips(financialData: {
     categoryName?: string;
     type?: string;
   }>;
-  timestamp?: number; // For bypassing cache
+
 }): Promise<FinancialTip[]> {
   try {
-    // Note: Cache now handled by unified cache system via routes
-    if (financialData.timestamp) {
-      console.log('Bypassing cache for fresh AI financial tips');
-    }
     const { 
       totalIncome, 
       totalExpenses, 
@@ -692,7 +688,6 @@ export async function generateSpendingInsights(transactions: Array<{
   actionable: boolean;
 }>> {
   try {
-    // Create hash for transactions to use as cache key
     // No caching in Fly.io - caching handled by main application
     const expenseTransactions = transactions.filter(t => t.type === 'expense');
 
@@ -776,7 +771,6 @@ Generate financial insights based on this spending data.`
       actionable: Boolean(insight.actionable)
     }));
 
-    // Cache handled by unified cache system via /execute-gpt-task endpoint
 
     return processedInsights;
   } catch (error) {
@@ -925,7 +919,6 @@ Provide an AI-powered financial health score that adapts to this user's specific
       }
     };
 
-    // Cache handled by unified cache system via /execute-gpt-task endpoint
 
     return processedResult;
   } catch (error) {
@@ -955,7 +948,6 @@ export async function generateTrendPredictions(
       throw new Error('No transaction data available for predictions');
     }
 
-    // Note: Cache now handled by unified cache system via routes
 
     // Prepare comprehensive financial data for AI analysis
     const monthlyData = new Map();
@@ -1069,7 +1061,6 @@ Analysis Requirements:
       }
     };
 
-    // Note: Cache now handled by unified cache system via routes
     // Success logging removed for production
 
     return predictions;
@@ -1125,7 +1116,6 @@ export async function generateExpensePredictions(transactions: Array<{
       };
     }
 
-    // Note: Cache now handled by unified cache system via routes
 
     // Analyze spending patterns by month and category
     const monthlyData = new Map<string, Map<string, number>>();
@@ -1289,7 +1279,6 @@ ANALYSIS GUIDELINES:
       monthlyPredictions
     };
 
-    // Note: Cache now handled by unified cache system via routes
     // Success logging removed for production
 
     return finalResult;
@@ -1328,7 +1317,6 @@ export async function generateDailyRecommendations(financialData: {
   try {
     // Production: minimal logging only
 
-    // Note: Cache now handled by unified cache system via routes
     // Production: minimal logging only
 
     // Limit data to last 3 months and 100 transactions for efficiency
@@ -1475,7 +1463,6 @@ Only provide recommendations and insights based on the actual financial data pro
       insights
     };
 
-    // Note: Cache now handled by unified cache system via routes
     // Success logging removed for production
 
     return result;
@@ -1510,7 +1497,6 @@ export async function generateFinancialHealthScore(financialData: {
     const { transactions, budgets, summary } = financialData;
 
     // Create a more stable hash that focuses on significant financial changes
-    // Exclude transaction IDs and exact timestamps to reduce cache misses
     const stableData = {
       transactionCount: transactions.length,
       totalIncome: summary.totalIncome,
@@ -1575,7 +1561,6 @@ Calculate health score quickly.`
       warnings: Array.isArray(result.warnings) ? result.warnings : null
     };
 
-    // Cache the result for 2 hours to reduce frequent API calls
     // No caching in Fly.io - handled by main application
 
     return healthData;
@@ -1666,7 +1651,6 @@ app.post("/execute-gpt-task", async (req, res) => {
           totalExpenses: payload.totalExpenses,
           transactionsByCategory: payload.categories || payload.transactionsByCategory || [],
           recentTransactions: payload.transactions || payload.recentTransactions || [],
-          timestamp: payload.timestamp
         };
         result = await generateFinancialTips(tipsPayload);
         break;
