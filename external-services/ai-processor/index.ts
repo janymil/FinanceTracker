@@ -511,36 +511,33 @@ export async function generateFinancialTips(financialData: {
       }];
     }
 
-    // Build summary with safe data access
-    const categoryAnalysis = Array.isArray(transactionsByCategory) && transactionsByCategory.length > 0 
-      ? transactionsByCategory.map(cat => `- ${cat.categoryName || 'Unknown'}: $${cat.amount || 0} (${cat.type || 'expense'})`).join('\n')
-      : '- No category data available';
-
-    const recentAnalysis = transactionCount > 0 
-      ? recentTransactions.slice(0, 10).map(t => `- ${t.description || 'Unknown'}: $${t.amount || 0} (${new Date(t.date || Date.now()).toLocaleDateString()})`).join('\n')
-      : '- No recent transactions available';
-
-    const incomeCount = transactionCount > 0 ? recentTransactions.filter(t => t.type === 'income').length : 0;
-    const expenseCount = transactionCount > 0 ? recentTransactions.filter(t => t.type === 'expense').length : 0;
-    const avgTransaction = transactionCount > 0 ? (totalIncome + totalExpenses) / transactionCount : 0;
-
     const summary = `Financial Summary:
 - Monthly Income: $${totalIncome}
 - Monthly Expenses: $${totalExpenses}
 - Net Balance: $${netBalance} ${netBalance < 0 ? '(DEFICIT)' : '(SURPLUS)'}
 - Transaction Count: ${transactionCount}
+- Raw Transactions Retrieved: ${recentTransactions.length}
 
 Spending by Category:
-${categoryAnalysis}
+${transactionsByCategory.filter(cat => cat.type === 'expense').map(cat => 
+  `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalExpenses) * 100).toFixed(1)}% of expenses)`
+).join('\n')}
 
-Recent Transaction Analysis:
-${recentAnalysis}
+Income by Category:
+${transactionsByCategory.filter(cat => cat.type === 'income').map(cat => 
+  `- ${cat.categoryName}: $${cat.amount} (${((cat.amount / totalIncome) * 100).toFixed(1)}% of income)`
+).join('\n')}
+
+Recent Transactions (last 10):
+${recentTransactions.slice(0, 10).map(t => 
+  `- ${t.description}: $${t.amount} (${t.categoryName || 'Uncategorized'}) [${t.type}] on ${new Date(t.date).toLocaleDateString()}`
+).join('\n')}
 
 Transaction Pattern Analysis:
-- Average transaction size: $${avgTransaction.toFixed(2)}
-- Income transactions: ${incomeCount}
-- Expense transactions: ${expenseCount}
-- Date range: ${transactionCount > 0 ? new Date(Math.min(...recentTransactions.map(t => new Date(t.date || Date.now()).getTime()))).toLocaleDateString() : 'No data'} to ${transactionCount > 0 ? new Date(Math.max(...recentTransactions.map(t => new Date(t.date || Date.now()).getTime()))).toLocaleDateString() : 'No data'}
+- Average transaction size: $${(totalIncome + totalExpenses) / transactionCount}
+- Income transactions: ${recentTransactions.filter(t => t.type === 'income').length}
+- Expense transactions: ${recentTransactions.filter(t => t.type === 'expense').length}
+- Date range: ${new Date(Math.min(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()} to ${new Date(Math.max(...recentTransactions.map(t => new Date(t.date).getTime()))).toLocaleDateString()}
 
 Generate 4 independent box analyses with exact mathematical calculations.`;
 
