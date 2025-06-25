@@ -139,7 +139,7 @@ export function registerAIRoutes(app: Express) {
       // Check unified cache for financial tips
       const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
       // CACHE DISABLED FOR TESTING
-      const cachedResult = null; // await unifiedAICache.get('financial-tips', userId, month, {
+      // Cache system completely removed
       //   totalIncome: financialData.totalIncome || 0,
       //   totalExpenses: financialData.totalExpenses || 0,
       //   transactions: formattedTransactions.slice(0, 50)
@@ -179,7 +179,7 @@ export function registerAIRoutes(app: Express) {
       // Always save to unified cache (remove timestamp bypass condition)
       if (tipResults && tipResults.length > 0) {
         try {
-          await unifiedAICache.set('financial-tips', userId, month, {
+          // No caching system
             totalIncome: financialData.totalIncome || 0,
             totalExpenses: financialData.totalExpenses || 0,
             transactions: formattedTransactions.slice(0, 50)
@@ -241,7 +241,7 @@ export function registerAIRoutes(app: Express) {
       };
       
       // CACHE DISABLED FOR TESTING
-      const cachedResult = null; // await unifiedAICache.get('spending-insights', userId, month, cachePayload);
+      // Cache system completely removed
       
       if (cachedResult) {
         console.log('AI spending insights: Using unified cache - avoiding API call');
@@ -270,7 +270,7 @@ export function registerAIRoutes(app: Express) {
       
       // Save to unified cache with enhanced error logging
       try {
-        await unifiedAICache.set('spending-insights', userId, month, cachePayload, insights);
+        // No caching system
         console.log('✅ Spending insights: Successfully saved to unified cache');
       } catch (cacheError) {
         console.error("❌ CRITICAL: Failed to save spending insights to unified cache:", cacheError);
@@ -353,7 +353,7 @@ export function registerAIRoutes(app: Express) {
       };
       
       // CACHE DISABLED FOR TESTING
-      const cachedResult = null; // await unifiedAICache.get('trend-predictions', userId, month, cachePayload);
+      // Cache system completely removed
       
       if (cachedResult) {
         console.log('AI trend predictions: Using unified cache - avoiding API call');
@@ -389,7 +389,7 @@ export function registerAIRoutes(app: Express) {
           payloadSize: JSON.stringify(cachePayload).length,
           predictionKeys: Object.keys(predictions || {})
         });
-        await unifiedAICache.set('trend-predictions', userId, month, cachePayload, predictions);
+        // No caching system
         console.log('AI trend predictions: Successfully saved to unified cache');
       } catch (cacheError) {
         console.error("CRITICAL: Failed to save trend predictions to cache:", cacheError);
@@ -465,7 +465,7 @@ export function registerAIRoutes(app: Express) {
       };
       
       // CACHE DISABLED FOR TESTING
-      const cachedResult = null; // await unifiedAICache.get('daily-recommendations', userId, month, cachePayload);
+      // Cache system completely removed
       
       // Add cache-busting headers
       res.set({
@@ -619,7 +619,7 @@ export function registerAIRoutes(app: Express) {
       // Check unified cache for financial health score
       const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
       // CACHE DISABLED FOR TESTING
-      const cachedResult = null; // await unifiedAICache.get('financial-health', userId, month, stableFinancialData);
+      // Cache system completely removed
       
       if (cachedResult) {
         console.log('AI financial health: Using unified cache - avoiding API call');
@@ -930,7 +930,7 @@ export function registerAIRoutes(app: Express) {
       };
       
       // CACHE DISABLED FOR TESTING
-      const cachedResult = null; // await unifiedAICache.get('expense-predictions', userId, month, cachePayload);
+      // Cache system completely removed
       
       if (cachedResult) {
         console.log('AI expense predictions: Using unified cache - avoiding API call');
@@ -948,7 +948,7 @@ export function registerAIRoutes(app: Express) {
 
       // Save to unified cache
       try {
-        await unifiedAICache.set('expense-predictions', userId, month, cachePayload, predictions);
+        // No caching system
         console.log('AI expense predictions: Saved to unified cache');
       } catch (cacheError) {
         console.error("Error saving expense predictions to unified cache:", cacheError);
