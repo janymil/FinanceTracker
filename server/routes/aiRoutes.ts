@@ -126,10 +126,11 @@ export function registerAIRoutes(app: Express) {
 
       // Validate and process transaction data
       const transactions = financialData.transactions;
-      if (!Array.isArray(transactions) || transactions.length === 0) {
-        console.log('TIP ENDPOINT: Empty transactions - calling Fly.io with authentic empty data');
-        // Send authentic empty data instead of fallbacks
-      }
+      // Always call Fly.io with authentic user data - no defensive fallbacks
+      console.log('TIP ENDPOINT: Processing authentic user data:', { 
+        transactionCount: transactions.length,
+        hasFinancialData: !!financialData 
+      });
 
       console.log('TIP ENDPOINT: Processing', transactions.length, 'transactions');
 

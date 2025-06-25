@@ -1003,9 +1003,9 @@ Analysis Requirements:
         expectedSavings: 0,
         budgetVariance: 0,
         confidence: 0,
-        keyInsights: [],
+        keyInsights: ["No financial data available for trend analysis"],
         recommendations: [],
-        riskFactors: []
+        riskFactors: ["Insufficient data for reliable predictions"]
       }
     };
 

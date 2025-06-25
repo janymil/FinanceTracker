@@ -43,24 +43,10 @@ export async function runAI(task: string, userId: string, payload: Record<string
   } catch (error: any) {
     console.error(`[AI ${task}] Fly.io error - returning empty result:`, error.message);
     
-    // Return proper error structures without fallbacks or cache
-    switch (task) {
-      case 'daily-recommendations':
-        return { recommendations: [], insights: [], error: 'AI service temporarily unavailable' };
-      case 'financial-tips':
-        return { tips: [], error: 'AI service temporarily unavailable' };
-      case 'contextual-tips':
-        return { tips: [], error: 'AI service temporarily unavailable' };
-      case 'expense-predictions':
-        return { categoryPredictions: [], monthlyPredictions: [], error: 'AI service temporarily unavailable' };
-      case 'spending-insights':
-        return { insights: [], trends: [], error: 'AI service temporarily unavailable' };
-      case 'trend-predictions':
-        return { predictions: [], error: 'AI service temporarily unavailable' };
-      case 'financial-health-score':
-        return { score: 0, trend: 'stable', error: 'AI service temporarily unavailable' };
-      default:
-        return { error: 'AI service temporarily unavailable' };
-    }
+    // Return proper error structures - no fallback data
+    return { 
+      error: 'AI service temporarily unavailable', 
+      message: 'Unable to process request at this time' 
+    };
   }
 }
