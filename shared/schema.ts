@@ -284,6 +284,11 @@ export const aiCache = pgTable("ai_cache", {
   inputHash: varchar("input_hash", { length: 64 }).notNull(), // SHA-256 hash of input
   inputJson: jsonb("input_json").notNull(), // Input data for the AI function
   outputJson: jsonb("output_json").notNull(), // AI response data
+  lastAccessed: timestamp("last_accessed").defaultNow(), // For LRU cache management
+  month: varchar("month", { length: 7 }), // YYYY-MM format for month-specific caching
+  expiresAt: timestamp("expires_at"), // TTL-based cache expiration
+  hitCount: integer("hit_count").default(0).notNull(), // Track cache usage statistics
+  isError: boolean("is_error").default(false).notNull(), // Distinguish error states from successful responses
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
@@ -291,6 +296,12 @@ export const aiCache = pgTable("ai_cache", {
   index("ai_cache_user_function_idx").on(table.userId, table.functionKey),
   // Index for cache hit detection
   index("ai_cache_hash_idx").on(table.inputHash),
+  // Index for month-specific queries
+  index("ai_cache_month_idx").on(table.month),
+  // Index for LRU cache cleanup
+  index("ai_cache_last_accessed_idx").on(table.lastAccessed),
+  // Index for TTL expiration cleanup
+  index("ai_cache_expires_at_idx").on(table.expiresAt),
 ]);
 
 export const importLogs = pgTable("import_logs", {
