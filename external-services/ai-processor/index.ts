@@ -1597,15 +1597,20 @@ app.post("/execute-gpt-task", async (req, res) => {
         break;
       
       case "financial-tips":
-        // Fix payload structure for financial tips
+        // Fix payload structure for financial tips - map frontend payload to expected format
         const tipsPayload = {
           totalIncome: payload.totalIncome,
           totalExpenses: payload.totalExpenses,
-          transactionsByCategory: payload.transactionsByCategory,
-          recentTransactions: payload.recentTransactions,
+          transactionsByCategory: payload.categories || payload.transactionsByCategory || [],
+          recentTransactions: payload.transactions || payload.recentTransactions || [],
           timestamp: payload.timestamp
         };
-        console.log('Financial tips: Fixed payload structure', Object.keys(tipsPayload));
+        console.log('Financial tips: Fixed payload structure', {
+          totalIncome: tipsPayload.totalIncome,
+          totalExpenses: tipsPayload.totalExpenses,
+          categoriesCount: tipsPayload.transactionsByCategory.length,
+          transactionsCount: tipsPayload.recentTransactions.length
+        });
         result = await generateFinancialTips(tipsPayload);
         break;
 
