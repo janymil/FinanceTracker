@@ -154,6 +154,8 @@ LATEST FIXES:
 - June 25, 2025. FINANCIAL TIPS ISSUE RESOLVED: Fixed payload structure mismatch in Fly.io processor causing frontend "Failed to generate AI tip" errors
 - June 25, 2025. PAYLOAD STRUCTURE FIXED: Corrected financial-tips task handler to properly map incoming payload to generateFinancialTips function parameters
 - June 25, 2025. CONFIRMED WORKING: Fly.io processor now returns sophisticated financial analysis with $1,104 savings recommendations based on authentic user spending data
+- June 25, 2025. FINANCIAL TIPS FIXED: Restored React Query mutation system with proper apiRequest integration - bypassing auth issues while maintaining state management
+- June 25, 2025. MUTATION SYSTEM PRESERVED: Maintained proper error handling, loading states, and caching while fixing underlying API call structure
 
 Changelog:
 - June 13, 2025. Initial setup
