@@ -258,7 +258,20 @@ export function registerAIRoutes(app: Express) {
         useAdvancedFactors
       };
 
+      // Initialize UnifiedAICache with 24 hours TTL
+      const cache = new UnifiedAICache('financial-health-score', userId);
+
+      // Try to get cached result
+      const cachedResult = await cache.get(aiPayload);
+      if (cachedResult) {
+        return res.json(cachedResult);
+      }
+
+      // Generate new AI response
       const aiScore = await runAI('financial-health-score', userId, aiPayload);
+
+      // Cache the result for 24 hours
+      await cache.set(aiPayload, aiScore, false, 24);
       
       console.log('Financial health: Fly.io response structure:', {
         hasScore: typeof aiScore?.score === 'number',
@@ -361,44 +374,6 @@ export function registerAIRoutes(app: Express) {
         return res.status(400).json({ message: "Transactions array is required" });
       }
 
-      // Always call Fly.io even with minimal data for testing
-      console.log('DAILY RECOMMENDATIONS: Processing with', transactions.length, 'transactions');
-
-      // Create stable hash for caching - only regenerate on significant changes
-      const lastWeekTransactions = transactions?.filter(t => {
-        const transactionDate = new Date(t.date);
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        return transactionDate >= weekAgo;
-      }).length;
-
-      const dataForHash = {
-        transactionCount: transactions?.length || 0,
-        lastWeekTransactionCount: lastWeekTransactions,
-        totalIncome: Math.round((summary?.totalIncome) / 100) * 100, // Round to nearest $100
-        totalExpenses: Math.round((summary?.totalExpenses) / 100) * 100,
-        budgetCount: budgets?.length || 0,
-        currentWeek: Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000)) // Weekly refresh
-      };
-      // Cache system removed
-
-      // Standardize cache payload for daily recommendations
-      const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      const cachePayload = {
-        summary,
-        transactions: transactions.slice(0, 100),
-        budgets
-      };
-      
-      // CACHE DISABLED FOR TESTING
-      // Cache system completely removed
-      
-      // Cache system removed
-      
-      // Cache system removed
-
-      console.log('Making Fly.io API call via centralized processor');
-      
       // Create categories object for the payload
       const categoriesData = await storage.getCategories(userId);
       const categories = {};
@@ -426,15 +401,16 @@ export function registerAIRoutes(app: Express) {
         categories: categories
       };
 
-      console.log('DEBUG: Daily recommendations payload being sent to Fly.io:', {
-        transactionCount: aiPayload.transactions.length,
-        summaryData: aiPayload.summary,
-        budgetCount: aiPayload.budgets.length,
-        categoryCount: Object.keys(aiPayload.categories).length,
-        hasActualTransactions: aiPayload.transactions.length > 0,
-        firstTransaction: aiPayload.transactions[0] || 'none'
-      });
+      // Initialize UnifiedAICache with 24 hours TTL
+      const cache = new UnifiedAICache('daily-recommendations', userId);
 
+      // Try to get cached result
+      const cachedResult = await cache.get(aiPayload);
+      if (cachedResult) {
+        return res.json(cachedResult);
+      }
+
+      // Generate new AI response
       let recommendations = await runAI('daily-recommendations', userId, aiPayload);
       
       console.log('Daily recommendations: Received response from Fly.io:', {
@@ -455,12 +431,8 @@ export function registerAIRoutes(app: Express) {
         fullResponse: recommendations
       });
 
-      // NO FALLBACK - Force Fly.io only for testing
-      console.log('Daily recommendations: Using Fly.io response directly (no fallback):', recommendations);
-
-
-
-      // No caching system
+      // Cache the result for 24 hours
+      await cache.set(aiPayload, recommendations, false, 24);
 
       return res.json(recommendations);
     } catch (error) {
