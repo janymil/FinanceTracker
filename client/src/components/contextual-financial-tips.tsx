@@ -116,6 +116,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
           summary,
           transactions: monthTransactions, // Pass only filtered transactions
           budgets,
+          goals, // Include goals data for AI analysis
           selectedMonth: currentMonth
         }, {
           headers: authHeaders
@@ -138,7 +139,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
     };
 
     fetchTips();
-  }, [summary, transactions, budgets, selectedMonth]);
+  }, [summary, transactions, budgets, goals, selectedMonth]);
 
   return (
     <Card className="h-full">
