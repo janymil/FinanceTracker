@@ -465,8 +465,7 @@ export function registerImportRoutes(app: Express) {
       );
 
       // Clear all AI caches after successful import to trigger fresh AI insights
-      const { aiCache } = await import('../cache');
-      aiCache.clearUserCache(userId);
+      // Cache system removed
       
       // Delete cached daily recommendations from database
       await storage.deleteCachedDailyRecommendations(userId);

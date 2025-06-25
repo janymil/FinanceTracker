@@ -47,7 +47,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   // Load saved tip from localStorage on component mount
   useEffect(() => {
     if (user?.id) {
-      const savedTip = localStorage.getItem(`ai-tip-${user.id}`);
+      // Cache system removed
       if (savedTip) {
         setCurrentTip(cleanAIText(savedTip));
       }
@@ -125,7 +125,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     onSuccess: (cleanedTip: string) => {
       setCurrentTip(cleanedTip);
       if (user?.id) {
-        localStorage.setItem(`ai-tip-${user.id}`, cleanedTip);
+        // Cache system removed
       }
       toast({
         title: "AI Tip Generated",

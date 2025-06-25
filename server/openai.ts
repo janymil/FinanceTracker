@@ -330,8 +330,7 @@ export async function generateSpendingInsights(transactions: Array<{
 }>> {
   try {
     // Create hash for transactions to use as cache key
-    const transactionsHash = aiCache.createDataHash(transactions);
-    const cached = aiCache.getInsights(transactionsHash);
+    // Cache system removed
     if (cached) {
       console.log('Using cached insights result');
       return cached;
@@ -414,7 +413,7 @@ Generate financial insights based on this spending data.`
     }));
 
     // Cache the result
-    aiCache.setInsights(transactionsHash, processedInsights);
+    // Cache system removed
     
     return processedInsights;
   } catch (error) {
@@ -462,7 +461,7 @@ export async function generateAIFinancialHealthScore(financialData: {
     
     // Create hash for caching
     const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-    const cached = await unifiedAICache.get('financial-health-score', 'local-fallback', month, financialData);
+    // Cache system removed
     if (cached) {
       console.log('Using unified cache for AI financial health score (local fallback)');
       return cached;
@@ -549,7 +548,7 @@ Provide an AI-powered financial health score that adapts to this user's specific
     };
 
     // Cache the result in unified cache system
-    await unifiedAICache.set('financial-health-score', 'local-fallback', month, financialData, processedResult);
+    // Cache system removed
     
     return processedResult;
   } catch (error) {
@@ -1457,7 +1456,7 @@ export async function generateFinancialHealthScore(financialData: {
     };
     
     const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-    const cached = await unifiedAICache.get('financial-health', 'local-fallback', month, stableData);
+    // Cache system removed
     if (cached) {
       console.log('Using unified cache for financial health data (local fallback) - avoiding OpenAI API call');
       return cached;
@@ -1559,7 +1558,7 @@ Analyze this financial data and provide a comprehensive health assessment.`
     };
 
     // Cache the result in unified cache system
-    await unifiedAICache.set('financial-health', 'local-fallback', month, stableData, healthData);
+    // Cache system removed
     
     return healthData;
   } catch (error) {

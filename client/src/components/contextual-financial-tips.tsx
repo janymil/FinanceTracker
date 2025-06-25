@@ -34,7 +34,6 @@ interface FinancialTip {
 export default function ContextualFinancialTips({ summary, transactions, budgets, selectedMonth }: ContextualTipsProps) {
   const [tips, setTips] = useState<FinancialTip[] | null>(null);
   const [loading, setLoading] = useState(false);
-  const [lastLoadedMonth, setLastLoadedMonth] = useState<string | null>(null);
   
   // Dynamic month detection at component level for consistent access
   const getMostRecentTransactionMonth = () => {
@@ -50,8 +49,6 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
     const mostRecentDate = new Date(sortedTransactions[0].date);
     return `${mostRecentDate.getFullYear()}-${String(mostRecentDate.getMonth() + 1).padStart(2, '0')}`;
   };
-  
-  const currentMonth = selectedMonth || getMostRecentTransactionMonth();
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -73,6 +70,8 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
   };
 
   useEffect(() => {
+    const currentMonth = selectedMonth || getMostRecentTransactionMonth();
+    
     if (!transactions || !summary) return;
     
     // Filter transactions for the selected month
@@ -82,119 +81,25 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
       return transactionMonth === currentMonth;
     });
 
-    console.log('Contextual tips: Month filtering debug', {
-      selectedMonth: currentMonth,
-      calculatedMonth: getMostRecentTransactionMonth(),
-      totalTransactions: transactions.length,
-      monthTransactions: monthTransactions.length,
-      firstTxDate: transactions[0]?.date,
-      firstMonthTxDate: monthTransactions[0]?.date,
-      willMakeAPICall: monthTransactions.length > 0
-    });
-
-    // Check for cache invalidation flag (set after data imports or manual refresh)
-    const shouldSkipCache = localStorage.getItem('invalidate-ai-cache') === 'true';
-    console.log('Contextual tips: Cache invalidation check', { shouldSkipCache });
-
-    // If month changed, clear previous tips and reset state
-    if (lastLoadedMonth && lastLoadedMonth !== currentMonth) {
-      setTips(null);
-      setLastLoadedMonth(null);
-    }
-
-    // Force refresh if invalidation flag is set or month changed
-    if (shouldSkipCache || lastLoadedMonth !== currentMonth) {
-      setTips(null);
-      setLastLoadedMonth(null);
-      console.log('Contextual tips: Forcing refresh due to cache invalidation or month change');
-    }
-
-    // Debug: Log transaction data being sent to API
-    if (monthTransactions.length > 0) {
-      console.log('Contextual tips: Transaction sample being sent to AI:', {
-        firstTransaction: {
-          description: monthTransactions[0].description,
-          categoryName: monthTransactions[0].categoryName,
-          category: monthTransactions[0].category,
-          amount: monthTransactions[0].amount,
-          type: monthTransactions[0].type
-        },
-        totalTransactions: monthTransactions.length,
-        hasCategories: monthTransactions.filter(t => t.categoryName && t.categoryName !== 'Uncategorized').length
-      });
-    }
-
-    // If no transactions for this month, show no data state
+    // Skip API call if no transactions for this month
     if (monthTransactions.length === 0) {
-      console.log('🚫 Contextual tips: No transactions for calculated month', {
-        currentMonth,
-        allTransactionDates: transactions.map(t => t.date).slice(0, 3),
-        totalTransactions: transactions.length,
-        monthFilter: currentMonth
-      });
+      console.log('Contextual tips: No transactions for month, skipping API');
       setTips([]);
-      setLastLoadedMonth(currentMonth);
       return;
     }
 
-    // Skip if we already loaded tips for this month (unless forced refresh)
-    if (lastLoadedMonth === currentMonth && tips && !shouldSkipCache) {
-      console.log('Contextual tips: Skipping API call - already loaded for this month');
-      return;
-    }
-
-    // Create a month-specific cache key based on filtered transactions
-    const dataHash = JSON.stringify({
-      transactionCount: monthTransactions.length,
-      totalIncome: summary?.totalIncome || 0,
-      totalExpenses: summary?.totalExpenses || 0,
-      budgetCount: budgets?.length || 0
-    });
-    const cacheKey = `financial-tips-${currentMonth}-${btoa(dataHash).slice(0, 12)}`;
-    
-    // Check localStorage for cached tips first (unless cache invalidation flag is set)
-    if (!shouldSkipCache) {
-      const cachedData = localStorage.getItem(cacheKey);
-      if (cachedData) {
-        try {
-          const { tips: cachedTips, timestamp } = JSON.parse(cachedData);
-          const isExpired = Date.now() - timestamp > 30 * 60 * 1000; // 30 minutes (shorter cache)
-          
-          if (!isExpired && cachedTips) {
-            console.log('Contextual tips: Using cached data, skipping API call');
-            setTips(cachedTips);
-            setLastLoadedMonth(currentMonth);
-            return; // Use cached tips, skip API call
-          } else {
-            console.log('Contextual tips: Cache expired or invalid, will fetch fresh');
-          }
-        } catch (e) {
-          console.log('Contextual tips: Invalid cached data, will fetch fresh');
-        }
-      } else {
-        console.log('Contextual tips: No cached data found, will fetch fresh');
-      }
-    }
-
+    // Always fetch fresh tips - no caching
     const fetchTips = async () => {
-      if (loading) return; // Prevent multiple simultaneous calls
-      
-      console.log('Contextual tips: Starting API call', {
-        monthTransactions: monthTransactions.length,
-        currentMonth,
-        shouldSkipCache,
-        summary,
-        budgets: budgets?.length || 0,
-        hasValidData: monthTransactions.length > 0 && summary && (summary.totalIncome > 0 || summary.totalExpenses > 0)
-      });
+      if (loading) return;
       
       setLoading(true);
+      
       try {
-        // Get auth headers for Clerk authentication
-        const getAuthHeaders = async (): Promise<Record<string, string>> => {
+        const getAuthHeaders = async () => {
           try {
-            if (typeof window !== 'undefined' && window.Clerk?.session) {
-              const token = await window.Clerk.session.getToken();
+            const clerk = (window as any).Clerk;
+            if (clerk && clerk.session) {
+              const token = await clerk.session.getToken();
               if (token) {
                 return { Authorization: `Bearer ${token}` };
               }
@@ -222,38 +127,16 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
         });
         
         setTips(fetchedTips);
-        setLastLoadedMonth(currentMonth);
         
-        // Cache the tips with timestamp for this specific month
-        localStorage.setItem(cacheKey, JSON.stringify({
-          tips: fetchedTips,
-          timestamp: Date.now()
-        }));
-        
-        // Clear cache invalidation flag after successful fetch
-        localStorage.removeItem('invalidate-ai-cache');
       } catch (error) {
         console.error('Failed to fetch AI tips:', error);
         setTips([]);
-        setLastLoadedMonth(currentMonth);
       } finally {
         setLoading(false);
       }
     };
 
-    // Only call fetchTips if we have data and haven't already loaded
-    console.log('Contextual tips: useEffect decision point', {
-      hasTransactions: !!transactions && transactions.length > 0,
-      hasSummary: !!summary,
-      monthTransactionCount: monthTransactions.length,
-      currentMonth,
-      lastLoadedMonth,
-      shouldCallAPI: monthTransactions.length > 0 && (!lastLoadedMonth || lastLoadedMonth !== currentMonth || shouldSkipCache)
-    });
-
-    if (monthTransactions.length > 0 && (!lastLoadedMonth || lastLoadedMonth !== currentMonth || shouldSkipCache)) {
-      fetchTips();
-    }
+    fetchTips();
   }, [summary, transactions, budgets, selectedMonth]);
 
   return (
@@ -269,54 +152,49 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
           <p className="text-sm text-gray-500">Generating AI insights...</p>
         ) : tips && tips.length === 0 ? (
           <div className="text-center py-6">
-            <Lightbulb className="h-10 w-10 text-gray-400 mx-auto mb-3" />
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              No transactions found for {currentMonth ? new Date(currentMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'this month'}
+            <div className="text-gray-400 mb-2">
+              <Lightbulb className="h-12 w-12 mx-auto" />
+            </div>
+            <p className="text-sm text-gray-500 mb-2">
+              No financial tips available for this period.
             </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Switch to a month with transaction data to see AI insights
-            </p>
-          </div>
-        ) : (
-          tips?.map((tip) => {
-            const IconComponent = getCategoryIcon(tip.category);
-            return (
-              <div key={tip.id} className="border rounded-lg p-4 space-y-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-2">
-                    <IconComponent className={`h-5 w-5 ${
-                      tip.priority === 'high' ? 'text-red-600' :
-                      tip.priority === 'medium' ? 'text-yellow-600' :
-                      'text-green-600'
-                    }`} />
-                    <h4 className="font-medium text-sm">{tip.title}</h4>
-                  </div>
-                  <Badge className={`${getPriorityColor(tip.priority)} text-xs`}>
-                    {tip.priority}
-                  </Badge>
-                </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                  {tip.description}
-                </p>
-                <div className="flex items-center justify-between">
-                  <Badge variant="outline" className="text-xs">
-                    {tip.category}
-                  </Badge>
-                  {tip.actionable && (
-                    <span className="text-xs text-blue-600 font-medium">
-                      Action Required
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })
-        )}
-        {tips && tips.length > 0 && (
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-400">
               Tips are generated using AI based on your current transactions and budget settings.
             </p>
+          </div>
+        ) : tips && tips.length > 0 ? (
+          <div className="space-y-3">
+            {tips.map((tip) => {
+              const IconComponent = getCategoryIcon(tip.category);
+              return (
+                <div key={tip.id} className="p-3 border rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+                  <div className="flex items-start gap-3">
+                    <IconComponent className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-medium text-sm text-gray-900 truncate">{tip.title}</h4>
+                        <Badge variant="outline" className={`text-xs ${getPriorityColor(tip.priority)}`}>
+                          {tip.priority}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-gray-600 leading-relaxed">{tip.description}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            <div className="text-center mt-4">
+              <p className="text-xs text-gray-400">
+                Tips are generated using AI based on your current transactions and budget settings.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <div className="text-gray-400 mb-2">
+              <Lightbulb className="h-12 w-12 mx-auto" />
+            </div>
+            <p className="text-sm text-gray-500">Loading financial insights...</p>
           </div>
         )}
       </CardContent>

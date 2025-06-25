@@ -19,7 +19,7 @@ export function registerContextualFinancialTipsRoutes(app: Express) {
 
       // Clear database cache
       await storage.deleteCachedDailyRecommendations(userId);
-      // Legacy table removed - unified cache handles clearing via unifiedAICache.invalidateUser()
+      // Cache system removed
       
       // No cache to clear
       

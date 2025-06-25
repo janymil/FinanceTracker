@@ -55,8 +55,7 @@ async function processBatchedOperations() {
           })));
           
           // Cache insights with transaction hash
-          const transactionsHash = aiCache.createDataHash(transactions);
-          aiCache.setInsights(transactionsHash, insights);
+          // Cache system removed
         }
         
         // Generate financial tips if user has enough data
