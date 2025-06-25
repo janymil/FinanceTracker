@@ -120,7 +120,8 @@ FinanzerPro is a comprehensive personal finance management application built wit
 
 ## Changelog
 
-- June 25, 2025. Initial setup
+- June 25, 2025: Initial setup
+- June 25, 2025: Implemented unified AI cache system across all 7 AI functions with proper TTL values, user isolation, and database integration
 
 ## User Preferences
 
