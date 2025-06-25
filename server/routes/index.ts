@@ -19,7 +19,7 @@ import { registerImportRoutes } from "./importRoutes";
 import { handleContactForm } from "../contact";
 import { registerRedeemRoutes } from "./redeemRoutes";
 import { registerClerkWebhookRoutes } from "./clerkWebhooks";
-import { registerContextualFinancialTipsRoutes } from './contextualFinancialTipsRoutes';
+// Contextual financial tips routes moved to aiRoutes.ts
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Cookie consent middleware
@@ -46,7 +46,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/upload-receipt', uploadReceiptHandler);
   registerAIRoutes(app);
   registerAdminRoutes(app);
-  registerContextualFinancialTipsRoutes(app);
+  // Contextual financial tips routes moved to aiRoutes.ts
 
   // Register Clerk webhooks after other routes to avoid middleware conflicts
   registerClerkWebhookRoutes(app);
