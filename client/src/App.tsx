@@ -145,6 +145,59 @@ function AppContent() {
   );
 }
 
+// Dynamic Page Router - handles all authenticated routes dynamically
+function DynamicPageRouter() {
+  const [location] = useLocation();
+  
+  // Extract language and path from URL (e.g., /en/dashboard -> lang='en', path='dashboard')
+  const matches = location.match(/^\/([a-z]{2})\/(.*)$/);
+  const pagePath = matches ? matches[2] : location.replace(/^\/[a-z]{2}\/?/, '');
+  
+  // Route mapping for existing pages
+  const pageComponents: Record<string, React.ComponentType> = {
+    'dashboard': Dashboard,
+    'transactions': TransactionsPage,
+    'income': IncomePage,
+    'expenses': ExpensesPage,
+    'budget': BudgetPage,
+    'categories': CategoriesPage,
+    'goals': GoalsPage,
+    'collaborative-goals': CollaborativeGoalsPage,
+    'calendar': CalendarPage,
+    'trends': TrendsPage,
+    'reports': ReportsPage,
+    'export': ExportPage,
+    'subscribe': SubscribePage,
+    'redeem': RedeemPage,
+    'profile': ProfilePage,
+    'admin-analytics': AdminAnalytics,
+    // Public pages accessible from authenticated app
+    'pricing': Pricing,
+    'terms-of-service': TermsOfService,
+    'privacy-policy': PrivacyPolicy,
+    'cookie-policy': CookiePolicy,
+    'contact': Contact,
+    'help': Help,
+  };
+  
+  // Handle collaborative goal detail pages (with ID parameter)
+  const collaborativeGoalMatch = pagePath.match(/^collaborative-goals\/(.+)$/);
+  if (collaborativeGoalMatch) {
+    return <CollaborativeGoalDetailPage />;
+  }
+  
+  // Get component for current page
+  const PageComponent = pageComponents[pagePath] || pageComponents['dashboard']; // Default to dashboard
+  
+  // If no specific route matched, default to dashboard for authenticated users
+  if (!pagePath || pagePath === '') {
+    return <Dashboard />;
+  }
+  
+  // Render the appropriate component
+  return <PageComponent />;
+}
+
 export function AuthenticatedApp() {
   const { user: clerkUser, isLoaded } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -175,37 +228,7 @@ export function AuthenticatedApp() {
           sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
         )}>
           <div className="p-3 sm:p-6 max-w-full overflow-x-hidden">
-            <Switch>
-              {/* Language-prefixed routes */}
-              <Route path="/:lang/dashboard" component={Dashboard} />
-              <Route path="/:lang/transactions" component={TransactionsPage} />
-              <Route path="/:lang/income" component={IncomePage} />
-              <Route path="/:lang/expenses" component={ExpensesPage} />
-              <Route path="/:lang/budget" component={BudgetPage} />
-              <Route path="/:lang/categories" component={CategoriesPage} />
-              <Route path="/:lang/goals" component={GoalsPage} />
-              <Route path="/:lang/collaborative-goals" component={CollaborativeGoalsPage} />
-              <Route path="/:lang/collaborative-goals/:id" component={CollaborativeGoalDetailPage} />
-              <Route path="/:lang/calendar" component={CalendarPage} />
-              <Route path="/:lang/trends" component={TrendsPage} />
-              <Route path="/:lang/reports" component={ReportsPage} />
-              <Route path="/:lang/export" component={ExportPage} />
-              <Route path="/:lang/subscribe" component={SubscribePage} />
-              <Route path="/pricing" component={Pricing} />
-              <Route path="/terms-of-service" component={TermsOfService} />
-              <Route path="/privacy-policy" component={PrivacyPolicy} />
-              <Route path="/cookie-policy" component={CookiePolicy} />
-              <Route path="/contact" component={Contact} />
-              <Route path="/help" component={Help} />
-              <Route path="/redeem" component={RedeemPage} />
-              <Route path="/profile" component={ProfilePage} />
-              <Route path="/admin-analytics" component={AdminAnalytics} />
-              
-              {/* Default route */}
-              <Route path="/" component={Dashboard} />
-
-              <Route component={NotFoundPage} />
-            </Switch>
+            <DynamicPageRouter />
           </div>
         </main>
       </div>
