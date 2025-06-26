@@ -326,11 +326,16 @@ export default function Dashboard() {
   const formatMonth = (monthStr: string) => {
     const [year, month] = monthStr.split('-');
     const locale = getDateLocale();
+    console.log('formatMonth: locale =', locale, 'for monthStr =', monthStr);
     
-    return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString(locale, {
+    const date = new Date(parseInt(year), parseInt(month) - 1);
+    const formatted = date.toLocaleDateString(locale, {
       month: 'long',
       year: 'numeric'
     });
+    
+    console.log('formatMonth: formatted =', formatted);
+    return formatted;
   };
 
   // Generate dynamic month options (current month + last 11 months)
