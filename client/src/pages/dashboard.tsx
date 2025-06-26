@@ -323,31 +323,33 @@ export default function Dashboard() {
     }
   };
 
-  const formatMonth = (monthStr: string) => {
-    const [year, month] = monthStr.split('-');
-    const currentLang = i18n.language;
-    
-    const monthNames = {
-      'es': [
-        'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
-      ],
-      'sk': [
-        'január', 'február', 'marec', 'apríl', 'máj', 'jún',
-        'júl', 'august', 'september', 'október', 'november', 'december'
-      ],
-      'en': [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-      ]
+  const formatMonth = React.useMemo(() => {
+    return (monthStr: string) => {
+      const [year, month] = monthStr.split('-');
+      const currentLang = i18n.language;
+      
+      const monthNames = {
+        'es': [
+          'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+          'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+        ],
+        'sk': [
+          'január', 'február', 'marec', 'apríl', 'máj', 'jún',
+          'júl', 'august', 'september', 'október', 'november', 'december'
+        ],
+        'en': [
+          'January', 'February', 'March', 'April', 'May', 'June',
+          'July', 'August', 'September', 'October', 'November', 'December'
+        ]
+      };
+      
+      const langKey = currentLang.startsWith('es') ? 'es' : 
+                      currentLang.startsWith('sk') ? 'sk' : 'en';
+      
+      const monthName = monthNames[langKey][parseInt(month) - 1];
+      return `${monthName} ${year}`;
     };
-    
-    const langKey = currentLang.startsWith('es') ? 'es' : 
-                    currentLang.startsWith('sk') ? 'sk' : 'en';
-    
-    const monthName = monthNames[langKey][parseInt(month) - 1];
-    return `${monthName} ${year}`;
-  };
+  }, [i18n.language]);
 
   // Generate dynamic month options (current month + last 11 months)
   const generateMonthOptions = () => {
@@ -389,7 +391,7 @@ export default function Dashboard() {
                 {t("Welcome back")}, {user.firstName || t("User")}!
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
-                {t("Here's an overview of your financial situation for")} {i18n.language.startsWith('es') ? 'junio 2025' : i18n.language.startsWith('sk') ? 'jún 2025' : 'June 2025'}
+                {t("Here's an overview of your financial situation for")} {formatMonth(selectedMonth)}
               </p>
             </div>
             <div className="flex items-center space-x-4">
