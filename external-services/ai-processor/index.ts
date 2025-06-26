@@ -1335,7 +1335,7 @@ export async function generateDailyRecommendations(financialData: {
     categoryName: string;
     period: string;
   }>;
-}) {
+}, language: string = 'en-us') {
   try {
     // Production: minimal logging only
 
@@ -1442,7 +1442,9 @@ Only provide recommendations and insights based on the actual financial data pro
       messages: [
         {
           role: "system",
-          content: "You are an expert financial advisor who provides personalized, actionable recommendations based on real user data. Always return valid JSON."
+          content: `You are an expert financial advisor who provides personalized, actionable recommendations based on real user data. Always return valid JSON.
+
+Respond in ${getLanguageLabel(language)}.`
         },
         {
           role: "user",
@@ -1514,7 +1516,7 @@ export async function generateFinancialHealthScore(financialData: {
     totalExpenses: number;
     netBalance: number;
   };
-}): Promise<FinancialHealthData> {
+}, language: string = 'en-us'): Promise<FinancialHealthData> {
   try {
     const { transactions, budgets, summary } = financialData;
 
@@ -1556,7 +1558,9 @@ export async function generateFinancialHealthScore(financialData: {
       messages: [
         {
           role: "system",
-          content: `Calculate financial health score (0-100). Return JSON: {"score": number, "trend": "improving/stable/declining", "category": "excellent/good/fair/poor", "insights": ["max 2 insights"], "achievements": ["max 1"], "warnings": ["max 1"]}`
+          content: `Calculate financial health score (0-100). Return JSON: {"score": number, "trend": "improving/stable/declining", "category": "excellent/good/fair/poor", "insights": ["max 2 insights"], "achievements": ["max 1"], "warnings": ["max 1"]}
+
+Respond in ${getLanguageLabel(language)}.`
         },
         {
           role: "user",
@@ -1663,7 +1667,7 @@ app.post("/execute-gpt-task", async (req, res) => {
           };
         }
         
-        result = await generateContextualFinancialTips(contextualPayload);
+        result = await generateContextualFinancialTips(contextualPayload, payload.language || 'en-us');
         break;
       
       case "financial-tips":
@@ -1674,7 +1678,7 @@ app.post("/execute-gpt-task", async (req, res) => {
           transactionsByCategory: payload.categories || payload.transactionsByCategory || [],
           recentTransactions: payload.transactions || payload.recentTransactions || [],
         };
-        result = await generateFinancialTips(tipsPayload);
+        result = await generateFinancialTips(tipsPayload, payload.language || 'en-us');
         break;
 
       case "daily-recommendations":
