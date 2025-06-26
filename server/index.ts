@@ -267,17 +267,22 @@ app.use((req, res, next) => {
   next();
 });
 
-// Security headers middleware to prevent phishing detection
+// Security headers middleware - only for frontend user routes
 app.use((req, res, next) => {
-  // Skip all header setting for webhook routes to prevent conflicts
-  if (req.path === '/api/clerk-webhooks') {
+  // Skip security headers for webhooks, static assets, and SEO files
+  if (req.path.startsWith('/api/clerk-webhooks') ||
+      req.path.startsWith('/api/stripe-webhook') ||
+      req.path.startsWith('/uploads/') ||
+      req.path.includes('.') || // Static files (css, js, images, etc.)
+      req.path === '/robots.txt' ||
+      req.path === '/sitemap.xml') {
     return next();
   }
   
   // Only set headers if response hasn't been sent yet
   if (!res.headersSent && !res.finished) {
     try {
-      // Security headers for all requests
+      // Security headers for frontend user routes
       res.setHeader('X-Content-Type-Options', 'nosniff');
       res.setHeader('X-Frame-Options', 'DENY');
       res.setHeader('X-XSS-Protection', '1; mode=block');
@@ -291,9 +296,6 @@ app.use((req, res, next) => {
       console.error('Error setting security headers:', error);
     }
   }
-  
-  // CSP headers temporarily removed to isolate header conflict issue
-  // TODO: Re-implement CSP after resolving header conflicts
   
   // Additional security for admin and auth endpoints only
   if (!res.headersSent && !res.finished) {
