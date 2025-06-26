@@ -287,56 +287,13 @@ export default function Help() {
   };
 
   return (
-    <>
+    <AppLayout isPublicPage={true}>
       <SEO 
         title="Help & Documentation - FinanzerPro User Guide | Features & Support"
         description="Complete FinanzerPro documentation covering expense tracking, receipt OCR scanning, AI categorization, budgeting, goals, and all features. Get help with setup, troubleshooting, and maximizing your financial management."
         keywords="finanzerpro help, expense tracker guide, receipt scanning tutorial, AI categorization help, budget app documentation, personal finance support, financial management tutorial"
         canonical="https://finanzerpro.com/help"
       />
-      <div className="min-h-screen bg-background">
-      {/* Header for anonymous users */}
-      {!user && (
-        <AnonymousHeader />
-      )}
-      
-      {/* Header for authenticated users */}
-      {user && (
-        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center">
-                <button 
-                  onClick={() => setLocation('/')} 
-                  className="flex items-center hover:opacity-80 transition-opacity"
-                >
-                  <TrendingUp className="h-8 w-8 text-primary mr-3" />
-                  <span className="text-xl font-bold text-gray-900 dark:text-white">FinanzerPro</span>
-                </button>
-              </div>
-              <div className="flex items-center space-x-4">
-                {/* Help and Contact links hidden on mobile - available in footer */}
-                <button 
-                  onClick={() => setLocation('/help')} 
-                  className="hidden sm:block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Help
-                </button>
-                <button 
-                  onClick={() => setLocation('/contact')} 
-                  className="hidden sm:block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Contact
-                </button>
-                <Button onClick={handleLogin} className="bg-primary hover:bg-primary/90">
-                  Sign In
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
-      )}
-
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Documentation */}

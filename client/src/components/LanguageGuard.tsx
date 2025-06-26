@@ -20,32 +20,8 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
     console.log('LanguageGuard: Detected lang from URL:', lang);
     console.log('LanguageGuard: Current i18n language:', i18n.language);
 
-    // Allow certain pages without language prefix (e.g. /contact)
-    const noPrefixAllowed = [
-      '/pricing',
-      '/terms-of-service',
-      '/privacy-policy',
-      '/cookie-policy',
-      '/contact',
-      '/help',
-      '/redeem',
-      '/profile',
-      '/admin-analytics',
-      '/mobile-upload'
-    ];
-    const matchesNoPrefix = noPrefixAllowed.some((p) => location.startsWith(p));
-
+    // If no language in URL, detect and redirect
     if (!lang || !['en', 'es', 'sk'].includes(lang)) {
-      if (matchesNoPrefix) {
-        const preferred = localStorage.getItem('preferredLanguage') || 'en';
-        if (i18n.language !== preferred) {
-          i18n.changeLanguage(preferred).finally(() => setReady(true));
-        } else {
-          setReady(true);
-        }
-        return;
-      }
-      
       console.log('LanguageGuard: No valid language in URL, redirecting...');
       detectLanguageAndRedirect();
       return;
