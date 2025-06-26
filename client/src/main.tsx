@@ -4,9 +4,11 @@ import { ClerkProvider } from '@clerk/clerk-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Router } from 'wouter';
 import { HelmetProvider } from 'react-helmet-async';
+import { I18nextProvider } from 'react-i18next';
 import App from './App.tsx';
 import './index.css';
 import { clearStaleSession } from './utils/sessionCleanup';
+import i18n from './i18n/i18n.js';
 
 // Clear any stale authentication data on app startup
 clearStaleSession();
@@ -36,14 +38,16 @@ if (!container) throw new Error('Root element not found');
 const root = createRoot(container);
 root.render(
   <StrictMode>
-    <HelmetProvider>
-      <ClerkProvider publishableKey={clerkPubKey}>
-        <QueryClientProvider client={queryClient}>
-          <Router>
-            <App />
-          </Router>
-        </QueryClientProvider>
-      </ClerkProvider>
-    </HelmetProvider>
+    <I18nextProvider i18n={i18n}>
+      <HelmetProvider>
+        <ClerkProvider publishableKey={clerkPubKey}>
+          <QueryClientProvider client={queryClient}>
+            <Router>
+              <App />
+            </Router>
+          </QueryClientProvider>
+        </ClerkProvider>
+      </HelmetProvider>
+    </I18nextProvider>
   </StrictMode>
 );
