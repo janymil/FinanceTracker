@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 import LanguageGuard from "@/components/LanguageGuard";
 import { useState, useEffect } from "react";
+import React from "react";
 import { cn } from "@/lib/utils";
 import { SignedIn, SignedOut, useClerk, useUser } from "@clerk/clerk-react";
 import { initGA } from "@/lib/analytics";
@@ -99,37 +100,32 @@ function Router() {
         <Route path="/:lang/auth" component={AuthPage} />
         <Route path="/:lang" component={Landing} />
         
-        {/* Default route - redirect to user's language/dashboard */}
+        {/* Default route - redirect to user's language */}
         <Route path="/" component={() => { 
           const [, setLocation] = useLocation();
+          const { isSignedIn } = useUser();
           
-          // Detect user's preferred language using simplified codes
-          const browserLang = navigator.language.toLowerCase();
-          const supportedLangs = ['en', 'es', 'sk'];
-          
-          // Check localStorage for previous language choice
-          const savedLang = localStorage.getItem('preferredLanguage');
-          
-          let targetLang = 'en'; // fallback
-          
-          // Priority: saved language > browser language mapping > fallback
-          if (savedLang && supportedLangs.includes(savedLang)) {
-            targetLang = savedLang;
-          } else {
-            // Extract main language code dynamically
-            const mainLangCode = browserLang.split('-')[0];
-            if (mainLangCode === 'es') {
-              targetLang = 'es';
-            } else if (mainLangCode === 'sk') {
-              targetLang = 'sk';
+          React.useEffect(() => {
+            // Get saved language or use browser language
+            const savedLang = localStorage.getItem('preferredLanguage');
+            const browserLang = navigator.language.toLowerCase().split('-')[0];
+            const supportedLangs = ['en', 'es', 'sk'];
+            
+            const targetLang = savedLang && supportedLangs.includes(savedLang) 
+              ? savedLang 
+              : supportedLangs.includes(browserLang) 
+                ? browserLang 
+                : 'en';
+            
+            // Redirect to appropriate page based on auth status
+            if (isSignedIn) {
+              setLocation(`/${targetLang}/dashboard`);
             } else {
-              targetLang = 'en';
+              setLocation(`/${targetLang}`);
             }
-          }
+          }, [setLocation, isSignedIn]);
           
-          // Use client-side navigation instead of page reload
-          setLocation(`/${targetLang}/dashboard`); 
-          return null; 
+          return <AppLoader />; 
         }} />
         
         {/* Mobile upload - special case without language prefix */}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { SignIn, SignUp } from "@clerk/clerk-react";
+import { SignIn, SignUp, useUser } from "@clerk/clerk-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 import { DollarSign, TrendingUp, Shield } from "lucide-react";
