@@ -35,7 +35,9 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { useUser } from "@clerk/clerk-react";
-import { AppLayout } from "@/components/AppLayout";
+import Header from "@/components/header";
+import { AnonymousHeader } from "@/components/anonymous-header";
+import { Footer } from "@/components/footer";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -286,6 +288,8 @@ export default function Help() {
     premium: "$9.99"
   };
 
+  const { isSignedIn } = useUser();
+
   return (
     <>
       <SEO 
@@ -294,7 +298,8 @@ export default function Help() {
         keywords="finanzerpro help, expense tracker guide, receipt scanning tutorial, AI categorization help, budget app documentation, personal finance support, financial management tutorial"
         canonical="https://finanzerpro.com/help"
       />
-      <AppLayout isPublicPage={true}>
+      <div className="min-h-screen bg-background">
+        {isSignedIn ? <Header onMenuClick={() => {}} sidebarCollapsed={false} /> : <AnonymousHeader />}
         <div className="container mx-auto px-4 py-6 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Documentation */}
@@ -1248,7 +1253,8 @@ export default function Help() {
           </div>
         </div>
         </div>
-      </AppLayout>
+        {!isSignedIn && <Footer />}
+      </div>
     </>
   );
 }
