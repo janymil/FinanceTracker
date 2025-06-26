@@ -8,8 +8,9 @@ import { SEO } from "@/components/SEO";
 
 export default function AuthPage() {
   const [location, setLocation] = useLocation();
-  const { user, isAuthenticated } = useAuth();
+  const { user: clerkUser, isLoaded } = useUser();
   const [activeTab, setActiveTab] = useState("sign-up");
+  const [hasRedirected, setHasRedirected] = useState(false);
 
   // Extract current language from URL to build language-aware redirect URLs
   const currentLang = location.match(/^\/([a-z]{2})\//)?.[1] || 'en';
@@ -38,12 +39,25 @@ export default function AuthPage() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // Redirect if already logged in - use useEffect to prevent render loop
+  // Redirect if already logged in - prevent multiple redirects
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isLoaded && clerkUser && !hasRedirected) {
+      setHasRedirected(true);
       setLocation(dashboardUrl);
     }
-  }, [isAuthenticated, user, setLocation, dashboardUrl]);
+  }, [isLoaded, clerkUser, dashboardUrl, setLocation, hasRedirected]);
+
+  // Show loading state while Clerk is loading
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
