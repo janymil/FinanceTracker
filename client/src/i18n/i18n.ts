@@ -1,28 +1,40 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import HttpBackend from 'i18next-http-backend';
+
+// Import translation files directly
+import enTranslations from '../../public/locales/en-us/translation.json';
+import esTranslations from '../../public/locales/es-pe/translation.json';
+import skTranslations from '../../public/locales/sk-sk/translation.json';
+
+// Static resources object
+const resources = {
+  'en-us': {
+    translation: enTranslations
+  },
+  'es-pe': {
+    translation: esTranslations
+  },
+  'sk-sk': {
+    translation: skTranslations
+  }
+};
 
 i18n
-  .use(HttpBackend)
   .use(initReactI18next)
   .init({
     lng: 'en-us', // Set default explicitly
     fallbackLng: 'en-us',
-    debug: false,
+    debug: true,
+    
+    // Use static resources instead of HTTP backend
+    resources,
     
     interpolation: {
       escapeValue: false, // React already does escaping
     },
     
-    backend: {
-      loadPath: '/locales/{{lng}}/translation.json',
-    },
-    
     // Supported languages
     supportedLngs: ['en-us', 'es-pe', 'sk-sk'],
-    
-    // Don't preload all languages
-    preload: false,
     
     // Load exact language codes only
     load: 'currentOnly',

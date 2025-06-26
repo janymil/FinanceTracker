@@ -52,10 +52,15 @@ export default function LanguageGuard() {
     }
 
     console.log('LanguageGuard: Changing language to:', lang);
+    console.log('LanguageGuard: Current i18n language before change:', i18n.language);
+    console.log('LanguageGuard: i18n store contains languages:', Object.keys(i18n.store.data));
+    
     // Change i18next language and wait for it to complete before rendering
     i18n.changeLanguage(lang).then(() => {
       console.log('LanguageGuard: Language changed successfully to:', i18n.language);
+      console.log('LanguageGuard: Store data for', lang, ':', i18n.store.data[lang]);
       console.log('LanguageGuard: Test translation Dashboard:', i18n.t('Dashboard'));
+      console.log('LanguageGuard: Test translation Transactions:', i18n.t('Transactions'));
       setReady(true);
     }).catch(error => {
       console.error('LanguageGuard: Error changing language:', error);
