@@ -56,74 +56,71 @@ export default function PrivacyPolicy() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">3. Information Sharing</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("3. Information Sharing")}</h2>
             <p className="mb-4">
-              We do not sell, trade, or otherwise transfer your personal information to third parties except:
+              {t("We do not sell, trade, or otherwise transfer your personal information to third parties except:")}
             </p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li><strong>Service Providers:</strong> Third-party companies that help us operate our service</li>
-              <li><strong>Payment Processing:</strong> Stripe for subscription payments (no financial transaction data shared)</li>
-              <li><strong>Cloud Storage:</strong> Encrypted backups for Premium users</li>
-              <li><strong>Legal Requirements:</strong> When required by law or to protect rights and safety</li>
+              <li><strong>{t("Service Providers:")}</strong> {t("Third-party companies that help us operate our service")}</li>
+              <li><strong>{t("Payment Processing:")}</strong> {t("Stripe for subscription payments (no financial transaction data shared)")}</li>
+              <li><strong>{t("Cloud Storage:")}</strong> {t("Encrypted backups for Premium users")}</li>
+              <li><strong>{t("Legal Requirements:")}</strong> {t("When required by law or to protect rights and safety")}</li>
             </ul>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">4. Data Security</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("4. Data Security")}</h2>
             <p className="mb-4">
-              We implement appropriate security measures to protect your personal information:
+              {t("We implement appropriate security measures to protect your personal information:")}
             </p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li>All data transmission is encrypted using SSL/TLS</li>
-              <li>Passwords are hashed using industry-standard encryption</li>
-              <li>Regular security audits and updates</li>
-              <li>Limited access to personal data on a need-to-know basis</li>
-              <li>Secure cloud backup storage with encryption</li>
+              <li>{t("All data transmission is encrypted using SSL/TLS")}</li>
+              <li>{t("Passwords are hashed using industry-standard encryption")}</li>
+              <li>{t("Regular security audits and updates")}</li>
+              <li>{t("Limited access to personal data on a need-to-know basis")}</li>
+              <li>{t("Secure cloud backup storage with encryption")}</li>
             </ul>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">5. Data Retention</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("5. Data Retention")}</h2>
             <p className="mb-4">
-              We retain your information for as long as your account is active or as needed to provide services.
-              You may delete your account and data at any time through your account settings.
+              {t("We retain your information for as long as your account is active or as needed to provide services. You may delete your account and data at any time through your account settings.")}
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">6. Your Rights</h2>
-            <p className="mb-4">You have the right to:</p>
+            <h2 className="text-2xl font-semibold mb-4">{t("6. Your Rights")}</h2>
+            <p className="mb-4">{t("You have the right to:")}</p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li>Access, update, or delete your personal information</li>
-              <li>Export your data in a portable format</li>
-              <li>Opt out of certain communications</li>
-              <li>Request information about how your data is used</li>
+              <li>{t("Access, update, or delete your personal information")}</li>
+              <li>{t("Export your data in a portable format")}</li>
+              <li>{t("Opt out of certain communications")}</li>
+              <li>{t("Request information about how your data is used")}</li>
             </ul>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">7. Cookies and Tracking</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("7. Cookies and Tracking")}</h2>
             <p className="mb-4">
-              We use cookies and similar tracking technologies to provide and improve our service. 
-              See our Cookie Policy for detailed information.
+              {t("We use cookies and similar tracking technologies to provide and improve our service. See our Cookie Policy for detailed information.")}
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">8. Changes to This Policy</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("8. Changes to This Policy")}</h2>
             <p className="mb-4">
-              We may update this privacy policy from time to time. We will notify you of any changes 
-              by posting the new policy on this page and updating the "Last updated" date.
+              {t("We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the \"Last updated\" date.")}
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">9. Contact Us</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("9. Contact Us")}</h2>
             <p className="mb-4">
-              If you have any questions about this Privacy Policy, please contact us at:
+              {t("If you have any questions about this Privacy Policy, please contact us at:")}
             </p>
-            <p className="mb-2">Email: info@finanzerpro.com</p>
-            <p>Address: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120</p>
+            <p className="mb-2">{t("Email: info@finanzerpro.com")}</p>
+            <p>{t("Address: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120")}</p>
           </section>
         </div>
       </div>
