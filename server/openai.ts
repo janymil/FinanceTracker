@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { UnifiedAICache } from "../lib/unifiedAICache";
+import { getLanguageLabel } from "../lib/languageUtils";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -78,7 +79,7 @@ export interface FinancialHealthData {
   warnings: string[];
 }
 
-export async function categorizeExpense(description: string, amount: number): Promise<ExpenseCategorizationResult> {
+export async function categorizeExpense(description: string, amount: number, language: string = 'en-us'): Promise<ExpenseCategorizationResult> {
   try {
     // Cache removed - direct OpenAI call
     const response = await openai.chat.completions.create({
@@ -86,7 +87,7 @@ export async function categorizeExpense(description: string, amount: number): Pr
       messages: [
         {
           role: "system",
-          content: `You are an expert financial categorization assistant. Analyze the expense description and amount to determine the most appropriate category.
+          content: `Respond in ${getLanguageLabel(language)}. You are an expert financial categorization assistant. Analyze the expense description and amount to determine the most appropriate category.
 
 Available categories:
 - Food & Dining (restaurants, groceries, takeout)
@@ -160,7 +161,8 @@ export async function generateFinancialTips(
       type?: string;
     }>;
     timestamp?: number; // For bypassing cache
-  }
+  },
+  language: string = 'en-us'
 ): Promise<FinancialTip[]> {
   try {
     // Initialize UnifiedAICache with 168 hours (7 days) TTL
@@ -248,7 +250,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
         messages: [
           {
             role: "system",
-            content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
+            content: `Respond in ${getLanguageLabel(language)}. You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
 
 1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
 2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
@@ -630,7 +632,8 @@ export async function generateTrendPredictions(
     type: string;
     categoryName: string;
   }>,
-  budgets: Array<{ categoryName: string; amount: string; }> = []
+  budgets: Array<{ categoryName: string; amount: string; }> = [],
+  language: string = 'en-us'
 ): Promise<{
   categoryPredictions: TrendPrediction[];
   financialForecast: FinancialForecast;
@@ -749,7 +752,7 @@ Analysis Requirements:
       messages: [
         {
           role: "system",
-          content: "You are an advanced financial forecasting AI that analyzes spending patterns and predicts future financial trends with high accuracy. Use sophisticated pattern recognition and statistical analysis to provide reliable predictions."
+          content: `Respond in ${getLanguageLabel(language)}. You are an advanced financial forecasting AI that analyzes spending patterns and predicts future financial trends with high accuracy. Use sophisticated pattern recognition and statistical analysis to provide reliable predictions.`
         },
         {
           role: "user",
