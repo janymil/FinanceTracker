@@ -7,10 +7,12 @@ import { TrendingUp, Shield, DollarSign, BarChart3, Crown, Check, X, Star, Sun, 
 import { useLocation } from "wouter";
 import { SEO } from "@/components/SEO";
 import { useTheme } from "@/context/ThemeContext";
+import { useTranslation } from "react-i18next";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   
   const handleLogin = () => {
     setLocation('/auth#sign-in');

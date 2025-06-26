@@ -8,6 +8,7 @@ import { DashboardSkeleton } from "@/components/dashboard-skeleton";
 import { SEO } from "@/components/SEO";
 import { useCurrency } from "@/context/CurrencyContext";
 import { CurrencySetupModal } from "@/components/CurrencySetupModal";
+import { useTranslation } from "react-i18next";
 
 
 // Core components for immediate display
@@ -81,6 +82,7 @@ export default function Dashboard() {
   const { isReady, user } = useClerkUserReady();
   const { showSetupModal, setShowSetupModal } = useCurrency();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Check for subscription success/error messages
   useEffect(() => {
@@ -91,26 +93,26 @@ export default function Dashboard() {
 
     if (upgrade === 'success' && plan) {
       toast({
-        title: "Subscription Successful!",
-        description: `You've been upgraded to the ${plan} plan. Enjoy your new features!`,
+        title: t("Subscription Successful!"),
+        description: t("You've been upgraded to the {{plan}} plan. Enjoy your new features!", { plan }),
       });
       // Clean up URL parameters
       window.history.replaceState({}, '', '/');
     } else if (error) {
-      let message = "An error occurred during payment processing.";
+      let message = t("An error occurred during payment processing.");
       switch (error) {
         case 'payment_not_completed':
-          message = "Payment was not completed. Please try again.";
+          message = t("Payment was not completed. Please try again.");
           break;
         case 'user_not_found':
-          message = "User account not found. Please contact support.";
+          message = t("User account not found. Please contact support.");
           break;
         case 'plan_update_failed':
-          message = "Payment successful but plan update failed. Please contact support.";
+          message = t("Payment successful but plan update failed. Please contact support.");
           break;
       }
       toast({
-        title: "Payment Error",
+        title: t("Payment Error"),
         description: message,
         variant: "destructive",
       });
