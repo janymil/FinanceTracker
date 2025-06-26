@@ -34,6 +34,7 @@ import { useToast } from "@/hooks/use-toast";
 import MonthFilter from "@/components/month-filter";
 import { format } from "date-fns";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useTranslation } from "react-i18next";
 
 interface Transaction {
   id: number;
@@ -70,6 +71,7 @@ export default function Transactions() {
   const { toast } = useToast();
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
+  const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -764,10 +766,10 @@ export default function Transactions() {
                 className="shrink-0"
               >
                 <Filter className="h-4 w-4 mr-2" />
-                Filters
+                {t("Filters")}
                 {(filterType !== "all" || filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all") && (
                   <Badge variant="secondary" className="ml-2 px-1 py-0 text-xs">
-                    Active
+                    {t("Active")}
                   </Badge>
                 )}
               </Button>
