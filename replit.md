@@ -169,3 +169,88 @@ Preferred communication style: Simple, everyday language.
 CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
 Do not take actions unless explicitly asked by the user.
 Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
+
+referred communication style: Simple, everyday language.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
