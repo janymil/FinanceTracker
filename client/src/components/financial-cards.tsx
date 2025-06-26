@@ -72,7 +72,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
   }, [summary]);
 
   const getBudgetStatus = () => {
-    if (!summary) return { status: 'loading', statusText: t('Loading...'), percentage: 0, remaining: 0, bgColor: 'bg-gray-50', textColor: 'text-gray-600' };
+    if (!summary) return { status: 'loading', percentage: 0, remaining: 0, bgColor: 'bg-gray-50', textColor: 'text-gray-600' };
     
 
     
@@ -81,7 +81,6 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
 
       return {
         status: 'no-budget',
-        statusText: t('No Budget Set'),
         percentage: 0,
         remaining: 0,
         bgColor: 'bg-gray-50 dark:bg-gray-900/20',
@@ -111,7 +110,6 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
     if (!currentMonthBudgets || currentMonthBudgets.length === 0) {
       return {
         status: 'no-budget',
-        statusText: t('No Budget Set'),
         percentage: 0,
         remaining: 0,
         bgColor: 'bg-gray-50 dark:bg-gray-900/20',
@@ -135,7 +133,6 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
 
     if (percentage <= 50) return { 
       status: 'healthy', 
-      statusText: t('Healthy'),
       percentage, 
       remaining, 
       bgColor: 'bg-green-50 dark:bg-green-900/20', 
@@ -143,7 +140,6 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
     };
     if (percentage <= 90) return { 
       status: 'moderate', 
-      statusText: t('Moderate'),
       percentage, 
       remaining, 
       bgColor: 'bg-yellow-50 dark:bg-yellow-900/20', 
@@ -151,7 +147,6 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
     };
     return { 
       status: 'critical', 
-      statusText: t('Critical'),
       percentage, 
       remaining, 
       bgColor: 'bg-red-50 dark:bg-red-900/20', 
@@ -261,7 +256,11 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
                 {t('Budget Status')}
               </p>
               <p className={`text-2xl font-bold ${budgetInfo.textColor}`}>
-                {budgetInfo.statusText}
+                {budgetInfo.status === 'loading' ? t('Loading...') :
+                 budgetInfo.status === 'no-budget' ? t('No Budget Set') :
+                 budgetInfo.status === 'healthy' ? t('Healthy') :
+                 budgetInfo.status === 'moderate' ? t('Moderate') :
+                 budgetInfo.status === 'critical' ? t('Critical') : ''}
               </p>
               <p className={`text-xs mt-1 ${budgetInfo.textColor} opacity-80`}>
                 {Math.round(budgetInfo.percentage)}% {t('utilized')}. {t('Remaining')}: {formatCurrency(budgetInfo.remaining)}
