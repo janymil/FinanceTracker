@@ -33,8 +33,6 @@ export default function PrivacyPolicy() {
       />
       {isSignedIn ? <Header onMenuClick={() => {}} sidebarCollapsed={false} /> : <AnonymousHeader />}
       <main className="container mx-auto px-4 py-8 max-w-4xl">
-      
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-4xl font-bold mb-8">{t("Privacy Policy")}</h1>
         <p className="text-muted-foreground mb-8">{t("Last updated: June 14, 2025")}</p>
 
