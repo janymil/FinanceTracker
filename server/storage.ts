@@ -55,7 +55,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { DataEncryption } from "./encryption";
-import { eq, and, gte, lte, desc, sum, count, sql, or, isNull } from "drizzle-orm";
+import { eq, and, gte, lte, desc, sum, count, sql, or, isNull, gt } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -179,6 +179,7 @@ export interface IStorage {
   // AI Cache operations for unified cache system
   getAICacheEntry(userId: string, functionKey: string, inputHash: string): Promise<AiCache | null>;
   setAICacheEntry(userId: string, functionKey: string, inputHash: string, input: any, output: any, month?: string, isError?: boolean): Promise<void>;
+  getRecentAICacheEntry(userId: string, functionKey: string): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {

@@ -42,7 +42,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
     queryFn: async () => {
       const response = await apiRequest('POST', '/api/ai/tip', {
         mode: 'fetch_cached',
-        userId: user.id
+        userId: user?.id
       });
       return response.json();
     },
