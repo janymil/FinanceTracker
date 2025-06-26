@@ -155,6 +155,76 @@ function AuthenticatedApp() {
         )}>
           <div className="p-3 sm:p-6 max-w-full overflow-x-hidden">
             <Switch>
+              {/* Specific language routes for exact matching */}
+              <Route path="/es-pe/dashboard" component={Dashboard} />
+              <Route path="/es-pe/transactions" component={TransactionsPage} />
+              <Route path="/es-pe/income" component={IncomePage} />
+              <Route path="/es-pe/expenses" component={ExpensesPage} />
+              <Route path="/es-pe/budget" component={BudgetPage} />
+              <Route path="/es-pe/categories" component={CategoriesPage} />
+              <Route path="/es-pe/goals" component={GoalsPage} />
+              <Route path="/es-pe/collaborative-goals" component={CollaborativeGoalsPage} />
+              <Route path="/es-pe/collaborative-goals/:id" component={CollaborativeGoalDetailPage} />
+              <Route path="/es-pe/calendar" component={CalendarPage} />
+              <Route path="/es-pe/trends" component={TrendsPage} />
+              <Route path="/es-pe/reports" component={ReportsPage} />
+              <Route path="/es-pe/export" component={ExportPage} />
+              <Route path="/es-pe/subscribe" component={SubscribePage} />
+              <Route path="/es-pe/pricing" component={Pricing} />
+              <Route path="/es-pe/terms-of-service" component={TermsOfService} />
+              <Route path="/es-pe/privacy-policy" component={PrivacyPolicy} />
+              <Route path="/es-pe/cookie-policy" component={CookiePolicy} />
+              <Route path="/es-pe/contact" component={Contact} />
+              <Route path="/es-pe/help" component={Help} />
+              <Route path="/es-pe/redeem" component={RedeemPage} />
+              <Route path="/es-pe/profile" component={ProfilePage} />
+
+              <Route path="/sk-sk/dashboard" component={Dashboard} />
+              <Route path="/sk-sk/transactions" component={TransactionsPage} />
+              <Route path="/sk-sk/income" component={IncomePage} />
+              <Route path="/sk-sk/expenses" component={ExpensesPage} />
+              <Route path="/sk-sk/budget" component={BudgetPage} />
+              <Route path="/sk-sk/categories" component={CategoriesPage} />
+              <Route path="/sk-sk/goals" component={GoalsPage} />
+              <Route path="/sk-sk/collaborative-goals" component={CollaborativeGoalsPage} />
+              <Route path="/sk-sk/collaborative-goals/:id" component={CollaborativeGoalDetailPage} />
+              <Route path="/sk-sk/calendar" component={CalendarPage} />
+              <Route path="/sk-sk/trends" component={TrendsPage} />
+              <Route path="/sk-sk/reports" component={ReportsPage} />
+              <Route path="/sk-sk/export" component={ExportPage} />
+              <Route path="/sk-sk/subscribe" component={SubscribePage} />
+              <Route path="/sk-sk/pricing" component={Pricing} />
+              <Route path="/sk-sk/terms-of-service" component={TermsOfService} />
+              <Route path="/sk-sk/privacy-policy" component={PrivacyPolicy} />
+              <Route path="/sk-sk/cookie-policy" component={CookiePolicy} />
+              <Route path="/sk-sk/contact" component={Contact} />
+              <Route path="/sk-sk/help" component={Help} />
+              <Route path="/sk-sk/redeem" component={RedeemPage} />
+              <Route path="/sk-sk/profile" component={ProfilePage} />
+
+              <Route path="/en-us/dashboard" component={Dashboard} />
+              <Route path="/en-us/transactions" component={TransactionsPage} />
+              <Route path="/en-us/income" component={IncomePage} />
+              <Route path="/en-us/expenses" component={ExpensesPage} />
+              <Route path="/en-us/budget" component={BudgetPage} />
+              <Route path="/en-us/categories" component={CategoriesPage} />
+              <Route path="/en-us/goals" component={GoalsPage} />
+              <Route path="/en-us/collaborative-goals" component={CollaborativeGoalsPage} />
+              <Route path="/en-us/collaborative-goals/:id" component={CollaborativeGoalDetailPage} />
+              <Route path="/en-us/calendar" component={CalendarPage} />
+              <Route path="/en-us/trends" component={TrendsPage} />
+              <Route path="/en-us/reports" component={ReportsPage} />
+              <Route path="/en-us/export" component={ExportPage} />
+              <Route path="/en-us/subscribe" component={SubscribePage} />
+              <Route path="/en-us/pricing" component={Pricing} />
+              <Route path="/en-us/terms-of-service" component={TermsOfService} />
+              <Route path="/en-us/privacy-policy" component={PrivacyPolicy} />
+              <Route path="/en-us/cookie-policy" component={CookiePolicy} />
+              <Route path="/en-us/contact" component={Contact} />
+              <Route path="/en-us/help" component={Help} />
+              <Route path="/en-us/redeem" component={RedeemPage} />
+              <Route path="/en-us/profile" component={ProfilePage} />
+
               {/* Default language routes */}
               <Route path="/" component={Dashboard} />
               <Route path="/dashboard" component={Dashboard} />
@@ -180,30 +250,6 @@ function AuthenticatedApp() {
               <Route path="/redeem" component={RedeemPage} />
               <Route path="/profile" component={ProfilePage} />
               <Route path="/admin-analytics" component={AdminAnalytics} />
-
-              {/* Language-prefixed authenticated routes */}
-              <Route path="/:lang/dashboard" component={Dashboard} />
-              <Route path="/:lang/transactions" component={TransactionsPage} />
-              <Route path="/:lang/income" component={IncomePage} />
-              <Route path="/:lang/expenses" component={ExpensesPage} />
-              <Route path="/:lang/budget" component={BudgetPage} />
-              <Route path="/:lang/categories" component={CategoriesPage} />
-              <Route path="/:lang/goals" component={GoalsPage} />
-              <Route path="/:lang/collaborative-goals" component={CollaborativeGoalsPage} />
-              <Route path="/:lang/collaborative-goals/:id" component={CollaborativeGoalDetailPage} />
-              <Route path="/:lang/calendar" component={CalendarPage} />
-              <Route path="/:lang/trends" component={TrendsPage} />
-              <Route path="/:lang/reports" component={ReportsPage} />
-              <Route path="/:lang/export" component={ExportPage} />
-              <Route path="/:lang/subscribe" component={SubscribePage} />
-              <Route path="/:lang/pricing" component={Pricing} />
-              <Route path="/:lang/terms-of-service" component={TermsOfService} />
-              <Route path="/:lang/privacy-policy" component={PrivacyPolicy} />
-              <Route path="/:lang/cookie-policy" component={CookiePolicy} />
-              <Route path="/:lang/contact" component={Contact} />
-              <Route path="/:lang/help" component={Help} />
-              <Route path="/:lang/redeem" component={RedeemPage} />
-              <Route path="/:lang/profile" component={ProfilePage} />
 
               <Route component={NotFoundPage} />
             </Switch>
