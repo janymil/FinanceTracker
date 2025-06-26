@@ -35,8 +35,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { useUser } from "@clerk/clerk-react";
-import { AnonymousHeader } from "@/components/anonymous-header";
-import Header from "@/components/header";
+import { AppLayout } from "@/components/AppLayout";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -295,15 +294,8 @@ export default function Help() {
         keywords="finanzerpro help, expense tracker guide, receipt scanning tutorial, AI categorization help, budget app documentation, personal finance support, financial management tutorial"
         canonical="https://finanzerpro.com/help"
       />
-      <div className="min-h-screen bg-background">
-      {/* Header for all users */}
-      {user ? (
-        <Header onMenuClick={() => {}} sidebarCollapsed={false} />
-      ) : (
-        <AnonymousHeader />
-      )}
-
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <AppLayout isPublicPage={true}>
+        <div className="container mx-auto px-4 py-6 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Documentation */}
         <div className="lg:col-span-2">
@@ -1253,10 +1245,10 @@ export default function Help() {
               </div>
             </CardContent>
           </Card>
+          </div>
         </div>
         </div>
-      </div>
-      </div>
+      </AppLayout>
     </>
   );
 }

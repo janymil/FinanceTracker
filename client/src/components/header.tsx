@@ -67,8 +67,8 @@ interface Category {
 
 
 interface HeaderProps {
-  onMenuClick?: () => void;
-  sidebarCollapsed?: boolean;
+  onMenuClick: () => void;
+  sidebarCollapsed: boolean;
 }
 
 export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {

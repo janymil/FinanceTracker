@@ -5,13 +5,10 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SEO } from "@/components/SEO";
 import { AnonymousHeader } from "@/components/anonymous-header";
-import Header from "@/components/header";
-import { useUser } from "@clerk/clerk-react";
 import { useTranslation } from 'react-i18next';
 
 export default function PrivacyPolicy() {
   const [, setLocation] = useLocation();
-  const { user } = useUser();
   const { t } = useTranslation();
   
   useEffect(() => {
@@ -24,11 +21,8 @@ export default function PrivacyPolicy() {
 
   return (
     <div className="min-h-screen bg-background">
-      {user ? (
-        <Header onMenuClick={() => {}} sidebarCollapsed={false} />
-      ) : (
-        <AnonymousHeader />
-      )}
+      {/* Header for anonymous users */}
+      <AnonymousHeader />
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-4xl font-bold mb-8">{t("Privacy Policy")}</h1>
