@@ -382,5 +382,7 @@
   "Critical": "Crítico",
   "utilized": "utilizado",
   "Remaining": "Restante",
-  "Loading...": "Cargando..."
+  "Loading...": "Cargando...",
+  "Loading budget data...": "Cargando datos del presupuesto...",
+  "Set up your first budget to track spending": "Configura tu primer presupuesto para rastrear gastos"
 }

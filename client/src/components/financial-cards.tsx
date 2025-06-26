@@ -189,7 +189,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
                 {formatCurrency(animatedValues.income)}
               </p>
               <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                {summary?.incomeTransactionCount || 0} {(summary?.incomeTransactionCount || 0) !== 1 ? t('transactions') : t('transaction')}
+                {summary?.incomeTransactionCount || 0} {(summary?.incomeTransactionCount || 0) === 1 ? t('transaction') : t('transactions')}
               </p>
             </div>
             <div className="bg-green-100 dark:bg-green-800/40 p-3 rounded-lg">
@@ -211,7 +211,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
                 {formatCurrency(Math.abs(animatedValues.expenses))}
               </p>
               <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                {summary?.expenseTransactionCount || 0} {(summary?.expenseTransactionCount || 0) !== 1 ? t('transactions') : t('transaction')}
+                {summary?.expenseTransactionCount || 0} {(summary?.expenseTransactionCount || 0) === 1 ? t('transaction') : t('transactions')}
               </p>
             </div>
             <div className="bg-red-100 dark:bg-red-800/40 p-3 rounded-lg">
@@ -233,7 +233,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
                 {formatCurrency(animatedValues.balance)}
               </p>
               <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                {summary?.totalTransactionCount || 0} {t('total')} {(summary?.totalTransactionCount || 0) !== 1 ? t('transactions') : t('transaction')}
+                {summary?.totalTransactionCount || 0} {t('total')} {(summary?.totalTransactionCount || 0) === 1 ? t('transaction') : t('transactions')}
               </p>
             </div>
             <div className="bg-blue-100 dark:bg-blue-800/40 p-3 rounded-lg">
@@ -263,7 +263,9 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
                  budgetInfo.status === 'critical' ? t('Critical') : ''}
               </p>
               <p className={`text-xs mt-1 ${budgetInfo.textColor} opacity-80`}>
-                {Math.round(budgetInfo.percentage)}% {t('utilized')}. {t('Remaining')}: {formatCurrency(budgetInfo.remaining)}
+                {budgetInfo.status === 'loading' ? t('Loading budget data...') :
+                 budgetInfo.status === 'no-budget' ? t('Set up your first budget to track spending') :
+                 `${Math.round(budgetInfo.percentage)}% ${t('utilized')}. ${t('Remaining')}: ${formatCurrency(budgetInfo.remaining)}`}
               </p>
             </div>
             <div className={`p-3 rounded-lg ${
