@@ -129,9 +129,9 @@ export default function AuthPage() {
             <TabsContent value="sign-up" className="space-y-4">
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
                 <SignUp 
-                  routing="hash"
-                  fallbackRedirectUrl={dashboardUrl}
-                  forceRedirectUrl={dashboardUrl}
+                  routing="virtual"
+                  redirectUrl={dashboardUrl}
+                  afterSignUpUrl={dashboardUrl}
                   signInUrl="#sign-in"
                   appearance={{
                     elements: {
@@ -172,9 +172,9 @@ export default function AuthPage() {
             <TabsContent value="sign-in" className="space-y-4">
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
                 <SignIn 
-                  routing="hash"
-                  fallbackRedirectUrl={dashboardUrl}
-                  forceRedirectUrl={dashboardUrl}
+                  routing="virtual"
+                  redirectUrl={dashboardUrl}
+                  afterSignInUrl={dashboardUrl}
                   signUpUrl="#sign-up"
                   appearance={{
                     elements: {
