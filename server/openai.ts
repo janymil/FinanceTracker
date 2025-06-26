@@ -1566,7 +1566,8 @@ export async function generateFinancialHealthScore(
       totalExpenses: number;
       netBalance: number;
     };
-  }
+  },
+  language: string = 'en-us'
 ): Promise<FinancialHealthData> {
   try {
     const { transactions, budgets, summary } = financialData;
@@ -1615,7 +1616,7 @@ export async function generateFinancialHealthScore(
       messages: [
         {
           role: "system",
-          content: `You are an expert financial health analyst. Analyze the user's financial data and provide a comprehensive health assessment.
+          content: `Respond in ${getLanguageLabel(language)}. You are an expert financial health analyst. Analyze the user's financial data and provide a comprehensive health assessment.
 
 Calculate a financial health score (0-100) based on:
 - Income vs expenses ratio

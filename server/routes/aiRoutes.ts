@@ -47,7 +47,9 @@ export function registerAIRoutes(app: Express) {
       for (let i = 0; i < limit; i++) {
         const transaction = uncategorized[i];
         try {
-          const result = await categorizeExpense(transaction.description, parseFloat(transaction.amount));
+          // Extract language from request headers or use default
+          const language = req.headers['accept-language']?.split(',')[0]?.split('-').join('-') || 'en-us';
+          const result = await categorizeExpense(transaction.description, parseFloat(transaction.amount), language);
           suggestions.push({
             id: `suggestion-${transaction.id}`,
             transactionDescription: transaction.description,
