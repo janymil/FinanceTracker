@@ -36,6 +36,11 @@ async function loadTranslations() {
           resources['sk'] = { translation: translations };
         }
         
+        console.log(`Created resource mappings for ${lang}:`, {
+          primary: !!resources[lang],
+          simplified: lang === 'en-us' ? !!resources['en'] : lang === 'es-pe' ? !!resources['es'] : !!resources['sk']
+        });
+        
         console.log(`Loaded translations for ${lang}:`, Object.keys(translations).length, 'keys');
       } else {
         console.error(`Failed to load translations for ${lang}:`, response.status);
