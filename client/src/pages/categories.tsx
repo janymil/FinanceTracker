@@ -50,6 +50,7 @@ const categoryColors = [
 ];
 
 export default function Categories() {
+  const { t } = useTranslation();
   const { isReady, user } = useClerkUserReady();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -193,7 +194,7 @@ export default function Categories() {
               </div>
               <div>
                 <h3 className="font-medium text-gray-900 dark:text-white">
-                  {category.name}
+                  {getLocalizedCategoryName(category, t)}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {category.transactionCount} transactions
