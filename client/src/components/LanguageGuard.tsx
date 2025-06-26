@@ -7,8 +7,30 @@ interface LanguageGuardProps {
   children: React.ReactNode;
 }
 
-// Helper function to get user's preferred language
-function getUserPreferredLanguage(): string {
+// Helper function to get language-prefixed path without causing page reloads
+function getLanguagePrefixedPath(currentPath: string): string | null {
+  // Check if URL has old locale-specific format and convert to simplified
+  const oldLangMatch = currentPath.match(/^\/([a-z]{2}-[a-z]{2})\//);
+  if (oldLangMatch) {
+    const oldLang = oldLangMatch[1];
+    const langMap: Record<string, string> = {
+      'en-us': 'en',
+      'es-pe': 'es',
+      'sk-sk': 'sk'
+    };
+    const newLang = langMap[oldLang];
+    if (newLang) {
+      return currentPath.replace(`/${oldLang}/`, `/${newLang}/`);
+    }
+  }
+  
+  // Check if already has simplified language prefix
+  const hasLangPrefix = /^\/([a-z]{2})\//.test(currentPath);
+  if (hasLangPrefix) {
+    return null;
+  }
+  
+  // Detect preferred language (use simplified codes)
   let preferredLang = localStorage.getItem('preferredLanguage');
   
   if (!preferredLang || !['en', 'es', 'sk'].includes(preferredLang)) {
@@ -19,56 +41,21 @@ function getUserPreferredLanguage(): string {
     const mainLangCode = browserLang.split('-')[0].toLowerCase();
     
     // Map to our supported simplified codes
-    if (mainLangCode === 'es') {
+    if (mainLangCode === 'en') {
+      preferredLang = 'en';
+    } else if (mainLangCode === 'es') {
       preferredLang = 'es';
     } else if (mainLangCode === 'sk') {
       preferredLang = 'sk';
     } else {
-      preferredLang = 'en'; // fallback for all other languages
+      preferredLang = 'en'; // Default fallback
     }
     
-    // Save the detected preference
     localStorage.setItem('preferredLanguage', preferredLang);
   }
   
-  return preferredLang;
-}
-
-// DYNAMIC helper function - works with ANY route without hardcoding
-function getLanguagePrefixedPath(currentPath: string): string | null {
-  console.log('LanguageGuard: Processing path:', currentPath);
-  
-  // Check if URL has old locale-specific format (e.g. /es-pe/anything)
-  const oldLangMatch = currentPath.match(/^\/([a-z]{2}-[a-z]{2})(.*)$/);
-  if (oldLangMatch) {
-    const oldLang = oldLangMatch[1];
-    const remainingPath = oldLangMatch[2];
-    const langMap: Record<string, string> = {
-      'en-us': 'en',
-      'es-pe': 'es', 
-      'sk-sk': 'sk'
-    };
-    const newLang = langMap[oldLang];
-    if (newLang) {
-      console.log('LanguageGuard: Converting old format:', `${oldLang} -> ${newLang}`);
-      return `/${newLang}${remainingPath}`;
-    }
-  }
-  
-  // Check if already has simplified language prefix (e.g. /es/anything or /en/ or /sk/anything)
-  const hasLangPrefix = /^\/([a-z]{2})(?:\/|$)/.test(currentPath);
-  if (hasLangPrefix) {
-    console.log('LanguageGuard: Path already has language prefix');
-    return null; // Already has language prefix, no change needed
-  }
-  
-  // Get user's preferred language
-  const preferredLang = getUserPreferredLanguage();
-  
-  // Add language prefix to ANY path (completely dynamic)
-  const newPath = currentPath === '/' ? `/${preferredLang}/` : `/${preferredLang}${currentPath}`;
-  console.log('LanguageGuard: Adding language prefix:', currentPath, '->', newPath);
-  return newPath;
+  // Return the language-prefixed URL
+  return `/${preferredLang}${currentPath}`;
 }
 
 export default function LanguageGuard({ children }: LanguageGuardProps) {
