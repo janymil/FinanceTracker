@@ -80,8 +80,9 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header for anonymous users */}
-      {!user && (
+      {user ? (
+        <Header onMenuClick={() => {}} sidebarCollapsed={false} />
+      ) : (
         <AnonymousHeader />
       )}
 

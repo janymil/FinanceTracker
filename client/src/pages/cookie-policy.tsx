@@ -5,10 +5,13 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SEO } from "@/components/SEO";
 import { AnonymousHeader } from "@/components/anonymous-header";
+import Header from "@/components/header";
+import { useUser } from "@clerk/clerk-react";
 import { useTranslation } from 'react-i18next';
 
 export default function CookiePolicy() {
   const [, setLocation] = useLocation();
+  const { user } = useUser();
   const { t } = useTranslation();
   
   useEffect(() => {
@@ -21,8 +24,11 @@ export default function CookiePolicy() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header for anonymous users */}
-      <AnonymousHeader />
+      {user ? (
+        <Header onMenuClick={() => {}} sidebarCollapsed={false} />
+      ) : (
+        <AnonymousHeader />
+      )}
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-4xl font-bold mb-8">{t("Cookie Policy")}</h1>
