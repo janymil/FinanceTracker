@@ -154,6 +154,18 @@ FinanzerPro is a comprehensive personal finance management application built wit
 - June 26, 2025: Completed deep multilingual system analysis and fixed critical inconsistencies - corrected i18n configuration fallback to use 'en' instead of 'en-us', fixed AI processor language mapping to remove regional specificity for Spanish (Spanish instead of Spanish (Peru)), and eliminated duplicate route patterns in AuthenticatedApp component. All components now consistently follow: URL routes (/es, /en, /sk) → Translation files (es-pe, en-us, sk-sk) → Date localization (es-pe, en-us, sk-sk) mapping pattern.
 - June 26, 2025: Fixed complete header multilingual support - added missing translation keys for "Redeem Code" (Canjear Código), "Add Transaction" (Agregar Transacción), "Profile & Account Configuration" (Perfil y Configuración de Cuenta), "Help & Documentation" (Ayuda y Documentación), and "Sign Out" (Cerrar Sesión) across all languages (English, Spanish, Slovak). Header now displays correctly localized text for all UI elements including buttons and dropdown menu items.
 - June 26, 2025: Fixed dashboard month localization - replaced hardcoded 'en-US' locale in formatMonth and generateMonthOptions functions with dynamic locale detection. Month names now display correctly in user's language: "junio 2025" for Spanish, "jún 2025" for Slovak, and "June 2025" for English. Added getDateLocale helper function for consistent date formatting across dashboard.
+- June 26, 2025: Fixed critical locale code formatting error - corrected uppercase locale codes to lowercase in dashboard getDateLocale function. CORRECT PATTERN: es-pe, sk-sk, en-us (lowercase with hyphen). WRONG PATTERN: es-PE, sk-SK, en-US (uppercase). This maintains consistency with project's locale mapping standards.
+
+## CRITICAL LOCALE PATTERN - ALWAYS USE LOWERCASE
+```javascript
+if (currentLang.startsWith('es')) {
+  return 'es-pe'; // Use Spanish (Peru) for all Spanish variants
+} else if (currentLang.startsWith('sk')) {
+  return 'sk-sk'; // Use Slovak
+} else {
+  return 'en-us'; // Default to English
+}
+```
 
 ## Architecture Decision: AI Cache System
 

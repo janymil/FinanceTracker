@@ -315,11 +315,11 @@ export default function Dashboard() {
     const currentLang = i18n.language;
     
     if (currentLang.startsWith('es')) {
-      return 'es-PE'; // Use Spanish (Peru) for all Spanish variants
+      return 'es-pe'; // Use Spanish (Peru) for all Spanish variants
     } else if (currentLang.startsWith('sk')) {
-      return 'sk-SK'; // Use Slovak
+      return 'sk-sk'; // Use Slovak
     } else {
-      return 'en-US'; // Default to English
+      return 'en-us'; // Default to English
     }
   };
 
