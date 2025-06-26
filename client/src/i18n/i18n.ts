@@ -1,38 +1,40 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-
-// Import translation files directly
-import enUS from '../../public/locales/en-us/translation.json';
-import esPE from '../../public/locales/es-pe/translation.json';
-import skSK from '../../public/locales/sk-sk/translation.json';
-
-const resources = {
-  'en-us': {
-    translation: enUS
-  },
-  'es-pe': {
-    translation: esPE
-  },
-  'sk-sk': {
-    translation: skSK
-  }
-};
+import HttpBackend from 'i18next-http-backend';
+import languageDetector from './languageDetector';
 
 i18n
+  .use(HttpBackend)
+  .use(languageDetector)
   .use(initReactI18next)
   .init({
-    lng: 'en-us', // Default language
     fallbackLng: 'en-us',
     debug: true,
-    
-    resources,
     
     interpolation: {
       escapeValue: false, // React already does escaping
     },
     
+    backend: {
+      loadPath: '/locales/{{lng}}/translation.json',
+    },
+    
+    detection: {
+      order: ['path', 'cookie', 'navigator'],
+      caches: ['cookie'],
+    },
+    
     // Supported languages
     supportedLngs: ['en-us', 'es-pe', 'sk-sk'],
+    
+    // Don't preload all languages
+    preload: false,
+    
+    // Load namespace synchronously
+    load: 'languageOnly',
+    
+    // Clean up language codes
+    cleanCode: true,
     
     // React specific options
     react: {
