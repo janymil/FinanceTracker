@@ -48,6 +48,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
   const { user } = useUser();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Fetch categories for edit form
   useEffect(() => {
@@ -168,9 +169,9 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
     <Card className="bg-white dark:bg-gray-800">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">Recent Transactions</CardTitle>
+          <CardTitle className="text-lg font-semibold">{t('Recent Transactions')}</CardTitle>
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            Last 5 transactions
+            {t('Last 5 transactions')}
           </span>
         </div>
       </CardHeader>
@@ -178,8 +179,8 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
         <div className="space-y-3">
           {displayTransactions.length === 0 ? (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              <p>No transactions found</p>
-              <p className="text-sm">Start by adding your first transaction</p>
+              <p>{t('No transactions found')}</p>
+              <p className="text-sm">{t('Start by adding your first transaction')}</p>
             </div>
           ) : (
             displayTransactions.map((transaction) => (
@@ -228,7 +229,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                         {transaction.isRecurring && (
                           <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 dark:border-blue-800 dark:text-blue-300">
                             <Repeat className="h-3 w-3 mr-1" />
-                            Recurring
+                            {t('Recurring')}
                           </Badge>
                         )}
                       </div>
