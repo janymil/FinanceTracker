@@ -1,13 +1,12 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import HttpBackend from 'i18next-http-backend';
-import languageDetector from './languageDetector';
 
 i18n
   .use(HttpBackend)
-  .use(languageDetector)
   .use(initReactI18next)
   .init({
+    lng: 'en-us', // Set default explicitly
     fallbackLng: 'en-us',
     debug: false,
     
@@ -17,11 +16,6 @@ i18n
     
     backend: {
       loadPath: '/locales/{{lng}}/translation.json',
-    },
-    
-    detection: {
-      order: ['path', 'cookie', 'navigator'],
-      caches: ['cookie'],
     },
     
     // Supported languages
