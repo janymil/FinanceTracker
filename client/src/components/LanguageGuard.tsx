@@ -51,28 +51,11 @@ export default function LanguageGuard() {
       return;
     }
 
-    // Load resources and change language
-    i18n.loadLanguages([lang]).then(() => {
-      return i18n.changeLanguage(lang);
-    }).then(() => {
-      // Verify translations are loaded
-      const hasTranslations = i18n.hasResourceBundle(lang, 'translation');
-      if (hasTranslations) {
-        setReady(true);
-      } else {
-        console.warn('LanguageGuard: Translations not loaded, retrying...');
-        // Retry once after a short delay
-        setTimeout(() => {
-          if (i18n.hasResourceBundle(lang, 'translation')) {
-            setReady(true);
-          } else {
-            console.error('LanguageGuard: Failed to load translations for', lang);
-            setReady(true); // Render anyway to avoid infinite loading
-          }
-        }, 200);
-      }
+    // Since resources are preloaded, just change the language
+    i18n.changeLanguage(lang).then(() => {
+      setReady(true);
     }).catch(error => {
-      console.error('LanguageGuard: Error loading/changing language:', error);
+      console.error('LanguageGuard: Error changing language:', error);
       setReady(true); // Still render to avoid infinite loading
     });
   }, [lang]);
