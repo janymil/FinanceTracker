@@ -36,6 +36,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { useUser } from "@clerk/clerk-react";
 import { AnonymousHeader } from "@/components/anonymous-header";
+import Header from "@/components/header";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -295,8 +296,10 @@ export default function Help() {
         canonical="https://finanzerpro.com/help"
       />
       <div className="min-h-screen bg-background">
-      {/* Header for anonymous users */}
-      {!user && (
+      {/* Header for all users */}
+      {user ? (
+        <Header onMenuClick={() => {}} sidebarCollapsed={false} />
+      ) : (
         <AnonymousHeader />
       )}
 
