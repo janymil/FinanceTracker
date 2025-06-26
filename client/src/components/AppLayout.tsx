@@ -42,6 +42,7 @@ export function AppLayout({ children, isPublicPage = false }: AppLayoutProps) {
               </div>
             </main>
           </div>
+          <Footer sidebarCollapsed={sidebarCollapsed} />
           <FinancialMascot />
         </div>
       );
@@ -83,6 +84,7 @@ export function AppLayout({ children, isPublicPage = false }: AppLayoutProps) {
             </div>
           </main>
         </div>
+        <Footer sidebarCollapsed={sidebarCollapsed} />
         <FinancialMascot />
       </div>
     );
