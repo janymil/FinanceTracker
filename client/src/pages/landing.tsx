@@ -99,10 +99,10 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Everything You Need to Manage Your Money
+              {t("Everything You Need to Manage Your Money")}
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300">
-              Powerful tools designed to give you complete financial control
+              {t("Powerful tools designed to give you complete financial control")}
             </p>
           </div>
 
@@ -112,11 +112,11 @@ export default function Landing() {
                 <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <DollarSign className="h-8 w-8 text-primary" />
                 </div>
-                <CardTitle>Expense Tracking</CardTitle>
+                <CardTitle>{t("Expense Tracking")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Automatically categorize and track all your expenses with detailed insights.
+                  {t("Automatically categorize and track all your expenses with detailed insights.")}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -126,11 +126,11 @@ export default function Landing() {
                 <div className="bg-green-100 dark:bg-green-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <BarChart3 className="h-8 w-8 text-success" />
                 </div>
-                <CardTitle>Budget Management</CardTitle>
+                <CardTitle>{t("Budget Management")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Set budgets by category and get alerts when you're close to limits.
+                  {t("Set budgets by category and get alerts when you're close to limits.")}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -140,11 +140,11 @@ export default function Landing() {
                 <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <TrendingUp className="h-8 w-8 text-premium" />
                 </div>
-                <CardTitle>Financial Analytics</CardTitle>
+                <CardTitle>{t("Financial Analytics")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Interactive charts and reports to understand your spending patterns.
+                  {t("Interactive charts and reports to understand your spending patterns.")}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -154,11 +154,11 @@ export default function Landing() {
                 <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Shield className="h-8 w-8 text-gray-600 dark:text-gray-300" />
                 </div>
-                <CardTitle>Secure & Private</CardTitle>
+                <CardTitle>{t("Secure & Private")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Industry-standard encryption to keep your financial data safe and private.
+                  {t("Industry-standard encryption to keep your financial data safe and private.")}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -171,19 +171,19 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-              Choose Your Perfect
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"> Financial Plan</span>
+              {t("Choose Your Perfect")}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"> {t("Financial Plan")}</span>
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-              From basic expense tracking to AI-powered financial insights, we have the right plan for every financial journey.
+              {t("From basic expense tracking to AI-powered financial insights, we have the right plan for every financial journey.")}
             </p>
           </div>
 
           <Tabs defaultValue="monthly" className="w-full">
             <div className="flex justify-center mb-8">
               <TabsList className="grid w-full max-w-md grid-cols-2">
-                <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                <TabsTrigger value="yearly">Yearly</TabsTrigger>
+                <TabsTrigger value="monthly">{t("Monthly")}</TabsTrigger>
+                <TabsTrigger value="yearly">{t("Yearly")}</TabsTrigger>
               </TabsList>
             </div>
             
@@ -196,11 +196,11 @@ export default function Landing() {
                 <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Star className="h-8 w-8 text-gray-600 dark:text-gray-300" />
                 </div>
-                <CardTitle className="text-2xl">Free</CardTitle>
+                <CardTitle className="text-2xl">{t("Free")}</CardTitle>
                 <div className="text-4xl font-bold text-gray-900 dark:text-white">
-                  $0<span className="text-lg font-normal text-gray-500">/month</span>
+                  $0<span className="text-lg font-normal text-gray-500">/{t("month")}</span>
                 </div>
-                <CardDescription>Perfect for getting started with expense tracking</CardDescription>
+                <CardDescription>{t("Perfect for getting started with expense tracking")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
