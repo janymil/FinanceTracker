@@ -74,9 +74,9 @@ loadTranslations().then(resources => {
   i18n
     .use(initReactI18next)
     .init({
-      lng: 'en-us',
-      supportedLngs: ['en-us', 'en-US', 'en', 'es-pe', 'es-PE', 'es', 'sk-sk', 'sk-SK', 'sk'],
-      fallbackLng: 'en-us',
+      lng: 'en',
+      supportedLngs: ['en', 'es', 'sk', 'en-us', 'es-pe', 'sk-sk'],
+      fallbackLng: 'en',
       debug: true,
       interpolation: { escapeValue: false },
       react: { useSuspense: false },

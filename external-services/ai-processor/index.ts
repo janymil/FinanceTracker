@@ -9,7 +9,7 @@ dotenv.config();
 function getLanguageLabel(lang: string): string {
   const languageMap: { [key: string]: string } = {
     'en-us': 'English',
-    'es-pe': 'Spanish (Peru)',
+    'es-pe': 'Spanish',
     'sk-sk': 'Slovak',
     'en': 'English',
     'es': 'Spanish',

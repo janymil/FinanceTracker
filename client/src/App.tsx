@@ -208,15 +208,14 @@ export function AuthenticatedApp() {
               <Route path="/:lang/redeem" component={RedeemPage} />
               <Route path="/:lang/profile" component={ProfilePage} />
               <Route path="/:lang/admin-analytics" component={AdminAnalytics} />
-              <Route path="/pricing" component={Pricing} />
-              <Route path="/terms-of-service" component={TermsOfService} />
-              <Route path="/privacy-policy" component={PrivacyPolicy} />
-              <Route path="/cookie-policy" component={CookiePolicy} />
-              <Route path="/contact" component={Contact} />
-              <Route path="/help" component={Help} />
-              <Route path="/redeem" component={RedeemPage} />
-              <Route path="/profile" component={ProfilePage} />
-              <Route path="/admin-analytics" component={AdminAnalytics} />
+              
+              {/* Public pages with language prefix for authenticated users */}
+              <Route path="/:lang/pricing" component={Pricing} />
+              <Route path="/:lang/terms-of-service" component={TermsOfService} />
+              <Route path="/:lang/privacy-policy" component={PrivacyPolicy} />
+              <Route path="/:lang/cookie-policy" component={CookiePolicy} />
+              <Route path="/:lang/contact" component={Contact} />
+              <Route path="/:lang/help" component={Help} />
               
               {/* Default route */}
               <Route path="/" component={Dashboard} />
