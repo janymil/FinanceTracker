@@ -73,6 +73,16 @@ root.render(
       <HelmetProvider>
         <ClerkProvider 
           publishableKey={clerkPubKey}
+          routerPush={(to) => { 
+            console.log('Clerk routerPush to:', to);
+            window.history.pushState({}, '', to); 
+            window.dispatchEvent(new PopStateEvent('popstate'));
+          }}
+          routerReplace={(to) => { 
+            console.log('Clerk routerReplace to:', to);
+            window.history.replaceState({}, '', to); 
+            window.dispatchEvent(new PopStateEvent('popstate'));
+          }}
           appearance={{
             layout: {
               logoImageUrl: '/icon.png',
