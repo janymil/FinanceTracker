@@ -809,7 +809,7 @@ export async function generateAIFinancialHealthScore(financialData: {
     type: string;
   }>;
   useAdvancedFactors?: boolean;
-}): Promise<{
+}, language: string = 'en-us'): Promise<{
   score: number;
   status: string;
   color: string;
@@ -854,6 +854,8 @@ Your analysis should consider:
 - Personalized weight adjustments based on user's situation
 
 Provide a comprehensive financial health score from 0-100 with detailed factor breakdown.
+
+Respond in ${getLanguageLabel(language)}.
 
 Respond with JSON in this format:
 {
@@ -951,7 +953,8 @@ export async function generateTrendPredictions(
     type: string;
     categoryName: string;
   }>,
-  budgets: Array<{ categoryName: string; amount: string; }>
+  budgets: Array<{ categoryName: string; amount: string; }>,
+  language: string = 'en-us'
 ): Promise<{
   categoryPredictions: TrendPrediction[];
   financialForecast: FinancialForecast;
@@ -1049,7 +1052,9 @@ Analysis Requirements:
       messages: [
         {
           role: "system",
-          content: "You are an advanced financial forecasting AI that analyzes spending patterns and predicts future financial trends with high accuracy. Use sophisticated pattern recognition and statistical analysis to provide reliable predictions."
+          content: `You are an advanced financial forecasting AI that analyzes spending patterns and predicts future financial trends with high accuracy. Use sophisticated pattern recognition and statistical analysis to provide reliable predictions.
+
+Respond in ${getLanguageLabel(language)}.`
         },
         {
           role: "user",
@@ -1105,7 +1110,7 @@ export async function generateExpensePredictions(transactions: Array<{
   type: string;
   categoryName?: string;
   recurring?: boolean;
-}>): Promise<ExpensePrediction> {
+}>, language: string = 'en-us'): Promise<ExpensePrediction> {
   try {
     // Return empty predictions for insufficient data
     if (!transactions || transactions.length < 5) {
@@ -1254,7 +1259,9 @@ ANALYSIS GUIDELINES:
       messages: [
         {
           role: "system",
-          content: "You are an advanced financial forecasting AI specializing in expense prediction analysis. You analyze spending patterns, identify trends, and generate accurate predictions based on historical transaction data. Focus on realistic, data-driven predictions with appropriate confidence levels."
+          content: `You are an advanced financial forecasting AI specializing in expense prediction analysis. You analyze spending patterns, identify trends, and generate accurate predictions based on historical transaction data. Focus on realistic, data-driven predictions with appropriate confidence levels.
+
+Respond in ${getLanguageLabel(language)}.`
         },
         {
           role: "user",
