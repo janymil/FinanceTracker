@@ -82,12 +82,21 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
       }
     }
 
+    // Map URL language codes to i18n language codes
+    const langMap: Record<string, string> = {
+      'en': 'en-us',
+      'es': 'es-pe', 
+      'sk': 'sk-sk'
+    };
+    
+    const i18nLang = langMap[lang] || 'en-us';
+
     // Change language if needed and mark ready
-    if (i18n.language !== lang) {
-      console.log('LanguageGuard: Changing language from', i18n.language, 'to', lang);
+    if (i18n.language !== i18nLang) {
+      console.log('LanguageGuard: Changing language from', i18n.language, 'to', i18nLang);
       // Save user's manual language choice
       localStorage.setItem('preferredLanguage', lang);
-      i18n.changeLanguage(lang).then(() => {
+      i18n.changeLanguage(i18nLang).then(() => {
         console.log('LanguageGuard: Language changed successfully to', lang);
         console.log('LanguageGuard: i18n language is now:', i18n.language);
         console.log('LanguageGuard: Has resources for', lang, ':', i18n.hasResourceBundle(lang, 'translation'));
