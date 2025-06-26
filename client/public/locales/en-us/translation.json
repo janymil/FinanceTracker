@@ -372,5 +372,12 @@
   "Category": "Category",
   "Recurring": "Recurring",
   "Filters": "Filters",
-  "Active": "Active"
+  "Active": "Active",
+  "Net Balance": "Net Balance",
+  "Budget Status": "Budget Status",
+  "transaction": "transaction",
+  "transactions": "transactions",
+  "total": "total",
+  "utilized": "utilized",
+  "Remaining": "Remaining"
 }

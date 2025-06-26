@@ -203,13 +203,13 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-red-700 dark:text-red-300 mb-1">
-                Total Expenses
+                {t("Total Expenses")}
               </p>
               <p className="text-2xl font-bold text-red-800 dark:text-red-200 transition-all duration-300 ease-out">
                 {formatCurrency(Math.abs(animatedValues.expenses))}
               </p>
               <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                {summary?.expenseTransactionCount || 0} transaction{(summary?.expenseTransactionCount || 0) !== 1 ? 's' : ''}
+                {summary?.expenseTransactionCount || 0} {(summary?.expenseTransactionCount || 0) === 1 ? t("transaction") : t("transactions")}
               </p>
             </div>
             <div className="bg-red-100 dark:bg-red-800/40 p-3 rounded-lg">
@@ -225,13 +225,13 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">
-                Net Balance
+                {t("Net Balance")}
               </p>
               <p className="text-2xl font-bold text-blue-800 dark:text-blue-200 transition-all duration-300 ease-out">
                 {formatCurrency(animatedValues.balance)}
               </p>
               <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                {summary?.totalTransactionCount || 0} total transaction{(summary?.totalTransactionCount || 0) !== 1 ? 's' : ''}
+                {summary?.totalTransactionCount || 0} {t("total")} {(summary?.totalTransactionCount || 0) === 1 ? t("transaction") : t("transactions")}
               </p>
             </div>
             <div className="bg-blue-100 dark:bg-blue-800/40 p-3 rounded-lg">
@@ -251,13 +251,13 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
           <div className="flex items-center justify-between">
             <div>
               <p className={`text-sm font-medium mb-1 ${budgetInfo.textColor}`}>
-                Budget Status
+                {t("Budget Status")}
               </p>
               <p className={`text-2xl font-bold ${budgetInfo.textColor}`}>
                 {budgetInfo.status}
               </p>
               <p className={`text-xs mt-1 ${budgetInfo.textColor} opacity-80`}>
-                {Math.round(budgetInfo.percentage)}% utilized. Remaining: {formatCurrency(budgetInfo.remaining)}
+                {Math.round(budgetInfo.percentage)}% {t("utilized")}. {t("Remaining")}: {formatCurrency(budgetInfo.remaining)}
               </p>
             </div>
             <div className={`p-3 rounded-lg ${
