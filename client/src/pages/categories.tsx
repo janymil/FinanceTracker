@@ -197,7 +197,7 @@ export default function Categories() {
                   {getLocalizedCategoryName(category, t)}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {category.transactionCount} transactions
+                  {category.transactionCount} {t("transactions")}
                 </p>
               </div>
             </div>
@@ -241,10 +241,10 @@ export default function Categories() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Category Management
+                {t("Category Management")}
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
-                Organize your income and expense sources
+                {t("Organize your income and expense sources")}
               </p>
             </div>
           </div>
@@ -256,13 +256,13 @@ export default function Categories() {
             <TabsList className="w-full sm:w-auto">
               <TabsTrigger value="expenses" className="flex items-center gap-2 text-xs sm:text-sm">
                 <TrendingUp className="h-4 w-4" />
-                <span className="hidden sm:inline">Expense Categories</span>
-                <span className="sm:hidden">Expenses</span>
+                <span className="hidden sm:inline">{t("Expense Categories")}</span>
+                <span className="sm:hidden">{t("Expenses")}</span>
               </TabsTrigger>
               <TabsTrigger value="income" className="flex items-center gap-2 text-xs sm:text-sm">
                 <DollarSign className="h-4 w-4" />
-                <span className="hidden sm:inline">Income Categories</span>
-                <span className="sm:hidden">Income</span>
+                <span className="hidden sm:inline">{t("Income Categories")}</span>
+                <span className="sm:hidden">{t("Income")}</span>
               </TabsTrigger>
             </TabsList>
 
