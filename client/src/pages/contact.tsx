@@ -7,7 +7,7 @@ import { Mail, MapPin, Clock, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { SEO } from "@/components/SEO";
-import { AnonymousHeader } from "@/components/anonymous-header";
+import { AppLayout } from "@/components/AppLayout";
 import { useUser } from "@clerk/clerk-react";
 
 export default function Contact() {
@@ -78,12 +78,13 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header for anonymous users */}
-      {!user && (
-        <AnonymousHeader />
-      )}
-
+    <AppLayout isPublicPage={true}>
+      <SEO 
+        title="Contact Us - FinanzerPro Support | Get Help & Send Messages"
+        description="Contact FinanzerPro support team for assistance with personal finance management, expense tracking, budgeting, and technical support. Get answers to your questions quickly."
+        keywords="finanzerpro contact, customer support, help desk, finance app support, expense tracker help, budget app assistance"
+        canonical="https://finanzerpro.com/contact"
+      />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Contact Us</h1>

@@ -35,8 +35,8 @@ export function AppLayout({ children, isPublicPage = false }: AppLayoutProps) {
               setIsCollapsed={setSidebarCollapsed}
             />
             <main className={`flex-1 transition-all duration-300 ${
-              sidebarCollapsed ? 'ml-16' : 'ml-64'
-            } lg:ml-0`}>
+              sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
+            }`}>
               <div className="p-6">
                 {children}
               </div>
@@ -76,8 +76,8 @@ export function AppLayout({ children, isPublicPage = false }: AppLayoutProps) {
             setIsCollapsed={setSidebarCollapsed}
           />
           <main className={`flex-1 transition-all duration-300 ${
-            sidebarCollapsed ? 'ml-16' : 'ml-64'
-          } lg:ml-0`}>
+            sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
+          }`}>
             <div className="p-6">
               {children}
             </div>
