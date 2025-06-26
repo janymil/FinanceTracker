@@ -2,7 +2,7 @@ import { Switch, Route, useLocation } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/hooks/useAuth";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
-import { LanguageGuard } from "@/components/LanguageGuard";
+import LanguageGuard from "@/components/LanguageGuard";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { SignedIn, SignedOut, useClerk, useUser } from "@clerk/clerk-react";
@@ -96,26 +96,7 @@ function Router() {
         </SignedOut>
 
         {/* Language-prefixed routes */}
-        <Route path="/:lang/*">
-          <LanguageGuard>
-            <SignedIn>
-              <AuthenticatedApp />
-            </SignedIn>
-            <SignedOut>
-              <Switch>
-                <Route path="/pricing" component={Pricing} />
-                <Route path="/privacy-policy" component={PrivacyPolicy} />
-                <Route path="/terms-of-service" component={TermsOfService} />
-                <Route path="/cookie-policy" component={CookiePolicy} />
-                <Route path="/contact" component={Contact} />
-                <Route path="/help" component={Help} />
-                <Route path="/auth" component={AuthPage} />
-                <Route path="/" component={Landing} />
-                <Route component={NotFoundPage} />
-              </Switch>
-            </SignedOut>
-          </LanguageGuard>
-        </Route>
+        <Route path="/:lang/*" component={LanguageGuard} />
 
         {/* Private routes for authenticated users */}
         <SignedIn>
@@ -148,10 +129,12 @@ function AppContent() {
   );
 }
 
-function AuthenticatedApp() {
+function AuthenticatedApp({ basePath, subPath }: { basePath?: string; subPath?: string }) {
   const { user: clerkUser, isLoaded } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  
+  console.log('AuthenticatedApp - received subPath:', subPath);
   
   // Use Clerk user directly for faster loading in production
   if (!isLoaded || !clerkUser) {
