@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useParams, useLocation } from 'wouter';
+import { useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
 
 // Supported languages
@@ -17,39 +17,34 @@ function isValidLocale(locale: string): locale is SupportedLocale {
   return SUPPORTED_LOCALES.includes(locale as SupportedLocale);
 }
 
+// Extract language from current URL path
+function extractLanguageFromPath(path: string): SupportedLocale | null {
+  const segments = path.split('/').filter(Boolean);
+  if (segments.length > 0) {
+    const potentialLang = segments[0];
+    if (isValidLocale(potentialLang)) {
+      return potentialLang;
+    }
+  }
+  return null;
+}
+
 export function LanguageGuard({ children }: { children: React.ReactNode }) {
-  const params = useParams();
-  const [location, setLocation] = useLocation();
+  const [location] = useLocation();
   const { i18n } = useTranslation();
   
-  const lang = params.lang as string;
-  
   useEffect(() => {
-    if (!lang) {
-      // No language in URL, redirect to default
-      const currentPath = location.replace(/^\//, '');
-      setLocation(`/en-us/${currentPath}`);
-      return;
-    }
+    const lang = extractLanguageFromPath(location);
     
-    if (!isValidLocale(lang)) {
-      // Invalid language, redirect to English
-      const pathWithoutLang = location.replace(/^\/[^\/]+/, '');
-      setLocation(`/en-us${pathWithoutLang}`);
-      return;
+    if (lang && isValidLocale(lang)) {
+      // Valid language in URL - switch to it
+      const i18nLanguage = LOCALE_MAP[lang];
+      if (i18n.language !== i18nLanguage) {
+        i18n.changeLanguage(i18nLanguage);
+      }
     }
-    
-    // Valid language, update i18next
-    const i18nLanguage = LOCALE_MAP[lang];
-    if (i18n.language !== i18nLanguage) {
-      i18n.changeLanguage(i18nLanguage);
-    }
-  }, [lang, location, setLocation, i18n]);
-  
-  // Don't render children until language is validated and set
-  if (!lang || !isValidLocale(lang)) {
-    return null;
-  }
+    // For routes without language prefix, keep current language
+  }, [location, i18n]);
   
   return <>{children}</>;
 }

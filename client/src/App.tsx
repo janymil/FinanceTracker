@@ -1,7 +1,8 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/hooks/useAuth";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
+import { LanguageGuard } from "@/components/LanguageGuard";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { SignedIn, SignedOut, useClerk, useUser } from "@clerk/clerk-react";
@@ -17,7 +18,7 @@ import Sidebar from "@/components/sidebar";
 import { Footer } from "@/components/footer";
 import { CookieBanner } from "@/components/cookie-banner";
 import { FinancialMascot } from "@/components/financial-mascot";
-import { LanguageRouter, LanguageRoute } from "@/components/LanguageRouter";
+
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 
@@ -64,28 +65,42 @@ function Router() {
   useAnalytics();
   
   return (
-    <LanguageRouter>
-      {/* Public routes for unauthenticated users */}
-      <SignedOut>
-        <Switch>
-          <LanguageRoute path="/" component={Landing} />
-          <LanguageRoute path="/pricing" component={Pricing} />
-          <LanguageRoute path="/privacy-policy" component={PrivacyPolicy} />
-          <LanguageRoute path="/terms-of-service" component={TermsOfService} />
-          <LanguageRoute path="/cookie-policy" component={CookiePolicy} />
-          <LanguageRoute path="/contact" component={Contact} />
-          <LanguageRoute path="/help" component={Help} />
-          <LanguageRoute path="/auth" component={AuthPage} />
-          <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
-          <Route component={NotFoundPage} />
-        </Switch>
-      </SignedOut>
+    <LanguageGuard>
+      <Switch>
+        {/* Public routes for unauthenticated users */}
+        <SignedOut>
+          <Switch>
+            {/* Default language routes */}
+            <Route path="/" component={Landing} />
+            <Route path="/pricing" component={Pricing} />
+            <Route path="/privacy-policy" component={PrivacyPolicy} />
+            <Route path="/terms-of-service" component={TermsOfService} />
+            <Route path="/cookie-policy" component={CookiePolicy} />
+            <Route path="/contact" component={Contact} />
+            <Route path="/help" component={Help} />
+            <Route path="/auth" component={AuthPage} />
+            
+            {/* Language-prefixed public routes */}
+            <Route path="/:lang/" component={Landing} />
+            <Route path="/:lang/pricing" component={Pricing} />
+            <Route path="/:lang/privacy-policy" component={PrivacyPolicy} />
+            <Route path="/:lang/terms-of-service" component={TermsOfService} />
+            <Route path="/:lang/cookie-policy" component={CookiePolicy} />
+            <Route path="/:lang/contact" component={Contact} />
+            <Route path="/:lang/help" component={Help} />
+            <Route path="/:lang/auth" component={AuthPage} />
+            
+            <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
+            <Route component={NotFoundPage} />
+          </Switch>
+        </SignedOut>
 
-      {/* Private routes for authenticated users */}
-      <SignedIn>
-        <AuthenticatedApp />
-      </SignedIn>
-    </LanguageRouter>
+        {/* Private routes for authenticated users */}
+        <SignedIn>
+          <AuthenticatedApp />
+        </SignedIn>
+      </Switch>
+    </LanguageGuard>
   );
 }
 
@@ -140,31 +155,56 @@ function AuthenticatedApp() {
         )}>
           <div className="p-3 sm:p-6 max-w-full overflow-x-hidden">
             <Switch>
-              <LanguageRoute path="/" component={Dashboard} />
-              <LanguageRoute path="/dashboard" component={Dashboard} />
-              <LanguageRoute path="/transactions" component={TransactionsPage} />
-              <LanguageRoute path="/income" component={IncomePage} />
-              <LanguageRoute path="/expenses" component={ExpensesPage} />
-              <LanguageRoute path="/budget" component={BudgetPage} />
-              <LanguageRoute path="/categories" component={CategoriesPage} />
-              <LanguageRoute path="/goals" component={GoalsPage} />
-              <LanguageRoute path="/collaborative-goals" component={CollaborativeGoalsPage} />
+              {/* Default language routes */}
+              <Route path="/" component={Dashboard} />
+              <Route path="/dashboard" component={Dashboard} />
+              <Route path="/transactions" component={TransactionsPage} />
+              <Route path="/income" component={IncomePage} />
+              <Route path="/expenses" component={ExpensesPage} />
+              <Route path="/budget" component={BudgetPage} />
+              <Route path="/categories" component={CategoriesPage} />
+              <Route path="/goals" component={GoalsPage} />
+              <Route path="/collaborative-goals" component={CollaborativeGoalsPage} />
               <Route path="/collaborative-goals/:id" component={CollaborativeGoalDetailPage} />
-              <Route path="/:lang/collaborative-goals/:id" component={CollaborativeGoalDetailPage} />
-              <LanguageRoute path="/calendar" component={CalendarPage} />
-              <LanguageRoute path="/trends" component={TrendsPage} />
-              <LanguageRoute path="/reports" component={ReportsPage} />
-              <LanguageRoute path="/export" component={ExportPage} />
-              <LanguageRoute path="/subscribe" component={SubscribePage} />
-              <LanguageRoute path="/pricing" component={Pricing} />
-              <LanguageRoute path="/terms-of-service" component={TermsOfService} />
-              <LanguageRoute path="/privacy-policy" component={PrivacyPolicy} />
-              <LanguageRoute path="/cookie-policy" component={CookiePolicy} />
-              <LanguageRoute path="/contact" component={Contact} />
-              <LanguageRoute path="/help" component={Help} />
-              <LanguageRoute path="/redeem" component={RedeemPage} />
-              <LanguageRoute path="/profile" component={ProfilePage} />
+              <Route path="/calendar" component={CalendarPage} />
+              <Route path="/trends" component={TrendsPage} />
+              <Route path="/reports" component={ReportsPage} />
+              <Route path="/export" component={ExportPage} />
+              <Route path="/subscribe" component={SubscribePage} />
+              <Route path="/pricing" component={Pricing} />
+              <Route path="/terms-of-service" component={TermsOfService} />
+              <Route path="/privacy-policy" component={PrivacyPolicy} />
+              <Route path="/cookie-policy" component={CookiePolicy} />
+              <Route path="/contact" component={Contact} />
+              <Route path="/help" component={Help} />
+              <Route path="/redeem" component={RedeemPage} />
+              <Route path="/profile" component={ProfilePage} />
               <Route path="/admin-analytics" component={AdminAnalytics} />
+
+              {/* Language-prefixed authenticated routes */}
+              <Route path="/:lang/dashboard" component={Dashboard} />
+              <Route path="/:lang/transactions" component={TransactionsPage} />
+              <Route path="/:lang/income" component={IncomePage} />
+              <Route path="/:lang/expenses" component={ExpensesPage} />
+              <Route path="/:lang/budget" component={BudgetPage} />
+              <Route path="/:lang/categories" component={CategoriesPage} />
+              <Route path="/:lang/goals" component={GoalsPage} />
+              <Route path="/:lang/collaborative-goals" component={CollaborativeGoalsPage} />
+              <Route path="/:lang/collaborative-goals/:id" component={CollaborativeGoalDetailPage} />
+              <Route path="/:lang/calendar" component={CalendarPage} />
+              <Route path="/:lang/trends" component={TrendsPage} />
+              <Route path="/:lang/reports" component={ReportsPage} />
+              <Route path="/:lang/export" component={ExportPage} />
+              <Route path="/:lang/subscribe" component={SubscribePage} />
+              <Route path="/:lang/pricing" component={Pricing} />
+              <Route path="/:lang/terms-of-service" component={TermsOfService} />
+              <Route path="/:lang/privacy-policy" component={PrivacyPolicy} />
+              <Route path="/:lang/cookie-policy" component={CookiePolicy} />
+              <Route path="/:lang/contact" component={Contact} />
+              <Route path="/:lang/help" component={Help} />
+              <Route path="/:lang/redeem" component={RedeemPage} />
+              <Route path="/:lang/profile" component={ProfilePage} />
+
               <Route component={NotFoundPage} />
             </Switch>
           </div>
