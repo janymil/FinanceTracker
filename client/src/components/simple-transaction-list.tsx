@@ -16,6 +16,7 @@ import ReceiptModal from "@/components/receipt-modal";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/clerk-react";
+import { useTranslation } from "react-i18next";
 
 interface Transaction {
   id: number;
