@@ -389,7 +389,7 @@ export default function Dashboard() {
                 {t("Welcome back")}, {user.firstName || t("User")}!
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
-                {t("Here's an overview of your financial situation for")} {formatMonth(selectedMonth)}
+                {t("Here's an overview of your financial situation for")} {formatMonth(selectedMonth)} {/* v2 */}
               </p>
             </div>
             <div className="flex items-center space-x-4">
