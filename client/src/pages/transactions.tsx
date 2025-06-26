@@ -321,7 +321,7 @@ export default function Transactions() {
     return matchesSearch && matchesType && matchesCategory && matchesRecurring && matchesMonth && matchesDate;
   });
 
-  const availableCategories = Array.from(new Set(transactions.map((t: Transaction) => t.categoryName).filter(Boolean)));
+  const availableCategories = Array.from(new Set(transactions.map((t: Transaction) => t.categoryName).filter(Boolean))) as string[];
 
   const handleSubmit = async () => {
     if (!newTransaction.amount || !newTransaction.description) return;
@@ -746,7 +746,7 @@ export default function Transactions() {
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             filterType={filterType}
-            onTypeChange={setFilterType}
+            onTypeChange={(value: string) => setFilterType(value as "all" | "income" | "expense")}
             filterCategory={filterCategory}
             onCategoryChange={setFilterCategory}
             filterRecurring={filterRecurring}
