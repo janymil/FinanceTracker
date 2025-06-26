@@ -400,13 +400,13 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
 
                 <div className="flex justify-end gap-2 pt-4">
                   <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancel
+                    {t("Cancel")}
                   </Button>
                   <Button 
                     onClick={handleSubmit}
                     disabled={!newTransaction.amount || !newTransaction.description}
                   >
-                    Add Transaction
+                    {t("Add Transaction")}
                   </Button>
                 </div>
               </div>
@@ -446,13 +446,13 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
           {user?.plan === 'premium' ? (
             <Badge className="bg-premium text-white hidden sm:flex">
               <Crown className="h-3 w-3 mr-1" />
-              Premium
+{t("Premium")}
             </Badge>
           ) : (
             <Link href="/subscribe">
               <Button size="sm" className="bg-premium hover:bg-premium/90 text-white hidden sm:flex">
                 <Crown className="h-4 w-4 mr-1" />
-                Upgrade
+                {t("Upgrade")}
               </Button>
             </Link>
           )}
@@ -489,27 +489,27 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
               <DropdownMenuItem asChild>
                 <Link href="/profile">
                   <User className="h-4 w-4 mr-2" />
-                  Profile & Account Configuration
+{t("Profile & Account Configuration")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/help">
                   <HelpCircle className="h-4 w-4 mr-2" />
-                  Help & Documentation
+{t("Help & Documentation")}
                 </Link>
               </DropdownMenuItem>
               {user?.plan !== 'premium' && (
                 <DropdownMenuItem asChild>
                   <Link href="/subscribe">
                     <Crown className="h-4 w-4 mr-2" />
-                    Upgrade to Premium
+{t("Upgrade to Premium")}
                   </Link>
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={async () => await signOut({ redirectUrl: '/' })}>
                 <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
+{t("Sign Out")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
