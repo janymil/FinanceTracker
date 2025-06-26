@@ -147,6 +147,7 @@ FinanzerPro is a comprehensive personal finance management application built wit
 - June 26, 2025: Completed auth page UX improvements - swapped column layout to prioritize Clerk signup/signin form first (left column on desktop, first on mobile), moved informational banner to right side with highlights. Improved mobile experience and visual organization by separating authentication forms from informational content.
 - June 26, 2025: Fixed page reload issue after login - removed redirect URLs from Clerk components and configured ClerkProvider with client-side navigation using browser history API. Authentication now uses smooth client-side transitions without full page reloads.
 - June 26, 2025: Fixed auth page language persistence - auth page now respects saved language preference from localStorage when redirecting after login, ensuring users return to their chosen language (e.g., /es/dashboard) instead of defaulting to URL language or English.
+- June 26, 2025: Centralized filter logic across transaction pages - created unified TransactionFilters component with comprehensive multilingual support, replaced duplicated filter code in transactions/income/expenses pages, added proper translation keys for all filter options (search, categories, date ranges, recurring types). Improved maintainability and consistency across application.
 
 ## Architecture Decision: AI Cache System
 
@@ -165,5 +166,6 @@ FinanzerPro is a comprehensive personal finance management application built wit
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
-Do not provide summaries after completing tasks - user explicitly requests no summaries.
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
 Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
