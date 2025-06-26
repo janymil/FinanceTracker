@@ -292,13 +292,13 @@ export default function Dashboard() {
         referenceNote: "",
       });
       toast({
-        title: "Transaction Added",
-        description: "Transaction has been created successfully",
+        title: t("Transaction Added"),
+        description: t("Transaction has been created successfully"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("Error"),
         description: error.message,
         variant: "destructive",
       });
@@ -357,10 +357,10 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Welcome back, {user.firstName || 'User'}!
+                {t("Welcome back")}, {user.firstName || t("User")}!
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
-                Here's an overview of your financial situation for {formatMonth(selectedMonth)}
+                {t("Here's an overview of your financial situation for")} {formatMonth(selectedMonth)}
               </p>
             </div>
             <div className="flex items-center space-x-4">
@@ -397,21 +397,21 @@ export default function Dashboard() {
                     }}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Transaction
+                    {t("Add Transaction")}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Add New Transaction</DialogTitle>
+                    <DialogTitle>{t("Add New Transaction")}</DialogTitle>
                     <DialogDescription>
-                      Record a new income or expense transaction
+                      {t("Record a new income or expense transaction")}
                     </DialogDescription>
                   </DialogHeader>
 
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="amount">Amount</Label>
+                        <Label htmlFor="amount">{t("Amount")}</Label>
                         <Input
                           id="amount"
                           type="number"
@@ -422,7 +422,7 @@ export default function Dashboard() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="date">Date</Label>
+                        <Label htmlFor="date">{t("Date")}</Label>
                         <Input
                           id="date"
                           type="date"
@@ -433,17 +433,17 @@ export default function Dashboard() {
                     </div>
 
                     <div>
-                      <Label htmlFor="description">Description</Label>
+                      <Label htmlFor="description">{t("Description")}</Label>
                       <Input
                         id="description"
                         value={newTransaction.description}
                         onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })}
-                        placeholder="Transaction description"
+                        placeholder={t("Transaction description")}
                       />
                     </div>
 
                     <div>
-                      <Label>Type</Label>
+                      <Label>{t("Type")}</Label>
                       <div className="flex gap-2 mt-2">
                         <Button
                           variant={newTransaction.type === "income" ? "default" : "outline"}
@@ -451,7 +451,7 @@ export default function Dashboard() {
                           onClick={() => setNewTransaction({ ...newTransaction, type: "income" })}
                         >
                           <ArrowUpRight className="h-4 w-4 mr-2" />
-                          Income
+                          {t("Income")}
                         </Button>
                         <Button
                           variant={newTransaction.type === "expense" ? "default" : "outline"}
@@ -459,16 +459,16 @@ export default function Dashboard() {
                           onClick={() => setNewTransaction({ ...newTransaction, type: "expense" })}
                         >
                           <ArrowDownRight className="h-4 w-4 mr-2" />
-                          Expense
+                          {t("Expense")}
                         </Button>
                       </div>
                     </div>
 
                     <div>
-                      <Label htmlFor="category">Category</Label>
+                      <Label htmlFor="category">{t("Category")}</Label>
                       <Select value={newTransaction.categoryId} onValueChange={(value) => setNewTransaction({ ...newTransaction, categoryId: value })}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
+                          <SelectValue placeholder={t("Select a category")} />
                         </SelectTrigger>
                         <SelectContent>
                           {Array.isArray(categories) && (categories as Category[])
