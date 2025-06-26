@@ -7,9 +7,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SEO } from "@/components/SEO";
 
 export default function AuthPage() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { user, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState("sign-up");
+
+  // Extract current language from URL to build language-aware redirect URLs
+  const currentLang = location.match(/^\/([a-z]{2})\//)?.[1] || 'en';
+  const dashboardUrl = `/${currentLang}/dashboard`;
 
   // Check URL hash to determine which tab to show
   useEffect(() => {
@@ -37,9 +41,9 @@ export default function AuthPage() {
   // Redirect if already logged in - use useEffect to prevent render loop
   useEffect(() => {
     if (isAuthenticated && user) {
-      setLocation("/");
+      setLocation(dashboardUrl);
     }
-  }, [isAuthenticated, user, setLocation]);
+  }, [isAuthenticated, user, setLocation, dashboardUrl]);
 
   return (
     <>
@@ -112,8 +116,8 @@ export default function AuthPage() {
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
                 <SignUp 
                   routing="hash"
-                  fallbackRedirectUrl="/"
-                  forceRedirectUrl="/"
+                  fallbackRedirectUrl={dashboardUrl}
+                  forceRedirectUrl={dashboardUrl}
                   signInUrl="#sign-in"
                   appearance={{
                     elements: {
@@ -155,8 +159,8 @@ export default function AuthPage() {
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
                 <SignIn 
                   routing="hash"
-                  fallbackRedirectUrl="/"
-                  forceRedirectUrl="/"
+                  fallbackRedirectUrl={dashboardUrl}
+                  forceRedirectUrl={dashboardUrl}
                   signUpUrl="#sign-up"
                   appearance={{
                     elements: {

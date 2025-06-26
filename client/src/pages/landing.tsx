@@ -10,12 +10,15 @@ import { useTheme } from "@/context/ThemeContext";
 import { useTranslation } from "react-i18next";
 
 export default function Landing() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
   
+  // Extract current language from URL to build language-aware links
+  const currentLang = location.match(/^\/([a-z]{2})\//)?.[1] || 'en';
+  
   const handleLogin = () => {
-    setLocation('/auth#sign-in');
+    setLocation(`/${currentLang}/auth#sign-in`);
   };
 
   const handleGetStarted = (plan: string) => {
@@ -23,7 +26,7 @@ export default function Landing() {
     if (plan !== 'free') {
       localStorage.setItem('selectedPlan', plan);
     }
-    setLocation('/auth#sign-up');
+    setLocation(`/${currentLang}/auth#sign-up`);
   };
 
   return (
