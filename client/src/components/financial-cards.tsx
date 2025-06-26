@@ -23,7 +23,7 @@ interface FinancialCardsProps {
 
 export default function FinancialCards({ summary, isLoading, budgetsData, selectedMonth }: FinancialCardsProps) {
   const { currency } = useCurrency();
-  const { t, ready } = useTranslation();
+  const { t } = useTranslation();
   const [animatedValues, setAnimatedValues] = useState({
     income: 0,
     expenses: 0,
@@ -154,7 +154,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
 
   const budgetInfo = getBudgetStatus();
 
-  if (isLoading || !ready) {
+  if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[...Array(4)].map((_, i) => (
@@ -181,7 +181,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-green-700 dark:text-green-300 mb-1">
-                {t('Total Income')}
+                Total Income
               </p>
               <p className="text-2xl font-bold text-green-800 dark:text-green-200 transition-all duration-300 ease-out">
                 {formatCurrency(animatedValues.income)}
@@ -203,7 +203,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-red-700 dark:text-red-300 mb-1">
-                {t('Total Expenses')}
+                Total Expenses
               </p>
               <p className="text-2xl font-bold text-red-800 dark:text-red-200 transition-all duration-300 ease-out">
                 {formatCurrency(Math.abs(animatedValues.expenses))}
