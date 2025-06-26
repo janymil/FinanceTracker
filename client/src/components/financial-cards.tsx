@@ -72,7 +72,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
   }, [summary]);
 
   const getBudgetStatus = () => {
-    if (!summary) return { status: 'Loading...', percentage: 0, remaining: 0, bgColor: 'bg-gray-50', textColor: 'text-gray-600' };
+    if (!summary) return { status: 'loading', statusText: t('Loading...'), percentage: 0, remaining: 0, bgColor: 'bg-gray-50', textColor: 'text-gray-600' };
     
 
     
@@ -80,7 +80,8 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
     if (!budgetsData) {
 
       return {
-        status: t('No Budget Set'),
+        status: 'no-budget',
+        statusText: t('No Budget Set'),
         percentage: 0,
         remaining: 0,
         bgColor: 'bg-gray-50 dark:bg-gray-900/20',
@@ -109,7 +110,8 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
     // If no budgets active for this period, show "No Budget Set" status
     if (!currentMonthBudgets || currentMonthBudgets.length === 0) {
       return {
-        status: t('No Budget Set'),
+        status: 'no-budget',
+        statusText: t('No Budget Set'),
         percentage: 0,
         remaining: 0,
         bgColor: 'bg-gray-50 dark:bg-gray-900/20',
@@ -132,21 +134,24 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
     const remaining = totalBudget - totalSpent;
 
     if (percentage <= 50) return { 
-      status: t('Healthy'), 
+      status: 'healthy', 
+      statusText: t('Healthy'),
       percentage, 
       remaining, 
       bgColor: 'bg-green-50 dark:bg-green-900/20', 
       textColor: 'text-green-700 dark:text-green-300' 
     };
     if (percentage <= 90) return { 
-      status: t('Moderate'), 
+      status: 'moderate', 
+      statusText: t('Moderate'),
       percentage, 
       remaining, 
       bgColor: 'bg-yellow-50 dark:bg-yellow-900/20', 
       textColor: 'text-yellow-700 dark:text-yellow-300' 
     };
     return { 
-      status: t('Critical'), 
+      status: 'critical', 
+      statusText: t('Critical'),
       percentage, 
       remaining, 
       bgColor: 'bg-red-50 dark:bg-red-900/20', 
@@ -253,7 +258,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
           <div className="flex items-center justify-between">
             <div>
               <p className={`text-sm font-medium mb-1 ${budgetInfo.textColor}`}>
-                {t('Budget Status') || 'Budget Status'}
+                {t('Budget Status')}
               </p>
               <p className={`text-2xl font-bold ${budgetInfo.textColor}`}>
                 {budgetInfo.status}
