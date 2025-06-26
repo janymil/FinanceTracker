@@ -26,6 +26,7 @@ import {
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -36,6 +37,7 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed }: SidebarProps) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const location = useLocation();
   const [currentPath] = location;
 
@@ -66,84 +68,84 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
 
   const menuItems = [
     {
-      title: "Dashboard",
+      title: t("Dashboard"),
       icon: LayoutDashboard,
       href: "/",
       requiredPlan: "free",
       badge: null,
     },
     {
-      title: "Transactions",
+      title: t("Transactions"),
       icon: CreditCard,
       href: "/transactions",
       requiredPlan: "free",
       badge: null,
     },
     {
-      title: "Income",
+      title: t("Income"),
       icon: TrendingUp,
       href: "/income",
       requiredPlan: "free",
       badge: null,
     },
     {
-      title: "Expenses",
+      title: t("Expenses"),
       icon: TrendingDown,
       href: "/expenses",
       requiredPlan: "free",
       badge: null,
     },
     {
-      title: "Budget",
+      title: t("Budget"),
       icon: Target,
       href: "/budget",
       requiredPlan: "standard" as const,
       badge: "Standard" as const,
     },
     {
-      title: "Categories",
+      title: t("Categories"),
       icon: CreditCard,
       href: "/categories",
       requiredPlan: "free",
       badge: null,
     },
     {
-      title: "Goals",
+      title: t("Goals"),
       icon: Crosshair,
       href: "/goals",
       requiredPlan: "standard" as const,
       badge: "Standard" as const,
     },
     {
-      title: "Collaborative Goals",
+      title: t("Collaborative Goals"),
       icon: Users,
       href: "/collaborative-goals",
       requiredPlan: "standard" as const,
       badge: "Standard" as const,
     },
     {
-      title: "Reports",
+      title: t("Reports"),
       icon: FileText,
       href: "/reports",
       requiredPlan: "free",
       badge: null,
     },
     {
-      title: "Trends",
+      title: t("Trends"),
       icon: TrendingUp,
       href: "/trends",
       requiredPlan: "premium" as const,
       badge: "Premium" as const,
     },
     {
-      title: "Calendar View",
+      title: t("Calendar View"),
       icon: Calendar,
       href: "/calendar",
       requiredPlan: "standard" as const,
       badge: "Standard" as const,
     },
     {
-      title: "Data Management",
+      title: t("Data Management"),
       icon: Download,
       href: "/export",
       requiredPlan: "premium" as const,
