@@ -23,11 +23,7 @@ interface FinancialCardsProps {
 
 export default function FinancialCards({ summary, isLoading, budgetsData, selectedMonth }: FinancialCardsProps) {
   const { currency } = useCurrency();
-  const { t, i18n } = useTranslation();
-  
-  // Debug logging
-  console.log('FinancialCards: Current language:', i18n.language);
-  console.log('FinancialCards: Translation test:', t('Total Income'));
+  const { t, ready } = useTranslation();
   const [animatedValues, setAnimatedValues] = useState({
     income: 0,
     expenses: 0,
@@ -158,7 +154,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
 
   const budgetInfo = getBudgetStatus();
 
-  if (isLoading) {
+  if (isLoading || !ready) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[...Array(4)].map((_, i) => (
