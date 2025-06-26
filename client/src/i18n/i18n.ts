@@ -20,7 +20,7 @@ i18n
     },
     
     detection: {
-      order: ['path', 'cookie', 'navigator'],
+      order: ['cookie'],
       caches: ['cookie'],
     },
     
@@ -30,11 +30,11 @@ i18n
     // Don't preload all languages
     preload: false,
     
-    // Load namespace synchronously
-    load: 'languageOnly',
+    // Load exact language codes only
+    load: 'currentOnly',
     
-    // Clean up language codes
-    cleanCode: true,
+    // Don't clean up language codes - use exact matches
+    cleanCode: false,
     
     // React specific options
     react: {
