@@ -248,7 +248,8 @@ export default function Contact() {
             </Card>
           </div>
         </div>
-      </div>
-    </div>
+      </main>
+      {!isSignedIn && <Footer />}
+    </>
   );
 }
