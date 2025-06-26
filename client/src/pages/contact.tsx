@@ -50,23 +50,17 @@ export default function Contact() {
 
       const data = await response.json();
 
-      if (data.success) {
+      if (response.ok) {
         toast({
-          title: "Message sent successfully",
-          description: "Thank you for contacting us. We'll get back to you within 24 hours.",
+          title: "Message sent successfully!",
+          description: "We'll get back to you within 24 hours.",
         });
-
-        // Reset form
         setName("");
         setEmail("");
         setSubject("");
         setMessage("");
       } else {
-        toast({
-          title: "Failed to send message",
-          description: data.error || "Please try again later.",
-          variant: "destructive",
-        });
+        throw new Error(data.error || 'Failed to send message');
       }
     } catch (error) {
       toast({
@@ -118,8 +112,8 @@ export default function Contact() {
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Your name"
                       required
+                      placeholder="Your full name"
                     />
                   </div>
                   <div>
@@ -131,8 +125,8 @@ export default function Contact() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="your@email.com"
                       required
+                      placeholder="your@email.com"
                     />
                   </div>
                 </div>
@@ -146,8 +140,8 @@ export default function Contact() {
                     type="text"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
-                    placeholder="What's this about?"
                     required
+                    placeholder="What can we help you with?"
                   />
                 </div>
 
@@ -159,61 +153,44 @@ export default function Contact() {
                     id="message"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Tell us how we can help..."
-                    rows={5}
                     required
+                    placeholder="Please describe your question or issue in detail..."
+                    rows={5}
                   />
                 </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={isSubmitting}
-                >
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </CardContent>
           </Card>
 
-          {/* Contact Information */}
+          {/* Contact Information & FAQ */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Get in touch</CardTitle>
-                <CardDescription>
-                  Here are the different ways you can reach us.
-                </CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Mail className="h-5 w-5" />
+                  Get in Touch
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Mail className="h-5 w-5 text-primary" />
+                <div className="flex items-start space-x-3">
+                  <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <p className="font-medium">Email</p>
-                    <p className="text-sm text-muted-foreground">info@finanzerpro.com</p>
+                    <p className="font-medium">Email Support</p>
+                    <p className="text-sm text-muted-foreground">support@finanzerpro.com</p>
+                    <p className="text-xs text-muted-foreground">We typically respond within 24 hours</p>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-3">
-                  <MapPin className="h-5 w-5 text-primary" />
+                <div className="flex items-start space-x-3">
+                  <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <p className="font-medium">Address</p>
-                    <p className="text-sm text-muted-foreground">
-                      NutriNova LLC<br />
-                      2105 Vista Oeste NW<br />
-                      Albuquerque, NM 87120
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <Clock className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="font-medium">Business Hours</p>
-                    <p className="text-sm text-muted-foreground">
-                      Monday - Friday: 9:00 AM - 6:00 PM (PST)<br />
-                      Saturday - Sunday: 10:00 AM - 4:00 PM (PST)
-                    </p>
+                    <p className="font-medium">Response Time</p>
+                    <p className="text-sm text-muted-foreground">Monday - Friday: Within 24 hours</p>
+                    <p className="text-sm text-muted-foreground">Weekends: Within 48 hours</p>
                   </div>
                 </div>
               </CardContent>
@@ -221,20 +198,30 @@ export default function Contact() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Frequently Asked Questions</CardTitle>
+                <CardTitle>Quick Help</CardTitle>
+                <CardDescription>
+                  Common questions and helpful resources
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="font-medium mb-2">How do I upgrade my plan?</p>
+                  <p className="font-medium mb-2">How do I get started?</p>
                   <p className="text-sm text-muted-foreground">
-                    Visit your account settings and click on "Upgrade Plan" to choose between Standard and Premium plans.
+                    Create an account and start adding transactions. Check our help documentation for detailed guides.
+                  </p>
+                </div>
+
+                <div>
+                  <p className="font-medium mb-2">What subscription plans are available?</p>
+                  <p className="text-sm text-muted-foreground">
+                    We offer Free, Standard ($4.99/month), and Premium ($9.99/month) plans with different features.
                   </p>
                 </div>
 
                 <div>
                   <p className="font-medium mb-2">Is my financial data secure?</p>
                   <p className="text-sm text-muted-foreground">
-                    Yes, we use industry-standard encryption and security measures to protect your data. Read our Privacy Policy for details.
+                    Yes, we use bank-level encryption and security measures to protect your data.
                   </p>
                 </div>
 
@@ -248,7 +235,8 @@ export default function Contact() {
             </Card>
           </div>
         </div>
-      </div>
-    </div>
+      </main>
+      {!isSignedIn && <Footer />}
+    </>
   );
 }
