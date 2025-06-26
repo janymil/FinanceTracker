@@ -21,7 +21,7 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
     console.log('LanguageGuard: Current i18n language:', i18n.language);
 
     // If no language in URL, detect and redirect
-    if (!lang || !['en-us', 'es-pe', 'sk-sk'].includes(lang)) {
+    if (!lang || !['en', 'es', 'sk'].includes(lang)) {
       console.log('LanguageGuard: No valid language in URL, redirecting...');
       detectLanguageAndRedirect();
       return;

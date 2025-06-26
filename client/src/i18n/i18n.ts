@@ -5,7 +5,12 @@ import { initReactI18next } from 'react-i18next';
 async function loadTranslations() {
   const resources: any = {};
   
-  // Load all supported languages
+  // Load all supported languages (mapping simplified codes to existing files)
+  const languageMapping = {
+    'en': 'en-us',
+    'es': 'es-pe', 
+    'sk': 'sk-sk'
+  };
   const languages = ['en-us', 'es-pe', 'sk-sk'];
   
   for (const lang of languages) {
@@ -19,7 +24,7 @@ async function loadTranslations() {
           translation: translations
         };
         
-        // Create aliases for language variants
+        // Create simplified language mappings
         if (lang === 'en-us') {
           resources['en-US'] = { translation: translations };
           resources['en'] = { translation: translations };
@@ -48,9 +53,9 @@ loadTranslations().then(resources => {
   i18n
     .use(initReactI18next)
     .init({
-      lng: 'en-us',
-      supportedLngs: ['en-us', 'en-US', 'en', 'es-pe', 'es-PE', 'es', 'sk-sk', 'sk-SK', 'sk'],
-      fallbackLng: 'en-us',
+      lng: 'en',
+      supportedLngs: ['en', 'es', 'sk', 'en-us', 'es-pe', 'sk-sk'],
+      fallbackLng: 'en',
       debug: true,
       
       resources,
