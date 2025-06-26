@@ -3,6 +3,7 @@ import { TrendingUp, TrendingDown, DollarSign, Shield } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useTranslation } from "react-i18next";
 
 interface FinancialSummary {
   totalIncome: number;
@@ -22,6 +23,7 @@ interface FinancialCardsProps {
 
 export default function FinancialCards({ summary, isLoading, budgetsData, selectedMonth }: FinancialCardsProps) {
   const { currency } = useCurrency();
+  const { t } = useTranslation();
   const [animatedValues, setAnimatedValues] = useState({
     income: 0,
     expenses: 0,
@@ -105,7 +107,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
     // If no budgets active for this period, show "No Budget Set" status
     if (!currentMonthBudgets || currentMonthBudgets.length === 0) {
       return {
-        status: 'No Budget Set',
+        status: t('No Budget Set'),
         percentage: 0,
         remaining: 0,
         bgColor: 'bg-gray-50 dark:bg-gray-900/20',
@@ -128,21 +130,21 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
     const remaining = totalBudget - totalSpent;
 
     if (percentage <= 50) return { 
-      status: 'Healthy', 
+      status: t('Healthy'), 
       percentage, 
       remaining, 
       bgColor: 'bg-green-50 dark:bg-green-900/20', 
       textColor: 'text-green-700 dark:text-green-300' 
     };
     if (percentage <= 90) return { 
-      status: 'Moderate', 
+      status: t('Moderate'), 
       percentage, 
       remaining, 
       bgColor: 'bg-yellow-50 dark:bg-yellow-900/20', 
       textColor: 'text-yellow-700 dark:text-yellow-300' 
     };
     return { 
-      status: 'Critical', 
+      status: t('Critical'), 
       percentage, 
       remaining, 
       bgColor: 'bg-red-50 dark:bg-red-900/20', 
@@ -179,13 +181,13 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-green-700 dark:text-green-300 mb-1">
-                Total Income
+                {t("Total Income")}
               </p>
               <p className="text-2xl font-bold text-green-800 dark:text-green-200 transition-all duration-300 ease-out">
                 {formatCurrency(animatedValues.income)}
               </p>
               <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                {summary?.incomeTransactionCount || 0} transaction{(summary?.incomeTransactionCount || 0) !== 1 ? 's' : ''}
+                {summary?.incomeTransactionCount || 0} {(summary?.incomeTransactionCount || 0) === 1 ? t("transaction") : t("transactions")}
               </p>
             </div>
             <div className="bg-green-100 dark:bg-green-800/40 p-3 rounded-lg">
