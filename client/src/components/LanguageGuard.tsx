@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useLocation } from 'wouter';
+import { useLocation, useRoute } from 'wouter';
 import { useTranslation } from 'react-i18next';
 
 // Supported languages
@@ -17,34 +17,34 @@ function isValidLocale(locale: string): locale is SupportedLocale {
   return SUPPORTED_LOCALES.includes(locale as SupportedLocale);
 }
 
-// Extract language from current URL path
-function extractLanguageFromPath(path: string): SupportedLocale | null {
-  const segments = path.split('/').filter(Boolean);
-  if (segments.length > 0) {
-    const potentialLang = segments[0];
-    if (isValidLocale(potentialLang)) {
-      return potentialLang;
-    }
-  }
-  return null;
-}
-
 export function LanguageGuard({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
+  const [, setLocation] = useLocation();
+  const [match, params] = useRoute('/:lang/*');
   const { i18n } = useTranslation();
   
   useEffect(() => {
-    const lang = extractLanguageFromPath(location);
-    
-    if (lang && isValidLocale(lang)) {
-      // Valid language in URL - switch to it
-      const i18nLanguage = LOCALE_MAP[lang];
-      if (i18n.language !== i18nLanguage) {
-        i18n.changeLanguage(i18nLanguage);
+    if (match && params?.lang) {
+      const lang = params.lang as string;
+      
+      if (isValidLocale(lang)) {
+        // Valid language - switch to it
+        const i18nLanguage = LOCALE_MAP[lang];
+        if (i18n.language !== i18nLanguage) {
+          i18n.changeLanguage(i18nLanguage);
+        }
+      } else {
+        // Invalid language - redirect to default
+        const currentPath = window.location.pathname.replace(`/${lang}`, '');
+        setLocation(`/en-us${currentPath}`);
+        return;
       }
     }
-    // For routes without language prefix, keep current language
-  }, [location, i18n]);
+  }, [match, params, i18n, setLocation]);
+  
+  // Only render children if we have a valid language match
+  if (!match || !params?.lang || !isValidLocale(params.lang)) {
+    return null;
+  }
   
   return <>{children}</>;
 }

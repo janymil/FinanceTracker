@@ -95,6 +95,28 @@ function Router() {
           </Switch>
         </SignedOut>
 
+        {/* Language-prefixed routes */}
+        <Route path="/:lang/*">
+          <LanguageGuard>
+            <SignedIn>
+              <AuthenticatedApp />
+            </SignedIn>
+            <SignedOut>
+              <Switch>
+                <Route path="/pricing" component={Pricing} />
+                <Route path="/privacy-policy" component={PrivacyPolicy} />
+                <Route path="/terms-of-service" component={TermsOfService} />
+                <Route path="/cookie-policy" component={CookiePolicy} />
+                <Route path="/contact" component={Contact} />
+                <Route path="/help" component={Help} />
+                <Route path="/auth" component={AuthPage} />
+                <Route path="/" component={Landing} />
+                <Route component={NotFoundPage} />
+              </Switch>
+            </SignedOut>
+          </LanguageGuard>
+        </Route>
+
         {/* Private routes for authenticated users */}
         <SignedIn>
           <AuthenticatedApp />
@@ -155,32 +177,7 @@ function AuthenticatedApp() {
         )}>
           <div className="p-3 sm:p-6 max-w-full overflow-x-hidden">
             <Switch>
-              {/* Language-prefixed routes */}
-              <Route path="/:lang/dashboard" component={Dashboard} />
-              <Route path="/:lang/transactions" component={TransactionsPage} />
-              <Route path="/:lang/income" component={IncomePage} />
-              <Route path="/:lang/expenses" component={ExpensesPage} />
-              <Route path="/:lang/budget" component={BudgetPage} />
-              <Route path="/:lang/categories" component={CategoriesPage} />
-              <Route path="/:lang/goals" component={GoalsPage} />
-              <Route path="/:lang/collaborative-goals" component={CollaborativeGoalsPage} />
-              <Route path="/:lang/collaborative-goals/:id" component={CollaborativeGoalDetailPage} />
-              <Route path="/:lang/calendar" component={CalendarPage} />
-              <Route path="/:lang/trends" component={TrendsPage} />
-              <Route path="/:lang/reports" component={ReportsPage} />
-              <Route path="/:lang/export" component={ExportPage} />
-              <Route path="/:lang/subscribe" component={SubscribePage} />
-              <Route path="/:lang/pricing" component={Pricing} />
-              <Route path="/:lang/terms-of-service" component={TermsOfService} />
-              <Route path="/:lang/privacy-policy" component={PrivacyPolicy} />
-              <Route path="/:lang/cookie-policy" component={CookiePolicy} />
-              <Route path="/:lang/contact" component={Contact} />
-              <Route path="/:lang/help" component={Help} />
-              <Route path="/:lang/redeem" component={RedeemPage} />
-              <Route path="/:lang/profile" component={ProfilePage} />
-
-              {/* Default language routes */}
-              <Route path="/" component={Dashboard} />
+              {/* Relative routes - the /:lang/ prefix is handled by LanguageGuard */}
               <Route path="/dashboard" component={Dashboard} />
               <Route path="/transactions" component={TransactionsPage} />
               <Route path="/income" component={IncomePage} />
@@ -204,6 +201,9 @@ function AuthenticatedApp() {
               <Route path="/redeem" component={RedeemPage} />
               <Route path="/profile" component={ProfilePage} />
               <Route path="/admin-analytics" component={AdminAnalytics} />
+              
+              {/* Default route */}
+              <Route path="/" component={Dashboard} />
 
               <Route component={NotFoundPage} />
             </Switch>
