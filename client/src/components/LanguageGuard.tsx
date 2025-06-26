@@ -97,15 +97,15 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
       // Save user's manual language choice
       localStorage.setItem('preferredLanguage', lang);
       i18n.changeLanguage(i18nLang).then(() => {
-        console.log('LanguageGuard: Language changed successfully to', lang);
+        console.log('LanguageGuard: Language changed successfully to', i18nLang);
         console.log('LanguageGuard: i18n language is now:', i18n.language);
-        console.log('LanguageGuard: Has resources for', lang, ':', i18n.hasResourceBundle(lang, 'translation'));
+        console.log('LanguageGuard: Has resources for', i18nLang, ':', i18n.hasResourceBundle(i18nLang, 'translation'));
         
         // Force reload resources if not available
-        if (!i18n.hasResourceBundle(lang, 'translation')) {
+        if (!i18n.hasResourceBundle(i18nLang, 'translation')) {
           console.log('LanguageGuard: Missing resources, reloading...');
-          i18n.reloadResources(lang).then(() => {
-            console.log('LanguageGuard: Resources reloaded for', lang);
+          i18n.reloadResources(i18nLang).then(() => {
+            console.log('LanguageGuard: Resources reloaded for', i18nLang);
             setReady(true);
           }).catch(error => {
             console.error('LanguageGuard: Error reloading resources:', error);
@@ -119,8 +119,8 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
         setReady(true);
       });
     } else {
-      console.log('LanguageGuard: Language already set to', lang);
-      console.log('LanguageGuard: Has resources for', lang, ':', i18n.hasResourceBundle(lang, 'translation'));
+      console.log('LanguageGuard: Language already set to', i18nLang);
+      console.log('LanguageGuard: Has resources for', i18nLang, ':', i18n.hasResourceBundle(i18nLang, 'translation'));
       setReady(true);
     }
   }, [location, i18n]);
