@@ -9,6 +9,7 @@ import { SEO } from "@/components/SEO";
 import { useCurrency } from "@/context/CurrencyContext";
 import { CurrencySetupModal } from "@/components/CurrencySetupModal";
 import { useTranslation } from "react-i18next";
+import i18n from "@/i18n/i18n";
 
 
 // Core components for immediate display
@@ -309,9 +310,24 @@ export default function Dashboard() {
     return null;
   }
 
+  // Helper function to get proper locale mapping for date formatting
+  const getDateLocale = () => {
+    const currentLang = i18n.language;
+    
+    if (currentLang.startsWith('es')) {
+      return 'es-PE'; // Use Spanish (Peru) for all Spanish variants
+    } else if (currentLang.startsWith('sk')) {
+      return 'sk-SK'; // Use Slovak
+    } else {
+      return 'en-US'; // Default to English
+    }
+  };
+
   const formatMonth = (monthStr: string) => {
     const [year, month] = monthStr.split('-');
-    return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', {
+    const locale = getDateLocale();
+    
+    return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString(locale, {
       month: 'long',
       year: 'numeric'
     });
@@ -321,13 +337,14 @@ export default function Dashboard() {
   const generateMonthOptions = () => {
     const options = [];
     const now = new Date();
+    const locale = getDateLocale();
 
     for (let i = 0; i < 12; i++) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const value = `${year}-${month}`;
-      const label = date.toLocaleDateString('en-US', {
+      const label = date.toLocaleDateString(locale, {
         month: 'long',
         year: 'numeric'
       });
