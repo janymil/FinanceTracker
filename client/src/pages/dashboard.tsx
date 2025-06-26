@@ -94,7 +94,7 @@ export default function Dashboard() {
     if (upgrade === 'success' && plan) {
       toast({
         title: t("Subscription Successful!"),
-        description: t("You've been upgraded to the {{plan}} plan. Enjoy your new features!", { plan }),
+        description: `${t("You've been upgraded to the")} ${plan} ${t("plan. Enjoy your new features!")}`,
       });
       // Clean up URL parameters
       window.history.replaceState({}, '', '/');
