@@ -14,10 +14,8 @@ import Contact from '../pages/contact';
 import Help from '../pages/help';
 import NotFoundPage from '../pages/not-found';
 
-// Import AuthenticatedApp dynamically to avoid circular imports
-import { lazy, Suspense } from 'react';
-
-const AuthenticatedApp = lazy(() => import('../App').then(module => ({ default: module.AuthenticatedApp })));
+// Import AuthenticatedApp directly now that it's exported
+import { AuthenticatedApp } from '../App';
 
 const SUPPORTED_LANGUAGES = ['en-us', 'es-pe', 'sk-sk'];
 
@@ -29,14 +27,15 @@ export default function LanguageGuard() {
   console.log('LanguageGuard - lang:', lang, 'location:', location);
 
   useEffect(() => {
-    if (SUPPORTED_LANGUAGES.includes(lang)) {
+    if (lang && SUPPORTED_LANGUAGES.includes(lang)) {
       i18n.changeLanguage(lang);
     }
   }, [lang]);
 
   // Redirect invalid lang to /en-us
-  if (!SUPPORTED_LANGUAGES.includes(lang)) {
-    return <Redirect to="/en-us/dashboard" />;
+  if (!lang || !SUPPORTED_LANGUAGES.includes(lang)) {
+    window.location.href = "/en-us/dashboard";
+    return null;
   }
 
   // Strip the lang and pass the remaining route to AuthenticatedApp
