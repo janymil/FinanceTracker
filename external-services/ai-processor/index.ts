@@ -3,8 +3,20 @@ import cors from "cors";
 import OpenAI from "openai";
 import dotenv from "dotenv";
 
-
 dotenv.config();
+
+// Language utility function
+function getLanguageLabel(lang: string): string {
+  const languageMap: { [key: string]: string } = {
+    'en-us': 'English',
+    'es-pe': 'Spanish (Peru)',
+    'sk-sk': 'Slovak',
+    'en': 'English',
+    'es': 'Spanish',
+    'sk': 'Slovak'
+  };
+  return languageMap[lang] || 'English';
+}
 
 const app = express();
 const port = parseInt(process.env.PORT || '8080', 10);
@@ -94,7 +106,7 @@ export interface FinancialHealthData {
   warnings: string[];
 }
 
-export async function categorizeExpense(description: string, amount: number): Promise<ExpenseCategorizationResult> {
+export async function categorizeExpense(description: string, amount: number, language: string = 'en-us'): Promise<ExpenseCategorizationResult> {
   try {
     // Direct OpenAI processing only
     const response = await openai.chat.completions.create({
@@ -102,7 +114,7 @@ export async function categorizeExpense(description: string, amount: number): Pr
       messages: [
         {
           role: "system",
-          content: `You are an expert financial categorization assistant. Analyze the expense description and amount to determine the most appropriate category.
+          content: `You are an expert financial categorization assistant. Respond in ${getLanguageLabel(language)}. Analyze the expense description and amount to determine the most appropriate category.
 
 Available categories:
 - Food & Dining (restaurants, groceries, takeout)
@@ -189,6 +201,7 @@ export async function generateContextualFinancialTips(data: {
     type: 'saving' | 'debt' | 'investment';
   }>;
   selectedMonth: string;
+  language?: string;
 }): Promise<{ tips: Array<{
   id: string;
   title: string;
@@ -198,7 +211,7 @@ export async function generateContextualFinancialTips(data: {
   actionable: boolean;
 }> }> {
   try {
-    const { summary, transactions, budgets, goals, selectedMonth } = data;
+    const { summary, transactions, budgets, goals, selectedMonth, language = 'en-us' } = data;
     
     // Return basic tip if no meaningful data
     if (transactions.length === 0 && summary.totalIncome === 0 && summary.totalExpenses === 0) {
@@ -545,7 +558,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
         messages: [
           {
             role: "system",
-            content: `You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
+            content: `You are an AI Financial Analyst providing premium-level insights. Respond in ${getLanguageLabel(language)}. Your analysis must demonstrate these EXACT capabilities that users pay for:
 
 1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
 2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
