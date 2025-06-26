@@ -8,7 +8,16 @@ interface CookieConsent {
 }
 
 export function cookieConsentMiddleware(req: Request, res: Response, next: NextFunction) {
-  // Get consent from cookie or header
+  // Skip cookie consent processing for API routes, static assets, and server-to-server routes
+  if (req.path.startsWith('/api/') || 
+      req.path.startsWith('/uploads/') ||
+      req.path.includes('.') || // Static files (css, js, images, etc.)
+      req.path === '/robots.txt' ||
+      req.path === '/sitemap.xml') {
+    return next();
+  }
+  
+  // Get consent from cookie or header for frontend user-facing routes only
   let consent: CookieConsent | null = null;
   
   // Try to get consent from cookie first
