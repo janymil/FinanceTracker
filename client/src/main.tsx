@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ClerkProvider } from '@clerk/clerk-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -91,32 +91,44 @@ const getUserLanguage = (): string => {
 const userLanguage = getUserLanguage();
 const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
 
+// Loading component for translations
+const TranslationLoader = () => (
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p className="text-gray-600 dark:text-gray-300">Loading translations...</p>
+    </div>
+  </div>
+);
+
 const root = createRoot(container);
 root.render(
   <StrictMode>
     <I18nextProvider i18n={i18n}>
-      <HelmetProvider>
-        <ClerkProvider 
-          publishableKey={clerkPubKey}
-          afterSignInUrl={dashboardRedirectUrl}
-          afterSignUpUrl={dashboardRedirectUrl}
-          appearance={{
-            layout: {
-              logoImageUrl: '/icon.png',
-              showOptionalFields: false,
-            },
-            variables: {
-              colorPrimary: '#3b82f6',
-            }
-          }}
-        >
-          <QueryClientProvider client={queryClient}>
-            <Router>
-              <App />
-            </Router>
-          </QueryClientProvider>
-        </ClerkProvider>
-      </HelmetProvider>
+      <Suspense fallback={<TranslationLoader />}>
+        <HelmetProvider>
+          <ClerkProvider 
+            publishableKey={clerkPubKey}
+            afterSignInUrl={dashboardRedirectUrl}
+            afterSignUpUrl={dashboardRedirectUrl}
+            appearance={{
+              layout: {
+                logoImageUrl: '/icon.png',
+                showOptionalFields: false,
+              },
+              variables: {
+                colorPrimary: '#3b82f6',
+              }
+            }}
+          >
+            <QueryClientProvider client={queryClient}>
+              <Router>
+                <App />
+              </Router>
+            </QueryClientProvider>
+          </ClerkProvider>
+        </HelmetProvider>
+      </Suspense>
     </I18nextProvider>
   </StrictMode>
 );
