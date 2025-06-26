@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, useLocation, useRouter } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/hooks/useAuth";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
@@ -65,45 +65,36 @@ function Router() {
   useAnalytics();
   
   return (
-    <LanguageGuard>
-      <Switch>
-        {/* Public routes for unauthenticated users */}
-        <SignedOut>
-          <Switch>
-            {/* Default language routes */}
-            <Route path="/" component={Landing} />
-            <Route path="/pricing" component={Pricing} />
-            <Route path="/privacy-policy" component={PrivacyPolicy} />
-            <Route path="/terms-of-service" component={TermsOfService} />
-            <Route path="/cookie-policy" component={CookiePolicy} />
-            <Route path="/contact" component={Contact} />
-            <Route path="/help" component={Help} />
-            <Route path="/auth" component={AuthPage} />
-            
-            {/* Language-prefixed public routes */}
-            <Route path="/:lang/" component={Landing} />
-            <Route path="/:lang/pricing" component={Pricing} />
-            <Route path="/:lang/privacy-policy" component={PrivacyPolicy} />
-            <Route path="/:lang/terms-of-service" component={TermsOfService} />
-            <Route path="/:lang/cookie-policy" component={CookiePolicy} />
-            <Route path="/:lang/contact" component={Contact} />
-            <Route path="/:lang/help" component={Help} />
-            <Route path="/:lang/auth" component={AuthPage} />
-            
-            <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
-            <Route component={NotFoundPage} />
-          </Switch>
-        </SignedOut>
-
-        {/* Language-prefixed routes */}
-        <Route path="/:lang/*" component={LanguageGuard} />
-
-        {/* Private routes for authenticated users */}
-        <SignedIn>
-          <AuthenticatedApp />
-        </SignedIn>
-      </Switch>
-    </LanguageGuard>
+    <Switch>
+      {/* Language-prefixed routes - these capture the :lang parameter */}
+      <Route path="/:lang/*" component={LanguageGuard} />
+      
+      {/* Default language routes - redirect to /en-us */}
+      <Route path="/" component={() => { window.location.href = "/en-us/"; return null; }} />
+      <Route path="/dashboard" component={() => { window.location.href = "/en-us/dashboard"; return null; }} />
+      <Route path="/transactions" component={() => { window.location.href = "/en-us/transactions"; return null; }} />
+      <Route path="/budgets" component={() => { window.location.href = "/en-us/budgets"; return null; }} />
+      <Route path="/goals" component={() => { window.location.href = "/en-us/goals"; return null; }} />
+      <Route path="/insights" component={() => { window.location.href = "/en-us/insights"; return null; }} />
+      <Route path="/reports" component={() => { window.location.href = "/en-us/reports"; return null; }} />
+      <Route path="/settings" component={() => { window.location.href = "/en-us/settings"; return null; }} />
+      <Route path="/profile" component={() => { window.location.href = "/en-us/profile"; return null; }} />
+      <Route path="/subscription" component={() => { window.location.href = "/en-us/subscription"; return null; }} />
+      <Route path="/backup" component={() => { window.location.href = "/en-us/backup"; return null; }} />
+      <Route path="/upload" component={() => { window.location.href = "/en-us/upload"; return null; }} />
+      <Route path="/redeem" component={() => { window.location.href = "/en-us/redeem"; return null; }} />
+      <Route path="/pricing" component={() => { window.location.href = "/en-us/pricing"; return null; }} />
+      <Route path="/privacy-policy" component={() => { window.location.href = "/en-us/privacy-policy"; return null; }} />
+      <Route path="/terms-of-service" component={() => { window.location.href = "/en-us/terms-of-service"; return null; }} />
+      <Route path="/cookie-policy" component={() => { window.location.href = "/en-us/cookie-policy"; return null; }} />
+      <Route path="/contact" component={() => { window.location.href = "/en-us/contact"; return null; }} />
+      <Route path="/help" component={() => { window.location.href = "/en-us/help"; return null; }} />
+      <Route path="/auth" component={() => { window.location.href = "/en-us/auth"; return null; }} />
+      <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
+      
+      {/* 404 page */}
+      <Route component={NotFoundPage} />
+    </Switch>
   );
 }
 
@@ -129,7 +120,7 @@ function AppContent() {
   );
 }
 
-function AuthenticatedApp({ basePath, subPath }: { basePath?: string; subPath?: string }) {
+export function AuthenticatedApp({ basePath, subPath }: { basePath?: string; subPath?: string }) {
   const { user: clerkUser, isLoaded } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

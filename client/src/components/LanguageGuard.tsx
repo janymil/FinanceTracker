@@ -2,6 +2,22 @@ import { useEffect } from 'react';
 import { useParams, useLocation } from 'wouter';
 import { Redirect } from 'wouter';
 import i18n from '../i18n/i18n';
+import { SignedIn, SignedOut } from '@clerk/clerk-react';
+import { Switch, Route } from 'wouter';
+import Landing from '../pages/landing';
+import AuthPage from '../pages/auth-page';
+import Pricing from '../pages/pricing';
+import PrivacyPolicy from '../pages/privacy-policy';
+import TermsOfService from '../pages/terms-of-service';
+import CookiePolicy from '../pages/cookie-policy';
+import Contact from '../pages/contact';
+import Help from '../pages/help';
+import NotFoundPage from '../pages/not-found';
+
+// Import AuthenticatedApp dynamically to avoid circular imports
+import { lazy, Suspense } from 'react';
+
+const AuthenticatedApp = lazy(() => import('../App').then(module => ({ default: module.AuthenticatedApp })));
 
 const SUPPORTED_LANGUAGES = ['en-us', 'es-pe', 'sk-sk'];
 
@@ -13,13 +29,13 @@ export default function LanguageGuard() {
   console.log('LanguageGuard - lang:', lang, 'location:', location);
 
   useEffect(() => {
-    if (lang && SUPPORTED_LANGUAGES.includes(lang)) {
+    if (SUPPORTED_LANGUAGES.includes(lang)) {
       i18n.changeLanguage(lang);
     }
   }, [lang]);
 
   // Redirect invalid lang to /en-us
-  if (!lang || !SUPPORTED_LANGUAGES.includes(lang)) {
+  if (!SUPPORTED_LANGUAGES.includes(lang)) {
     return <Redirect to="/en-us/dashboard" />;
   }
 
@@ -28,8 +44,26 @@ export default function LanguageGuard() {
 
   console.log('LanguageGuard - strippedPath:', strippedPath);
 
-  // For now, just return null to prevent errors - we'll need to properly implement AuthenticatedApp with props
-  return null;
+  return (
+    <>
+      <SignedIn>
+        <AuthenticatedApp basePath={`/${lang}`} subPath={strippedPath} />
+      </SignedIn>
+      <SignedOut>
+        <Switch>
+          <Route path="/pricing" component={Pricing} />
+          <Route path="/privacy-policy" component={PrivacyPolicy} />
+          <Route path="/terms-of-service" component={TermsOfService} />
+          <Route path="/cookie-policy" component={CookiePolicy} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/help" component={Help} />
+          <Route path="/auth" component={AuthPage} />
+          <Route path="/" component={Landing} />
+          <Route component={NotFoundPage} />
+        </Switch>
+      </SignedOut>
+    </>
+  );
 }
 
 // Utility function to get localized path
