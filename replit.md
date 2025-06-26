@@ -133,6 +133,7 @@ FinanzerPro is a comprehensive personal finance management application built wit
 - June 25, 2025: Cleaned up Fly.io processor - removed all cache-related code to maintain pure stateless OpenAI API processing architecture
 - June 25, 2025: Fixed mascot image persistence across logout/login sessions by preserving mascot localStorage keys during session cleanup
 - June 25, 2025: Added database persistence for AI financial tips to work across different browsers - tips now load from database cache when localStorage is empty
+- June 26, 2025: Fixed daily recommendations cache persistence issue - replaced transaction-based cache keys with date-based keys (YYYY-MM-DD format) in both frontend and backend for proper 24-hour caching
 
 ## Architecture Decision: AI Cache System
 
