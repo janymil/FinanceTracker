@@ -357,5 +357,18 @@
   "Category": "Kategória",
   "Recurring": "Opakujúce sa",
   "Filters": "Filtre",
-  "Active": "Aktívne"
+  "Active": "Aktívne",
+  "Total Income": "Celkové Príjmy",
+  "Total Expenses": "Celkové Výdavky",
+  "Net Balance": "Čistý Zostatok",
+  "Budget Status": "Stav Rozpočtu",
+  "transaction": "transakcia",
+  "transactions": "transakcie",
+  "total": "celkom",
+  "No Budget Set": "Žiadny Rozpočet",
+  "Healthy": "Zdravý",
+  "Moderate": "Mierny",
+  "Critical": "Kritický",
+  "utilized": "využité",
+  "Remaining": "Zostáva"
 }

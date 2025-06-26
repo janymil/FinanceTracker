@@ -372,5 +372,18 @@
   "Category": "Category",
   "Recurring": "Recurring",
   "Filters": "Filters",
-  "Active": "Active"
+  "Active": "Active",
+  "Total Income": "Total Income",
+  "Total Expenses": "Total Expenses",
+  "Net Balance": "Net Balance",
+  "Budget Status": "Budget Status",
+  "transaction": "transaction",
+  "transactions": "transactions",
+  "total": "total",
+  "No Budget Set": "No Budget Set",
+  "Healthy": "Healthy",
+  "Moderate": "Moderate",
+  "Critical": "Critical",
+  "utilized": "utilized",
+  "Remaining": "Remaining"
 }
