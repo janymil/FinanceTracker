@@ -325,17 +325,28 @@ export default function Dashboard() {
 
   const formatMonth = (monthStr: string) => {
     const [year, month] = monthStr.split('-');
-    const locale = getDateLocale();
-    console.log('formatMonth: locale =', locale, 'for monthStr =', monthStr);
+    const currentLang = i18n.language;
     
-    const date = new Date(parseInt(year), parseInt(month) - 1);
-    const formatted = date.toLocaleDateString(locale, {
-      month: 'long',
-      year: 'numeric'
-    });
+    const monthNames = {
+      'es': [
+        'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+      ],
+      'sk': [
+        'január', 'február', 'marec', 'apríl', 'máj', 'jún',
+        'júl', 'august', 'september', 'október', 'november', 'december'
+      ],
+      'en': [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ]
+    };
     
-    console.log('formatMonth: formatted =', formatted);
-    return formatted;
+    const langKey = currentLang.startsWith('es') ? 'es' : 
+                    currentLang.startsWith('sk') ? 'sk' : 'en';
+    
+    const monthName = monthNames[langKey][parseInt(month) - 1];
+    return `${monthName} ${year}`;
   };
 
   // Generate dynamic month options (current month + last 11 months)
