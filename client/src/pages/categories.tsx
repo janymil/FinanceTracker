@@ -12,6 +12,7 @@ import { Plus, Edit3, Trash2, TrendingUp, DollarSign } from "lucide-react";
 import { categoryIcons } from "@/lib/icons-registry";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface Category {
   id: number;
@@ -21,6 +22,20 @@ interface Category {
   type: "income" | "expense";
   transactionCount: number;
   isInUse: boolean;
+  userId?: string | null; // Add userId field to identify predefined categories
+}
+
+// Helper function to check if a category is predefined (userId is null)
+const isPredefinedCategory = (category: Category): boolean => {
+  return category.userId === null || category.userId === undefined;
+}
+
+// Helper function to get localized category name
+const getLocalizedCategoryName = (category: Category, t: (key: string) => string): string => {
+  if (isPredefinedCategory(category)) {
+    return t(category.name);
+  }
+  return category.name; // Return original name for custom categories
 }
 
 const categoryColors = [
