@@ -79,7 +79,7 @@ export default function MonthFilter({ selectedMonth, onMonthSelect, onDateRangeR
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-gray-500" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by Month</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("Filter by Month")}</span>
           </div>
           <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto">
             <Button
@@ -121,7 +121,7 @@ export default function MonthFilter({ selectedMonth, onMonthSelect, onDateRangeR
         {selectedMonth && (
           <div className="mt-2 flex items-center gap-2">
             <Badge variant="secondary" className="text-xs">
-              Filtering by: {visibleMonths.find(m => m.key === selectedMonth)?.label || selectedMonth}
+              {t("Filtering by")}: {visibleMonths.find(m => m.key === selectedMonth)?.label || selectedMonth}
             </Badge>
             <Button
               variant="ghost"
@@ -129,7 +129,7 @@ export default function MonthFilter({ selectedMonth, onMonthSelect, onDateRangeR
               onClick={() => onMonthSelect(null)}
               className="h-6 px-2 text-xs"
             >
-              Clear
+              {t("Clear")}
             </Button>
           </div>
         )}

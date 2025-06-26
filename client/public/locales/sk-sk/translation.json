@@ -325,5 +325,8 @@
   "September": "September",
   "October": "Október",
   "November": "November",
-  "December": "December"
+  "December": "December",
+  "Filter by Month": "Filtrovať podľa mesiaca",
+  "Filtering by": "Filtruje sa podľa",
+  "Clear": "Vyčistiť"
 }
