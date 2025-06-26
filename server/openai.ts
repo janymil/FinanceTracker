@@ -812,7 +812,8 @@ export async function generateExpensePredictions(
     type: string;
     categoryName?: string;
     recurring?: boolean;
-  }>
+  }>,
+  language: string = 'en-us'
 ): Promise<ExpensePrediction> {
   try {
     // Return empty predictions for insufficient data
@@ -982,7 +983,7 @@ ANALYSIS GUIDELINES:
       messages: [
         {
           role: "system",
-          content: "You are an advanced financial forecasting AI specializing in expense prediction analysis. You analyze spending patterns, identify trends, and generate accurate predictions based on historical transaction data. Focus on realistic, data-driven predictions with appropriate confidence levels."
+          content: `Respond in ${getLanguageLabel(language)}. You are an advanced financial forecasting AI specializing in expense prediction analysis. You analyze spending patterns, identify trends, and generate accurate predictions based on historical transaction data. Focus on realistic, data-driven predictions with appropriate confidence levels.`
         },
         {
           role: "user",
@@ -1060,7 +1061,8 @@ export async function generateDailyRecommendations(
       categoryName: string;
       period: string;
     }>;
-  }
+  },
+  language: string = 'en-us'
 ) {
   try {
     // Initialize UnifiedAICache with 24 hours TTL
@@ -1170,7 +1172,7 @@ Only provide recommendations and insights based on the actual financial data pro
       messages: [
         {
           role: "system",
-          content: "You are an expert financial advisor who provides personalized, actionable recommendations based on real user data. Always return valid JSON."
+          content: `Respond in ${getLanguageLabel(language)}. You are an expert financial advisor who provides personalized, actionable recommendations based on real user data. Always return valid JSON.`
         },
         {
           role: "user",
@@ -1260,7 +1262,8 @@ export async function generateContextualFinancialTips(
       type: 'saving' | 'debt' | 'investment';
     }>;
     selectedMonth: string;
-  }
+  },
+  language: string = 'en-us'
 ): Promise<{ tips: Array<{
   id: string;
   title: string;
@@ -1485,7 +1488,7 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
       messages: [
         {
           role: "system",
-          content: "You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips."
+          content: `Respond in ${getLanguageLabel(language)}. You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.`
         },
         {
           role: "user",
