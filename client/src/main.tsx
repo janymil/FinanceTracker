@@ -9,9 +9,19 @@ import App from './App.tsx';
 import './index.css';
 import { clearStaleSession } from './utils/sessionCleanup';
 import i18n from './i18n/i18n';
-
 // Clear any stale authentication data on app startup
 clearStaleSession();
+
+// Simple browser language detection function
+function detectLanguageFromBrowser(): string {
+  const browserLang = navigator.language || 'en-US';
+  const mainLangCode = browserLang.split('-')[0].toLowerCase();
+  
+  // Map to supported language codes
+  if (mainLangCode === 'es') return 'es-pe';
+  if (mainLangCode === 'sk') return 'sk-sk';
+  return 'en-us';
+}
 
 // Get Clerk publishable key
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -66,6 +76,21 @@ const queryClient = new QueryClient({
 const container = document.getElementById('root');
 if (!container) throw new Error('Root element not found');
 
+// Get user's language preference for redirect URLs
+const getUserLanguage = (): string => {
+  const savedLanguage = localStorage.getItem('preferredLanguage');
+  const detectedLanguage = detectLanguageFromBrowser();
+  const initialLanguage = savedLanguage || detectedLanguage || 'en-us';
+  
+  // Convert to simplified language code
+  if (initialLanguage.startsWith('es')) return 'es';
+  if (initialLanguage.startsWith('sk')) return 'sk';
+  return 'en';
+};
+
+const userLanguage = getUserLanguage();
+const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
+
 const root = createRoot(container);
 root.render(
   <StrictMode>
@@ -73,8 +98,8 @@ root.render(
       <HelmetProvider>
         <ClerkProvider 
           publishableKey={clerkPubKey}
-          signInFallbackRedirectUrl="/dashboard"
-          signUpFallbackRedirectUrl="/dashboard"
+          signInFallbackRedirectUrl={dashboardRedirectUrl}
+          signUpFallbackRedirectUrl={dashboardRedirectUrl}
           appearance={{
             layout: {
               logoImageUrl: '/icon.png',
