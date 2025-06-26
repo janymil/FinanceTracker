@@ -16,21 +16,30 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
     const pathParts = location.split('/').filter(Boolean);
     const lang = pathParts[0];
 
+    console.log('LanguageGuard: URL path:', location);
+    console.log('LanguageGuard: Detected lang from URL:', lang);
+    console.log('LanguageGuard: Current i18n language:', i18n.language);
+
     // If no language in URL, detect and redirect
     if (!lang || !['en-us', 'es-pe', 'sk-sk'].includes(lang)) {
+      console.log('LanguageGuard: No valid language in URL, redirecting...');
       detectLanguageAndRedirect();
       return;
     }
 
     // Change language if needed and mark ready
     if (i18n.language !== lang) {
+      console.log('LanguageGuard: Changing language from', i18n.language, 'to', lang);
       i18n.changeLanguage(lang).then(() => {
+        console.log('LanguageGuard: Language changed successfully to', lang);
+        console.log('LanguageGuard: i18n language is now:', i18n.language);
         setReady(true);
       }).catch(error => {
         console.error('LanguageGuard: Error changing language:', error);
         setReady(true);
       });
     } else {
+      console.log('LanguageGuard: Language already set to', lang);
       setReady(true);
     }
   }, [location, i18n]);
