@@ -193,7 +193,7 @@ export default function AuthPage() {
                   Account Creation Process
                 </h4>
                 <p className="text-sm text-blue-800 dark:text-blue-200">
-                  After clicking "Sign Up", we'll create your secure account and send a verification email. This typically takes 10-15 seconds.
+                  After clicking "Sign Up", we'll create your secure account and send a verification email. This typically takes 6-8 seconds.
                 </p>
                 <div className="mt-2 flex items-center text-xs text-blue-700 dark:text-blue-300">
                   <div className="flex space-x-1">
