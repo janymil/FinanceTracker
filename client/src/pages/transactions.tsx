@@ -780,7 +780,7 @@ export default function Transactions() {
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
-                    <Label className="text-sm font-medium">Type</Label>
+                    <Label className="text-sm font-medium">{t("Type")}</Label>
                     <Select value={filterType} onValueChange={(value: any) => setFilterType(value)}>
                       <SelectTrigger className="mt-1">
                         <SelectValue />
