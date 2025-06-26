@@ -34,8 +34,6 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
         console.log('LanguageGuard: Language changed successfully to', lang);
         console.log('LanguageGuard: i18n language is now:', i18n.language);
         console.log('LanguageGuard: Has resources for', lang, ':', i18n.hasResourceBundle(lang, 'translation'));
-        console.log('LanguageGuard: Test translation Dashboard:', i18n.t('Dashboard'));
-        console.log('LanguageGuard: Test translation Transactions:', i18n.t('Transactions'));
         
         // Force reload resources if not available
         if (!i18n.hasResourceBundle(lang, 'translation')) {
