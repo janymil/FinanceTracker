@@ -256,34 +256,34 @@ export default function Landing() {
                 <div className="space-y-3">
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Everything in Free plan</span>
+                    <span>{t("Everything in Free plan")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Goals and budget management</span>
+                    <span>{t("Goals and budget management")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Interactive charts and reports</span>
+                    <span>{t("Interactive charts and reports")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>AI expense categorization</span>
+                    <span>{t("AI expense categorization")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Calendar view and reminders</span>
+                    <span>{t("Calendar view and reminders")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Unlimited transaction history</span>
+                    <span>{t("Unlimited transaction history")}</span>
                   </div>
                 </div>
                 <Button 
                   onClick={() => handleGetStarted('standard')} 
                   className="w-full mt-6 bg-blue-600 hover:bg-blue-700"
                 >
-                  Subscribe Now
+                  {t("Subscribe Now")}
                 </Button>
               </CardContent>
             </Card>
@@ -294,45 +294,45 @@ export default function Landing() {
                 <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Crown className="h-8 w-8 text-premium" />
                 </div>
-                <CardTitle className="text-2xl">Premium</CardTitle>
+                <CardTitle className="text-2xl">{t("Premium")}</CardTitle>
                 <div className="text-4xl font-bold text-premium">
-                  $9.99<span className="text-lg font-normal text-gray-500">/month</span>
+                  $9.99<span className="text-lg font-normal text-gray-500">/{t("month")}</span>
                 </div>
-                <CardDescription>Complete AI-powered financial automation</CardDescription>
+                <CardDescription>{t("Complete AI-powered financial automation")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Everything in Standard plan</span>
+                    <span>{t("Everything in Standard plan")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>AI financial tips and insights</span>
+                    <span>{t("AI financial tips and insights")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Advanced trends analysis</span>
+                    <span>{t("Advanced trends analysis")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Expense prediction</span>
+                    <span>{t("Expense prediction")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Daily personalized recommendations</span>
+                    <span>{t("Daily personalized recommendations")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Cloud data backup</span>
+                    <span>{t("Cloud data backup")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Data management (CSV, PDF)</span>
+                    <span>{t("Data management (CSV, PDF)")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Priority email support</span>
+                    <span>{t("Priority email support")}</span>
                   </div>
                 </div>
                 <Button 
@@ -340,7 +340,7 @@ export default function Landing() {
                   className="w-full mt-6 bg-premium hover:bg-premium/90"
                 >
                   <Crown className="h-4 w-4 mr-2" />
-                  Subscribe Now
+                  {t("Subscribe Now")}
                 </Button>
               </CardContent>
             </Card>
@@ -356,33 +356,33 @@ export default function Landing() {
                 <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Star className="h-8 w-8 text-gray-600 dark:text-gray-300" />
                 </div>
-                <CardTitle className="text-2xl">Free</CardTitle>
+                <CardTitle className="text-2xl">{t("Free")}</CardTitle>
                 <div className="text-4xl font-bold text-gray-900 dark:text-white">
-                  $0<span className="text-lg font-normal text-gray-500">/year</span>
+                  $0<span className="text-lg font-normal text-gray-500">/{t("year")}</span>
                 </div>
-                <CardDescription>Perfect for getting started with expense tracking</CardDescription>
+                <CardDescription>{t("Perfect for getting started with expense tracking")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Basic expense and income tracking</span>
+                    <span>{t("Basic expense and income tracking")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Manual categorization</span>
+                    <span>{t("Manual categorization")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Up to 100 transactions view</span>
+                    <span>{t("Up to 100 transactions view")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Simple financial overview</span>
+                    <span>{t("Simple financial overview")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Personalized financial tips</span>
+                    <span>{t("Personalized financial tips")}</span>
                   </div>
                 </div>
                 <Button 
@@ -390,7 +390,7 @@ export default function Landing() {
                   className="w-full mt-6" 
                   variant="outline"
                 >
-                  Get Started Free
+                  {t("Get Started Free")}
                 </Button>
               </CardContent>
             </Card>
@@ -399,21 +399,21 @@ export default function Landing() {
             <Card className="border-2 border-blue-500 relative">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <Badge className="bg-green-500 text-white px-4 py-1">
-                  Save $9.98
+                  {t("Save $9.98")}
                 </Badge>
               </div>
               <CardHeader className="text-center pb-8 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-transparent">
                 <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <TrendingUp className="h-8 w-8 text-blue-600" />
                 </div>
-                <CardTitle className="text-2xl">Standard</CardTitle>
+                <CardTitle className="text-2xl">{t("Standard")}</CardTitle>
                 <div className="text-4xl font-bold text-blue-600">
-                  $49.90<span className="text-lg font-normal text-gray-500">/year</span>
+                  $49.90<span className="text-lg font-normal text-gray-500">/{t("year")}</span>
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-300">
-                  $4.16/month • Save 2 months
+                  {t("$4.16/month • Save 2 months")}
                 </div>
-                <CardDescription>For users serious about financial management</CardDescription>
+                <CardDescription>{t("For users serious about financial management")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
