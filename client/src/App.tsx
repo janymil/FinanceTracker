@@ -71,6 +71,28 @@ function Router() {
       
       {/* Default language routes - redirect to /en-us */}
       <Route path="/" component={() => { window.location.href = "/en-us/dashboard"; return null; }} />
+      <Route path="/dashboard" component={() => { window.location.href = "/en-us/dashboard"; return null; }} />
+      <Route path="/transactions" component={() => { window.location.href = "/en-us/transactions"; return null; }} />
+      <Route path="/income" component={() => { window.location.href = "/en-us/income"; return null; }} />
+      <Route path="/expenses" component={() => { window.location.href = "/en-us/expenses"; return null; }} />
+      <Route path="/budget" component={() => { window.location.href = "/en-us/budget"; return null; }} />
+      <Route path="/categories" component={() => { window.location.href = "/en-us/categories"; return null; }} />
+      <Route path="/goals" component={() => { window.location.href = "/en-us/goals"; return null; }} />
+      <Route path="/collaborative-goals" component={() => { window.location.href = "/en-us/collaborative-goals"; return null; }} />
+      <Route path="/calendar" component={() => { window.location.href = "/en-us/calendar"; return null; }} />
+      <Route path="/trends" component={() => { window.location.href = "/en-us/trends"; return null; }} />
+      <Route path="/reports" component={() => { window.location.href = "/en-us/reports"; return null; }} />
+      <Route path="/export" component={() => { window.location.href = "/en-us/export"; return null; }} />
+      <Route path="/subscribe" component={() => { window.location.href = "/en-us/subscribe"; return null; }} />
+      <Route path="/pricing" component={() => { window.location.href = "/en-us/pricing"; return null; }} />
+      <Route path="/terms-of-service" component={() => { window.location.href = "/en-us/terms-of-service"; return null; }} />
+      <Route path="/privacy-policy" component={() => { window.location.href = "/en-us/privacy-policy"; return null; }} />
+      <Route path="/cookie-policy" component={() => { window.location.href = "/en-us/cookie-policy"; return null; }} />
+      <Route path="/contact" component={() => { window.location.href = "/en-us/contact"; return null; }} />
+      <Route path="/help" component={() => { window.location.href = "/en-us/help"; return null; }} />
+      <Route path="/redeem" component={() => { window.location.href = "/en-us/redeem"; return null; }} />
+      <Route path="/profile" component={() => { window.location.href = "/en-us/profile"; return null; }} />
+      <Route path="/admin-analytics" component={() => { window.location.href = "/en-us/admin-analytics"; return null; }} />
       <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
       
       {/* 404 page */}

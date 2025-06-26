@@ -11,13 +11,23 @@ export default function LanguageGuard() {
 
   const lang = params.lang;
 
+  console.log('LanguageGuard DEBUG:', {
+    params,
+    lang,
+    location,
+    supportedLangs: SUPPORTED_LANGS,
+    isSupported: lang && SUPPORTED_LANGS.includes(lang)
+  });
+
   useEffect(() => {
     if (lang && SUPPORTED_LANGS.includes(lang)) {
+      console.log('Setting i18n language to:', lang);
       i18n.changeLanguage(lang);
     }
   }, [lang]);
 
   if (!lang || !SUPPORTED_LANGS.includes(lang)) {
+    console.log('Invalid language, redirecting to /en-us/dashboard');
     window.location.href = '/en-us/dashboard';
     return null;
   }
