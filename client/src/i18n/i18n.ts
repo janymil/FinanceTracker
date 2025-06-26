@@ -1,10 +1,10 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// Import translation files directly
-import enTranslations from '../../public/locales/en-us/translation.json';
-import esTranslations from '../../public/locales/es-pe/translation.json';
-import skTranslations from '../../public/locales/sk-sk/translation.json';
+// Import translation files directly from src directory
+import enTranslations from '../locales/en-us/translation.json';
+import esTranslations from '../locales/es-pe/translation.json';
+import skTranslations from '../locales/sk-sk/translation.json';
 
 // Static resources object
 const resources = {
@@ -24,7 +24,7 @@ i18n
   .init({
     lng: 'en-us', // Set default explicitly
     fallbackLng: 'en-us',
-    debug: true,
+    debug: false,
     
     // Use static resources instead of HTTP backend
     resources,
