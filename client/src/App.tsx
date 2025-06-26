@@ -97,7 +97,34 @@ function Router() {
 
         {/* Private routes for authenticated users */}
         <SignedIn>
-          <AuthenticatedApp />
+          <Switch>
+            {/* Language-prefixed authenticated routes */}
+            <Route path="/:lang/dashboard" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/transactions" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/income" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/expenses" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/budget" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/categories" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/goals" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/collaborative-goals" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/collaborative-goals/:id" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/calendar" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/trends" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/reports" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/export" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/subscribe" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/pricing" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/terms-of-service" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/privacy-policy" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/cookie-policy" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/contact" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/help" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/redeem" component={() => <AuthenticatedApp />} />
+            <Route path="/:lang/profile" component={() => <AuthenticatedApp />} />
+            
+            {/* Default authenticated routes */}
+            <Route component={() => <AuthenticatedApp />} />
+          </Switch>
         </SignedIn>
       </Switch>
     </LanguageGuard>
@@ -155,13 +182,7 @@ function AuthenticatedApp() {
         )}>
           <div className="p-3 sm:p-6 max-w-full overflow-x-hidden">
             <Switch>
-              {/* Test route to debug routing */}
-              <Route path="/es-pe/dashboard">
-                {() => {
-                  console.log('Spanish dashboard route matched!');
-                  return <Dashboard />;
-                }}
-              </Route>
+              <Route path="/es-pe/dashboard" component={Dashboard} />
               
               {/* Specific language routes for exact matching */}
               <Route path="/es-pe/transactions" component={TransactionsPage} />
