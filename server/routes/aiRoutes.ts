@@ -110,8 +110,21 @@ export function registerAIRoutes(app: Express) {
         return res.status(403).json({ message: "AI financial tips require premium plan" });
       }
 
+      // Handle fetch_cached mode
+      const { mode, financialData } = req.body;
+      
+      if (mode === 'fetch_cached') {
+        // Get the most recent cached tip directly from database
+        const recentEntry = await storage.getRecentAICacheEntry(userId, 'financial-tips');
+        
+        if (recentEntry && recentEntry.output) {
+          return res.json({ tip: recentEntry.output });
+        } else {
+          return res.json({ tip: null });
+        }
+      }
+
       // Get financial data from request body (sent from frontend)
-      const { financialData } = req.body;
       
       if (!financialData || !financialData.transactions) {
         return res.status(400).json({ message: "Financial data with transactions required" });

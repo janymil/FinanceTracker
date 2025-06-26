@@ -2177,6 +2177,25 @@ export class DatabaseStorage implements IStorage {
       .onConflictDoNothing();
   }
 
+  // Get most recent AI cache entry for a user and function
+  async getRecentAICacheEntry(userId: string, functionKey: string): Promise<any> {
+    const entry = await db
+      .select()
+      .from(aiCache)
+      .where(
+        and(
+          eq(aiCache.userId, userId),
+          eq(aiCache.functionKey, functionKey),
+          eq(aiCache.isError, false),
+          gt(aiCache.expiresAt, new Date())
+        )
+      )
+      .orderBy(desc(aiCache.lastAccessed))
+      .limit(1);
+
+    return entry[0] || null;
+  }
+
   // Removed: Contextual Financial Tips operations - using unified ai_cache system
 
   // Removed: Legacy cache methods - using unified ai_cache system

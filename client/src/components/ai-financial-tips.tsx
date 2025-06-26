@@ -34,15 +34,37 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const { user } = useUser();
 
-  // Load cached tip on component mount
+  // Fetch cached AI tip from database using React Query
+  const { data: cachedTipData } = useQuery({
+    queryKey: ['ai-financial-tip', user?.id],
+    enabled: !!user?.id,
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours cache
+    queryFn: async () => {
+      const response = await apiRequest('POST', '/api/ai/tip', {
+        mode: 'fetch_cached',
+        userId: user.id
+      });
+      return response.json();
+    },
+  });
+
+  // Load cached tip from database or localStorage
   useEffect(() => {
     if (user?.id) {
-      const cachedTip = localStorage.getItem(`ai-financial-tip-${user.id}`);
-      if (cachedTip && !currentTip) {
-        setCurrentTip(cachedTip);
+      // First try database cache
+      if (cachedTipData?.tip && !currentTip) {
+        setCurrentTip(cachedTipData.tip);
+        // Also save to localStorage for immediate access
+        localStorage.setItem(`ai-financial-tip-${user.id}`, cachedTipData.tip);
+      } else {
+        // Fallback to localStorage
+        const cachedTip = localStorage.getItem(`ai-financial-tip-${user.id}`);
+        if (cachedTip && !currentTip) {
+          setCurrentTip(cachedTip);
+        }
       }
     }
-  }, [user?.id]);
+  }, [user?.id, cachedTipData]);
 
   // Save tip to localStorage whenever it changes
   useEffect(() => {
