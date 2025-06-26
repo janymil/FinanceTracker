@@ -1,90 +1,47 @@
 import { useEffect } from 'react';
-import { useParams, useLocation } from 'wouter';
-import { Redirect } from 'wouter';
-import i18n from '../i18n/i18n';
-import { SignedIn, SignedOut } from '@clerk/clerk-react';
-import { Switch, Route } from 'wouter';
-import Landing from '../pages/landing';
-import AuthPage from '../pages/auth-page';
-import Pricing from '../pages/pricing';
-import PrivacyPolicy from '../pages/privacy-policy';
-import TermsOfService from '../pages/terms-of-service';
-import CookiePolicy from '../pages/cookie-policy';
-import Contact from '../pages/contact';
-import Help from '../pages/help';
-import NotFoundPage from '../pages/not-found';
-
-// Import AuthenticatedApp directly now that it's exported
+import { useLocation, useParams, Router } from 'wouter';
 import { AuthenticatedApp } from '../App';
+import i18n from '../i18n/i18n';
 
-const SUPPORTED_LANGUAGES = ['en-us', 'es-pe', 'sk-sk'];
+const SUPPORTED_LANGS = ['en-us', 'es-pe', 'sk-sk'];
 
 export default function LanguageGuard() {
   const params = useParams();
-  const { lang } = params;
   const [location] = useLocation();
 
-  console.log('LanguageGuard - lang:', lang, 'location:', location);
+  const lang = params.lang;
 
   useEffect(() => {
-    if (lang && SUPPORTED_LANGUAGES.includes(lang)) {
+    if (lang && SUPPORTED_LANGS.includes(lang)) {
       i18n.changeLanguage(lang);
     }
   }, [lang]);
 
-  // Redirect invalid lang to /en-us
-  if (!lang || !SUPPORTED_LANGUAGES.includes(lang)) {
-    window.location.href = "/en-us/dashboard";
+  if (!lang || !SUPPORTED_LANGS.includes(lang)) {
+    window.location.href = '/en-us/dashboard';
     return null;
   }
 
-  // Strip the lang and pass the remaining route to AuthenticatedApp
-  const strippedPath = location.replace(`/${lang}`, '') || '/dashboard';
-
-  console.log('LanguageGuard - strippedPath:', strippedPath);
+  // Strip lang prefix from path so inner routes work
+  const basePath = `/${lang}`;
+  const subPath = location.replace(`${basePath}`, '') || '/dashboard';
 
   return (
-    <>
-      <SignedIn>
-        <AuthenticatedApp basePath={`/${lang}`} subPath={strippedPath} />
-      </SignedIn>
-      <SignedOut>
-        <Switch>
-          <Route path="/pricing" component={Pricing} />
-          <Route path="/privacy-policy" component={PrivacyPolicy} />
-          <Route path="/terms-of-service" component={TermsOfService} />
-          <Route path="/cookie-policy" component={CookiePolicy} />
-          <Route path="/contact" component={Contact} />
-          <Route path="/help" component={Help} />
-          <Route path="/auth" component={AuthPage} />
-          <Route path="/" component={Landing} />
-          <Route component={NotFoundPage} />
-        </Switch>
-      </SignedOut>
-    </>
+    <Router base={basePath}>
+      <AuthenticatedApp />
+    </Router>
   );
 }
 
-// Utility function to get localized path
 export function getLocalizedPath(path: string): string {
-  const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
-  
-  // Find the locale code for current language
-  const localeCode = Object.entries(LOCALE_MAP).find(
-    ([_, i18nLang]) => i18nLang === currentLanguage
-  )?.[0] || 'en-us';
-  
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `/${localeCode}${cleanPath}`;
+  const localeCode = currentLanguage || 'en-us';
+  return `/${localeCode}${path}`;
 }
 
-// Hook for language-aware navigation
 export function useLanguageNavigate() {
-  const [, setLocation] = useLocation();
-  
   return (path: string) => {
     const localizedPath = getLocalizedPath(path);
-    setLocation(localizedPath);
+    window.location.href = localizedPath;
   };
 }

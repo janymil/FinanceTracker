@@ -70,30 +70,11 @@ function Router() {
       <Route path="/:lang/*" component={LanguageGuard} />
       
       {/* Default language routes - redirect to /en-us */}
-      <Route path="/" component={() => { window.location.href = "/en-us/"; return null; }} />
-      <Route path="/dashboard" component={() => { window.location.href = "/en-us/dashboard"; return null; }} />
-      <Route path="/transactions" component={() => { window.location.href = "/en-us/transactions"; return null; }} />
-      <Route path="/budgets" component={() => { window.location.href = "/en-us/budgets"; return null; }} />
-      <Route path="/goals" component={() => { window.location.href = "/en-us/goals"; return null; }} />
-      <Route path="/insights" component={() => { window.location.href = "/en-us/insights"; return null; }} />
-      <Route path="/reports" component={() => { window.location.href = "/en-us/reports"; return null; }} />
-      <Route path="/settings" component={() => { window.location.href = "/en-us/settings"; return null; }} />
-      <Route path="/profile" component={() => { window.location.href = "/en-us/profile"; return null; }} />
-      <Route path="/subscription" component={() => { window.location.href = "/en-us/subscription"; return null; }} />
-      <Route path="/backup" component={() => { window.location.href = "/en-us/backup"; return null; }} />
-      <Route path="/upload" component={() => { window.location.href = "/en-us/upload"; return null; }} />
-      <Route path="/redeem" component={() => { window.location.href = "/en-us/redeem"; return null; }} />
-      <Route path="/pricing" component={() => { window.location.href = "/en-us/pricing"; return null; }} />
-      <Route path="/privacy-policy" component={() => { window.location.href = "/en-us/privacy-policy"; return null; }} />
-      <Route path="/terms-of-service" component={() => { window.location.href = "/en-us/terms-of-service"; return null; }} />
-      <Route path="/cookie-policy" component={() => { window.location.href = "/en-us/cookie-policy"; return null; }} />
-      <Route path="/contact" component={() => { window.location.href = "/en-us/contact"; return null; }} />
-      <Route path="/help" component={() => { window.location.href = "/en-us/help"; return null; }} />
-      <Route path="/auth" component={() => { window.location.href = "/en-us/auth"; return null; }} />
+      <Route path="/" component={() => { window.location.href = "/en-us/dashboard"; return null; }} />
       <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
       
       {/* 404 page */}
-      <Route component={NotFoundPage} />
+      <Route path="*" component={NotFoundPage} />
     </Switch>
   );
 }
@@ -120,12 +101,12 @@ function AppContent() {
   );
 }
 
-export function AuthenticatedApp({ basePath, subPath }: { basePath?: string; subPath?: string }) {
+export function AuthenticatedApp() {
   const { user: clerkUser, isLoaded } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
-  console.log('AuthenticatedApp - received subPath:', subPath);
+
   
   // Use Clerk user directly for faster loading in production
   if (!isLoaded || !clerkUser) {
