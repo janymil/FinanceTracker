@@ -275,52 +275,52 @@ export default function Categories() {
                   }}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  New Category
+                  {t("New Category")}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
-                    {editingCategory ? "Edit Category" : "Create New Category"}
+                    {editingCategory ? t("Edit Category") : t("Create New Category")}
                   </DialogTitle>
                   <DialogDescription>
-                    {editingCategory ? "Update the category details" : "Add a new category to organize your transactions"}
+                    {editingCategory ? t("Update the category details") : t("Add a new category to organize your transactions")}
                   </DialogDescription>
                 </DialogHeader>
                 
                 <div className="space-y-4 max-h-[60vh] overflow-y-auto px-1">
                   <div>
-                    <Label htmlFor="name">Category Name</Label>
+                    <Label htmlFor="name">{t("Category Name")}</Label>
                     <Input
                       id="name"
                       value={newCategory.name}
                       onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                      placeholder="Enter category name"
+                      placeholder={t("Enter category name")}
                     />
                   </div>
 
                   <div>
-                    <Label>Category Type</Label>
+                    <Label>{t("Category Type")}</Label>
                     <div className="flex gap-2 mt-2">
                       <Button
                         variant={newCategory.type === "expense" ? "default" : "outline"}
                         size="sm"
                         onClick={() => setNewCategory({ ...newCategory, type: "expense" })}
                       >
-                        Expense
+                        {t("Expense")}
                       </Button>
                       <Button
                         variant={newCategory.type === "income" ? "default" : "outline"}
                         size="sm"
                         onClick={() => setNewCategory({ ...newCategory, type: "income" })}
                       >
-                        Income
+                        {t("Income")}
                       </Button>
                     </div>
                   </div>
 
                   <div>
-                    <Label>Icon</Label>
+                    <Label>{t("Icon")}</Label>
                     <div className="grid grid-cols-4 gap-2 mt-2">
                       {(() => {
                         // Define basic icons based on category type
@@ -360,7 +360,7 @@ export default function Categories() {
                   </div>
 
                   <div>
-                    <Label>Color</Label>
+                    <Label>{t("Color")}</Label>
                     <div className="grid grid-cols-4 gap-2 mt-2">
                       {categoryColors.map((color) => (
                         <Button
@@ -385,13 +385,13 @@ export default function Categories() {
 
                   <div className="flex justify-end gap-2 pt-4">
                     <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                      Cancel
+                      {t("Cancel")}
                     </Button>
                     <Button 
                       onClick={handleSubmit}
                       disabled={!newCategory.name.trim()}
                     >
-                      {editingCategory ? "Update" : "Create"}
+                      {editingCategory ? t("Update") : t("Create")}
                     </Button>
                   </div>
                 </div>
