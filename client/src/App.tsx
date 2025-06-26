@@ -101,6 +101,8 @@ function Router() {
         
         {/* Default route - redirect to user's language/dashboard */}
         <Route path="/" component={() => { 
+          const [, setLocation] = useLocation();
+          
           // Detect user's preferred language using simplified codes
           const browserLang = navigator.language.toLowerCase();
           const supportedLangs = ['en', 'es', 'sk'];
@@ -125,7 +127,8 @@ function Router() {
             }
           }
           
-          window.location.href = `/${targetLang}/dashboard`; 
+          // Use client-side navigation instead of page reload
+          setLocation(`/${targetLang}/dashboard`); 
           return null; 
         }} />
         
