@@ -507,20 +507,6 @@ export default function Income() {
           </div>
         </div>
 
-        {/* Filters */}
-        <TransactionFilters
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          filterCategory={filterCategory}
-          onCategoryChange={setFilterCategory}
-          filterRecurring={filterRecurring}
-          onRecurringChange={setFilterRecurring}
-          dateRange={dateRange}
-          onDateRangeChange={setDateRange}
-          availableCategories={availableCategories}
-          showTypeFilter={false}
-          searchPlaceholder="Search income..."
-        />
       </div>
 
       {/* Stats Cards */}
@@ -610,6 +596,21 @@ export default function Income() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Filters */}
+      <TransactionFilters
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        filterCategory={filterCategory}
+        onCategoryChange={setFilterCategory}
+        filterRecurring={filterRecurring}
+        onRecurringChange={setFilterRecurring}
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
+        availableCategories={availableCategories}
+        showTypeFilter={false}
+        searchPlaceholder="Search income..."
+      />
 
       {/* Income List */}
       <Card>
