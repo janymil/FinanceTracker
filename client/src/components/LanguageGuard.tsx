@@ -18,9 +18,15 @@ export default function LanguageGuard() {
       return;
     }
 
+    console.log('LanguageGuard: Changing language to:', lang);
     // Change i18next language and wait for it to complete before rendering
     i18n.changeLanguage(lang).then(() => {
+      console.log('LanguageGuard: Language changed successfully to:', i18n.language);
+      console.log('LanguageGuard: Test translation Dashboard:', i18n.t('Dashboard'));
       setReady(true);
+    }).catch(error => {
+      console.error('LanguageGuard: Error changing language:', error);
+      setReady(true); // Still render to avoid infinite loading
     });
   }, [lang]);
 
