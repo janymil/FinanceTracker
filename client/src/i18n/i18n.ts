@@ -1,26 +1,23 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import HttpApi from 'i18next-http-backend';
 
-// Synchronous initialization with preloaded resources
 i18n
+  .use(HttpApi)
   .use(initReactI18next)
   .init({
-    lng: 'en-us',
+    supportedLngs: ['en-us', 'es-pe', 'sk-sk'],
     fallbackLng: 'en-us',
     debug: false,
-    
-    // Empty resources initially - will be populated by ResourceLoader
-    resources: {},
-    
-    interpolation: {
-      escapeValue: false,
+
+    backend: {
+      loadPath: '/locales/{{lng}}/translation.json',
     },
-    
-    supportedLngs: ['en-us', 'es-pe', 'sk-sk'],
-    load: 'currentOnly',
-    cleanCode: false,
-    nonExplicitSupportedLngs: false,
-    
+
+    interpolation: {
+      escapeValue: false, // React already escapes
+    },
+
     react: {
       useSuspense: false,
     },

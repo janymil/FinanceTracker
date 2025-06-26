@@ -26,7 +26,7 @@ const languageDetector = {
     }
     
     // 3. Try browser language with mapping
-    const browserLang = navigator.language || navigator.userLanguage;
+    const browserLang = navigator.language || (navigator as any).userLanguage;
     const langMap = {
       'en': 'en-us',
       'en-US': 'en-us',
@@ -66,3 +66,38 @@ const languageDetector = {
 };
 
 export default languageDetector;
+
+// Standalone function for redirecting to correct language route
+export function detectLanguageAndRedirect() {
+  const currentPath = window.location.pathname;
+  
+  // If already has language prefix, don't redirect
+  const hasLangPrefix = /^\/([a-z]{2}-[a-z]{2})\//.test(currentPath);
+  if (hasLangPrefix) {
+    return;
+  }
+  
+  // Detect preferred language
+  let preferredLang = localStorage.getItem('preferredLanguage');
+  
+  if (!preferredLang || !['en-us', 'es-pe', 'sk-sk'].includes(preferredLang)) {
+    // Try browser language mapping
+    const browserLang = navigator.language || navigator.userLanguage || 'en-US';
+    const langMap: Record<string, string> = {
+      'en': 'en-us',
+      'en-US': 'en-us',
+      'es': 'es-pe', 
+      'es-PE': 'es-pe',
+      'es-ES': 'es-pe',
+      'sk': 'sk-sk',
+      'sk-SK': 'sk-sk'
+    };
+    
+    preferredLang = langMap[browserLang] || 'en-us';
+    localStorage.setItem('preferredLanguage', preferredLang);
+  }
+  
+  // Redirect to language-prefixed URL
+  const newPath = `/${preferredLang}${currentPath}`;
+  window.location.replace(newPath);
+}

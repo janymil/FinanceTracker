@@ -1,94 +1,50 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useParams, Router } from 'wouter';
-import { AuthenticatedApp } from '../App';
-import i18n from '../i18n/i18n';
+import { useLocation } from 'wouter';
+import { useTranslation } from 'react-i18next';
+import { detectLanguageAndRedirect } from '../i18n/languageDetector.ts';
 
-const SUPPORTED_LANGS = ['en-us', 'es-pe', 'sk-sk'];
+interface LanguageGuardProps {
+  children: React.ReactNode;
+}
 
-export default function LanguageGuard() {
-  const params = useParams();
+export default function LanguageGuard({ children }: LanguageGuardProps) {
   const [location] = useLocation();
+  const { i18n } = useTranslation();
   const [ready, setReady] = useState(false);
 
-  const lang = params.lang;
-
   useEffect(() => {
-    if (!lang || !SUPPORTED_LANGS.includes(lang)) {
-      // Intelligent language detection and redirect
-      const detectLanguageAndRedirect = () => {
-        // 1. Try saved user preference first
-        const savedLang = localStorage.getItem('preferred-language');
-        if (savedLang && SUPPORTED_LANGS.includes(savedLang)) {
-          window.location.href = `/${savedLang}/dashboard`;
-          return;
-        }
-        
-        // 2. Try browser language mapping
-        const browserLang = navigator.language || (navigator as any).userLanguage || 'en';
-        const langMap: Record<string, string> = {
-          'en': 'en-us',
-          'en-US': 'en-us',
-          'en-GB': 'en-us',
-          'es': 'es-pe',
-          'es-PE': 'es-pe', 
-          'es-ES': 'es-pe',
-          'es-MX': 'es-pe',
-          'sk': 'sk-sk',
-          'sk-SK': 'sk-sk'
-        };
-        
-        // Try direct mapping first, then try language prefix
-        const mappedLang = langMap[browserLang] || langMap[browserLang.split('-')[0]] || 'en-us';
-        
-        // Save the detected language as preference
-        localStorage.setItem('preferred-language', mappedLang);
-        
-        // Redirect to the detected/mapped language
-        window.location.href = `/${mappedLang}/dashboard`;
-      };
-      
+    const pathParts = location.split('/').filter(Boolean);
+    const lang = pathParts[0];
+
+    // If no language in URL, detect and redirect
+    if (!lang || !['en-us', 'es-pe', 'sk-sk'].includes(lang)) {
       detectLanguageAndRedirect();
       return;
     }
 
-    // Since resources are preloaded, just change the language
-    i18n.changeLanguage(lang).then(() => {
+    // Change language if needed and mark ready
+    if (i18n.language !== lang) {
+      i18n.changeLanguage(lang).then(() => {
+        setReady(true);
+      }).catch(error => {
+        console.error('LanguageGuard: Error changing language:', error);
+        setReady(true);
+      });
+    } else {
       setReady(true);
-    }).catch(error => {
-      console.error('LanguageGuard: Error changing language:', error);
-      setReady(true); // Still render to avoid infinite loading
-    });
-  }, [lang]);
+    }
+  }, [location, i18n]);
 
-  if (!lang || !SUPPORTED_LANGS.includes(lang)) {
-    return null;
-  }
-
-  // Wait for translations to load before rendering
   if (!ready) {
-    return <div>Loading translations...</div>;
+    return <div>Loading...</div>;
   }
 
-  // Strip lang prefix from path so inner routes work
-  const basePath = `/${lang}`;
-  const subPath = location.replace(`${basePath}`, '') || '/dashboard';
+  return <>{children}</>;
 
-  return (
-    <Router base={basePath}>
-      <AuthenticatedApp />
-    </Router>
-  );
 }
 
+// Helper function for other components
 export function getLocalizedPath(path: string): string {
-  const currentLanguage = i18n.language;
-  const localeCode = currentLanguage || 'en-us';
-  return `/${localeCode}${path}`;
-}
-
-export function useLanguageNavigate() {
-  return (path: string) => {
-    const localizedPath = getLocalizedPath(path);
-    window.location.href = localizedPath;
-  };
+  const currentLang = localStorage.getItem('preferredLanguage') || 'en-us';
+  return `/${currentLang}${path.startsWith('/') ? path : `/${path}`}`;
 }
