@@ -35,7 +35,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { useUser } from "@clerk/clerk-react";
-import { AnonymousHeader } from "@/components/anonymous-header";
+import { AppLayout } from "@/components/AppLayout";
 
 interface ChatMessage {
   role: "user" | "assistant";
