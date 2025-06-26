@@ -155,143 +155,29 @@ function AuthenticatedApp() {
         )}>
           <div className="p-3 sm:p-6 max-w-full overflow-x-hidden">
             <Switch>
-              {/* Language-prefixed routes using dynamic :lang parameter */}
-              <Route path="/:lang/dashboard">
-                {(params) => {
-                  // Validate language parameter
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  if (validLangs.includes(params.lang)) {
-                    return <Dashboard />;
-                  }
-                  return <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/transactions">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <TransactionsPage /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/income">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <IncomePage /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/expenses">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <ExpensesPage /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/budget">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <BudgetPage /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/categories">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <CategoriesPage /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/goals">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <GoalsPage /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/collaborative-goals">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <CollaborativeGoalsPage /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/collaborative-goals/:id">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <CollaborativeGoalDetailPage /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/calendar">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <CalendarPage /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/trends">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <TrendsPage /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/reports">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <ReportsPage /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/export">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <ExportPage /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/subscribe">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <SubscribePage /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/pricing">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <Pricing /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/terms-of-service">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <TermsOfService /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/privacy-policy">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <PrivacyPolicy /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/cookie-policy">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <CookiePolicy /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/contact">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <Contact /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/help">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <Help /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/redeem">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <RedeemPage /> : <NotFoundPage />;
-                }}
-              </Route>
-              <Route path="/:lang/profile">
-                {(params) => {
-                  const validLangs = ['en-us', 'es-pe', 'sk-sk'];
-                  return validLangs.includes(params.lang) ? <ProfilePage /> : <NotFoundPage />;
-                }}
-              </Route>
+              {/* Language-prefixed routes */}
+              <Route path="/:lang/dashboard" component={Dashboard} />
+              <Route path="/:lang/transactions" component={TransactionsPage} />
+              <Route path="/:lang/income" component={IncomePage} />
+              <Route path="/:lang/expenses" component={ExpensesPage} />
+              <Route path="/:lang/budget" component={BudgetPage} />
+              <Route path="/:lang/categories" component={CategoriesPage} />
+              <Route path="/:lang/goals" component={GoalsPage} />
+              <Route path="/:lang/collaborative-goals" component={CollaborativeGoalsPage} />
+              <Route path="/:lang/collaborative-goals/:id" component={CollaborativeGoalDetailPage} />
+              <Route path="/:lang/calendar" component={CalendarPage} />
+              <Route path="/:lang/trends" component={TrendsPage} />
+              <Route path="/:lang/reports" component={ReportsPage} />
+              <Route path="/:lang/export" component={ExportPage} />
+              <Route path="/:lang/subscribe" component={SubscribePage} />
+              <Route path="/:lang/pricing" component={Pricing} />
+              <Route path="/:lang/terms-of-service" component={TermsOfService} />
+              <Route path="/:lang/privacy-policy" component={PrivacyPolicy} />
+              <Route path="/:lang/cookie-policy" component={CookiePolicy} />
+              <Route path="/:lang/contact" component={Contact} />
+              <Route path="/:lang/help" component={Help} />
+              <Route path="/:lang/redeem" component={RedeemPage} />
+              <Route path="/:lang/profile" component={ProfilePage} />
 
               {/* Default language routes */}
               <Route path="/" component={Dashboard} />
