@@ -65,66 +65,68 @@ function Router() {
   useAnalytics();
   
   return (
-    <Switch>
-      {/* Language-prefixed routes - these capture the :lang parameter */}
-      <Route path="/:lang/*" component={LanguageGuard} />
-      
-      {/* Default route - redirect to user's language/dashboard */}
-      <Route path="/" component={() => { 
-        // Detect user's preferred language
-        const browserLang = navigator.language.toLowerCase();
-        const supportedLangs = ['en-us', 'es-pe', 'sk-sk'];
+    <LanguageGuard>
+      <Switch>
+        {/* Language-prefixed routes */}
+        <Route path="/:lang/dashboard" component={AuthenticatedApp} />
+        <Route path="/:lang/transactions" component={AuthenticatedApp} />
+        <Route path="/:lang/income" component={AuthenticatedApp} />
+        <Route path="/:lang/expenses" component={AuthenticatedApp} />
+        <Route path="/:lang/budget" component={AuthenticatedApp} />
+        <Route path="/:lang/categories" component={AuthenticatedApp} />
+        <Route path="/:lang/goals" component={AuthenticatedApp} />
+        <Route path="/:lang/collaborative-goals" component={AuthenticatedApp} />
+        <Route path="/:lang/collaborative-goals/:id" component={AuthenticatedApp} />
+        <Route path="/:lang/trends" component={AuthenticatedApp} />
+        <Route path="/:lang/calendar" component={AuthenticatedApp} />
+        <Route path="/:lang/reports" component={AuthenticatedApp} />
+        <Route path="/:lang/export" component={AuthenticatedApp} />
+        <Route path="/:lang/profile" component={AuthenticatedApp} />
+        <Route path="/:lang/subscribe" component={AuthenticatedApp} />
+        <Route path="/:lang/redeem" component={AuthenticatedApp} />
+        <Route path="/:lang/admin/analytics" component={AuthenticatedApp} />
         
-        // Check localStorage for previous language choice
-        const savedLang = localStorage.getItem('i18nextLng');
+        {/* Public pages with language prefix */}
+        <Route path="/:lang/pricing" component={Pricing} />
+        <Route path="/:lang/terms" component={TermsOfService} />
+        <Route path="/:lang/privacy" component={PrivacyPolicy} />
+        <Route path="/:lang/cookies" component={CookiePolicy} />
+        <Route path="/:lang/contact" component={Contact} />
+        <Route path="/:lang/help" component={Help} />
+        <Route path="/:lang/auth" component={AuthPage} />
+        <Route path="/:lang" component={Landing} />
         
-        let targetLang = 'en-us'; // fallback
+        {/* Default route - redirect to user's language/dashboard */}
+        <Route path="/" component={() => { 
+          // Detect user's preferred language
+          const browserLang = navigator.language.toLowerCase();
+          const supportedLangs = ['en-us', 'es-pe', 'sk-sk'];
+          
+          // Check localStorage for previous language choice
+          const savedLang = localStorage.getItem('preferredLanguage');
+          
+          let targetLang = 'en-us'; // fallback
+          
+          // Priority: saved language > browser language mapping > fallback
+          if (savedLang && supportedLangs.includes(savedLang)) {
+            targetLang = savedLang;
+          } else if (browserLang.startsWith('es')) {
+            targetLang = 'es-pe';
+          } else if (browserLang.startsWith('sk')) {
+            targetLang = 'sk-sk';
+          }
+          
+          window.location.href = `/${targetLang}/dashboard`; 
+          return null; 
+        }} />
         
-        // Priority: saved language > browser language mapping > fallback
-        if (savedLang && supportedLangs.includes(savedLang)) {
-          targetLang = savedLang;
-        } else if (browserLang.startsWith('es')) {
-          targetLang = 'es-pe';
-        } else if (browserLang.startsWith('sk')) {
-          targetLang = 'sk-sk';
-        }
+        {/* Mobile upload - special case without language prefix */}
+        <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
         
-        window.location.href = `/${targetLang}/dashboard`; 
-        return null; 
-      }} />
-      
-      {/* Mobile upload - special case without language prefix */}
-      <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
-      
-      {/* Dynamic redirect for any other route without language prefix */}
-      <Route path="/*" component={() => {
-        const currentPath = window.location.pathname;
-        
-        // Detect user's preferred language
-        const browserLang = navigator.language.toLowerCase();
-        const supportedLangs = ['en-us', 'es-pe', 'sk-sk'];
-        
-        // Check localStorage for previous language choice
-        const savedLang = localStorage.getItem('i18nextLng');
-        
-        let targetLang = 'en-us'; // fallback
-        
-        // Priority: saved language > browser language mapping > fallback
-        if (savedLang && supportedLangs.includes(savedLang)) {
-          targetLang = savedLang;
-        } else if (browserLang.startsWith('es')) {
-          targetLang = 'es-pe';
-        } else if (browserLang.startsWith('sk')) {
-          targetLang = 'sk-sk';
-        }
-        
-        window.location.href = `/${targetLang}${currentPath}`;
-        return null;
-      }} />
-      
-      {/* 404 page */}
-      <Route path="*" component={NotFoundPage} />
-    </Switch>
+        {/* 404 page */}
+        <Route path="*" component={NotFoundPage} />
+      </Switch>
+    </LanguageGuard>
   );
 }
 
@@ -181,21 +183,21 @@ export function AuthenticatedApp() {
         )}>
           <div className="p-3 sm:p-6 max-w-full overflow-x-hidden">
             <Switch>
-              {/* Relative routes - the /:lang/ prefix is handled by LanguageGuard */}
-              <Route path="/dashboard" component={Dashboard} />
-              <Route path="/transactions" component={TransactionsPage} />
-              <Route path="/income" component={IncomePage} />
-              <Route path="/expenses" component={ExpensesPage} />
-              <Route path="/budget" component={BudgetPage} />
-              <Route path="/categories" component={CategoriesPage} />
-              <Route path="/goals" component={GoalsPage} />
-              <Route path="/collaborative-goals" component={CollaborativeGoalsPage} />
-              <Route path="/collaborative-goals/:id" component={CollaborativeGoalDetailPage} />
-              <Route path="/calendar" component={CalendarPage} />
-              <Route path="/trends" component={TrendsPage} />
-              <Route path="/reports" component={ReportsPage} />
-              <Route path="/export" component={ExportPage} />
-              <Route path="/subscribe" component={SubscribePage} />
+              {/* Language-prefixed routes */}
+              <Route path="/:lang/dashboard" component={Dashboard} />
+              <Route path="/:lang/transactions" component={TransactionsPage} />
+              <Route path="/:lang/income" component={IncomePage} />
+              <Route path="/:lang/expenses" component={ExpensesPage} />
+              <Route path="/:lang/budget" component={BudgetPage} />
+              <Route path="/:lang/categories" component={CategoriesPage} />
+              <Route path="/:lang/goals" component={GoalsPage} />
+              <Route path="/:lang/collaborative-goals" component={CollaborativeGoalsPage} />
+              <Route path="/:lang/collaborative-goals/:id" component={CollaborativeGoalDetailPage} />
+              <Route path="/:lang/calendar" component={CalendarPage} />
+              <Route path="/:lang/trends" component={TrendsPage} />
+              <Route path="/:lang/reports" component={ReportsPage} />
+              <Route path="/:lang/export" component={ExportPage} />
+              <Route path="/:lang/subscribe" component={SubscribePage} />
               <Route path="/pricing" component={Pricing} />
               <Route path="/terms-of-service" component={TermsOfService} />
               <Route path="/privacy-policy" component={PrivacyPolicy} />
