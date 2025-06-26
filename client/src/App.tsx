@@ -67,6 +67,17 @@ function Router() {
   return (
     <LanguageGuard>
       <Switch>
+        {/* Unprefixed routes that work for both authenticated and anonymous users */}
+        <Route path="/pricing" component={Pricing} />
+        <Route path="/terms-of-service" component={TermsOfService} />
+        <Route path="/privacy-policy" component={PrivacyPolicy} />
+        <Route path="/cookie-policy" component={CookiePolicy} />
+        <Route path="/contact" component={Contact} />
+        <Route path="/help" component={Help} />
+        <Route path="/profile" component={AuthenticatedApp} />
+        <Route path="/admin-analytics" component={AuthenticatedApp} />
+        <Route path="/redeem" component={AuthenticatedApp} />
+        
         {/* Language-prefixed routes */}
         <Route path="/:lang/dashboard" component={AuthenticatedApp} />
         <Route path="/:lang/transactions" component={AuthenticatedApp} />

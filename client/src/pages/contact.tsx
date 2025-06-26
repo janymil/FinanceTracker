@@ -83,6 +83,24 @@ export default function Contact() {
       {!user && (
         <AnonymousHeader />
       )}
+      
+      {/* Header for authenticated users */}
+      {user && (
+        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <h1 className="text-xl font-semibold">Contact Support</h1>
+              </div>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-muted-foreground">
+                  Logged in as {user.primaryEmailAddress?.emailAddress}
+                </span>
+              </div>
+            </div>
+          </div>
+        </header>
+      )}
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-12">

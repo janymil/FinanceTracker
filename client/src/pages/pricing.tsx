@@ -48,6 +48,30 @@ export default function Pricing() {
         canonical="https://finanzerpro.com/pricing"
       />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      
+      {/* Header for anonymous users */}
+      {!user && (
+        <AnonymousHeader />
+      )}
+      
+      {/* Header for authenticated users */}
+      {user && (
+        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <h1 className="text-xl font-semibold">Subscription Plans</h1>
+              </div>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-muted-foreground">
+                  Current Plan: {userPlan ? userPlan.charAt(0).toUpperCase() + userPlan.slice(1) : 'Free'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </header>
+      )}
+      
       {/* Hero Section */}
       <section className="pt-32 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
