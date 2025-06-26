@@ -98,6 +98,8 @@ root.render(
       <HelmetProvider>
         <ClerkProvider 
           publishableKey={clerkPubKey}
+          signInFallbackRedirectUrl={dashboardRedirectUrl}
+          signUpFallbackRedirectUrl={dashboardRedirectUrl}
           appearance={{
             layout: {
               logoImageUrl: '/icon.png',
