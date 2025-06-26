@@ -1,0 +1,49 @@
+STEP 2: Set Up Multilingual Support with i18next
+
+⚠️ DO NOT change or normalize any UI text, even if phrases are similar or repeated in different ways. Preserve existing string variations such as "Add Transaction", "Add New Transaction", "Select type", etc.
+
+Your tasks:
+
+1. ✅ Create folder structure for translations:
+   - `/src/locales/en-us/translation.json`
+   - `/src/locales/es-pe/translation.json`
+   - `/src/locales/sk-sk/translation.json`
+
+2. ✅ Create and configure:
+   - `/src/i18n/i18n.js` – core i18next setup using `react-i18next`, `i18next-http-backend`, and custom language detection
+   - `/src/i18n/languageDetector.js` – detect language from path (`/es-pe`, `/sk-sk`) with fallback to `en-us`
+
+3. ✅ Configure i18next to:
+   - Load translation JSON from `/locales/{{lng}}/translation.json`
+   - Use fallback `en-us`
+   - Detect language in this order: `path`, `cookie`, `navigator`
+   - Do not preload all languages
+
+4. ✅ Wrap the main React app with `<I18nextProvider i18n={i18n}>`.
+
+5. ✅ Modify only the `index.jsx` or `main.jsx` entry point (whichever is used) to initialize i18n and render wrapped app.
+
+6. ✅ Do **not** apply any `t()` usage yet inside components. That will be Step 3.
+
+7. ✅ Do not translate anything yet. Just set up structure and config files.
+
+🧠 Before coding, analyze:
+- Whether the app uses Vite, CRA, or Next.js
+- Whether React Router is present (needed for path-based locale detection)
+
+🚫 Do not modify JSX strings at this step
+🚫 Do not add any translation keys
+🚫 Do not auto-inject anything into existing components
+
+✅ STOP once:
+- i18n is initialized
+- app is wrapped in provider
+- language detection is working based on URL path (e.g., `/es-pe`)
+
+Then report:
+- The created file tree
+- Sample of each translation JSON (with only 1 placeholder key)
+- Contents of `i18n.js` and `languageDetector.js`
+- Confirmation that app builds and runs with no errors
+
+⏸️ Wait for my review before continuing to Step 3
