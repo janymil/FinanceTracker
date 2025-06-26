@@ -786,21 +786,21 @@ export default function Transactions() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Types</SelectItem>
-                        <SelectItem value="income">Income</SelectItem>
-                        <SelectItem value="expense">Expense</SelectItem>
+                        <SelectItem value="all">{t("All Types")}</SelectItem>
+                        <SelectItem value="income">{t("Income")}</SelectItem>
+                        <SelectItem value="expense">{t("Expense")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
-                    <Label className="text-sm font-medium">Category</Label>
+                    <Label className="text-sm font-medium">{t("Category")}</Label>
                     <Select value={filterCategory} onValueChange={setFilterCategory}>
                       <SelectTrigger className="mt-1">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
+                        <SelectItem value="all">{t("All Categories")}</SelectItem>
                         {availableCategories.filter(Boolean).map((category) => (
                           <SelectItem key={category} value={category}>
                             {category}
@@ -811,43 +811,43 @@ export default function Transactions() {
                   </div>
 
                   <div>
-                    <Label className="text-sm font-medium">Recurring</Label>
+                    <Label className="text-sm font-medium">{t("Recurring")}</Label>
                     <Select value={filterRecurring} onValueChange={setFilterRecurring}>
                       <SelectTrigger className="mt-1">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Transactions</SelectItem>
-                        <SelectItem value="recurring">Recurring Only</SelectItem>
-                        <SelectItem value="one-time">One-time Only</SelectItem>
+                        <SelectItem value="all">{t("All Transactions")}</SelectItem>
+                        <SelectItem value="recurring">{t("Recurring Only")}</SelectItem>
+                        <SelectItem value="one-time">{t("One-time Only")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
-                    <Label className="text-sm font-medium">Date Range</Label>
+                    <Label className="text-sm font-medium">{t("Date Range")}</Label>
                     <Select value={dateRange} onValueChange={setDateRange}>
                       <SelectTrigger className="mt-1">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Time</SelectItem>
-                        <SelectItem value="today">Today</SelectItem>
-                        <SelectItem value="week">Last Week</SelectItem>
-                        <SelectItem value="month">Last Month</SelectItem>
-                        <SelectItem value="current-month">This Month</SelectItem>
-                        <SelectItem value="jan">January</SelectItem>
-                        <SelectItem value="feb">February</SelectItem>
-                        <SelectItem value="mar">March</SelectItem>
-                        <SelectItem value="apr">April</SelectItem>
-                        <SelectItem value="may">May</SelectItem>
-                        <SelectItem value="jun">June</SelectItem>
-                        <SelectItem value="jul">July</SelectItem>
-                        <SelectItem value="aug">August</SelectItem>
-                        <SelectItem value="sep">September</SelectItem>
-                        <SelectItem value="oct">October</SelectItem>
-                        <SelectItem value="nov">November</SelectItem>
-                        <SelectItem value="dec">December</SelectItem>
+                        <SelectItem value="all">{t("All Time")}</SelectItem>
+                        <SelectItem value="today">{t("Today")}</SelectItem>
+                        <SelectItem value="week">{t("Last Week")}</SelectItem>
+                        <SelectItem value="month">{t("Last Month")}</SelectItem>
+                        <SelectItem value="current-month">{t("This Month")}</SelectItem>
+                        <SelectItem value="jan">{t("January")}</SelectItem>
+                        <SelectItem value="feb">{t("February")}</SelectItem>
+                        <SelectItem value="mar">{t("March")}</SelectItem>
+                        <SelectItem value="apr">{t("April")}</SelectItem>
+                        <SelectItem value="may">{t("May")}</SelectItem>
+                        <SelectItem value="jun">{t("June")}</SelectItem>
+                        <SelectItem value="jul">{t("July")}</SelectItem>
+                        <SelectItem value="aug">{t("August")}</SelectItem>
+                        <SelectItem value="sep">{t("September")}</SelectItem>
+                        <SelectItem value="oct">{t("October")}</SelectItem>
+                        <SelectItem value="nov">{t("November")}</SelectItem>
+                        <SelectItem value="dec">{t("December")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -866,7 +866,7 @@ export default function Transactions() {
                         setDateRange("all");
                       }}
                     >
-                      Clear all filters
+                      {t("Clear all filters")}
                     </Button>
                   </div>
                 )}
