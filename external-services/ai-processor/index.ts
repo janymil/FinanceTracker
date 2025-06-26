@@ -1689,11 +1689,11 @@ app.post("/execute-gpt-task", async (req, res) => {
           budgets: payload.budgets,
           categories: payload.categories
         };
-        result = await generateDailyRecommendations(dailyPayload);
+        result = await generateDailyRecommendations(dailyPayload, payload.language || 'en-us');
         break;
 
       case "expense-predictions":
-        result = await generateExpensePredictions(payload.transactions);
+        result = await generateExpensePredictions(payload.transactions, payload.language || 'en-us');
         break;
 
       case "financial-health-score":
@@ -1708,16 +1708,16 @@ app.post("/execute-gpt-task", async (req, res) => {
             warnings: ['Please add more transaction data for accurate analysis']
           };
         } else {
-          result = await generateAIFinancialHealthScore(payload);
+          result = await generateFinancialHealthScore(payload, payload.language || 'en-us');
         }
         break;
 
       case "spending-insights":
-        result = await generateSpendingInsights(payload.transactions);
+        result = await generateSpendingInsights(payload.transactions, payload.language || 'en-us');
         break;
 
       case "trend-predictions":
-        result = await generateTrendPredictions(payload.transactions, payload.budgets);
+        result = await generateTrendPredictions(payload.transactions, payload.budgets, payload.language || 'en-us');
         break;
 
       default:

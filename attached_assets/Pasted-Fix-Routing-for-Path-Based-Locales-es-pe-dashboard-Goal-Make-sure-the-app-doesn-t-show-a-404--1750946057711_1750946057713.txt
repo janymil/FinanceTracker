@@ -1,0 +1,63 @@
+Fix Routing for Path-Based Locales (/es-pe/dashboard)
+🎯 Goal: Make sure the app doesn’t show a 404 when the user navigates to /es-pe/... or /sk-sk/....
+👇 Here’s the AI Agent Prompt for Step 6:
+markdown
+Copy
+Edit
+STEP 6: Enable Path-Based Routing for Multilingual URLs
+
+🧠 Background:
+The app currently shows a 404 error when visiting URLs like `/es-pe/dashboard`. This is because React Router is not configured to recognize the language segment in the URL path.
+
+🎯 Goal:
+Update the routing logic to support dynamic language prefixes like:
+  - /en-us/dashboard
+  - /es-pe/transactions
+  - /sk-sk/settings
+
+Your tasks:
+
+1. ✅ Update the main `Routes` definition (`App.tsx` or `AppRoutes.tsx`):
+   - Use a dynamic path param `:lang` to prefix all routes:
+     ```tsx
+     <Route path="/:lang/dashboard" element={<Dashboard />} />
+     ```
+
+2. ✅ Create a wrapper component (e.g., `LanguageGuard.tsx`) that:
+   - Extracts `:lang` from the URL
+   - Validates it against supported locales (`en-us`, `es-pe`, `sk-sk`)
+   - Sets `i18n.changeLanguage(lang)` on load
+   - Redirects to `/en-us` if unknown locale
+
+3. ✅ Wrap all localized routes under this guard:
+   ```tsx
+   <Route path="/:lang/*" element={<LanguageGuard />}>
+     <Route path="dashboard" element={<Dashboard />} />
+     <Route path="transactions" element={<Transactions />} />
+     ...
+   </Route>
+✅ Add a fallback route:
+
+tsx
+Copy
+Edit
+<Route path="/" element={<Navigate to="/en-us/dashboard" />} />
+✅ Ensure navigation via Link or navigate() respects the current language (prefix all URLs with the current i18n.language).
+
+✅ Add a utility: getLocalizedPath(path: string) to auto-prefix paths based on current language:
+
+ts
+Copy
+Edit
+return `/${i18n.language}${path.startsWith('/') ? path : `/${path}`}`;
+✅ Stop once:
+
+Navigating to /es-pe/dashboard loads correctly
+
+App shows translated UI based on the path
+
+Invalid language codes redirect to /en-us
+
+You do not break existing routes
+
+🛑 WAIT for my confirmation before continuing to Step 7
