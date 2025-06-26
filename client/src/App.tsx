@@ -76,8 +76,8 @@ function Router() {
       <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
       
       {/* Dynamic redirect for any other route without language prefix */}
-      <Route path="/:path*" component={({ params }: any) => {
-        const currentPath = `/${params.path}${params['*'] ? '/' + params['*'] : ''}`;
+      <Route path="/*" component={() => {
+        const currentPath = window.location.pathname;
         window.location.href = `/en-us${currentPath}`;
         return null;
       }} />
