@@ -66,95 +66,101 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
     return planHierarchy[currentPlan as keyof typeof planHierarchy] >= planHierarchy[requiredPlan as keyof typeof planHierarchy];
   };
 
+  // Extract current language from URL to build language-aware links
+  const currentLang = currentPath.match(/^\/([a-z]{2})\//)?.[1] || 'en';
+
   const menuItems = [
     {
       title: t("Dashboard"),
       icon: LayoutDashboard,
-      href: "/",
+      href: `/${currentLang}/dashboard`,
       requiredPlan: "free",
       badge: null,
     },
     {
       title: t("Transactions"),
       icon: CreditCard,
-      href: "/transactions",
+      href: `/${currentLang}/transactions`,
       requiredPlan: "free",
       badge: null,
     },
     {
       title: t("Income"),
       icon: TrendingUp,
-      href: "/income",
+      href: `/${currentLang}/income`,
       requiredPlan: "free",
       badge: null,
     },
     {
       title: t("Expenses"),
       icon: TrendingDown,
-      href: "/expenses",
+      href: `/${currentLang}/expenses`,
       requiredPlan: "free",
       badge: null,
     },
     {
       title: t("Budget"),
       icon: Target,
-      href: "/budget",
+      href: `/${currentLang}/budget`,
       requiredPlan: "standard" as const,
       badge: "Standard" as const,
     },
     {
       title: t("Categories"),
       icon: CreditCard,
-      href: "/categories",
+      href: `/${currentLang}/categories`,
       requiredPlan: "free",
       badge: null,
     },
     {
       title: t("Goals"),
       icon: Crosshair,
-      href: "/goals",
+      href: `/${currentLang}/goals`,
       requiredPlan: "standard" as const,
       badge: "Standard" as const,
     },
     {
       title: t("Collaborative Goals"),
       icon: Users,
-      href: "/collaborative-goals",
+      href: `/${currentLang}/collaborative-goals`,
       requiredPlan: "standard" as const,
       badge: "Standard" as const,
     },
     {
       title: t("Reports"),
       icon: FileText,
-      href: "/reports",
+      href: `/${currentLang}/reports`,
       requiredPlan: "free",
       badge: null,
     },
     {
       title: t("Trends"),
       icon: TrendingUp,
-      href: "/trends",
+      href: `/${currentLang}/trends`,
       requiredPlan: "premium" as const,
       badge: "Premium" as const,
     },
     {
       title: t("Calendar View"),
       icon: Calendar,
-      href: "/calendar",
+      href: `/${currentLang}/calendar`,
       requiredPlan: "standard" as const,
       badge: "Standard" as const,
     },
     {
       title: t("Data Management"),
       icon: Download,
-      href: "/export",
+      href: `/${currentLang}/export`,
       requiredPlan: "premium" as const,
       badge: "Premium" as const,
     },
   ];
 
   const isActive = (href: string) => {
-    if (href === "/") return currentPath === "/";
+    // Special case for dashboard - check if current path ends with /dashboard
+    if (href.endsWith('/dashboard')) {
+      return currentPath.endsWith('/dashboard');
+    }
     return currentPath.startsWith(href);
   };
 
