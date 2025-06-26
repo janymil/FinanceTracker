@@ -40,7 +40,24 @@ root.render(
   <StrictMode>
     <I18nextProvider i18n={i18n}>
       <HelmetProvider>
-        <ClerkProvider publishableKey={clerkPubKey}>
+        <ClerkProvider 
+          publishableKey={clerkPubKey}
+          appearance={{
+            layout: {
+              logoImageUrl: '/icon.png',
+              showOptionalFields: false,
+            },
+            variables: {
+              colorPrimary: '#3b82f6',
+            }
+          }}
+          options={{
+            // Optimize for single-page application  
+            isSatellite: false,
+            // Disable telemetry to reduce network calls
+            telemetry: false,
+          }}
+        >
           <QueryClientProvider client={queryClient}>
             <Router>
               <App />
