@@ -68,26 +68,7 @@ function Router() {
   return (
     <LanguageGuard>
       <Switch>
-        {/* Language-prefixed routes */}
-        <Route path="/:lang/dashboard" component={AuthenticatedApp} />
-        <Route path="/:lang/transactions" component={AuthenticatedApp} />
-        <Route path="/:lang/income" component={AuthenticatedApp} />
-        <Route path="/:lang/expenses" component={AuthenticatedApp} />
-        <Route path="/:lang/budget" component={AuthenticatedApp} />
-        <Route path="/:lang/categories" component={AuthenticatedApp} />
-        <Route path="/:lang/goals" component={AuthenticatedApp} />
-        <Route path="/:lang/collaborative-goals" component={AuthenticatedApp} />
-        <Route path="/:lang/collaborative-goals/:id" component={AuthenticatedApp} />
-        <Route path="/:lang/trends" component={AuthenticatedApp} />
-        <Route path="/:lang/calendar" component={AuthenticatedApp} />
-        <Route path="/:lang/reports" component={AuthenticatedApp} />
-        <Route path="/:lang/export" component={AuthenticatedApp} />
-        <Route path="/:lang/profile" component={AuthenticatedApp} />
-        <Route path="/:lang/subscribe" component={AuthenticatedApp} />
-        <Route path="/:lang/redeem" component={AuthenticatedApp} />
-        <Route path="/:lang/admin/analytics" component={AuthenticatedApp} />
-        
-        {/* Public pages with language prefix */}
+        {/* Public pages with specific components - order matters for matching */}
         <Route path="/:lang/pricing" component={Pricing} />
         <Route path="/:lang/terms" component={TermsOfService} />
         <Route path="/:lang/terms-of-service" component={TermsOfService} />
@@ -98,7 +79,12 @@ function Router() {
         <Route path="/:lang/contact" component={Contact} />
         <Route path="/:lang/help" component={Help} />
         <Route path="/:lang/auth" component={AuthPage} />
+        
+        {/* Landing page */}
         <Route path="/:lang" component={Landing} />
+        
+        {/* DYNAMIC catch-all for ANY authenticated route - no hardcoding needed */}
+        <Route path="/:lang/*" component={AuthenticatedApp} />
         
         {/* Default route - redirect to user's language */}
         <Route path="/" component={() => { 
