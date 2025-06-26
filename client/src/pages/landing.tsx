@@ -8,6 +8,7 @@ import { useLocation } from "wouter";
 import { SEO } from "@/components/SEO";
 import { useTheme } from "@/context/ThemeContext";
 import { useTranslation } from "react-i18next";
+import { Footer } from "@/components/footer";
 
 export default function Landing() {
   const [location, setLocation] = useLocation();
@@ -690,24 +691,7 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-4">
-              <TrendingUp className="h-8 w-8 text-primary mr-2" />
-              <span className="text-xl font-bold">{t("FinanzerPro")}</span>
-            </div>
-            <p className="text-gray-400 mb-8">
-              {t("Take control of your financial future with intelligent expense tracking and budgeting.")}
-            </p>
-            <div className="border-t border-gray-800 pt-8">
-              <p className="text-gray-400">
-                {t("© 2025 FinanzerPro. All rights reserved.")}
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
     </>
   );

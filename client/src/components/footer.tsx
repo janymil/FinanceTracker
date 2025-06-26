@@ -7,16 +7,21 @@ interface FooterProps {
   sidebarCollapsed?: boolean;
 }
 
-export function Footer({ sidebarCollapsed = false }: FooterProps) {
+export function Footer({ sidebarCollapsed }: FooterProps) {
   const { t } = useTranslation();
   const handleLinkClick = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Only apply sidebar margins if sidebarCollapsed is explicitly passed (i.e., we're in AppLayout)
+  const sidebarMarginClass = sidebarCollapsed !== undefined 
+    ? (sidebarCollapsed ? "lg:ml-16" : "lg:ml-64")
+    : "";
+
   return (
     <footer className={cn(
       "bg-background border-t transition-all duration-300",
-      sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
+      sidebarMarginClass
     )}>
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
