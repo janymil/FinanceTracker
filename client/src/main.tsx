@@ -51,12 +51,6 @@ root.render(
               colorPrimary: '#3b82f6',
             }
           }}
-          options={{
-            // Optimize for single-page application  
-            isSatellite: false,
-            // Disable telemetry to reduce network calls
-            telemetry: false,
-          }}
         >
           <QueryClientProvider client={queryClient}>
             <Router>
