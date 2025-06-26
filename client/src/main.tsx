@@ -73,20 +73,6 @@ root.render(
       <HelmetProvider>
         <ClerkProvider 
           publishableKey={clerkPubKey}
-          routerPush={(to) => { 
-            console.log('Clerk routerPush:', to);
-            // Handle language-aware redirects
-            const processedUrl = processClerkRedirect(to);
-            window.history.pushState({}, '', processedUrl); 
-            window.dispatchEvent(new PopStateEvent('popstate'));
-          }}
-          routerReplace={(to) => { 
-            console.log('Clerk routerReplace:', to);
-            // Handle language-aware redirects
-            const processedUrl = processClerkRedirect(to);
-            window.history.replaceState({}, '', processedUrl); 
-            window.dispatchEvent(new PopStateEvent('popstate'));
-          }}
           appearance={{
             layout: {
               logoImageUrl: '/icon.png',
