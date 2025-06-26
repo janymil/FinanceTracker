@@ -1,0 +1,68 @@
+Even when a signed-in user visits public pages like /help, they should still see the logged-in version of the header and layout.
+
+✅ Root Cause:
+Your router likely treats /help, /contact, etc., as completely public, and doesn’t wrap them in the SignedIn context or doesn’t render the authenticated layout.
+
+✅ Solution:
+Render a unified layout for all pages, whether public or private, and conditionally show logged-in header based on useUser() or useAuth().
+
+🔧 Fix:
+Wrap your entire app in a single layout (e.g., <AppShell />) and use logic like:
+
+tsx
+Copy
+Edit
+const { user, isSignedIn } = useUser();
+
+return (
+  <>
+    <Header isAuthenticated={isSignedIn} />
+    <main>{children}</main>
+  </>
+);
+Don’t split layout logic between "public" and "private" pages. Use one layout, and adjust the UI based on auth state.
+
+⚠️ Problem 2: Page reloads when navigating — not SPA behavior
+✅ Cause:
+You're likely using window.location.href = ... or <a href="...">, which causes a full-page reload instead of a client-side route transition.
+
+✅ Solution: Use Wouter's <Link> and useLocation()
+🔧 Correct:
+tsx
+Copy
+Edit
+import { Link } from 'wouter';
+
+<Link href="/sk/help">Pomoc</Link>
+Or programmatically:
+
+tsx
+Copy
+Edit
+const [, navigate] = useLocation();
+navigate('/sk/help');
+❌ Incorrect:
+tsx
+Copy
+Edit
+<a href="/sk/help">Pomoc</a>           // Triggers full reload
+window.location.href = "/sk/help";     // Also reloads the page
+🧠 Clarification: Language Code Format
+You're absolutely right — your app uses:
+
+/en/..., /es/..., /sk/...
+
+Not full codes like /en-us/... or /es-pe/.... So all routing and translation logic should use:
+
+ts
+Copy
+Edit
+const SUPPORTED_LANGUAGES = ['en', 'es', 'sk'];
+Update i18n.ts and routing guards accordingly.
+
+✅ Summary of What to Fix
+Issue	Fix
+Auth layout missing on public pages	Use a unified layout and detect auth inside it
+Page reload when navigating	Replace href or window.location.href with Wouter's Link
+Wrong language code (es-pe)	Use es, sk, en instead in routes and i18n config
+i18n not updating translations	Use i18next-http-backend and .changeLanguage() correctly
