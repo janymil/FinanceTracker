@@ -85,7 +85,7 @@ function Router() {
         <Route path="/:lang/profile" component={AuthenticatedApp} />
         <Route path="/:lang/subscribe" component={AuthenticatedApp} />
         <Route path="/:lang/redeem" component={AuthenticatedApp} />
-        <Route path="/:lang/admin/analytics" component={AuthenticatedApp} />
+        <Route path="/:lang/admin-analytics" component={AuthenticatedApp} />
         
         {/* Public pages with language prefix */}
         <Route path="/:lang/pricing" component={Pricing} />
@@ -207,7 +207,7 @@ export function AuthenticatedApp() {
               <Route path="/:lang/subscribe" component={SubscribePage} />
               <Route path="/:lang/redeem" component={RedeemPage} />
               <Route path="/:lang/profile" component={ProfilePage} />
-              <Route path="/:lang/admin/analytics" component={AdminAnalytics} />
+              <Route path="/:lang/admin-analytics" component={AdminAnalytics} />
               <Route path="/pricing" component={Pricing} />
               <Route path="/terms-of-service" component={TermsOfService} />
               <Route path="/privacy-policy" component={PrivacyPolicy} />
