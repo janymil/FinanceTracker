@@ -11,6 +11,7 @@ import { Trash2, Filter, TrendingDown, TrendingUp, ChevronDown, ChevronUp, Recei
 import { Link, useLocation } from "wouter";
 import { useState, useMemo } from "react";
 import ReceiptModal from "@/components/receipt-modal";
+import { useTranslation } from "react-i18next";
 
 interface Transaction {
   id: number;
@@ -41,6 +42,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
   const [, setLocation] = useLocation();
   const [expandedTransactions, setExpandedTransactions] = useState<Set<number>>(new Set());
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const { t } = useTranslation();
 
   // Filter and search transactions
   const filteredTransactions = useMemo(() => {
@@ -112,7 +114,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
     return (
       <Card className="bg-white dark:bg-gray-800">
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
+          <CardTitle>{t('Recent Transactions')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -136,10 +138,10 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
     <Card className="bg-white dark:bg-gray-800">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">Recent Transactions</CardTitle>
+          <CardTitle className="text-lg font-semibold">{t('Recent Transactions')}</CardTitle>
           <div className="flex items-center space-x-2">
             <Input 
-              placeholder="Search transactions..." 
+              placeholder={t('Search transactions...')} 
               className="w-48 h-8 text-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -152,15 +154,15 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
               </PopoverTrigger>
               <PopoverContent className="w-48" align="end">
                 <div className="space-y-2">
-                  <h4 className="font-medium leading-none">Filter by type</h4>
+                  <h4 className="font-medium leading-none">{t('Filter by type')}</h4>
                   <Select value={filterType} onValueChange={setFilterType}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="All transactions" />
+                      <SelectValue placeholder={t('All transactions')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All transactions</SelectItem>
-                      <SelectItem value="expense">Expenses only</SelectItem>
-                      <SelectItem value="income">Income only</SelectItem>
+                      <SelectItem value="all">{t('All transactions')}</SelectItem>
+                      <SelectItem value="expense">{t('Expenses only')}</SelectItem>
+                      <SelectItem value="income">{t('Income only')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -173,8 +175,8 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
         <div className="space-y-3">
           {filteredTransactions.length === 0 ? (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              <p>No transactions found</p>
-              <p className="text-sm">Start by adding your first transaction</p>
+              <p>{t('No transactions found')}</p>
+              <p className="text-sm">{t('Start by adding your first transaction')}</p>
             </div>
           ) : (
             filteredTransactions.map((transaction) => {
