@@ -33,13 +33,28 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
       i18n.changeLanguage(lang).then(() => {
         console.log('LanguageGuard: Language changed successfully to', lang);
         console.log('LanguageGuard: i18n language is now:', i18n.language);
-        setReady(true);
+        console.log('LanguageGuard: Has resources for', lang, ':', i18n.hasResourceBundle(lang, 'translation'));
+        
+        // Force reload resources if not available
+        if (!i18n.hasResourceBundle(lang, 'translation')) {
+          console.log('LanguageGuard: Missing resources, reloading...');
+          i18n.reloadResources(lang).then(() => {
+            console.log('LanguageGuard: Resources reloaded for', lang);
+            setReady(true);
+          }).catch(error => {
+            console.error('LanguageGuard: Error reloading resources:', error);
+            setReady(true);
+          });
+        } else {
+          setReady(true);
+        }
       }).catch(error => {
         console.error('LanguageGuard: Error changing language:', error);
         setReady(true);
       });
     } else {
       console.log('LanguageGuard: Language already set to', lang);
+      console.log('LanguageGuard: Has resources for', lang, ':', i18n.hasResourceBundle(lang, 'translation'));
       setReady(true);
     }
   }, [location, i18n]);
