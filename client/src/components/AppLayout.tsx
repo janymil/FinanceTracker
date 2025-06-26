@@ -27,10 +27,10 @@ export function AppLayout({ children, isPublicPage = false }: AppLayoutProps) {
         />
         <div className="flex">
           <Sidebar 
-            isOpen={sidebarOpen}
-            setIsOpen={setSidebarOpen}
-            isCollapsed={sidebarCollapsed}
-            setIsCollapsed={setSidebarCollapsed}
+            open={sidebarOpen}
+            collapsed={sidebarCollapsed}
+            onOpenChange={setSidebarOpen}
+            onCollapsedChange={setSidebarCollapsed}
           />
           <main className={`flex-1 transition-all duration-300 ${
             sidebarCollapsed ? 'ml-16' : 'ml-64'

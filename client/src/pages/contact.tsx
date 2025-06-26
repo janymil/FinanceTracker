@@ -7,13 +7,11 @@ import { Mail, MapPin, Clock, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { SEO } from "@/components/SEO";
-import { useUser } from "@clerk/clerk-react";
-import Header from "@/components/header";
 import { AnonymousHeader } from "@/components/anonymous-header";
-import { Footer } from "@/components/footer";
+import { useUser } from "@clerk/clerk-react";
 
 export default function Contact() {
-  const { isSignedIn } = useUser();
+  const { user } = useUser();
   const [, setLocation] = useLocation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -80,15 +78,13 @@ export default function Contact() {
   };
 
   return (
-    <>
-      <SEO 
-        title="Contact Us - Get Support | FinanzerPro Customer Service"
-        description="Need help with FinanzerPro? Contact our support team for assistance with expense tracking, budgeting, AI features, and account management. We're here to help!"
-        keywords="finanzerpro contact, customer support, help desk, financial app support, expense tracker help, budget app assistance"
-        canonical="https://finanzerpro.com/contact"
-      />
-      {isSignedIn ? <Header onMenuClick={() => {}} sidebarCollapsed={false} /> : <AnonymousHeader />}
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="min-h-screen bg-background">
+      {/* Header for anonymous users */}
+      {!user && (
+        <AnonymousHeader />
+      )}
+
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -248,8 +244,7 @@ export default function Contact() {
             </Card>
           </div>
         </div>
-      </main>
-      {!isSignedIn && <Footer />}
-    </>
+      </div>
+    </div>
   );
 }
