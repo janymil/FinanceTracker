@@ -69,6 +69,6 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
 
 // Helper function for other components
 export function getLocalizedPath(path: string): string {
-  const currentLang = localStorage.getItem('preferredLanguage') || 'en-us';
+  const currentLang = localStorage.getItem('preferredLanguage') || 'en';
   return `/${currentLang}${path.startsWith('/') ? path : `/${path}`}`;
 }

@@ -25,23 +25,19 @@ const languageDetector = {
       return cookieLang;
     }
     
-    // 3. Try browser language with mapping
+    // 3. Try browser language with dynamic mapping
     const browserLang = navigator.language || (navigator as any).userLanguage;
-    const langMap = {
-      'en': 'en',
-      'en-US': 'en',
-      'en-us': 'en',
-      'es': 'es',
-      'es-PE': 'es',
-      'es-pe': 'es',
-      'es-ES': 'es',
-      'sk': 'sk',
-      'sk-SK': 'sk',
-      'sk-sk': 'sk'
-    };
     
-    if (langMap[browserLang]) {
-      return langMap[browserLang];
+    // Extract the main language code (e.g., 'en' from 'en-GB', 'es' from 'es-MX')
+    const mainLangCode = browserLang.split('-')[0].toLowerCase();
+    
+    // Map to our supported simplified codes
+    if (mainLangCode === 'en') {
+      return 'en';
+    } else if (mainLangCode === 'es') {
+      return 'es';
+    } else if (mainLangCode === 'sk') {
+      return 'sk';
     }
     
     // 4. Fallback to default
@@ -74,29 +70,50 @@ export default languageDetector;
 export function detectLanguageAndRedirect() {
   const currentPath = window.location.pathname;
   
-  // If already has language prefix, don't redirect
-  const hasLangPrefix = /^\/([a-z]{2}-[a-z]{2})\//.test(currentPath);
+  // Check if URL has old locale-specific format and convert to simplified
+  const oldLangMatch = currentPath.match(/^\/([a-z]{2}-[a-z]{2})\//);
+  if (oldLangMatch) {
+    const oldLang = oldLangMatch[1];
+    const langMap = {
+      'en-us': 'en',
+      'es-pe': 'es',
+      'sk-sk': 'sk'
+    };
+    const newLang = langMap[oldLang];
+    if (newLang) {
+      const newPath = currentPath.replace(`/${oldLang}/`, `/${newLang}/`);
+      window.location.replace(newPath);
+      return;
+    }
+  }
+  
+  // Check if already has simplified language prefix
+  const hasLangPrefix = /^\/([a-z]{2})\//.test(currentPath);
   if (hasLangPrefix) {
     return;
   }
   
-  // Detect preferred language
+  // Detect preferred language (use simplified codes)
   let preferredLang = localStorage.getItem('preferredLanguage');
   
-  if (!preferredLang || !['en-us', 'es-pe', 'sk-sk'].includes(preferredLang)) {
-    // Try browser language mapping
+  if (!preferredLang || !['en', 'es', 'sk'].includes(preferredLang)) {
+    // Try browser language with dynamic mapping
     const browserLang = navigator.language || navigator.userLanguage || 'en-US';
-    const langMap: Record<string, string> = {
-      'en': 'en-us',
-      'en-US': 'en-us',
-      'es': 'es-pe', 
-      'es-PE': 'es-pe',
-      'es-ES': 'es-pe',
-      'sk': 'sk-sk',
-      'sk-SK': 'sk-sk'
-    };
     
-    preferredLang = langMap[browserLang] || 'en-us';
+    // Extract the main language code (e.g., 'en' from 'en-GB', 'es' from 'es-MX')
+    const mainLangCode = browserLang.split('-')[0].toLowerCase();
+    
+    // Map to our supported simplified codes
+    if (mainLangCode === 'en') {
+      preferredLang = 'en';
+    } else if (mainLangCode === 'es') {
+      preferredLang = 'es';
+    } else if (mainLangCode === 'sk') {
+      preferredLang = 'sk';
+    } else {
+      preferredLang = 'en'; // Default fallback
+    }
+    
     localStorage.setItem('preferredLanguage', preferredLang);
   }
   
