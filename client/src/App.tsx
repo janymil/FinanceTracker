@@ -69,8 +69,29 @@ function Router() {
       {/* Language-prefixed routes - these capture the :lang parameter */}
       <Route path="/:lang/*" component={LanguageGuard} />
       
-      {/* Default route - redirect to /en-us/dashboard */}
-      <Route path="/" component={() => { window.location.href = "/en-us/dashboard"; return null; }} />
+      {/* Default route - redirect to user's language/dashboard */}
+      <Route path="/" component={() => { 
+        // Detect user's preferred language
+        const browserLang = navigator.language.toLowerCase();
+        const supportedLangs = ['en-us', 'es-pe', 'sk-sk'];
+        
+        // Check localStorage for previous language choice
+        const savedLang = localStorage.getItem('i18nextLng');
+        
+        let targetLang = 'en-us'; // fallback
+        
+        // Priority: saved language > browser language mapping > fallback
+        if (savedLang && supportedLangs.includes(savedLang)) {
+          targetLang = savedLang;
+        } else if (browserLang.startsWith('es')) {
+          targetLang = 'es-pe';
+        } else if (browserLang.startsWith('sk')) {
+          targetLang = 'sk-sk';
+        }
+        
+        window.location.href = `/${targetLang}/dashboard`; 
+        return null; 
+      }} />
       
       {/* Mobile upload - special case without language prefix */}
       <Route path="/mobile-upload/:sessionId" component={MobileUpload} />
@@ -78,7 +99,26 @@ function Router() {
       {/* Dynamic redirect for any other route without language prefix */}
       <Route path="/*" component={() => {
         const currentPath = window.location.pathname;
-        window.location.href = `/en-us${currentPath}`;
+        
+        // Detect user's preferred language
+        const browserLang = navigator.language.toLowerCase();
+        const supportedLangs = ['en-us', 'es-pe', 'sk-sk'];
+        
+        // Check localStorage for previous language choice
+        const savedLang = localStorage.getItem('i18nextLng');
+        
+        let targetLang = 'en-us'; // fallback
+        
+        // Priority: saved language > browser language mapping > fallback
+        if (savedLang && supportedLangs.includes(savedLang)) {
+          targetLang = savedLang;
+        } else if (browserLang.startsWith('es')) {
+          targetLang = 'es-pe';
+        } else if (browserLang.startsWith('sk')) {
+          targetLang = 'sk-sk';
+        }
+        
+        window.location.href = `/${targetLang}${currentPath}`;
         return null;
       }} />
       
