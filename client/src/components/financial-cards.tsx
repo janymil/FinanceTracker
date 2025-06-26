@@ -263,8 +263,8 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
                  budgetInfo.status === 'critical' ? t('Critical') : ''}
               </p>
               <p className={`text-xs mt-1 ${budgetInfo.textColor} opacity-80`}>
-                {budgetInfo.status === 'loading' ? t('Loading budget data...') :
-                 budgetInfo.status === 'no-budget' ? t('Set up your first budget to track spending') :
+                {budgetInfo.status === 'loading' ? t('Loading...') :
+                 budgetInfo.status === 'no-budget' ? t('No Budget Set') :
                  `${Math.round(budgetInfo.percentage)}% ${t('utilized')}. ${t('Remaining')}: ${formatCurrency(budgetInfo.remaining)}`}
               </p>
             </div>
