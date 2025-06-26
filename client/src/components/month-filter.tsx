@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 interface MonthFilterProps {
   selectedMonth: string | null;
@@ -13,6 +14,23 @@ interface MonthFilterProps {
 
 export default function MonthFilter({ selectedMonth, onMonthSelect, onDateRangeReset }: MonthFilterProps) {
   const [monthOffset, setMonthOffset] = useState(8); // Start showing the last 4 months
+  const { t } = useTranslation();
+
+  // Helper function to get translated month name
+  const getTranslatedMonthName = (date: Date, short = false) => {
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const shortMonthNames = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    
+    const monthIndex = date.getMonth();
+    const monthName = short ? shortMonthNames[monthIndex] : monthNames[monthIndex];
+    return t(monthName);
+  };
 
   // Generate month navigation data (last 12 months including current)
   const generateMonthData = () => {
@@ -24,7 +42,7 @@ export default function MonthFilter({ selectedMonth, onMonthSelect, onDateRangeR
       const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
       months.push({
         key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
-        label: format(date, "MMM yyyy"),
+        label: `${getTranslatedMonthName(date, true)} ${date.getFullYear()}`,
         month: date.getMonth(),
         year: date.getFullYear(),
       });
@@ -84,7 +102,7 @@ export default function MonthFilter({ selectedMonth, onMonthSelect, onDateRangeR
                   className="h-8 px-2 sm:px-3 text-xs whitespace-nowrap shrink-0"
                 >
                   <span className="hidden sm:inline">{month.label}</span>
-                  <span className="sm:hidden">{format(new Date(month.year, month.month), "MMM")}</span>
+                  <span className="sm:hidden">{getTranslatedMonthName(new Date(month.year, month.month), true)}</span>
                 </Button>
               ))}
             </div>
