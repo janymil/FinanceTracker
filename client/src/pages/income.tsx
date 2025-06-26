@@ -33,6 +33,8 @@ import { format } from "date-fns";
 import MonthFilter from "@/components/month-filter";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useTranslation } from "react-i18next";
+import TransactionFilters from "@/components/TransactionFilters";
 
 interface Transaction {
   id: number;
@@ -69,6 +71,7 @@ export default function Income() {
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -76,7 +79,6 @@ export default function Income() {
   const [filterRecurring, setFilterRecurring] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
 
   // React Query hooks for data fetching using the same pattern as transactions page
   const { data: allTransactions = [], isLoading: transactionsLoading, refetch: refetchTransactions } = useTransactions();
@@ -506,96 +508,19 @@ export default function Income() {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search income..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => setShowFilters(!showFilters)}
-              className="sm:w-auto"
-            >
-              <Filter className="mr-2 h-4 w-4" />
-              Filters
-              {(filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all" || selectedMonth) && (
-                <Badge variant="secondary" className="ml-2 px-1 py-0 text-xs">
-                  {[
-                    filterCategory !== "all" ? "Category" : null,
-                    filterRecurring !== "all" ? "Recurring" : null,
-                    dateRange !== "all" ? "Date" : null,
-                    selectedMonth ? "Month" : null
-                  ].filter(Boolean).length}
-                </Badge>
-              )}
-            </Button>
-          </div>
-
-          {showFilters && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg">
-              <div>
-                <Label htmlFor="categoryFilter">Category</Label>
-                <Select value={filterCategory} onValueChange={setFilterCategory}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {availableCategories.map((category: string) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="recurringFilter">Type</Label>
-                <Select value={filterRecurring} onValueChange={setFilterRecurring}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="recurring">Recurring</SelectItem>
-                    <SelectItem value="one-time">One-time</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="dateFilter">Date Range</Label>
-                <Select value={dateRange} onValueChange={setDateRange}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Time</SelectItem>
-                    <SelectItem value="this-month">This Month</SelectItem>
-                    <SelectItem value="last-month">Last Month</SelectItem>
-                    <SelectItem value="this-year">This Year</SelectItem>
-                    <SelectItem value="last-30-days">Last 30 Days</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Month Filter</Label>
-                <MonthFilter 
-                  selectedMonth={selectedMonth} 
-                  onMonthSelect={setSelectedMonth}
-                />
-              </div>
-            </div>
-          )}
-        </div>
+        <TransactionFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          filterCategory={filterCategory}
+          onCategoryChange={setFilterCategory}
+          filterRecurring={filterRecurring}
+          onRecurringChange={setFilterRecurring}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+          availableCategories={availableCategories}
+          showTypeFilter={false}
+          searchPlaceholder="Search income..."
+        />
       </div>
 
       {/* Stats Cards */}
