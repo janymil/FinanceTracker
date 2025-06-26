@@ -162,6 +162,12 @@ export default function AuthPage() {
                   redirectUrl={dashboardUrl}
                   afterSignUpUrl={dashboardUrl}
                   signInUrl="#sign-in"
+                  initialValues={{
+                    emailAddress: "",
+                    password: "",
+                    firstName: "",
+                    lastName: ""
+                  }}
                   appearance={{
                     elements: {
                       formButtonPrimary: "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 w-full disabled:opacity-75 disabled:transform-none disabled:cursor-wait disabled:animate-pulse",
@@ -186,7 +192,8 @@ export default function AuthPage() {
                     },
                     layout: {
                       socialButtonsPlacement: "top",
-                      showOptionalFields: false
+                      showOptionalFields: false,
+                      logoPlacement: "none"
                     },
                     variables: {
                       colorPrimary: "#3b82f6",
