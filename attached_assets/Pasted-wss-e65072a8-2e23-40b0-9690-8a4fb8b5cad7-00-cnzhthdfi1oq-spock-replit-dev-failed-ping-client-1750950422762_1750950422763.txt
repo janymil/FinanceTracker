@@ -1,0 +1,475 @@
+wss://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/' failed: 
+ping @ client:1035
+waitForSuccessfulPing @ client:1054
+handleMessage @ client:968Understand this error
+sidebar.tsx:50 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/auth/user 502 (Bad Gateway)
+queryFn @ sidebar.tsx:50
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+financial-health-mascot.tsx:88 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/financial-health 502 (Bad Gateway)
+queryFn @ financial-health-mascot.tsx:88
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+queryClient.ts:56 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/categories 502 (Bad Gateway)
+apiRequest @ queryClient.ts:56
+await in apiRequest
+queryFn @ header.tsx:101
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+queryClient.ts:56 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/transactions 502 (Bad Gateway)
+apiRequest @ queryClient.ts:56
+await in apiRequest
+queryFn @ useTransactions.ts:12
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+queryClient.ts:56 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/budgets 502 (Bad Gateway)
+apiRequest @ queryClient.ts:56
+await in apiRequest
+queryFn @ budget-overview.tsx:37
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+queryClient.ts:56 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/financial-summary?startDate=2025-06-01T00%3A00%3A00.000Z&endDate=2025-06-29T22%3A00%3A00.000Z 502 (Bad Gateway)
+apiRequest @ queryClient.ts:56
+await in apiRequest
+queryFn @ dashboard.tsx:203
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+queryClient.ts:56 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/transaction-reminders?days=30 502 (Bad Gateway)
+apiRequest @ queryClient.ts:56
+await in apiRequest
+queryFn @ transaction-reminders-widget.tsx:113
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+queryClient.ts:75 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/auth/user 502 (Bad Gateway)
+(anonymous) @ queryClient.ts:75
+await in (anonymous)
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+ai-financial-tips.tsx:109 AI Tips: Component state: {hasUser: true, userPlan: 'premium', hasSummary: true, summaryIncome: 5860, summaryExpenses: 7668.9}
+ai-financial-tips.tsx:109 AI Tips: Component state: {hasUser: true, userPlan: 'premium', hasSummary: true, summaryIncome: 5860, summaryExpenses: 7668.9}
+queryClient.ts:56 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/expense-reminders/upcoming 502 (Bad Gateway)
+apiRequest @ queryClient.ts:56
+await in apiRequest
+queryFn @ transaction-reminders-widget.tsx:125
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+6queryClient.ts:30 Clerk token available: true
+queryClient.ts:56 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/auth/user 502 (Bad Gateway)
+apiRequest @ queryClient.ts:56
+await in apiRequest
+queryFn @ dashboard.tsx:175
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=17106d5f:498
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+financial-health-mascot.tsx:88 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/financial-health 502 (Bad Gateway)
+queryFn @ financial-health-mascot.tsx:88
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=17106d5f:498
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+queryClient.ts:56 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/categories 502 (Bad Gateway)
+apiRequest @ queryClient.ts:56
+await in apiRequest
+queryFn @ dashboard.tsx:190
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=17106d5f:498
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+queryClient.ts:56 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/transactions 502 (Bad Gateway)
+apiRequest @ queryClient.ts:56
+await in apiRequest
+queryFn @ useTransactions.ts:12
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=17106d5f:498
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+queryClient.ts:56 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/budgets 502 (Bad Gateway)
+apiRequest @ queryClient.ts:56
+await in apiRequest
+queryFn @ budget-overview.tsx:37
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=17106d5f:498
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+queryClient.ts:56 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/financial-summary?startDate=2025-06-01T00%3A00%3A00.000Z&endDate=2025-06-29T22%3A00%3A00.000Z 502 (Bad Gateway)
+apiRequest @ queryClient.ts:56
+await in apiRequest
+queryFn @ dashboard.tsx:203
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=17106d5f:498
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+queryClient.ts:30 Clerk token available: true
+queryClient.ts:56 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/transaction-reminders?days=30 502 (Bad Gateway)
+apiRequest @ queryClient.ts:56
+await in apiRequest
+queryFn @ transaction-reminders-widget.tsx:113
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=17106d5f:498
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+queryClient.ts:75 
+            
+            
+           GET https://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/api/auth/user 502 (Bad Gateway)
+(anonymous) @ queryClient.ts:75
+await in (anonymous)
+fetchFn @ @tanstack_react-query.js?v=17106d5f:840
+run @ @tanstack_react-query.js?v=17106d5f:494
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=17106d5f:498
+start @ @tanstack_react-query.js?v=17106d5f:536
+fetch @ @tanstack_react-query.js?v=17106d5f:926
+executeFetch_fn @ @tanstack_react-query.js?v=17106d5f:2211
+fetch @ @tanstack_react-query.js?v=17106d5f:2011
+refetch @ @tanstack_react-query.js?v=17106d5f:2001
+onFocus @ @tanstack_react-query.js?v=17106d5f:749
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1112
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1111
+batch @ @tanstack_react-query.js?v=17106d5f:583
+onFocus @ @tanstack_react-query.js?v=17106d5f:1110
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:313
+onFocus @ @tanstack_react-query.js?v=17106d5f:312
+(anonymous) @ @tanstack_react-query.js?v=17106d5f:299
+listener @ @tanstack_react-query.js?v=17106d5f:270Understand this error
+queryClient.ts:30 Clerk token available: true
+client:1035 WebSocket connection to 'wss://e65072a8-2e23-40b0-9690-8a4fb8b5cad7-00-cnzhthdfi1oq.spock.replit.dev/' failed: 
+ping @ client:1035
+waitForSuccessfulPing @ client:1060Understand this error
+queryClient.ts:56 
+            
+            
+           GET 

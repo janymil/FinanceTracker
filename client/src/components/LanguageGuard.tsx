@@ -14,7 +14,40 @@ export default function LanguageGuard() {
 
   useEffect(() => {
     if (!lang || !SUPPORTED_LANGS.includes(lang)) {
-      window.location.href = '/en-us/dashboard';
+      // Intelligent language detection and redirect
+      const detectLanguageAndRedirect = () => {
+        // 1. Try saved user preference first
+        const savedLang = localStorage.getItem('preferred-language');
+        if (savedLang && SUPPORTED_LANGS.includes(savedLang)) {
+          window.location.href = `/${savedLang}/dashboard`;
+          return;
+        }
+        
+        // 2. Try browser language mapping
+        const browserLang = navigator.language || (navigator as any).userLanguage || 'en';
+        const langMap: Record<string, string> = {
+          'en': 'en-us',
+          'en-US': 'en-us',
+          'en-GB': 'en-us',
+          'es': 'es-pe',
+          'es-PE': 'es-pe', 
+          'es-ES': 'es-pe',
+          'es-MX': 'es-pe',
+          'sk': 'sk-sk',
+          'sk-SK': 'sk-sk'
+        };
+        
+        // Try direct mapping first, then try language prefix
+        const mappedLang = langMap[browserLang] || langMap[browserLang.split('-')[0]] || 'en-us';
+        
+        // Save the detected language as preference
+        localStorage.setItem('preferred-language', mappedLang);
+        
+        // Redirect to the detected/mapped language
+        window.location.href = `/${mappedLang}/dashboard`;
+      };
+      
+      detectLanguageAndRedirect();
       return;
     }
 
