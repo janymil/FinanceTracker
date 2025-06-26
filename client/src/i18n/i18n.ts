@@ -54,7 +54,7 @@ loadTranslations().then(resources => {
     .use(initReactI18next)
     .init({
       lng: 'en',
-      supportedLngs: ['en', 'es', 'sk', 'en-us', 'es-pe', 'sk-sk'],
+      supportedLngs: ['en', 'es', 'sk', 'en-us', 'es-pe', 'sk-sk', 'en-US', 'es-PE', 'sk-SK'],
       fallbackLng: 'en',
       debug: true,
       
