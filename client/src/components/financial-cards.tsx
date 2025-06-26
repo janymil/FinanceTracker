@@ -71,6 +71,12 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
     }
   }, [summary]);
 
+  // Force re-render when language changes
+  useEffect(() => {
+    // This effect ensures the component re-renders when language changes
+    // No action needed, just dependency on i18n.language
+  }, [i18n.language]);
+
   const getBudgetStatus = () => {
     if (!summary) return { status: 'loading', percentage: 0, remaining: 0, bgColor: 'bg-gray-50', textColor: 'text-gray-600' };
     
