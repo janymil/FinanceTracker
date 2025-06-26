@@ -123,10 +123,11 @@ export default function Dashboard() {
     }
   }, [toast]);
   const [isPending, startTransition] = useTransition();
-  const [selectedMonth, setSelectedMonth] = useState(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  });
+  const [selectedYear, setSelectedYear] = useState(() => String(new Date().getFullYear()));
+  const [selectedMonthNum, setSelectedMonthNum] = useState(() => String(new Date().getMonth() + 1).padStart(2, '0'));
+  
+  // Combine month and year for API calls
+  const selectedMonth = `${selectedYear}-${selectedMonthNum}`;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Defer expensive rendering to prevent Suspense errors
@@ -352,21 +353,33 @@ export default function Dashboard() {
     };
   }, [i18n.language]);
 
-  // Generate dynamic month options (current month + last 11 months)
+  // Generate month options (1-12)
   const generateMonthOptions = () => {
-    const options = [];
-    const now = new Date();
+    const currentLang = i18n.language;
+    const monthNames = {
+      'es': ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
+      'sk': ['január', 'február', 'marec', 'apríl', 'máj', 'jún', 'júl', 'august', 'september', 'október', 'november', 'december'],
+      'en': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    };
+    
+    const langKey = currentLang.startsWith('es') ? 'es' : 
+                    currentLang.startsWith('sk') ? 'sk' : 'en';
+    
+    return monthNames[langKey].map((name, index) => ({
+      value: String(index + 1).padStart(2, '0'),
+      label: name
+    }));
+  };
 
-    for (let i = 0; i < 12; i++) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const value = `${year}-${month}`;
-      const label = formatMonth(value);
-      options.push({ value, label });
+  // Generate year options (current year and previous years)
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = 0; i < 5; i++) {
+      const year = currentYear - i;
+      years.push({ value: String(year), label: String(year) });
     }
-
-    return options;
+    return years;
   };
 
   const handleSubmit = async () => {
@@ -396,19 +409,33 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="flex items-center space-x-4">
-              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger className="w-40">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {generateMonthOptions().map(({ value, label }) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center space-x-2">
+                <Calendar className="h-4 w-4 text-gray-500" />
+                <Select value={selectedMonthNum} onValueChange={setSelectedMonthNum}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder={t("Month")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {generateMonthOptions().map(({ value, label }) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <SelectTrigger className="w-20">
+                    <SelectValue placeholder={t("Year")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {generateYearOptions().map(({ value, label }) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button 
