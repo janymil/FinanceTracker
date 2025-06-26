@@ -48,39 +48,60 @@ async function loadTranslations() {
   return resources;
 }
 
-// Initialize i18n with preloaded resources
-loadTranslations().then(resources => {
-  i18n
-    .use(initReactI18next)
-    .init({
-      lng: 'en',
-      supportedLngs: ['en', 'es', 'sk', 'en-us', 'es-pe', 'sk-sk', 'en-US', 'es-PE', 'sk-SK'],
-      fallbackLng: 'en',
-      debug: true,
-      
-      resources,
+// Initialize i18n only once with proper error handling
+let isInitialized = false;
 
-      interpolation: {
-        escapeValue: false,
-      },
+async function initializeI18n() {
+  if (isInitialized) {
+    console.warn('i18n already initialized, skipping...');
+    return;
+  }
 
-      react: {
-        useSuspense: false,
-      },
-    });
-}).catch(error => {
-  console.error('Failed to initialize i18n:', error);
-  // Fallback initialization without resources
-  i18n
-    .use(initReactI18next)
-    .init({
-      lng: 'en',
-      supportedLngs: ['en', 'es', 'sk', 'en-us', 'es-pe', 'sk-sk', 'en-US', 'es-PE', 'sk-SK'],
-      fallbackLng: 'en',
-      debug: true,
-      interpolation: { escapeValue: false },
-      react: { useSuspense: false },
-    });
-});
+  try {
+    const resources = await loadTranslations();
+    
+    await i18n
+      .use(initReactI18next)
+      .init({
+        lng: 'en',
+        supportedLngs: ['en', 'es', 'sk', 'en-us', 'es-pe', 'sk-sk', 'en-US', 'es-PE', 'sk-SK'],
+        fallbackLng: 'en',
+        debug: true,
+        
+        resources,
+
+        interpolation: {
+          escapeValue: false,
+        },
+
+        react: {
+          useSuspense: false,
+        },
+      });
+    
+    isInitialized = true;
+    console.log('i18n initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize i18n:', error);
+    
+    // Fallback initialization without resources
+    await i18n
+      .use(initReactI18next)
+      .init({
+        lng: 'en',
+        supportedLngs: ['en', 'es', 'sk', 'en-us', 'es-pe', 'sk-sk', 'en-US', 'es-PE', 'sk-SK'],
+        fallbackLng: 'en',
+        debug: true,
+        interpolation: { escapeValue: false },
+        react: { useSuspense: false },
+      });
+    
+    isInitialized = true;
+    console.log('i18n initialized with fallback');
+  }
+}
+
+// Initialize on module load
+initializeI18n();
 
 export default i18n;
