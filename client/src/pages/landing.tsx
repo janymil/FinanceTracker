@@ -455,55 +455,55 @@ export default function Landing() {
             <Card className="border-2 border-premium relative">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <Badge className="bg-green-500 text-white px-4 py-1">
-                  Save $19.98
+                  {t("Save $19.98")}
                 </Badge>
               </div>
               <CardHeader className="text-center pb-8 bg-gradient-to-br from-premium-light to-white dark:from-premium/20 dark:to-transparent">
                 <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Crown className="h-8 w-8 text-premium" />
                 </div>
-                <CardTitle className="text-2xl">Premium</CardTitle>
+                <CardTitle className="text-2xl">{t("Premium")}</CardTitle>
                 <div className="text-4xl font-bold text-premium">
-                  $99.90<span className="text-lg font-normal text-gray-500">/year</span>
+                  $99.90<span className="text-lg font-normal text-gray-500">/{t("year")}</span>
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-300">
-                  $8.33/month • Save 2 months
+                  {t("$8.33/month • Save 2 months")}
                 </div>
-                <CardDescription>Complete AI-powered financial automation</CardDescription>
+                <CardDescription>{t("Complete AI-powered financial automation")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Everything in Standard plan</span>
+                    <span>{t("Everything in Standard plan")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>AI financial tips and insights</span>
+                    <span>{t("AI financial tips and insights")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Advanced trends analysis</span>
+                    <span>{t("Advanced trends analysis")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Expense prediction</span>
+                    <span>{t("Expense prediction")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Daily personalized recommendations</span>
+                    <span>{t("Daily personalized recommendations")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Cloud data backup</span>
+                    <span>{t("Cloud data backup")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Data management (CSV, PDF)</span>
+                    <span>{t("Data management (CSV, PDF)")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Priority email support</span>
+                    <span>{t("Priority email support")}</span>
                   </div>
                 </div>
                 <Button 
@@ -511,7 +511,7 @@ export default function Landing() {
                   className="w-full mt-6 bg-premium hover:bg-premium/90"
                 >
                   <Crown className="h-4 w-4 mr-2" />
-                  Subscribe Now
+                  {t("Subscribe Now")}
                 </Button>
               </CardContent>
             </Card>
@@ -526,10 +526,10 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Compare All Features
+              {t("Compare All Features")}
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300">
-              See exactly what's included in each plan
+              {t("See exactly what's included in each plan")}
             </p>
           </div>
 
@@ -537,105 +537,105 @@ export default function Landing() {
             <table className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700">
-                  <th className="text-left p-6 font-semibold text-gray-900 dark:text-white">Features</th>
-                  <th className="text-center p-6 font-semibold text-gray-900 dark:text-white">Free</th>
-                  <th className="text-center p-6 font-semibold text-blue-600">Standard</th>
-                  <th className="text-center p-6 font-semibold text-premium">Premium</th>
+                  <th className="text-left p-6 font-semibold text-gray-900 dark:text-white">{t("Features")}</th>
+                  <th className="text-center p-6 font-semibold text-gray-900 dark:text-white">{t("Free")}</th>
+                  <th className="text-center p-6 font-semibold text-blue-600">{t("Standard")}</th>
+                  <th className="text-center p-6 font-semibold text-premium">{t("Premium")}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Basic expense tracking</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">{t("Basic expense tracking")}</td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Manual categorization</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">{t("Manual categorization")}</td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Simple financial overview</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">{t("Simple financial overview")}</td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Personalized financial tips</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">{t("Personalized financial tips")}</td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Transaction history</td>
-                  <td className="p-6 text-center text-gray-500">Up to 100</td>
-                  <td className="p-6 text-center text-gray-500">Unlimited</td>
-                  <td className="p-6 text-center text-gray-500">Unlimited</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">{t("Transaction history")}</td>
+                  <td className="p-6 text-center text-gray-500">{t("Up to 100")}</td>
+                  <td className="p-6 text-center text-gray-500">{t("Unlimited")}</td>
+                  <td className="p-6 text-center text-gray-500">{t("Unlimited")}</td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Goals and budget management</td>
-                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
-                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
-                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
-                </tr>
-                <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Interactive charts and reports</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">{t("Goals and budget management")}</td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">AI expense categorization</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">{t("Interactive charts and reports")}</td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Calendar view and reminders</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">{t("AI expense categorization")}</td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">AI financial tips and insights</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">{t("Calendar view and reminders")}</td>
+                  <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                  <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-gray-100 dark:border-gray-700">
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">{t("AI financial tips and insights")}</td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Advanced trends analysis</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">{t("Advanced trends analysis")}</td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Expense prediction</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">{t("Expense prediction")}</td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Daily personalized recommendations</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">{t("Daily personalized recommendations")}</td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Cloud data backup</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">{t("Cloud data backup")}</td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Data management (CSV, PDF)</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">{t("Data management (CSV, PDF)")}</td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
                 </tr>
                 <tr>
-                  <td className="p-6 font-medium text-gray-900 dark:text-white">Priority email support</td>
+                  <td className="p-6 font-medium text-gray-900 dark:text-white">{t("Priority email support")}</td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><X className="h-5 w-5 text-gray-400 mx-auto" /></td>
                   <td className="p-6 text-center"><Check className="h-5 w-5 text-success mx-auto" /></td>
@@ -651,35 +651,35 @@ export default function Landing() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Frequently Asked Questions
+              {t("Frequently Asked Questions")}
             </h2>
           </div>
           
           <div className="space-y-8">
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Can I cancel my subscription anytime?
+                {t("Can I cancel my subscription anytime?")}
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Yes, you can cancel your subscription at any time. Your access will continue until the end of your current billing period.
+                {t("Yes, you can cancel your subscription at any time. Your access will continue until the end of your current billing period.")}
               </p>
             </div>
             
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Is there a free trial for paid plans?
+                {t("Is there a free trial for paid plans?")}
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                No, there is no free trial for paid plans. However, you can start with our free plan to explore basic features before upgrading to Standard or Premium.
+                {t("No, there is no free trial for paid plans. However, you can start with our free plan to explore basic features before upgrading to Standard or Premium.")}
               </p>
             </div>
             
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                How secure is my financial data?
+                {t("How secure is my financial data?")}
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                We use industry-standard encryption to protect your data. Your information is encrypted both in transit and at rest.
+                {t("We use industry-standard encryption to protect your data. Your information is encrypted both in transit and at rest.")}
               </p>
             </div>
           </div>
@@ -692,14 +692,14 @@ export default function Landing() {
           <div className="text-center">
             <div className="flex items-center justify-center mb-4">
               <TrendingUp className="h-8 w-8 text-primary mr-2" />
-              <span className="text-xl font-bold">FinanzerPro</span>
+              <span className="text-xl font-bold">{t("FinanzerPro")}</span>
             </div>
             <p className="text-gray-400 mb-8">
-              Take control of your financial future with intelligent expense tracking and budgeting.
+              {t("Take control of your financial future with intelligent expense tracking and budgeting.")}
             </p>
             <div className="border-t border-gray-800 pt-8">
               <p className="text-gray-400">
-                © 2025 FinanzerPro. All rights reserved.
+                {t("© 2025 FinanzerPro. All rights reserved.")}
               </p>
             </div>
           </div>
