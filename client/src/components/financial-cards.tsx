@@ -160,6 +160,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
     };
   };
 
+  // Calculate budget info on every render (including language changes)
   const budgetInfo = getBudgetStatus();
 
   if (isLoading) {
