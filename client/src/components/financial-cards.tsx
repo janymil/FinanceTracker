@@ -25,6 +25,15 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
   const { currency } = useCurrency();
   const { t, i18n } = useTranslation();
   
+  // Debug logging to track language changes
+  console.log('FinancialCards render - current language:', i18n.language);
+  console.log('FinancialCards render - Total Income translation:', t('Total Income'));
+  
+  // Force fresh translations by explicitly getting them with current language
+  const getCurrentTranslation = (key: string) => {
+    return i18n.t(key, { lng: i18n.language });
+  };
+  
 
   const [animatedValues, setAnimatedValues] = useState({
     income: 0,
@@ -190,13 +199,13 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-green-700 dark:text-green-300 mb-1">
-                {t('Total Income')}
+                {getCurrentTranslation('Total Income')}
               </p>
               <p className="text-2xl font-bold text-green-800 dark:text-green-200 transition-all duration-300 ease-out">
                 {formatCurrency(animatedValues.income)}
               </p>
               <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                {summary?.incomeTransactionCount || 0} {(summary?.incomeTransactionCount || 0) === 1 ? t('transaction') : t('transactions')}
+                {summary?.incomeTransactionCount || 0} {(summary?.incomeTransactionCount || 0) === 1 ? getCurrentTranslation('transaction') : getCurrentTranslation('transactions')}
               </p>
             </div>
             <div className="bg-green-100 dark:bg-green-800/40 p-3 rounded-lg">
@@ -212,7 +221,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-red-700 dark:text-red-300 mb-1">
-                {t('Total Expenses')}
+                {getCurrentTranslation('Total Expenses')}
               </p>
               <p className="text-2xl font-bold text-red-800 dark:text-red-200 transition-all duration-300 ease-out">
                 {formatCurrency(Math.abs(animatedValues.expenses))}
