@@ -353,17 +353,13 @@ export default function Dashboard() {
   const generateMonthOptions = () => {
     const options = [];
     const now = new Date();
-    const locale = getDateLocale();
 
     for (let i = 0; i < 12; i++) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const value = `${year}-${month}`;
-      const label = date.toLocaleDateString(locale, {
-        month: 'long',
-        year: 'numeric'
-      });
+      const label = formatMonth(value);
       options.push({ value, label });
     }
 
