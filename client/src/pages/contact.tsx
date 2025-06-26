@@ -5,13 +5,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, MapPin, Clock, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 import { SEO } from "@/components/SEO";
 import { AnonymousHeader } from "@/components/anonymous-header";
+import { useUser } from "@clerk/clerk-react";
 
 export default function Contact() {
-  const { user } = useAuth();
+  const { user } = useUser();
   const [, setLocation] = useLocation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

@@ -33,8 +33,8 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
+import { useUser } from "@clerk/clerk-react";
 import { AnonymousHeader } from "@/components/anonymous-header";
 
 interface ChatMessage {
@@ -44,7 +44,7 @@ interface ChatMessage {
 }
 
 export default function Help() {
-  const { user } = useAuth();
+  const { user } = useUser();
   const [, setLocation] = useLocation();
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {

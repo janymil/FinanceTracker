@@ -98,22 +98,28 @@ function Router() {
         
         {/* Default route - redirect to user's language/dashboard */}
         <Route path="/" component={() => { 
-          // Detect user's preferred language
+          // Detect user's preferred language using simplified codes
           const browserLang = navigator.language.toLowerCase();
-          const supportedLangs = ['en-us', 'es-pe', 'sk-sk'];
+          const supportedLangs = ['en', 'es', 'sk'];
           
           // Check localStorage for previous language choice
           const savedLang = localStorage.getItem('preferredLanguage');
           
-          let targetLang = 'en-us'; // fallback
+          let targetLang = 'en'; // fallback
           
           // Priority: saved language > browser language mapping > fallback
           if (savedLang && supportedLangs.includes(savedLang)) {
             targetLang = savedLang;
-          } else if (browserLang.startsWith('es')) {
-            targetLang = 'es-pe';
-          } else if (browserLang.startsWith('sk')) {
-            targetLang = 'sk-sk';
+          } else {
+            // Extract main language code dynamically
+            const mainLangCode = browserLang.split('-')[0];
+            if (mainLangCode === 'es') {
+              targetLang = 'es';
+            } else if (mainLangCode === 'sk') {
+              targetLang = 'sk';
+            } else {
+              targetLang = 'en';
+            }
           }
           
           window.location.href = `/${targetLang}/dashboard`; 

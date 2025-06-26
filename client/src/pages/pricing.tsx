@@ -4,16 +4,16 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, X, Crown, TrendingUp, Star } from "lucide-react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
 import { SEO } from "@/components/SEO";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useUser } from "@clerk/clerk-react";
 
 export default function Pricing() {
   const [, setLocation] = useLocation();
-  const { user } = useAuth();
+  const { user } = useUser();
 
-  // Get user's current plan
-  const userPlan = user && 'plan' in user && user.plan ? user.plan : 'free';
+  // Get user's current plan - default to free for public page
+  const userPlan = 'free';
 
   const handleGetStarted = (plan: string) => {
     if (user) {
