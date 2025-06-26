@@ -84,7 +84,7 @@ export default function Dashboard() {
   const { isReady, user } = useClerkUserReady();
   const { showSetupModal, setShowSetupModal } = useCurrency();
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Check for subscription success/error messages
   useEffect(() => {

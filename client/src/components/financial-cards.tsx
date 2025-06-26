@@ -25,9 +25,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
   const { currency } = useCurrency();
   const { t, i18n } = useTranslation();
   
-  // Debug logging to track language changes
-  console.log('FinancialCards render - current language:', i18n.language);
-  console.log('FinancialCards render - Total Income translation:', t('Total Income'));
+
   
 
   const [animatedValues, setAnimatedValues] = useState({
