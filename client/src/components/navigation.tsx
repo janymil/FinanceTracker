@@ -22,7 +22,7 @@ export default function Navigation() {
   const handleLogout = async () => {
     // Clear user session data while preserving AI tips and theme
     clearUserSession();
-    // Use Clerk signOut - the custom router functions will handle navigation
+    // Use default Clerk signOut - let Clerk handle the redirect
     await signOut();
   };
 
