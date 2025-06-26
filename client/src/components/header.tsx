@@ -419,8 +419,8 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
           <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
             {new Date().toLocaleDateString(
               i18n.language === 'sk' || i18n.language === 'sk-sk' ? 'sk-SK' : 
-              i18n.language === 'es' || i18n.language === 'es-pe' || i18n.language.startsWith('es') ? 'es' : 
-              'en', { 
+              i18n.language === 'es' || i18n.language === 'es-pe' || i18n.language.startsWith('es') ? 'es-PE' : 
+              'en-US', { 
               weekday: 'long',
               day: 'numeric', 
               month: 'long', 
