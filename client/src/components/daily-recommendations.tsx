@@ -80,10 +80,13 @@ export default function DailyRecommendations({ summary, transactions = [], budge
   
 
   
-  // Fetch AI recommendations from backend - force refetch
+  // Create stable date-based cache key that matches backend 24-hour TTL
+  const todayKey = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  
+  // Fetch AI recommendations from backend
   const { data: recommendationsData, isLoading: recommendationsLoading, error: recommendationsError, refetch } = useQuery({
-    queryKey: ['daily-recommendations', user?.id, Math.floor((transactions?.length || 0) / 5) * 5], // Only change key every 5 transactions
-    enabled: isUserReady && isPremiumUser, // Let AI decide if data is sufficient
+    queryKey: ['daily-recommendations', user?.id, todayKey], // Cache by user and date only
+    enabled: isUserReady && isPremiumUser && hasTransactionData,
     staleTime: 24 * 60 * 60 * 1000, // 24 hours cache for session persistence
     refetchOnWindowFocus: false,
     queryFn: async () => {
@@ -179,7 +182,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                 </div>
               ) : recommendations.length > 0 ? (
                 <div className="space-y-3">
-                {recommendations.map((rec) => {
+                {recommendations.map((rec: Recommendation) => {
                   const isCompleted = completedTasks.has(rec.id);
                   
                   return (
@@ -265,7 +268,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
 
               {insights.length > 0 ? (
                 <div className="space-y-3">
-                  {insights.map((insight) => (
+                  {insights.map((insight: PersonalizationInsight) => (
                     <Card key={insight.id} className="p-4">
                       <div className="flex items-start gap-3">
                         <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
