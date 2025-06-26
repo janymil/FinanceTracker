@@ -72,7 +72,7 @@ interface HeaderProps {
 }
 
 export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { user: clerkUser } = useUser();
   const { isReady } = useClerkUserReady();
@@ -193,7 +193,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
               className="border-orange-500 text-orange-600 hover:bg-orange-50 dark:border-orange-400 dark:text-orange-400 dark:hover:bg-orange-950"
             >
               <Gift className="h-4 w-4 mr-2" />
-              Redeem Code
+              {t("Redeem Code")}
             </Button>
           </Link>
 
@@ -417,7 +417,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
         {/* Center - Date selector or breadcrumb */}
         <div className="hidden md:flex items-center">
           <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {new Date().toLocaleDateString('en-US', { 
+            {new Date().toLocaleDateString(i18n.language === 'sk' ? 'sk-SK' : i18n.language === 'es' ? 'es-ES' : 'en-US', { 
               weekday: 'long',
               day: 'numeric', 
               month: 'long', 
