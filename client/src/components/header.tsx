@@ -224,16 +224,16 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Add New Transaction</DialogTitle>
+                <DialogTitle>{t("Add New Transaction")}</DialogTitle>
                 <DialogDescription>
-                  Record a new income or expense transaction
+                  {t("Record a new income or expense transaction")}
                 </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="amount">Amount</Label>
+                    <Label htmlFor="amount">{t("Amount")}</Label>
                     <Input
                       id="amount"
                       type="number"
@@ -244,7 +244,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="date">Date</Label>
+                    <Label htmlFor="date">{t("Date")}</Label>
                     <Input
                       id="date"
                       type="date"
@@ -255,18 +255,18 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                 </div>
 
                 <div>
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">{t("Description")}</Label>
                   <Textarea
                     id="description"
                     value={newTransaction.description}
                     onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })}
-                    placeholder="What was this transaction for?"
+                    placeholder={t("What was this transaction for?")}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="type">Type</Label>
+                    <Label htmlFor="type">{t("Type")}</Label>
                     <Select
                       value={newTransaction.type}
                       onValueChange={(value: "income" | "expense") => 
@@ -274,22 +274,22 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
+                        <SelectValue placeholder={t("Select type")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="income">Income</SelectItem>
-                        <SelectItem value="expense">Expense</SelectItem>
+                        <SelectItem value="income">{t("Income")}</SelectItem>
+                        <SelectItem value="expense">{t("Expense")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="category">Category</Label>
+                    <Label htmlFor="category">{t("Category")}</Label>
                     <Select
                       value={newTransaction.categoryId}
                       onValueChange={(value) => setNewTransaction({ ...newTransaction, categoryId: value })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder={t("Select category")} />
                       </SelectTrigger>
                       <SelectContent>
                         {(categories as Category[])
@@ -355,14 +355,14 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                         />
                         <label htmlFor="recurring" className="flex items-center text-sm font-medium">
                           <Repeat className="h-4 w-4 mr-2" />
-                          Make this a recurring transaction
+{t("Make this a recurring transaction")}
                         </label>
                       </div>
 
                       {newTransaction.isRecurring && (
                         <div className="grid grid-cols-2 gap-4 pl-6">
                           <div>
-                            <Label htmlFor="frequency">Frequency</Label>
+                            <Label htmlFor="frequency">{t("Frequency")}</Label>
                             <Select
                               value={newTransaction.recurringFrequency}
                               onValueChange={(value) => setNewTransaction({ 
@@ -371,17 +371,17 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                               })}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Select frequency" />
+                                <SelectValue placeholder={t("Select frequency")} />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="weekly">Weekly</SelectItem>
-                                <SelectItem value="monthly">Monthly</SelectItem>
-                                <SelectItem value="yearly">Yearly</SelectItem>
+                                <SelectItem value="weekly">{t("Weekly")}</SelectItem>
+                                <SelectItem value="monthly">{t("Monthly")}</SelectItem>
+                                <SelectItem value="yearly">{t("Yearly")}</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
                           <div>
-                            <Label htmlFor="endDate">End Date (Optional)</Label>
+                            <Label htmlFor="endDate">{t("End Date (Optional)")}</Label>
                             <Input
                               id="endDate"
                               type="date"
