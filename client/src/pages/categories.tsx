@@ -403,9 +403,9 @@ export default function Categories() {
           <TabsContent value="expenses" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Expense Categories</CardTitle>
+                <CardTitle>{t("Expense Categories")}</CardTitle>
                 <CardDescription>
-                  Manage categories for your expenses and spending
+                  {t("Manage categories for your expenses and spending")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -413,14 +413,14 @@ export default function Categories() {
                   <div className="text-center py-8">
                     <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      No Expense Categories
+                      {t("No Expense Categories")}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      Create your first expense category to organize your spending
+                      {t("Create your first expense category to organize your spending")}
                     </p>
                     <Button onClick={() => setIsDialogOpen(true)}>
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Expense Category
+                      {t("Add Expense Category")}
                     </Button>
                   </div>
                 ) : (
@@ -438,9 +438,9 @@ export default function Categories() {
           <TabsContent value="income" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Income Categories</CardTitle>
+                <CardTitle>{t("Income Categories")}</CardTitle>
                 <CardDescription>
-                  Manage categories for your income sources
+                  {t("Manage categories for your income sources")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -448,14 +448,14 @@ export default function Categories() {
                   <div className="text-center py-8">
                     <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      No Income Categories
+                      {t("No Income Categories")}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      Create your first income category to organize your revenue sources
+                      {t("Create your first income category to organize your revenue sources")}
                     </p>
                     <Button onClick={() => setIsDialogOpen(true)}>
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Income Category
+                      {t("Add Income Category")}
                     </Button>
                   </div>
                 ) : (
