@@ -17,7 +17,40 @@ export function AppLayout({ children, isPublicPage = false }: AppLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // For authenticated users, show the full app layout
+  // For public pages, show different layouts based on auth state
+  if (isPublicPage) {
+    if (isSignedIn && user) {
+      // Logged-in user on public page - show authenticated header but no sidebar
+      return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <Header 
+            onMenuClick={() => setSidebarOpen(true)} 
+            sidebarCollapsed={sidebarCollapsed}
+          />
+          <main className="flex-1">
+            <div className="p-6">
+              {children}
+            </div>
+          </main>
+          <FinancialMascot />
+        </div>
+      );
+    } else {
+      // Anonymous user on public page - show anonymous header
+      return (
+        <div className="min-h-screen bg-background">
+          <AnonymousHeader />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+          <CookieBanner />
+        </div>
+      );
+    }
+  }
+
+  // For private pages, show full authenticated layout
   if (isSignedIn && user) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -45,7 +78,7 @@ export function AppLayout({ children, isPublicPage = false }: AppLayoutProps) {
     );
   }
 
-  // For anonymous users or public pages, show minimal layout
+  // Fallback for unauthenticated access to private pages
   return (
     <div className="min-h-screen bg-background">
       <AnonymousHeader />
