@@ -5,6 +5,7 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SEO } from "@/components/SEO";
 import { AnonymousHeader } from "@/components/anonymous-header";
+import { useTranslation } from 'react-i18next';
 
 export default function TermsOfService() {
   const [, setLocation] = useLocation();
