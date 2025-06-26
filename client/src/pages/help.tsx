@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { 
   TrendingUp, 
@@ -1247,7 +1248,6 @@ export default function Help() {
         </div>
         </div>
       </div>
-    </div>
-    </>
+    </AppLayout>
   );
 }

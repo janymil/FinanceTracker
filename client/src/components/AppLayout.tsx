@@ -20,18 +20,28 @@ export function AppLayout({ children, isPublicPage = false }: AppLayoutProps) {
   // For public pages, show different layouts based on auth state
   if (isPublicPage) {
     if (isSignedIn && user) {
-      // Logged-in user on public page - show authenticated header but no sidebar
+      // Logged-in user on public page - show full authenticated layout (header + sidebar)
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <Header 
             onMenuClick={() => setSidebarOpen(true)} 
             sidebarCollapsed={sidebarCollapsed}
           />
-          <main className="flex-1">
-            <div className="p-6">
-              {children}
-            </div>
-          </main>
+          <div className="flex">
+            <Sidebar 
+              isOpen={sidebarOpen}
+              setIsOpen={setSidebarOpen}
+              isCollapsed={sidebarCollapsed}
+              setIsCollapsed={setSidebarCollapsed}
+            />
+            <main className={`flex-1 transition-all duration-300 ${
+              sidebarCollapsed ? 'ml-16' : 'ml-64'
+            } lg:ml-0`}>
+              <div className="p-6">
+                {children}
+              </div>
+            </main>
+          </div>
           <FinancialMascot />
         </div>
       );
