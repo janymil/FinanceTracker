@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from 'react-i18next';
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useClerk, useUser } from "@clerk/clerk-react";
@@ -71,6 +72,7 @@ interface HeaderProps {
 }
 
 export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { user: clerkUser } = useUser();
   const { isReady } = useClerkUserReady();
@@ -138,13 +140,13 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
         referenceNote: "",
       });
       toast({
-        title: "Transaction Added",
-        description: "Transaction has been created successfully",
+        title: t("Transaction Added"),
+        description: t("Transaction has been created successfully"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("Error"),
         description: error.message,
         variant: "destructive",
       });
@@ -154,8 +156,8 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const handleSubmit = async () => {
     if (!newTransaction.amount || !newTransaction.description) {
       toast({
-        title: "Error",
-        description: "Please fill in all required fields",
+        title: t("Error"),
+        description: t("Please fill in all required fields"),
         variant: "destructive",
       });
       return;
@@ -217,7 +219,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                 }}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add Transaction
+                {t("Add Transaction")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
