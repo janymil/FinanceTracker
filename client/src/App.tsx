@@ -145,56 +145,88 @@ function AppContent() {
   );
 }
 
-// Dynamic Page Router - handles all authenticated routes dynamically
+// TRULY Dynamic Page Router - automatically handles ANY route without hardcoding
 function DynamicPageRouter() {
   const [location] = useLocation();
+  const [PageComponent, setPageComponent] = useState<React.ComponentType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Extract language and path from URL (e.g., /en/dashboard -> lang='en', path='dashboard')
-  const matches = location.match(/^\/([a-z]{2})\/(.*)$/);
-  const pagePath = matches ? matches[2] : location.replace(/^\/[a-z]{2}\/?/, '');
+  useEffect(() => {
+    async function loadComponent() {
+      setIsLoading(true);
+      
+      // Extract page path from URL (remove language prefix)
+      const matches = location.match(/^\/[a-z]{2}\/(.*)$/);
+      let pagePath = matches ? matches[1] : location.replace(/^\/[a-z]{2}\/?/, '');
+      
+      // Handle empty path - default to dashboard
+      if (!pagePath || pagePath === '') {
+        pagePath = 'dashboard';
+      }
+      
+      // Handle paths with parameters (like /collaborative-goals/123)
+      let componentPath = pagePath;
+      if (pagePath.includes('/')) {
+        const basePath = pagePath.split('/')[0];
+        if (basePath === 'collaborative-goals') {
+          componentPath = 'collaborative-goal-detail';
+        } else {
+          // For other paths with parameters, just use the base path
+          componentPath = basePath;
+        }
+      }
+      
+      try {
+        // TRY to dynamically import ANY component based on path
+        // This will work for any existing page AND any new page you create
+        const component = (await import(`@/pages/${componentPath}`)).default;
+        setPageComponent(() => component);
+      } catch (error) {
+        console.log(`Page not found: @/pages/${componentPath}, trying fallback...`);
+        
+        // If that fails, try common alternative names
+        const alternativePaths = [
+          componentPath.replace(/-/g, ''), // Remove dashes: admin-analytics -> adminanalytics
+          componentPath.replace(/-/g, '_'), // Replace with underscores: admin-analytics -> admin_analytics
+          `${componentPath}-page`, // Add -page suffix
+          componentPath.replace(/s$/, ''), // Remove trailing 's': categories -> category
+        ];
+        
+        let foundComponent = null;
+        for (const altPath of alternativePaths) {
+          try {
+            foundComponent = (await import(`@/pages/${altPath}`)).default;
+            console.log(`Found component at alternative path: @/pages/${altPath}`);
+            break;
+          } catch {
+            // Continue trying alternatives
+          }
+        }
+        
+        if (foundComponent) {
+          setPageComponent(() => foundComponent);
+        } else {
+          // Final fallback to 404
+          console.error(`No component found for path: ${componentPath}`);
+          const NotFound = (await import('@/pages/not-found')).default;
+          setPageComponent(() => NotFound);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    loadComponent();
+  }, [location]);
   
-  // Route mapping for existing pages
-  const pageComponents: Record<string, React.ComponentType> = {
-    'dashboard': Dashboard,
-    'transactions': TransactionsPage,
-    'income': IncomePage,
-    'expenses': ExpensesPage,
-    'budget': BudgetPage,
-    'categories': CategoriesPage,
-    'goals': GoalsPage,
-    'collaborative-goals': CollaborativeGoalsPage,
-    'calendar': CalendarPage,
-    'trends': TrendsPage,
-    'reports': ReportsPage,
-    'export': ExportPage,
-    'subscribe': SubscribePage,
-    'redeem': RedeemPage,
-    'profile': ProfilePage,
-    'admin-analytics': AdminAnalytics,
-    // Public pages accessible from authenticated app
-    'pricing': Pricing,
-    'terms-of-service': TermsOfService,
-    'privacy-policy': PrivacyPolicy,
-    'cookie-policy': CookiePolicy,
-    'contact': Contact,
-    'help': Help,
-  };
-  
-  // Handle collaborative goal detail pages (with ID parameter)
-  const collaborativeGoalMatch = pagePath.match(/^collaborative-goals\/(.+)$/);
-  if (collaborativeGoalMatch) {
-    return <CollaborativeGoalDetailPage />;
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
   
-  // Get component for current page
-  const PageComponent = pageComponents[pagePath] || pageComponents['dashboard']; // Default to dashboard
-  
-  // If no specific route matched, default to dashboard for authenticated users
-  if (!pagePath || pagePath === '') {
-    return <Dashboard />;
+  if (!PageComponent) {
+    return <div className="flex items-center justify-center min-h-screen">Page not found</div>;
   }
   
-  // Render the appropriate component
   return <PageComponent />;
 }
 
