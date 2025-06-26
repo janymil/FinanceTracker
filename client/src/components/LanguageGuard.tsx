@@ -67,7 +67,9 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
     const pathParts = location.split('/').filter(Boolean);
     const lang = pathParts[0];
 
-
+    console.log('LanguageGuard: URL path:', location);
+    console.log('LanguageGuard: Detected lang from URL:', lang);
+    console.log('LanguageGuard: Current i18n language:', i18n.language);
 
     // If no language in URL, detect and redirect using client-side navigation
     if (!lang || !['en', 'es', 'sk'].includes(lang)) {

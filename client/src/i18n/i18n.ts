@@ -36,8 +36,6 @@ async function loadTranslations() {
           resources['sk'] = { translation: translations };
         }
         
-
-        
         console.log(`Loaded translations for ${lang}:`, Object.keys(translations).length, 'keys');
       } else {
         console.error(`Failed to load translations for ${lang}:`, response.status);

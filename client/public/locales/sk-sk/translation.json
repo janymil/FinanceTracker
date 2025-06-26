@@ -357,12 +357,5 @@
   "Category": "Kategória",
   "Recurring": "Opakujúce sa",
   "Filters": "Filtre",
-  "Active": "Aktívne",
-  "Net Balance": "Čistý Zostatok",
-  "Budget Status": "Stav Rozpočtu",
-  "transaction": "transakcia",
-  "transactions": "transakcie",
-  "total": "celkovo",
-  "utilized": "využitých",
-  "Remaining": "Zostáva"
+  "Active": "Aktívne"
 }

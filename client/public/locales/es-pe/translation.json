@@ -357,12 +357,5 @@
   "Category": "Categoría",
   "Recurring": "Recurrente",
   "Filters": "Filtros",
-  "Active": "Activo",
-  "Net Balance": "Balance Neto",
-  "Budget Status": "Estado del Presupuesto",
-  "transaction": "transacción",
-  "transactions": "transacciones",
-  "total": "total",
-  "utilized": "utilizado",
-  "Remaining": "Restante"
+  "Active": "Activo"
 }
