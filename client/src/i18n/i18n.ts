@@ -65,7 +65,7 @@ loadTranslations().then(resources => {
       },
 
       react: {
-        useSuspense: true, // Enable suspense to prevent rendering before translations load
+        useSuspense: false,
       },
     });
 }).catch(error => {
@@ -79,7 +79,7 @@ loadTranslations().then(resources => {
       fallbackLng: 'en',
       debug: true,
       interpolation: { escapeValue: false },
-      react: { useSuspense: true },
+      react: { useSuspense: false },
     });
 });
 
