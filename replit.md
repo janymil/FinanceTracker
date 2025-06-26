@@ -145,6 +145,8 @@ FinanzerPro is a comprehensive personal finance management application built wit
 - June 26, 2025: Fixed footer consistency for landing page - Footer component now intelligently adapts between sidebar layouts (AppLayout with margins) and landing page (full width). All pages now use the same comprehensive footer with contact info, support links, and legal pages.
 - June 26, 2025: Implemented signup performance optimizations - added informative signup info banner with loading animations to manage user expectations during Clerk's 6-8 second account creation process (reduced from 10-15 seconds through middleware optimizations). Enhanced signup button styling with disabled states and visual feedback. Configured ClerkProvider with appearance optimizations to improve perceived performance.
 - June 26, 2025: Completed auth page UX improvements - swapped column layout to prioritize Clerk signup/signin form first (left column on desktop, first on mobile), moved informational banner to right side with highlights. Improved mobile experience and visual organization by separating authentication forms from informational content.
+- June 26, 2025: Fixed page reload issue after login - removed redirect URLs from Clerk components and configured ClerkProvider with client-side navigation using browser history API. Authentication now uses smooth client-side transitions without full page reloads.
+- June 26, 2025: Fixed auth page language persistence - auth page now respects saved language preference from localStorage when redirecting after login, ensuring users return to their chosen language (e.g., /es/dashboard) instead of defaulting to URL language or English.
 
 ## Architecture Decision: AI Cache System
 

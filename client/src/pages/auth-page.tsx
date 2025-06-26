@@ -13,7 +13,16 @@ export default function AuthPage() {
   const [hasRedirected, setHasRedirected] = useState(false);
 
   // Extract current language from URL to build language-aware redirect URLs
-  const currentLang = location.match(/^\/([a-z]{2})\//)?.[1] || 'en';
+  // If no language in URL, use saved preference or browser language
+  const urlLang = location.match(/^\/([a-z]{2})\//)?.[1];
+  const savedLang = localStorage.getItem('preferredLanguage');
+  const browserLang = navigator.language.toLowerCase().split('-')[0];
+  const supportedLangs = ['en', 'es', 'sk'];
+  
+  const currentLang = urlLang || 
+    (savedLang && supportedLangs.includes(savedLang) ? savedLang : 
+    (supportedLangs.includes(browserLang) ? browserLang : 'en'));
+  
   const dashboardUrl = `/${currentLang}/dashboard`;
 
   // Check URL hash to determine which tab to show
