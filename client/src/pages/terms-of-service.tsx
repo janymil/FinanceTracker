@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 export default function TermsOfService() {
   const [, setLocation] = useLocation();
+  const { t } = useTranslation();
   
   useEffect(() => {
     document.title = "Terms of Service - FinanzerPro";
