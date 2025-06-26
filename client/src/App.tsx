@@ -204,8 +204,13 @@ export function AuthenticatedApp() {
               <Route path="/:lang/reports" component={ReportsPage} />
               <Route path="/:lang/export" component={ExportPage} />
               <Route path="/:lang/subscribe" component={SubscribePage} />
-              <Route path="/:lang/help" component={Help} />
-              <Route path="/:lang/redeem" component={RedeemPage} />
+              <Route path="/pricing" component={Pricing} />
+              <Route path="/terms-of-service" component={TermsOfService} />
+              <Route path="/privacy-policy" component={PrivacyPolicy} />
+              <Route path="/cookie-policy" component={CookiePolicy} />
+              <Route path="/contact" component={Contact} />
+              <Route path="/help" component={Help} />
+              <Route path="/redeem" component={RedeemPage} />
               <Route path="/profile" component={ProfilePage} />
               <Route path="/admin-analytics" component={AdminAnalytics} />
               
