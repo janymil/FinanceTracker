@@ -85,6 +85,8 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
     // Change language if needed and mark ready
     if (i18n.language !== lang) {
       console.log('LanguageGuard: Changing language from', i18n.language, 'to', lang);
+      // Save user's manual language choice
+      localStorage.setItem('preferredLanguage', lang);
       i18n.changeLanguage(lang).then(() => {
         console.log('LanguageGuard: Language changed successfully to', lang);
         console.log('LanguageGuard: i18n language is now:', i18n.language);
