@@ -155,8 +155,15 @@ function AuthenticatedApp() {
         )}>
           <div className="p-3 sm:p-6 max-w-full overflow-x-hidden">
             <Switch>
+              {/* Test route to debug routing */}
+              <Route path="/es-pe/dashboard">
+                {() => {
+                  console.log('Spanish dashboard route matched!');
+                  return <Dashboard />;
+                }}
+              </Route>
+              
               {/* Specific language routes for exact matching */}
-              <Route path="/es-pe/dashboard" component={Dashboard} />
               <Route path="/es-pe/transactions" component={TransactionsPage} />
               <Route path="/es-pe/income" component={IncomePage} />
               <Route path="/es-pe/expenses" component={ExpensesPage} />
