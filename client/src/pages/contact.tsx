@@ -50,23 +50,17 @@ export default function Contact() {
 
       const data = await response.json();
 
-      if (data.success) {
+      if (response.ok) {
         toast({
-          title: "Message sent successfully",
-          description: "Thank you for contacting us. We'll get back to you within 24 hours.",
+          title: "Message sent successfully!",
+          description: "We'll get back to you within 24 hours.",
         });
-
-        // Reset form
         setName("");
         setEmail("");
         setSubject("");
         setMessage("");
       } else {
-        toast({
-          title: "Failed to send message",
-          description: data.error || "Please try again later.",
-          variant: "destructive",
-        });
+        throw new Error(data.error || 'Failed to send message');
       }
     } catch (error) {
       toast({
@@ -118,8 +112,8 @@ export default function Contact() {
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Your name"
                       required
+                      placeholder="Your name"
                     />
                   </div>
                   <div>
@@ -131,12 +125,11 @@ export default function Contact() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="your@email.com"
                       required
+                      placeholder="your@email.com"
                     />
                   </div>
                 </div>
-
                 <div>
                   <label htmlFor="subject" className="block text-sm font-medium mb-2">
                     Subject
@@ -146,11 +139,10 @@ export default function Contact() {
                     type="text"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
-                    placeholder="What's this about?"
                     required
+                    placeholder="What can we help you with?"
                   />
                 </div>
-
                 <div>
                   <label htmlFor="message" className="block text-sm font-medium mb-2">
                     Message
@@ -159,12 +151,11 @@ export default function Contact() {
                     id="message"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Tell us how we can help..."
-                    rows={5}
                     required
+                    rows={6}
+                    placeholder="Tell us more about your question or issue..."
                   />
                 </div>
-
                 <Button 
                   type="submit" 
                   className="w-full" 
@@ -180,39 +171,27 @@ export default function Contact() {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Get in touch</CardTitle>
-                <CardDescription>
-                  Here are the different ways you can reach us.
-                </CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Mail className="h-5 w-5" />
+                  Get in Touch
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Mail className="h-5 w-5 text-primary" />
+                <div className="flex items-start space-x-3">
+                  <Clock className="h-5 w-5 mt-0.5 text-primary" />
                   <div>
-                    <p className="font-medium">Email</p>
-                    <p className="text-sm text-muted-foreground">info@finanzerpro.com</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <MapPin className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="font-medium">Address</p>
+                    <p className="font-medium">Response Time</p>
                     <p className="text-sm text-muted-foreground">
-                      NutriNova LLC<br />
-                      2105 Vista Oeste NW<br />
-                      Albuquerque, NM 87120
+                      We typically respond within 24 hours during business days
                     </p>
                   </div>
                 </div>
-
-                <div className="flex items-center space-x-3">
-                  <Clock className="h-5 w-5 text-primary" />
+                <div className="flex items-start space-x-3">
+                  <TrendingUp className="h-5 w-5 mt-0.5 text-primary" />
                   <div>
-                    <p className="font-medium">Business Hours</p>
+                    <p className="font-medium">Support Available</p>
                     <p className="text-sm text-muted-foreground">
-                      Monday - Friday: 9:00 AM - 6:00 PM (PST)<br />
-                      Saturday - Sunday: 10:00 AM - 4:00 PM (PST)
+                      Monday - Friday, 9 AM - 6 PM EST
                     </p>
                   </div>
                 </div>
@@ -227,14 +206,14 @@ export default function Contact() {
                 <div>
                   <p className="font-medium mb-2">How do I upgrade my plan?</p>
                   <p className="text-sm text-muted-foreground">
-                    Visit your account settings and click on "Upgrade Plan" to choose between Standard and Premium plans.
+                    Visit your account settings and click on the "Upgrade Plan" button to choose a new subscription tier.
                   </p>
                 </div>
 
                 <div>
-                  <p className="font-medium mb-2">Is my financial data secure?</p>
+                  <p className="font-medium mb-2">Is my data secure?</p>
                   <p className="text-sm text-muted-foreground">
-                    Yes, we use industry-standard encryption and security measures to protect your data. Read our Privacy Policy for details.
+                    Yes, we use bank-level encryption and security measures to protect your financial data.
                   </p>
                 </div>
 
@@ -248,7 +227,8 @@ export default function Contact() {
             </Card>
           </div>
         </div>
-      </div>
-    </div>
+      </main>
+      {!isSignedIn && <Footer />}
+    </>
   );
 }

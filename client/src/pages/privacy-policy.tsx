@@ -4,10 +4,14 @@ import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SEO } from "@/components/SEO";
+import { useUser } from "@clerk/clerk-react";
+import Header from "@/components/header";
 import { AnonymousHeader } from "@/components/anonymous-header";
+import { Footer } from "@/components/footer";
 import { useTranslation } from 'react-i18next';
 
 export default function PrivacyPolicy() {
+  const { isSignedIn } = useUser();
   const [, setLocation] = useLocation();
   const { t } = useTranslation();
   
@@ -20,9 +24,15 @@ export default function PrivacyPolicy() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header for anonymous users */}
-      <AnonymousHeader />
+    <>
+      <SEO 
+        title="Privacy Policy - FinanzerPro Data Protection & Security"
+        description="Learn how FinanzerPro protects your financial data with bank-level security, encryption, and privacy practices. Read our comprehensive privacy policy for personal finance management."
+        keywords="finanzerpro privacy policy, data protection, financial data security, privacy practices, encryption"
+        canonical="https://finanzerpro.com/privacy-policy"
+      />
+      {isSignedIn ? <Header onMenuClick={() => {}} sidebarCollapsed={false} /> : <AnonymousHeader />}
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-4xl font-bold mb-8">{t("Privacy Policy")}</h1>
