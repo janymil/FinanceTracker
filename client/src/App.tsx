@@ -153,7 +153,6 @@ function AppContent() {
     <>
       <Router />
       <SignedOut>
-        <Footer />
         <CookieBanner />
       </SignedOut>
     </>
