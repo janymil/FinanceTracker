@@ -10,18 +10,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TrendingUp, Crown, ChevronDown, User, Settings, LogOut } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useClerk } from "@clerk/clerk-react";
 import { clearUserSession } from "@/lib/queryClient";
 
 export default function Navigation() {
   const { user, clerkUser } = useAuth();
   const { signOut } = useClerk();
+  const [, setLocation] = useLocation();
 
   const handleLogout = async () => {
-    // Clear user session data while preserving AI tips and theme
-    clearUserSession();
-    await signOut({ redirectUrl: '/' });
+    try {
+      // Clear user session data while preserving AI tips and theme
+      clearUserSession();
+      // Sign out without redirectUrl to avoid conflicts
+      await signOut();
+      // Manually navigate to landing page
+      setLocation('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force navigation even if signOut fails
+      setLocation('/');
+    }
   };
 
   return (
