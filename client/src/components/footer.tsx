@@ -1,12 +1,14 @@
 import { Link } from "wouter";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { useTranslation } from 'react-i18next';
 
 interface FooterProps {
   sidebarCollapsed?: boolean;
 }
 
 export function Footer({ sidebarCollapsed = false }: FooterProps) {
+  const { t } = useTranslation();
   const handleLinkClick = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -20,22 +22,21 @@ export function Footer({ sidebarCollapsed = false }: FooterProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">FinanzerPro</h3>
+            <h3 className="text-lg font-semibold">{t("FinanzerPro")}</h3>
             <p className="text-sm text-muted-foreground">
-              Take control of your finances with intelligent expense tracking, 
-              budgeting, and AI-powered insights.
+              {t("Take control of your finances with intelligent expense tracking, budgeting, and AI-powered insights.")}
             </p>
             <div className="text-sm text-muted-foreground">
-              <p>NutriNova LLC</p>
-              <p>2105 Vista Oeste NW</p>
-              <p>Albuquerque, NM 87120</p>
-              <p>info@finanzerpro.com</p>
+              <p>{t("NutriNova LLC")}</p>
+              <p>{t("2105 Vista Oeste NW")}</p>
+              <p>{t("Albuquerque, NM 87120")}</p>
+              <p>{t("info@finanzerpro.com")}</p>
             </div>
           </div>
 
           {/* Product */}
           <div className="space-y-4">
-            <h4 className="font-semibold">Product</h4>
+            <h4 className="font-semibold">{t("Product")}</h4>
             <ul className="space-y-2 text-sm">
               {/* Pricing removed as requested */}
             </ul>
@@ -43,16 +44,16 @@ export function Footer({ sidebarCollapsed = false }: FooterProps) {
 
           {/* Support */}
           <div className="space-y-4">
-            <h4 className="font-semibold">Support</h4>
+            <h4 className="font-semibold">{t("Support")}</h4>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/contact" onClick={handleLinkClick} className="text-muted-foreground hover:text-foreground transition-colors">
-                  Contact Us
+                  {t("Contact Us")}
                 </Link>
               </li>
               <li>
                 <Link href="/help" onClick={handleLinkClick} className="text-muted-foreground hover:text-foreground transition-colors">
-                  Help Center
+                  {t("Help Center")}
                 </Link>
               </li>
             </ul>
@@ -63,20 +64,20 @@ export function Footer({ sidebarCollapsed = false }: FooterProps) {
         
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="text-sm text-muted-foreground">
-            © 2025 FinanzerPro. All rights reserved.
+            {t("© 2025 FinanzerPro. All rights reserved.")}
           </div>
           <div className="flex items-center space-x-6 text-sm">
             <Link href="/privacy-policy" onClick={handleLinkClick} className="text-muted-foreground hover:text-foreground transition-colors">
-              Privacy Policy
+              {t("Privacy Policy")}
             </Link>
             <Link href="/terms-of-service" onClick={handleLinkClick} className="text-muted-foreground hover:text-foreground transition-colors">
-              Terms of Service
+              {t("Terms of Service")}
             </Link>
             <Link href="/cookie-policy" onClick={handleLinkClick} className="text-muted-foreground hover:text-foreground transition-colors">
-              Cookie Policy
+              {t("Cookie Policy")}
             </Link>
             <Link href="/contact" onClick={handleLinkClick} className="text-muted-foreground hover:text-foreground transition-colors">
-              Contact
+              {t("Contact")}
             </Link>
           </div>
         </div>
