@@ -23,7 +23,12 @@ interface FinancialCardsProps {
 
 export default function FinancialCards({ summary, isLoading, budgetsData, selectedMonth }: FinancialCardsProps) {
   const { currency } = useCurrency();
-  const { t, i18n, ready } = useTranslation();
+  const { t, i18n } = useTranslation();
+  
+  // Debug what's happening
+  console.log('Current language:', i18n.language);
+  console.log('Total Income translation:', t('Total Income'));
+  console.log('Total Expenses translation:', t('Total Expenses'));
   const [animatedValues, setAnimatedValues] = useState({
     income: 0,
     expenses: 0,
@@ -154,11 +159,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
 
   const budgetInfo = getBudgetStatus();
 
-  // Check if translations are ready - both conditions must be true
-  const hasResources = i18n.hasResourceBundle(i18n.language, 'translation');
-  const translationsReady = ready && hasResources;
-
-  if (isLoading || !translationsReady) {
+  if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[...Array(4)].map((_, i) => (
