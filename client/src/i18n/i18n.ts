@@ -9,7 +9,7 @@ i18n
   .use(initReactI18next)
   .init({
     fallbackLng: 'en-us',
-    debug: true,
+    debug: false,
     
     interpolation: {
       escapeValue: false, // React already does escaping
@@ -20,7 +20,7 @@ i18n
     },
     
     detection: {
-      order: ['cookie'],
+      order: ['path', 'cookie', 'navigator'],
       caches: ['cookie'],
     },
     
@@ -35,6 +35,9 @@ i18n
     
     // Don't clean up language codes - use exact matches
     cleanCode: false,
+    
+    // Disable automatic language normalization to prevent browser conflicts
+    nonExplicitSupportedLngs: false,
     
     // React specific options
     react: {
