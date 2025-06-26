@@ -35,6 +35,7 @@ import MonthFilter from "@/components/month-filter";
 import { format } from "date-fns";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
+import TransactionFilters from "@/components/TransactionFilters";
 
 interface Transaction {
   id: number;
