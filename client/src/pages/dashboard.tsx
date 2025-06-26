@@ -487,10 +487,10 @@ export default function Dashboard() {
                       <RequirePlan plan="standard">
                         <div className="space-y-4 border-t pt-4">
                           <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Smart Bill Assistant
+                            {t("Smart Bill Assistant")}
                           </div>
                           <div>
-                            <Label htmlFor="paymentUrl">Payment URL (Optional)</Label>
+                            <Label htmlFor="paymentUrl">{t("Payment URL (Optional)")}</Label>
                             <Input
                               id="paymentUrl"
                               type="url"
@@ -499,19 +499,19 @@ export default function Dashboard() {
                               placeholder="https://example.com/pay"
                             />
                             <p className="text-xs text-gray-500 mt-1">
-                              Link to where you can pay this bill
+                              {t("Link to where you can pay this bill")}
                             </p>
                           </div>
                           <div>
-                            <Label htmlFor="referenceNote">Reference Note (Optional)</Label>
+                            <Label htmlFor="referenceNote">{t("Reference Note (Optional)")}</Label>
                             <Input
                               id="referenceNote"
                               value={newTransaction.referenceNote}
                               onChange={(e) => setNewTransaction({ ...newTransaction, referenceNote: e.target.value })}
-                              placeholder="Account #123456, Reference: ABC789"
+                              placeholder={t("Account #123456, Reference: ABC789")}
                             />
                             <p className="text-xs text-gray-500 mt-1">
-                              Account number or other reference information
+                              {t("Account number or other reference information")}
                             </p>
                           </div>
                         </div>
@@ -531,14 +531,14 @@ export default function Dashboard() {
                           />
                           <label htmlFor="recurring" className="flex items-center text-sm font-medium">
                             <Repeat className="h-4 w-4 mr-2" />
-                            Make this a recurring transaction
+                            {t("Make this a recurring transaction")}
                           </label>
                         </div>
 
                         {newTransaction.isRecurring && (
                           <div className="grid grid-cols-2 gap-4 pl-6">
                             <div>
-                              <Label htmlFor="frequency">Frequency</Label>
+                              <Label htmlFor="frequency">{t("Frequency")}</Label>
                               <Select
                                 value={newTransaction.recurringFrequency}
                                 onValueChange={(value) => setNewTransaction({ 
@@ -547,17 +547,17 @@ export default function Dashboard() {
                                 })}
                               >
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select frequency" />
+                                  <SelectValue placeholder={t("Select frequency")} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="weekly">Weekly</SelectItem>
-                                  <SelectItem value="monthly">Monthly</SelectItem>
-                                  <SelectItem value="yearly">Yearly</SelectItem>
+                                  <SelectItem value="weekly">{t("Weekly")}</SelectItem>
+                                  <SelectItem value="monthly">{t("Monthly")}</SelectItem>
+                                  <SelectItem value="yearly">{t("Yearly")}</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
                             <div>
-                              <Label htmlFor="endDate">End Date (Optional)</Label>
+                              <Label htmlFor="endDate">{t("End Date (Optional)")}</Label>
                               <Input
                                 id="endDate"
                                 type="date"
@@ -575,13 +575,13 @@ export default function Dashboard() {
 
                     <div className="flex justify-end gap-2 pt-4">
                       <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                        Cancel
+                        {t("Cancel")}
                       </Button>
                       <Button 
                         onClick={handleSubmit}
                         disabled={!newTransaction.amount || !newTransaction.description}
                       >
-                        Add
+                        {t("Add")}
                       </Button>
                     </div>
                   </div>
@@ -617,19 +617,19 @@ export default function Dashboard() {
               />
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">AI Financial Tips</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t("AI Financial Tips")}</h3>
                   <div className="bg-standard-light text-standard px-2 py-1 rounded text-xs font-medium">
-                    Standard Feature
+                    {t("Standard Feature")}
                   </div>
                 </div>
 
                 <div className="text-center py-8">
                   <div className="text-4xl text-gray-300 dark:text-gray-600 mb-4">🤖</div>
                   <p className="text-gray-500 dark:text-gray-400 mb-4">
-                    AI-powered financial tips available with Standard plan
+                    {t("AI-powered financial tips available with Standard plan")}
                   </p>
                   <Button className="bg-standard hover:bg-standard/90 text-white">
-                  <Link href="/pricing">Upgrade to Standard</Link>
+                  <Link href="/pricing">{t("Upgrade to Standard")}</Link>
                   </Button>
                 </div>
               </div>
