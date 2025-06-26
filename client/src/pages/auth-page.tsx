@@ -86,8 +86,6 @@ export default function AuthPage() {
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
                 <SignUp 
                   routing="virtual"
-                  redirectUrl={dashboardUrl}
-                  afterSignUpUrl={dashboardUrl}
                   signInUrl="#sign-in"
                   initialValues={{
                     emailAddress: "",
@@ -136,8 +134,6 @@ export default function AuthPage() {
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
                 <SignIn 
                   routing="virtual"
-                  redirectUrl={dashboardUrl}
-                  afterSignInUrl={dashboardUrl}
                   signUpUrl="#sign-up"
                   appearance={{
                     elements: {
