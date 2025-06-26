@@ -17,6 +17,37 @@ clearStaleSession();
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 console.log('Clerk publishable key loaded:', clerkPubKey?.slice(0, 20) + '...');
 
+// Function to process Clerk redirects with language awareness
+function processClerkRedirect(url: string): string {
+  console.log('Processing Clerk redirect:', url);
+  
+  // If URL already has language prefix, return as-is
+  if (/^\/[a-z]{2}\//.test(url)) {
+    console.log('URL already has language prefix:', url);
+    return url;
+  }
+  
+  // Get saved language preference or default to browser language
+  const savedLang = localStorage.getItem('preferredLanguage');
+  const browserLang = navigator.language.toLowerCase().split('-')[0];
+  const supportedLangs = ['en', 'es', 'sk'];
+  
+  const currentLang = savedLang && supportedLangs.includes(savedLang) ? savedLang : 
+    (supportedLangs.includes(browserLang) ? browserLang : 'en');
+  
+  // For root path or common auth redirects, redirect to dashboard with language
+  if (url === '/' || url === '/dashboard' || url === '') {
+    const dashboardUrl = `/${currentLang}/dashboard`;
+    console.log('Redirecting to language-aware dashboard:', dashboardUrl);
+    return dashboardUrl;
+  }
+  
+  // For other paths, add language prefix
+  const languageAwareUrl = `/${currentLang}${url.startsWith('/') ? url : '/' + url}`;
+  console.log('Adding language prefix:', languageAwareUrl);
+  return languageAwareUrl;
+}
+
 if (!clerkPubKey) {
   throw new Error('Missing Clerk Publishable Key');
 }
@@ -44,17 +75,17 @@ root.render(
           publishableKey={clerkPubKey}
           routerPush={(to) => { 
             console.log('Clerk routerPush:', to);
-            window.history.pushState({}, '', to); 
+            // Handle language-aware redirects
+            const processedUrl = processClerkRedirect(to);
+            window.history.pushState({}, '', processedUrl); 
             window.dispatchEvent(new PopStateEvent('popstate'));
-            // Force a small delay to ensure the route change is processed
-            setTimeout(() => window.dispatchEvent(new PopStateEvent('popstate')), 10);
           }}
           routerReplace={(to) => { 
             console.log('Clerk routerReplace:', to);
-            window.history.replaceState({}, '', to); 
+            // Handle language-aware redirects
+            const processedUrl = processClerkRedirect(to);
+            window.history.replaceState({}, '', processedUrl); 
             window.dispatchEvent(new PopStateEvent('popstate'));
-            // Force a small delay to ensure the route change is processed
-            setTimeout(() => window.dispatchEvent(new PopStateEvent('popstate')), 10);
           }}
           appearance={{
             layout: {
