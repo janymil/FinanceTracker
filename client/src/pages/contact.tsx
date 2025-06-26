@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { SEO } from "@/components/SEO";
 import { AnonymousHeader } from "@/components/anonymous-header";
+import Header from "@/components/header";
 import { useUser } from "@clerk/clerk-react";
 
 export default function Contact() {
