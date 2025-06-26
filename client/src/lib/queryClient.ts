@@ -163,13 +163,17 @@ export function clearUserSession() {
   }
   
   // Clear query cache without forcing reload on auth, help, contact, and other public pages
+  // Also skip reload during language routing transitions to prevent interference
   const publicPages = ['/auth', '/help', '/contact', '/privacy-policy', '/terms-of-service', '/cookie-policy', '/pricing', '/'];
   const isPublicPage = publicPages.some(page => 
     window.location.pathname === page || 
     window.location.pathname.startsWith('/auth')
   );
   
-  if (!isPublicPage) {
+  // Skip reload if we're in the middle of language routing (URL has language prefix)
+  const hasLanguagePrefix = /^\/[a-z]{2}\//.test(window.location.pathname);
+  
+  if (!isPublicPage && !hasLanguagePrefix) {
     window.location.reload();
   }
 }
