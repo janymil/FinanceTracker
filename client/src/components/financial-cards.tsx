@@ -25,8 +25,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
   const { currency } = useCurrency();
   const { t, i18n } = useTranslation();
   
-  // Ensure translations are loaded before rendering
-  const translationsLoaded = i18n.exists('Total Income') && i18n.exists('Total Expenses') && i18n.exists('Net Balance') && i18n.exists('Budget Status');
+
   const [animatedValues, setAnimatedValues] = useState({
     income: 0,
     expenses: 0,
@@ -157,7 +156,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
 
   const budgetInfo = getBudgetStatus();
 
-  if (isLoading || !translationsLoaded) {
+  if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[...Array(4)].map((_, i) => (
