@@ -417,7 +417,10 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
         {/* Center - Date selector or breadcrumb */}
         <div className="hidden md:flex items-center">
           <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {new Date().toLocaleDateString(i18n.language === 'sk' ? 'sk-SK' : i18n.language === 'es' ? 'es-ES' : 'en-US', { 
+            {new Date().toLocaleDateString(
+              i18n.language === 'sk' || i18n.language === 'sk-sk' ? 'sk-SK' : 
+              i18n.language === 'es' || i18n.language === 'es-pe' || i18n.language.startsWith('es') ? 'es' : 
+              'en', { 
               weekday: 'long',
               day: 'numeric', 
               month: 'long', 
