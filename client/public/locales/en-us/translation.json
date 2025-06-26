@@ -118,5 +118,15 @@
   "Basic expense tracking": "Basic expense tracking",
   "Transaction history": "Transaction history",
   "Up to 100": "Up to 100",
-  "Unlimited": "Unlimited"
+  "Unlimited": "Unlimited",
+  "Frequently Asked Questions": "Frequently Asked Questions",
+  "Can I cancel my subscription anytime?": "Can I cancel my subscription anytime?",
+  "Yes, you can cancel your subscription at any time. Your access will continue until the end of your current billing period.": "Yes, you can cancel your subscription at any time. Your access will continue until the end of your current billing period.",
+  "Is there a free trial for paid plans?": "Is there a free trial for paid plans?",
+  "No, there is no free trial for paid plans. However, you can start with our free plan to explore basic features before upgrading to Standard or Premium.": "No, there is no free trial for paid plans. However, you can start with our free plan to explore basic features before upgrading to Standard or Premium.",
+  "How secure is my financial data?": "How secure is my financial data?",
+  "We use industry-standard encryption to protect your data. Your information is encrypted both in transit and at rest.": "We use industry-standard encryption to protect your data. Your information is encrypted both in transit and at rest.",
+  "FinanzerPro": "FinanzerPro",
+  "Take control of your financial future with intelligent expense tracking and budgeting.": "Take control of your financial future with intelligent expense tracking and budgeting.",
+  "© 2025 FinanzerPro. All rights reserved.": "© 2025 FinanzerPro. All rights reserved."
 }
