@@ -7,11 +7,13 @@ import { Mail, MapPin, Clock, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { SEO } from "@/components/SEO";
-import { AppLayout } from "@/components/AppLayout";
 import { useUser } from "@clerk/clerk-react";
+import Header from "@/components/header";
+import { AnonymousHeader } from "@/components/anonymous-header";
+import { Footer } from "@/components/footer";
 
 export default function Contact() {
-  const { user } = useUser();
+  const { isSignedIn } = useUser();
   const [, setLocation] = useLocation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -85,8 +87,8 @@ export default function Contact() {
         keywords="finanzerpro contact, customer support, help desk, financial app support, expense tracker help, budget app assistance"
         canonical="https://finanzerpro.com/contact"
       />
-      <AppLayout isPublicPage={true}>
-        <div className="container mx-auto px-4 py-8 max-w-6xl">
+      {isSignedIn ? <Header onMenuClick={() => {}} sidebarCollapsed={false} /> : <AnonymousHeader />}
+      <main className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
