@@ -144,12 +144,16 @@ export function registerAIRoutes(app: Express) {
         budgetAssigned: t.budgetAssigned
       }));
 
+      // Extract language from request headers or use default
+      const language = req.headers['accept-language']?.split(',')[0]?.split('-').join('-') || 'en-us';
+      
       const aiPayload = {
         totalIncome: financialData.totalIncome,
         totalExpenses: financialData.totalExpenses,
         transactionsByCategory: financialData.categories,
         recentTransactions: formattedTransactions,
-        timestamp: financialData.timestamp
+        timestamp: financialData.timestamp,
+        language: language
       };
 
       // Initialize UnifiedAICache with 168 hours TTL (7 days)
@@ -222,6 +226,9 @@ export function registerAIRoutes(app: Express) {
 
       const transactions = await storage.getUserTransactions(userId, 100);
 
+      // Extract language from request headers or use default
+      const language = req.headers['accept-language']?.split(',')[0]?.split('-').join('-') || 'en-us';
+      
       const aiPayload = {
         transactions: transactions.map(t => ({
           description: t.description,
@@ -229,7 +236,8 @@ export function registerAIRoutes(app: Express) {
           date: t.date.toISOString(),
           categoryName: t.categoryName || 'Uncategorized',
           type: t.type
-        }))
+        })),
+        language: language
       };
 
       // Initialize UnifiedAICache with 72 hours TTL
@@ -553,6 +561,9 @@ export function registerAIRoutes(app: Express) {
           spent: budgetSpending.get(b.categoryName) || 0
         }));
 
+      // Extract language from request headers or use default
+      const language = req.headers['accept-language']?.split(',')[0]?.split('-').join('-') || 'en-us';
+      
       const aiPayload = {
         transactions: processedTransactions,
         budgets: processedBudgets,
@@ -560,7 +571,8 @@ export function registerAIRoutes(app: Express) {
           totalIncome: summary.totalIncome,
           totalExpenses: summary.totalExpenses,
           netBalance: summary.totalIncome - summary.totalExpenses
-        }
+        },
+        language: language
       };
 
       // Initialize UnifiedAICache with 24 hours TTL

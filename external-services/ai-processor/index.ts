@@ -689,7 +689,7 @@ export async function generateSpendingInsights(transactions: Array<{
   date: string;
   categoryName?: string;
   type: string;
-}>): Promise<Array<{
+}>, language: string = 'en-us'): Promise<Array<{
   id: string;
   type: "warning" | "suggestion" | "achievement" | "trend";
   title: string;
@@ -728,6 +728,8 @@ Generate 2-4 insights focusing on:
 Each insight should have:
 - Unique ID
 - Type: warning, suggestion, achievement, or trend
+
+Respond in ${getLanguageLabel(language)}.`
 - Clear title and description
 - Impact level: high, medium, low
 - Category if relevant
