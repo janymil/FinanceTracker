@@ -29,11 +29,6 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
   console.log('FinancialCards render - current language:', i18n.language);
   console.log('FinancialCards render - Total Income translation:', t('Total Income'));
   
-  // Force fresh translations by explicitly getting them with current language
-  const getCurrentTranslation = (key: string) => {
-    return i18n.t(key, { lng: i18n.language });
-  };
-  
 
   const [animatedValues, setAnimatedValues] = useState({
     income: 0,
@@ -199,7 +194,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-green-700 dark:text-green-300 mb-1">
-                {getCurrentTranslation('Total Income')}
+                {t('Total Income')}
               </p>
               <p className="text-2xl font-bold text-green-800 dark:text-green-200 transition-all duration-300 ease-out">
                 {formatCurrency(animatedValues.income)}
