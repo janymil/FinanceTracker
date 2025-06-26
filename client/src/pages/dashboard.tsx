@@ -136,8 +136,8 @@ export default function Dashboard() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('subscription') === 'success') {
       toast({
-        title: "Subscription Activated!",
-        description: "Welcome to your new plan! All features are now available.",
+        title: t("Subscription Activated!"),
+        description: t("Welcome to your new plan! All features are now available."),
       });
       // Clean up URL
       window.history.replaceState({}, '', '/dashboard');

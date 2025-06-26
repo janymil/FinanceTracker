@@ -49,13 +49,13 @@ export default function Landing() {
                 onClick={() => setLocation('/help')} 
                 className="hidden sm:block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
               >
-                Help
+                {t("Help")}
               </button>
               <button 
                 onClick={() => setLocation('/contact')} 
                 className="hidden sm:block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
               >
-                Contact
+                {t("Contact")}
               </button>
               <button
                 onClick={toggleTheme}
@@ -69,7 +69,7 @@ export default function Landing() {
                 )}
               </button>
               <Button onClick={handleLogin} className="bg-primary hover:bg-primary/90">
-                Sign In
+                {t("Sign In")}
               </Button>
             </div>
           </div>
@@ -80,15 +80,15 @@ export default function Landing() {
       <section className="pt-20 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-            Take Control of Your
-            <span className="text-primary block">Financial Future</span>
+            {t("Take Control of Your")}
+            <span className="text-primary block">{t("Financial Future")}</span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-            Track expenses, manage budgets, and gain insights into your spending patterns with our comprehensive financial management platform.
+            {t("Track expenses, manage budgets, and gain insights into your spending patterns with our comprehensive financial management platform.")}
           </p>
           <div className="flex justify-center">
             <Button onClick={handleLogin} size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8 py-3">
-              Get Started Free
+              {t("Get Started Free")}
             </Button>
           </div>
         </div>
