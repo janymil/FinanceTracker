@@ -206,23 +206,23 @@ export default function Landing() {
                 <div className="space-y-3">
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Basic expense and income tracking</span>
+                    <span>{t("Basic expense and income tracking")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Manual categorization</span>
+                    <span>{t("Manual categorization")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Up to 100 transactions view</span>
+                    <span>{t("Up to 100 transactions view")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Simple financial overview</span>
+                    <span>{t("Simple financial overview")}</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-success mr-3" />
-                    <span>Personalized financial tips</span>
+                    <span>{t("Personalized financial tips")}</span>
                   </div>
                 </div>
                 <Button 
@@ -230,7 +230,7 @@ export default function Landing() {
                   className="w-full mt-6" 
                   variant="outline"
                 >
-                  Get Started Free
+                  {t("Get Started Free")}
                 </Button>
               </CardContent>
             </Card>
@@ -239,18 +239,18 @@ export default function Landing() {
             <Card className="border-2 border-blue-500 relative">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <Badge className="bg-blue-500 text-white px-4 py-1">
-                  Most Popular
+                  {t("Most Popular")}
                 </Badge>
               </div>
               <CardHeader className="text-center pb-8 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-transparent">
                 <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <TrendingUp className="h-8 w-8 text-blue-600" />
                 </div>
-                <CardTitle className="text-2xl">Standard</CardTitle>
+                <CardTitle className="text-2xl">{t("Standard")}</CardTitle>
                 <div className="text-4xl font-bold text-blue-600">
-                  $4.99<span className="text-lg font-normal text-gray-500">/month</span>
+                  $4.99<span className="text-lg font-normal text-gray-500">/{t("month")}</span>
                 </div>
-                <CardDescription>For users serious about financial management</CardDescription>
+                <CardDescription>{t("For users serious about financial management")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
