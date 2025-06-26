@@ -396,5 +396,6 @@
   "Moderate": "Moderate",
   "Critical": "Critical",
   "utilized": "utilized",
-  "Remaining": "Remaining"
+  "Remaining": "Remaining",
+  "Loading...": "Loading..."
 }

@@ -250,8 +250,8 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
 
       {/* Budget Status Card */}
       <Card className={`${budgetInfo.bgColor} shadow-sm border ${
-        budgetInfo.status === 'Healthy' ? 'border-green-200 dark:border-green-800' :
-        budgetInfo.status === 'Moderate' ? 'border-yellow-200 dark:border-yellow-800' :
+        budgetInfo.status === 'healthy' ? 'border-green-200 dark:border-green-800' :
+        budgetInfo.status === 'moderate' ? 'border-yellow-200 dark:border-yellow-800' :
         'border-red-200 dark:border-red-800'
       }`}>
         <CardContent className="p-6">
@@ -261,15 +261,15 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
                 {t('Budget Status')}
               </p>
               <p className={`text-2xl font-bold ${budgetInfo.textColor}`}>
-                {budgetInfo.status}
+                {budgetInfo.statusText}
               </p>
               <p className={`text-xs mt-1 ${budgetInfo.textColor} opacity-80`}>
                 {Math.round(budgetInfo.percentage)}% {t('utilized')}. {t('Remaining')}: {formatCurrency(budgetInfo.remaining)}
               </p>
             </div>
             <div className={`p-3 rounded-lg ${
-              budgetInfo.status === 'Healthy' ? 'bg-green-100 dark:bg-green-800/40' :
-              budgetInfo.status === 'Moderate' ? 'bg-yellow-100 dark:bg-yellow-800/40' :
+              budgetInfo.status === 'healthy' ? 'bg-green-100 dark:bg-green-800/40' :
+              budgetInfo.status === 'moderate' ? 'bg-yellow-100 dark:bg-yellow-800/40' :
               'bg-red-100 dark:bg-red-800/40'
             }`}>
               <Shield className={`h-6 w-6 ${budgetInfo.textColor}`} />
