@@ -5,9 +5,11 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SEO } from "@/components/SEO";
 import { AnonymousHeader } from "@/components/anonymous-header";
+import { useTranslation } from 'react-i18next';
 
 export default function PrivacyPolicy() {
   const [, setLocation] = useLocation();
+  const { t } = useTranslation();
   
   useEffect(() => {
     document.title = "Privacy Policy - FinanzerPro";
@@ -23,34 +25,33 @@ export default function PrivacyPolicy() {
       <AnonymousHeader />
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-4xl font-bold mb-8">Privacy Policy</h1>
-        <p className="text-muted-foreground mb-8">Last updated: June 14, 2025</p>
+        <h1 className="text-4xl font-bold mb-8">{t("Privacy Policy")}</h1>
+        <p className="text-muted-foreground mb-8">{t("Last updated: June 14, 2025")}</p>
 
         <div className="prose prose-lg dark:prose-invert max-w-none">
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">1. Information We Collect</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("1. Information We Collect")}</h2>
             <p className="mb-4">
-              We collect information you provide directly to us, such as when you create or modify your account, 
-              add financial transactions, set budgets, or contact us for support.
+              {t("We collect information you provide directly to us, such as when you create or modify your account, add financial transactions, set budgets, or contact us for support.")}
             </p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li><strong>Account Information:</strong> Email address, name, password (encrypted)</li>
-              <li><strong>Financial Data:</strong> Transaction details, categories, budgets, goals</li>
-              <li><strong>Usage Data:</strong> How you interact with our service, features used</li>
-              <li><strong>Device Information:</strong> Browser type, IP address, operating system</li>
+              <li><strong>{t("Account Information:")}</strong> {t("Email address, name, password (encrypted)")}</li>
+              <li><strong>{t("Financial Data:")}</strong> {t("Transaction details, categories, budgets, goals")}</li>
+              <li><strong>{t("Usage Data:")}</strong> {t("How you interact with our service, features used")}</li>
+              <li><strong>{t("Device Information:")}</strong> {t("Browser type, IP address, operating system")}</li>
             </ul>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">2. How We Use Your Information</h2>
-            <p className="mb-4">We use the information we collect to:</p>
+            <h2 className="text-2xl font-semibold mb-4">{t("2. How We Use Your Information")}</h2>
+            <p className="mb-4">{t("We use the information we collect to:")}</p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li>Provide, maintain, and improve our financial management services</li>
-              <li>Process transactions and send related information</li>
-              <li>Provide AI-powered insights and recommendations (Premium users)</li>
-              <li>Send technical notices, updates, security alerts, and support messages</li>
-              <li>Respond to your comments and questions</li>
-              <li>Analyze usage patterns to improve our service</li>
+              <li>{t("Provide, maintain, and improve our financial management services")}</li>
+              <li>{t("Process transactions and send related information")}</li>
+              <li>{t("Provide AI-powered insights and recommendations (Premium users)")}</li>
+              <li>{t("Send technical notices, updates, security alerts, and support messages")}</li>
+              <li>{t("Respond to your comments and questions")}</li>
+              <li>{t("Analyze usage patterns to improve our service")}</li>
             </ul>
           </section>
 
