@@ -1650,6 +1650,16 @@ NEVER return empty arrays for personalizedFactors or recommendations.`
       }
     };
 
+    // Debug: Log what AI actually returned
+    console.log('AI Response Debug:', {
+      score: processedResult.score,
+      status: processedResult.status,
+      hasAiAnalysis: !!processedResult.aiAnalysis,
+      personalizedFactors: processedResult.aiAnalysis?.personalizedFactors,
+      recommendations: processedResult.aiAnalysis?.recommendations,
+      factors: processedResult.factors?.slice(0, 2) // Just show first 2 for brevity
+    });
+
     // Convert to frontend-expected format
     const healthData: FinancialHealthData = {
       score: processedResult.score,

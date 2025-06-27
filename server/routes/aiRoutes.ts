@@ -598,6 +598,16 @@ export function registerAIRoutes(app: Express) {
         language: language
       };
 
+      // Debug: Log what data is being sent to AI
+      console.log('Financial Health Data being sent to AI:', {
+        transactionCount: processedTransactions.length,
+        budgetCount: processedBudgets.length,
+        summary: aiPayload.summary,
+        firstTransaction: processedTransactions[0],
+        firstBudget: processedBudgets[0],
+        language: language
+      });
+
 
 
       // Initialize UnifiedAICache with 24 hours TTL
