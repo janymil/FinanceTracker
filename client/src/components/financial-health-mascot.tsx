@@ -25,7 +25,7 @@ interface FinancialHealthData {
   score: number;
   status: string;
   color: string;
-  factors?: string[];
+  factors?: Array<string | { name: string; score?: number; max?: number; status?: string; aiInsight?: string }>;
   aiAnalysis?: {
     personalizedFactors?: string[];
     recommendations?: Array<{
@@ -365,7 +365,7 @@ export default function FinancialHealthMascot() {
                         className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
                       >
                         <Target className="h-3 w-3 text-green-500" />
-                        {factor}
+                        {typeof factor === 'string' ? factor : (factor as any).name || 'Financial Factor'}
                       </motion.li>
                     ))}
                   </ul>
