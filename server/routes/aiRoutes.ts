@@ -587,27 +587,13 @@ export function registerAIRoutes(app: Express) {
         return res.json(cachedResult);
       }
 
-      // Return simple basic health data without AI complexity for mascot component
-      const simplifiedResponse = {
-        score: Math.min(100, Math.max(0, Math.round((summary.totalIncome - summary.totalExpenses) / summary.totalIncome * 100))) || 50,
-        status: summary.totalIncome > summary.totalExpenses ? 'Good' : 'Fair',
-        color: summary.totalIncome > summary.totalExpenses ? 'green' : 'yellow',
-        factors: [
-          'Income vs Expenses Analysis',
-          'Budget Adherence Check',
-          'Spending Pattern Review'
-        ],
-        aiAnalysis: {
-          personalizedFactors: ['Basic financial analysis'],
-          recommendations: [],
-          riskAssessment: 'Standard assessment'
-        }
-      };
+      // Use unified AI processor for financial health score
+      const healthData = await runAI('financial-health-score', userId, aiPayload);
 
       // Cache the result for 24 hours
-      await cache.set(aiPayload, simplifiedResponse, false, 24);
+      await cache.set(aiPayload, healthData, false, 24);
 
-      return res.json(simplifiedResponse);
+      return res.json(healthData);
     } catch (error) {
       console.error("Error generating financial health score:", error);
       return res.status(500).json({ message: "Failed to generate financial health score" });
