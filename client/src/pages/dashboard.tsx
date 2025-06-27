@@ -815,9 +815,6 @@ export default function Dashboard() {
         {/* Standard and Premium User Content - Only show if NOT free plan */}
         {databaseUser?.plan && databaseUser.plan !== 'free' && ['standard', 'premium'].includes(databaseUser.plan) && (
           <div className="space-y-8">
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-              DEBUG: Showing PREMIUM user layout (AI-Enhanced Financial Health Mascot) - Plan: {databaseUser.plan}
-            </div>
 
             {/* AI-Enhanced Financial Health for Standard/Premium Users */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
