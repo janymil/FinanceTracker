@@ -306,19 +306,20 @@ export function registerAIRoutes(app: Express) {
         return res.json(cachedResult);
       }
 
-      // Generate new AI response
-      const aiScore = await runAI('financial-health-score', userId, aiPayload);
+      // Generate new AI response with old local function
+      const { generateFinancialHealthScore } = await import('../openai');
+      const aiScore = await generateFinancialHealthScore({
+        transactions: processedTransactions,
+        budgets: processedBudgets,
+        summary: {
+          totalIncome: summary.totalIncome,
+          totalExpenses: summary.totalExpenses,
+          netBalance: summary.totalIncome - summary.totalExpenses
+        }
+      });
 
       // Cache the result for 24 hours
       await cache.set(aiPayload, aiScore, false, 24);
-      
-      console.log('Financial health: Fly.io response structure:', {
-        hasScore: typeof aiScore?.score === 'number',
-        score: aiScore?.score,
-        hasStatus: !!aiScore?.status,
-        status: aiScore?.status,
-        fullResponse: aiScore
-      });
 
       return res.json(aiScore);
     } catch (error) {
