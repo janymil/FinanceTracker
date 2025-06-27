@@ -510,5 +510,22 @@
   "youreOnTheRightTrack": "You're on the right track, but there's room to improve! 🤔",
   "letsWorkTogether": "Let's work together to improve your financial health! 💡",
   "greatFinancialHabits": "Great financial habits! Keep it up! 💪",
-  "youreCrushingGoals": "You're crushing your financial goals! 🎉"
+  "youreCrushingGoals": "You're crushing your financial goals! 🎉",
+  "mascot": {
+    "settings": "Mascot Settings",
+    "show_mascot": "Show Mascot",
+    "current_mood": "Current Mood",
+    "health_score": "Health Score",
+    "generating": "Generating...",
+    "generate_new": "Generate New",
+    "health_changed": "Your financial health has changed significantly!",
+    "alt_text": "Financial mascot in {{mood}} mood",
+    "image_expired": "Mascot image expired",
+    "click_generate": "Click 'Generate New' to create a fresh mascot",
+    "generate_prompt": "Click to generate your financial mascot",
+    "new_generated": "New mascot generated!",
+    "generate_failed": "Failed to generate mascot",
+    "toggle_failed": "Failed to toggle mascot",
+    "show": "Show Mascot"
+  }
 }

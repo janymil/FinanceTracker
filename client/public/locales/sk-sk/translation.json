@@ -495,5 +495,22 @@
   "youreOnTheRightTrack": "Ste na správnej ceste, ale je priestor na zlepšenie! 🤔",
   "letsWorkTogether": "Poďme spolupracovať na zlepšení vášho finančného zdravia! 💡",
   "greatFinancialHabits": "Skvelé finančné návyky! Pokračujte! 💪",
-  "youreCrushingGoals": "Plníte svoje finančné ciele! 🎉"
+  "youreCrushingGoals": "Plníte svoje finančné ciele! 🎉",
+  "mascot": {
+    "settings": "Nastavenia maskota",
+    "show_mascot": "Zobraziť maskota",
+    "current_mood": "Aktuálna nálada",
+    "health_score": "Skóre zdravia",
+    "generating": "Generuje sa...",
+    "generate_new": "Vygenerovať nového",
+    "health_changed": "Vaše finančné zdravie sa výrazne zmenilo!",
+    "alt_text": "Finančný maskot v nálade {{mood}}",
+    "image_expired": "Obrázok maskota vypršal",
+    "click_generate": "Kliknite na 'Vygenerovať nového' pre vytvorenie nového maskota",
+    "generate_prompt": "Kliknite pre vygenerovanie vášho finančného maskota",
+    "new_generated": "Nový maskot vygenerovaný!",
+    "generate_failed": "Nepodarilo sa vygenerovať maskota",
+    "toggle_failed": "Nepodarilo sa prepnúť maskota",
+    "show": "Zobraziť maskota"
+  }
 }
