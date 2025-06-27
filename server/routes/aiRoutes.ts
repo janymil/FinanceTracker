@@ -586,21 +586,7 @@ export function registerAIRoutes(app: Express) {
       }
 
       // Use unified AI processor for financial health score
-      console.log('Financial health: Making Fly.io API call via centralized processor');
       const healthData = await runAI('financial-health-score', userId, aiPayload);
-
-      console.log('Financial health: What runAI returned:', {
-        hasInsights: !!healthData?.insights,
-        insightsType: typeof healthData?.insights,
-        insightsLength: healthData?.insights?.length,
-        insights: healthData?.insights,
-        hasAchievements: !!healthData?.achievements, 
-        achievementsLength: healthData?.achievements?.length,
-        achievements: healthData?.achievements,
-        hasWarnings: !!healthData?.warnings,
-        warningsLength: healthData?.warnings?.length, 
-        warnings: healthData?.warnings
-      });
 
       // Cache the result for 24 hours
       await cache.set(aiPayload, healthData, false, 24);

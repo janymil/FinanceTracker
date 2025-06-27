@@ -1612,12 +1612,10 @@ Provide an AI-powered financial health score that adapts to this user's specific
       ],
       response_format: { type: "json_object" },
       temperature: 0.1,
-      max_tokens: 300
+      max_tokens: 800
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
-    
-    console.log('Fly.io Financial Health: Raw AI response:', JSON.stringify(result, null, 2));
     
     const processedResult = {
       score: Math.max(0, Math.min(100, result.score || 50)),
