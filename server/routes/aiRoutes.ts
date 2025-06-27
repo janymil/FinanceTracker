@@ -591,6 +591,25 @@ export function registerAIRoutes(app: Express) {
 
       // Cache the result for 24 hours
       await cache.set(aiPayload, healthData, false, 24);
+      
+      console.log('Financial health: Final response structure:', {
+        hasScore: typeof healthData?.score === 'number',
+        score: healthData?.score,
+        hasStatus: !!healthData?.status,
+        status: healthData?.status,
+        hasCategory: !!healthData?.category,
+        category: healthData?.category,
+        hasInsights: Array.isArray(healthData?.insights),
+        insightsCount: healthData?.insights?.length || 0,
+        insights: healthData?.insights,
+        hasAchievements: Array.isArray(healthData?.achievements),
+        achievementsCount: healthData?.achievements?.length || 0,
+        achievements: healthData?.achievements,
+        hasWarnings: Array.isArray(healthData?.warnings),
+        warningsCount: healthData?.warnings?.length || 0,
+        warnings: healthData?.warnings,
+        fullResponse: healthData
+      });
 
       return res.json(healthData);
     } catch (error) {
