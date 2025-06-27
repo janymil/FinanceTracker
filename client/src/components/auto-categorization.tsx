@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
@@ -22,6 +23,7 @@ import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import RequirePlan from "@/components/require-plan";
+import { useTranslation } from "react-i18next";
 
 interface CategorySuggestion {
   id: string;
@@ -52,6 +54,7 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [suggestions, setSuggestions] = useState<CategorySuggestion[]>([]);
 
   // Machine learning categorization function
@@ -90,12 +93,12 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
       const data = await apiRequest("POST", "/api/auto-categorize");
       setSuggestions(data.suggestions || []);
       toast({
-        title: "Auto-Categorization Complete",
-        description: `Found ${data.suggestions?.length || 0} suggestions for uncategorized transactions`,
+        title: t("Auto-Categorization Complete"),
+        description: t("Found {{count}} suggestions for uncategorized transactions", { count: data.suggestions?.length || 0 }),
       });
     } catch (error: any) {
       toast({
-        title: "Categorization Failed",
+        title: t("Categorization Failed"),
         description: error.message,
         variant: "destructive",
       });
@@ -107,12 +110,12 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
       const data = await apiRequest("PATCH", `/api/transactions/${transactionId}`, { categoryId });
       await queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
       toast({
-        title: "Category Applied",
-        description: "Transaction has been categorized successfully",
+        title: t("Category Applied"),
+        description: t("Transaction has been categorized successfully"),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("Error"),
         description: error.message,
         variant: "destructive",
       });
@@ -126,7 +129,7 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
       return data;
     } catch (error: any) {
       toast({
-        title: "AI Categorization Error",
+        title: t("AI Categorization Error"),
         description: error.message,
         variant: "destructive",
       });
@@ -158,8 +161,8 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
       setSuggestions(updatedSuggestions);
       
       toast({
-        title: "AI Categorization Complete",
-        description: `Suggested category: ${result.category}`,
+        title: t("AI Categorization Complete"),
+        description: t("Suggested category: {{category}}", { category: result.category }),
       });
     } catch (error) {
       console.error('AI categorization failed:', error);
@@ -175,175 +178,170 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
     setSuggestions([]);
   };
 
-
-
   return (
     <RequirePlan plan="standard" feature="Auto-Categorization">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Brain className="h-5 w-5" />
-            Auto-Categorization
-            <Badge className="bg-blue-600 text-white">Standard+</Badge>
+            {t("Auto-Categorization")}
+            <Badge className="bg-blue-600 text-white">{t("Standard")}+</Badge>
           </CardTitle>
           <CardDescription>
-            AI-powered transaction categorization with machine learning
+            {t("AI-powered transaction categorization with machine learning")}
           </CardDescription>
         </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          {/* Action Button */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                Smart Transaction Analysis
-              </h4>
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Analyze uncategorized transactions and get AI suggestions
-              </p>
-            </div>
-            <Button 
-              onClick={() => {
-                if (transactions.length > 0) {
-                  autoCategorize();
-                } else {
-                  toast({
-                    title: "No Transactions Available",
-                    description: "Add transactions to enable AI auto-categorization",
-                    variant: "default"
-                  });
-                }
-              }}
-              className="flex items-center gap-2"
-              disabled={transactions.length === 0}
-            >
-              <Sparkles className="h-4 w-4" />
-              Auto-Categorize
-            </Button>
-          </div>
-
-          {/* Suggestions List */}
-          {suggestions.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
+        <CardContent>
+          <div className="space-y-6">
+            {/* Action Button */}
+            <div className="flex items-center justify-between">
+              <div>
                 <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                  AI Suggestions ({suggestions.length})
+                  {t("Smart Transaction Analysis")}
                 </h4>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => {
-                    suggestions.forEach(suggestion => handleApplySuggestion(suggestion));
-                  }}
-                >
-                  Apply All
-                </Button>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  {t("Analyze uncategorized transactions and get AI suggestions")}
+                </p>
               </div>
-
-              <div className="space-y-3">
-                {suggestions.map((suggestion) => (
-                  <div
-                    key={suggestion.id}
-                    className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                          <Target className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                            {suggestion.transactionDescription}
-                          </p>
-                          <p className="text-xs text-gray-600 dark:text-gray-300">
-                            ${suggestion.amount.toFixed(2)} • {suggestion.date}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          <ChevronRight className="h-3 w-3 text-gray-400" />
-                          <Badge 
-                            variant="outline"
-                            className="text-xs"
-                          >
-                            {suggestion.suggestedCategory}
-                          </Badge>
-                          <span className="text-xs text-gray-500">
-                            {Math.round(suggestion.confidence * 100)}% confidence
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 ml-4">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={async () => {
-                          const transaction = transactions.find(t => t.id.toString() === suggestion.id);
-                          if (transaction) {
-                            await handleAICategorize(transaction);
-                          }
-                        }}
-                        className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                      >
-                        <Brain className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleApplySuggestion(suggestion)}
-                        className="text-green-600 border-green-300 hover:bg-green-50"
-                      >
-                        <Check className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleRejectSuggestion(suggestion.id)}
-                        className="text-red-600 border-red-300 hover:bg-red-50"
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <Button 
+                onClick={() => {
+                  if (transactions.length > 0) {
+                    autoCategorize();
+                  } else {
+                    toast({
+                      title: t("No Transactions Available"),
+                      description: t("Add transactions to enable AI auto-categorization"),
+                      variant: "default"
+                    });
+                  }
+                }}
+                className="flex items-center gap-2"
+                disabled={transactions.length === 0}
+              >
+                <Sparkles className="h-4 w-4" />
+                {t("Auto-Categorize")}
+              </Button>
             </div>
-          )}
 
-          {/* ML Features */}
-          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
-              Machine Learning Features:
-            </h4>
-            <div className="grid grid-cols-2 gap-3 text-xs text-gray-600 dark:text-gray-300">
-              <div className="flex items-center gap-2">
-                <Check className="h-3 w-3 text-green-600" />
-                Merchant recognition
+            {/* Suggestions List */}
+            {suggestions.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                    {t("AI Suggestions")} ({suggestions.length})
+                  </h4>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      suggestions.forEach(suggestion => handleApplySuggestion(suggestion));
+                    }}
+                  >
+                    {t("Apply All")}
+                  </Button>
+                </div>
+
+                <div className="space-y-3">
+                  {suggestions.map((suggestion) => (
+                    <div
+                      key={suggestion.id}
+                      className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                            <Target className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              {suggestion.transactionDescription}
+                            </p>
+                            <p className="text-xs text-gray-600 dark:text-gray-300">
+                              ${suggestion.amount.toFixed(2)} • {suggestion.date}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            <ChevronRight className="h-3 w-3 text-gray-400" />
+                            <Badge 
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {suggestion.suggestedCategory}
+                            </Badge>
+                            <span className="text-xs text-gray-500">
+                              {t("{{confidence}}% confidence", { confidence: Math.round(suggestion.confidence * 100) })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 ml-4">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={async () => {
+                            const transaction = transactions.find(t => t.id.toString() === suggestion.id);
+                            if (transaction) {
+                              await handleAICategorize(transaction);
+                            }
+                          }}
+                          className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                        >
+                          <Brain className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleApplySuggestion(suggestion)}
+                          className="text-green-600 border-green-300 hover:bg-green-50"
+                        >
+                          <Check className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRejectSuggestion(suggestion.id)}
+                          className="text-red-600 border-red-300 hover:bg-red-50"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Check className="h-3 w-3 text-green-600" />
-                Pattern learning
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="h-3 w-3 text-green-600" />
-                Amount-based logic
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="h-3 w-3 text-green-600" />
-                Confidence scoring
+            )}
+
+            {/* ML Features */}
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                {t("Machine Learning Features:")}
+              </h4>
+              <div className="grid grid-cols-2 gap-3 text-xs text-gray-600 dark:text-gray-300">
+                <div className="flex items-center gap-2">
+                  <Check className="h-3 w-3 text-green-600" />
+                  {t("Merchant recognition")}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="h-3 w-3 text-green-600" />
+                  {t("Pattern learning")}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="h-3 w-3 text-green-600" />
+                  {t("Amount-based logic")}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="h-3 w-3 text-green-600" />
+                  {t("Confidence scoring")}
+                </div>
               </div>
             </div>
           </div>
-
-          {/* Status */}
-
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
     </RequirePlan>
   );
 }

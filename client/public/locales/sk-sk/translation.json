@@ -477,7 +477,7 @@
   "predicted": "predpokladané",
   "No Timeline Data Available": "Nie sú K Dispozícii Údaje Časovej Osi",
   "Add transactions to generate timeline expense predictions": "Pridajte transakcie na vygenerovanie predikcie výdavkov časovej osi",
-  "AI-powered expense predictions help you plan your budget with machine learning insights": "AI predikcie výdavkov vám pomôžu plánovať rozpočet s poznatkami strojového učenia"
+  "AI-powered expense predictions help you plan your budget with machine learning insights": "AI predikcie výdavkov vám pomôžu plánovať rozpočet s poznatkami strojového učenia",
 
   "total": "celkom",
   "No Budget Set": "Žiadny Rozpočet",
@@ -569,5 +569,29 @@
     "show": "Zobraziť maskota"
   },
   "aiAnalysisSection": "Sekcia AI analýzy",
-  "analysisInProgress": "Analýza prebieha..."
+  "analysisInProgress": "Analýza prebieha...",
+
+  "Auto-Categorization": "Auto-Kategorizácia",
+  "AI-powered transaction categorization with machine learning": "AI kategorizácia transakcií so strojovým učením",
+  "Smart Transaction Analysis": "Inteligentná Analýza Transakcií",
+  "Analyze uncategorized transactions and get AI suggestions": "Analyzujte nekategorizované transakcie a získajte AI návrhy",
+  "Auto-Categorize": "Auto-Kategorizovať",
+  "No Transactions Available": "Žiadne Transakcie Dostupné",
+  "Add transactions to enable AI auto-categorization": "Pridajte transakcie na povolenie AI auto-kategorizácie",
+  "AI Suggestions": "AI Návrhy",
+  "Apply All": "Použiť Všetky",
+  "Machine Learning Features:": "Funkcie Strojového Učenia:",
+  "Merchant recognition": "Rozpoznávanie obchodníkov",
+  "Pattern learning": "Učenie sa vzorov",
+  "Amount-based logic": "Logika založená na sume",
+  "Confidence scoring": "Hodnotenie spoľahlivosti",
+  "Auto-Categorization Complete": "Auto-Kategorizácia Dokončená",
+  "Found {{count}} suggestions for uncategorized transactions": "Našlo sa {{count}} návrhov pre nekategorizované transakcie",
+  "Categorization Failed": "Kategorizácia Zlyhala",
+  "Category Applied": "Kategória Použitá",
+  "Transaction has been categorized successfully": "Transakcia bola úspešne kategorizovaná",
+  "AI Categorization Error": "Chyba AI Kategorizácie",
+  "AI Categorization Complete": "AI Kategorizácia Dokončená",
+  "Suggested category: {{category}}": "Navrhovaná kategória: {{category}}",
+  "{{confidence}}% confidence": "{{confidence}}% spoľahlivosť"
 }
