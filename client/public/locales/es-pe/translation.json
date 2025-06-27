@@ -426,8 +426,7 @@
   "Create your first income category to organize your revenue sources": "Crea tu primera categoría de ingresos para organizar tus fuentes de ingresos",
   "Add Income Category": "Agregar Categoría de Ingresos",
   "transactions": "transacciones",
-  Adding daily recommendations translation keys in Spanish to the translation file.```text
-In use": "En uso",
+  "In use": "En uso",
 
   "Recent Transactions": "Transacciones Recientes",
   "Search transactions...": "Buscar transacciones...",
@@ -641,4 +640,3 @@ In use": "En uso",
       "low": "baja"
     }
   }
-}
