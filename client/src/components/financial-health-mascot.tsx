@@ -340,14 +340,14 @@ export default function FinancialHealthMascot() {
               transition={{ duration: 0.3 }}
               className="mt-4 space-y-3"
             >
-              {/* Factors */}
-              {healthData?.factors && healthData.factors.length > 0 && (
+              {/* Insights */}
+              {healthData?.insights && healthData.insights.length > 0 && (
                 <div>
                   <h4 className="text-sm font-medium text-green-700 dark:text-green-400 mb-2">
-                    📊 Financial Factors
+                    📊 Financial Insights
                   </h4>
                   <ul className="space-y-1">
-                    {healthData.factors.map((factor, index) => (
+                    {healthData.insights.map((insight, index) => (
                       <motion.li
                         key={index}
                         initial={{ opacity: 0, x: -20 }}
@@ -356,7 +356,7 @@ export default function FinancialHealthMascot() {
                         className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
                       >
                         <Target className="h-3 w-3 text-green-500" />
-                        {factor}
+                        {insight}
                       </motion.li>
                     ))}
                   </ul>
