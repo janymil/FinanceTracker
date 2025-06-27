@@ -31,37 +31,25 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
     queryKey: ['/api/categories'],
   });
 
-  // Helper function to get localized category name using translation key
-  const getLocalizedCategoryName = (categoryName: string): string => {
-    if (!categories) return categoryName;
-    
-    const category = categories.find((cat: any) => cat.name === categoryName);
-    if (!category || !category.translationKey) {
-      // Custom category or no translation key, keep original name
-      return categoryName;
-    }
-    
-    // Predefined category with translation key, translate it
-    return t(category.translationKey) || categoryName;
-  };
+  // Use the helper function for consistent category localization
 
   // Handle both summary data and API data
-  let data = [];
+  let data: any[] = [];
   let totalExpenses = 0;
 
   if (summary?.expensesByCategory) {
     // Use summary data if provided
     data = summary.expensesByCategory;
     totalExpenses = summary.totalExpenses;
-  } else if (expenseData) {
+  } else if (expenseData && (expenseData as any).expensesByCategory) {
     // Use API data if no summary provided
-    data = expenseData.expensesByCategory || [];
-    totalExpenses = expenseData.totalExpenses || 0;
+    data = (expenseData as any).expensesByCategory || [];
+    totalExpenses = (expenseData as any).totalExpenses || 0;
   }
 
-  const chartData = data.map((item, index) => ({
+  const chartData = data.map((item: any, index: number) => ({
     ...item,
-    category: getLocalizedCategoryName(item.category),
+    category: getLocalizedCategoryName(item.category, categories as any[] | undefined, t),
     color: item.color || COLORS[index % COLORS.length],
     percentage: totalExpenses > 0 ? ((item.amount / totalExpenses) * 100).toFixed(1) : '0.0'
   }));
