@@ -797,6 +797,77 @@ export default function Dashboard() {
 
           </div>
         )}
+
+        {/* Standard and Premium User Content */}
+        {databaseUser?.plan && ['standard', 'premium'].includes(databaseUser.plan) && (
+          <div className="space-y-8">
+
+            {/* AI-Enhanced Financial Health for Standard/Premium Users */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <FinancialHealthMascot />
+              <LazyQuickFinancialSnapshot 
+                summary={financialSummary}
+                transactions={transactions as any}
+              />
+              <LazyContextualFinancialTips
+                summary={financialSummary}
+                transactions={transactions as any}
+                budgets={budgets as any}
+                selectedMonth={deferredSelectedMonth}
+              />
+            </div>
+
+            {/* Transaction Lists */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <SimpleTransactionList 
+                transactions={transactions as any}
+                isLoading={transactionsLoading}
+                isPremium={databaseUser?.plan === 'premium'}
+              />
+
+              <LazyExpenseChart summary={{
+                totalExpenses: Math.abs(financialSummary?.totalExpenses || 0),
+                expensesByCategory: financialSummary?.transactionsByCategory
+                  ?.filter((cat: any) => cat.type === 'expense')
+                  ?.map((cat: any, index: number) => ({
+                    category: cat.categoryName,
+                    amount: Math.abs(cat.amount)
+                  })) || []
+              }} />
+            </div>
+
+            {/* Budget Categories */}
+            <RequirePlan plan="standard">
+              <BudgetOverview />
+            </RequirePlan>
+
+            {/* Advanced Features */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <LazyTransactionRemindersWidget />
+
+              <LazyDailyRecommendations 
+                summary={financialSummary}
+                transactions={transactions as any}
+                budgets={budgets as any}
+              />
+            </div>
+
+            {/* Premium Features */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <LazyExpensePrediction 
+                transactions={transactions as any}
+                summary={financialSummary}
+              />
+              
+              <LazyAutoCategorization transactions={transactions as any} />
+            </div>
+
+            <LazyAIFinancialTips 
+              summary={!summaryLoading ? financialSummary : undefined}
+            />
+
+          </div>
+        )}
       </div>
     </div>
     </>
