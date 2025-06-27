@@ -638,8 +638,14 @@ export function registerAIRoutes(app: Express) {
     // Helper function to clean repetitive headers and improve readability
     const cleanText = (text: string): string => {
       return text
+        // Remove common headers at the beginning
         .replace(/^(Personal Financial Pattern|AI Recommendation|Recommendation|Insight)\s*:?\s*/i, '')
-        .replace(/^(Pattern|Analysis)\s*:?\s*/i, '')
+        .replace(/^(Pattern|Analysis|Financial Pattern|Smart Recommendation)\s*:?\s*/i, '')
+        // Remove headers anywhere in the text (not just beginning)
+        .replace(/(Personal Financial Pattern|AI Recommendation|Recommendation|Insight)\s*:?\s*/gi, '')
+        .replace(/(Pattern|Analysis|Financial Pattern|Smart Recommendation)\s*:?\s*/gi, '')
+        // Clean up extra spaces and line breaks
+        .replace(/\s+/g, ' ')
         .trim();
     };
 
@@ -647,7 +653,7 @@ export function registerAIRoutes(app: Express) {
     if (aiData.aiAnalysis?.personalizedFactors) {
       aiData.aiAnalysis.personalizedFactors.forEach((factor: string) => {
         const cleanFactor = cleanText(factor);
-        if (cleanFactor && cleanFactor.length > 15) {
+        if (cleanFactor && cleanFactor.length > 15 && insights.length < 8) {
           insights.push(cleanFactor);
         }
       });
@@ -656,7 +662,7 @@ export function registerAIRoutes(app: Express) {
     // Process factor insights with improved formatting
     if (aiData.factors) {
       aiData.factors.forEach((factor: any) => {
-        if (factor.aiInsight) {
+        if (factor.aiInsight && insights.length < 8) {
           const cleanInsight = cleanText(factor.aiInsight);
           if (cleanInsight && cleanInsight.length > 15) {
             insights.push(cleanInsight);
@@ -669,8 +675,25 @@ export function registerAIRoutes(app: Express) {
     if (aiData.aiAnalysis?.recommendations) {
       aiData.aiAnalysis.recommendations.forEach((rec: string) => {
         const cleanRec = cleanText(rec);
-        if (cleanRec && cleanRec.length > 15) {
-          insights.push(cleanRec);
+        if (cleanRec && cleanRec.length > 15 && insights.length < 8) {
+          // Make recommendations more actionable by adding context
+          if (!cleanRec.toLowerCase().includes('improve') && !cleanRec.toLowerCase().includes('increase') && !cleanRec.toLowerCase().includes('reduce')) {
+            insights.push(`Consider: ${cleanRec}`);
+          } else {
+            insights.push(cleanRec);
+          }
+        }
+      });
+    }
+
+    // Process any additional insights from the response structure
+    if (typeof aiData === 'string') {
+      // If the AI response is a string, parse it for insights
+      const lines = aiData.split('\n').filter(line => line.trim());
+      lines.forEach(line => {
+        const cleanLine = cleanText(line);
+        if (cleanLine && cleanLine.length > 20 && insights.length < 8) {
+          insights.push(cleanLine);
         }
       });
     }
