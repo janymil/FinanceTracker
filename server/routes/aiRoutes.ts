@@ -589,6 +589,16 @@ export function registerAIRoutes(app: Express) {
 
       // Use unified AI processor for financial health score
       const healthData = await runAI('financial-health-score', userId, aiPayload);
+      
+      console.log('DEBUG: Raw AI response structure:', {
+        hasScore: typeof healthData?.score === 'number',
+        score: healthData?.score,
+        hasFactors: Array.isArray(healthData?.factors),
+        factorCount: healthData?.factors?.length || 0,
+        factorTypes: healthData?.factors?.map((f: any) => typeof f),
+        firstFactor: healthData?.factors?.[0],
+        fullResponse: healthData
+      });
 
       // Convert complex AI response to simple mascot-compatible format
       const simplifiedResponse = {
@@ -596,6 +606,7 @@ export function registerAIRoutes(app: Express) {
         status: healthData.status || 'Fair',
         color: healthData.color || 'yellow',
         factors: healthData.factors ? healthData.factors.map((factor: any) => {
+          console.log('DEBUG: Processing factor:', factor, 'type:', typeof factor);
           if (typeof factor === 'string') return factor;
           return factor.name || 'Financial Factor';
         }) : [],
@@ -605,6 +616,8 @@ export function registerAIRoutes(app: Express) {
           riskAssessment: healthData.aiAnalysis?.riskAssessment || ''
         }
       };
+      
+      console.log('DEBUG: Simplified response for mascot:', simplifiedResponse);
 
       // Cache the result for 24 hours
       await cache.set(aiPayload, simplifiedResponse, false, 24);
