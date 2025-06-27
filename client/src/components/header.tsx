@@ -313,7 +313,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                           ))}
                         {(categories as Category[]).filter((cat: Category) => cat.type === newTransaction.type).length === 0 && (
                           <div className="px-2 py-1 text-sm text-gray-500">
-                            No categories available for {newTransaction.type}
+                            {t("No categories available for")} {newTransaction.type}
                           </div>
                         )}
                       </SelectContent>
@@ -328,10 +328,10 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                     {newTransaction.type === "expense" && (
                       <div className="space-y-4">
                         <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Smart Bill Assistant
+                          {t("Smart Bill Assistant")}
                         </div>
                         <div>
-                          <Label htmlFor="paymentUrl">Payment URL (Optional)</Label>
+                          <Label htmlFor="paymentUrl">{t("Payment URL (Optional)")}</Label>
                           <Input
                             id="paymentUrl"
                             type="url"
@@ -340,11 +340,11 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                             placeholder="https://example.com/pay"
                           />
                           <p className="text-xs text-gray-500 mt-1">
-                            Link to where you can pay this bill
+                            {t("Link to where you can pay this bill")}
                           </p>
                         </div>
                         <div>
-                          <Label htmlFor="referenceNote">Reference Note (Optional)</Label>
+                          <Label htmlFor="referenceNote">{t("Reference Note (Optional)")}</Label>
                           <Input
                             id="referenceNote"
                             value={newTransaction.referenceNote}
