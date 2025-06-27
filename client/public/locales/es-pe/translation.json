@@ -524,7 +524,6 @@
     "show_mascot": "Mostrar Mascota",
     "current_mood": "Estado Actual",
     "health_score": "Puntuación de Salud",
-    "generating": "Generando...",
     "generate_new": "Generar Nueva",
     "health_changed": "¡Tu salud financiera ha cambiado significativamente!",
     "alt_text": "Mascota financiera con estado {{mood}}",

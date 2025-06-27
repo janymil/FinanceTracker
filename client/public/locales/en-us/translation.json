@@ -483,7 +483,7 @@
   "Start spending and your budget progress will appear here": "Start spending and your budget progress will appear here",
   "personalizedFinancialTips": "Personalized Financial Tips",
   "generatingAIInsights": "Generating AI insights...",
-  "noFinancialTipsAvailable": "No financial tips available for this period.",```text
+  "noFinancialTipsAvailable": "No financial tips available for this period.",
   "aiTipsDisclaimer": "Tips are generated using AI based on your current transactions and budget settings.",
   "loadingFinancialInsights": "Loading financial insights...",
   "viewAllTransactions": "View All Transactions",
@@ -540,7 +540,6 @@
     "show_mascot": "Show Mascot",
     "current_mood": "Current Mood",
     "health_score": "Health Score",
-,
     "generate_new": "Generate New",
     "health_changed": "Your financial health has changed significantly!",
     "alt_text": "Financial mascot in {{mood}} mood",
