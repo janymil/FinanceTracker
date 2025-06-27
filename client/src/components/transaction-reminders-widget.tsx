@@ -423,25 +423,25 @@ export default function TransactionRemindersWidget() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="category">Category</Label>
+                      <Label htmlFor="category">{t('upcomingReminders.form.category')}</Label>
                       <Select 
                         value={newReminder.categoryId} 
                         onValueChange={(value) => setNewReminder({ ...newReminder, categoryId: value })}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
+                          <SelectValue placeholder={t('upcomingReminders.form.selectCategory')} />
                         </SelectTrigger>
                         <SelectContent>
                           {allCategories.map((category: Category) => (
                             <SelectItem key={category.id} value={category.id.toString()}>
-                              {category.name} ({category.type})
+                              {category.name} ({t(`types.${category.type}`)})
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
-                      <Label htmlFor="reminderDays">Remind me</Label>
+                      <Label htmlFor="reminderDays">{t('upcomingReminders.form.remindMe')}</Label>
                       <Select 
                         value={newReminder.reminderDaysBefore.toString()} 
                         onValueChange={(value) => setNewReminder({ ...newReminder, reminderDaysBefore: parseInt(value) })}
@@ -450,10 +450,10 @@ export default function TransactionRemindersWidget() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="0">On due date</SelectItem>
-                          <SelectItem value="1">1 day before</SelectItem>
-                          <SelectItem value="3">3 days before</SelectItem>
-                          <SelectItem value="7">1 week before</SelectItem>
+                          <SelectItem value="0">{t('upcomingReminders.form.onDueDate')}</SelectItem>
+                          <SelectItem value="1">{t('upcomingReminders.form.oneDayBefore')}</SelectItem>
+                          <SelectItem value="3">{t('upcomingReminders.form.threeDaysBefore')}</SelectItem>
+                          <SelectItem value="7">{t('upcomingReminders.form.oneWeekBefore')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -469,14 +469,14 @@ export default function TransactionRemindersWidget() {
                         }
                       />
                       <label htmlFor="recurring" className="text-sm font-medium">
-                        Recurring reminder
+                        {t('upcomingReminders.form.recurringReminder')}
                       </label>
                     </div>
 
                     {newReminder.isRecurring && (
                       <div className="grid grid-cols-2 gap-4 pl-6">
                         <div>
-                          <Label htmlFor="frequency">Frequency</Label>
+                          <Label htmlFor="frequency">{t('upcomingReminders.form.frequency')}</Label>
                           <Select
                             value={newReminder.recurringFrequency}
                             onValueChange={(value) => setNewReminder({ 
@@ -488,14 +488,14 @@ export default function TransactionRemindersWidget() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="weekly">Weekly</SelectItem>
-                              <SelectItem value="monthly">Monthly</SelectItem>
-                              <SelectItem value="yearly">Yearly</SelectItem>
+                              <SelectItem value="weekly">{t('upcomingReminders.form.weekly')}</SelectItem>
+                              <SelectItem value="monthly">{t('upcomingReminders.form.monthly')}</SelectItem>
+                              <SelectItem value="yearly">{t('upcomingReminders.form.yearly')}</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                         <div>
-                          <Label htmlFor="endDate">End Date</Label>
+                          <Label htmlFor="endDate">{t('upcomingReminders.form.endDate')}</Label>
                           <Input
                             id="endDate"
                             type="date"
