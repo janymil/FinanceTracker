@@ -365,13 +365,13 @@ export class DatabaseStorage implements IStorage {
 
     const userTransactions = await query;
 
-    // Decrypt sensitive fields
+    // Decrypt sensitive fields and cast to correct type
     return userTransactions.map(transaction => ({
       ...transaction,
       amount: DataEncryption.decryptAmount(transaction.amount),
       description: DataEncryption.decryptDescription(transaction.description),
       referenceNote: transaction.referenceNote ? DataEncryption.decrypt(transaction.referenceNote) : null
-    }));
+    })) as TransactionWithCategory[];
   }
 
   async updateTransaction(id: number, transaction: Partial<InsertTransaction>): Promise<Transaction> {
