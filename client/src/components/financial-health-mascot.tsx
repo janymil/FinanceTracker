@@ -18,7 +18,9 @@ import {
   Frown,
   Meh,
   Star,
-  Crown
+  Crown,
+  Brain,
+  Lightbulb
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import RequirePlan from "./require-plan";
@@ -348,74 +350,123 @@ export default function FinancialHealthMascot() {
                 transition={{ duration: 0.3 }}
                 className="mt-4 space-y-3"
               >
+                {/* AI Financial Metrics */}
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg mb-3">
+                  <h4 className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-3 flex items-center gap-2">
+                    <Zap className="h-4 w-4" />
+                    AI Financial Analysis
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-blue-700 dark:text-blue-300">
+                        {healthData.score || 0}%
+                      </div>
+                      <div className="text-xs text-blue-600 dark:text-blue-400">Health Score</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-purple-700 dark:text-purple-300">
+                        {healthData.insights?.length || 0}
+                      </div>
+                      <div className="text-xs text-purple-600 dark:text-purple-400">AI Insights</div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Achievements */}
                 {healthData?.achievements && healthData.achievements.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-green-700 dark:text-green-400 mb-2">
-                      {t('recentAchievements')}
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-green-700 dark:text-green-400 mb-2 flex items-center gap-2">
+                      <Crown className="h-4 w-4" />
+                      Financial Strengths
                     </h4>
-                    <ul className="space-y-1">
+                    <div className="space-y-2">
                       {healthData.achievements.map((achievement, index) => (
-                        <motion.li
+                        <motion.div
                           key={index}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.1 }}
-                          className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
+                          className="bg-green-50 dark:bg-green-900/20 p-2 rounded border-l-3 border-green-400"
                         >
-                          <Crown className="h-3 w-3 text-yellow-500" />
-                          {achievement}
-                        </motion.li>
+                          <div className="text-xs text-green-800 dark:text-green-200 font-medium">
+                            ✅ {achievement}
+                          </div>
+                        </motion.div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 )}
 
-                {/* Insights */}
+                {/* AI Insights */}
                 {healthData?.insights && healthData.insights.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-2">
-                      {t('smartInsights')}
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-2 flex items-center gap-2">
+                      <Brain className="h-4 w-4" />
+                      AI-Powered Insights
                     </h4>
-                    <ul className="space-y-1">
+                    <div className="space-y-2">
                       {healthData.insights.map((insight, index) => (
-                        <motion.li
+                        <motion.div
                           key={index}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.1 }}
-                          className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
+                          className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded border-l-3 border-blue-400"
                         >
-                          <Zap className="h-3 w-3 text-blue-500" />
-                          {insight}
-                        </motion.li>
+                          <div className="flex items-start gap-2">
+                            <Lightbulb className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <div className="text-xs text-blue-800 dark:text-blue-200">
+                              <div className="font-medium mb-1">Personal Financial Pattern</div>
+                              <div className="text-blue-600 dark:text-blue-300">{insight}</div>
+                            </div>
+                          </div>
+                        </motion.div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 )}
 
-                {/* Warnings */}
+                {/* AI Recommendations */}
                 {healthData?.warnings && healthData.warnings.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-red-700 dark:text-red-400 mb-2">
-                      {t('actionItems')}
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2 flex items-center gap-2">
+                      <Target className="h-4 w-4" />
+                      Smart Recommendations
                     </h4>
-                    <ul className="space-y-1">
+                    <div className="space-y-2">
                       {healthData.warnings.map((warning, index) => (
-                        <motion.li
+                        <motion.div
                           key={index}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.1 }}
-                          className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
+                          className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded border-l-3 border-amber-400"
                         >
-                          <AlertTriangle className="h-3 w-3 text-red-500" />
-                          {warning}
-                        </motion.li>
+                          <div className="flex items-start gap-2">
+                            <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                            <div className="text-xs text-amber-800 dark:text-amber-200">
+                              <div className="font-medium mb-1">AI Recommendation</div>
+                              <div className="text-amber-600 dark:text-amber-300">{warning}</div>
+                            </div>
+                          </div>
+                        </motion.div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 )}
+
+                {/* Premium AI Badge */}
+                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-3 rounded-lg text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <Zap className="h-4 w-4 text-purple-600" />
+                    <span className="text-xs font-medium text-purple-700 dark:text-purple-300">
+                      Powered by AI
+                    </span>
+                  </div>
+                  <div className="text-xs text-purple-600 dark:text-purple-400">
+                    Advanced financial analysis for Standard & Premium users
+                  </div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
