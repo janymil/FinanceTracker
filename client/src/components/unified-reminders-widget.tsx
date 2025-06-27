@@ -204,13 +204,13 @@ export default function UnifiedRemindersWidget() {
       setIsDialogOpen(false);
       resetForm();
       toast({
-        title: "Reminder Created",
-        description: "Expense reminder has been set successfully",
+        title: t('upcomingReminders.reminderCreated'),
+        description: t('upcomingReminders.reminderCreatedDescription'),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create reminder",
+        title: t('common.error'),
+        description: error.message || t('upcomingReminders.failedToCreate'),
         variant: "destructive",
       });
     }
@@ -405,14 +405,14 @@ export default function UnifiedRemindersWidget() {
                         }
                       />
                       <label htmlFor="recurring" className="text-sm font-medium">
-                        Recurring reminder
+                        {t('upcomingReminders.form.recurringReminder')}
                       </label>
                     </div>
 
                     {newReminder.isRecurring && (
                       <div className="grid grid-cols-2 gap-4 pl-6">
                         <div>
-                          <Label htmlFor="frequency">Frequency</Label>
+                          <Label htmlFor="frequency">{t('upcomingReminders.form.frequency')}</Label>
                           <Select
                             value={newReminder.recurringFrequency}
                             onValueChange={(value) => setNewReminder({ 
@@ -424,14 +424,14 @@ export default function UnifiedRemindersWidget() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="weekly">Weekly</SelectItem>
-                              <SelectItem value="monthly">Monthly</SelectItem>
-                              <SelectItem value="yearly">Yearly</SelectItem>
+                              <SelectItem value="weekly">{t('recurring.weekly')}</SelectItem>
+                              <SelectItem value="monthly">{t('recurring.monthly')}</SelectItem>
+                              <SelectItem value="yearly">{t('recurring.yearly')}</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                         <div>
-                          <Label htmlFor="endDate">End Date</Label>
+                          <Label htmlFor="endDate">{t('upcomingReminders.form.endDate')}</Label>
                           <Input
                             id="endDate"
                             type="date"
@@ -448,7 +448,7 @@ export default function UnifiedRemindersWidget() {
 
                   <div className="space-y-4 border-t pt-4">
                     <div>
-                      <Label htmlFor="paymentUrl">Payment URL</Label>
+                      <Label htmlFor="paymentUrl">{t('upcomingReminders.form.paymentUrl')}</Label>
                       <Input
                         id="paymentUrl"
                         value={newReminder.paymentUrl}
@@ -457,26 +457,26 @@ export default function UnifiedRemindersWidget() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="referenceNote">Reference Note</Label>
+                      <Label htmlFor="referenceNote">{t('upcomingReminders.form.referenceNote')}</Label>
                       <Input
                         id="referenceNote"
                         value={newReminder.referenceNote}
                         onChange={(e) => setNewReminder({ ...newReminder, referenceNote: e.target.value })}
-                        placeholder="Account number, reference ID, etc."
+                        placeholder={t('upcomingReminders.form.referenceNotePlaceholder')}
                       />
                     </div>
                   </div>
 
                   <div className="flex gap-2 pt-4">
                     <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="flex-1">
-                      Cancel
+                      {t('common.cancel')}
                     </Button>
                     <Button 
                       onClick={handleSubmit}
                       disabled={!newReminder.title || !newReminder.dueDate}
                       className="flex-1"
                     >
-                      {editingReminder ? "Update" : "Create"} Reminder
+                      {editingReminder ? t('common.update') : t('common.create')} {t('upcomingReminders.reminder')}
                     </Button>
                   </div>
                 </div>
@@ -572,9 +572,9 @@ export default function UnifiedRemindersWidget() {
           ) : (
             <div className="text-center py-8">
               <Bell className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-600 dark:text-gray-300">No upcoming reminders</p>
+              <p className="text-gray-600 dark:text-gray-300">{t('upcomingReminders.noReminders')}</p>
               <p className="text-sm text-gray-500 mt-1">
-                Create future-dated transactions or add manual reminders to see them here
+                {t('upcomingReminders.noRemindersDescription')}
               </p>
             </div>
           )}
