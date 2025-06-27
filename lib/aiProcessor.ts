@@ -79,7 +79,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
           fallbackResult = await generateTrendPredictions(payload.transactions, payload.budgets, payload.language || 'en-us');
           break;
         case 'expense-predictions':
-          fallbackResult = await generateExpensePredictions(userId, payload.transactions);
+          fallbackResult = await generateExpensePredictions(payload.transactions, payload.language || 'en-us');
           break;
         default:
           throw new Error(`No local fallback available for task: ${task}`);
