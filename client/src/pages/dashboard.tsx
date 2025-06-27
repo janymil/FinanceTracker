@@ -679,7 +679,14 @@ export default function Dashboard() {
         {/* Debug: User plan is {databaseUser?.plan} */}
         {console.log('Dashboard Debug - User Plan:', databaseUser?.plan)}
 
-        {/* Free User Content */}
+        {/* Loading State */}
+        {!databaseUser && (
+          <div className="bg-gray-100 border border-gray-400 text-gray-700 px-4 py-3 rounded mb-4">
+            DEBUG: Loading user plan data...
+          </div>
+        )}
+
+        {/* Free User Content - Only show if plan is explicitly 'free' */}
         {databaseUser?.plan === 'free' && (
           <div className="space-y-8">
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -804,8 +811,8 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Standard and Premium User Content */}
-        {databaseUser?.plan && ['standard', 'premium'].includes(databaseUser.plan) && (
+        {/* Standard and Premium User Content - Only show if NOT free plan */}
+        {databaseUser?.plan && databaseUser.plan !== 'free' && ['standard', 'premium'].includes(databaseUser.plan) && (
           <div className="space-y-8">
             <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
               DEBUG: Showing PREMIUM user layout (AI-Enhanced Financial Health Mascot) - Plan: {databaseUser.plan}
