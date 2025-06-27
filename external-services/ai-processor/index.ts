@@ -1330,6 +1330,7 @@ export async function generateDailyRecommendations(financialData: {
     period: string;
   }>;
 }, language: string = 'en-us') {
+  const normalizedLanguage = normalizeLanguageCode(language);
   try {
     // Production: minimal logging only
 
@@ -1438,7 +1439,7 @@ Only provide recommendations and insights based on the actual financial data pro
           role: "system",
           content: `You are an expert financial advisor who provides personalized, actionable recommendations based on real user data. Always return valid JSON.
 
-Respond in ${getLanguageLabel(language)}.`
+Respond in ${getLanguageLabel(normalizedLanguage)}.`
         },
         {
           role: "user",
