@@ -1607,7 +1607,24 @@ ${recentTransactions.slice(0, 20).map(t =>
 
 Budgets: ${budgets.length} active budgets
 
-You MUST provide specific insights in personalizedFactors array and actionable recommendations in recommendations array. Give at least 2-3 items in each array based on the spending patterns and financial situation shown above.`
+CRITICAL REQUIREMENTS:
+1. personalizedFactors array: Provide at least 3 specific insights about this user's spending patterns, habits, or financial behavior based on their actual transactions shown above
+2. recommendations array: Provide at least 3 actionable recommendations to improve their financial health
+3. DO NOT return empty arrays - always provide meaningful content
+
+Example format you MUST follow:
+"personalizedFactors": [
+  "You spend most on [category] which is [percentage]% of your expenses",
+  "Your income vs expenses ratio suggests [specific observation]",
+  "Your transaction frequency shows [pattern analysis]"
+]
+"recommendations": [
+  "Reduce [specific category] spending by [amount] to improve savings", 
+  "Set up a budget for [category] to limit monthly spending",
+  "Track [specific behavior] to optimize your financial health"
+]
+
+NEVER return empty arrays for personalizedFactors or recommendations.`
         }
       ],
       response_format: { type: "json_object" },
@@ -1616,6 +1633,14 @@ You MUST provide specific insights in personalizedFactors array and actionable r
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
+    
+    // Debug logging to trace AI response processing
+    console.log('=== FLY.IO FINANCIAL HEALTH DEBUG ===');
+    console.log('Raw AI Response:', JSON.stringify(result, null, 2));
+    console.log('AI Analysis object:', result.aiAnalysis);
+    console.log('Personalized Factors:', result.aiAnalysis?.personalizedFactors);
+    console.log('Recommendations:', result.aiAnalysis?.recommendations);
+    console.log('====================================');
     
     const processedResult = {
       score: Math.max(0, Math.min(100, result.score || 50)),

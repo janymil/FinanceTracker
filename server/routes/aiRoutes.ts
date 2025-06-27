@@ -578,6 +578,17 @@ export function registerAIRoutes(app: Express) {
         language: language
       };
 
+      // Debug logging to trace user data collection
+      console.log('=== FINANCIAL HEALTH DATA COLLECTION DEBUG ===');
+      console.log('User ID:', userId);
+      console.log('Raw transactions count:', transactions.length);
+      console.log('Raw budgets count:', budgets.length);
+      console.log('Processed transactions count:', processedTransactions.length);
+      console.log('Sample transactions:', processedTransactions.slice(0, 3));
+      console.log('Summary:', summary);
+      console.log('AI Payload:', JSON.stringify(aiPayload, null, 2));
+      console.log('==============================================');
+
       // Initialize UnifiedAICache with 24 hours TTL
       const cache = new UnifiedAICache('financial-health-score', userId);
 
