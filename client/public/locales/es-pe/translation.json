@@ -426,7 +426,8 @@
   "Create your first income category to organize your revenue sources": "Crea tu primera categoría de ingresos para organizar tus fuentes de ingresos",
   "Add Income Category": "Agregar Categoría de Ingresos",
   "transactions": "transacciones",
-  "In use": "En uso",
+  Adding daily recommendations translation keys in Spanish to the translation file.```text
+In use": "En uso",
 
   "Recent Transactions": "Transacciones Recientes",
   "Search transactions...": "Buscar transacciones...",
@@ -568,7 +569,7 @@
   "No Timeline Data Available": "No Hay Datos de Cronología Disponibles",
   "Add transactions to generate timeline expense predictions": "Agrega transacciones para generar predicciones de gastos de cronología",
   "AI-powered expense predictions help you plan your budget with machine learning insights": "Las predicciones de gastos con IA te ayudan a planificar tu presupuesto con información de aprendizaje automático",
-  
+
   "Auto-Categorization": "Auto-Categorización",
   "AI-powered transaction categorization with machine learning": "Categorización de transacciones con IA y aprendizaje automático",
   "Smart Transaction Analysis": "Análisis Inteligente de Transacciones",
@@ -591,5 +592,53 @@
   "AI Categorization Error": "Error de Categorización IA",
   "AI Categorization Complete": "Categorización IA Completa",
   "Suggested category: {{category}}": "Categoría sugerida: {{category}}",
-  "{{confidence}}% confidence": "{{confidence}}% confianza"
+  "{{confidence}}% confidence": "{{confidence}}% confianza",
+  "autoCategorization": {
+    "title": "Categorización IA",
+    "description": "Categoriza automáticamente tus transacciones",
+    "categorizeButton": "Categorizar Transacciones",
+    "processing": "Procesando...",
+    "success": "Se categorizaron exitosamente {{count}} transacciones",
+    "noTransactions": "No se encontraron transacciones sin categorizar",
+    "error": "Error al categorizar transacciones. Inténtalo de nuevo.",
+    "premiumRequired": "Función Premium",
+    "upgradeMessage": "Actualiza a Premium para categorizar automáticamente tus transacciones con IA",
+    "upgradeButton": "Actualizar a Premium"
+  },
+  "dailyRecommendations": {
+    "title": "Recomendaciones Diarias",
+    "description": "Recomendaciones personalizadas impulsadas por IA para {{date}}",
+    "todaysTasks": "Tareas de Hoy",
+    "personalInsights": "Perspectivas Personales",
+    "todaysRecommendations": "Recomendaciones de Hoy",
+    "completed": "completado",
+    "aiGenerated": "Generado por IA",
+    "personalFinancialInsights": "Perspectivas Financieras Personales",
+    "basedOn": "Basado en:",
+    "confidence": "confianza",
+    "potentialSavings": "Ahorro potencial:",
+    "premiumFeature": "Función Premium",
+    "premiumDescription": "Obtén recomendaciones diarias personalizadas y perspectivas financieras impulsadas por IA",
+    "upgradeButton": "Actualizar a Premium",
+    "noRecommendationsTitle": "No Hay Recomendaciones Disponibles",
+    "noRecommendationsMessage": "Agrega al menos 3 transacciones para recibir recomendaciones diarias impulsadas por IA con perspectivas reales de categorías.",
+    "noInsightsTitle": "No Hay Perspectivas Personales Disponibles",
+    "noInsightsMessage": "Agrega al menos 3 transacciones para generar perspectivas financieras personalizadas impulsadas por IA",
+    "noInsightsMessageAlt": "No hay perspectivas disponibles. Agrega más datos de transacciones para análisis personalizado.",
+    "failedToLoadTitle": "Error al Cargar Recomendaciones",
+    "failedToLoadMessage": "No se pudieron generar las recomendaciones diarias. Inténtalo de nuevo más tarde.",
+    "loadingText": "Cargando recomendaciones...",
+    "categories": {
+      "spending": "gasto",
+      "saving": "ahorro",
+      "budgeting": "presupuesto",
+      "goal": "objetivo",
+      "habit": "hábito"
+    },
+    "priorities": {
+      "high": "alta",
+      "medium": "media",
+      "low": "baja"
+    }
+  }
 }

@@ -484,6 +484,7 @@
   "personalizedFinancialTips": "Personalized Financial Tips",
   "generatingAIInsights": "Generating AI insights...",
   "noFinancialTipsAvailable": "No financial tips available for this period.",
+```text
   "aiTipsDisclaimer": "Tips are generated using AI based on your current transactions and budget settings.",
   "loadingFinancialInsights": "Loading financial insights...",
   "viewAllTransactions": "View All Transactions",
@@ -582,7 +583,7 @@
   "No Timeline Data Available": "No Timeline Data Available",
   "Add transactions to generate timeline expense predictions": "Add transactions to generate timeline expense predictions",
   "AI-powered expense predictions help you plan your budget with machine learning insights": "AI-powered expense predictions help you plan your budget with machine learning insights",
-  
+
   "Auto-Categorization": "Auto-Categorization",
   "AI-powered transaction categorization with machine learning": "AI-powered transaction categorization with machine learning",
   "Smart Transaction Analysis": "Smart Transaction Analysis",
@@ -605,5 +606,53 @@
   "AI Categorization Error": "AI Categorization Error",
   "AI Categorization Complete": "AI Categorization Complete",
   "Suggested category: {{category}}": "Suggested category: {{category}}",
-  "{{confidence}}% confidence": "{{confidence}}% confidence"
+  "{{confidence}}% confidence": "{{confidence}}% confidence",
+  "autoCategorization": {
+    "title": "AI Categorization",
+    "description": "Automatically categorize your transactions",
+    "categorizeButton": "Categorize Transactions",
+    "processing": "Processing...",
+    "success": "Successfully categorized {{count}} transactions",
+    "noTransactions": "No uncategorized transactions found",
+    "error": "Failed to categorize transactions. Please try again.",
+    "premiumRequired": "Premium Feature",
+    "upgradeMessage": "Upgrade to Premium to automatically categorize your transactions with AI",
+    "upgradeButton": "Upgrade to Premium"
+  },
+  "dailyRecommendations": {
+    "title": "Daily Recommendations",
+    "description": "AI-powered personalized recommendations for {{date}}",
+    "todaysTasks": "Today's Tasks",
+    "personalInsights": "Personal Insights",
+    "todaysRecommendations": "Today's Recommendations",
+    "completed": "completed",
+    "aiGenerated": "AI-Generated",
+    "personalFinancialInsights": "Personal Financial Insights",
+    "basedOn": "Based on:",
+    "confidence": "confidence",
+    "potentialSavings": "Potential savings:",
+    "premiumFeature": "Premium Feature",
+    "premiumDescription": "Get personalized daily recommendations and AI-powered financial insights",
+    "upgradeButton": "Upgrade to Premium",
+    "noRecommendationsTitle": "No Recommendations Available",
+    "noRecommendationsMessage": "Add at least 3 transactions to receive AI-powered daily recommendations with real category insights.",
+    "noInsightsTitle": "No Personal Insights Available",
+    "noInsightsMessage": "Add at least 3 transactions to generate AI-powered personalized financial insights",
+    "noInsightsMessageAlt": "No insights available. Add more transaction data for personalized analysis.",
+    "failedToLoadTitle": "Failed to Load Recommendations",
+    "failedToLoadMessage": "Unable to generate daily recommendations. Please try again later.",
+    "loadingText": "Loading recommendations...",
+    "categories": {
+      "spending": "spending",
+      "saving": "saving",
+      "budgeting": "budgeting",
+      "goal": "goal",
+      "habit": "habit"
+    },
+    "priorities": {
+      "high": "high",
+      "medium": "medium",
+      "low": "low"
+    }
+  }
 }

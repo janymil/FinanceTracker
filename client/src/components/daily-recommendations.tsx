@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ import { useUser } from '@clerk/clerk-react';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useCurrency } from '@/context/CurrencyContext';
+import { useTranslation } from 'react-i18next';
 
 interface DailyRecommendationsProps {
   summary?: any;
@@ -60,6 +62,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
   const [currentDate, setCurrentDate] = useState(new Date());
   const { user } = useUser();
   const { currency } = useCurrency();
+  const { t } = useTranslation();
 
   // Get user's plan from database
   const { data: databaseUser, isLoading: userLoading } = useQuery({
@@ -134,35 +137,39 @@ export default function DailyRecommendations({ summary, transactions = [], budge
     }
   };
 
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString(undefined, { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
   return (
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Lightbulb className="h-5 w-5 text-yellow-600" />
-          Daily Recommendations
+          {t('dailyRecommendations.title')}
         </CardTitle>
         <CardDescription>
-          AI-powered personalized recommendations for {currentDate.toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}
+          {t('dailyRecommendations.description', { date: formatDate(currentDate) })}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {isPremiumUser ? (
           <Tabs defaultValue="recommendations" className="space-y-6">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="recommendations">Today's Tasks</TabsTrigger>
-              <TabsTrigger value="insights">Personal Insights</TabsTrigger>
+              <TabsTrigger value="recommendations">{t('dailyRecommendations.todaysTasks')}</TabsTrigger>
+              <TabsTrigger value="insights">{t('dailyRecommendations.personalInsights')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="recommendations" className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="font-medium">Today's Recommendations</h4>
+                <h4 className="font-medium">{t('dailyRecommendations.todaysRecommendations')}</h4>
                 <Badge variant="outline" className="text-xs">
-                  {completedTasks.size}/{recommendations.length} completed
+                  {completedTasks.size}/{recommendations.length} {t('dailyRecommendations.completed')}
                 </Badge>
               </div>
 
@@ -174,10 +181,10 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                 <div className="text-center py-8">
                   <AlertTriangle className="h-12 w-12 text-red-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    Failed to Load Recommendations
+                    {t('dailyRecommendations.failedToLoadTitle')}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    Unable to generate daily recommendations. Please try again later.
+                    {t('dailyRecommendations.failedToLoadMessage')}
                   </p>
                 </div>
               ) : recommendations.length > 0 ? (
@@ -204,7 +211,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                               {rec.title}
                             </h5>
                             <Badge variant="outline" className="text-xs capitalize">
-                              {rec.type}
+                              {rec.type ? t(`dailyRecommendations.categories.${rec.type}`) : rec.type}
                             </Badge>
                           </div>
 
@@ -236,7 +243,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                           {rec.amount && (
                             <div className="flex items-center gap-1 text-sm font-medium text-green-600">
                               <PiggyBank className="h-4 w-4" />
-                              Potential savings: {currency}{rec.amount.toLocaleString()}
+                              {t('dailyRecommendations.potentialSavings')} {currency}{rec.amount.toLocaleString()}
                             </div>
                           )}
                         </div>
@@ -249,10 +256,10 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                 <div className="text-center py-8">
                   <Lightbulb className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    No Recommendations Available
+                    {t('dailyRecommendations.noRecommendationsTitle')}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    Add at least 3 transactions to receive AI-powered daily recommendations with real category insights.
+                    {t('dailyRecommendations.noRecommendationsMessage')}
                   </p>
                 </div>
               )}
@@ -260,9 +267,9 @@ export default function DailyRecommendations({ summary, transactions = [], budge
 
             <TabsContent value="insights" className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="font-medium">Personal Financial Insights</h4>
+                <h4 className="font-medium">{t('dailyRecommendations.personalFinancialInsights')}</h4>
                 <Badge variant="outline" className="text-xs">
-                  AI-Generated
+                  {t('dailyRecommendations.aiGenerated')}
                 </Badge>
               </div>
 
@@ -279,9 +286,9 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                             {insight.insight}
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-300">
-                            <span>Based on: {insight.basedOn}</span>
+                            <span>{t('dailyRecommendations.basedOn')} {insight.basedOn}</span>
                             <span>•</span>
-                            <span>{(insight.confidence * 100).toFixed(0)}% confidence</span>
+                            <span>{(insight.confidence * 100).toFixed(0)}% {t('dailyRecommendations.confidence')}</span>
                             <span>•</span>
                             <span>{insight.timeframe}</span>
                           </div>
@@ -294,12 +301,12 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                 <div className="text-center py-8">
                   <Lightbulb className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    No Personal Insights Available
+                    {t('dailyRecommendations.noInsightsTitle')}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
                     {hasTransactionData 
-                      ? "No insights available. Add more transaction data for personalized analysis." 
-                      : "Add at least 3 transactions to generate AI-powered personalized financial insights"
+                      ? t('dailyRecommendations.noInsightsMessageAlt')
+                      : t('dailyRecommendations.noInsightsMessage')
                     }
                   </p>
                 </div>
@@ -312,15 +319,15 @@ export default function DailyRecommendations({ summary, transactions = [], budge
               <Lock className="h-8 w-8 text-purple-600" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              Premium Feature
+              {t('dailyRecommendations.premiumFeature')}
             </h3>
             <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-              Get personalized daily recommendations and AI-powered financial insights
+              {t('dailyRecommendations.premiumDescription')}
             </p>
             <Link href="/subscribe">
               <Button className="bg-purple-600 hover:bg-purple-700 text-white">
                 <Crown className="h-4 w-4 mr-2" />
-                Upgrade to Premium
+                {t('dailyRecommendations.upgradeButton')}
               </Button>
             </Link>
           </div>

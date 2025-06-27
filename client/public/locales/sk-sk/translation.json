@@ -567,7 +567,6 @@
   },
   "aiAnalysisSection": "Sekcia AI analýzy",
   "analysisInProgress": "Analýza prebieha...",
-
   "Auto-Categorization": "Auto-Kategorizácia",
   "AI-powered transaction categorization with machine learning": "AI kategorizácia transakcií so strojovým učením",
   "Smart Transaction Analysis": "Inteligentná Analýza Transakcií",
@@ -590,5 +589,53 @@
   "AI Categorization Error": "Chyba AI Kategorizácie",
   "AI Categorization Complete": "AI Kategorizácia Dokončená",
   "Suggested category: {{category}}": "Navrhovaná kategória: {{category}}",
-  "{{confidence}}% confidence": "{{confidence}}% spoľahlivosť"
+  "{{confidence}}% confidence": "{{confidence}}% spoľahlivosť",
+  "autoCategorization": {
+    "title": "AI Kategorizácia",
+    "description": "Automaticky kategorizuje vaše transakcie",
+    "categorizeButton": "Kategorizovať Transakcie",
+    "processing": "Spracováva sa...",
+    "success": "Úspešne kategorizovaných {{count}} transakcií",
+    "noTransactions": "Nenašli sa žiadne nekategorizované transakcie",
+    "error": "Nepodarilo sa kategorizovať transakcie. Skúste to znovu.",
+    "premiumRequired": "Prémiová Funkcia",
+    "upgradeMessage": "Upgradujte na Premium pre automatickú kategorizáciu transakcií pomocou AI",
+    "upgradeButton": "Upgradovať na Premium"
+  },
+  "dailyRecommendations": {
+    "title": "Denné Odporúčania",
+    "description": "AI personalizované odporúčania pre {{date}}",
+    "todaysTasks": "Dnešné Úlohy",
+    "personalInsights": "Osobné Poznatky",
+    "todaysRecommendations": "Dnešné Odporúčania",
+    "completed": "dokončené",
+    "aiGenerated": "Generované AI",
+    "personalFinancialInsights": "Osobné Finančné Poznatky",
+    "basedOn": "Založené na:",
+    "confidence": "istota",
+    "potentialSavings": "Potenciálne úspory:",
+    "premiumFeature": "Prémiová Funkcia",
+    "premiumDescription": "Získajte personalizované denné odporúčania a finančné poznatky poháňané AI",
+    "upgradeButton": "Upgradovať na Premium",
+    "noRecommendationsTitle": "Žiadne Odporúčania Nie Sú Dostupné",
+    "noRecommendationsMessage": "Pridajte aspoň 3 transakcie na získanie AI denných odporúčaní so skutočnými poznatkami kategórií.",
+    "noInsightsTitle": "Žiadne Osobné Poznatky Nie Sú Dostupné",
+    "noInsightsMessage": "Pridajte aspoň 3 transakcie na generovanie AI personalizovaných finančných poznatkov",
+    "noInsightsMessageAlt": "Žiadne poznatky nie sú dostupné. Pridajte viac transakčných údajov pre personalizovanú analýzu.",
+    "failedToLoadTitle": "Nepodarilo Sa Načítať Odporúčania",
+    "failedToLoadMessage": "Nepodarilo sa vygenerovať denné odporúčania. Skúste to znovu neskôr.",
+    "loadingText": "Načítavajú sa odporúčania...",
+    "categories": {
+      "spending": "výdavky",
+      "saving": "šetrenie",
+      "budgeting": "rozpočet",
+      "goal": "cieľ",
+      "habit": "zvyk"
+    },
+    "priorities": {
+      "high": "vysoká",
+      "medium": "stredná",
+      "low": "nízka"
+    }
+  }
 }
