@@ -279,9 +279,6 @@ export function registerAIRoutes(app: Express) {
       }
 
       const { summary, budgets, useAdvancedFactors } = req.body;
-      
-      // Get language from request headers
-      const language = getUserLanguage(req);
 
       const transactions = await storage.getUserTransactions(userId, 100);
 
@@ -309,35 +306,19 @@ export function registerAIRoutes(app: Express) {
         return res.json(cachedResult);
       }
 
-      // Generate new AI response with old local function
-      const { generateFinancialHealthScore } = await import('../openai');
-      const aiScore = await generateFinancialHealthScore(
-        userId,
-        {
-          transactions: transactions.map(t => ({
-            id: t.id,
-            amount: t.amount,
-            description: t.description,
-            date: t.date.toISOString(),
-            type: t.type as 'income' | 'expense',
-            categoryName: t.categoryName || 'Uncategorized'
-          })),
-          budgets: budgets.map((b: any) => ({
-            categoryName: b.categoryName || 'Uncategorized',
-            amount: b.amount,
-            spent: b.spent || 0
-          })),
-          summary: {
-            totalIncome: summary.totalIncome,
-            totalExpenses: summary.totalExpenses,
-            netBalance: summary.totalIncome - summary.totalExpenses
-          }
-        },
-        language
-      );
+      // Generate new AI response
+      const aiScore = await runAI('financial-health-score', userId, aiPayload);
 
       // Cache the result for 24 hours
       await cache.set(aiPayload, aiScore, false, 24);
+      
+      console.log('Financial health: Fly.io response structure:', {
+        hasScore: typeof aiScore?.score === 'number',
+        score: aiScore?.score,
+        hasStatus: !!aiScore?.status,
+        status: aiScore?.status,
+        fullResponse: aiScore
+      });
 
       return res.json(aiScore);
     } catch (error) {
