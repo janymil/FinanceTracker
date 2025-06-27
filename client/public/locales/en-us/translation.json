@@ -480,5 +480,10 @@
   "Detailed expense breakdown and budget tracking available with Standard": "Detailed expense breakdown and budget tracking available with Standard",
   "Edit Budgets": "Edit Budgets",
   "No spending on budgeted categories yet": "No spending on budgeted categories yet",
-  "Start spending and your budget progress will appear here": "Start spending and your budget progress will appear here"
+  "Start spending and your budget progress will appear here": "Start spending and your budget progress will appear here",
+  "personalizedFinancialTips": "Personalized Financial Tips",
+  "generatingAIInsights": "Generating AI insights...",
+  "noFinancialTipsAvailable": "No financial tips available for this period.",
+  "aiTipsDisclaimer": "Tips are generated using AI based on your current transactions and budget settings.",
+  "loadingFinancialInsights": "Loading financial insights..."
 }

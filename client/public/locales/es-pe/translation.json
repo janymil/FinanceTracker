@@ -465,5 +465,10 @@
   "Budget by Category": "Presupuesto por Categoría",
   "Edit Budgets": "Editar Presupuestos",
   "No spending on budgeted categories yet": "Aún no hay gastos en las categorías presupuestadas",
-  "Start spending and your budget progress will appear here": "Comienza a gastar y tu progreso de presupuesto aparecerá aquí"
+  "Start spending and your budget progress will appear here": "Comienza a gastar y tu progreso de presupuesto aparecerá aquí",
+  "personalizedFinancialTips": "Consejos Financieros Personalizados",
+  "generatingAIInsights": "Generando información de IA...",
+  "noFinancialTipsAvailable": "No hay consejos financieros disponibles para este período.",
+  "aiTipsDisclaimer": "Los consejos se generan usando IA basada en tus transacciones y configuraciones de presupuesto actuales.",
+  "loadingFinancialInsights": "Cargando información financiera..."
 }

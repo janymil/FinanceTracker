@@ -465,5 +465,10 @@
   "Budget by Category": "Rozpočet podľa kategórií",
   "Edit Budgets": "Upraviť Rozpočty",
   "No spending on budgeted categories yet": "Zatiaľ žiadne výdavky v rozpočtovaných kategóriách",
-  "Start spending and your budget progress will appear here": "Začnite utrácať a váš pokrok rozpočtu sa zobrazí tu"
+  "Start spending and your budget progress will appear here": "Začnite utrácať a váš pokrok rozpočtu sa zobrazí tu",
+  "personalizedFinancialTips": "Personalizované Finančné Tipy",
+  "generatingAIInsights": "Generujem AI poznatky...",
+  "noFinancialTipsAvailable": "Pre toto obdobie nie sú k dispozícii žiadne finančné tipy.",
+  "aiTipsDisclaimer": "Tipy sú generované pomocou AI na základe vašich aktuálnych transakcií a nastavení rozpočtu.",
+  "loadingFinancialInsights": "Načítavam finančné poznatky..."
 }
