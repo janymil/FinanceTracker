@@ -1617,6 +1617,8 @@ Provide an AI-powered financial health score that adapts to this user's specific
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
     
+    console.log('Fly.io Financial Health: Raw AI response:', JSON.stringify(result, null, 2));
+    
     const processedResult = {
       score: Math.max(0, Math.min(100, result.score || 50)),
       status: result.status || 'Fair',
