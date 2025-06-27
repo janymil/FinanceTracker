@@ -5,17 +5,40 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// Language utility function
+// Language utility function - supports all formats
 function getLanguageLabel(lang: string): string {
-  const languageMap: { [key: string]: string } = {
-    'en-us': 'English',
-    'es-pe': 'Spanish',
-    'sk-sk': 'Slovak',
-    'en': 'English',
-    'es': 'Spanish',
-    'sk': 'Slovak'
-  };
-  return languageMap[lang] || 'English';
+  if (!lang) return 'English';
+  
+  const normalizedLang = lang.toLowerCase();
+  
+  // Handle all Spanish variants
+  if (normalizedLang.startsWith('es')) {
+    return 'Spanish';
+  }
+  // Handle all Slovak variants
+  if (normalizedLang.startsWith('sk')) {
+    return 'Slovak';
+  }
+  // Handle all English variants (default)
+  return 'English';
+}
+
+// Normalize language code to full locale format
+function normalizeLanguageCode(lang: string): string {
+  if (!lang) return 'en-us';
+  
+  const normalizedLang = lang.toLowerCase();
+  
+  // Handle all Spanish variants
+  if (normalizedLang.startsWith('es')) {
+    return 'es-pe';
+  }
+  // Handle all Slovak variants
+  if (normalizedLang.startsWith('sk')) {
+    return 'sk-sk';
+  }
+  // Handle all English variants (default)
+  return 'en-us';
 }
 
 const app = express();
@@ -497,7 +520,7 @@ export async function generateFinancialTips(financialData: {
     type?: string;
   }>;
 
-}): Promise<FinancialTip[]> {
+}, language: string = 'en-us'): Promise<FinancialTip[]> {
   try {
     const { 
       totalIncome, 
@@ -1702,7 +1725,8 @@ app.post("/execute-gpt-task", async (req, res) => {
 // Legacy endpoints for backward compatibility
 app.post('/generate-financial-tip', async (req, res) => {
   try {
-    const result = await generateFinancialTips(req.body);
+    const language = normalizeLanguageCode(req.body.language || 'en-us');
+    const result = await generateFinancialTips(req.body, language);
     res.json(result);
   } catch (error) {
     console.error('Legacy financial tip error:', error);

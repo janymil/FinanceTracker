@@ -1,13 +1,20 @@
 /**
  * Utility function to get language labels for OpenAI system messages
+ * Supports all language code formats: en, es, sk, en-us, es-pe, sk-sk, en-US, es-PE, sk-SK
  */
 export function getLanguageLabel(lang: string): string {
-  switch (lang) {
-    case 'es-pe': return 'Latin American Spanish';
-    case 'sk-sk': return 'Slovak';
-    case 'en-us':
-    default: return 'American English';
+  const normalizedLang = lang.toLowerCase();
+  
+  // Handle all Spanish variants
+  if (normalizedLang.startsWith('es')) {
+    return 'Spanish';
   }
+  // Handle all Slovak variants
+  if (normalizedLang.startsWith('sk')) {
+    return 'Slovak';
+  }
+  // Handle all English variants (default)
+  return 'English';
 }
 
 /**

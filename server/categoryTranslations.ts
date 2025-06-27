@@ -80,18 +80,39 @@ export const categoryTranslations = {
   }
 };
 
+/**
+ * Normalizes any language code format to full locale format
+ * Supports: en, es, sk, en-us, es-pe, sk-sk, en-US, es-PE, sk-SK
+ */
+export function normalizeLanguageCode(lang: string): string {
+  if (!lang) return 'en-us';
+  
+  const normalizedLang = lang.toLowerCase();
+  
+  // Handle all Spanish variants
+  if (normalizedLang.startsWith('es')) {
+    return 'es-pe';
+  }
+  // Handle all Slovak variants
+  if (normalizedLang.startsWith('sk')) {
+    return 'sk-sk';
+  }
+  // Handle all English variants (default)
+  return 'en-us';
+}
+
 // Helper function to get user language from request
 export function getUserLanguage(req: any): string {
   // Check for custom language header from frontend
   const userLanguage = req.headers['x-user-language'];
   if (userLanguage) {
-    return userLanguage;
+    return normalizeLanguageCode(userLanguage);
   }
   
   // Check the URL path for language preference
   const referer = req.headers.referer || req.headers.origin || req.url || '';
   
-  // Check if URL contains language path
+  // Check if URL contains language path - handle all formats
   if (referer.includes('/es/') || referer.includes('/es')) {
     return 'es-pe'; // Spanish (Peru)
   }
@@ -113,14 +134,8 @@ export function getUserLanguage(req: any): string {
     
     const primaryLang = languages[0]?.code || 'en';
     
-    // Map browser language codes to our supported locales
-    if (primaryLang.startsWith('es')) {
-      return 'es-pe'; // Spanish (Peru) for all Spanish variants
-    } else if (primaryLang.startsWith('sk')) {
-      return 'sk-sk'; // Slovak
-    } else {
-      return 'en-us'; // Default to English
-    }
+    // Use the normalize function for consistency
+    return normalizeLanguageCode(primaryLang);
   }
   
   return 'en-us'; // Default fallback
