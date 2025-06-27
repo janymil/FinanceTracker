@@ -607,17 +607,72 @@ export function registerAIRoutes(app: Express) {
       // Try to get cached result using stable key
       const cachedResult = await cache.get(cacheKey);
       if (cachedResult) {
-        // Return cached data directly - it's already in correct format from Fly.io
+        // Clean cached data too
+        const cleanText = (text: string): string => {
+          if (!text || typeof text !== 'string') return '';
+          return text
+            .replace(/Personal Financial Pattern\s*:?\s*/gi, '')
+            .replace(/AI Recommendation\s*:?\s*/gi, '')
+            .replace(/Smart Recommendation\s*:?\s*/gi, '')
+            .replace(/Recommendation\s*:?\s*/gi, '')
+            .replace(/Financial Pattern\s*:?\s*/gi, '')
+            .replace(/Pattern\s*:?\s*/gi, '')
+            .replace(/Analysis\s*:?\s*/gi, '')
+            .replace(/Insight\s*:?\s*/gi, '')
+            .replace(/^\d+\.\s*/, '') // Remove numbered list prefixes
+            .replace(/^[-•]\s*/, '') // Remove bullet points
+            .replace(/\s+/g, ' ')
+            .trim();
+        };
+
+        if (cachedResult.insights && Array.isArray(cachedResult.insights)) {
+          cachedResult.insights = cachedResult.insights.map(cleanText).filter(text => text.length > 10);
+        }
+        if (cachedResult.achievements && Array.isArray(cachedResult.achievements)) {
+          cachedResult.achievements = cachedResult.achievements.map(cleanText).filter(text => text.length > 10);
+        }
+        if (cachedResult.warnings && Array.isArray(cachedResult.warnings)) {
+          cachedResult.warnings = cachedResult.warnings.map(cleanText).filter(text => text.length > 10);
+        }
+
         return res.json(cachedResult);
       }
 
       // Use unified AI processor for financial health score
       const healthData = await runAI('financial-health-score', userId, aiPayload);
 
+      // Clean text from insights to remove headers
+      const cleanText = (text: string): string => {
+        if (!text || typeof text !== 'string') return '';
+        return text
+          .replace(/Personal Financial Pattern\s*:?\s*/gi, '')
+          .replace(/AI Recommendation\s*:?\s*/gi, '')
+          .replace(/Smart Recommendation\s*:?\s*/gi, '')
+          .replace(/Recommendation\s*:?\s*/gi, '')
+          .replace(/Financial Pattern\s*:?\s*/gi, '')
+          .replace(/Pattern\s*:?\s*/gi, '')
+          .replace(/Analysis\s*:?\s*/gi, '')
+          .replace(/Insight\s*:?\s*/gi, '')
+          .replace(/^\d+\.\s*/, '') // Remove numbered list prefixes
+          .replace(/^[-•]\s*/, '') // Remove bullet points
+          .replace(/\s+/g, ' ')
+          .trim();
+      };
+
+      // Clean the insights array
+      if (healthData.insights && Array.isArray(healthData.insights)) {
+        healthData.insights = healthData.insights.map(cleanText).filter(text => text.length > 10);
+      }
+      if (healthData.achievements && Array.isArray(healthData.achievements)) {
+        healthData.achievements = healthData.achievements.map(cleanText).filter(text => text.length > 10);
+      }
+      if (healthData.warnings && Array.isArray(healthData.warnings)) {
+        healthData.warnings = healthData.warnings.map(cleanText).filter(text => text.length > 10);
+      }
+
       // Cache the result for 24 hours using stable key
       await cache.set(cacheKey, healthData, false, 24);
 
-      // Return data directly - Fly.io processor already formats it correctly
       return res.json(healthData);
     } catch (error) {
       console.error("Error generating financial health score:", error);
