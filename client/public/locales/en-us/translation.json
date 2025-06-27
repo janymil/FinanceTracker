@@ -569,6 +569,15 @@
   "decreasing": "decreasing", 
   "stable": "stable",
 
+  "common": {
+    "auto": "Auto",
+    "manual": "Manual",
+    "cancel": "Cancel",
+    "create": "Create",
+    "update": "Update",
+    "error": "Error"
+  },
+
   "upcomingReminders": {
     "title": "Upcoming Reminders",
     "description": "Stay on top of your bills and payments",

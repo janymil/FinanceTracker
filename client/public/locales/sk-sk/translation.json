@@ -639,6 +639,15 @@
     }
   },
 
+  "common": {
+    "auto": "Auto",
+    "manual": "Manuálne",
+    "cancel": "Zrušiť",
+    "create": "Vytvoriť",
+    "update": "Aktualizovať",
+    "error": "Chyba"
+  },
+
   "upcomingReminders": {
     "title": "Nadchádzajúce Pripomienky",
     "description": "Zostaňte v obraze so svojimi účtami a platbami",

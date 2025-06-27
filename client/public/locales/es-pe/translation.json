@@ -559,6 +559,15 @@
   "Prediction factors": "Factores de predicción",
   "No Category Data Available": "No Hay Datos de Categoría Disponibles",
 
+  "common": {
+    "auto": "Auto",
+    "manual": "Manual",
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "error": "Error"
+  },
+
   "upcomingReminders": {
     "title": "Recordatorios Próximos",
     "description": "Mantente al día con tus facturas y pagos",
