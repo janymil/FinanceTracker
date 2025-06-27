@@ -5,6 +5,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 const TrendsChart = lazy(() => import("@/components/trends-chart"));
 const ExpenseChart = lazy(() => import("@/components/expense-chart").then(module => ({ default: module.ExpenseChart })));
 const FinancialHealthScore = lazy(() => import("@/components/financial-health-score"));
+const FinancialHealthMascot = lazy(() => import("@/components/financial-health-mascot"));
 const QuickFinancialSnapshot = lazy(() => import("@/components/quick-financial-snapshot"));
 const ContextualFinancialTips = lazy(() => import("@/components/contextual-financial-tips"));
 const RemindersStreaks = lazy(() => import("@/components/reminders-streaks"));
@@ -82,6 +83,14 @@ export function LazyFinancialHealthScore(props: any) {
   return (
     <LazyComponentWrapper>
       <FinancialHealthScore {...props} />
+    </LazyComponentWrapper>
+  );
+}
+
+export function LazyFinancialHealthMascot(props: any) {
+  return (
+    <LazyComponentWrapper>
+      <FinancialHealthMascot {...props} />
     </LazyComponentWrapper>
   );
 }
