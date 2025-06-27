@@ -320,19 +320,19 @@ export default function FinancialHealthMascot() {
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <CheckCircle className="h-4 w-4 text-green-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.achievements?.length || 0} Achievements
+              {healthData.aiAnalysis?.recommendations?.filter(r => r.priority === 'high')?.length || 0} High Priority
             </p>
           </div>
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <Target className="h-4 w-4 text-blue-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.insights?.length || 0} Insights
+              {healthData.aiAnalysis?.personalizedFactors?.length || 0} Insights
             </p>
           </div>
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <AlertTriangle className="h-4 w-4 text-yellow-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.warnings?.length || 0} Alerts
+              {healthData.factors?.filter(f => f.status === 'poor')?.length || 0} Alerts
             </p>
           </div>
         </div>
