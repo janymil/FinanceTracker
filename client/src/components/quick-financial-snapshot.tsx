@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, DollarSign, CreditCard, Wallet, PiggyBank } from "lucide-react";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useTranslation } from "react-i18next";
 
 interface QuickSnapshotProps {
   summary?: {
@@ -18,6 +19,7 @@ interface QuickSnapshotProps {
 
 export default function QuickFinancialSnapshot({ summary, transactions }: QuickSnapshotProps) {
   const { currency } = useCurrency();
+  const { t } = useTranslation();
   
   // Don't show currency symbol if none is selected yet
   const displayCurrency = currency || '$';
@@ -107,36 +109,36 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
   const insights = [
     {
       icon: Wallet,
-      title: "Monthly Balance",
+      title: t("Monthly Balance"),
       value: formatCurrency(summary?.netBalance || 0),
-      description: (summary?.netBalance || 0) >= 0 ? "Positive cash flow" : "Negative cash flow",
+      description: (summary?.netBalance || 0) >= 0 ? t("Positive cash flow") : t("Negative cash flow"),
       color: (summary?.netBalance || 0) >= 0 ? "text-green-600" : "text-red-600",
       bgColor: (summary?.netBalance || 0) >= 0 ? "bg-green-50" : "bg-red-50"
     },
     {
       icon: CreditCard,
-      title: "Top Expense",
+      title: t("Top Expense"),
       value: topExpense ? formatCurrency(topExpense.amount) : `${displayCurrency}0`,
-      description: topExpense?.categoryName || "No expenses",
+      description: topExpense?.categoryName || t("No expenses"),
       color: "text-red-600",
       bgColor: "bg-red-50"
     },
     {
       icon: PiggyBank,
-      title: "Top Income",
+      title: t("Top Income"),
       value: topIncome ? formatCurrency(topIncome.amount) : `${displayCurrency}0`,
-      description: topIncome?.categoryName || "No income",
+      description: topIncome?.categoryName || t("No income"),
       color: "text-green-600",
       bgColor: "bg-green-50"
     },
     {
       icon: spendingTrend === 'increasing' ? TrendingUp : 
             spendingTrend === 'decreasing' ? TrendingDown : DollarSign,
-      title: "Spending Trend",
-      value: spendingTrend === 'increasing' ? "↗ Rising" : 
-             spendingTrend === 'decreasing' ? "↘ Falling" : "→ Stable",
-      description: spendingTrend === 'increasing' ? "Expenses are increasing" :
-                   spendingTrend === 'decreasing' ? "Expenses are decreasing" : "Consistent spending",
+      title: t("Spending Trend"),
+      value: spendingTrend === 'increasing' ? t("↗ Rising") : 
+             spendingTrend === 'decreasing' ? t("↘ Falling") : t("→ Stable"),
+      description: spendingTrend === 'increasing' ? t("Expenses are increasing") :
+                   spendingTrend === 'decreasing' ? t("Expenses are decreasing") : t("Consistent spending"),
       color: spendingTrend === 'increasing' ? "text-orange-600" : 
              spendingTrend === 'decreasing' ? "text-blue-600" : "text-gray-600",
       bgColor: spendingTrend === 'increasing' ? "bg-orange-50" : 
@@ -149,7 +151,7 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
       <CardContent className="p-6">
         <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
           <DollarSign className="h-5 w-5 text-blue-600" />
-          Quick Financial Snapshot
+          {t("Quick Financial Snapshot")}
         </h3>
 
         <div className="grid grid-cols-2 gap-4">
@@ -178,19 +180,19 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
 
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="text-xs text-gray-500 space-y-1">
-            <p className="font-medium">Quick Tips:</p>
+            <p className="font-medium">{t("Quick Tips")}:</p>
             <ul className="list-disc list-inside space-y-1 ml-2">
               {(summary?.netBalance || 0) < 0 && (
-                <li>Focus on reducing expenses this month</li>
+                <li>{t("Focus on reducing expenses this month")}</li>
               )}
               {spendingTrend === 'increasing' && (
-                <li>Monitor your spending - it's trending upward</li>
+                <li>{t("Monitor your spending - it's trending upward")}</li>
               )}
               {topExpense && Math.abs(topExpense.amount) > (summary?.totalIncome || 0) * 0.3 && (
-                <li>Consider reviewing your {topExpense.categoryName.toLowerCase()} expenses</li>
+                <li>{t("Consider reviewing your {{category}} expenses", { category: topExpense.categoryName.toLowerCase() })}</li>
               )}
               {(summary?.netBalance || 0) > 0 && spendingTrend !== 'increasing' && (
-                <li>Great job! You're maintaining healthy finances</li>
+                <li>{t("Great job! You're maintaining healthy finances")}</li>
               )}
             </ul>
           </div>
