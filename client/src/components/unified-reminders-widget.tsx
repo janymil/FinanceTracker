@@ -386,7 +386,7 @@ export default function UnifiedRemindersWidget() {
                         <SelectContent>
                           {allCategories.map((category: Category) => (
                             <SelectItem key={category.id} value={category.id.toString()}>
-                              {getLocalizedCategoryName(category.name)} ({t(`transactions.${category.type}`)})
+                              {getLocalizedCategoryName(category.name)} ({t(`types.${category.type}`)})
                             </SelectItem>
                           ))}
                         </SelectContent>

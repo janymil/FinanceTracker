@@ -568,6 +568,12 @@
     "error": "Error"
   },
 
+  "types": {
+    "expense": "gasto",
+    "income": "ingreso",
+    "goal": "meta"
+  },
+
   "plans": {
     "standard": "Estándar"
   },

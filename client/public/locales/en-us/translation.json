@@ -578,6 +578,12 @@
     "error": "Error"
   },
 
+  "types": {
+    "expense": "expense",
+    "income": "income",
+    "goal": "goal"
+  },
+
   "plans": {
     "standard": "Standard"
   },

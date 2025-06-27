@@ -648,6 +648,12 @@
     "error": "Chyba"
   },
 
+  "types": {
+    "expense": "výdavok",
+    "income": "príjem",
+    "goal": "cieľ"
+  },
+
   "plans": {
     "standard": "Štandard"
   },
