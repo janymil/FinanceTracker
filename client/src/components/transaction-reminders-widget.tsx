@@ -321,7 +321,7 @@ export default function TransactionRemindersWidget() {
                 {t('upcomingReminders.title')}
                 <Badge className="bg-blue-600 text-white">
                   <Crown className="h-3 w-3 mr-1" />
-                  {t('Standard')}+
+                  {t('plans.standard')}+
                 </Badge>
               </CardTitle>
               <CardDescription>
@@ -354,7 +354,7 @@ export default function TransactionRemindersWidget() {
               {t('upcomingReminders.title')}
               <Badge className="bg-blue-600 text-white">
                 <Crown className="h-3 w-3 mr-1" />
-                {t('Standard')}+
+                {t('plans.standard')}+
               </Badge>
             </CardTitle>
             <CardDescription>

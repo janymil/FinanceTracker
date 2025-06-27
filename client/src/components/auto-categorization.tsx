@@ -185,7 +185,7 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
           <CardTitle className="flex items-center gap-2">
             <Brain className="h-5 w-5" />
             {t("Auto-Categorization")}
-            <Badge className="bg-blue-600 text-white">{t("Standard")}+</Badge>
+            <Badge className="bg-blue-600 text-white">{t("plans.standard")}+</Badge>
           </CardTitle>
           <CardDescription>
             {t("AI-powered transaction categorization with machine learning")}
