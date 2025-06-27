@@ -1638,9 +1638,9 @@ Provide an AI-powered financial health score that adapts to this user's specific
       category: processedResult.status.toLowerCase() === 'excellent' ? 'excellent' :
                 processedResult.status.toLowerCase() === 'good' ? 'good' :
                 processedResult.status.toLowerCase() === 'fair' ? 'fair' : 'poor',
-      insights: processedResult.aiAnalysis.personalizedFactors || [],
-      achievements: processedResult.factors.filter(f => f.status === 'good').map(f => f.aiInsight) || [],
-      warnings: processedResult.aiAnalysis.recommendations || []
+      insights: Array.isArray(processedResult.aiAnalysis.personalizedFactors) ? processedResult.aiAnalysis.personalizedFactors : [],
+      achievements: Array.isArray(processedResult.factors) ? processedResult.factors.filter((f: any) => f.status === 'good').map((f: any) => f.aiInsight).filter(Boolean) : [],
+      warnings: Array.isArray(processedResult.aiAnalysis.recommendations) ? processedResult.aiAnalysis.recommendations : []
     };
 
     // No caching in Fly.io - handled by main application
