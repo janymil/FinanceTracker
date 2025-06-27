@@ -13,7 +13,7 @@
   "Data Management": "Správa údajov",
   "Month": "Mesiac",
   "Year": "Rok",
-  "Standard": "Štandardný",
+  "Standard": "Standard",
   "Premium": "Premium",
   "Subscription Successful!": "Predplatné bolo úspešné!",
   "You've been upgraded to the": "Boli ste aktualizovaní na",
@@ -445,6 +445,9 @@
   "Budget Status": "Stav Rozpočtu",
   "transaction": "transakcia",
   "transactions": "transakcie",
+
+,
+
   "AI Expense Prediction": "AI Predikcia Výdavkov",
   "Machine learning predictions based on your spending patterns": "Predikcie strojového učenia na základe vašich vzorcov míňania",
   "By Category": "Podľa Kategórie",
