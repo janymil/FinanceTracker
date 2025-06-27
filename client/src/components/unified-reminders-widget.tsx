@@ -222,13 +222,13 @@ export default function UnifiedRemindersWidget() {
       await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
       toast({
-        title: "Reminder Completed",
-        description: "Reminder marked as completed",
+        title: t('upcomingReminders.reminderCompleted'),
+        description: t('upcomingReminders.reminderCompletedDescription'),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to complete reminder",
+        title: t('common.error'),
+        description: error.message || t('upcomingReminders.failedToComplete'),
         variant: "destructive",
       });
     }
@@ -240,13 +240,13 @@ export default function UnifiedRemindersWidget() {
       await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
       toast({
-        title: "Reminder Deleted",
-        description: "Reminder has been removed",
+        title: t('upcomingReminders.reminderDeleted'),
+        description: t('upcomingReminders.reminderDeletedDescription'),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete reminder",
+        title: t('common.error'),
+        description: error.message || t('upcomingReminders.failedToDelete'),
         variant: "destructive",
       });
     }
