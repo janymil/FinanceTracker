@@ -590,10 +590,26 @@ export function registerAIRoutes(app: Express) {
       // Use unified AI processor for financial health score
       const healthData = await runAI('financial-health-score', userId, aiPayload);
 
-      // Cache the result for 24 hours
-      await cache.set(aiPayload, healthData, false, 24);
+      // Convert complex AI response to simple mascot-compatible format
+      const simplifiedResponse = {
+        score: healthData.score || 50,
+        status: healthData.status || 'Fair',
+        color: healthData.color || 'yellow',
+        factors: healthData.factors ? healthData.factors.map((factor: any) => {
+          if (typeof factor === 'string') return factor;
+          return factor.name || 'Financial Factor';
+        }) : [],
+        aiAnalysis: {
+          personalizedFactors: healthData.aiAnalysis?.personalizedFactors || [],
+          recommendations: healthData.aiAnalysis?.recommendations || [],
+          riskAssessment: healthData.aiAnalysis?.riskAssessment || ''
+        }
+      };
 
-      return res.json(healthData);
+      // Cache the result for 24 hours
+      await cache.set(aiPayload, simplifiedResponse, false, 24);
+
+      return res.json(simplifiedResponse);
     } catch (error) {
       console.error("Error generating financial health score:", error);
       return res.status(500).json({ message: "Failed to generate financial health score" });
