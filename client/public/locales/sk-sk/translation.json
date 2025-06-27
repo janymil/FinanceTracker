@@ -42,7 +42,6 @@
   "Transaction description": "Popis transakcie",
   "Type": "Typ",
   "Category": "Kategória",
-  "Select category": "Vybrať kategóriu",
   "Select a category": "Vyberte kategóriu",
   "No categories available for": "Žiadne kategórie nie sú dostupné pre",
   "Quick Financial Snapshot": "Rýchly finančný prehľad",
@@ -465,6 +464,5 @@
   "Budget by Category": "Rozpočet podľa kategórií",
   "Edit Budgets": "Upraviť Rozpočty",
   "No spending on budgeted categories yet": "Zatiaľ žiadne výdavky v rozpočtovaných kategóriách",
-  "Start spending and your budget progress will appear here": "Začnite utrácať a váš pokrok rozpočtu sa zobrazí tu",
-  "Select type": "Vybrať typ"
+  "Start spending and your budget progress will appear here": "Začnite utrácať a váš pokrok rozpočtu sa zobrazí tu"
 }

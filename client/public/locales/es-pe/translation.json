@@ -42,7 +42,6 @@
   "Transaction description": "Descripción de la transacción",
   "Type": "Tipo",
   "Category": "Categoría",
-  "Select category": "Seleccionar categoría",
   "Select a category": "Selecciona una categoría",
   "No categories available for": "No hay categorías disponibles para",
   "Quick Financial Snapshot": "Resumen Financiero Rápido",
@@ -328,7 +327,7 @@
   "Help Center": "Centro de Ayuda",
   "© 2025 FinanzerPro. All rights reserved.": "© 2025 FinanzerPro. Todos los derechos reservados.",
   "Privacy Policy": "Política de Privacidad",
-  "Terms of Service": "Términos de Service",
+  "Terms of Service": "Términos de Servicio",
   "Cookie Policy": "Política de Cookies",
   "Contact": "Contacto",
 
@@ -426,7 +425,7 @@
   "Create your first income category to organize your revenue sources": "Crea tu primera categoría de ingresos para organizar tus fuentes de ingresos",
   "Add Income Category": "Agregar Categoría de Ingresos",
   "transactions": "transacciones",
-  "Adding the "Select category" translation to the specified JSON file.In use": "En uso",
+  "In use": "En uso",
 
   "Recent Transactions": "Transacciones Recientes",
   "Search transactions...": "Buscar transacciones...",

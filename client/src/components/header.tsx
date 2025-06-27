@@ -137,7 +137,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
           query.queryKey[0] === "financial-health" ||
           query.queryKey[0] === "transaction-reminders"
       });
-
+      
       setIsDialogOpen(false);
       setNewTransaction({
         amount: "",
