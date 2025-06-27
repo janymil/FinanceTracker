@@ -63,9 +63,9 @@ async function initializeI18n() {
     await i18n
       .use(initReactI18next)
       .init({
-        lng: 'en',
+        lng: 'en-us', // Use full locale instead of simplified
         supportedLngs: ['en', 'es', 'sk', 'en-us', 'es-pe', 'sk-sk', 'en-US', 'es-PE', 'sk-SK'],
-        fallbackLng: 'en',
+        fallbackLng: 'en-us',
         debug: true,
         
         resources,
@@ -88,9 +88,9 @@ async function initializeI18n() {
     await i18n
       .use(initReactI18next)
       .init({
-        lng: 'en',
+        lng: 'en-us',
         supportedLngs: ['en', 'es', 'sk', 'en-us', 'es-pe', 'sk-sk', 'en-US', 'es-PE', 'sk-SK'],
-        fallbackLng: 'en',
+        fallbackLng: 'en-us',
         debug: true,
         interpolation: { escapeValue: false },
         react: { useSuspense: false },
