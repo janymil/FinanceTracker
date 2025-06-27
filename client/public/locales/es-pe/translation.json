@@ -608,6 +608,7 @@
     "failedToComplete": "Error al completar recordatorio",
     "failedToDelete": "Error al eliminar recordatorio"
   },
+
   "Add transactions to generate category-specific expense predictions": "Agrega transacciones para generar predicciones de gastos específicas por categoría",
   "Timeline Forecast": "Pronóstico de Cronología",
   "1 Month": "1 Mes",
