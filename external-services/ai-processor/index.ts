@@ -1554,29 +1554,60 @@ export async function generateFinancialHealthScore(financialData: {
       messages: [
         {
           role: "system",
-          content: `You are a financial health analyst. Analyze the user's financial data and provide a comprehensive health assessment. Return JSON: {"score": number, "trend": "improving/stable/declining", "category": "excellent/good/fair/poor", "insights": ["array of 2-3 specific insights"], "achievements": ["array of 1-2 positive achievements"], "warnings": ["array of 1-2 areas needing attention"]}
+          content: `You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
 
-ALWAYS provide meaningful content for insights, achievements, and warnings based on the financial data. Never return empty arrays.
+Your analysis should consider:
+- Spending patterns and volatility
+- Seasonal trends in expenses
+- Category distribution and priorities
+- Financial behavior consistency
+- Risk factors and resilience
+- Personalized weight adjustments based on user's situation
 
-Respond in ${getLanguageLabel(normalizedLanguage)}.`
+Provide a comprehensive financial health score from 0-100 with detailed factor breakdown.
+
+Respond in ${getLanguageLabel(normalizedLanguage)}.
+
+Respond with JSON in this format:
+{
+  "score": 85,
+  "status": "Good",
+  "color": "blue",
+  "factors": [
+    {
+      "name": "Adaptive Spending Control",
+      "score": 25,
+      "max": 30,
+      "status": "good",
+      "aiInsight": "Your spending shows good consistency with minor seasonal variations"
+    }
+  ],
+  "icon": "TrendingUp",
+  "aiAnalysis": {
+    "personalizedFactors": ["Custom factor explanations"],
+    "riskAssessment": "Overall risk level and factors",
+    "recommendations": ["Personalized recommendations"],
+    "confidence": 0.87
+  }
+}`
         },
         {
           role: "user",
-          content: `Financial Overview:
-- Monthly Income: $${summary.totalIncome}
-- Monthly Expenses: $${summary.totalExpenses}  
+          content: `Analyze this financial data for a personalized health score:
+
+Financial Summary:
+- Income: $${summary.totalIncome}
+- Expenses: $${summary.totalExpenses}
 - Net Balance: $${summary.netBalance}
-- Savings Rate: ${savingsRate.toFixed(1)}%
-- Total Transactions: ${recentTransactions.length}
-- Active Budgets: ${budgets.length}
 
-Recent Spending by Category:
-${Array.from(categorySpending.entries()).slice(0, 5).map(([cat, amount]) => `- ${cat}: $${amount}`).join('\n')}
+Transaction History (${recentTransactions.length} transactions):
+${recentTransactions.slice(0, 20).map(t => 
+  `- ${t.description}: $${t.amount} (${t.categoryName}) on ${t.date.split('T')[0]}`
+).join('\n')}
 
-Recent Transactions:
-${recentTransactions.slice(0, 10).map(t => `- ${t.type}: $${t.amount} (${t.categoryName})`).join('\n')}
+Budgets: ${budgets.length} active budgets
 
-Provide detailed financial health analysis with specific insights, achievements, and actionable warnings.`
+Provide an AI-powered financial health score that adapts to this user's specific situation and spending patterns.`
         }
       ],
       response_format: { type: "json_object" },
@@ -1585,14 +1616,31 @@ Provide detailed financial health analysis with specific insights, achievements,
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
-
-    const healthData: FinancialHealthData = {
+    
+    const processedResult = {
       score: Math.max(0, Math.min(100, result.score || 50)),
-      trend: result.trend || 'stable',
-      category: result.category || 'fair',
-      insights: Array.isArray(result.insights) && result.insights.length > 0 ? result.insights : null,
-      achievements: Array.isArray(result.achievements) && result.achievements.length > 0 ? result.achievements : null,
-      warnings: Array.isArray(result.warnings) && result.warnings.length > 0 ? result.warnings : null
+      status: result.status || 'Fair',
+      color: result.color || 'yellow',
+      factors: result.factors || [],
+      icon: result.icon || 'Shield',
+      aiAnalysis: {
+        personalizedFactors: result.aiAnalysis?.personalizedFactors || [],
+        riskAssessment: result.aiAnalysis?.riskAssessment || 'Standard risk assessment',
+        recommendations: result.aiAnalysis?.recommendations || [],
+        confidence: Math.max(0, Math.min(1, result.aiAnalysis?.confidence || 0.7))
+      }
+    };
+
+    // Convert to frontend-expected format
+    const healthData: FinancialHealthData = {
+      score: processedResult.score,
+      trend: 'stable', // Default trend
+      category: processedResult.status.toLowerCase() === 'excellent' ? 'excellent' :
+                processedResult.status.toLowerCase() === 'good' ? 'good' :
+                processedResult.status.toLowerCase() === 'fair' ? 'fair' : 'poor',
+      insights: processedResult.aiAnalysis.personalizedFactors || [],
+      achievements: processedResult.factors.filter(f => f.status === 'good').map(f => f.aiInsight) || [],
+      warnings: processedResult.aiAnalysis.recommendations || []
     };
 
     // No caching in Fly.io - handled by main application
