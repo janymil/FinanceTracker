@@ -625,59 +625,82 @@ export function registerAIRoutes(app: Express) {
 
   // Helper function to transform AI response for mascot component
   function transformAIResponseForMascot(aiData: any) {
-    // Extract insights from different AI response fields
+    // Extract and organize insights into clean, user-friendly format
     const insights: string[] = [];
     const achievements: string[] = [];
     const warnings: string[] = [];
 
-    // Add personalized factors as insights
+    // Process personalized factors into clean insights (remove repetitive headers)
     if (aiData.aiAnalysis?.personalizedFactors) {
-      insights.push(...aiData.aiAnalysis.personalizedFactors);
+      aiData.aiAnalysis.personalizedFactors.forEach((factor: string) => {
+        // Remove "Personal Financial Pattern" prefix and clean up text
+        const cleanFactor = factor.replace(/^Personal Financial Pattern\s*:?\s*/i, '').trim();
+        if (cleanFactor && !cleanFactor.startsWith('Personal Financial Pattern')) {
+          insights.push(cleanFactor);
+        }
+      });
     }
 
-    // Add factor insights
+    // Process factor insights with clean names
     if (aiData.factors) {
       aiData.factors.forEach((factor: any) => {
         if (factor.aiInsight) {
-          insights.push(`${factor.name}: ${factor.aiInsight}`);
+          const cleanInsight = factor.aiInsight.replace(/^Personal Financial Pattern\s*:?\s*/i, '').trim();
+          if (cleanInsight) {
+            insights.push(`${factor.name}: ${cleanInsight}`);
+          }
         }
       });
     }
 
-    // Add recommendations as insights
+    // Process recommendations into clean format (remove repetitive headers)
     if (aiData.aiAnalysis?.recommendations) {
-      insights.push(...aiData.aiAnalysis.recommendations);
+      aiData.aiAnalysis.recommendations.forEach((rec: string) => {
+        const cleanRec = rec.replace(/^Personal Financial Pattern\s*:?\s*/i, '').trim();
+        if (cleanRec && !cleanRec.startsWith('Personal Financial Pattern')) {
+          insights.push(cleanRec);
+        }
+      });
     }
 
-    // Extract achievements from positive factors
+    // Extract achievements from positive factors with clean formatting
     if (aiData.factors) {
       aiData.factors.forEach((factor: any) => {
         if (factor.status === 'good' || factor.status === 'excellent') {
-          achievements.push(`Strong ${factor.name} (${factor.score}/${factor.max})`);
+          achievements.push(`${factor.name}: Strong performance (${factor.score}/${factor.max})`);
         }
       });
     }
 
-    // Extract warnings from negative factors and risk assessment
+    // Extract warnings from negative factors with actionable format
     if (aiData.factors) {
       aiData.factors.forEach((factor: any) => {
         if (factor.status === 'poor' || factor.status === 'below average') {
-          warnings.push(`Improve ${factor.name} (${factor.score}/${factor.max})`);
+          warnings.push(`${factor.name} needs improvement (${factor.score}/${factor.max})`);
         }
       });
     }
 
+    // Add risk assessment as a clean warning
     if (aiData.aiAnalysis?.riskAssessment) {
-      warnings.push(aiData.aiAnalysis.riskAssessment);
+      const cleanRisk = aiData.aiAnalysis.riskAssessment.replace(/^AI Recommendation\s*:?\s*/i, '').trim();
+      if (cleanRisk) {
+        warnings.push(cleanRisk);
+      }
     }
+
+    // Remove duplicates and empty entries
+    const uniqueInsights = Array.from(new Set(insights.filter(i => i && i.length > 10)));
+    const uniqueAchievements = Array.from(new Set(achievements.filter(a => a && a.length > 5)));
+    const uniqueWarnings = Array.from(new Set(warnings.filter(w => w && w.length > 5)));
 
     return {
       score: aiData.score || 50,
       trend: aiData.trend || 'stable',
       category: aiData.category || 'fair',
-      insights: insights.slice(0, 10), // Limit to 10 insights
-      achievements: achievements.slice(0, 5), // Limit to 5 achievements
-      warnings: warnings.slice(0, 5), // Limit to 5 warnings
+      insights: uniqueInsights.slice(0, 8), // Limit to 8 insights for better UX
+      achievements: uniqueAchievements.slice(0, 4), // Limit to 4 achievements
+      warnings: uniqueWarnings.slice(0, 5), // Limit to 5 warnings
       factors: aiData.factors || [],
       aiAnalysis: aiData.aiAnalysis || {}
     };
