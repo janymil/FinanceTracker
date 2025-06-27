@@ -602,34 +602,88 @@ export function registerAIRoutes(app: Express) {
       // Try to get cached result
       const cachedResult = await cache.get(aiPayload);
       if (cachedResult) {
-        // Transform cached AI response to match frontend mascot interface
-        const mascotResponse = {
-          score: cachedResult.score || 50,
-          trend: cachedResult.trend || 'stable',
-          category: cachedResult.category || 'fair'
-        };
-        return res.json(mascotResponse);
+        // Transform AI analysis into frontend-expected format
+        const response = transformAIResponseForMascot(cachedResult);
+        return res.json(response);
       }
 
       // Use unified AI processor for financial health score
       const healthData = await runAI('financial-health-score', userId, aiPayload);
 
-      // Transform AI response to match frontend mascot interface
-      const mascotResponse = {
-        score: healthData.score || 50,
-        trend: healthData.trend || 'stable',
-        category: healthData.category || 'fair'
-      };
+      // Transform AI analysis into frontend-expected format
+      const response = transformAIResponseForMascot(healthData);
 
       // Cache the result for 24 hours
       await cache.set(aiPayload, healthData, false, 24);
 
-      return res.json(mascotResponse);
+      return res.json(response);
     } catch (error) {
       console.error("Error generating financial health score:", error);
       return res.status(500).json({ message: "Failed to generate financial health score" });
     }
   });
+
+  // Helper function to transform AI response for mascot component
+  function transformAIResponseForMascot(aiData: any) {
+    // Extract insights from different AI response fields
+    const insights: string[] = [];
+    const achievements: string[] = [];
+    const warnings: string[] = [];
+
+    // Add personalized factors as insights
+    if (aiData.aiAnalysis?.personalizedFactors) {
+      insights.push(...aiData.aiAnalysis.personalizedFactors);
+    }
+
+    // Add factor insights
+    if (aiData.factors) {
+      aiData.factors.forEach((factor: any) => {
+        if (factor.aiInsight) {
+          insights.push(`${factor.name}: ${factor.aiInsight}`);
+        }
+      });
+    }
+
+    // Add recommendations as insights
+    if (aiData.aiAnalysis?.recommendations) {
+      insights.push(...aiData.aiAnalysis.recommendations);
+    }
+
+    // Extract achievements from positive factors
+    if (aiData.factors) {
+      aiData.factors.forEach((factor: any) => {
+        if (factor.status === 'good' || factor.status === 'excellent') {
+          achievements.push(`Strong ${factor.name} (${factor.score}/${factor.max})`);
+        }
+      });
+    }
+
+    // Extract warnings from negative factors and risk assessment
+    if (aiData.factors) {
+      aiData.factors.forEach((factor: any) => {
+        if (factor.status === 'poor' || factor.status === 'below average') {
+          warnings.push(`Improve ${factor.name} (${factor.score}/${factor.max})`);
+        }
+      });
+    }
+
+    if (aiData.aiAnalysis?.riskAssessment) {
+      warnings.push(aiData.aiAnalysis.riskAssessment);
+    }
+
+    return {
+      score: aiData.score || 50,
+      trend: aiData.trend || 'stable',
+      category: aiData.category || 'fair',
+      insights: insights.slice(0, 10), // Limit to 10 insights
+      achievements: achievements.slice(0, 5), // Limit to 5 achievements
+      warnings: warnings.slice(0, 5), // Limit to 5 warnings
+      factors: aiData.factors || [],
+      aiAnalysis: aiData.aiAnalysis || {}
+    };
+  }
+
+  // Financial Mascot endpoints
 
   // Financial Mascot endpoints
   app.get('/api/mascot', isAuthenticated, async (req: any, res) => {

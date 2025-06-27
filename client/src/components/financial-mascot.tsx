@@ -23,6 +23,22 @@ interface FinancialHealth {
   score: number;
   trend: string;
   category: string;
+  factors?: Array<{
+    name: string;
+    score: number;
+    max: number;
+    status: string;
+    aiInsight: string;
+  }>;
+  aiAnalysis?: {
+    personalizedFactors: string[];
+    recommendations: string[];
+    riskAssessment: string;
+    confidence: number;
+  };
+  achievements?: string[];
+  warnings?: string[];
+  insights?: string[];
 }
 
 export function FinancialMascot() {
