@@ -497,7 +497,7 @@ export async function generateFinancialTips(financialData: {
     type?: string;
   }>;
 
-}): Promise<FinancialTip[]> {
+}, language: string = 'en-us'): Promise<FinancialTip[]> {
   try {
     const { 
       totalIncome, 
