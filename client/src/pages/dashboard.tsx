@@ -178,6 +178,9 @@ export default function Dashboard() {
   const startDate = new Date(`${selectedMonth}-01`);
   const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
 
+  // Hooks
+  const queryClient = useQueryClient();
+
   // Core data loads immediately with shared cache
   const { data: transactions, isLoading: transactionsLoading, error: transactionsError } = useTransactions();
 
