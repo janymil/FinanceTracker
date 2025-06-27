@@ -736,58 +736,6 @@ export function registerAIRoutes(app: Express) {
     };
   }
 
-  // Helper function to categorize insights
-  function categorizeInsights(insights: string[]): string[] {
-    return insights.map(insight => {
-      const categoryPrefix = getCategoryPrefix(insight);
-      return `${categoryPrefix}: ${insight}`;
-    });
-  }
-
-  // Helper function to categorize recommendations
-  function categorizeRecommendations(recommendations: string[]): string[] {
-    return recommendations.map(recommendation => {
-      if (recommendation.toLowerCase().includes('budget')) {
-        return `Budget Strategy: ${recommendation}`;
-      } else if (recommendation.toLowerCase().includes('saving') || recommendation.toLowerCase().includes('save')) {
-        return `Savings Goal: ${recommendation}`;
-      } else if (recommendation.toLowerCase().includes('income') || recommendation.toLowerCase().includes('earn')) {
-        return `Income Enhancement: ${recommendation}`;
-      } else if (recommendation.toLowerCase().includes('expense') || recommendation.toLowerCase().includes('spending')) {
-        return `Expense Management: ${recommendation}`;
-      } else {
-        return `Financial Strategy: ${recommendation}`;
-      }
-    });
-  }
-
-  // Helper function to get category prefix based on content
-  function getCategoryPrefix(text: string): string {
-    const lowerText = text.toLowerCase();
-    
-    if (lowerText.includes('housing') || lowerText.includes('rent') || lowerText.includes('mortgage')) {
-      return 'Housing Analysis';
-    } else if (lowerText.includes('shopping') || lowerText.includes('purchase')) {
-      return 'Spending Pattern';
-    } else if (lowerText.includes('income') || lowerText.includes('salary') || lowerText.includes('earning')) {
-      return 'Income Analysis';
-    } else if (lowerText.includes('budget') || lowerText.includes('management')) {
-      return 'Budget Control';
-    } else if (lowerText.includes('expense') || lowerText.includes('volatility')) {
-      return 'Expense Behavior';
-    } else if (lowerText.includes('category') || lowerText.includes('distribution')) {
-      return 'Spending Distribution';
-    } else if (lowerText.includes('resilience') || lowerText.includes('financial health')) {
-      return 'Financial Resilience';
-    } else if (lowerText.includes('seasonal') || lowerText.includes('trend')) {
-      return 'Trend Analysis';
-    } else {
-      return 'Financial Insight';
-    }
-  }
-
-  // Financial Mascot endpoints
-
   // Financial Mascot endpoints
   app.get('/api/mascot', isAuthenticated, async (req: any, res) => {
     try {
