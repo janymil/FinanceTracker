@@ -49,6 +49,18 @@ export async function apiRequest(
     ...authHeaders,
   };
   
+  // Add current language for backend translation
+  if (typeof window !== 'undefined' && window.i18next) {
+    const currentLang = window.i18next.language;
+    if (currentLang.startsWith('es')) {
+      headers['x-user-language'] = 'es-pe';
+    } else if (currentLang.startsWith('sk')) {
+      headers['x-user-language'] = 'sk-sk';
+    } else {
+      headers['x-user-language'] = 'en-us';
+    }
+  }
+  
   if (data) {
     headers["Content-Type"] = "application/json";
   }
@@ -72,8 +84,21 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     const authHeaders = await getAuthHeaders();
     
+    // Add current language for backend translation
+    const headers: Record<string, string> = { ...authHeaders };
+    if (typeof window !== 'undefined' && window.i18next) {
+      const currentLang = window.i18next.language;
+      if (currentLang.startsWith('es')) {
+        headers['x-user-language'] = 'es-pe';
+      } else if (currentLang.startsWith('sk')) {
+        headers['x-user-language'] = 'sk-sk';
+      } else {
+        headers['x-user-language'] = 'en-us';
+      }
+    }
+    
     const res = await fetch(queryKey[0] as string, {
-      headers: authHeaders,
+      headers,
       credentials: "include",
     });
 
