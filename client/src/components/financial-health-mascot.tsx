@@ -22,10 +22,15 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface FinancialHealthData {
   score: number;
-  status: string;
-  color: string;
+  trend?: 'improving' | 'declining' | 'stable';
   category: 'excellent' | 'good' | 'fair' | 'poor';
-  icon: string;
+  insights?: string[];
+  achievements?: string[];
+  warnings?: string[];
+  // New structure from Fly.io processor  
+  status?: string;
+  color?: string;
+  icon?: string;
   factors?: Array<{
     name: string;
     score: number;
@@ -320,13 +325,13 @@ export default function FinancialHealthMascot() {
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <CheckCircle className="h-4 w-4 text-green-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.aiAnalysis?.recommendations?.filter(r => r.priority === 'high')?.length || 0} High Priority
+              {healthData.achievements?.length || 0} Achievements
             </p>
           </div>
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <Target className="h-4 w-4 text-blue-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.aiAnalysis?.personalizedFactors?.length || 0} Insights
+              {healthData.insights?.length || 0} Insights
             </p>
           </div>
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
