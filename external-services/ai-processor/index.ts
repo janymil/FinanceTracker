@@ -1554,17 +1554,29 @@ export async function generateFinancialHealthScore(financialData: {
       messages: [
         {
           role: "system",
-          content: `Calculate financial health score (0-100). Return JSON: {"score": number, "trend": "improving/stable/declining", "category": "excellent/good/fair/poor", "insights": ["max 2 insights"], "achievements": ["max 1"], "warnings": ["max 1"]}
+          content: `You are a financial health analyst. Analyze the user's financial data and provide a comprehensive health assessment. Return JSON: {"score": number, "trend": "improving/stable/declining", "category": "excellent/good/fair/poor", "insights": ["array of 2-3 specific insights"], "achievements": ["array of 1-2 positive achievements"], "warnings": ["array of 1-2 areas needing attention"]}
+
+ALWAYS provide meaningful content for insights, achievements, and warnings based on the financial data. Never return empty arrays.
 
 Respond in ${getLanguageLabel(normalizedLanguage)}.`
         },
         {
           role: "user",
-          content: `Income: $${summary.totalIncome}, Expenses: $${summary.totalExpenses}, Savings: ${savingsRate.toFixed(1)}%
-Transactions: ${recentTransactions.length}
-Budgets: ${budgets.length}
+          content: `Financial Overview:
+- Monthly Income: $${summary.totalIncome}
+- Monthly Expenses: $${summary.totalExpenses}  
+- Net Balance: $${summary.netBalance}
+- Savings Rate: ${savingsRate.toFixed(1)}%
+- Total Transactions: ${recentTransactions.length}
+- Active Budgets: ${budgets.length}
 
-Calculate health score quickly.`
+Recent Spending by Category:
+${Array.from(categorySpending.entries()).slice(0, 5).map(([cat, amount]) => `- ${cat}: $${amount}`).join('\n')}
+
+Recent Transactions:
+${recentTransactions.slice(0, 10).map(t => `- ${t.type}: $${t.amount} (${t.categoryName})`).join('\n')}
+
+Provide detailed financial health analysis with specific insights, achievements, and actionable warnings.`
         }
       ],
       response_format: { type: "json_object" },

@@ -579,6 +579,9 @@ export function registerAIRoutes(app: Express) {
       // Initialize UnifiedAICache with 24 hours TTL
       const cache = new UnifiedAICache('financial-health-score', userId);
 
+      // Clear cache temporarily to test new AI prompt
+      await cache.clear();
+
       // Try to get cached result
       const cachedResult = await cache.get(aiPayload);
       if (cachedResult) {
