@@ -512,14 +512,14 @@ export default function TransactionRemindersWidget() {
 
                   <div className="flex gap-2 pt-4">
                     <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="flex-1">
-                      Cancel
+                      {t('common.cancel')}
                     </Button>
                     <Button 
                       onClick={handleSubmit}
                       disabled={!newReminder.title || !newReminder.dueDate}
                       className="flex-1"
                     >
-                      Create Reminder
+                      {t('upcomingReminders.createReminder')}
                     </Button>
                   </div>
                 </div>
