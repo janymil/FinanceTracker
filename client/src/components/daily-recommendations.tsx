@@ -62,7 +62,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
   const [currentDate, setCurrentDate] = useState(new Date());
   const { user } = useUser();
   const { currency } = useCurrency();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Get user's plan from database
   const { data: databaseUser, isLoading: userLoading } = useQuery({
@@ -138,7 +138,17 @@ export default function DailyRecommendations({ summary, transactions = [], budge
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString(undefined, { 
+    // Get current language for date formatting
+    const currentLang = i18n.language || 'en';
+    let locale = 'en-US';
+    
+    if (currentLang.startsWith('es')) {
+      locale = 'es-ES';
+    } else if (currentLang.startsWith('sk')) {
+      locale = 'sk-SK';
+    }
+    
+    return date.toLocaleDateString(locale, { 
       weekday: 'long', 
       year: 'numeric', 
       month: 'long', 
