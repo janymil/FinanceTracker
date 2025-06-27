@@ -428,7 +428,9 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
       messages: [
         {
           role: "system",
-          content: "You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips."
+          content: `You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.
+
+Respond in ${getLanguageLabel(language)}.`
         },
         {
           role: "user",
@@ -844,6 +846,8 @@ export async function generateAIFinancialHealthScore(financialData: {
         {
           role: "system",
           content: `You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
+
+Respond in ${getLanguageLabel(language)}.
 
 Your analysis should consider:
 - Spending patterns and volatility
