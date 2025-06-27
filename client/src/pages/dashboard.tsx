@@ -86,6 +86,18 @@ export default function Dashboard() {
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
 
+  // Helper functions for category localization
+  const isPredefinedCategory = (category: any): boolean => {
+    return category.userId === null;
+  };
+
+  const getLocalizedCategoryName = (category: any): string => {
+    if (isPredefinedCategory(category)) {
+      return t(category.name);
+    }
+    return category.name;
+  };
+
   // Check for subscription success/error messages
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);

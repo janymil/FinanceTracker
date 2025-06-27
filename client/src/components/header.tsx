@@ -76,6 +76,18 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { user } = useAuth();
   const { user: clerkUser } = useUser();
   const { isReady } = useClerkUserReady();
+
+  // Helper functions for category localization
+  const isPredefinedCategory = (category: any): boolean => {
+    return category.userId === null;
+  };
+
+  const getLocalizedCategoryName = (category: any): string => {
+    if (isPredefinedCategory(category)) {
+      return t(category.name);
+    }
+    return category.name;
+  };
   const { canChangeCurrency } = useCurrency();
   const { toast } = useToast();
   const { signOut } = useClerk();
@@ -296,7 +308,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                           .filter((cat: Category) => cat.type === newTransaction.type)
                           .map((category: Category) => (
                             <SelectItem key={category.id} value={category.id.toString()}>
-                              {category.name}
+                              {getLocalizedCategoryName(category)}
                             </SelectItem>
                           ))}
                         {(categories as Category[]).filter((cat: Category) => cat.type === newTransaction.type).length === 0 && (
