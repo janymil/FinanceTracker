@@ -1703,9 +1703,9 @@ Provide an AI-powered financial health score that adapts to this user's specific
       category: processedResult.status.toLowerCase() === 'excellent' ? 'excellent' :
                 processedResult.status.toLowerCase() === 'good' ? 'good' :
                 processedResult.status.toLowerCase() === 'fair' ? 'fair' : 'poor',
-      insights: Array.isArray(processedResult.aiAnalysis.personalizedFactors) ? processedResult.aiAnalysis.personalizedFactors : [],
+      insights: Array.isArray(processedResult.aiAnalysis?.personalizedFactors) ? processedResult.aiAnalysis.personalizedFactors : [],
       achievements: Array.isArray(processedResult.factors) ? processedResult.factors.filter((f: any) => f.status === 'good').map((f: any) => f.aiInsight).filter(Boolean) : [],
-      warnings: Array.isArray(processedResult.aiAnalysis.recommendations) ? processedResult.aiAnalysis.recommendations : []
+      warnings: Array.isArray(processedResult.aiAnalysis?.recommendations) ? processedResult.aiAnalysis.recommendations : []
     };
 
     // Cache the result with 24 hours TTL
