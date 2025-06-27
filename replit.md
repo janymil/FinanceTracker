@@ -190,9 +190,13 @@ if (currentLang.startsWith('es')) {
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
-CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
-Do not take actions unless explicitly asked by the user.
-Focus on actions and results without repetitive phrases or unnecessary explanations.
+CRITICAL COMMUNICATION RULES:
+- NEVER write summaries after completing tasks
+- NEVER repeat the same output twice 
+- NEVER provide repetitive explanations
+- User has explicitly and repeatedly requested NO SUMMARIES
+- Focus only on actions and results
+- Do not take actions unless explicitly asked by the user
 
 referred communication style: Simple, everyday language.
 CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
