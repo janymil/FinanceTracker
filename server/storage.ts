@@ -22,8 +22,10 @@ import {
   type InsertUser,
   type Transaction,
   type InsertTransaction,
+  type TransactionWithCategory,
   type Budget,
   type InsertBudget,
+  type BudgetWithCategory,
   type Goal,
   type InsertGoal,
   type Category,
@@ -331,7 +333,7 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getUserTransactions(userId: string, limit?: number): Promise<Transaction[]> {
+  async getUserTransactions(userId: string, limit?: number): Promise<TransactionWithCategory[]> {
     let query = db
       .select({
         id: transactions.id,
@@ -444,7 +446,7 @@ export class DatabaseStorage implements IStorage {
     return newBudget;
   }
 
-  async getUserBudgets(userId: string): Promise<Budget[]> {
+  async getUserBudgets(userId: string): Promise<BudgetWithCategory[]> {
     const budgetData = await db
       .select({
         id: budgets.id,

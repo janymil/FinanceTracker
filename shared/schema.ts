@@ -371,6 +371,22 @@ export type InsertImportLog = typeof importLogs.$inferInsert;
 export type AiCache = typeof aiCache.$inferSelect;
 export type InsertAiCache = typeof aiCache.$inferInsert;
 
+// Extended types for joined data
+export type TransactionWithCategory = Transaction & {
+  categoryName?: string | null;
+  categoryIcon?: string | null;
+  categoryColor?: string | null;
+};
+
+export type BudgetWithCategory = Budget & {
+  categoryName?: string | null;
+  categoryIcon?: string | null;
+  categoryColor?: string | null;
+  spent?: number;
+  remaining?: number;
+  percentage?: number;
+};
+
 // Insert schemas
 export const insertTransactionSchema = createInsertSchema(transactions).omit({
   id: true,
