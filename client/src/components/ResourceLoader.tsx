@@ -11,12 +11,11 @@ export default function ResourceLoader({ children }: ResourceLoaderProps) {
   useEffect(() => {
     const loadResources = async () => {
       try {
-        // Fetch all translation files with cache busting
-        const timestamp = Date.now();
+        // Fetch all translation files
         const [enRes, esRes, skRes] = await Promise.all([
-          fetch(`/locales/en-us/translation.json?v=${timestamp}`),
-          fetch(`/locales/es-pe/translation.json?v=${timestamp}`),
-          fetch(`/locales/sk-sk/translation.json?v=${timestamp}`)
+          fetch('/locales/en-us/translation.json'),
+          fetch('/locales/es-pe/translation.json'),
+          fetch('/locales/sk-sk/translation.json')
         ]);
 
         const [enData, esData, skData] = await Promise.all([
