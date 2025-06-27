@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { TrendingUp, Shield, AlertTriangle, CheckCircle, HelpCircle } from "lucide-react";
@@ -19,6 +19,26 @@ interface FinancialHealthProps {
 export default function FinancialHealthScore({ summary, budgets }: FinancialHealthProps) {
   const [useAIScore, setUseAIScore] = useState(false);
   const { isReady, user } = useClerkUserReady();
+
+  // Get user's plan from database to determine if AI features should be enabled
+  const { data: databaseUser } = useQuery({
+    queryKey: ["auth-user", user?.id],
+    enabled: isReady && !!user?.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes - plan doesn't change often
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/auth/user");
+      return response.json();
+    },
+  });
+
+  // Enable AI score for standard and premium users
+  useEffect(() => {
+    if (databaseUser?.plan && ['standard', 'premium'].includes(databaseUser.plan)) {
+      setUseAIScore(true);
+    } else {
+      setUseAIScore(false);
+    }
+  }, [databaseUser?.plan]);
 
   // Fetch AI-powered financial health score using React Query
   const aiScoreQuery = useQuery({

@@ -600,8 +600,6 @@ export function registerAIRoutes(app: Express) {
     }
   });
 
-
-
   // Financial Mascot endpoints
   app.get('/api/mascot', isAuthenticated, async (req: any, res) => {
     try {

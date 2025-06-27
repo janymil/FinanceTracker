@@ -676,9 +676,23 @@ export default function Dashboard() {
 
 
 
-        {/* Free User Content */}
+        {/* Debug: User plan is {databaseUser?.plan} */}
+        {console.log('Dashboard Debug - User Plan:', databaseUser?.plan)}
+
+        {/* Loading State */}
+        {!databaseUser && (
+          <div className="bg-gray-100 border border-gray-400 text-gray-700 px-4 py-3 rounded mb-4">
+            DEBUG: Loading user plan data...
+          </div>
+        )}
+
+        {/* Free User Content - Only show if plan is explicitly 'free' */}
+        {console.log('Free section check:', databaseUser?.plan, databaseUser?.plan === 'free')}
         {databaseUser?.plan === 'free' && (
           <div className="space-y-8">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              DEBUG: Showing FREE user layout (Mathematical Financial Health Score)
+            </div>
 
             {/* Simple Financial Health Score for Free Users */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -794,6 +808,80 @@ export default function Dashboard() {
               summary={!summaryLoading ? financialSummary : undefined}
             />
 
+
+          </div>
+        )}
+
+        {/* Standard and Premium User Content - Only show if NOT free plan */}
+        {databaseUser?.plan && databaseUser.plan !== 'free' && ['standard', 'premium'].includes(databaseUser.plan) && (
+          <div className="space-y-8">
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+              DEBUG: Showing PREMIUM user layout (AI-Enhanced Financial Health Mascot) - Plan: {databaseUser.plan}
+            </div>
+
+            {/* AI-Enhanced Financial Health for Standard/Premium Users */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <FinancialHealthMascot />
+              <LazyQuickFinancialSnapshot 
+                summary={financialSummary}
+                transactions={transactions as any}
+              />
+              <LazyContextualFinancialTips
+                summary={financialSummary}
+                transactions={transactions as any}
+                budgets={budgets as any}
+                selectedMonth={deferredSelectedMonth}
+              />
+            </div>
+
+            {/* Transaction Lists */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <SimpleTransactionList 
+                transactions={transactions as any}
+                isLoading={transactionsLoading}
+                isPremium={databaseUser?.plan === 'premium'}
+              />
+
+              <LazyExpenseChart summary={{
+                totalExpenses: Math.abs(financialSummary?.totalExpenses || 0),
+                expensesByCategory: financialSummary?.transactionsByCategory
+                  ?.filter((cat: any) => cat.type === 'expense')
+                  ?.map((cat: any, index: number) => ({
+                    category: cat.categoryName,
+                    amount: Math.abs(cat.amount)
+                  })) || []
+              }} />
+            </div>
+
+            {/* Budget Categories */}
+            <RequirePlan plan="standard">
+              <BudgetOverview />
+            </RequirePlan>
+
+            {/* Advanced Features */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <LazyTransactionRemindersWidget />
+
+              <LazyDailyRecommendations 
+                summary={financialSummary}
+                transactions={transactions as any}
+                budgets={budgets as any}
+              />
+            </div>
+
+            {/* Premium Features */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <LazyExpensePrediction 
+                transactions={transactions as any}
+                summary={financialSummary}
+              />
+              
+              <LazyAutoCategorization transactions={transactions as any} />
+            </div>
+
+            <LazyAIFinancialTips 
+              summary={!summaryLoading ? financialSummary : undefined}
+            />
 
           </div>
         )}
