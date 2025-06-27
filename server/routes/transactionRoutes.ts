@@ -346,7 +346,15 @@ export function registerTransactionRoutes(app: Express) {
       console.log(`Fetching reminders for ${daysAhead} days ahead`);
       const reminders = await storage.getUpcomingTransactionReminders(userId, daysAhead);
       console.log(`Found ${reminders.length} reminders for user ${userId}:`, JSON.stringify(reminders, null, 2));
-      res.json(reminders);
+      
+      // Get user language and translate predefined category names
+      const userLanguage = getUserLanguage(req);
+      const translatedReminders = reminders.map(reminder => ({
+        ...reminder,
+        categoryName: translateCategoryName(reminder.categoryName, userLanguage)
+      }));
+      
+      res.json(translatedReminders);
     } catch (error) {
       console.error("Error fetching transaction reminders:", error);
       res.status(500).json({ message: "Failed to fetch transaction reminders" });
