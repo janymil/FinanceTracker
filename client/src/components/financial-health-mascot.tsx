@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -84,15 +85,7 @@ export default function FinancialHealthMascot() {
   const { data: healthData, isLoading } = useQuery<FinancialHealthData>({
     queryKey: ["/api/financial-health"],
     queryFn: async () => {
-      const token = await window.Clerk.session?.getToken();
-      const response = await fetch("/api/financial-health", {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        credentials: "include"
-      });
-      if (!response.ok) throw new Error('Failed to fetch financial health');
+      const response = await apiRequest("GET", "/api/financial-health");
       return response.json();
     },
     enabled: isReady && !!user?.id,
