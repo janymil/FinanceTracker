@@ -667,7 +667,6 @@ export default function Dashboard() {
 
         {/* Financial Overview Cards */}
         <FinancialCards
-          key={i18n.language} // Force re-render when language changes
           summary={financialSummary}
           isLoading={summaryLoading}
           budgetsData={budgets as any}
@@ -676,7 +675,7 @@ export default function Dashboard() {
 
 
 
-        {/* Debug: User plan is {databaseUser?.plan} */}
+
 
 
         {/* Loading State */}
