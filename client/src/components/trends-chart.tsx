@@ -10,10 +10,22 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
 
 export default function TrendsChart() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isReady, user } = useClerkUserReady();
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
+
+  // Get localized date locale for month formatting
+  const getDateLocale = () => {
+    const currentLang = i18n.language;
+    if (currentLang.startsWith('es')) {
+      return 'es-pe'; // Spanish (Peru)
+    } else if (currentLang.startsWith('sk')) {
+      return 'sk-sk'; // Slovak
+    } else {
+      return 'en-us'; // Default to English
+    }
+  };
 
   // Fetch user's actual financial data for trend calculation
   const { data: transactions, isLoading: transactionsLoading } = useQuery({
@@ -33,7 +45,7 @@ export default function TrendsChart() {
     
     for (let i = 5; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthLabel = date.toLocaleDateString('en-US', {
+      const monthLabel = date.toLocaleDateString(getDateLocale(), {
         month: 'short',
         year: 'numeric'
       });
