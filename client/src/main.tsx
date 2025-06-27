@@ -93,28 +93,30 @@ const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
 
 const root = createRoot(container);
 root.render(
-  <I18nextProvider i18n={i18n}>
-    <HelmetProvider>
-      <ClerkProvider 
-        publishableKey={clerkPubKey}
-        afterSignInUrl={dashboardRedirectUrl}
-        afterSignUpUrl={dashboardRedirectUrl}
-        appearance={{
-          layout: {
-            logoImageUrl: '/icon.png',
-            showOptionalFields: false,
-          },
-          variables: {
-            colorPrimary: '#3b82f6',
-          }
-        }}
-      >
-        <QueryClientProvider client={queryClient}>
-          <Router>
-            <App />
-          </Router>
-        </QueryClientProvider>
-      </ClerkProvider>
-    </HelmetProvider>
-  </I18nextProvider>
+  <StrictMode>
+    <I18nextProvider i18n={i18n}>
+      <HelmetProvider>
+        <ClerkProvider 
+          publishableKey={clerkPubKey}
+          afterSignInUrl={dashboardRedirectUrl}
+          afterSignUpUrl={dashboardRedirectUrl}
+          appearance={{
+            layout: {
+              logoImageUrl: '/icon.png',
+              showOptionalFields: false,
+            },
+            variables: {
+              colorPrimary: '#3b82f6',
+            }
+          }}
+        >
+          <QueryClientProvider client={queryClient}>
+            <Router>
+              <App />
+            </Router>
+          </QueryClientProvider>
+        </ClerkProvider>
+      </HelmetProvider>
+    </I18nextProvider>
+  </StrictMode>
 );
