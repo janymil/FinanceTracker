@@ -61,22 +61,22 @@ export async function runAI(task: string, userId: string, payload: Record<string
       
       switch (task) {
         case 'contextual-tips':
-          fallbackResult = await generateContextualFinancialTips(userId, payload);
+          fallbackResult = await generateContextualFinancialTips(userId, payload, payload.language || 'en-us');
           break;
         case 'financial-tips':
-          fallbackResult = await generateFinancialTips(userId, payload);
+          fallbackResult = await generateFinancialTips(payload, payload.language || 'en-us');
           break;
         case 'daily-recommendations':
-          fallbackResult = await generateDailyRecommendations(userId, payload);
+          fallbackResult = await generateDailyRecommendations(payload, payload.language || 'en-us');
           break;
         case 'spending-insights':
-          fallbackResult = await generateSpendingInsights(userId, payload.transactions);
+          fallbackResult = await generateSpendingInsights(payload.transactions, payload.language || 'en-us');
           break;
         case 'financial-health-score':
-          fallbackResult = await generateAIFinancialHealthScore(userId, payload);
+          fallbackResult = await generateAIFinancialHealthScore(payload, payload.language || 'en-us');
           break;
         case 'trend-predictions':
-          fallbackResult = await generateTrendPredictions(userId, payload.transactions, payload.budgets);
+          fallbackResult = await generateTrendPredictions(payload.transactions, payload.budgets, payload.language || 'en-us');
           break;
         case 'expense-predictions':
           fallbackResult = await generateExpensePredictions(userId, payload.transactions);
