@@ -729,7 +729,6 @@ export class DatabaseStorage implements IStorage {
     const categoryResults = await db
       .select({
         categoryName: categories.name,
-        categoryUserId: categories.userId,
         amount: sum(transactions.amount),
         type: transactions.type,
       })
@@ -742,7 +741,7 @@ export class DatabaseStorage implements IStorage {
           lte(transactions.date, endDate)
         )
       )
-      .groupBy(categories.name, categories.userId, transactions.type);
+      .groupBy(categories.name, transactions.type);
 
     const totalIncome = Number(incomeResult[0]?.total || 0);
     const totalExpenses = Number(expenseResult[0]?.total || 0);
@@ -752,7 +751,6 @@ export class DatabaseStorage implements IStorage {
 
     const transactionsByCategory = categoryResults.map(result => ({
       categoryName: result.categoryName || 'Uncategorized',
-      categoryUserId: result.categoryUserId,
       amount: Number(result.amount || 0),
       type: result.type,
     }));
