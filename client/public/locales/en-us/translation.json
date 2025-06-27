@@ -580,6 +580,13 @@
 
   "upcomingReminders": {
     "title": "Upcoming Reminders",
+    "customReminder": "Custom Reminder",
+    "priority": {
+      "high": "high",
+      "medium": "medium", 
+      "low": "low",
+      "normal": "normal"
+    },
     "description": "Stay on top of your bills and payments",
     "addReminder": "Add Reminder",
     "reminder": "Reminder",

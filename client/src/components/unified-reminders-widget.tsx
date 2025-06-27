@@ -201,7 +201,7 @@ export default function UnifiedRemindersWidget() {
       amount: reminder.amount,
       dueDate: new Date(reminder.dueDate),
       type: 'expense' as const,
-      categoryName: 'Custom Reminder',
+      categoryName: t('upcomingReminders.customReminder'),
       isRecurring: reminder.isRecurring,
       source: 'manual' as const,
       priority: getReminderPriority(new Date(reminder.dueDate)),
@@ -528,7 +528,7 @@ export default function UnifiedRemindersWidget() {
                             <Repeat className="h-3 w-3 text-gray-500" />
                           )}
                           <Badge className={`text-xs px-1 py-0.5 ${priorityColor}`}>
-                            {reminder.priority}
+                            {t(`upcomingReminders.priority.${reminder.priority}`)}
                           </Badge>
                         </div>
                         <p className="text-xs text-gray-600 dark:text-gray-300">{reminder.description}</p>
