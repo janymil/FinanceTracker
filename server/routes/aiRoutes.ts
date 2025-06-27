@@ -630,6 +630,22 @@ export function registerAIRoutes(app: Express) {
 
   // Helper function to transform AI response for mascot component
   function transformAIResponseForMascot(aiData: any) {
+    // Check if data is already in the correct format (from Fly.io processor)
+    if (aiData && aiData.insights && Array.isArray(aiData.insights)) {
+      // Data is already in frontend format, just return it
+      return {
+        score: aiData.score || 50,
+        trend: aiData.trend || 'stable',
+        category: aiData.category || 'fair',
+        insights: aiData.insights || [],
+        achievements: aiData.achievements || [],
+        warnings: aiData.warnings || [],
+        factors: aiData.factors || [],
+        aiAnalysis: aiData.aiAnalysis || {}
+      };
+    }
+
+    // Fallback transformation for raw AI data format
     const insights: string[] = [];
     const achievements: string[] = [];
     const warnings: string[] = [];
@@ -653,8 +669,6 @@ export function registerAIRoutes(app: Express) {
         .trim();
     };
 
-    // Process the AI response - check different possible structures
-    
     // If aiData has personalizedFactors
     if (aiData?.aiAnalysis?.personalizedFactors && Array.isArray(aiData.aiAnalysis.personalizedFactors)) {
       aiData.aiAnalysis.personalizedFactors.forEach((factor: string) => {
@@ -670,17 +684,6 @@ export function registerAIRoutes(app: Express) {
       aiData.aiAnalysis.recommendations.forEach((rec: string) => {
         const cleaned = cleanText(rec);
         if (cleaned && cleaned.length > 20 && insights.length < 8) {
-          insights.push(cleaned);
-        }
-      });
-    }
-
-    // If it's a simple string response, split and clean
-    if (typeof aiData === 'string') {
-      const lines = aiData.split(/\n|\r\n/).filter(line => line.trim());
-      lines.forEach(line => {
-        const cleaned = cleanText(line);
-        if (cleaned && cleaned.length > 25 && insights.length < 8) {
           insights.push(cleaned);
         }
       });
@@ -706,18 +709,6 @@ export function registerAIRoutes(app: Express) {
         if (factor.status === 'poor' || factor.status === 'below average') {
           const percentage = Math.round((factor.score / factor.max) * 100);
           warnings.push(`${factor.name}: ${percentage}%`);
-        }
-      });
-    }
-
-    // Fallback: try to extract insights from any object properties
-    if (insights.length === 0 && typeof aiData === 'object') {
-      Object.values(aiData).forEach((value: any) => {
-        if (typeof value === 'string' && value.length > 30) {
-          const cleaned = cleanText(value);
-          if (cleaned && cleaned.length > 25 && insights.length < 8) {
-            insights.push(cleaned);
-          }
         }
       });
     }
