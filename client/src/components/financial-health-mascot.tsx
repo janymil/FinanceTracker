@@ -83,7 +83,7 @@ export default function FinancialHealthMascot() {
   const [showDetails, setShowDetails] = useState(false);
 
   const { data: healthData, isLoading } = useQuery<FinancialHealthData>({
-    queryKey: ["/api/financial-health"],
+    queryKey: ["/api/financial-health", Date.now()],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/financial-health");
       return response.json();
