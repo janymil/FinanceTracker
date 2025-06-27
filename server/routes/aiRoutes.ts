@@ -486,6 +486,13 @@ export function registerAIRoutes(app: Express) {
   // Financial Health Score (Free for all users)
   app.get('/api/financial-health', isAuthenticated, async (req: any, res) => {
     try {
+      // Disable all caching
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
