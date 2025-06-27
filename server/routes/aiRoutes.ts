@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
+import { getUserLanguage } from "../categoryTranslations";
 import { 
   categorizeExpense,
   type ExpenseCategorizationResult 
@@ -47,8 +48,8 @@ export function registerAIRoutes(app: Express) {
       for (let i = 0; i < limit; i++) {
         const transaction = uncategorized[i];
         try {
-          // Extract language from request headers or use default
-          const language = req.headers['accept-language']?.split(',')[0]?.split('-').join('-') || 'en-us';
+          // Get user language from consistent header detection
+          const language = getUserLanguage(req);
           const result = await categorizeExpense(transaction.description, parseFloat(transaction.amount), language);
           suggestions.push({
             id: `suggestion-${transaction.id}`,
@@ -144,8 +145,8 @@ export function registerAIRoutes(app: Express) {
         budgetAssigned: t.budgetAssigned
       }));
 
-      // Extract language from request headers or use default
-      const language = req.headers['accept-language']?.split(',')[0]?.split('-').join('-') || 'en-us';
+      // Get user language from consistent header detection
+      const language = getUserLanguage(req);
       
       const aiPayload = {
         totalIncome: financialData.totalIncome,
@@ -226,8 +227,8 @@ export function registerAIRoutes(app: Express) {
 
       const transactions = await storage.getUserTransactions(userId, 100);
 
-      // Extract language from request headers or use default
-      const language = req.headers['accept-language']?.split(',')[0]?.split('-').join('-') || 'en-us';
+      // Get user language from consistent header detection
+      const language = getUserLanguage(req);
       
       const aiPayload = {
         transactions: transactions.map(t => ({
