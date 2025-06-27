@@ -25,7 +25,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
 
   try {
     console.log(`[AI ${task}] Calling Fly.io processor...`);
-    const response = await fetch("https://finanzerpro.fly.dev/execute-gpt-task", {
+    const response = await fetch("https://finanzerpro-ai-processor.fly.dev/ai", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
