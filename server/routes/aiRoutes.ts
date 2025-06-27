@@ -483,7 +483,7 @@ export function registerAIRoutes(app: Express) {
     }
   });
 
-  // Financial Health Score (Basic for free users, AI-powered for Standard+ users)
+  // Financial Health Score (AI-powered for Standard+ users only)
   app.get('/api/financial-health', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
@@ -494,6 +494,11 @@ export function registerAIRoutes(app: Express) {
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
+      }
+
+      // Require standard+ plan for AI financial health analysis
+      if (!user.plan || !['standard', 'premium'].includes(user.plan)) {
+        return res.status(403).json({ message: "AI financial health analysis requires Standard or Premium subscription" });
       }
 
       // Get user's financial data
@@ -514,40 +519,6 @@ export function registerAIRoutes(app: Express) {
         totalExpenses,
         netBalance: totalIncome - totalExpenses
       };
-
-      // For free users, return basic mathematical calculation
-      if (!user.plan || user.plan === 'free') {
-        const savingsRate = totalIncome > 0 ? 
-          (totalIncome - totalExpenses) / totalIncome : 0;
-        
-        let score = 50;
-        let category: 'excellent' | 'good' | 'fair' | 'poor' = 'fair';
-        
-        if (savingsRate > 0.2) {
-          score = 85;
-          category = 'excellent';
-        } else if (savingsRate > 0.1) {
-          score = 70;
-          category = 'good';
-        } else if (savingsRate > 0) {
-          score = 55;
-          category = 'fair';
-        } else {
-          score = 30;
-          category = 'poor';
-        }
-
-        const basicHealthData = {
-          score,
-          trend: 'stable' as const,
-          category,
-          insights: [], // Empty for free users
-          achievements: summary.netBalance > 0 ? ['Positive net balance'] : [],
-          warnings: summary.netBalance < 0 ? ['Expenses exceed income'] : []
-        };
-
-        return res.json(basicHealthData);
-      }
 
       // Create a stable data hash that only changes with significant financial changes
       // This prevents cache misses from minor data changes like transaction IDs or exact timestamps
