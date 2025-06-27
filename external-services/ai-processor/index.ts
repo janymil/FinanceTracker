@@ -1607,7 +1607,7 @@ ${recentTransactions.slice(0, 20).map(t =>
 
 Budgets: ${budgets.length} active budgets
 
-Provide an AI-powered financial health score that adapts to this user's specific situation and spending patterns.`
+You MUST provide specific insights in personalizedFactors array and actionable recommendations in recommendations array. Give at least 2-3 items in each array based on the spending patterns and financial situation shown above.`
         }
       ],
       response_format: { type: "json_object" },
