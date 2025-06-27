@@ -459,5 +459,9 @@
   "Critical": "Crítico",
   "utilized": "utilizado",
   "Remaining": "Restante",
-  "Loading...": "Cargando..."
+  "Loading...": "Cargando...",
+  "Detailed expense breakdown and budget tracking available with Standard": "Desglose detallado de gastos y seguimiento de presupuesto disponible con Estándar",
+  "Edit Budgets": "Editar Presupuestos",
+  "No spending on budgeted categories yet": "Aún no hay gastos en las categorías presupuestadas",
+  "Start spending and your budget progress will appear here": "Comienza a gastar y tu progreso de presupuesto aparecerá aquí"
 }

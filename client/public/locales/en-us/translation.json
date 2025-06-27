@@ -475,5 +475,9 @@
   "Critical": "Critical",
   "utilized": "utilized",
   "Remaining": "Remaining",
-  "Loading...": "Loading..."
+  "Loading...": "Loading...",
+  "Detailed expense breakdown and budget tracking available with Standard": "Detailed expense breakdown and budget tracking available with Standard",
+  "Edit Budgets": "Edit Budgets",
+  "No spending on budgeted categories yet": "No spending on budgeted categories yet",
+  "Start spending and your budget progress will appear here": "Start spending and your budget progress will appear here"
 }
