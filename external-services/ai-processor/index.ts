@@ -521,6 +521,7 @@ export async function generateFinancialTips(financialData: {
   }>;
 
 }, language: string = 'en-us'): Promise<FinancialTip[]> {
+  const normalizedLanguage = normalizeLanguageCode(language);
   try {
     const { 
       totalIncome, 
@@ -581,7 +582,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
         messages: [
           {
             role: "system",
-            content: `You are an AI Financial Analyst providing premium-level insights. Respond in ${getLanguageLabel(language)}. Your analysis must demonstrate these EXACT capabilities that users pay for:
+            content: `You are an AI Financial Analyst providing premium-level insights. Respond in ${getLanguageLabel(normalizedLanguage)}. Your analysis must demonstrate these EXACT capabilities that users pay for:
 
 1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
 2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
@@ -723,6 +724,7 @@ export async function generateSpendingInsights(transactions: Array<{
   recommendation?: string;
   actionable: boolean;
 }>> {
+  const normalizedLanguage = normalizeLanguageCode(language);
   try {
     // No caching in Fly.io - caching handled by main application
     const expenseTransactions = transactions.filter(t => t.type === 'expense');
@@ -740,7 +742,7 @@ export async function generateSpendingInsights(transactions: Array<{
       messages: [
         {
           role: "system",
-          content: `Respond in ${getLanguageLabel(language)}. You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights. Generate 2-4 insights focusing on unusual spending patterns, budget optimization opportunities, positive financial behaviors, and spending trends. Each insight should have a unique ID, type (warning/suggestion/achievement/trend), clear title and description, impact level (high/medium/low), category if relevant, amount if relevant, actionable recommendation, and whether it's actionable (boolean). Respond with JSON array format.`
+          content: `Respond in ${getLanguageLabel(normalizedLanguage)}. You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights. Generate 2-4 insights focusing on unusual spending patterns, budget optimization opportunities, positive financial behaviors, and spending trends. Each insight should have a unique ID, type (warning/suggestion/achievement/trend), clear title and description, impact level (high/medium/low), category if relevant, amount if relevant, actionable recommendation, and whether it's actionable (boolean). Respond with JSON array format.`
         },
         {
           role: "user",
@@ -1507,6 +1509,7 @@ export async function generateFinancialHealthScore(financialData: {
     netBalance: number;
   };
 }, language: string = 'en-us'): Promise<FinancialHealthData> {
+  const normalizedLanguage = normalizeLanguageCode(language);
   try {
     const { transactions, budgets, summary } = financialData;
 
