@@ -625,51 +625,57 @@ export function registerAIRoutes(app: Express) {
 
   // Helper function to transform AI response for mascot component
   function transformAIResponseForMascot(aiData: any) {
-    console.log('🔧 TRANSFORM DEBUG: Original aiData structure:', JSON.stringify(aiData, null, 2));
-    
     // Extract and organize insights into clean, user-friendly format
     const insights: string[] = [];
     const achievements: string[] = [];
     const warnings: string[] = [];
 
-    // Process personalized factors into clean insights (remove repetitive headers)
+    // Helper function to clean repetitive headers and improve readability
+    const cleanText = (text: string): string => {
+      return text
+        .replace(/^(Personal Financial Pattern|AI Recommendation|Recommendation|Insight)\s*:?\s*/i, '')
+        .replace(/^(Pattern|Analysis)\s*:?\s*/i, '')
+        .trim();
+    };
+
+    // Process personalized factors into clean insights
     if (aiData.aiAnalysis?.personalizedFactors) {
       aiData.aiAnalysis.personalizedFactors.forEach((factor: string) => {
-        // Remove "Personal Financial Pattern" prefix and clean up text
-        const cleanFactor = factor.replace(/^Personal Financial Pattern\s*:?\s*/i, '').trim();
-        if (cleanFactor && !cleanFactor.startsWith('Personal Financial Pattern')) {
+        const cleanFactor = cleanText(factor);
+        if (cleanFactor && cleanFactor.length > 15) {
           insights.push(cleanFactor);
         }
       });
     }
 
-    // Process factor insights with clean names
+    // Process factor insights with improved formatting
     if (aiData.factors) {
       aiData.factors.forEach((factor: any) => {
         if (factor.aiInsight) {
-          const cleanInsight = factor.aiInsight.replace(/^Personal Financial Pattern\s*:?\s*/i, '').trim();
-          if (cleanInsight) {
-            insights.push(`${factor.name}: ${cleanInsight}`);
+          const cleanInsight = cleanText(factor.aiInsight);
+          if (cleanInsight && cleanInsight.length > 15) {
+            insights.push(cleanInsight);
           }
         }
       });
     }
 
-    // Process recommendations into clean format (remove repetitive headers)
+    // Process recommendations with clean formatting
     if (aiData.aiAnalysis?.recommendations) {
       aiData.aiAnalysis.recommendations.forEach((rec: string) => {
-        const cleanRec = rec.replace(/^Personal Financial Pattern\s*:?\s*/i, '').trim();
-        if (cleanRec && !cleanRec.startsWith('Personal Financial Pattern')) {
+        const cleanRec = cleanText(rec);
+        if (cleanRec && cleanRec.length > 15) {
           insights.push(cleanRec);
         }
       });
     }
 
-    // Extract achievements from positive factors with clean formatting
+    // Extract achievements from positive factors with better formatting
     if (aiData.factors) {
       aiData.factors.forEach((factor: any) => {
         if (factor.status === 'good' || factor.status === 'excellent') {
-          achievements.push(`${factor.name}: Strong performance (${factor.score}/${factor.max})`);
+          const percentage = Math.round((factor.score / factor.max) * 100);
+          achievements.push(`Strong ${factor.name.toLowerCase()} (${percentage}% performance)`);
         }
       });
     }
@@ -678,15 +684,16 @@ export function registerAIRoutes(app: Express) {
     if (aiData.factors) {
       aiData.factors.forEach((factor: any) => {
         if (factor.status === 'poor' || factor.status === 'below average') {
-          warnings.push(`${factor.name} needs improvement (${factor.score}/${factor.max})`);
+          const percentage = Math.round((factor.score / factor.max) * 100);
+          warnings.push(`${factor.name} needs attention (${percentage}% performance)`);
         }
       });
     }
 
     // Add risk assessment as a clean warning
     if (aiData.aiAnalysis?.riskAssessment) {
-      const cleanRisk = aiData.aiAnalysis.riskAssessment.replace(/^AI Recommendation\s*:?\s*/i, '').trim();
-      if (cleanRisk) {
+      const cleanRisk = cleanText(aiData.aiAnalysis.riskAssessment);
+      if (cleanRisk && cleanRisk.length > 20) {
         warnings.push(cleanRisk);
       }
     }
@@ -696,7 +703,7 @@ export function registerAIRoutes(app: Express) {
     const uniqueAchievements = Array.from(new Set(achievements.filter(a => a && a.length > 5)));
     const uniqueWarnings = Array.from(new Set(warnings.filter(w => w && w.length > 5)));
 
-    const result = {
+    return {
       score: aiData.score || 50,
       trend: aiData.trend || 'stable',
       category: aiData.category || 'fair',
@@ -706,9 +713,6 @@ export function registerAIRoutes(app: Express) {
       factors: aiData.factors || [],
       aiAnalysis: aiData.aiAnalysis || {}
     };
-    
-    console.log('🔧 TRANSFORM DEBUG: Final transformed result:', JSON.stringify(result, null, 2));
-    return result;
   }
 
   // Financial Mascot endpoints
