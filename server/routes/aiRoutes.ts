@@ -321,6 +321,8 @@ export function registerAIRoutes(app: Express) {
       });
 
       // Transform the AI response to match the frontend FinancialHealthData interface
+      console.log('DEBUG: Raw AI response structure:', JSON.stringify(aiScore, null, 2));
+      
       const transformedResponse = {
         score: aiScore?.score || 50,
         trend: aiScore?.trend || 'stable',
@@ -330,6 +332,8 @@ export function registerAIRoutes(app: Express) {
         warnings: aiScore?.warnings || (aiScore?.aiAnalysis?.recommendations?.filter(r => r.priority === 'medium')?.map(r => r.action) || [])
       };
 
+      console.log('DEBUG: Transformed response for frontend:', JSON.stringify(transformedResponse, null, 2));
+      
       return res.json(transformedResponse);
     } catch (error) {
       console.error("Error generating AI financial health score:", error);
