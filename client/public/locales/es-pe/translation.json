@@ -470,5 +470,6 @@
   "generatingAIInsights": "Generando información de IA...",
   "noFinancialTipsAvailable": "No hay consejos financieros disponibles para este período.",
   "aiTipsDisclaimer": "Los consejos se generan usando IA basada en tus transacciones y configuraciones de presupuesto actuales.",
-  "loadingFinancialInsights": "Cargando información financiera..."
+  "loadingFinancialInsights": "Cargando información financiera...",
+  "View All Transactions": "Ver Todas las Transacciones"
 }

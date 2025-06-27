@@ -485,5 +485,6 @@
   "generatingAIInsights": "Generating AI insights...",
   "noFinancialTipsAvailable": "No financial tips available for this period.",
   "aiTipsDisclaimer": "Tips are generated using AI based on your current transactions and budget settings.",
-  "loadingFinancialInsights": "Loading financial insights..."
+  "loadingFinancialInsights": "Loading financial insights...",
+  "View All Transactions": "View All Transactions"
 }
