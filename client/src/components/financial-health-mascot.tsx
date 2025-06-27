@@ -23,18 +23,11 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface FinancialHealthData {
   score: number;
-  status: string;
-  color: string;
-  factors?: string[];
-  aiAnalysis?: {
-    personalizedFactors?: string[];
-    recommendations?: Array<{
-      action: string;
-      impact: string;
-      priority: string;
-    }>;
-    riskAssessment?: string;
-  };
+  trend: 'improving' | 'declining' | 'stable';
+  category: 'excellent' | 'good' | 'fair' | 'poor';
+  insights: string[];
+  achievements: string[];
+  warnings: string[];
 }
 
 interface MascotState {
@@ -103,10 +96,8 @@ export default function FinancialHealthMascot() {
 
   useEffect(() => {
     if (healthData) {
-      // Map status to category for mascot config
-      const category = healthData.status?.toLowerCase().includes('excellent') ? 'excellent' :
-                      healthData.status?.toLowerCase().includes('good') ? 'good' :
-                      healthData.status?.toLowerCase().includes('fair') ? 'fair' : 'poor';
+      // Use category directly from the health data
+      const category = healthData.category || 'fair';
       
       const config = mascotConfigs[category] || mascotConfigs.fair;
       setMascotState({
@@ -312,19 +303,19 @@ export default function FinancialHealthMascot() {
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <CheckCircle className="h-4 w-4 text-green-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.factors?.length || 0} Factors
+              {healthData.insights?.length || 0} Insights
             </p>
           </div>
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <Target className="h-4 w-4 text-blue-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.aiAnalysis?.personalizedFactors?.length || 0} Insights
+              {healthData.achievements?.length || 0} Achievements
             </p>
           </div>
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <AlertTriangle className="h-4 w-4 text-yellow-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.aiAnalysis?.recommendations?.length || 0} Tips
+              {healthData.warnings?.length || 0} Warnings
             </p>
           </div>
         </div>
