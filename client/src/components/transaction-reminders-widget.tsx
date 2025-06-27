@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useUser, useAuth } from "@clerk/clerk-react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -85,6 +86,7 @@ interface UnifiedReminder {
 }
 
 export default function TransactionRemindersWidget() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { user, isLoaded, isSignedIn } = useUser();
   const queryClient = useQueryClient();
@@ -316,14 +318,14 @@ export default function TransactionRemindersWidget() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5" />
-                Upcoming Payments & Reminders
+                {t('upcomingReminders.title')}
                 <Badge className="bg-blue-600 text-white">
                   <Crown className="h-3 w-3 mr-1" />
-                  Standard+
+                  {t('plans.standard')}+
                 </Badge>
               </CardTitle>
               <CardDescription>
-                Automatic reminders from transactions and manual payment reminders
+                {t('upcomingReminders.description')}
               </CardDescription>
             </div>
           </CardHeader>
@@ -349,10 +351,10 @@ export default function TransactionRemindersWidget() {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
-              Upcoming Payments & Reminders
+              {t('upcomingReminders.title')}
               <Badge className="bg-blue-600 text-white">
                 <Crown className="h-3 w-3 mr-1" />
-                Standard+
+                {t('plans.standard')}+
               </Badge>
             </CardTitle>
             <CardDescription>
