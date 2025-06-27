@@ -386,7 +386,7 @@ export default function TransactionRemindersWidget() {
                       placeholder={t('upcomingReminders.form.titlePlaceholder')}
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="description">{t('upcomingReminders.form.description')}</Label>
                     <Textarea
@@ -535,7 +535,7 @@ export default function TransactionRemindersWidget() {
                 const TypeIcon = getTypeIcon(reminder.type);
                 const typeColor = getTypeColor(reminder.type);
                 const SourceIcon = getSourceIcon(reminder.source);
-                
+
                 return (
                   <div key={reminder.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 border rounded-lg gap-3">
                     <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -602,7 +602,7 @@ export default function TransactionRemindersWidget() {
                   </div>
                 );
               })}
-              
+
               {unifiedReminders.length > 8 && (
                 <p className="text-xs text-gray-500 text-center">
                   +{unifiedReminders.length - 8} more reminders
