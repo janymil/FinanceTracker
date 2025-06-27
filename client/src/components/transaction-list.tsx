@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -182,7 +181,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
             filteredTransactions.map((transaction) => {
               const isExpanded = expandedTransactions.has(transaction.id);
               const showOcrData = hasOcrData(transaction);
-              
+
               return (
                 <div key={transaction.id} className="border rounded-lg overflow-hidden">
                   <div className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
@@ -198,7 +197,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                           <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
                         )}
                       </div>
-                      
+
                       {/* Receipt thumbnail for desktop */}
                       {transaction.imageUrl && (
                         <div className="hidden md:block">
@@ -217,7 +216,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                           </div>
                         </div>
                       )}
-                      
+
                       <div className="flex-1">
                         <div className="flex items-center space-x-2">
                           <p className="font-medium text-gray-900 dark:text-white">
@@ -256,7 +255,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                       <div className="text-right">
                         <span className={`font-semibold ${
@@ -271,7 +270,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                           </div>
                         )}
                       </div>
-                      
+
                       {(showOcrData || transaction.imageUrl) && (
                         <Button
                           size="sm"
@@ -286,7 +285,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                           )}
                         </Button>
                       )}
-                      
+
                       {isPremium && (
                         <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-gray-400 hover:text-destructive">
                           <Trash2 className="h-4 w-4" />
@@ -294,7 +293,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                       )}
                     </div>
                   </div>
-                  
+
                   {/* Expanded OCR details */}
                   {isExpanded && (showOcrData || transaction.imageUrl) && (
                     <div className="border-t bg-gray-50 dark:bg-gray-800 p-4 space-y-3">
@@ -316,7 +315,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                           </div>
                         </div>
                       )}
-                      
+
                       {/* OCR Data */}
                       {showOcrData && (
                         <div className="space-y-2">
@@ -349,7 +348,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                               </div>
                             )}
                           </div>
-                          
+
                           {/* Full OCR text - collapsed by default */}
                           {transaction.ocrText && (
                             <Collapsible>
@@ -383,7 +382,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
             className="w-full text-primary hover:text-primary/80"
             onClick={() => setLocation('/transactions')}
           >
-            View All Transactions
+            {t("View All Transactions")}
           </Button>
         </div>
 

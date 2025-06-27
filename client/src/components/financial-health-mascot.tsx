@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { apiRequest } from "@/lib/queryClient";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,47 +38,48 @@ interface MascotState {
   color: string;
 }
 
-const mascotConfigs = {
-  excellent: {
-    emotion: 'excited' as const,
-    animation: 'celebrating' as const,
-    message: "You're crushing your financial goals! 🎉",
-    color: 'text-green-600',
-    bgColor: 'bg-green-100',
-    borderColor: 'border-green-300'
-  },
-  good: {
-    emotion: 'happy' as const,
-    animation: 'idle' as const,
-    message: "Great financial habits! Keep it up! 💪",
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-100',
-    borderColor: 'border-blue-300'
-  },
-  fair: {
-    emotion: 'neutral' as const,
-    animation: 'thinking' as const,
-    message: "You're on the right track, but there's room to improve! 🤔",
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-100',
-    borderColor: 'border-yellow-300'
-  },
-  poor: {
-    emotion: 'concerned' as const,
-    animation: 'warning' as const,
-    message: "Let's work together to improve your financial health! 💡",
-    color: 'text-red-600',
-    bgColor: 'bg-red-100',
-    borderColor: 'border-red-300'
-  }
-};
-
 export default function FinancialHealthMascot() {
   const { isReady, user } = useClerkUserReady();
+  const { t } = useTranslation();
+
+  const mascotConfigs = {
+    excellent: {
+      emotion: 'excited' as const,
+      animation: 'celebrating' as const,
+      message: t('youreCrushingGoals'),
+      color: 'text-green-600',
+      bgColor: 'bg-green-100',
+      borderColor: 'border-green-300'
+    },
+    good: {
+      emotion: 'happy' as const,
+      animation: 'idle' as const,
+      message: t('greatFinancialHabits'),
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100',
+      borderColor: 'border-blue-300'
+    },
+    fair: {
+      emotion: 'neutral' as const,
+      animation: 'thinking' as const,
+      message: t('youreOnTheRightTrack'),
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-100',
+      borderColor: 'border-yellow-300'
+    },
+    poor: {
+      emotion: 'concerned' as const,
+      animation: 'warning' as const,
+      message: t('letsWorkTogether'),
+      color: 'text-red-600',
+      bgColor: 'bg-red-100',
+      borderColor: 'border-red-300'
+    }
+  };
   const [mascotState, setMascotState] = useState<MascotState>({
     emotion: 'neutral',
     animation: 'idle',
-    message: 'Analyzing your financial health...',
+    message: t('yourFinancialAssistantIsWakingUp'),
     color: 'text-gray-600'
   });
   const [showDetails, setShowDetails] = useState(false);
@@ -194,7 +196,7 @@ export default function FinancialHealthMascot() {
             </motion.div>
           </div>
           <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-3">
-            Your financial assistant is waking up...
+            {t('yourFinancialAssistantIsWakingUp')}
           </p>
         </CardContent>
       </Card>
@@ -208,7 +210,7 @@ export default function FinancialHealthMascot() {
           <div className="text-center">
             <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-3" />
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Add some transactions to see your financial health mascot!
+              {t('addTransactionsToSeeMascot')}
             </p>
           </div>
         </CardContent>
@@ -232,7 +234,7 @@ export default function FinancialHealthMascot() {
             </motion.div>
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white">
-                Financial Health Assistant
+                {t('financialHealthAssistant')}
               </h3>
               <Badge className={`${getScoreBadgeColor(healthData.score)} text-xs`}>
                 {healthData.score}/100
@@ -271,7 +273,7 @@ export default function FinancialHealthMascot() {
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Health Score
+              {t('healthScore')}
             </span>
             <span className={`text-sm font-bold ${getScoreColor(healthData.score)}`}>
               {healthData.score}%
@@ -296,19 +298,19 @@ export default function FinancialHealthMascot() {
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <CheckCircle className="h-4 w-4 text-green-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.achievements?.length || 0} Achievements
+              {healthData.achievements?.length || 0} {t('achievements')}
             </p>
           </div>
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <Target className="h-4 w-4 text-blue-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.insights?.length || 0} Insights
+              {healthData.insights?.length || 0} {t('insights')}
             </p>
           </div>
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <AlertTriangle className="h-4 w-4 text-yellow-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.warnings?.length || 0} Alerts
+              {healthData.warnings?.length || 0} {t('alerts')}
             </p>
           </div>
         </div>
@@ -320,7 +322,7 @@ export default function FinancialHealthMascot() {
           onClick={() => setShowDetails(!showDetails)}
           className="w-full"
         >
-          {showDetails ? 'Hide Details' : 'Show Details'}
+          {showDetails ? t('hideDetails') : t('showDetails')}
         </Button>
 
         {/* Detailed Information */}
@@ -337,7 +339,7 @@ export default function FinancialHealthMascot() {
               {healthData?.achievements && healthData.achievements.length > 0 && (
                 <div>
                   <h4 className="text-sm font-medium text-green-700 dark:text-green-400 mb-2">
-                    🏆 Recent Achievements
+                    {t('recentAchievements')}
                   </h4>
                   <ul className="space-y-1">
                     {healthData.achievements.map((achievement, index) => (
@@ -360,7 +362,7 @@ export default function FinancialHealthMascot() {
               {healthData?.insights && healthData.insights.length > 0 && (
                 <div>
                   <h4 className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-2">
-                    💡 Smart Insights
+                    {t('smartInsights')}
                   </h4>
                   <ul className="space-y-1">
                     {healthData.insights.map((insight, index) => (
@@ -383,7 +385,7 @@ export default function FinancialHealthMascot() {
               {healthData?.warnings && healthData.warnings.length > 0 && (
                 <div>
                   <h4 className="text-sm font-medium text-red-700 dark:text-red-400 mb-2">
-                    ⚠️ Action Items
+                    {t('actionItems')}
                   </h4>
                   <ul className="space-y-1">
                     {healthData.warnings.map((warning, index) => (
