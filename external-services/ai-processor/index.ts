@@ -428,7 +428,7 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
       messages: [
         {
           role: "system",
-          content: "You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips."
+          content: `Respond in ${getLanguageLabel(data.language || 'en-us')}. You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.`
         },
         {
           role: "user",
