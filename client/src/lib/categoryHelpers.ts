@@ -1,4 +1,5 @@
-import { TFunction } from 'react-i18next';
+// Type for translation function
+type TFunction = (key: string) => string;
 
 export interface Category {
   id: number;
