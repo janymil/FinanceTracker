@@ -7,8 +7,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import RequirePlan from "@/components/require-plan";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useTranslation } from "react-i18next";
 
 export default function TrendsChart() {
+  const { t } = useTranslation();
   const { isReady, user } = useClerkUserReady();
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
@@ -98,15 +100,15 @@ export default function TrendsChart() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
-                Financial Trends
+                {t("Financial Trends")}
               </CardTitle>
               <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Evolution of your income, expenses and net balance over the last months
+                {t("Evolution of your income, expenses and net balance over the last months")}
               </p>
             </div>
             <Badge className="bg-premium text-white">
               <Crown className="h-3 w-3 mr-1" />
-              Premium
+              {t("Premium")}
             </Badge>
           </div>
         </CardHeader>
@@ -120,21 +122,21 @@ export default function TrendsChart() {
   }
 
   return (
-    <RequirePlan plan="premium" feature="Financial Trends">
+    <RequirePlan plan="premium" feature={t("Financial Trends")}>
       <Card className="bg-white dark:bg-gray-800">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
-                Financial Trends
+                {t("Financial Trends")}
               </CardTitle>
               <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Evolution of your income, expenses and net balance over the last months
+                {t("Evolution of your income, expenses and net balance over the last months")}
               </p>
             </div>
             <Badge className="bg-premium text-white">
               <Crown className="h-3 w-3 mr-1" />
-              Premium
+              {t("Premium")}
             </Badge>
           </div>
         </CardHeader>
@@ -168,7 +170,7 @@ export default function TrendsChart() {
                 stroke="hsl(var(--success))"
                 strokeWidth={3}
                 dot={{ fill: "hsl(var(--success))", strokeWidth: 2, r: 4 }}
-                name="Income"
+                name={t("Income")}
                 connectNulls={false}
               />
               <Line
@@ -177,7 +179,7 @@ export default function TrendsChart() {
                 stroke="hsl(var(--destructive))"
                 strokeWidth={3}
                 dot={{ fill: "hsl(var(--destructive))", strokeWidth: 2, r: 4 }}
-                name="Expenses"
+                name={t("Expenses")}
                 connectNulls={false}
               />
               <Line
@@ -187,7 +189,7 @@ export default function TrendsChart() {
                 strokeWidth={2}
                 strokeDasharray="5 5"
                 dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
-                name="Net Balance"
+                name={t("Net Balance")}
                 connectNulls={false}
               />
             </LineChart>
