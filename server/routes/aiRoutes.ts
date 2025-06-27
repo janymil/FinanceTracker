@@ -581,14 +581,22 @@ export function registerAIRoutes(app: Express) {
       // Initialize UnifiedAICache with 24 hours TTL
       const cache = new UnifiedAICache('financial-health-score', userId);
 
-      // Try to get cached result
-      const cachedResult = await cache.get(aiPayload);
-      if (cachedResult) {
-        return res.json(cachedResult);
-      }
+      // Try to get cached result - DISABLED FOR DEBUGGING
+      // const cachedResult = await cache.get(aiPayload);
+      // if (cachedResult) {
+      //   return res.json(cachedResult);
+      // }
 
       // Use unified AI processor for financial health score
       const healthData = await runAI('financial-health-score', userId, aiPayload);
+
+      // Debug: Log the response structure to understand the data flow
+      console.log('=== FINANCIAL HEALTH DEBUG ===');
+      console.log('Raw AI Response:', JSON.stringify(healthData, null, 2));
+      console.log('Has insights:', healthData?.insights?.length || 0);
+      console.log('Has achievements:', healthData?.achievements?.length || 0);
+      console.log('Has warnings:', healthData?.warnings?.length || 0);
+      console.log('================================');
 
       // Cache the result for 24 hours
       await cache.set(aiPayload, healthData, false, 24);
