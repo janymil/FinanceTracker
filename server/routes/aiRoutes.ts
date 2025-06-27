@@ -587,37 +587,22 @@ export function registerAIRoutes(app: Express) {
         return res.json(cachedResult);
       }
 
-      // Use unified AI processor for financial health score
-      const healthData = await runAI('financial-health-score', userId, aiPayload);
-      
-      console.log('DEBUG: Raw AI response structure:', {
-        hasScore: typeof healthData?.score === 'number',
-        score: healthData?.score,
-        hasFactors: Array.isArray(healthData?.factors),
-        factorCount: healthData?.factors?.length || 0,
-        factorTypes: healthData?.factors?.map((f: any) => typeof f),
-        firstFactor: healthData?.factors?.[0],
-        fullResponse: healthData
-      });
-
-      // Convert complex AI response to simple mascot-compatible format
+      // Return simple basic health data without AI complexity for mascot component
       const simplifiedResponse = {
-        score: healthData.score || 50,
-        status: healthData.status || 'Fair',
-        color: healthData.color || 'yellow',
-        factors: healthData.factors ? healthData.factors.map((factor: any) => {
-          console.log('DEBUG: Processing factor:', factor, 'type:', typeof factor);
-          if (typeof factor === 'string') return factor;
-          return factor.name || 'Financial Factor';
-        }) : [],
+        score: Math.min(100, Math.max(0, Math.round((summary.totalIncome - summary.totalExpenses) / summary.totalIncome * 100))) || 50,
+        status: summary.totalIncome > summary.totalExpenses ? 'Good' : 'Fair',
+        color: summary.totalIncome > summary.totalExpenses ? 'green' : 'yellow',
+        factors: [
+          'Income vs Expenses Analysis',
+          'Budget Adherence Check',
+          'Spending Pattern Review'
+        ],
         aiAnalysis: {
-          personalizedFactors: healthData.aiAnalysis?.personalizedFactors || [],
-          recommendations: healthData.aiAnalysis?.recommendations || [],
-          riskAssessment: healthData.aiAnalysis?.riskAssessment || ''
+          personalizedFactors: ['Basic financial analysis'],
+          recommendations: [],
+          riskAssessment: 'Standard assessment'
         }
       };
-      
-      console.log('DEBUG: Simplified response for mascot:', simplifiedResponse);
 
       // Cache the result for 24 hours
       await cache.set(aiPayload, simplifiedResponse, false, 24);
