@@ -98,6 +98,11 @@ export default function FinancialHealthMascot() {
 
   useEffect(() => {
     if (healthData) {
+      console.log('Financial Health Mascot - Received data:', healthData);
+      console.log('Insights:', healthData.insights);
+      console.log('Achievements:', healthData.achievements);
+      console.log('Warnings:', healthData.warnings);
+      
       const config = mascotConfigs[healthData.category] || mascotConfigs.fair;
       setMascotState({
         emotion: config.emotion,
