@@ -562,8 +562,8 @@ export function registerAIRoutes(app: Express) {
           spent: budgetSpending.get(b.categoryName) || 0
         }));
 
-      // Extract language from request headers or use default
-      const language = req.headers['accept-language']?.split(',')[0]?.split('-').join('-') || 'en-us';
+      // Get user language from consistent header detection
+      const language = getUserLanguage(req);
       
       const aiPayload = {
         transactions: processedTransactions,
@@ -1008,7 +1008,8 @@ Answer questions about features, subscription plans, how to use the app, trouble
           targetDate: goal.targetDate,
           progress: goal.progress || ((goal.currentAmount / goal.targetAmount) * 100)
         })) || [],
-        selectedMonth: formattedMonth
+        selectedMonth: formattedMonth,
+        language: getUserLanguage(req)
       };
 
       // Initialize UnifiedAICache with 72 hours TTL
