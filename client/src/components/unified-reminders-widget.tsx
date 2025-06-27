@@ -93,8 +93,7 @@ export default function UnifiedRemindersWidget() {
   const { isReady, user } = useClerkUserReady();
   const { t } = useTranslation();
   
-  // Debug translation
-  console.log("Translation test:", t('upcomingReminders.title'), "Language:", t.lng || 'unknown');
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReminder, setEditingReminder] = useState<ExpenseReminder | null>(null);
   
