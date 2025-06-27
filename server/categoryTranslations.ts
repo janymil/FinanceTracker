@@ -1,3 +1,5 @@
+import { normalizeLanguageCode } from '../lib/languageUtils';
+
 // Category translation mappings for predefined categories
 export const categoryTranslations = {
   // Expense categories
@@ -79,27 +81,6 @@ export const categoryTranslations = {
     'sk-sk': 'Iné príjmy'
   }
 };
-
-/**
- * Normalizes any language code format to full locale format
- * Supports: en, es, sk, en-us, es-pe, sk-sk, en-US, es-PE, sk-SK
- */
-export function normalizeLanguageCode(lang: string): string {
-  if (!lang) return 'en-us';
-  
-  const normalizedLang = lang.toLowerCase();
-  
-  // Handle all Spanish variants
-  if (normalizedLang.startsWith('es')) {
-    return 'es-pe';
-  }
-  // Handle all Slovak variants
-  if (normalizedLang.startsWith('sk')) {
-    return 'sk-sk';
-  }
-  // Handle all English variants (default)
-  return 'en-us';
-}
 
 // Helper function to get user language from request
 export function getUserLanguage(req: any): string {
