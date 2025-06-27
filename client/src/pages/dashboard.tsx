@@ -682,7 +682,7 @@ export default function Dashboard() {
         {/* Loading State */}
         {!databaseUser && (
           <div className="bg-gray-100 border border-gray-400 text-gray-700 px-4 py-3 rounded mb-4">
-            DEBUG: Loading user plan data...
+
           </div>
         )}
 
@@ -690,9 +690,7 @@ export default function Dashboard() {
 
         {databaseUser?.plan === 'free' && (
           <div className="space-y-8">
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              DEBUG: Showing FREE user layout (Mathematical Financial Health Score)
-            </div>
+
 
             {/* Simple Financial Health Score for Free Users */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -815,9 +813,7 @@ export default function Dashboard() {
         {/* Standard and Premium User Content - Only show if NOT free plan */}
         {databaseUser?.plan && databaseUser.plan !== 'free' && ['standard', 'premium'].includes(databaseUser.plan) && (
           <div className="space-y-8">
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-              DEBUG: Showing PREMIUM user layout (AI-Enhanced Financial Health Mascot) - Plan: {databaseUser.plan}
-            </div>
+
 
             {/* AI-Enhanced Financial Health for Standard/Premium Users */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
