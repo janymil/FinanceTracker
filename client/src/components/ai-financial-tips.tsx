@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Lightbulb, Sparkles, TrendingUp, GraduationCap } from "lucide-react";
 import { useUser } from '@clerk/clerk-react';
+import { useTranslation } from 'react-i18next';
 
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -29,6 +30,7 @@ interface AIFinancialTipsProps {
 }
 
 export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [currentTip, setCurrentTip] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -196,8 +198,8 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       setCurrentTip(cleanedTip);
       // Cache system removed
       toast({
-        title: "AI Tip Generated",
-        description: "New financial advice based on your spending data",
+        title: t('aiTipGenerated'),
+        description: t('newFinancialAdviceGenerated'),
       });
     },
     onError: (error: any) => {
@@ -208,8 +210,8 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
         cause: error?.cause
       });
       toast({
-        title: "Error",
-        description: error.message || "Failed to generate AI tip. Please try again.",
+        title: t('error'),
+        description: error.message || t('failedToGenerateAITip'),
         variant: "destructive",
       });
     },
@@ -223,10 +225,10 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-purple-600" />
-          AI Financial Tips
+          {t('aiFinancialTips')}
         </CardTitle>
         <CardDescription>
-          Get personalized financial advice based on your spending patterns
+          {t('getPersonalizedFinancialAdvice')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -236,10 +238,10 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                  Personalized AI Analysis
+                  {t('personalizedAIAnalysis')}
                 </h4>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Generate insights based on your monthly spending data
+                  {t('generateInsightsBasedOnSpendingData')}
                 </p>
               </div>
               <Button 
@@ -250,12 +252,12 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                 {isGenerating ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Generating...
+                    {t('generating')}
                   </>
                 ) : (
                   <>
                     <TrendingUp className="h-4 w-4" />
-                    Get AI Tip
+                    {t('getAITip')}
                   </>
                 )}
               </Button>
@@ -295,25 +297,25 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                     // Define the 4 thematic sections with their patterns
                     const sectionPatterns = [
                       {
-                        title: "📊 Spending Pattern Analysis",
+                        title: t('spendingPatternAnalysisTitle'),
                         icon: TrendingUp,
                         keywords: ["spending", "pattern", "analysis", "breakdown", "category", "expenses", "mathematical", "reveals", "bulk"],
                         color: "blue"
                       },
                       {
-                        title: "💡 Personalized Saving Recommendations", 
+                        title: t('personalizedSavingRecommendationsTitle'), 
                         icon: Lightbulb,
                         keywords: ["saving", "recommend", "rebalancing", "budget", "limiting", "redirect", "sustainable", "implementation"],
                         color: "green"
                       },
                       {
-                        title: "📋 Budget Optimization Suggestions",
+                        title: t('budgetOptimizationSuggestionsTitle'),
                         icon: GraduationCap, 
                         keywords: ["budget", "optimization", "income-to-expense", "ratio", "financial", "strategies", "protection", "realigning"],
                         color: "purple"
                       },
                       {
-                        title: "🎯 Advanced Financial Analysis",
+                        title: t('advancedFinancialAnalysisTitle'),
                         icon: Sparkles,
                         keywords: ["advanced", "analysis", "necessitates", "action", "focus", "balanced", "cash flow", "immediate"],
                         color: "orange"
@@ -374,7 +376,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                     // Ensure we have at least one section
                     if (sections.length === 0) {
                       sections.push({
-                        title: "📊 AI Financial Analysis",
+                        title: t('aiFinancialAnalysis'),
                         icon: TrendingUp,
                         content: cleanAIText(cleanedContent),
                         color: "blue"
@@ -437,10 +439,10 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             {!summary && (
               <div className="text-center py-6">
                 <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                  No Financial Data
+                  {t('noFinancialData')}
                 </h4>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Add some transactions to get personalized AI tips
+                  {t('addTransactionsForAITips')}
                 </p>
               </div>
             )}
@@ -448,24 +450,24 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
             {/* Features List */}
             <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
-                AI Analysis Features:
+                {t('aiAnalysisFeatures')}
               </h4>
               <div className="grid grid-cols-1 gap-2 text-xs text-gray-600 dark:text-gray-300">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-3 w-3 text-purple-600" />
-                  Spending pattern analysis
+                  {t('spendingPatternAnalysis')}
                 </div>
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-3 w-3 text-purple-600" />
-                  Personalized saving recommendations
+                  {t('personalizedSavingRecommendations')}
                 </div>
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-3 w-3 text-purple-600" />
-                  Budget optimization suggestions
+                  {t('budgetOptimizationSuggestions')}
                 </div>
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-3 w-3 text-purple-600" />
-                  Context-aware financial advice
+                  {t('contextAwareFinancialAdvice')}
                 </div>
               </div>
             </div>
