@@ -366,41 +366,41 @@ export default function TransactionRemindersWidget() {
               <DialogTrigger asChild>
                 <Button size="sm" onClick={resetForm} className="w-full sm:w-auto">
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Reminder
+                  {t('upcomingReminders.addReminder')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Create Payment Reminder</DialogTitle>
+                  <DialogTitle>{t('upcomingReminders.createReminder')}</DialogTitle>
                   <DialogDescription>
-                    Set up a reminder for an upcoming expense, payment, or income
+                    {t('upcomingReminders.description')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="title">Title *</Label>
+                    <Label htmlFor="title">{t('upcomingReminders.form.title')} *</Label>
                     <Input
                       id="title"
                       value={newReminder.title}
                       onChange={(e) => setNewReminder({ ...newReminder, title: e.target.value })}
-                      placeholder="e.g., Rent payment, Insurance bill"
+                      placeholder={t('upcomingReminders.form.titlePlaceholder')}
                     />
                   </div>
                   
                   <div>
-                    <Label htmlFor="description">Description</Label>
+                    <Label htmlFor="description">{t('upcomingReminders.form.description')}</Label>
                     <Textarea
                       id="description"
                       value={newReminder.description}
                       onChange={(e) => setNewReminder({ ...newReminder, description: e.target.value })}
-                      placeholder="Additional notes about this payment"
+                      placeholder={t('upcomingReminders.form.descriptionPlaceholder')}
                       rows={2}
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="amount">Amount</Label>
+                      <Label htmlFor="amount">{t('upcomingReminders.form.amount')}</Label>
                       <Input
                         id="amount"
                         type="number"
@@ -411,7 +411,7 @@ export default function TransactionRemindersWidget() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="dueDate">Due Date *</Label>
+                      <Label htmlFor="dueDate">{t('upcomingReminders.form.dueDate')} *</Label>
                       <Input
                         id="dueDate"
                         type="date"
