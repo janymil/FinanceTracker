@@ -512,24 +512,6 @@ export function registerAIRoutes(app: Express) {
       const budgets = await storage.getUserBudgets(userId);
       const categories = await storage.getCategories(userId);
       
-      console.log(`[Financial Health] Data collection for user ${userId}:`, {
-        transactionCount: transactions.length,
-        budgetCount: budgets.length,
-        categoryCount: categories.length,
-        firstTransaction: transactions[0] ? {
-          id: transactions[0].id,
-          amount: transactions[0].amount,
-          description: transactions[0].description,
-          type: transactions[0].type,
-          categoryName: transactions[0].categoryName
-        } : 'NO_TRANSACTIONS',
-        firstBudget: budgets[0] ? {
-          id: budgets[0].id,
-          amount: budgets[0].amount,
-          categoryName: budgets[0].categoryName
-        } : 'NO_BUDGETS'
-      });
-      
       // Calculate summary from transactions
       const totalIncome = transactions
         .filter(t => t.type === 'income')
@@ -543,8 +525,6 @@ export function registerAIRoutes(app: Express) {
         totalExpenses,
         netBalance: totalIncome - totalExpenses
       };
-      
-      console.log(`[Financial Health] Summary calculated:`, summary);
 
       // Create a stable data hash that only changes with significant financial changes
       // This prevents cache misses from minor data changes like transaction IDs or exact timestamps
