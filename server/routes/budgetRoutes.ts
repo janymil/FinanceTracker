@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
+import { getUserLanguage, translateCategoryName } from "../categoryTranslations";
 
 export function registerBudgetRoutes(app: Express) {
   // Budget routes
@@ -107,7 +108,20 @@ export function registerBudgetRoutes(app: Express) {
       }
 
       const budgets = await storage.getUserBudgets(userId);
-      return res.json(budgets);
+      
+      // Get user language and translate predefined category names
+      const userLanguage = getUserLanguage(req);
+      const translatedBudgets = budgets.map(budget => {
+        if (budget.categoryName) {
+          return {
+            ...budget,
+            categoryName: translateCategoryName(budget.categoryName, userLanguage)
+          };
+        }
+        return budget;
+      });
+      
+      return res.json(translatedBudgets);
     } catch (error) {
       console.error("Error fetching budgets:", error);
       return res.status(500).json({ message: "Failed to fetch budgets" });

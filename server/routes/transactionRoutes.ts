@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
+import { getUserLanguage, translateCategoryName } from "../categoryTranslations";
 import { insertTransactionSchema } from "@shared/schema";
 import { categorizeExpense } from "../openai";
 import { batchProcessor } from "../batch-processor";
@@ -258,7 +259,17 @@ export function registerTransactionRoutes(app: Express) {
         new Date(endDate as string)
       );
 
-      res.json(summary);
+      // Get user language and translate predefined category names
+      const userLanguage = getUserLanguage(req);
+      const translatedSummary = {
+        ...summary,
+        transactionsByCategory: summary.transactionsByCategory.map((cat: any) => ({
+          ...cat,
+          categoryName: translateCategoryName(cat.categoryName, userLanguage)
+        }))
+      };
+
+      res.json(translatedSummary);
     } catch (error) {
       console.error("Error fetching financial summary:", error);
       res.status(500).json({ message: "Failed to fetch financial summary" });
@@ -280,11 +291,14 @@ export function registerTransactionRoutes(app: Express) {
 
       const summary = await storage.getUserFinancialSummary(userId, startDate, endDate);
 
+      // Get user language for translation
+      const userLanguage = getUserLanguage(req);
+
       // Filter for expense categories only and format for chart
       const expensesByCategory = summary.transactionsByCategory
         .filter((cat: any) => cat.type === 'expense')
         .map((cat: any, index: number) => ({
-          category: cat.categoryName,
+          category: translateCategoryName(cat.categoryName, userLanguage),
           amount: Math.abs(cat.amount),
           color: COLORS[index % COLORS.length]
         }));
