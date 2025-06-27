@@ -158,9 +158,6 @@ FinanzerPro is a comprehensive personal finance management application built wit
 - June 26, 2025: Fixed month localization completely - replaced browser toLocaleDateString with explicit month name arrays for Spanish, Slovak, and English. Dashboard summary and month filter dropdown now display correct localized months: "junio 2025" in Spanish, "jún 2025" in Slovak, and "June 2025" in English. Fixed browser locale override issue.
 - June 26, 2025: Fixed manual URL language switching fallback issue - removed English hardcoded fallbacks (`|| 'English text'`) from financial cards component that were interfering with URL rewriting. When users manually change `/es` to `/sk` in URL, the component now properly waits for translation loading instead of showing English fallback text. All translation keys (Total Income, Total Expenses, Net Balance) now use pure t() function calls.
 - June 26, 2025: Completed financial-cards translation fixes - corrected pluralization logic (=== 1 instead of !== 1), removed hardcoded statusText from budget status objects, implemented dynamic status translation using direct t() calls in JSX, and fixed budget status display logic to show appropriate messages for loading/no-budget states. Component now translates completely when switching between /en, /es, and /sk URLs.
-- June 27, 2025: CRITICAL FIX - Completed multilingual support for ALL AI functions in Fly.io processor - fixed generateContextualFinancialTips and generateAIFinancialHealthScore functions missing "Respond in [Language]" instructions. All 9 AI functions now properly respond in user's selected language (English, Spanish, Slovak) instead of defaulting to English. This resolves the major bug where AI-generated content (financial tips, health scores, insights) were appearing in English regardless of user language preference.
-- June 27, 2025: CRITICAL FIX - Fixed fallback system multilingual support - corrected function parameter passing in lib/aiProcessor.ts fallback calls. When Fly.io fails, local fallback functions now properly receive language parameter and generate responses in user's selected language. Fixed the root cause where AI outputs defaulted to English due to incorrect fallback function signatures.
-- June 27, 2025: MAJOR FIXES - Completed deep backend analysis and fixed all critical errors: Added missing getUserLanguage(req) calls in 5 AI endpoints (/api/ai/categorize, /api/ai/financial-health-score, /api/trend-predictions, /api/ai/daily-recommendations, /api/ai/expense-predictions), added missing language parameters in payloads, corrected all 5 fallback function parameter mismatches in lib/aiProcessor.ts by adding missing userId parameters. Multilingual system now works correctly in both primary and fallback scenarios.
 
 ## CRITICAL LOCALE PATTERN - ALWAYS USE LOWERCASE
 ```javascript
@@ -190,13 +187,9 @@ if (currentLang.startsWith('es')) {
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
-CRITICAL COMMUNICATION RULES:
-- NEVER write summaries after completing tasks
-- NEVER repeat the same output twice 
-- NEVER provide repetitive explanations
-- User has explicitly and repeatedly requested NO SUMMARIES
-- Focus only on actions and results
-- Do not take actions unless explicitly asked by the user
+CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.
+Do not take actions unless explicitly asked by the user.
+Focus on actions and results without repetitive phrases or unnecessary explanations.
 
 referred communication style: Simple, everyday language.
 CRITICAL: Do not provide summaries after completing tasks - user explicitly and repeatedly requests no summaries.

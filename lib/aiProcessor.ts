@@ -61,25 +61,25 @@ export async function runAI(task: string, userId: string, payload: Record<string
       
       switch (task) {
         case 'contextual-tips':
-          fallbackResult = await generateContextualFinancialTips(userId, payload, payload.language || 'en-us');
+          fallbackResult = await generateContextualFinancialTips(userId, payload);
           break;
         case 'financial-tips':
-          fallbackResult = await generateFinancialTips(userId, payload, payload.language || 'en-us');
+          fallbackResult = await generateFinancialTips(userId, payload);
           break;
         case 'daily-recommendations':
-          fallbackResult = await generateDailyRecommendations(userId, payload, payload.language || 'en-us');
+          fallbackResult = await generateDailyRecommendations(userId, payload);
           break;
         case 'spending-insights':
-          fallbackResult = await generateSpendingInsights(userId, payload.transactions, payload.language || 'en-us');
+          fallbackResult = await generateSpendingInsights(userId, payload.transactions);
           break;
         case 'financial-health-score':
-          fallbackResult = await generateAIFinancialHealthScore(payload, payload.language || 'en-us');
+          fallbackResult = await generateAIFinancialHealthScore(userId, payload);
           break;
         case 'trend-predictions':
-          fallbackResult = await generateTrendPredictions(userId, payload.transactions, payload.budgets, payload.language || 'en-us');
+          fallbackResult = await generateTrendPredictions(userId, payload.transactions, payload.budgets);
           break;
         case 'expense-predictions':
-          fallbackResult = await generateExpensePredictions(payload.transactions, payload.language || 'en-us');
+          fallbackResult = await generateExpensePredictions(userId, payload.transactions);
           break;
         default:
           throw new Error(`No local fallback available for task: ${task}`);

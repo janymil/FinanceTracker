@@ -428,9 +428,7 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
       messages: [
         {
           role: "system",
-          content: `You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.
-
-Respond in ${getLanguageLabel(language)}.`
+          content: `Respond in ${getLanguageLabel(data.language || 'en-us')}. You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.`
         },
         {
           role: "user",
@@ -499,7 +497,7 @@ export async function generateFinancialTips(financialData: {
     type?: string;
   }>;
 
-}, language: string = 'en-us'): Promise<FinancialTip[]> {
+}): Promise<FinancialTip[]> {
   try {
     const { 
       totalIncome, 
@@ -719,40 +717,7 @@ export async function generateSpendingInsights(transactions: Array<{
       messages: [
         {
           role: "system",
-          content: `You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights.
-
-Generate 2-4 insights focusing on:
-- Unusual spending patterns
-- Budget optimization opportunities  
-- Positive financial behaviors
-- Spending trends and recommendations
-
-Each insight should have:
-- Unique ID
-- Type: warning, suggestion, achievement, or trend
-- Clear title and description
-- Impact level: high, medium, low
-- Category if relevant
-- Amount if relevant
-- Actionable recommendation
-- Whether it's actionable (boolean)
-
-Respond in ${getLanguageLabel(language)}.
-
-Respond with JSON array format:
-[
-  {
-    "id": "insight_1",
-    "type": "warning",
-    "title": "High dining expenses",
-    "description": "Your restaurant spending increased 40% this month",
-    "impact": "high",
-    "category": "Food & Dining",
-    "amount": 450,
-    "recommendation": "Consider meal planning to reduce dining out",
-    "actionable": true
-  }
-]`
+          content: `Respond in ${getLanguageLabel(language)}. You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights. Generate 2-4 insights focusing on unusual spending patterns, budget optimization opportunities, positive financial behaviors, and spending trends. Each insight should have a unique ID, type (warning/suggestion/achievement/trend), clear title and description, impact level (high/medium/low), category if relevant, amount if relevant, actionable recommendation, and whether it's actionable (boolean). Respond with JSON array format.`
         },
         {
           role: "user",
@@ -846,8 +811,6 @@ export async function generateAIFinancialHealthScore(financialData: {
         {
           role: "system",
           content: `You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
-
-Respond in ${getLanguageLabel(language)}.
 
 Your analysis should consider:
 - Spending patterns and volatility
