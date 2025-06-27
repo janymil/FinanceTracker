@@ -703,5 +703,27 @@
       "medium": "medium",
       "low": "low"
     }
+  },
+  "upcomingPayments": {
+    "title": "Upcoming Payments & Reminders",
+    "description": "Automatic reminders from transactions and manual payment reminders",
+    "standardPlus": "Standard+",
+    "addReminder": "Add Reminder",
+    "errorMessage": "Failed to load reminders. Please try again.",
+    "noReminders": "No upcoming payments or reminders",
+    "createRecurring": "Create recurring transactions to see automatic reminders",
+    "recurring": "Recurring",
+    "auto": "Auto",
+    "priority": {
+      "high": "high",
+      "medium": "medium",
+      "low": "low"
+    },
+    "frequency": {
+      "weekly": "weekly",
+      "monthly": "monthly",
+      "yearly": "yearly",
+      "daily": "daily"
+    }
   }
 }
