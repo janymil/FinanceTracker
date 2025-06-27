@@ -34,6 +34,18 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
 import TransactionFilters from "@/components/TransactionFilters";
 
+// Helper functions for category localization
+const isPredefinedCategory = (category: Category): boolean => {
+  return category.userId === null;
+};
+
+const getLocalizedCategoryName = (category: Category, t: any): string => {
+  if (isPredefinedCategory(category)) {
+    return t(`categories.${category.name.toLowerCase().replace(/\s+/g, '_')}`);
+  }
+  return category.name;
+};
+
 interface Transaction {
   id: number;
   amount: string;
@@ -57,6 +69,7 @@ interface Category {
   icon: string;
   color: string;
   type: "income" | "expense";
+  userId: string | null;
 }
 
 export default function Expenses() {
@@ -477,7 +490,7 @@ export default function Expenses() {
                       <SelectContent>
                         {expenseCategories.map((category: Category) => (
                           <SelectItem key={category.id} value={category.id.toString()}>
-                            {category.name}
+                            {getLocalizedCategoryName(category, t)}
                           </SelectItem>
                         ))}
                       </SelectContent>
