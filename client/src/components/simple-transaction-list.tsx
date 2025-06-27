@@ -446,14 +446,6 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
           </Dialog>
         )}
       </CardContent>
-      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-        <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-2">
-          Free plan: {transactions?.length || 0}/100 transaction entries used
-        </div>
-        <Link href="/transactions" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium">
-          {t("View All Transactions")}
-        </Link>
-      </div>
     </Card>
   );
 }

@@ -7,7 +7,6 @@ import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
 import { Badge } from "./ui/badge";
 import { useToast } from "../hooks/use-toast";
-import { useTranslation } from "react-i18next";
 
 interface MascotData {
   id: string;
@@ -36,12 +35,11 @@ export function FinancialMascot() {
   const [position, setPosition] = useState({ x: 16, y: 16 }); // Default: bottom-4 right-4
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const { t } = useTranslation();
 
   // Fetch mascot data
   const fetchMascot = async () => {
     if (!isReady || !user?.id) return;
-
+    
     try {
       const token = await window.Clerk?.session?.getToken();
       const response = await fetch("/api/mascot", {
@@ -69,7 +67,7 @@ export function FinancialMascot() {
             console.warn('Failed to parse cached mascot data');
           }
         }
-
+        
         // Set a default mascot state for unauthenticated users
         setMascot({
           id: '',
@@ -101,7 +99,7 @@ export function FinancialMascot() {
   // Fetch financial health data
   const fetchFinancialHealth = async () => {
     if (!isReady || !user?.id) return;
-
+    
     try {
       const token = await window.Clerk?.session?.getToken();
       const response = await fetch("/api/financial-health", {
@@ -155,7 +153,7 @@ export function FinancialMascot() {
           }
         }
       };
-
+      
       fetchWithRetry();
     }
   }, [isReady, user?.id]);
@@ -175,17 +173,17 @@ export function FinancialMascot() {
         credentials: "include",
         body: JSON.stringify({})
       });
-
+      
       if (response.ok) {
         const data = await response.json();
         setMascot(data);
         localStorage.setItem(`mascot_${user?.id}`, JSON.stringify(data));
-        toast({ title: t("mascot.new_generated") });
+        toast({ title: "New mascot generated!" });
       } else {
         throw new Error("Failed to generate mascot");
       }
     } catch (error: any) {
-      toast({ title: t("mascot.generate_failed"), variant: "destructive" });
+      toast({ title: "Failed to generate mascot", variant: "destructive" });
     } finally {
       setIsGenerating(false);
     }
@@ -204,14 +202,14 @@ export function FinancialMascot() {
         credentials: "include",
         body: JSON.stringify({ enabled })
       });
-
+      
       if (response.ok) {
         const data = await response.json();
         setMascot(data);
         localStorage.setItem(`mascot_${user?.id}`, JSON.stringify(data));
       }
     } catch (error: any) {
-      toast({ title: t("mascot.toggle_failed"), variant: "destructive" });
+      toast({ title: "Failed to toggle mascot", variant: "destructive" });
     }
   };
 
@@ -239,14 +237,14 @@ export function FinancialMascot() {
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!isDragging) return;
-
+    
     const newX = window.innerWidth - (e.clientX - dragOffset.x) - 96; // 96px for mascot width
     const newY = window.innerHeight - (e.clientY - dragOffset.y) - 96; // 96px for mascot height
-
+    
     // Keep mascot within screen bounds
     const boundedX = Math.max(16, Math.min(newX, window.innerWidth - 112));
     const boundedY = Math.max(16, Math.min(newY, window.innerHeight - 112));
-
+    
     setPosition({ x: boundedX, y: boundedY });
   };
 
@@ -260,7 +258,7 @@ export function FinancialMascot() {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
       document.body.style.cursor = 'grabbing';
-
+      
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
@@ -301,7 +299,7 @@ export function FinancialMascot() {
           variant="outline"
           className="bg-white dark:bg-gray-800 shadow-lg border-2 border-blue-200 dark:border-blue-700 hover:border-blue-400 dark:hover:border-blue-500"
           onClick={() => handleToggle(true)}
-          title={t("mascot.show")}
+          title="Show Financial Mascot"
         >
           <Sparkles className="h-4 w-4 text-blue-500" />
         </Button>
@@ -326,7 +324,7 @@ export function FinancialMascot() {
           <Card className="w-64 shadow-lg border border-gray-200 dark:border-gray-700">
             <CardContent className="p-4 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-sm">{t("mascot.settings")}</h3>
+                <h3 className="font-semibold text-sm">Financial Mascot</h3>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -339,7 +337,7 @@ export function FinancialMascot() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="mascot-enabled" className="text-xs">
-                    {t("mascot.show_mascot")}
+                    Show Mascot
                   </Label>
                   <Switch
                     id="mascot-enabled"
@@ -352,15 +350,15 @@ export function FinancialMascot() {
                   <>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">{t("mascot.current_mood")}:</span>
+                        <span className="text-xs text-muted-foreground">Current Mood:</span>
                         <Badge variant="outline" className="text-xs">
                           {currentMood}
                         </Badge>
                       </div>
-
+                      
                       {financialHealth && (
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">{t("mascot.health_score")}:</span>
+                          <span className="text-xs text-muted-foreground">Health Score:</span>
                           <span className="text-xs font-medium">{financialHealth.score}%</span>
                         </div>
                       )}
@@ -377,19 +375,19 @@ export function FinancialMascot() {
                         {isGenerating ? (
                           <>
                             <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-                            {t("mascot.generating")}
+                            Generating...
                           </>
                         ) : (
                           <>
                             <Sparkles className="h-3 w-3 mr-1" />
-                            {t("mascot.generate_new")}
+                            Generate New
                           </>
                         )}
                       </Button>
 
                       {shouldRegenerateMascot && (
                         <p className="text-xs text-amber-600 dark:text-amber-400">
-                          {t("mascot.health_changed")}
+                          Your financial health changed! Consider generating a new mascot.
                         </p>
                       )}
                     </div>
@@ -417,7 +415,7 @@ export function FinancialMascot() {
             {mascot?.imageUrl ? (
               <img
                 src={mascot.imageUrl}
-                alt={t("mascot.alt_text", { mood: currentMood })}
+                alt={`Financial mascot showing ${currentMood} mood`}
                 className="mascot-image w-20 h-20 rounded-full shadow-lg border-2 border-white dark:border-gray-700 cursor-pointer hover:scale-105 transition-transform animate-bounce"
                 style={{ 
                   animationDuration: '3s',
@@ -433,8 +431,8 @@ export function FinancialMascot() {
                     e.currentTarget.style.display = 'none';
                     if (!isGenerating) {
                       toast({
-                        title: t("mascot.image_expired"),
-                        description: t("mascot.click_generate"),
+                        title: "Mascot image expired",
+                        description: "Click the mascot to generate a new one",
                         variant: "default"
                       });
                     }
@@ -448,7 +446,7 @@ export function FinancialMascot() {
               <div 
                 className="mascot-image w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 shadow-lg border-2 border-white dark:border-gray-700 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform group"
                 onClick={() => setShowSettings(!showSettings)}
-                title={t("mascot.generate_prompt")}
+                title="Click to generate your financial mascot"
               >
                 {isGenerating ? (
                   <RefreshCw className="h-8 w-8 text-white animate-spin" />
