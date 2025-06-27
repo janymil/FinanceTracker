@@ -1652,16 +1652,37 @@ NEVER return empty arrays for personalizedFactors or recommendations.`
 
 
 
-    // Convert to frontend-expected format
+    // Clean text function to remove headers
+    const cleanText = (text: string): string => {
+      if (!text || typeof text !== 'string') return '';
+      return text
+        .replace(/Personal Financial Pattern\s*:?\s*/gi, '')
+        .replace(/AI Recommendation\s*:?\s*/gi, '')
+        .replace(/Smart Recommendation\s*:?\s*/gi, '')
+        .replace(/Recommendation\s*:?\s*/gi, '')
+        .replace(/Financial Pattern\s*:?\s*/gi, '')
+        .replace(/Pattern\s*:?\s*/gi, '')
+        .replace(/Analysis\s*:?\s*/gi, '')
+        .replace(/Insight\s*:?\s*/gi, '')
+        .replace(/^\d+\.\s*/, '') // Remove numbered list prefixes
+        .replace(/^[-•]\s*/, '') // Remove bullet points
+        .replace(/\s+/g, ' ')
+        .trim();
+    };
+
+    // Convert to frontend-expected format with cleaned text
     const healthData: FinancialHealthData = {
       score: processedResult.score,
       trend: 'stable', // Default trend
       category: processedResult.status.toLowerCase() === 'excellent' ? 'excellent' :
                 processedResult.status.toLowerCase() === 'good' ? 'good' :
                 processedResult.status.toLowerCase() === 'fair' ? 'fair' : 'poor',
-      insights: Array.isArray(processedResult.aiAnalysis?.personalizedFactors) ? processedResult.aiAnalysis.personalizedFactors : [],
-      achievements: Array.isArray(processedResult.factors) ? processedResult.factors.filter((f: any) => f.status === 'good').map((f: any) => f.aiInsight).filter(Boolean) : [],
-      warnings: Array.isArray(processedResult.aiAnalysis?.recommendations) ? processedResult.aiAnalysis.recommendations : []
+      insights: Array.isArray(processedResult.aiAnalysis?.personalizedFactors) ? 
+        processedResult.aiAnalysis.personalizedFactors.map(cleanText).filter(text => text.length > 10) : [],
+      achievements: Array.isArray(processedResult.factors) ? 
+        processedResult.factors.filter((f: any) => f.status === 'good').map((f: any) => f.aiInsight).filter(Boolean).map(cleanText) : [],
+      warnings: Array.isArray(processedResult.aiAnalysis?.recommendations) ? 
+        processedResult.aiAnalysis.recommendations.map(cleanText).filter(text => text.length > 10) : []
     };
 
     // No caching in Fly.io - handled by main application
