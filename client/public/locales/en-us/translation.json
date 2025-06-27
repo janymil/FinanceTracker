@@ -540,7 +540,7 @@
     "show_mascot": "Show Mascot",
     "current_mood": "Current Mood",
     "health_score": "Health Score",
-    "generating": "Generating...",
+,
     "generate_new": "Generate New",
     "health_changed": "Your financial health has changed significantly!",
     "alt_text": "Financial mascot in {{mood}} mood",
