@@ -10,6 +10,7 @@ import { Link } from 'wouter';
 import { useUser } from '@clerk/clerk-react';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { useTranslation } from 'react-i18next';
 
 interface ExpensePredictionProps {
   transactions?: any[];
@@ -33,6 +34,7 @@ interface MonthlyPrediction {
 }
 
 export default function ExpensePrediction({ transactions = [], summary }: ExpensePredictionProps) {
+  const { t } = useTranslation();
   const [predictionPeriod, setPredictionPeriod] = useState('3m');
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [monthlyPredictions, setMonthlyPredictions] = useState<MonthlyPrediction[]>([]);
@@ -89,10 +91,10 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-purple-600" />
-            AI Expense Prediction
+            {t('AI Expense Prediction')}
           </CardTitle>
           <CardDescription>
-            Machine learning predictions based on your spending patterns
+            {t('Machine learning predictions based on your spending patterns')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -109,19 +111,19 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Brain className="h-5 w-5 text-purple-600" />
-          AI Expense Prediction
+          {t('AI Expense Prediction')}
         </CardTitle>
         <CardDescription>
-          Machine learning predictions based on your spending patterns
+          {t('Machine learning predictions based on your spending patterns')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {isPremiumUser ? (
           <Tabs defaultValue="overview" className="space-y-6">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="categories">By Category</TabsTrigger>
-              <TabsTrigger value="timeline">Timeline</TabsTrigger>
+              <TabsTrigger value="overview">{t('Overview')}</TabsTrigger>
+              <TabsTrigger value="categories">{t('By Category')}</TabsTrigger>
+              <TabsTrigger value="timeline">{t('Timeline')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -133,10 +135,10 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                 <div className="text-center py-8">
                   <Brain className="h-12 w-12 text-red-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    Prediction Error
+                    {t('Prediction Error')}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    Failed to generate predictions. Please try again later.
+                    {t('Failed to generate predictions. Please try again later.')}
                   </p>
                 </div>
               ) : hasTransactionData && predictions.length > 0 ? (
@@ -144,43 +146,43 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                   <Card className="p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Calendar className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm font-medium">Next Month</span>
+                      <span className="text-sm font-medium">{t('Next Month')}</span>
                     </div>
                     <div className="text-2xl font-bold text-blue-600">
                       ${totalPredicted.toLocaleString()}
                     </div>
-                    <p className="text-xs text-gray-600 dark:text-gray-300">Predicted total expenses</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">{t('Predicted total expenses')}</p>
                   </Card>
                   <Card className="p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <TrendingUp className="h-4 w-4 text-green-600" />
-                      <span className="text-sm font-medium">Confidence</span>
+                      <span className="text-sm font-medium">{t('Confidence')}</span>
                     </div>
                     <div className="text-2xl font-bold text-green-600">
                       {(predictions.reduce((sum, p) => sum + p.confidence, 0) / predictions.length * 100).toFixed(0)}%
                     </div>
-                    <p className="text-xs text-gray-600 dark:text-gray-300">Average prediction accuracy</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">{t('Average prediction accuracy')}</p>
                   </Card>
                   <Card className="p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                      <span className="text-sm font-medium">Trend</span>
+                      <span className="text-sm font-medium">{t('Trend')}</span>
                     </div>
                     <div className="text-2xl font-bold text-yellow-600">
                       {predictions.filter(p => p.trend === 'increasing').length > predictions.filter(p => p.trend === 'decreasing').length ? '+' : '-'}
                       {Math.abs(((totalPredicted - Math.abs(summary?.totalExpenses || 0)) / Math.abs(summary?.totalExpenses || 1)) * 100).toFixed(0)}%
                     </div>
-                    <p className="text-xs text-gray-600 dark:text-gray-300">vs current month</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">{t('vs current month')}</p>
                   </Card>
                 </div>
               ) : (
                 <div className="text-center py-8">
                   <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    No Prediction Data Available
+                    {t('No Prediction Data Available')}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300 mb-6">
-                    Add more transactions to generate AI-powered expense predictions
+                    {t('Add more transactions to generate AI-powered expense predictions')}
                   </p>
                 </div>
               )}
@@ -195,18 +197,18 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                         <div>
                           <h5 className="font-medium text-sm">{prediction.category}</h5>
                           <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className={`text-xs ${prediction.trend === 'increasing' ? 'text-red-600' : prediction.trend === 'decreasing' ? 'text-green-600' : 'text-gray-600'}`}>{prediction.trend}</Badge>
-                            <Badge variant="outline" className="text-xs">{(prediction.confidence * 100).toFixed(0)}% confidence</Badge>
+                            <Badge variant="outline" className={`text-xs ${prediction.trend === 'increasing' ? 'text-red-600' : prediction.trend === 'decreasing' ? 'text-green-600' : 'text-gray-600'}`}>{t(prediction.trend)}</Badge>
+                            <Badge variant="outline" className="text-xs">{(prediction.confidence * 100).toFixed(0)}% {t('confidence')}</Badge>
                           </div>
                         </div>
                         <div className="text-right">
                           <div className="text-lg font-bold">${prediction.predictedNext.toLocaleString()}</div>
-                          <div className="text-xs text-gray-600 dark:text-gray-300">vs ${prediction.currentMonth.toLocaleString()} current</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300">{t('vs')} ${prediction.currentMonth.toLocaleString()} {t('current')}</div>
                         </div>
                       </div>
                       {prediction.factors.length > 0 && (
                         <div className="mt-3 pt-3 border-t">
-                          <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">Prediction factors:</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">{t('Prediction factors')}:</p>
                           <div className="flex flex-wrap gap-1">
                             {prediction.factors.map((factor, index) => (
                               <Badge key={index} variant="secondary" className="text-xs">{factor}</Badge>
@@ -220,8 +222,8 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
               ) : (
                 <div className="text-center py-8">
                   <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Category Data Available</h3>
-                  <p className="text-gray-600 dark:text-gray-300">Add transactions to generate category-specific expense predictions</p>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('No Category Data Available')}</h3>
+                  <p className="text-gray-600 dark:text-gray-300">{t('Add transactions to generate category-specific expense predictions')}</p>
                 </div>
               )}
             </TabsContent>
@@ -230,15 +232,15 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
               {hasTransactionData && monthlyPredictions.length > 0 ? (
                 <>
                   <div className="flex items-center justify-between">
-                    <h4 className="font-medium">Timeline Forecast</h4>
+                    <h4 className="font-medium">{t('Timeline Forecast')}</h4>
                     <Select value={predictionPeriod} onValueChange={(value: any) => setPredictionPeriod(value)}>
                       <SelectTrigger className="w-32">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="1m">1 Month</SelectItem>
-                        <SelectItem value="3m">3 Months</SelectItem>
-                        <SelectItem value="6m">6 Months</SelectItem>
+                        <SelectItem value="1m">{t('1 Month')}</SelectItem>
+                        <SelectItem value="3m">{t('3 Months')}</SelectItem>
+                        <SelectItem value="6m">{t('6 Months')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -249,7 +251,7 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="month" />
                         <YAxis />
-                        <Tooltip formatter={(value: any) => [`$${value.toLocaleString()}`, 'Predicted Expenses']} />
+                        <Tooltip formatter={(value: any) => [`$${value.toLocaleString()}`, t('Predicted Expenses')]} />
                         <Bar dataKey="predicted" fill="#8884d8" />
                       </BarChart>
                     </ResponsiveContainer>
@@ -264,12 +266,12 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
                           </div>
                           <div>
                             <h5 className="font-medium text-sm">{month.month}</h5>
-                            <p className="text-xs text-gray-600 dark:text-gray-300">{(month.confidence * 100).toFixed(0)}% confidence</p>
+                            <p className="text-xs text-gray-600 dark:text-gray-300">{(month.confidence * 100).toFixed(0)}% {t('confidence')}</p>
                           </div>
                         </div>
                         <div className="text-right">
                           <div className="font-bold">${month.predicted.toLocaleString()}</div>
-                          <div className="text-xs text-gray-600 dark:text-gray-300">predicted</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300">{t('predicted')}</div>
                         </div>
                       </div>
                     ))}
@@ -278,8 +280,8 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
               ) : (
                 <div className="text-center py-8">
                   <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Timeline Data Available</h3>
-                  <p className="text-gray-600 dark:text-gray-300">Add transactions to generate timeline expense predictions</p>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('No Timeline Data Available')}</h3>
+                  <p className="text-gray-600 dark:text-gray-300">{t('Add transactions to generate timeline expense predictions')}</p>
                 </div>
               )}
             </TabsContent>
@@ -289,12 +291,12 @@ export default function ExpensePrediction({ transactions = [], summary }: Expens
             <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
               <Lock className="h-8 w-8 text-purple-600" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Premium Feature</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">AI-powered expense predictions help you plan your budget with machine learning insights</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('Premium Feature')}</h3>
+            <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">{t('AI-powered expense predictions help you plan your budget with machine learning insights')}</p>
             <Link href="/subscribe">
               <Button className="bg-purple-600 hover:bg-purple-700 text-white">
                 <Crown className="h-4 w-4 mr-2" />
-                Upgrade to Premium
+                {t('Upgrade to Premium')}
               </Button>
             </Link>
           </div>
