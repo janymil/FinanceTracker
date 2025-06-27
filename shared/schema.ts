@@ -54,7 +54,6 @@ export const categories = pgTable("categories", {
   icon: varchar("icon", { length: 50 }).notNull(),
   color: varchar("color", { length: 20 }).notNull(),
   type: varchar("type", { length: 20 }).notNull(), // 'income', 'expense', or 'goal'
-  translationKey: varchar("translation_key", { length: 100 }), // For predefined categories: 'category.healthcare', null for custom
 });
 
 // Financial transactions

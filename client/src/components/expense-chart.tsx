@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { DollarSign } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { getLocalizedCategoryName } from "@/lib/categoryHelpers";
 
 
 interface ExpenseChartProps {
@@ -31,25 +30,37 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
     queryKey: ['/api/categories'],
   });
 
-  // Use the helper function for consistent category localization
+  // Helper function to check if category is predefined (userId: null)
+  const getLocalizedCategoryName = (categoryName: string): string => {
+    if (!categories) return categoryName;
+    
+    const category = categories.find((cat: any) => cat.name === categoryName);
+    if (!category || category.userId !== null) {
+      // Custom category or not found, keep original name
+      return categoryName;
+    }
+    
+    // Predefined category, translate it
+    return t(categoryName) || categoryName;
+  };
 
   // Handle both summary data and API data
-  let data: any[] = [];
+  let data = [];
   let totalExpenses = 0;
 
   if (summary?.expensesByCategory) {
     // Use summary data if provided
     data = summary.expensesByCategory;
     totalExpenses = summary.totalExpenses;
-  } else if (expenseData && (expenseData as any).expensesByCategory) {
+  } else if (expenseData) {
     // Use API data if no summary provided
-    data = (expenseData as any).expensesByCategory || [];
-    totalExpenses = (expenseData as any).totalExpenses || 0;
+    data = expenseData.expensesByCategory || [];
+    totalExpenses = expenseData.totalExpenses || 0;
   }
 
-  const chartData = data.map((item: any, index: number) => ({
+  const chartData = data.map((item, index) => ({
     ...item,
-    category: getLocalizedCategoryName(item.category, categories as any[] | undefined, t),
+    category: getLocalizedCategoryName(item.category),
     color: item.color || COLORS[index % COLORS.length],
     percentage: totalExpenses > 0 ? ((item.amount / totalExpenses) * 100).toFixed(1) : '0.0'
   }));
