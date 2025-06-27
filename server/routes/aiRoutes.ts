@@ -92,7 +92,9 @@ export function registerAIRoutes(app: Express) {
         return res.status(400).json({ message: "Description is required" });
       }
 
-      const result = await categorizeExpense(description, amount);
+      // Get user language from consistent header detection
+      const language = getUserLanguage(req);
+      const result = await categorizeExpense(description, amount, language);
       return res.json({ category: result.category });
     } catch (error) {
       console.error("Error categorizing expense:", error);
@@ -284,6 +286,9 @@ export function registerAIRoutes(app: Express) {
 
       console.log('AI financial health score: Making Fly.io API call via centralized processor');
       
+      // Get user language from consistent header detection
+      const language = getUserLanguage(req);
+      
       const aiPayload = {
         summary,
         budgets: budgets,
@@ -294,7 +299,8 @@ export function registerAIRoutes(app: Express) {
           categoryName: t.categoryName || 'Uncategorized',
           type: t.type
         })),
-        useAdvancedFactors
+        useAdvancedFactors,
+        language: language
       };
 
       // Initialize UnifiedAICache with 24 hours TTL
@@ -345,6 +351,9 @@ export function registerAIRoutes(app: Express) {
       const categories = await storage.getCategories(userId);
       const budgets = await storage.getUserBudgets(userId);
 
+      // Get user language from consistent header detection
+      const language = getUserLanguage(req);
+      
       const aiPayload = {
         transactions: transactions.map(t => ({
           id: t.id,
@@ -359,7 +368,8 @@ export function registerAIRoutes(app: Express) {
           .map(b => ({
             categoryName: b.categoryName,
             amount: b.amount
-          }))
+          })),
+        language: language
       };
 
       // Initialize UnifiedAICache with 48 hours TTL
@@ -417,6 +427,9 @@ export function registerAIRoutes(app: Express) {
         categories[cat.id] = cat.name;
       });
       
+      // Get user language from consistent header detection
+      const language = getUserLanguage(req);
+      
       const aiPayload = {
         summary: summary,
         transactions: transactions.slice(0, 100).map(t => ({
@@ -434,7 +447,8 @@ export function registerAIRoutes(app: Express) {
           categoryName: b.categoryName,
           period: b.period
         })),
-        categories: categories
+        categories: categories,
+        language: language
       };
 
       // Initialize UnifiedAICache with 24 hours TTL
@@ -868,10 +882,14 @@ export function registerAIRoutes(app: Express) {
         return res.json(cachedResult);
       }
 
+      // Get user language from consistent header detection
+      const language = getUserLanguage(req);
+      
       // Generate new AI response with full payload
       const aiPayload = {
         transactions: transactions.slice(0, 100),
-        summary: req.body.summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 }
+        summary: req.body.summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 },
+        language: language
       };
       const predictions = await runAI('expense-predictions', userId, aiPayload);
 
