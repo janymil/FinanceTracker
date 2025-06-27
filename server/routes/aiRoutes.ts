@@ -602,6 +602,8 @@ export function registerAIRoutes(app: Express) {
 
       // Debug: Log the response structure to understand the data flow
       console.log('=== FINANCIAL HEALTH DEBUG ===');
+      console.log('User plan:', user.plan);
+      console.log('Transactions count:', transactions.length);
       console.log('Raw AI Response:', JSON.stringify(healthData, null, 2));
       console.log('Has insights:', healthData?.insights?.length || 0);
       console.log('Has achievements:', healthData?.achievements?.length || 0);
