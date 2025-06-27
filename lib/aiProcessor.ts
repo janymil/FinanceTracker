@@ -24,7 +24,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
   console.log(`[AI ${task}] Direct Fly.io call with local fallback`);
 
   try {
-    console.log(`[AI ${task}] Calling Fly.io processor...`);
+    console.log(`[AI ${task}] Calling Fly.io processor with language: ${payload.language}...`);
     const response = await fetch("https://finanzerpro.fly.dev/execute-gpt-task", {
       method: "POST",
       headers: {
