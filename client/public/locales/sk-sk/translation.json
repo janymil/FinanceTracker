@@ -637,5 +637,48 @@
       "medium": "stredná",
       "low": "nízka"
     }
+  },
+
+  "upcomingReminders": {
+    "title": "Nadchádzajúce Pripomienky",
+    "subtitle": "Zostaňte v obraze so svojimi účtami a platbami",
+    "addReminder": "Pridať Pripomienku",
+    "reminder": "Pripomienka",
+    "noReminders": "Žiadne nadchádzajúce pripomienky",
+    "noRemindersDescription": "Vytvorte budúce transakcie alebo pridajte manuálne pripomienky pre ich zobrazenie",
+    "priority": {
+      "high": "Vysoká",
+      "medium": "Stredná",
+      "low": "Nízka",
+      "normal": "Normálna"
+    },
+    "form": {
+      "title": "Názov",
+      "titlePlaceholder": "Názov pripomienky",
+      "description": "Popis",
+      "descriptionPlaceholder": "Voliteľný popis",
+      "amount": "Suma",
+      "amountPlaceholder": "0.00",
+      "dueDate": "Dátum Splatnosti",
+      "category": "Kategória",
+      "categoryPlaceholder": "Vybrať kategóriu",
+      "reminderDays": "Pripomenúť mi",
+      "daysBefore": "dní pred",
+      "recurring": "Urobiť to opakujúce sa",
+      "frequency": "Frekvencia",
+      "endDate": "Dátum Ukončenia",
+      "paymentUrl": "URL Platby",
+      "referenceNote": "Referenčná Poznámka",
+      "referenceNotePlaceholder": "Číslo účtu, referenčné ID, atď."
+    },
+    "reminderCreated": "Pripomienka Vytvorená",
+    "reminderCreatedDescription": "Pripomienka výdavku bola úspešne nastavená",
+    "reminderCompleted": "Pripomienka Dokončená",
+    "reminderCompletedDescription": "Pripomienka označená ako dokončená",
+    "reminderDeleted": "Pripomienka Zmazaná",
+    "reminderDeletedDescription": "Pripomienka bola odstránená",
+    "failedToCreate": "Nepodarilo sa vytvoriť pripomienku",
+    "failedToComplete": "Nepodarilo sa dokončiť pripomienku",
+    "failedToDelete": "Nepodarilo sa zmazať pripomienku"
   }
 }
