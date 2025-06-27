@@ -602,18 +602,29 @@ export function registerAIRoutes(app: Express) {
       // Try to get cached result
       const cachedResult = await cache.get(aiPayload);
       if (cachedResult) {
-        return res.json(cachedResult);
+        // Transform cached AI response to match frontend mascot interface
+        const mascotResponse = {
+          score: cachedResult.score || 50,
+          trend: cachedResult.trend || 'stable',
+          category: cachedResult.category || 'fair'
+        };
+        return res.json(mascotResponse);
       }
 
       // Use unified AI processor for financial health score
       const healthData = await runAI('financial-health-score', userId, aiPayload);
 
-
+      // Transform AI response to match frontend mascot interface
+      const mascotResponse = {
+        score: healthData.score || 50,
+        trend: healthData.trend || 'stable',
+        category: healthData.category || 'fair'
+      };
 
       // Cache the result for 24 hours
       await cache.set(aiPayload, healthData, false, 24);
 
-      return res.json(healthData);
+      return res.json(mascotResponse);
     } catch (error) {
       console.error("Error generating financial health score:", error);
       return res.status(500).json({ message: "Failed to generate financial health score" });
