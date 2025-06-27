@@ -80,10 +80,32 @@ export const categoryTranslations = {
   }
 };
 
-// Helper function to get user language from request headers
+// Helper function to get user language from request
 export function getUserLanguage(req: any): string {
-  // Check Accept-Language header
+  // First check the URL path for language preference
+  const referer = req.headers.referer || req.headers.origin || req.url || '';
+  
+  console.log('Language detection - referer:', referer);
+  console.log('Language detection - url:', req.url);
+  
+  // Check if URL contains language path
+  if (referer.includes('/es/') || referer.includes('/es')) {
+    console.log('Detected Spanish from URL');
+    return 'es-pe'; // Spanish (Peru)
+  }
+  if (referer.includes('/sk/') || referer.includes('/sk')) {
+    console.log('Detected Slovak from URL');
+    return 'sk-sk'; // Slovak
+  }
+  if (referer.includes('/en/') || referer.includes('/en')) {
+    console.log('Detected English from URL');
+    return 'en-us'; // English
+  }
+  
+  // Fallback to Accept-Language header
   const acceptLanguage = req.headers['accept-language'];
+  console.log('Language detection - accept-language:', acceptLanguage);
+  
   if (acceptLanguage) {
     // Parse the Accept-Language header to get the primary language
     const languages = acceptLanguage.split(',').map((lang: string) => {
@@ -92,29 +114,39 @@ export function getUserLanguage(req: any): string {
     }).sort((a: any, b: any) => b.quality - a.quality);
     
     const primaryLang = languages[0]?.code || 'en';
+    console.log('Primary language from header:', primaryLang);
     
     // Map browser language codes to our supported locales
     if (primaryLang.startsWith('es')) {
+      console.log('Detected Spanish from header');
       return 'es-pe'; // Spanish (Peru) for all Spanish variants
     } else if (primaryLang.startsWith('sk')) {
+      console.log('Detected Slovak from header');
       return 'sk-sk'; // Slovak
     } else {
+      console.log('Defaulting to English from header');
       return 'en-us'; // Default to English
     }
   }
   
+  console.log('Using default fallback: en-us');
   return 'en-us'; // Default fallback
 }
 
 // Helper function to translate category name if it's predefined
 export function translateCategoryName(categoryName: string, language: string): string {
+  console.log(`Translating category: "${categoryName}" to language: "${language}"`);
+  
   // Check if this is a predefined category
   const translation = categoryTranslations[categoryName as keyof typeof categoryTranslations];
   
   if (translation && translation[language as keyof typeof translation]) {
-    return translation[language as keyof typeof translation];
+    const result = translation[language as keyof typeof translation];
+    console.log(`Translation found: "${categoryName}" -> "${result}"`);
+    return result;
   }
   
+  console.log(`No translation found for "${categoryName}" in "${language}", keeping original`);
   // Return original name for custom categories or if no translation found
   return categoryName;
 }
