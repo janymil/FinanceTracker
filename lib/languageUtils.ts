@@ -40,8 +40,29 @@ export function getLanguageLabel(lang: string): string {
 
 /**
  * Get current language from i18next or fallback to English
+ * Works both in client and server environments
  */
 export function getCurrentLanguage(): string {
-  // This will be imported where i18n is available
-  return 'en-us'; // Fallback, will be overridden by actual i18n.language
+  // For browser environment, use localStorage first, then default
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('preferredLanguage');
+    if (saved) {
+      return saved;
+    }
+    // Check URL path for language
+    const path = window.location.pathname;
+    if (path.startsWith('/es')) return 'es';
+    if (path.startsWith('/sk')) return 'sk';
+    if (path.startsWith('/en')) return 'en';
+  }
+  return 'en';
+}
+
+/**
+ * Get normalized language code for API requests
+ * Converts current language to backend-compatible format
+ */
+export function getCurrentLanguageForAPI(): string {
+  const currentLang = getCurrentLanguage();
+  return normalizeLanguageCode(currentLang);
 }

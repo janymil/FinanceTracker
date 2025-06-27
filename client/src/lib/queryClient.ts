@@ -1,4 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { getCurrentLanguageForAPI } from "../../../lib/languageUtils";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -50,15 +51,8 @@ export async function apiRequest(
   };
   
   // Add current language for backend translation
-  if (typeof window !== 'undefined' && window.i18next) {
-    const currentLang = window.i18next.language;
-    if (currentLang.startsWith('es')) {
-      headers['x-user-language'] = 'es-pe';
-    } else if (currentLang.startsWith('sk')) {
-      headers['x-user-language'] = 'sk-sk';
-    } else {
-      headers['x-user-language'] = 'en-us';
-    }
+  if (typeof window !== 'undefined') {
+    headers['x-user-language'] = getCurrentLanguageForAPI();
   }
   
   if (data) {
@@ -86,8 +80,8 @@ export const getQueryFn: <T>(options: {
     
     // Add current language for backend translation
     const headers: Record<string, string> = { ...authHeaders };
-    if (typeof window !== 'undefined' && window.i18next) {
-      const currentLang = window.i18next.language;
+    if (typeof window !== 'undefined') {
+      const currentLang = i18n.language;
       if (currentLang.startsWith('es')) {
         headers['x-user-language'] = 'es-pe';
       } else if (currentLang.startsWith('sk')) {
