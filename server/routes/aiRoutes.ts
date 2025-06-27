@@ -486,12 +486,7 @@ export function registerAIRoutes(app: Express) {
   // Financial Health Score (Free for all users)
   app.get('/api/financial-health', isAuthenticated, async (req: any, res) => {
     try {
-      // Disable all caching
-      res.set({
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      });
+
 
       const userId = getUserId(req);
       if (!userId) {
@@ -583,18 +578,20 @@ export function registerAIRoutes(app: Express) {
         language: language
       };
 
-      // Temporarily disable cache for testing
-      // const cache = new UnifiedAICache('financial-health-score', userId);
-      // const cachedResult = await cache.get(aiPayload);
-      // if (cachedResult) {
-      //   return res.json(cachedResult);
-      // }
+      // Initialize UnifiedAICache with 24 hours TTL
+      const cache = new UnifiedAICache('financial-health-score', userId);
+
+      // Try to get cached result
+      const cachedResult = await cache.get(aiPayload);
+      if (cachedResult) {
+        return res.json(cachedResult);
+      }
 
       // Use unified AI processor for financial health score
       const healthData = await runAI('financial-health-score', userId, aiPayload);
 
-      // Temporarily disable caching
-      // await cache.set(aiPayload, healthData, false, 24);
+      // Cache the result for 24 hours
+      await cache.set(aiPayload, healthData, false, 24);
 
       return res.json(healthData);
     } catch (error) {

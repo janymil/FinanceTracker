@@ -22,10 +22,9 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
 
   // Fetch AI-powered financial health score using React Query
   const aiScoreQuery = useQuery({
-    queryKey: ['financial-health', user?.id, summary, budgets, Date.now()],
+    queryKey: ['financial-health', user?.id, summary, budgets],
     enabled: isReady && useAIScore && !!user?.id && !!summary,
-    staleTime: 0, // No cache
-    cacheTime: 0, // No cache
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/financial-health");
       return response.json();
