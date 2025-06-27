@@ -22,32 +22,11 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface FinancialHealthData {
   score: number;
-  trend?: 'improving' | 'declining' | 'stable';
+  trend: 'improving' | 'declining' | 'stable';
   category: 'excellent' | 'good' | 'fair' | 'poor';
-  insights?: string[];
-  achievements?: string[];
-  warnings?: string[];
-  // New structure from Fly.io processor  
-  status?: string;
-  color?: string;
-  icon?: string;
-  factors?: Array<{
-    name: string;
-    score: number;
-    max: number;
-    status: string;
-    aiInsight?: string;
-  }>;
-  aiAnalysis?: {
-    personalizedFactors: string[];
-    riskAssessment: string;
-    recommendations: Array<{
-      action: string;
-      impact: string;
-      priority: 'high' | 'medium' | 'low';
-    }>;
-    confidence: number;
-  };
+  insights: string[];
+  achievements: string[];
+  warnings: string[];
 }
 
 interface MascotState {
@@ -337,7 +316,7 @@ export default function FinancialHealthMascot() {
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <AlertTriangle className="h-4 w-4 text-yellow-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.factors?.filter(f => f.status === 'poor')?.length || 0} Alerts
+              {healthData.warnings?.length || 0} Alerts
             </p>
           </div>
         </div>
