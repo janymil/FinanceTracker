@@ -495,5 +495,22 @@
   "youreOnTheRightTrack": "¡Estás en el camino correcto, pero hay margen de mejora! 🤔",
   "letsWorkTogether": "¡Trabajemos juntos para mejorar tu salud financiera! 💡",
   "greatFinancialHabits": "¡Excelentes hábitos financieros! ¡Sigue así! 💪",
-  "youreCrushingGoals": "¡Estás aplastando tus objetivos financieros! 🎉"
+  "youreCrushingGoals": "¡Estás aplastando tus objetivos financieros! 🎉",
+  "mascot": {
+    "settings": "Configuración de Mascota",
+    "show_mascot": "Mostrar Mascota",
+    "current_mood": "Estado Actual",
+    "health_score": "Puntuación de Salud",
+    "generating": "Generando...",
+    "generate_new": "Generar Nueva",
+    "health_changed": "¡Tu salud financiera ha cambiado significativamente!",
+    "alt_text": "Mascota financiera con estado {{mood}}",
+    "image_expired": "Imagen de mascota expirada",
+    "click_generate": "Haz clic en 'Generar Nueva' para crear una mascota fresca",
+    "generate_prompt": "Haz clic para generar tu mascota financiera",
+    "new_generated": "¡Nueva mascota generada!",
+    "generate_failed": "Falló al generar mascota",
+    "toggle_failed": "Falló al alternar mascota",
+    "show": "Mostrar Mascota"
+  }
 }
