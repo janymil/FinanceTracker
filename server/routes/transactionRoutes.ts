@@ -5,7 +5,6 @@ import { getUserLanguage, translateCategoryName } from "../categoryTranslations"
 import { insertTransactionSchema } from "@shared/schema";
 import { categorizeExpense } from "../openai";
 import { batchProcessor } from "../batch-processor";
-import { getUserLanguage, translateCategoryName } from "../categoryTranslations";
 
 const COLORS = [
   '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088fe',

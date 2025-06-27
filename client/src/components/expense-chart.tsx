@@ -25,42 +25,22 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
     enabled: !summary,
   });
 
-  // Fetch categories to determine which are predefined
-  const { data: categories } = useQuery({
-    queryKey: ['/api/categories'],
-  });
-
-  // Helper function to check if category is predefined (userId: null)
-  const getLocalizedCategoryName = (categoryName: string): string => {
-    if (!categories) return categoryName;
-    
-    const category = categories.find((cat: any) => cat.name === categoryName);
-    if (!category || category.userId !== null) {
-      // Custom category or not found, keep original name
-      return categoryName;
-    }
-    
-    // Predefined category, translate it
-    return t(categoryName) || categoryName;
-  };
-
-  // Handle both summary data and API data
+  // Handle both summary data and API data (backend already translates category names)
   let data = [];
   let totalExpenses = 0;
 
   if (summary?.expensesByCategory) {
-    // Use summary data if provided
+    // Use summary data if provided (already translated by backend)
     data = summary.expensesByCategory;
     totalExpenses = summary.totalExpenses;
   } else if (expenseData) {
-    // Use API data if no summary provided
+    // Use API data if no summary provided (already translated by backend)
     data = expenseData.expensesByCategory || [];
     totalExpenses = expenseData.totalExpenses || 0;
   }
 
-  const chartData = data.map((item, index) => ({
+  const chartData = data.map((item: any, index: number) => ({
     ...item,
-    category: getLocalizedCategoryName(item.category),
     color: item.color || COLORS[index % COLORS.length],
     percentage: totalExpenses > 0 ? ((item.amount / totalExpenses) * 100).toFixed(1) : '0.0'
   }));
