@@ -613,21 +613,24 @@ export function registerAIRoutes(app: Express) {
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-      const transactions = await storage.getUserTransactions(userId, {
-        startDate: startOfMonth,
-        endDate: endOfMonth
+      const allTransactions = await storage.getUserTransactions(userId);
+      
+      // Filter transactions for current month
+      const transactions = allTransactions.filter(t => {
+        const tDate = new Date(t.date);
+        return tDate >= startOfMonth && tDate <= endOfMonth;
       });
 
       const budgets = await storage.getUserBudgets(userId);
 
       // Simple mathematical calculations
       const totalIncome = transactions
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        .filter((t: any) => t.type === 'income')
+        .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
 
       const totalExpenses = transactions
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        .filter((t: any) => t.type === 'expense')
+        .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
 
       const netBalance = totalIncome - totalExpenses;
       const savingsRate = totalIncome > 0 ? (netBalance / totalIncome) * 100 : 0;
@@ -688,7 +691,7 @@ export function registerAIRoutes(app: Express) {
       const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
       
-      const prevTransactions = await storage.getTransactions(userId, {
+      const prevTransactions = await storage.getUserTransactions(userId, {
         startDate: prevMonthStart,
         endDate: prevMonthEnd
       });

@@ -21,7 +21,6 @@ import BudgetOverview from "@/components/budget-overview";
 import RequirePlan from "@/components/require-plan";
 import UpgradeBanner from "@/components/upgrade-banner";
 import FinancialHealthMascot from "@/components/financial-health-mascot";
-import SimpleFinancialHealthMascot from "@/components/simple-financial-health-mascot";
 
 // Modular lazy components with React 18 concurrent features
 import {
@@ -732,15 +731,7 @@ export default function Dashboard() {
                   summary={financialSummary}
                   transactions={transactions as any}
                 />
-                {/* Financial Health Mascot - Plan-based versions */}
-                <RequirePlan plan="standard">
-                  <FinancialHealthMascot />
-                </RequirePlan>
-                
-                {/* Simple Mathematical Mascot for Free users */}
-                <RequirePlan plan="free">
-                  <SimpleFinancialHealthMascot />
-                </RequirePlan>
+                <FinancialHealthMascot />
               </div>
               <LazyContextualFinancialTips
                 summary={financialSummary}
