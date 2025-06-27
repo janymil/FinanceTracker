@@ -592,15 +592,20 @@ export function registerAIRoutes(app: Express) {
         language: language
       };
 
-
-
-
+      // Create stable cache key based on core financial metrics (not exact transaction details)
+      const cacheKey = {
+        summary: aiPayload.summary,
+        transactionCount: processedTransactions.length,
+        budgetCount: processedBudgets.length,
+        language: language,
+        month: new Date().toISOString().slice(0, 7) // YYYY-MM format
+      };
 
       // Initialize UnifiedAICache with 24 hours TTL
       const cache = new UnifiedAICache('financial-health-score', userId);
 
-      // Try to get cached result
-      const cachedResult = await cache.get(aiPayload);
+      // Try to get cached result using stable key
+      const cachedResult = await cache.get(cacheKey);
       if (cachedResult) {
         // Transform AI analysis into frontend-expected format
         const response = transformAIResponseForMascot(cachedResult);
@@ -613,8 +618,8 @@ export function registerAIRoutes(app: Express) {
       // Transform AI analysis into frontend-expected format
       const response = transformAIResponseForMascot(healthData);
 
-      // Cache the result for 24 hours
-      await cache.set(aiPayload, healthData, false, 24);
+      // Cache the result for 24 hours using stable key
+      await cache.set(cacheKey, healthData, false, 24);
 
       return res.json(response);
     } catch (error) {
