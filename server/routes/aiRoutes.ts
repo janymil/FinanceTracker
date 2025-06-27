@@ -600,15 +600,7 @@ export function registerAIRoutes(app: Express) {
       // Use unified AI processor for financial health score
       const healthData = await runAI('financial-health-score', userId, aiPayload);
 
-      // Debug: Log the response structure to understand the data flow
-      console.log('=== FINANCIAL HEALTH DEBUG ===');
-      console.log('User plan:', user.plan);
-      console.log('Transactions count:', transactions.length);
-      console.log('Raw AI Response:', JSON.stringify(healthData, null, 2));
-      console.log('Has insights:', healthData?.insights?.length || 0);
-      console.log('Has achievements:', healthData?.achievements?.length || 0);
-      console.log('Has warnings:', healthData?.warnings?.length || 0);
-      console.log('================================');
+
 
       // Cache the result for 24 hours
       await cache.set(aiPayload, healthData, false, 24);
