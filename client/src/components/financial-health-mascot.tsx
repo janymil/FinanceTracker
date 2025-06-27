@@ -23,11 +23,18 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface FinancialHealthData {
   score: number;
-  trend: 'improving' | 'declining' | 'stable';
-  category: 'excellent' | 'good' | 'fair' | 'poor';
-  insights: string[];
-  achievements: string[];
-  warnings: string[];
+  status: string;
+  color: string;
+  factors?: string[];
+  aiAnalysis?: {
+    personalizedFactors?: string[];
+    recommendations?: Array<{
+      action: string;
+      impact: string;
+      priority: string;
+    }>;
+    riskAssessment?: string;
+  };
 }
 
 interface MascotState {

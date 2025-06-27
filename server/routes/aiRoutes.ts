@@ -593,17 +593,7 @@ export function registerAIRoutes(app: Express) {
       // Cache the result for 24 hours
       await cache.set(aiPayload, healthData, false, 24);
 
-      // Transform the response to match the mascot component's expected format
-      const transformedData = {
-        score: healthData.score || 50,
-        trend: healthData.trend || 'stable',
-        category: healthData.status ? healthData.status.toLowerCase() : 'fair',
-        insights: healthData.factors || [],
-        achievements: healthData.aiAnalysis?.achievements || [],
-        warnings: healthData.aiAnalysis?.warnings || []
-      };
-
-      return res.json(transformedData);
+      return res.json(healthData);
     } catch (error) {
       console.error("Error generating financial health score:", error);
       return res.status(500).json({ message: "Failed to generate financial health score" });
