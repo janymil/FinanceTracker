@@ -81,14 +81,7 @@ export const getQueryFn: <T>(options: {
     // Add current language for backend translation
     const headers: Record<string, string> = { ...authHeaders };
     if (typeof window !== 'undefined') {
-      const currentLang = i18n.language;
-      if (currentLang.startsWith('es')) {
-        headers['x-user-language'] = 'es-pe';
-      } else if (currentLang.startsWith('sk')) {
-        headers['x-user-language'] = 'sk-sk';
-      } else {
-        headers['x-user-language'] = 'en-us';
-      }
+      headers['x-user-language'] = getCurrentLanguageForAPI();
     }
     
     const res = await fetch(queryKey[0] as string, {
