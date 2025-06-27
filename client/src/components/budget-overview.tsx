@@ -8,6 +8,7 @@ import { useLocation } from "wouter";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useTranslation } from "react-i18next";
 
 interface Budget {
   id: number;
@@ -27,6 +28,7 @@ interface BudgetOverviewProps {
 export default function BudgetOverview({ className, isLimited = false }: BudgetOverviewProps) {
   const [, setLocation] = useLocation();
   const { isReady, user } = useClerkUserReady();
+  const { t } = useTranslation();
 
   // Fetch budgets using React Query
   const { data: budgets = [], isLoading: budgetsLoading } = useQuery({
@@ -101,19 +103,19 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
       <Card className={className}>
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <CardTitle className="text-lg font-semibold">Budget by Category</CardTitle>
+            <CardTitle className="text-lg font-semibold">{t('Budget by Category')}</CardTitle>
             <div className="bg-standard-light text-standard px-2 py-1 rounded text-xs font-medium">
-              Standard Feature
+              {t('Standard Feature')}
             </div>
           </div>
 
           <div className="text-center py-8">
             <div className="text-4xl text-gray-300 dark:text-gray-600 mb-4">📊</div>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
-              Detailed expense breakdown and budget tracking available with Standard
+              {t('Detailed expense breakdown and budget tracking available with Standard')}
             </p>
             <Button className="bg-standard hover:bg-standard/90 text-white">
-              Upgrade to Standard
+              {t('Upgrade to Standard')}
             </Button>
           </div>
         </CardContent>
@@ -125,7 +127,7 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
     return (
       <Card className="bg-white dark:bg-gray-800">
         <CardHeader>
-          <CardTitle>Budget by Category</CardTitle>
+          <CardTitle>{t('Budget by Category')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
@@ -158,15 +160,15 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
           <CardTitle className="text-lg font-semibold">Budget by Category</CardTitle>
           <Button size="sm" variant="outline" onClick={() => setLocation('/budget')}>
             <Edit3 className="h-4 w-4 mr-1" />
-            Edit Budgets
+            {t('Edit Budgets')}
           </Button>
         </div>
       </CardHeader>
       <CardContent>
         {budgetsWithSpending.length === 0 ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <p>No spending on budgeted categories yet</p>
-            <p className="text-sm">Start spending and your budget progress will appear here</p>
+            <p>{t('No spending on budgeted categories yet')}</p>
+            <p className="text-sm">{t('Start spending and your budget progress will appear here')}</p>
           </div>
         ) : (
           <div className="space-y-6">

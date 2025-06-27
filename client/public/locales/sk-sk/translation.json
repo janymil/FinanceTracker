@@ -459,5 +459,19 @@
   "Critical": "Kritický",
   "utilized": "využité",
   "Remaining": "Zostáva",
-  "Loading...": "Načítava..."
+  "Loading...": "Načítava...",
+  "Recurring": "Opakujúce sa",
+  "Receipt": "Účtenka",
+  "View Full Receipt Text": "Zobraziť celý text účtenky",
+  "Receipt Information (OCR)": "Informácie z účtenky (OCR)",
+  "Vendor": "Predajca",
+  "Original Amount": "Pôvodná suma",
+  "Receipt Date": "Dátum účtenky",
+  "Budget by Category": "Rozpočet podľa kategórie",
+  "Standard Feature": "Štandardná funkcia",
+  "Detailed expense breakdown and budget tracking available with Standard": "Podrobný rozpis výdavkov a sledovanie rozpočtu dostupné so Štandardným plánom",
+  "Upgrade to Standard": "Prejsť na Štandardný",
+  "Edit Budgets": "Upraviť rozpočty",
+  "No spending on budgeted categories yet": "Zatiaľ žiadne výdavky v rozpočtových kategóriách",
+  "Start spending and your budget progress will appear here": "Začnite míňať a váš pokrok rozpočtu sa zobrazí tu"
 }
