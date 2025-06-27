@@ -52,10 +52,10 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <DollarSign className="h-5 w-5" />
-            {t('dashboard.expenseBreakdown.title')}
+            {t('Expense Breakdown')}
           </CardTitle>
           <CardDescription>
-            {t('dashboard.expenseBreakdown.description')}
+            {t('Your spending by category')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -64,10 +64,10 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
               <DollarSign className="h-6 w-6 text-gray-400" />
             </div>
             <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-              {t('dashboard.expenseBreakdown.noExpensesTitle')}
+              {t('No Expenses to Display')}
             </h3>
             <p className="text-xs text-gray-600 dark:text-gray-300">
-              {t('dashboard.expenseBreakdown.noExpensesDescription')}
+              {t('Add some expense transactions to see your spending breakdown')}
             </p>
           </div>
         </CardContent>
@@ -105,8 +105,8 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
                 ))}
               </Pie>
               <Tooltip 
-                formatter={(value: number) => [`$${value.toLocaleString()}`, t('dashboard.expenseBreakdown.tooltipAmount')]}
-                labelFormatter={(label) => `${t('dashboard.expenseBreakdown.tooltipCategory')}: ${label}`}
+                formatter={(value: number) => [`$${value.toLocaleString()}`, t('Amount')]}
+                labelFormatter={(label) => `${t('Category')}: ${label}`}
               />
               <Legend />
             </PieChart>
