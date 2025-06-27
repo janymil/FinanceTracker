@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { DollarSign } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { getLocalizedCategoryName } from "@/lib/categoryHelpers";
 
 
 interface ExpenseChartProps {
@@ -30,18 +31,18 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
     queryKey: ['/api/categories'],
   });
 
-  // Helper function to check if category is predefined (userId: null)
+  // Helper function to get localized category name using translation key
   const getLocalizedCategoryName = (categoryName: string): string => {
     if (!categories) return categoryName;
     
     const category = categories.find((cat: any) => cat.name === categoryName);
-    if (!category || category.userId !== null) {
-      // Custom category or not found, keep original name
+    if (!category || !category.translationKey) {
+      // Custom category or no translation key, keep original name
       return categoryName;
     }
     
-    // Predefined category, translate it
-    return t(categoryName) || categoryName;
+    // Predefined category with translation key, translate it
+    return t(category.translationKey) || categoryName;
   };
 
   // Handle both summary data and API data

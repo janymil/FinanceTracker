@@ -10,9 +10,11 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useTranslation } from "react-i18next";
 
+// Types
 interface Budget {
   id: number;
   amount: string;
+  categoryId: number;
   categoryName: string;
   categoryIcon: string;
   categoryColor: string;
@@ -20,10 +22,66 @@ interface Budget {
   endDate: string;
 }
 
+interface Transaction {
+  id: number;
+  amount: string;
+  categoryId: number;
+  type: 'expense' | 'income';
+  date: string;
+}
+
+interface BudgetWithSpending extends Budget {
+  spent: number;
+}
+
 interface BudgetOverviewProps {
   className?: string;
   isLimited?: boolean;
 }
+
+// Constants
+const BUDGET_THRESHOLDS = {
+  WARNING: 75,
+  DANGER: 90,
+} as const;
+
+const PROGRESS_COLORS = {
+  SAFE: '#10B981',
+  WARNING: '#F59E0B',
+  DANGER: '#EF4444',
+} as const;
+
+// Utility functions
+const getCategoryIcon = (icon: string): string => {
+  const iconMap: Record<string, string> = {
+    'utensils': '🍽️',
+    'film': '🎬',
+    'home': '🏠',
+    'car': '🚗',
+    'heart': '❤️',
+    'shopping-bag': '🛍️',
+  };
+  return iconMap[icon] || '💰';
+};
+
+const formatCurrency = (amount: string | number): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(typeof amount === 'string' ? parseFloat(amount) : amount);
+};
+
+const formatDateRange = (startDate: string, endDate: string): string => {
+  const start = new Date(startDate).toLocaleDateString('en-US');
+  const end = new Date(endDate).toLocaleDateString('en-US');
+  return `${start} - ${end}`;
+};
+
+const getProgressColor = (percentage: number): string => {
+  if (percentage > BUDGET_THRESHOLDS.DANGER) return PROGRESS_COLORS.DANGER;
+  if (percentage > BUDGET_THRESHOLDS.WARNING) return PROGRESS_COLORS.WARNING;
+  return PROGRESS_COLORS.SAFE;
+};
 
 export default function BudgetOverview({ className, isLimited = false }: BudgetOverviewProps) {
   const [, setLocation] = useLocation();
@@ -31,7 +89,7 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
   const { t } = useTranslation();
 
   // Fetch budgets using React Query
-  const { data: budgets = [], isLoading: budgetsLoading } = useQuery({
+  const { data: budgets = [], isLoading: budgetsLoading } = useQuery<Budget[]>({
     queryKey: ['budgets', user?.id],
     enabled: isReady && !isLimited && !!user?.id,
     staleTime: 0,
@@ -42,7 +100,7 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
   });
 
   // Fetch transactions using React Query  
-  const { data: transactions = [], isLoading: transactionsLoading } = useQuery({
+  const { data: transactions = [], isLoading: transactionsLoading } = useQuery<Transaction[]>({
     queryKey: ['transactions', user?.id],
     enabled: isReady && !isLimited && !!user?.id,
     staleTime: 0,
@@ -52,41 +110,20 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
     },
   });
 
-
-
-  const formatCurrency = (amount: string | number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(typeof amount === 'string' ? parseFloat(amount) : amount);
-  };
-
-  const getCategoryIcon = (icon: string) => {
-    const iconMap: { [key: string]: string } = {
-      'utensils': '🍽️',
-      'film': '🎬',
-      'home': '🏠',
-      'car': '🚗',
-      'heart': '❤️',
-      'shopping-bag': '🛍️',
-    };
-    return iconMap[icon] || '💰';
-  };
-
-  const budgetsWithSpending = useMemo(() => {
+  const budgetsWithSpending = useMemo((): BudgetWithSpending[] => {
     if (!budgets || !transactions) return [];
 
     return budgets
-      .map((budget: any) => {
-        // Calculate total spending for this category in the current month
+      .map((budget) => {
+        // Calculate total spending for this category in the current budget period
         const categorySpending = transactions
-          .filter((transaction: any) => 
+          .filter((transaction) => 
             transaction.categoryId === budget.categoryId && 
             transaction.type === 'expense' &&
             new Date(transaction.date) >= new Date(budget.startDate) &&
             new Date(transaction.date) <= new Date(budget.endDate)
           )
-          .reduce((total: number, transaction: any) => 
+          .reduce((total, transaction) => 
             total + Math.abs(parseFloat(transaction.amount)), 0
           );
 
@@ -95,7 +132,7 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
           spent: categorySpending
         };
       })
-      .sort((a: any, b: any) => b.spent - a.spent); // Sort by spending amount descending
+      .sort((a, b) => b.spent - a.spent); // Sort by spending amount descending
   }, [budgets, transactions]);
 
   if (isLimited) {
@@ -157,7 +194,7 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
     <Card className="bg-white dark:bg-gray-800">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">Budget by Category</CardTitle>
+          <CardTitle className="text-lg font-semibold">{t('Budget by Category')}</CardTitle>
           <Button size="sm" variant="outline" onClick={() => setLocation('/budget')}>
             <Edit3 className="h-4 w-4 mr-1" />
             {t('Edit Budgets')}
@@ -172,10 +209,11 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
           </div>
         ) : (
           <div className="space-y-6">
-            {budgetsWithSpending.map((budget: any) => {
+            {budgetsWithSpending.map((budget) => {
               const spent = budget.spent;
               const budgetAmount = parseFloat(budget.amount);
               const percentage = Math.round((spent / budgetAmount) * 100);
+              const progressColor = getProgressColor(percentage);
 
               return (
                 <div key={budget.id} className="space-y-3">
@@ -191,15 +229,14 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
 
                   <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-2">
                     <span>{formatCurrency(spent)} / {formatCurrency(budget.amount)}</span>
-                    <span>{new Date(budget.startDate).toLocaleDateString('en-US')} - {new Date(budget.endDate).toLocaleDateString('en-US')}</span>
+                    <span>{formatDateRange(budget.startDate, budget.endDate)}</span>
                   </div>
 
                   <Progress 
                     value={Math.min(percentage, 100)} 
                     className="h-2"
                     style={{
-                      '--progress-foreground': percentage > 90 ? '#EF4444' : 
-                                             percentage > 75 ? '#F59E0B' : '#10B981'
+                      '--progress-foreground': progressColor
                     } as React.CSSProperties}
                   />
                 </div>
