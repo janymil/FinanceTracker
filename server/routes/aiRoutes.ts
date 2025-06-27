@@ -496,9 +496,21 @@ export function registerAIRoutes(app: Express) {
         return res.status(404).json({ message: "User not found" });
       }
 
+      // For testing: temporarily allow all users to see their plan status
+      console.log('Financial Health - User plan check:', {
+        userId: user.id,
+        plan: user.plan,
+        hasStandardAccess: ['standard', 'premium'].includes(user.plan || ''),
+        email: user.email
+      });
+
       // Require standard+ plan for AI financial health analysis
       if (!user.plan || !['standard', 'premium'].includes(user.plan)) {
-        return res.status(403).json({ message: "AI financial health analysis requires Standard or Premium subscription" });
+        return res.status(403).json({ 
+          message: "AI financial health analysis requires Standard or Premium subscription",
+          currentPlan: user.plan || 'free',
+          requiredPlans: ['standard', 'premium']
+        });
       }
 
       // Get user's financial data
