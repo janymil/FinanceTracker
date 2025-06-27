@@ -5,6 +5,23 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 import { DollarSign } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+// Helper functions for category localization
+const isPredefinedCategory = (categoryName: string): boolean => {
+  const predefinedCategories = [
+    'Housing', 'Transportation', 'Food', 'Entertainment', 'Healthcare', 
+    'Shopping', 'Utilities', 'Education', 'Travel', 'Personal Care',
+    'Salary', 'Freelance', 'Investments', 'Business', 'Other Income'
+  ];
+  return predefinedCategories.includes(categoryName);
+};
+
+const getLocalizedCategoryName = (categoryName: string, t: any): string => {
+  if (!isPredefinedCategory(categoryName)) {
+    return categoryName; // Keep custom categories as-is
+  }
+  return t(categoryName) || categoryName;
+};
+
 
 interface ExpenseChartProps {
   summary?: {
@@ -41,6 +58,7 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
 
   const chartData = data.map((item, index) => ({
     ...item,
+    category: getLocalizedCategoryName(item.category, t),
     color: item.color || COLORS[index % COLORS.length],
     percentage: totalExpenses > 0 ? ((item.amount / totalExpenses) * 100).toFixed(1) : '0.0'
   }));
