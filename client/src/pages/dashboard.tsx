@@ -262,9 +262,9 @@ export default function Dashboard() {
       if (response.ok) {
         const data = await response.json();
         setBudgets(data);
-        console.log('Dashboard budgets fetched:', data);
+
       } else {
-        console.log('Dashboard budgets fetch failed:', response.status);
+
       }
     } catch (error) {
       console.error('Error fetching budgets:', error);
@@ -677,7 +677,7 @@ export default function Dashboard() {
 
 
         {/* Debug: User plan is {databaseUser?.plan} */}
-        {console.log('Dashboard Debug - User Plan:', databaseUser?.plan)}
+
 
         {/* Loading State */}
         {!databaseUser && (
@@ -687,7 +687,7 @@ export default function Dashboard() {
         )}
 
         {/* Free User Content - Only show if plan is explicitly 'free' */}
-        {console.log('Free section check:', databaseUser?.plan, databaseUser?.plan === 'free')}
+
         {databaseUser?.plan === 'free' && (
           <div className="space-y-8">
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
