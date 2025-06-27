@@ -22,10 +22,8 @@ import {
   type InsertUser,
   type Transaction,
   type InsertTransaction,
-  type TransactionWithCategory,
   type Budget,
   type InsertBudget,
-  type BudgetWithCategory,
   type Goal,
   type InsertGoal,
   type Category,
@@ -333,7 +331,7 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getUserTransactions(userId: string, limit?: number): Promise<TransactionWithCategory[]> {
+  async getUserTransactions(userId: string, limit?: number): Promise<Transaction[]> {
     let query = db
       .select({
         id: transactions.id,
@@ -365,13 +363,13 @@ export class DatabaseStorage implements IStorage {
 
     const userTransactions = await query;
 
-    // Decrypt sensitive fields and cast to correct type
+    // Decrypt sensitive fields
     return userTransactions.map(transaction => ({
       ...transaction,
       amount: DataEncryption.decryptAmount(transaction.amount),
       description: DataEncryption.decryptDescription(transaction.description),
       referenceNote: transaction.referenceNote ? DataEncryption.decrypt(transaction.referenceNote) : null
-    })) as TransactionWithCategory[];
+    }));
   }
 
   async updateTransaction(id: number, transaction: Partial<InsertTransaction>): Promise<Transaction> {
@@ -446,7 +444,7 @@ export class DatabaseStorage implements IStorage {
     return newBudget;
   }
 
-  async getUserBudgets(userId: string): Promise<BudgetWithCategory[]> {
+  async getUserBudgets(userId: string): Promise<Budget[]> {
     const budgetData = await db
       .select({
         id: budgets.id,

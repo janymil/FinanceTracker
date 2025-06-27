@@ -35,7 +35,7 @@ export function registerAIRoutes(app: Express) {
 
       // Get uncategorized transactions
       const transactions = await storage.getUserTransactions(userId);
-      const uncategorized = transactions.filter(t => !t.categoryName || t.categoryName === 'Uncategorized');
+      const uncategorized = transactions.filter(t => !(t as any).categoryName || (t as any).categoryName === 'Uncategorized');
 
       if (uncategorized.length === 0) {
         return res.json({ message: "No uncategorized transactions found" });
