@@ -1578,9 +1578,9 @@ Calculate health score quickly.`
       score: Math.max(0, Math.min(100, result.score || 50)),
       trend: result.trend || 'stable',
       category: result.category || 'fair',
-      insights: Array.isArray(result.insights) ? result.insights : null,
-      achievements: Array.isArray(result.achievements) ? result.achievements : null,
-      warnings: Array.isArray(result.warnings) ? result.warnings : null
+      insights: Array.isArray(result.insights) ? result.insights : [],
+      achievements: Array.isArray(result.achievements) ? result.achievements : [],
+      warnings: Array.isArray(result.warnings) ? result.warnings : []
     };
 
     // No caching in Fly.io - handled by main application
