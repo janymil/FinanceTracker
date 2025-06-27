@@ -342,7 +342,7 @@ export default function FinancialHealthMascot() {
               className="mt-4 space-y-3"
             >
               {/* Achievements */}
-              {healthData.achievements && healthData.achievements.length > 0 && (
+              {healthData.achievements.length > 0 && (
                 <div>
                   <h4 className="text-sm font-medium text-green-700 dark:text-green-400 mb-2">
                     🏆 Recent Achievements
@@ -365,7 +365,7 @@ export default function FinancialHealthMascot() {
               )}
 
               {/* Insights */}
-              {healthData.insights && healthData.insights.length > 0 && (
+              {healthData.insights.length > 0 && (
                 <div>
                   <h4 className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-2">
                     💡 Smart Insights
@@ -388,7 +388,7 @@ export default function FinancialHealthMascot() {
               )}
 
               {/* Warnings */}
-              {healthData.warnings && healthData.warnings.length > 0 && (
+              {healthData.warnings.length > 0 && (
                 <div>
                   <h4 className="text-sm font-medium text-red-700 dark:text-red-400 mb-2">
                     ⚠️ Action Items
