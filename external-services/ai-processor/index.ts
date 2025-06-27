@@ -951,6 +951,7 @@ export async function generateTrendPredictions(
   categoryPredictions: TrendPrediction[];
   financialForecast: FinancialForecast;
 }> {
+  const normalizedLanguage = normalizeLanguageCode(language);
   try {
     // Return zeros for empty data instead of AI-generated examples
     if (!transactions || transactions.length === 0) {
@@ -1046,7 +1047,7 @@ Analysis Requirements:
           role: "system",
           content: `You are an advanced financial forecasting AI that analyzes spending patterns and predicts future financial trends with high accuracy. Use sophisticated pattern recognition and statistical analysis to provide reliable predictions.
 
-Respond in ${getLanguageLabel(language)}.`
+Respond in ${getLanguageLabel(normalizedLanguage)}.`
         },
         {
           role: "user",
@@ -1103,6 +1104,7 @@ export async function generateExpensePredictions(transactions: Array<{
   categoryName?: string;
   recurring?: boolean;
 }>, language: string = 'en-us'): Promise<ExpensePrediction> {
+  const normalizedLanguage = normalizeLanguageCode(language);
   try {
     // Return empty predictions for insufficient data
     if (!transactions || transactions.length < 5) {
@@ -1253,7 +1255,7 @@ ANALYSIS GUIDELINES:
           role: "system",
           content: `You are an advanced financial forecasting AI specializing in expense prediction analysis. You analyze spending patterns, identify trends, and generate accurate predictions based on historical transaction data. Focus on realistic, data-driven predictions with appropriate confidence levels.
 
-Respond in ${getLanguageLabel(language)}.`
+Respond in ${getLanguageLabel(normalizedLanguage)}.`
         },
         {
           role: "user",
@@ -1553,7 +1555,7 @@ export async function generateFinancialHealthScore(financialData: {
           role: "system",
           content: `Calculate financial health score (0-100). Return JSON: {"score": number, "trend": "improving/stable/declining", "category": "excellent/good/fair/poor", "insights": ["max 2 insights"], "achievements": ["max 1"], "warnings": ["max 1"]}
 
-Respond in ${getLanguageLabel(language)}.`
+Respond in ${getLanguageLabel(normalizedLanguage)}.`
         },
         {
           role: "user",
