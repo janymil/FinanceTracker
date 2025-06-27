@@ -535,5 +535,7 @@
     "generate_failed": "Falló al generar mascota",
     "toggle_failed": "Falló al alternar mascota",
     "show": "Mostrar Mascota"
-  }
+  },
+  "aiAnalysisSection": "Sección de Análisis IA",
+  "analysisInProgress": "Análisis en progreso..."
 }

@@ -274,14 +274,14 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                   try {
                     const parsedData = JSON.parse(currentTip);
                     if (parsedData.sections && Array.isArray(parsedData.sections) && parsedData.sections.length === 4) {
-                      // Use the structured sections from the AI processor
+                      // Use the structured sections from the AI processor  
                       sections = parsedData.sections.map((section: any, index: number) => {
                         const iconMap = [TrendingUp, Lightbulb, GraduationCap, Sparkles];
                         const emojis = ['📊', '💡', '📋', '🎯'];
                         return {
-                          title: `${emojis[index]} ${section.title}`,
+                          title: `${emojis[index]} ${section.title || t('aiAnalysisSection')}`,
                           icon: iconMap[index] || TrendingUp,
-                          content: cleanAIText(section.content || section.description || 'Analysis in progress...'),
+                          content: cleanAIText(section.content || section.description || t('analysisInProgress')),
                           color: section.color || ['blue', 'green', 'purple', 'orange'][index]
                         };
                       });

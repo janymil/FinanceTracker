@@ -534,5 +534,7 @@
     "generate_failed": "Nepodarilo sa vygenerovať maskota",
     "toggle_failed": "Nepodarilo sa prepnúť maskota",
     "show": "Zobraziť maskota"
-  }
+  },
+  "aiAnalysisSection": "Sekcia AI analýzy",
+  "analysisInProgress": "Analýza prebieha..."
 }
