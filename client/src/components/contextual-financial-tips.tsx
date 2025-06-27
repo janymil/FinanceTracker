@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Lightbulb, TrendingDown, PiggyBank, AlertCircle, CheckCircle } from 'lucide-react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 interface ContextualTipsProps {
   summary: {
@@ -32,6 +33,7 @@ interface FinancialTip {
 }
 
 export default function ContextualFinancialTips({ summary, transactions, budgets, selectedMonth }: ContextualTipsProps) {
+  const { t } = useTranslation();
   const [tips, setTips] = useState<FinancialTip[] | null>(null);
   const [loading, setLoading] = useState(false);
   
@@ -145,22 +147,22 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
           <Lightbulb className="h-5 w-5 text-yellow-600" />
-          Personalized Financial Tips
+          {t('personalizedFinancialTips')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {loading ? (
-          <p className="text-sm text-gray-500">Generating AI insights...</p>
+          <p className="text-sm text-gray-500">{t('generatingAIInsights')}</p>
         ) : tips && tips.length === 0 ? (
           <div className="text-center py-6">
             <div className="text-gray-400 mb-2">
               <Lightbulb className="h-12 w-12 mx-auto" />
             </div>
             <p className="text-sm text-gray-500 mb-2">
-              No financial tips available for this period.
+              {t('noFinancialTipsAvailable')}
             </p>
             <p className="text-xs text-gray-400">
-              Tips are generated using AI based on your current transactions and budget settings.
+              {t('aiTipsDisclaimer')}
             </p>
           </div>
         ) : tips && tips.length > 0 ? (
@@ -186,7 +188,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
             })}
             <div className="text-center mt-4">
               <p className="text-xs text-gray-400">
-                Tips are generated using AI based on your current transactions and budget settings.
+                {t('aiTipsDisclaimer')}
               </p>
             </div>
           </div>
@@ -195,7 +197,7 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
             <div className="text-gray-400 mb-2">
               <Lightbulb className="h-12 w-12 mx-auto" />
             </div>
-            <p className="text-sm text-gray-500">Loading financial insights...</p>
+            <p className="text-sm text-gray-500">{t('loadingFinancialInsights')}</p>
           </div>
         )}
       </CardContent>
