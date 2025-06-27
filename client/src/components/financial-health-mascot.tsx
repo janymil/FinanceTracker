@@ -83,23 +83,22 @@ export default function FinancialHealthMascot() {
   const [showDetails, setShowDetails] = useState(false);
 
   const { data: healthData, isLoading } = useQuery<FinancialHealthData>({
-    queryKey: ["/api/financial-health", user?.id],
+    queryKey: ["/api/financial-health", Date.now()],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/financial-health");
       return response.json();
     },
     enabled: isReady && !!user?.id,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchInterval: 30000, // Refresh every 30 seconds
+    staleTime: 0,
+    gcTime: 0,
   });
 
 
 
   useEffect(() => {
     if (healthData) {
-      // Use category directly from the health data
-      const category = healthData.category || 'fair';
-      
-      const config = mascotConfigs[category] || mascotConfigs.fair;
+      const config = mascotConfigs[healthData.category] || mascotConfigs.fair;
       setMascotState({
         emotion: config.emotion,
         animation: config.animation,
@@ -218,12 +217,7 @@ export default function FinancialHealthMascot() {
     );
   }
 
-  // Map status to category for mascot config
-  const category = healthData.status?.toLowerCase().includes('excellent') ? 'excellent' :
-                  healthData.status?.toLowerCase().includes('good') ? 'good' :
-                  healthData.status?.toLowerCase().includes('fair') ? 'fair' : 'poor';
-  
-  const config = mascotConfigs[category] || mascotConfigs.fair;
+  const config = mascotConfigs[healthData.category] || mascotConfigs.fair;
 
   return (
     <Card className={`relative overflow-hidden transition-all duration-300 ${config?.borderColor || 'border-gray-300'} border-2`}>
@@ -248,7 +242,7 @@ export default function FinancialHealthMascot() {
           </div>
           
           <div className="flex items-center gap-2">
-            {healthData.score >= 80 && (
+            {healthData.trend === 'improving' && (
               <motion.div
                 animate={{ y: [0, -3, 0] }}
                 transition={{ duration: 1, repeat: Infinity }}
@@ -256,7 +250,7 @@ export default function FinancialHealthMascot() {
                 <TrendingUp className="h-5 w-5 text-green-500" />
               </motion.div>
             )}
-            {healthData.score < 50 && (
+            {healthData.trend === 'declining' && (
               <motion.div
                 animate={{ y: [0, 3, 0] }}
                 transition={{ duration: 1, repeat: Infinity }}
@@ -303,19 +297,19 @@ export default function FinancialHealthMascot() {
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <CheckCircle className="h-4 w-4 text-green-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.insights?.length || 0} Insights
+              {healthData.achievements?.length || 0} Achievements
             </p>
           </div>
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <Target className="h-4 w-4 text-blue-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.achievements?.length || 0} Achievements
+              {healthData.insights?.length || 0} Insights
             </p>
           </div>
           <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
             <AlertTriangle className="h-4 w-4 text-yellow-500 mx-auto mb-1" />
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.warnings?.length || 0} Warnings
+              {healthData.warnings?.length || 0} Alerts
             </p>
           </div>
         </div>
@@ -340,11 +334,34 @@ export default function FinancialHealthMascot() {
               transition={{ duration: 0.3 }}
               className="mt-4 space-y-3"
             >
+              {/* Achievements */}
+              {healthData?.achievements && healthData.achievements.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium text-green-700 dark:text-green-400 mb-2">
+                    🏆 Recent Achievements
+                  </h4>
+                  <ul className="space-y-1">
+                    {healthData.achievements.map((achievement, index) => (
+                      <motion.li
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
+                      >
+                        <Crown className="h-3 w-3 text-yellow-500" />
+                        {achievement}
+                      </motion.li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {/* Insights */}
               {healthData?.insights && healthData.insights.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-medium text-green-700 dark:text-green-400 mb-2">
-                    📊 Financial Insights
+                  <h4 className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-2">
+                    💡 Smart Insights
                   </h4>
                   <ul className="space-y-1">
                     {healthData.insights.map((insight, index) => (
@@ -355,7 +372,7 @@ export default function FinancialHealthMascot() {
                         transition={{ delay: index * 0.1 }}
                         className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
                       >
-                        <Target className="h-3 w-3 text-green-500" />
+                        <Zap className="h-3 w-3 text-blue-500" />
                         {insight}
                       </motion.li>
                     ))}
@@ -363,14 +380,14 @@ export default function FinancialHealthMascot() {
                 </div>
               )}
 
-              {/* AI Insights */}
-              {healthData?.aiAnalysis?.personalizedFactors && healthData.aiAnalysis.personalizedFactors.length > 0 && (
+              {/* Warnings */}
+              {healthData?.warnings && healthData.warnings.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-2">
-                    💡 AI Insights
+                  <h4 className="text-sm font-medium text-red-700 dark:text-red-400 mb-2">
+                    ⚠️ Action Items
                   </h4>
                   <ul className="space-y-1">
-                    {healthData.aiAnalysis.personalizedFactors.map((factor, index) => (
+                    {healthData.warnings.map((warning, index) => (
                       <motion.li
                         key={index}
                         initial={{ opacity: 0, x: -20 }}
@@ -378,52 +395,11 @@ export default function FinancialHealthMascot() {
                         transition={{ delay: index * 0.1 }}
                         className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
                       >
-                        <Zap className="h-3 w-3 text-blue-500" />
-                        {factor}
+                        <AlertTriangle className="h-3 w-3 text-red-500" />
+                        {warning}
                       </motion.li>
                     ))}
                   </ul>
-                </div>
-              )}
-
-              {/* Recommendations */}
-              {healthData?.aiAnalysis?.recommendations && healthData.aiAnalysis.recommendations.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-medium text-purple-700 dark:text-purple-400 mb-2">
-                    🎯 Recommendations
-                  </h4>
-                  <ul className="space-y-1">
-                    {healthData.aiAnalysis.recommendations.slice(0, 3).map((rec, index) => (
-                      <motion.li
-                        key={index}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="text-xs text-gray-600 dark:text-gray-400"
-                      >
-                        <div className="flex items-start gap-2">
-                          <Crown className="h-3 w-3 text-purple-500 mt-0.5" />
-                          <div>
-                            <span className="font-medium">{rec.action}</span>
-                            <div className="text-xs text-gray-500">{rec.impact}</div>
-                          </div>
-                        </div>
-                      </motion.li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Risk Assessment */}
-              {healthData?.aiAnalysis?.riskAssessment && (
-                <div>
-                  <h4 className="text-sm font-medium text-orange-700 dark:text-orange-400 mb-2">
-                    ⚠️ Risk Assessment
-                  </h4>
-                  <div className="text-xs text-gray-600 dark:text-gray-400 flex items-start gap-2">
-                    <AlertTriangle className="h-3 w-3 text-orange-500 mt-0.5" />
-                    {healthData.aiAnalysis.riskAssessment}
-                  </div>
                 </div>
               )}
             </motion.div>
