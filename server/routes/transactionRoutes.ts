@@ -4,6 +4,7 @@ import { storage } from "../storage";
 import { insertTransactionSchema } from "@shared/schema";
 import { categorizeExpense } from "../openai";
 import { batchProcessor } from "../batch-processor";
+import { getUserLanguage, translateCategoryName } from "../categoryTranslations";
 
 const COLORS = [
   '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088fe',
@@ -117,7 +118,21 @@ export function registerTransactionRoutes(app: Express) {
 
       const transactions = await storage.getUserTransactions(userId, limit);
 
-      res.json(transactions);
+      // Get user language and translate predefined category names
+      const userLanguage = getUserLanguage(req);
+      const translatedTransactions = transactions.map(transaction => {
+        if (transaction.categoryName) {
+          // We need to check if this category is predefined
+          // For now, we'll translate all category names and let translateCategoryName handle the logic
+          return {
+            ...transaction,
+            categoryName: translateCategoryName(transaction.categoryName, userLanguage)
+          };
+        }
+        return transaction;
+      });
+
+      res.json(translatedTransactions);
     } catch (error) {
       console.error("Error fetching transactions:", error);
       res.status(500).json({ message: "Failed to fetch transactions" });

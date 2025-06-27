@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
+import { getUserLanguage, translateCategories } from "../categoryTranslations";
 
 export function registerUserRoutes(app: Express) {
   // Update user plan
@@ -35,7 +36,12 @@ export function registerUserRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
       const categories = await storage.getCategories(userId);
-      return res.json(categories);
+      
+      // Get user language and translate predefined categories
+      const userLanguage = getUserLanguage(req);
+      const translatedCategories = translateCategories(categories, userLanguage);
+      
+      return res.json(translatedCategories);
     } catch (error) {
       console.error("Error fetching categories:", error);
       return res.status(500).json({ message: "Failed to fetch categories" });
