@@ -546,7 +546,7 @@ export default function Dashboard() {
                             .filter((cat: Category) => cat.type === newTransaction.type)
                             .map((category: Category) => (
                               <SelectItem key={category.id} value={category.id.toString()}>
-                                {category.name}
+                                {getLocalizedCategoryName(category)}
                               </SelectItem>
                             ))}
                         </SelectContent>

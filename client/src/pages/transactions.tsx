@@ -73,6 +73,18 @@ export default function Transactions() {
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
   const { t } = useTranslation();
+
+  // Helper functions for category localization
+  const isPredefinedCategory = (category: any): boolean => {
+    return category.userId === null;
+  };
+
+  const getLocalizedCategoryName = (category: any): string => {
+    if (isPredefinedCategory(category)) {
+      return t(category.name);
+    }
+    return category.name;
+  };
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -567,7 +579,7 @@ export default function Transactions() {
                           .filter((cat: Category) => cat.type === newTransaction.type)
                           .map((category: Category) => (
                             <SelectItem key={category.id} value={category.id.toString()}>
-                              {category.name}
+                              {getLocalizedCategoryName(category)}
                             </SelectItem>
                           ))}
                       </SelectContent>
