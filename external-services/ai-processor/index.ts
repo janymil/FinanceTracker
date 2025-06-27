@@ -1634,13 +1634,7 @@ NEVER return empty arrays for personalizedFactors or recommendations.`
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
     
-    // Debug logging to trace AI response processing
-    console.log('=== FLY.IO FINANCIAL HEALTH DEBUG ===');
-    console.log('Raw AI Response:', JSON.stringify(result, null, 2));
-    console.log('AI Analysis object:', result.aiAnalysis);
-    console.log('Personalized Factors:', result.aiAnalysis?.personalizedFactors);
-    console.log('Recommendations:', result.aiAnalysis?.recommendations);
-    console.log('====================================');
+
     
     const processedResult = {
       score: Math.max(0, Math.min(100, result.score || 50)),
