@@ -81,6 +81,7 @@ export interface FinancialHealthData {
 }
 
 export async function categorizeExpense(description: string, amount: number, language: string = 'en-us'): Promise<ExpenseCategorizationResult> {
+  const normalizedLanguage = normalizeLanguageCode(language);
   try {
     // Cache removed - direct OpenAI call
     const response = await openai.chat.completions.create({
@@ -88,7 +89,7 @@ export async function categorizeExpense(description: string, amount: number, lan
       messages: [
         {
           role: "system",
-          content: `Respond in ${getLanguageLabel(language)}. You are an expert financial categorization assistant. Analyze the expense description and amount to determine the most appropriate category.
+          content: `Respond in ${getLanguageLabel(normalizedLanguage)}. You are an expert financial categorization assistant. Analyze the expense description and amount to determine the most appropriate category.
 
 Available categories:
 - Food & Dining (restaurants, groceries, takeout)
@@ -165,6 +166,7 @@ export async function generateFinancialTips(
   },
   language: string = 'en-us'
 ): Promise<FinancialTip[]> {
+  const normalizedLanguage = normalizeLanguageCode(language);
   try {
     // Initialize UnifiedAICache with 168 hours (7 days) TTL
     const cache = new UnifiedAICache('financial-tips', userId);
@@ -229,7 +231,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
         body: JSON.stringify({ 
           task: "financial-tips",
           userId: "system",
-          payload: financialData
+          payload: { ...financialData, language: normalizedLanguage }
         }),
         timeout: 30000 // 30 second timeout
       });
@@ -251,7 +253,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
         messages: [
           {
             role: "system",
-            content: `Respond in ${getLanguageLabel(language)}. You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
+            content: `Respond in ${getLanguageLabel(normalizedLanguage)}. You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
 
 1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
 2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
@@ -1273,6 +1275,7 @@ export async function generateContextualFinancialTips(
   priority: 'high' | 'medium' | 'low';
   actionable: boolean;
 }> }> {
+  const normalizedLanguage = normalizeLanguageCode(language);
   try {
     const { summary, transactions, budgets, goals = [], selectedMonth } = data;
     
