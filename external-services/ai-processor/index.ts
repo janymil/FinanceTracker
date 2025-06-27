@@ -728,14 +728,14 @@ Generate 2-4 insights focusing on:
 Each insight should have:
 - Unique ID
 - Type: warning, suggestion, achievement, or trend
-
-Respond in ${getLanguageLabel(language)}.`
 - Clear title and description
 - Impact level: high, medium, low
 - Category if relevant
 - Amount if relevant
 - Actionable recommendation
 - Whether it's actionable (boolean)
+
+Respond in ${getLanguageLabel(language)}.
 
 Respond with JSON array format:
 [
