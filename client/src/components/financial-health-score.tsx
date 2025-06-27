@@ -17,49 +17,10 @@ interface FinancialHealthProps {
 }
 
 export default function FinancialHealthScore({ summary, budgets }: FinancialHealthProps) {
-  const [useAIScore, setUseAIScore] = useState(false);
-  const { isReady, user } = useClerkUserReady();
-
-  // Get user's plan from database to determine if AI features should be enabled
-  const { data: databaseUser } = useQuery({
-    queryKey: ["auth-user", user?.id],
-    enabled: isReady && !!user?.id,
-    staleTime: 5 * 60 * 1000, // 5 minutes - plan doesn't change often
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/auth/user");
-      return response.json();
-    },
-  });
-
-  // Enable AI score for standard and premium users
-  useEffect(() => {
-    if (databaseUser?.plan && ['standard', 'premium'].includes(databaseUser.plan)) {
-      setUseAIScore(true);
-    } else {
-      setUseAIScore(false);
-    }
-  }, [databaseUser?.plan]);
-
-  // Fetch AI-powered financial health score using React Query
-  const aiScoreQuery = useQuery({
-    queryKey: ['financial-health', user?.id, summary, budgets],
-    enabled: isReady && useAIScore && !!user?.id && !!summary,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/financial-health");
-      return response.json();
-    },
-  });
-
-  const { data: aiScore, isLoading: aiScoreLoading } = aiScoreQuery;
+  // This component is designed for free users and provides mathematical calculations only
 
   const calculateHealthScore = () => {
     if (!summary) return { score: 0, status: 'Loading...', color: 'gray' };
-
-    // Return AI score if available and enabled
-    if (useAIScore && aiScore) {
-      return aiScore;
-    }
 
     let score = 0;
     const factors = [];
@@ -147,41 +108,6 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
   const healthData = calculateHealthScore();
   const StatusIcon = healthData.icon || CheckCircle;
 
-  if (aiScoreLoading) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="animate-pulse">
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
-            <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
-            <div className="space-y-2">
-              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
-              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (aiScoreQuery.error) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center py-8">
-            <div className="text-4xl text-gray-300 dark:text-gray-600 mb-4">⚠️</div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              Unable to Load Health Score
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">
-              Please try again in a moment
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card className="h-full">
       <CardHeader className="pb-3">
@@ -196,30 +122,18 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
               <TooltipContent className="max-w-sm p-4 text-sm">
                 <div className="space-y-2">
                   <div className="font-semibold">How Your Financial Health Score is Calculated:</div>
-                  {useAIScore ? (
-                    <div>
-                      <div className="text-blue-600 font-medium mb-2">🤖 AI-Powered Calculation</div>
-                      <div>AI analyzes your spending patterns, seasonal trends, and financial behavior to provide a personalized score that adapts to your unique situation.</div>
-                      <div className="mt-2">
-                        <strong>AI considers:</strong> Transaction patterns, spending volatility, category preferences, seasonal adjustments, goal progress, and predictive factors.
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <div>
-                        <strong>Spending Control (30%):</strong> Compares your expenses to income. Lower expense ratio = higher score.
-                      </div>
-                      <div>
-                        <strong>Savings Rate (25%):</strong> Measures how much you save. Aim for 10-20% of income.
-                      </div>
-                      <div>
-                        <strong>Budget Adherence (25%):</strong> How well you stick to your budgets. Under budget = excellent.
-                      </div>
-                      <div>
-                        <strong>Financial Stability (20%):</strong> Overall balance between income and expenses.
-                      </div>
-                    </>
-                  )}
+                  <div>
+                    <strong>Spending Control (30%):</strong> Compares your expenses to income. Lower expense ratio = higher score.
+                  </div>
+                  <div>
+                    <strong>Savings Rate (25%):</strong> Measures how much you save. Aim for 10-20% of income.
+                  </div>
+                  <div>
+                    <strong>Budget Adherence (25%):</strong> How well you stick to your budgets. Under budget = excellent.
+                  </div>
+                  <div>
+                    <strong>Financial Stability (20%):</strong> Overall balance between income and expenses.
+                  </div>
                   <div className="mt-3 pt-2 border-t border-gray-200">
                     <strong>Score Ranges:</strong><br />
                     80-100: Excellent | 65-79: Good | 50-64: Fair | Below 50: Needs Improvement
@@ -228,22 +142,6 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <button
-            onClick={() => {
-              if (!useAIScore && !aiScore) {
-                aiScoreQuery.refetch();
-              }
-              setUseAIScore(!useAIScore);
-            }}
-            className={`ml-2 px-2 py-1 text-xs rounded-full transition-colors ${
-              useAIScore 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-            }`}
-            title={useAIScore ? 'Switch to Standard Calculation' : 'Use AI-Powered Score'}
-          >
-            {useAIScore ? '🤖 AI' : 'AI'}
-          </button>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

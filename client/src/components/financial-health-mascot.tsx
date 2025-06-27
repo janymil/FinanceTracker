@@ -21,6 +21,7 @@ import {
   Crown
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import RequirePlan from "./require-plan";
 
 interface FinancialHealthData {
   score: number;
@@ -221,192 +222,205 @@ export default function FinancialHealthMascot() {
   const config = mascotConfigs[healthData.category] || mascotConfigs.fair;
 
   return (
-    <Card className={`relative overflow-hidden transition-all duration-300 ${config?.borderColor || 'border-gray-300'} border-2`}>
-      <CardContent className="p-6">
-        {/* Mascot Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <motion.div
-              {...getAnimationVariants(mascotState.animation)}
-              className={`p-3 rounded-full ${config?.bgColor || 'bg-gray-100'}`}
-            >
-              <MascotFace emotion={mascotState.emotion} />
-            </motion.div>
-            <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">
-                {t('financialHealthAssistant')}
-              </h3>
-              <Badge className={`${getScoreBadgeColor(healthData.score)} text-xs`}>
-                {healthData.score}/100
-              </Badge>
+    <RequirePlan 
+      plan="standard" 
+      feature="AI-Enhanced Financial Health Mascot"
+      description="Get a personalized AI companion that analyzes your financial behavior and provides intelligent insights"
+      benefits={[
+        "AI-powered financial health analysis",
+        "Personalized insights and recommendations", 
+        "Real-time emotional feedback based on spending patterns",
+        "Achievement tracking and celebration",
+        "Smart warnings and action items"
+      ]}
+    >
+      <Card className={`relative overflow-hidden transition-all duration-300 ${config?.borderColor || 'border-gray-300'} border-2`}>
+        <CardContent className="p-6">
+          {/* Mascot Header */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <motion.div
+                {...getAnimationVariants(mascotState.animation)}
+                className={`p-3 rounded-full ${config?.bgColor || 'bg-gray-100'}`}
+              >
+                <MascotFace emotion={mascotState.emotion} />
+              </motion.div>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  {t('financialHealthAssistant')}
+                </h3>
+                <Badge className={`${getScoreBadgeColor(healthData.score)} text-xs`}>
+                  {healthData.score}/100
+                </Badge>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {healthData.trend === 'improving' && (
+                <motion.div
+                  animate={{ y: [0, -3, 0] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                >
+                  <TrendingUp className="h-5 w-5 text-green-500" />
+                </motion.div>
+              )}
+              {healthData.trend === 'declining' && (
+                <motion.div
+                  animate={{ y: [0, 3, 0] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                >
+                  <TrendingDown className="h-5 w-5 text-red-500" />
+                </motion.div>
+              )}
             </div>
           </div>
-          
-          <div className="flex items-center gap-2">
-            {healthData.trend === 'improving' && (
+
+          {/* Mascot Message */}
+          <div className={`p-4 rounded-lg ${config?.bgColor || 'bg-gray-100'} mb-4`}>
+            <p className={`text-sm ${config?.color || 'text-gray-600'} text-center font-medium`}>
+              {mascotState.message}
+            </p>
+          </div>
+
+          {/* Health Score Progress */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t('healthScore')}
+              </span>
+              <span className={`text-sm font-bold ${getScoreColor(healthData.score)}`}>
+                {healthData.score}%
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <motion.div
-                animate={{ y: [0, -3, 0] }}
-                transition={{ duration: 1, repeat: Infinity }}
+                className={`h-2 rounded-full ${
+                  healthData.score >= 80 ? 'bg-green-500' :
+                  healthData.score >= 60 ? 'bg-blue-500' :
+                  healthData.score >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+                }`}
+                initial={{ width: 0 }}
+                animate={{ width: `${healthData.score}%` }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+              />
+            </div>
+          </div>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-3 gap-2 mb-4 text-center">
+            <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
+              <CheckCircle className="h-4 w-4 text-green-500 mx-auto mb-1" />
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                {healthData.achievements?.length || 0} {t('achievements')}
+              </p>
+            </div>
+            <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
+              <Target className="h-4 w-4 text-blue-500 mx-auto mb-1" />
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                {healthData.insights?.length || 0} {t('insights')}
+              </p>
+            </div>
+            <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
+              <AlertTriangle className="h-4 w-4 text-yellow-500 mx-auto mb-1" />
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                {healthData.warnings?.length || 0} {t('alerts')}
+              </p>
+            </div>
+          </div>
+
+          {/* Toggle Details Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowDetails(!showDetails)}
+            className="w-full"
+          >
+            {showDetails ? t('hideDetails') : t('showDetails')}
+          </Button>
+
+          {/* Detailed Information */}
+          <AnimatePresence>
+            {showDetails && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="mt-4 space-y-3"
               >
-                <TrendingUp className="h-5 w-5 text-green-500" />
+                {/* Achievements */}
+                {healthData?.achievements && healthData.achievements.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium text-green-700 dark:text-green-400 mb-2">
+                      {t('recentAchievements')}
+                    </h4>
+                    <ul className="space-y-1">
+                      {healthData.achievements.map((achievement, index) => (
+                        <motion.li
+                          key={index}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
+                        >
+                          <Crown className="h-3 w-3 text-yellow-500" />
+                          {achievement}
+                        </motion.li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Insights */}
+                {healthData?.insights && healthData.insights.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-2">
+                      {t('smartInsights')}
+                    </h4>
+                    <ul className="space-y-1">
+                      {healthData.insights.map((insight, index) => (
+                        <motion.li
+                          key={index}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
+                        >
+                          <Zap className="h-3 w-3 text-blue-500" />
+                          {insight}
+                        </motion.li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Warnings */}
+                {healthData?.warnings && healthData.warnings.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium text-red-700 dark:text-red-400 mb-2">
+                      {t('actionItems')}
+                    </h4>
+                    <ul className="space-y-1">
+                      {healthData.warnings.map((warning, index) => (
+                        <motion.li
+                          key={index}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
+                        >
+                          <AlertTriangle className="h-3 w-3 text-red-500" />
+                          {warning}
+                        </motion.li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </motion.div>
             )}
-            {healthData.trend === 'declining' && (
-              <motion.div
-                animate={{ y: [0, 3, 0] }}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                <TrendingDown className="h-5 w-5 text-red-500" />
-              </motion.div>
-            )}
-          </div>
-        </div>
-
-        {/* Mascot Message */}
-        <div className={`p-4 rounded-lg ${config?.bgColor || 'bg-gray-100'} mb-4`}>
-          <p className={`text-sm ${config?.color || 'text-gray-600'} text-center font-medium`}>
-            {mascotState.message}
-          </p>
-        </div>
-
-        {/* Health Score Progress */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t('healthScore')}
-            </span>
-            <span className={`text-sm font-bold ${getScoreColor(healthData.score)}`}>
-              {healthData.score}%
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-            <motion.div
-              className={`h-2 rounded-full ${
-                healthData.score >= 80 ? 'bg-green-500' :
-                healthData.score >= 60 ? 'bg-blue-500' :
-                healthData.score >= 40 ? 'bg-yellow-500' : 'bg-red-500'
-              }`}
-              initial={{ width: 0 }}
-              animate={{ width: `${healthData.score}%` }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-            />
-          </div>
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-2 mb-4 text-center">
-          <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
-            <CheckCircle className="h-4 w-4 text-green-500 mx-auto mb-1" />
-            <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.achievements?.length || 0} {t('achievements')}
-            </p>
-          </div>
-          <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
-            <Target className="h-4 w-4 text-blue-500 mx-auto mb-1" />
-            <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.insights?.length || 0} {t('insights')}
-            </p>
-          </div>
-          <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
-            <AlertTriangle className="h-4 w-4 text-yellow-500 mx-auto mb-1" />
-            <p className="text-xs text-gray-600 dark:text-gray-400">
-              {healthData.warnings?.length || 0} {t('alerts')}
-            </p>
-          </div>
-        </div>
-
-        {/* Toggle Details Button */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowDetails(!showDetails)}
-          className="w-full"
-        >
-          {showDetails ? t('hideDetails') : t('showDetails')}
-        </Button>
-
-        {/* Detailed Information */}
-        <AnimatePresence>
-          {showDetails && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="mt-4 space-y-3"
-            >
-              {/* Achievements */}
-              {healthData?.achievements && healthData.achievements.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-medium text-green-700 dark:text-green-400 mb-2">
-                    {t('recentAchievements')}
-                  </h4>
-                  <ul className="space-y-1">
-                    {healthData.achievements.map((achievement, index) => (
-                      <motion.li
-                        key={index}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
-                      >
-                        <Crown className="h-3 w-3 text-yellow-500" />
-                        {achievement}
-                      </motion.li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Insights */}
-              {healthData?.insights && healthData.insights.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-2">
-                    {t('smartInsights')}
-                  </h4>
-                  <ul className="space-y-1">
-                    {healthData.insights.map((insight, index) => (
-                      <motion.li
-                        key={index}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
-                      >
-                        <Zap className="h-3 w-3 text-blue-500" />
-                        {insight}
-                      </motion.li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Warnings */}
-              {healthData?.warnings && healthData.warnings.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-medium text-red-700 dark:text-red-400 mb-2">
-                    {t('actionItems')}
-                  </h4>
-                  <ul className="space-y-1">
-                    {healthData.warnings.map((warning, index) => (
-                      <motion.li
-                        key={index}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
-                      >
-                        <AlertTriangle className="h-3 w-3 text-red-500" />
-                        {warning}
-                      </motion.li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </CardContent>
-    </Card>
+          </AnimatePresence>
+        </CardContent>
+      </Card>
+    </RequirePlan>
   );
 }
