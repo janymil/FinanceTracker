@@ -623,6 +623,56 @@ export function registerAIRoutes(app: Express) {
     }
   });
 
+  // Helper function to get category prefix based on content
+  function getCategoryPrefix(text: string): string {
+    const lowerText = text.toLowerCase();
+    
+    if (lowerText.includes('housing') || lowerText.includes('rent') || lowerText.includes('mortgage')) {
+      return 'Housing Analysis';
+    } else if (lowerText.includes('shopping') || lowerText.includes('purchase')) {
+      return 'Spending Pattern';
+    } else if (lowerText.includes('income') || lowerText.includes('salary') || lowerText.includes('earning')) {
+      return 'Income Analysis';
+    } else if (lowerText.includes('budget') || lowerText.includes('management')) {
+      return 'Budget Control';
+    } else if (lowerText.includes('expense') || lowerText.includes('volatility')) {
+      return 'Expense Behavior';
+    } else if (lowerText.includes('category') || lowerText.includes('distribution')) {
+      return 'Spending Distribution';
+    } else if (lowerText.includes('resilience') || lowerText.includes('financial health')) {
+      return 'Financial Resilience';
+    } else if (lowerText.includes('seasonal') || lowerText.includes('trend')) {
+      return 'Trend Analysis';
+    } else {
+      return 'Financial Insight';
+    }
+  }
+
+  // Helper function to categorize insights
+  function categorizeInsights(insights: string[]): string[] {
+    return insights.map(insight => {
+      const categoryPrefix = getCategoryPrefix(insight);
+      return `${categoryPrefix}: ${insight}`;
+    });
+  }
+
+  // Helper function to categorize recommendations
+  function categorizeRecommendations(recommendations: string[]): string[] {
+    return recommendations.map(recommendation => {
+      if (recommendation.toLowerCase().includes('budget')) {
+        return `Budget Strategy: ${recommendation}`;
+      } else if (recommendation.toLowerCase().includes('saving') || recommendation.toLowerCase().includes('save')) {
+        return `Savings Goal: ${recommendation}`;
+      } else if (recommendation.toLowerCase().includes('income') || recommendation.toLowerCase().includes('earn')) {
+        return `Income Enhancement: ${recommendation}`;
+      } else if (recommendation.toLowerCase().includes('expense') || recommendation.toLowerCase().includes('spending')) {
+        return `Expense Management: ${recommendation}`;
+      } else {
+        return `Financial Strategy: ${recommendation}`;
+      }
+    });
+  }
+
   // Helper function to transform AI response for mascot component
   function transformAIResponseForMascot(aiData: any) {
     // Extract insights from different AI response fields
@@ -630,23 +680,26 @@ export function registerAIRoutes(app: Express) {
     const achievements: string[] = [];
     const warnings: string[] = [];
 
-    // Add personalized factors as insights
+    // Group personalized factors by category
     if (aiData.aiAnalysis?.personalizedFactors) {
-      insights.push(...aiData.aiAnalysis.personalizedFactors);
+      const categorizedInsights = categorizeInsights(aiData.aiAnalysis.personalizedFactors);
+      insights.push(...categorizedInsights);
     }
 
-    // Add factor insights
+    // Add factor insights with better formatting
     if (aiData.factors) {
       aiData.factors.forEach((factor: any) => {
         if (factor.aiInsight) {
-          insights.push(`${factor.name}: ${factor.aiInsight}`);
+          const categoryPrefix = getCategoryPrefix(factor.aiInsight);
+          insights.push(`${categoryPrefix}: ${factor.aiInsight}`);
         }
       });
     }
 
-    // Add recommendations as insights
+    // Add recommendations as insights with category prefixes
     if (aiData.aiAnalysis?.recommendations) {
-      insights.push(...aiData.aiAnalysis.recommendations);
+      const categorizedRecommendations = categorizeRecommendations(aiData.aiAnalysis.recommendations);
+      insights.push(...categorizedRecommendations);
     }
 
     // Extract achievements from positive factors
@@ -668,7 +721,7 @@ export function registerAIRoutes(app: Express) {
     }
 
     if (aiData.aiAnalysis?.riskAssessment) {
-      warnings.push(aiData.aiAnalysis.riskAssessment);
+      warnings.push(`Risk Assessment: ${aiData.aiAnalysis.riskAssessment}`);
     }
 
     return {
@@ -681,6 +734,56 @@ export function registerAIRoutes(app: Express) {
       factors: aiData.factors || [],
       aiAnalysis: aiData.aiAnalysis || {}
     };
+  }
+
+  // Helper function to categorize insights
+  function categorizeInsights(insights: string[]): string[] {
+    return insights.map(insight => {
+      const categoryPrefix = getCategoryPrefix(insight);
+      return `${categoryPrefix}: ${insight}`;
+    });
+  }
+
+  // Helper function to categorize recommendations
+  function categorizeRecommendations(recommendations: string[]): string[] {
+    return recommendations.map(recommendation => {
+      if (recommendation.toLowerCase().includes('budget')) {
+        return `Budget Strategy: ${recommendation}`;
+      } else if (recommendation.toLowerCase().includes('saving') || recommendation.toLowerCase().includes('save')) {
+        return `Savings Goal: ${recommendation}`;
+      } else if (recommendation.toLowerCase().includes('income') || recommendation.toLowerCase().includes('earn')) {
+        return `Income Enhancement: ${recommendation}`;
+      } else if (recommendation.toLowerCase().includes('expense') || recommendation.toLowerCase().includes('spending')) {
+        return `Expense Management: ${recommendation}`;
+      } else {
+        return `Financial Strategy: ${recommendation}`;
+      }
+    });
+  }
+
+  // Helper function to get category prefix based on content
+  function getCategoryPrefix(text: string): string {
+    const lowerText = text.toLowerCase();
+    
+    if (lowerText.includes('housing') || lowerText.includes('rent') || lowerText.includes('mortgage')) {
+      return 'Housing Analysis';
+    } else if (lowerText.includes('shopping') || lowerText.includes('purchase')) {
+      return 'Spending Pattern';
+    } else if (lowerText.includes('income') || lowerText.includes('salary') || lowerText.includes('earning')) {
+      return 'Income Analysis';
+    } else if (lowerText.includes('budget') || lowerText.includes('management')) {
+      return 'Budget Control';
+    } else if (lowerText.includes('expense') || lowerText.includes('volatility')) {
+      return 'Expense Behavior';
+    } else if (lowerText.includes('category') || lowerText.includes('distribution')) {
+      return 'Spending Distribution';
+    } else if (lowerText.includes('resilience') || lowerText.includes('financial health')) {
+      return 'Financial Resilience';
+    } else if (lowerText.includes('seasonal') || lowerText.includes('trend')) {
+      return 'Trend Analysis';
+    } else {
+      return 'Financial Insight';
+    }
   }
 
   // Financial Mascot endpoints
