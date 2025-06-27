@@ -630,116 +630,107 @@ export function registerAIRoutes(app: Express) {
 
   // Helper function to transform AI response for mascot component
   function transformAIResponseForMascot(aiData: any) {
-    // Extract and organize insights into clean, user-friendly format
     const insights: string[] = [];
     const achievements: string[] = [];
     const warnings: string[] = [];
 
-    // Helper function to clean repetitive headers and improve readability
+    // Aggressive text cleaning function
     const cleanText = (text: string): string => {
+      if (!text || typeof text !== 'string') return '';
+      
       return text
-        // Remove common headers at the beginning
-        .replace(/^(Personal Financial Pattern|AI Recommendation|Recommendation|Insight)\s*:?\s*/i, '')
-        .replace(/^(Pattern|Analysis|Financial Pattern|Smart Recommendation)\s*:?\s*/i, '')
-        // Remove headers anywhere in the text (not just beginning)
-        .replace(/(Personal Financial Pattern|AI Recommendation|Recommendation|Insight)\s*:?\s*/gi, '')
-        .replace(/(Pattern|Analysis|Financial Pattern|Smart Recommendation)\s*:?\s*/gi, '')
-        // Clean up extra spaces and line breaks
+        // Remove all variations of repetitive headers
+        .replace(/Personal Financial Pattern\s*:?\s*/gi, '')
+        .replace(/AI Recommendation\s*:?\s*/gi, '')
+        .replace(/Smart Recommendation\s*:?\s*/gi, '')
+        .replace(/Recommendation\s*:?\s*/gi, '')
+        .replace(/Financial Pattern\s*:?\s*/gi, '')
+        .replace(/Pattern\s*:?\s*/gi, '')
+        .replace(/Analysis\s*:?\s*/gi, '')
+        .replace(/Insight\s*:?\s*/gi, '')
+        // Clean up multiple spaces and line breaks
         .replace(/\s+/g, ' ')
         .trim();
     };
 
-    // Process personalized factors into clean insights
-    if (aiData.aiAnalysis?.personalizedFactors) {
+    // Process the AI response - check different possible structures
+    
+    // If aiData has personalizedFactors
+    if (aiData?.aiAnalysis?.personalizedFactors && Array.isArray(aiData.aiAnalysis.personalizedFactors)) {
       aiData.aiAnalysis.personalizedFactors.forEach((factor: string) => {
-        const cleanFactor = cleanText(factor);
-        if (cleanFactor && cleanFactor.length > 15 && insights.length < 8) {
-          insights.push(cleanFactor);
+        const cleaned = cleanText(factor);
+        if (cleaned && cleaned.length > 20 && insights.length < 8) {
+          insights.push(cleaned);
         }
       });
     }
 
-    // Process factor insights with improved formatting
-    if (aiData.factors) {
-      aiData.factors.forEach((factor: any) => {
-        if (factor.aiInsight && insights.length < 8) {
-          const cleanInsight = cleanText(factor.aiInsight);
-          if (cleanInsight && cleanInsight.length > 15) {
-            insights.push(cleanInsight);
-          }
-        }
-      });
-    }
-
-    // Process recommendations with clean formatting
-    if (aiData.aiAnalysis?.recommendations) {
+    // If aiData has recommendations
+    if (aiData?.aiAnalysis?.recommendations && Array.isArray(aiData.aiAnalysis.recommendations)) {
       aiData.aiAnalysis.recommendations.forEach((rec: string) => {
-        const cleanRec = cleanText(rec);
-        if (cleanRec && cleanRec.length > 15 && insights.length < 8) {
-          // Make recommendations more actionable by adding context
-          if (!cleanRec.toLowerCase().includes('improve') && !cleanRec.toLowerCase().includes('increase') && !cleanRec.toLowerCase().includes('reduce')) {
-            insights.push(`Consider: ${cleanRec}`);
-          } else {
-            insights.push(cleanRec);
+        const cleaned = cleanText(rec);
+        if (cleaned && cleaned.length > 20 && insights.length < 8) {
+          insights.push(cleaned);
+        }
+      });
+    }
+
+    // If it's a simple string response, split and clean
+    if (typeof aiData === 'string') {
+      const lines = aiData.split(/\n|\r\n/).filter(line => line.trim());
+      lines.forEach(line => {
+        const cleaned = cleanText(line);
+        if (cleaned && cleaned.length > 25 && insights.length < 8) {
+          insights.push(cleaned);
+        }
+      });
+    }
+
+    // If aiData has factors array
+    if (aiData?.factors && Array.isArray(aiData.factors)) {
+      aiData.factors.forEach((factor: any) => {
+        if (factor.aiInsight) {
+          const cleaned = cleanText(factor.aiInsight);
+          if (cleaned && cleaned.length > 20 && insights.length < 8) {
+            insights.push(cleaned);
           }
         }
-      });
-    }
-
-    // Process any additional insights from the response structure
-    if (typeof aiData === 'string') {
-      // If the AI response is a string, parse it for insights
-      const lines = aiData.split('\n').filter(line => line.trim());
-      lines.forEach(line => {
-        const cleanLine = cleanText(line);
-        if (cleanLine && cleanLine.length > 20 && insights.length < 8) {
-          insights.push(cleanLine);
-        }
-      });
-    }
-
-    // Extract achievements from positive factors with better formatting
-    if (aiData.factors) {
-      aiData.factors.forEach((factor: any) => {
+        
+        // Extract achievements
         if (factor.status === 'good' || factor.status === 'excellent') {
           const percentage = Math.round((factor.score / factor.max) * 100);
-          achievements.push(`Strong ${factor.name.toLowerCase()} (${percentage}% performance)`);
+          achievements.push(`${factor.name}: ${percentage}%`);
         }
-      });
-    }
-
-    // Extract warnings from negative factors with actionable format
-    if (aiData.factors) {
-      aiData.factors.forEach((factor: any) => {
+        
+        // Extract warnings
         if (factor.status === 'poor' || factor.status === 'below average') {
           const percentage = Math.round((factor.score / factor.max) * 100);
-          warnings.push(`${factor.name} needs attention (${percentage}% performance)`);
+          warnings.push(`${factor.name}: ${percentage}%`);
         }
       });
     }
 
-    // Add risk assessment as a clean warning
-    if (aiData.aiAnalysis?.riskAssessment) {
-      const cleanRisk = cleanText(aiData.aiAnalysis.riskAssessment);
-      if (cleanRisk && cleanRisk.length > 20) {
-        warnings.push(cleanRisk);
-      }
+    // Fallback: try to extract insights from any object properties
+    if (insights.length === 0 && typeof aiData === 'object') {
+      Object.values(aiData).forEach((value: any) => {
+        if (typeof value === 'string' && value.length > 30) {
+          const cleaned = cleanText(value);
+          if (cleaned && cleaned.length > 25 && insights.length < 8) {
+            insights.push(cleaned);
+          }
+        }
+      });
     }
 
-    // Remove duplicates and empty entries
-    const uniqueInsights = Array.from(new Set(insights.filter(i => i && i.length > 10)));
-    const uniqueAchievements = Array.from(new Set(achievements.filter(a => a && a.length > 5)));
-    const uniqueWarnings = Array.from(new Set(warnings.filter(w => w && w.length > 5)));
-
     return {
-      score: aiData.score || 50,
-      trend: aiData.trend || 'stable',
-      category: aiData.category || 'fair',
-      insights: uniqueInsights.slice(0, 8), // Limit to 8 insights for better UX
-      achievements: uniqueAchievements.slice(0, 4), // Limit to 4 achievements
-      warnings: uniqueWarnings.slice(0, 5), // Limit to 5 warnings
-      factors: aiData.factors || [],
-      aiAnalysis: aiData.aiAnalysis || {}
+      score: aiData?.score || 50,
+      trend: aiData?.trend || 'stable',
+      category: aiData?.category || 'fair',
+      insights: insights.slice(0, 8),
+      achievements: achievements.slice(0, 4),
+      warnings: warnings.slice(0, 5),
+      factors: aiData?.factors || [],
+      aiAnalysis: aiData?.aiAnalysis || {}
     };
   }
 
