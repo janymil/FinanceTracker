@@ -28,21 +28,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Contact form endpoint
   app.post('/api/contact', handleContactForm);
 
-  // Language detection test endpoint (for development)
-  app.get('/api/test-language', (req, res) => {
-    const { getUserLanguage } = require('../categoryTranslations');
-    const detectedLanguage = getUserLanguage(req);
-    res.json({ 
-      detectedLanguage,
-      headers: {
-        'x-user-language': req.headers['x-user-language'],
-        'accept-language': req.headers['accept-language'],
-        'referer': req.headers.referer
-      },
-      url: req.url
-    });
-  });
-
   // Register all route modules
   registerMobileUploadRoutes(app);
   registerAuthRoutes(app);
