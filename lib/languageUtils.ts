@@ -1,11 +1,33 @@
+// Supported language codes - these are the only valid codes for the application
+const SUPPORTED_LANGUAGES = ['en-us', 'es-pe', 'sk-sk'] as const;
+type SupportedLanguage = typeof SUPPORTED_LANGUAGES[number];
+
 /**
- * Normalize language code to full locale format
- * Supports all language code formats: en, es, sk, en-us, es-pe, sk-sk, en-US, es-PE, sk-SK
+ * Validates if a language code is supported by the application
+ * @param lang - Language code to validate
+ * @returns true if supported, false otherwise
  */
-export function normalizeLanguageCode(lang: string): string {
-  if (!lang) return 'en-us';
+export function isLanguageSupported(lang: string): lang is SupportedLanguage {
+  return SUPPORTED_LANGUAGES.includes(lang as SupportedLanguage);
+}
+
+/**
+ * Normalize language code to full locale format with validation
+ * Supports all language code formats: en, es, sk, en-us, es-pe, sk-sk, en-US, es-PE, sk-SK
+ * @param lang - Language code to normalize
+ * @returns Normalized language code (always one of: en-us, es-pe, sk-sk)
+ */
+export function normalizeLanguageCode(lang: string): SupportedLanguage {
+  if (!lang || typeof lang !== 'string') {
+    return 'en-us'; // Safe fallback for invalid input
+  }
   
-  const normalizedLang = lang.toLowerCase();
+  const normalizedLang = lang.toLowerCase().trim();
+  
+  // If already normalized and supported, return as-is
+  if (isLanguageSupported(normalizedLang)) {
+    return normalizedLang;
+  }
   
   // Handle all Spanish variants
   if (normalizedLang.startsWith('es')) {

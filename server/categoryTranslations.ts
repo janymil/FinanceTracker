@@ -82,43 +82,60 @@ export const categoryTranslations = {
   }
 };
 
-// Helper function to get user language from request
+// Helper function to get user language from request with improved detection
 export function getUserLanguage(req: any): string {
-  // Check for custom language header from frontend
+  // Priority 1: Check for custom language header from frontend (most reliable)
   const userLanguage = req.headers['x-user-language'];
-  if (userLanguage) {
-    return normalizeLanguageCode(userLanguage);
+  if (userLanguage && typeof userLanguage === 'string') {
+    const normalized = normalizeLanguageCode(userLanguage);
+    console.log(`[Lang Detection] Using x-user-language header: ${userLanguage} -> ${normalized}`);
+    return normalized;
   }
   
-  // Check the URL path for language preference
-  const referer = req.headers.referer || req.headers.origin || req.url || '';
-  
-  // Check if URL contains language path - handle all formats
-  if (referer.includes('/es/') || referer.includes('/es')) {
-    return 'es-pe'; // Spanish (Peru)
-  }
-  if (referer.includes('/sk/') || referer.includes('/sk')) {
-    return 'sk-sk'; // Slovak
-  }
-  if (referer.includes('/en/') || referer.includes('/en')) {
-    return 'en-us'; // English
+  // Priority 2: Extract language from URL path (more reliable than referer)
+  const urlPath = req.url || req.originalUrl || '';
+  const urlMatch = urlPath.match(/^\/(en|es|sk)\b/);
+  if (urlMatch) {
+    const langFromUrl = normalizeLanguageCode(urlMatch[1]);
+    console.log(`[Lang Detection] Using URL path: ${urlMatch[1]} -> ${langFromUrl}`);
+    return langFromUrl;
   }
   
-  // Fallback to Accept-Language header
+  // Priority 3: Check referer header for language preference
+  const referer = req.headers.referer || req.headers.origin || '';
+  if (referer && typeof referer === 'string') {
+    const refererMatch = referer.match(/\/(en|es|sk)(?:\/|$)/);
+    if (refererMatch) {
+      const langFromReferer = normalizeLanguageCode(refererMatch[1]);
+      console.log(`[Lang Detection] Using referer: ${refererMatch[1]} -> ${langFromReferer}`);
+      return langFromReferer;
+    }
+  }
+  
+  // Priority 4: Parse Accept-Language header (browser preference)
   const acceptLanguage = req.headers['accept-language'];
-  if (acceptLanguage) {
-    // Parse the Accept-Language header to get the primary language
-    const languages = acceptLanguage.split(',').map((lang: string) => {
-      const [code, quality] = lang.trim().split(';q=');
-      return { code: code.trim(), quality: quality ? parseFloat(quality) : 1 };
-    }).sort((a: any, b: any) => b.quality - a.quality);
-    
-    const primaryLang = languages[0]?.code || 'en';
-    
-    // Use the normalize function for consistency
-    return normalizeLanguageCode(primaryLang);
+  if (acceptLanguage && typeof acceptLanguage === 'string') {
+    try {
+      const languages = acceptLanguage.split(',').map((lang: string) => {
+        const [code, quality] = lang.trim().split(';q=');
+        return { 
+          code: code.trim(), 
+          quality: quality ? parseFloat(quality) || 1 : 1 
+        };
+      }).sort((a: any, b: any) => b.quality - a.quality);
+      
+      const primaryLang = languages[0]?.code;
+      if (primaryLang) {
+        const langFromAccept = normalizeLanguageCode(primaryLang);
+        console.log(`[Lang Detection] Using Accept-Language: ${primaryLang} -> ${langFromAccept}`);
+        return langFromAccept;
+      }
+    } catch (error) {
+      console.warn('[Lang Detection] Failed to parse Accept-Language header:', error);
+    }
   }
   
+  console.log('[Lang Detection] Using default fallback: en-us');
   return 'en-us'; // Default fallback
 }
 
