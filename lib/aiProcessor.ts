@@ -24,7 +24,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
   console.log(`[AI ${task}] Direct Fly.io call with local fallback`);
 
   try {
-    console.log(`[AI ${task}] Calling Fly.io processor with language: ${payload.language}...`);
+    console.log(`[AI ${task}] Calling Fly.io processor...`);
     const response = await fetch("https://finanzerpro.fly.dev/execute-gpt-task", {
       method: "POST",
       headers: {
@@ -61,7 +61,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
       
       switch (task) {
         case 'contextual-tips':
-          fallbackResult = await generateContextualFinancialTips(userId, payload, payload.language || 'en-us');
+          fallbackResult = await generateContextualFinancialTips(payload, payload.language || 'en-us');
           break;
         case 'financial-tips':
           fallbackResult = await generateFinancialTips(payload, payload.language || 'en-us');
