@@ -733,7 +733,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Basic/Premium User Content */}
+        {/* Standard and Premium User Content */}
         {(databaseUser?.plan === 'standard' || databaseUser?.plan === 'premium') && (
           <div className="space-y-8">
             {/* Advanced Analytics Row - AI-driven for Standard/Premium */}
@@ -783,8 +783,6 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <LazyTransactionRemindersWidget />
 
-              {/* <LazyRemindersStreaks /> - Hidden until functionality is complete */}
-
               <LazyDailyRecommendations 
                 summary={financialSummary}
                 transactions={transactions as any}
@@ -792,7 +790,7 @@ export default function Dashboard() {
               />
             </div>
 
-            {/* Premium Features - Show widgets with internal upgrade prompts */}
+            {/* Premium Features - Components handle internal upgrade prompts for Standard users */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <LazyExpensePrediction 
                 transactions={transactions as any}
@@ -805,8 +803,6 @@ export default function Dashboard() {
             <LazyAIFinancialTips 
               summary={!summaryLoading ? financialSummary : undefined}
             />
-
-
           </div>
         )}
 
