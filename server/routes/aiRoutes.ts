@@ -625,6 +625,8 @@ export function registerAIRoutes(app: Express) {
 
   // Helper function to transform AI response for mascot component
   function transformAIResponseForMascot(aiData: any) {
+    console.log('🔧 TRANSFORM DEBUG: Original aiData structure:', JSON.stringify(aiData, null, 2));
+    
     // Extract and organize insights into clean, user-friendly format
     const insights: string[] = [];
     const achievements: string[] = [];
@@ -694,7 +696,7 @@ export function registerAIRoutes(app: Express) {
     const uniqueAchievements = Array.from(new Set(achievements.filter(a => a && a.length > 5)));
     const uniqueWarnings = Array.from(new Set(warnings.filter(w => w && w.length > 5)));
 
-    return {
+    const result = {
       score: aiData.score || 50,
       trend: aiData.trend || 'stable',
       category: aiData.category || 'fair',
@@ -704,6 +706,9 @@ export function registerAIRoutes(app: Express) {
       factors: aiData.factors || [],
       aiAnalysis: aiData.aiAnalysis || {}
     };
+    
+    console.log('🔧 TRANSFORM DEBUG: Final transformed result:', JSON.stringify(result, null, 2));
+    return result;
   }
 
   // Financial Mascot endpoints
