@@ -79,10 +79,10 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <DollarSign className="h-5 w-5" />
-          {t('dashboard.expenseBreakdown.title')}
+          {t('Expense Breakdown')}
         </CardTitle>
         <CardDescription>
-          {t('dashboard.expenseBreakdown.monthDescription')}
+          {t('Your spending by category this month')}
         </CardDescription>
       </CardHeader>
       <CardContent>
