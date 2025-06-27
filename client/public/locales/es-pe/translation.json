@@ -568,6 +568,10 @@
     "error": "Error"
   },
 
+  "plans": {
+    "standard": "Estándar"
+  },
+
   "upcomingReminders": {
     "title": "Recordatorios Próximos",
     "description": "Recordatorios automáticos de transacciones y recordatorios de pago manual",

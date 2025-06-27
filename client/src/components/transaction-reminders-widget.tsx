@@ -358,7 +358,7 @@ export default function TransactionRemindersWidget() {
               </Badge>
             </CardTitle>
             <CardDescription>
-              Automatic reminders from transactions and manual payment reminders
+              {t('upcomingReminders.description')}
             </CardDescription>
           </div>
           <div className="mt-4">

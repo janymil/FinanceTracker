@@ -648,6 +648,10 @@
     "error": "Chyba"
   },
 
+  "plans": {
+    "standard": "Štandard"
+  },
+
   "upcomingReminders": {
     "title": "Nadchádzajúce Pripomienky",
     "description": "Automatické pripomienky z transakcií a manuálne platobné pripomienky",
