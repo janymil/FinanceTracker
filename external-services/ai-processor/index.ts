@@ -717,40 +717,7 @@ export async function generateSpendingInsights(transactions: Array<{
       messages: [
         {
           role: "system",
-          content: `You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights.
-
-Generate 2-4 insights focusing on:
-- Unusual spending patterns
-- Budget optimization opportunities  
-- Positive financial behaviors
-- Spending trends and recommendations
-
-Each insight should have:
-- Unique ID
-- Type: warning, suggestion, achievement, or trend
-
-Respond in ${getLanguageLabel(language)}.`
-- Clear title and description
-- Impact level: high, medium, low
-- Category if relevant
-- Amount if relevant
-- Actionable recommendation
-- Whether it's actionable (boolean)
-
-Respond with JSON array format:
-[
-  {
-    "id": "insight_1",
-    "type": "warning",
-    "title": "High dining expenses",
-    "description": "Your restaurant spending increased 40% this month",
-    "impact": "high",
-    "category": "Food & Dining",
-    "amount": 450,
-    "recommendation": "Consider meal planning to reduce dining out",
-    "actionable": true
-  }
-]`
+          content: `Respond in ${getLanguageLabel(language)}. You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights. Generate 2-4 insights focusing on unusual spending patterns, budget optimization opportunities, positive financial behaviors, and spending trends. Each insight should have a unique ID, type (warning/suggestion/achievement/trend), clear title and description, impact level (high/medium/low), category if relevant, amount if relevant, actionable recommendation, and whether it's actionable (boolean). Respond with JSON array format.`
         },
         {
           role: "user",
