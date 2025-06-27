@@ -93,6 +93,20 @@ export default function UnifiedRemindersWidget() {
   const { isReady, user } = useClerkUserReady();
   const { t } = useTranslation();
   
+  // Helper function to translate category names using centralized system
+  const getLocalizedCategoryName = (categoryName: string): string => {
+    // Try to translate using the predefined category translation keys
+    const translationKey = categoryName;
+    const translated = t(translationKey);
+    
+    // If translation key exists (not same as key), return translated
+    if (translated !== translationKey) {
+      return translated;
+    }
+    
+    // For custom categories or untranslatable ones, return original name
+    return categoryName;
+  };
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReminder, setEditingReminder] = useState<ExpenseReminder | null>(null);
@@ -372,7 +386,7 @@ export default function UnifiedRemindersWidget() {
                         <SelectContent>
                           {allCategories.map((category: Category) => (
                             <SelectItem key={category.id} value={category.id.toString()}>
-                              {category.name} ({t(`transactions.${category.type}`)})
+                              {getLocalizedCategoryName(category.name)} ({t(`transactions.${category.type}`)})
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -524,12 +538,12 @@ export default function UnifiedRemindersWidget() {
                           {reminder.categoryName && (
                             <>
                               <span>•</span>
-                              <span>{reminder.categoryName}</span>
+                              <span>{getLocalizedCategoryName(reminder.categoryName)}</span>
                             </>
                           )}
                           <span>•</span>
                           <span className={reminder.source === 'automatic' ? 'text-blue-600' : 'text-purple-600'}>
-                            {reminder.source === 'automatic' ? 'Auto' : 'Manual'}
+                            {reminder.source === 'automatic' ? t('common.auto') : t('common.manual')}
                           </span>
                         </div>
                       </div>
