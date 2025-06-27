@@ -92,11 +92,11 @@ export default function UnifiedRemindersWidget() {
   const { toast } = useToast();
   const { isReady, user } = useClerkUserReady();
   const { t } = useTranslation();
-
+  
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReminder, setEditingReminder] = useState<ExpenseReminder | null>(null);
-
+  
   const [newReminder, setNewReminder] = useState({
     title: "",
     description: "",
@@ -324,7 +324,7 @@ export default function UnifiedRemindersWidget() {
                       placeholder={t('upcomingReminders.form.titlePlaceholder')}
                     />
                   </div>
-
+                  
                   <div>
                     <Label htmlFor="description">{t('upcomingReminders.form.description')}</Label>
                     <Textarea
@@ -499,7 +499,7 @@ export default function UnifiedRemindersWidget() {
                 const TypeIcon = getTypeIcon(reminder.type);
                 const typeColor = getTypeColor(reminder.type);
                 const SourceIcon = getSourceIcon(reminder.source);
-
+                
                 return (
                   <div key={reminder.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
@@ -564,7 +564,7 @@ export default function UnifiedRemindersWidget() {
                   </div>
                 );
               })}
-
+              
               {unifiedReminders.length > 8 && (
                 <p className="text-xs text-gray-500 text-center">
                   +{unifiedReminders.length - 8} more reminders
