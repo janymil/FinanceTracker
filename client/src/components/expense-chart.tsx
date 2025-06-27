@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { DollarSign } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { getLocalizedCategoryName, isPredefinedCategory } from "@/lib/categoryHelpers";
 
 interface ExpenseChartProps {
   summary?: {
@@ -17,6 +19,7 @@ const COLORS = [
 ];
 
 export function ExpenseChart({ summary }: ExpenseChartProps) {
+  const { t } = useTranslation();
   const { data: expenseData } = useQuery({
     queryKey: ['/api/expense-breakdown'],
     enabled: !summary,
@@ -38,6 +41,7 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
 
   const chartData = data.map((item, index) => ({
     ...item,
+    category: getLocalizedCategoryName(item.category, t),
     color: item.color || COLORS[index % COLORS.length],
     percentage: totalExpenses > 0 ? ((item.amount / totalExpenses) * 100).toFixed(1) : '0.0'
   }));
@@ -48,10 +52,10 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <DollarSign className="h-5 w-5" />
-            Expense Breakdown
+            {t('dashboard.expenseBreakdown.title')}
           </CardTitle>
           <CardDescription>
-            Your spending by category
+            {t('dashboard.expenseBreakdown.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -60,10 +64,10 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
               <DollarSign className="h-6 w-6 text-gray-400" />
             </div>
             <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-              No Expenses to Display
+              {t('dashboard.expenseBreakdown.noExpensesTitle')}
             </h3>
             <p className="text-xs text-gray-600 dark:text-gray-300">
-              Add some expense transactions to see your spending breakdown
+              {t('dashboard.expenseBreakdown.noExpensesDescription')}
             </p>
           </div>
         </CardContent>
@@ -76,10 +80,10 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <DollarSign className="h-5 w-5" />
-          Expense Breakdown
+          {t('dashboard.expenseBreakdown.title')}
         </CardTitle>
         <CardDescription>
-          Your spending by category this month
+          {t('dashboard.expenseBreakdown.monthDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -101,8 +105,8 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
                 ))}
               </Pie>
               <Tooltip 
-                formatter={(value: number) => [`$${value.toLocaleString()}`, 'Amount']}
-                labelFormatter={(label) => `Category: ${label}`}
+                formatter={(value: number) => [`$${value.toLocaleString()}`, t('dashboard.expenseBreakdown.tooltipAmount')]}
+                labelFormatter={(label) => `${t('dashboard.expenseBreakdown.tooltipCategory')}: ${label}`}
               />
               <Legend />
             </PieChart>
