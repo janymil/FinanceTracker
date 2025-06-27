@@ -21,6 +21,7 @@ export const batchProcessor = {
 async function processBatchedOperations() {
   if (batchQueue.size === 0) return;
   
+  console.log(`Processing batch operations for ${batchQueue.size} users`);
   
   // Process users one by one to avoid rate limits
   for (const userId of Array.from(batchQueue)) {
@@ -41,6 +42,7 @@ async function processBatchedOperations() {
       const shouldUpdateInsights = await shouldProcessInsights(userId, transactions);
       
       if (shouldUpdateInsights) {
+        console.log(`Updating insights for user ${userId}`);
         
         // Pre-generate and cache insights for faster dashboard loading
         if (user.plan === 'premium') {
@@ -82,9 +84,11 @@ async function processBatchedOperations() {
           // Cache system removed
         }
         
+        console.log(`Batch processing completed for user ${userId}`);
       }
       
     } catch (error) {
+      console.error(`Batch processing error for user ${userId}:`, error);
     } finally {
       processingInProgress.delete(userId);
     }
@@ -116,3 +120,4 @@ setInterval(processBatchedOperations, 5 * 60 * 1000);
 // Initial cleanup on startup
 setTimeout(processBatchedOperations, 30000); // Run after 30 seconds of startup
 
+console.log('Batch processor initialized - running every 5 minutes');

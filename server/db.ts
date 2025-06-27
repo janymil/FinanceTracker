@@ -32,6 +32,7 @@ if (isProduction) {
   });
   db = neonDrizzle({ client: pool, schema });
   
+  console.log('✅ Connected to Neon production database');
 } else {
   // Development: Use standard PostgreSQL connection for Replit
   pool = new PgPool({ 
@@ -39,6 +40,7 @@ if (isProduction) {
   });
   db = pgDrizzle(pool, { schema });
   
+  console.log('✅ Connected to Replit development database');
 }
 
 export { pool, db };

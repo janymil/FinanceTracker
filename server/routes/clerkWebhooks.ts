@@ -6,6 +6,7 @@ export function registerClerkWebhookRoutes(app: Express) {
   // Test endpoint to verify webhook functionality in development
   app.post('/api/test-webhook', async (req, res) => {
     try {
+      console.log('Test webhook received:', JSON.stringify(req.body, null, 2));
       
       // Simulate processing a user.created event
       const testUserData = {
@@ -24,9 +25,11 @@ export function registerClerkWebhookRoutes(app: Express) {
         plan: 'free'
       });
       
+      console.log('Test webhook user created successfully:', testUserData.id);
       res.json({ success: true, message: 'Test webhook processed', userId: testUserData.id });
       return;
     } catch (error: any) {
+      console.error('Test webhook error:', error);
       res.status(500).json({ error: 'Test webhook failed', details: error.message });
       return;
     }
@@ -45,6 +48,7 @@ export function registerClerkWebhookRoutes(app: Express) {
       const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
       
       if (!webhookSecret) {
+        console.error('CLERK_WEBHOOK_SECRET is not configured');
         res.status(500).json({ error: 'Webhook secret not configured' });
         return;
       }
@@ -71,6 +75,7 @@ export function registerClerkWebhookRoutes(app: Express) {
           'svix-signature': svix_signature,
         });
       } catch (err) {
+        console.error('Webhook verification failed:', err);
         res.status(400).json({ error: 'Webhook verification failed' });
         return;
       }
@@ -78,6 +83,7 @@ export function registerClerkWebhookRoutes(app: Express) {
       // Handle different event types
       const { type, data } = evt as any;
       
+      console.log(`Clerk webhook received: ${type} for user ${data.id}`);
 
       switch (type) {
         case 'user.created':
@@ -93,17 +99,21 @@ export function registerClerkWebhookRoutes(app: Express) {
           break;
           
         case 'email.created':
+          console.log('Email created event received:', data);
           break;
           
         case 'sms.created':
+          console.log('SMS created event received:', data);
           break;
           
         default:
+          console.log(`Unhandled webhook event type: ${type}`);
       }
 
       res.status(200).json({ received: true });
       
     } catch (error) {
+      console.error('Clerk webhook error:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -135,8 +145,10 @@ async function handleUserCreated(userData: any) {
     };
 
     await storage.createUser(newUser);
+    console.log(`User created in database: ${id} (${primaryEmail})`);
     
   } catch (error) {
+    console.error('Error creating user from webhook:', error);
     throw error;
   }
 }
@@ -149,6 +161,7 @@ async function handleUserUpdated(userData: any) {
     // Check if user exists in our database
     const existingUser = await storage.getUser(id);
     if (!existingUser) {
+      console.log(`User ${id} not found in database, creating from update event`);
       return await handleUserCreated(userData);
     }
     
@@ -170,8 +183,10 @@ async function handleUserUpdated(userData: any) {
     };
 
     await storage.updateUser(id, updatedUser);
+    console.log(`User updated in database: ${id} (${primaryEmail})`);
     
   } catch (error) {
+    console.error('Error updating user from webhook:', error);
     throw error;
   }
 }
@@ -184,6 +199,7 @@ async function handleUserDeleted(userData: any) {
     const objectId = userData.id;
     const userId = userData.object === 'user' ? userData.id : null;
     
+    console.log(`Attempting to delete user. Object ID: ${objectId}, User ID: ${userId}`);
     
     // First try with the provided ID
     let existingUser = await storage.getUser(objectId);
@@ -198,18 +214,22 @@ async function handleUserDeleted(userData: any) {
         existingUser = allUsers.find(u => u.email === email);
         if (existingUser) {
           userIdToDelete = existingUser.id;
+          console.log(`Found user by email ${email}: ${userIdToDelete}`);
         }
       }
     }
     
     if (!existingUser) {
+      console.log(`User with object ID ${objectId} not found in database, nothing to delete`);
       return;
     }
 
     // Delete user data completely for GDPR compliance
     await storage.deleteUserCompletely(userIdToDelete);
+    console.log(`User deleted from database: ${userIdToDelete}`);
     
   } catch (error) {
+    console.error('Error deleting user from webhook:', error);
     throw error;
   }
 }

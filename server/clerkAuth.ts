@@ -2,6 +2,7 @@ import { clerkMiddleware, requireAuth } from '@clerk/express';
 import type { Request, Response, NextFunction } from 'express';
 
 export const setupClerkAuth = (app: any) => {
+  console.log('Setting up Clerk middleware with keys:', {
     publishable: process.env.VITE_CLERK_PUBLISHABLE_KEY?.substring(0, 20) + '...',
     secret: process.env.CLERK_SECRET_KEY?.substring(0, 20) + '...'
   });
@@ -39,6 +40,7 @@ export const isAuthenticated = (req: any, res: Response, next: NextFunction) => 
     
     next();
   } catch (error) {
+    console.error('Authentication error:', error);
     // If this is a user deletion scenario, return 401 instead of 500
     if (error.message?.includes('User not found') || error.message?.includes('deleted')) {
       return res.status(401).json({ message: 'User account no longer exists' });

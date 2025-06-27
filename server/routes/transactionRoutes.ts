@@ -80,21 +80,26 @@ export function registerTransactionRoutes(app: Express) {
                 const matchingCategory = categories.find(cat => cat.name === categorization.category);
                 if (matchingCategory) {
                   await storage.updateTransaction(transaction.id, { categoryId: matchingCategory.id });
+                  console.log(`Auto-categorized transaction ${transaction.id} as ${categorization.category}`);
                 }
               }
             } catch (error) {
+              console.error('Auto-categorization error:', error);
             }
           }
 
           // Schedule this user for batch processing
           batchProcessor.scheduleUser(userId);
 
+          console.log('Background processing completed for transaction:', transaction.id);
         } catch (error) {
+          console.error('Background processing error:', error);
           // Don't affect the user experience even if background processing fails
         }
       });
 
     } catch (error) {
+      console.error("Error creating transaction:", error);
       res.status(400).json({ message: "Failed to create transaction" });
     }
   });
@@ -129,6 +134,7 @@ export function registerTransactionRoutes(app: Express) {
 
       res.json(translatedTransactions);
     } catch (error) {
+      console.error("Error fetching transactions:", error);
       res.status(500).json({ message: "Failed to fetch transactions" });
     }
   });
@@ -143,6 +149,8 @@ export function registerTransactionRoutes(app: Express) {
 
       const transactionId = parseInt(req.params.id);
 
+      console.log('=== TRANSACTION UPDATE DEBUG ===');
+      console.log('Request body received:', JSON.stringify(req.body, null, 2));
 
       // Only update fields that are actually provided in the request
       const updateData: any = { userId }; // Always include userId for security
@@ -178,12 +186,16 @@ export function registerTransactionRoutes(app: Express) {
         updateData.referenceNote = req.body.referenceNote;
       }
 
+      console.log('Final updateData being sent to storage:', JSON.stringify(updateData, null, 2));
 
       const transaction = await storage.updateTransaction(transactionId, updateData);
 
+      console.log('Transaction returned from storage:', JSON.stringify(transaction, null, 2));
+      console.log('=== END TRANSACTION UPDATE DEBUG ===');
 
       return res.json(transaction);
     } catch (error) {
+      console.error("Error updating transaction:", error);
       return res.status(400).json({ message: "Failed to update transaction" });
     }
   });
@@ -200,6 +212,7 @@ export function registerTransactionRoutes(app: Express) {
       await storage.deleteTransaction(transactionId, userId);
       return res.json({ success: true });
     } catch (error) {
+      console.error("Error deleting transaction:", error);
       return res.status(500).json({ message: "Failed to delete transaction" });
     }
   });
@@ -220,6 +233,7 @@ export function registerTransactionRoutes(app: Express) {
       const recurringTransactions = await storage.getUserRecurringTransactions(userId);
       res.json(recurringTransactions);
     } catch (error) {
+      console.error("Error fetching recurring transactions:", error);
       res.status(500).json({ message: "Failed to fetch recurring transactions" });
     }
   });
@@ -256,6 +270,7 @@ export function registerTransactionRoutes(app: Express) {
 
       res.json(translatedSummary);
     } catch (error) {
+      console.error("Error fetching financial summary:", error);
       res.status(500).json({ message: "Failed to fetch financial summary" });
     }
   });
@@ -292,6 +307,7 @@ export function registerTransactionRoutes(app: Express) {
         totalExpenses: Math.abs(summary.totalExpenses)
       });
     } catch (error) {
+      console.error("Error fetching expense breakdown:", error);
       res.status(500).json({ message: "Failed to fetch expense breakdown" });
     }
   });
@@ -299,28 +315,37 @@ export function registerTransactionRoutes(app: Express) {
   // Automatic transaction reminders (Standard/Premium only)
   app.get('/api/transaction-reminders', async (req: any, res) => {
     try {
+      console.log('Transaction reminders endpoint hit - checking authentication...');
       
       // Check authentication first
       let userId: string | null = null;
       try {
         const auth = req.auth();
         userId = auth?.userId || null;
+        console.log(`Auth check result: userId=${userId}, auth=${!!auth}`);
       } catch (authError) {
+        console.error('Authentication error:', authError);
         return res.status(401).json({ message: "Authentication required" });
       }
       
       if (!userId) {
+        console.log('No user ID found, returning 401');
         return res.status(401).json({ message: "Authentication required" });
       }
 
+      console.log(`Transaction reminders API called for user: ${userId}`);
       const user = await storage.getUser(userId);
+      console.log(`Transaction reminders check - User: ${userId}, User plan: ${user?.plan}`);
 
       if (!user || user.plan === 'free') {
+        console.log(`Transaction reminders blocked - User plan: ${user?.plan}`);
         return res.status(403).json({ message: "Transaction reminders require Standard or Premium subscription" });
       }
 
       const daysAhead = req.query.days ? parseInt(req.query.days as string) : 7;
+      console.log(`Fetching reminders for ${daysAhead} days ahead`);
       const reminders = await storage.getUpcomingTransactionReminders(userId, daysAhead);
+      console.log(`Found ${reminders.length} reminders for user ${userId}:`, JSON.stringify(reminders, null, 2));
       
       // Get user language and translate predefined category names
       const userLanguage = getUserLanguage(req);
@@ -331,6 +356,7 @@ export function registerTransactionRoutes(app: Express) {
       
       res.json(translatedReminders);
     } catch (error) {
+      console.error("Error fetching transaction reminders:", error);
       res.status(500).json({ message: "Failed to fetch transaction reminders" });
     }
   });

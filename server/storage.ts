@@ -318,6 +318,7 @@ export class DatabaseStorage implements IStorage {
           lastProcessed: transaction.date,
         });
       } catch (error) {
+        console.error('Error creating recurring transaction record:', error);
       }
     }
 
@@ -924,7 +925,9 @@ export class DatabaseStorage implements IStorage {
       );
 
     // Calculate next occurrences for recurring transactions
+    console.log(`Found ${activeRecurringTransactions.length} active recurring transactions for user ${userId}`);
     activeRecurringTransactions.forEach(recurring => {
+      console.log(`Processing recurring transaction: ${recurring.id}, date: ${recurring.date}, frequency: ${recurring.recurringFrequency}`);
 
       const nextOccurrence = this.calculateNextOccurrence(
         recurring.date,
@@ -932,6 +935,7 @@ export class DatabaseStorage implements IStorage {
         recurring.recurringEndDate
       );
 
+      console.log(`Next occurrence calculated: ${nextOccurrence}, within window: ${nextOccurrence && nextOccurrence <= futureDate && nextOccurrence >= now}`);
 
       if (nextOccurrence && nextOccurrence <= futureDate && nextOccurrence >= now) {
         const reminder = {
@@ -945,6 +949,7 @@ export class DatabaseStorage implements IStorage {
           isRecurring: true,
           source: 'recurring_transaction' as 'future_transaction' | 'recurring_transaction'
         };
+        console.log(`Adding reminder: ${JSON.stringify(reminder)}`);
         reminders.push(reminder);
       }
     });
@@ -959,10 +964,12 @@ export class DatabaseStorage implements IStorage {
     const next = new Date(lastDate);
     next.setHours(0, 0, 0, 0); // Reset to start of day for accurate comparison
 
+    console.log(`Calculating next occurrence: lastDate=${lastDate.toISOString()}, frequency=${frequency}, now=${now.toISOString()}`);
 
     // For recurring transactions, we always need the NEXT occurrence, not today
     // If the transaction date is today, we need to calculate the next recurring date
     if (next.getTime() === now.getTime()) {
+      console.log(`Transaction date is today, calculating next occurrence for frequency: ${frequency}`);
       // Move to next occurrence immediately
       switch (frequency.toLowerCase()) {
         case 'weekly':
@@ -975,10 +982,14 @@ export class DatabaseStorage implements IStorage {
           next.setFullYear(next.getFullYear() + 1);
           break;
         default:
+          console.log(`Unknown frequency: ${frequency}, returning null`);
           return null;
       }
+      console.log(`Next occurrence for today's transaction: ${next.toISOString()}`);
     } else if (next > now) {
+      console.log(`Transaction date is in future, using: ${next.toISOString()}`);
       if (endDate && next > endDate) {
+        console.log(`Date exceeds end date, returning null`);
         return null;
       }
       return next;
@@ -989,22 +1000,28 @@ export class DatabaseStorage implements IStorage {
       switch (frequency.toLowerCase()) {
         case 'weekly':
           next.setDate(next.getDate() + 7);
+          console.log(`Added 7 days: ${next.toISOString()}`);
           break;
         case 'monthly':
           next.setMonth(next.getMonth() + 1);
+          console.log(`Added 1 month: ${next.toISOString()}`);
           break;
         case 'yearly':
           next.setFullYear(next.getFullYear() + 1);
+          console.log(`Added 1 year: ${next.toISOString()}`);
           break;
         default:
+          console.log(`Unknown frequency: ${frequency}, returning null`);
           return null;
       }
     }
 
     if (endDate && next > endDate) {
+      console.log(`Final date ${next.toISOString()} exceeds end date ${endDate.toISOString()}, returning null`);
       return null;
     }
 
+    console.log(`Calculated next occurrence: ${next.toISOString()}`);
     return next;
   }
 
@@ -1190,11 +1207,13 @@ export class DatabaseStorage implements IStorage {
 
       return updatedUser;
     } catch (error: any) {
+      console.error('Failed to update user in database:', error);
       throw new Error('Failed to update user profile in database');
     }
   }
 
   async deleteUserCompletely(userId: string): Promise<void> {
+    console.log(`Starting complete deletion of user: ${userId}`);
 
     try {
       // Check if user exists first
@@ -1205,48 +1224,64 @@ export class DatabaseStorage implements IStorage {
 
       // Delete all user transactions first
       const deletedTransactions = await db.delete(transactions).where(eq(transactions.userId, userId)).execute();
+      console.log(`Deleted transactions for user: ${userId}`);
 
       // Delete all user categories
       const deletedCategories = await db.delete(categories).where(eq(categories.userId, userId)).execute();
+      console.log(`Deleted categories for user: ${userId}`);
 
       // Delete all user budgets
       const deletedBudgets = await db.delete(budgets).where(eq(budgets.userId, userId)).execute();
+      console.log(`Deleted budgets for user: ${userId}`);
 
       // Delete all user goals
       const deletedGoals = await db.delete(goals).where(eq(goals.userId, userId)).execute();
+      console.log(`Deleted goals for user: ${userId}`);
 
       // Delete all expense reminders
       const deletedExpenseReminders = await db.delete(expenseReminders).where(eq(expenseReminders.userId, userId)).execute();
+      console.log(`Deleted expense reminders for user: ${userId}`);
 
       // Delete all collaborative goal participants
       const deletedCollaborativeGoalParticipants = await db.delete(collaborativeGoalParticipants).where(eq(collaborativeGoalParticipants.userId, userId)).execute();
+      console.log(`Deleted collaborative goal participants for user: ${userId}`);
 
       // Delete all goal contributions
       const deletedGoalContributions = await db.delete(goalContributions).where(eq(goalContributions.userId, userId)).execute();
+      console.log(`Deleted goal contributions for user: ${userId}`);
 
       // Delete all challenge activities
       const deletedChallengeActivities = await db.delete(challengeActivities).where(eq(challengeActivities.userId, userId)).execute();
+      console.log(`Deleted challenge activities for user: ${userId}`);
 
        // Delete all milestone achievements
       const deletedMilestoneAchievements = await db.delete(milestoneAchievements).where(eq(milestoneAchievements.userId, userId)).execute();
+      console.log(`Deleted milestone achievements for user: ${userId}`);
 
       // Delete all financial mascots
       const deletedFinancialMascots = await db.delete(financialMascots).where(eq(financialMascots.userId, userId)).execute();
+      console.log(`Deleted financial mascots for user: ${userId}`);
 
       // Delete all friendships
       const deletedFriendships = await db.delete(friendships).where(or(eq(friendships.requesterId, userId), eq(friendships.recipientId, userId))).execute();
+      console.log(`Deleted friendships for user: ${userId}`);
 
       // Delete all collaborative goals created by the user
       const deletedCollaborativeGoals = await db.delete(collaborativeGoals).where(eq(collaborativeGoals.createdBy, userId)).execute();
+      console.log(`Deleted collaborative goals for user: ${userId}`);
 
       // Delete all redeem codes associated with the user
       const deletedRedeemCodes = await db.delete(redeemCodes).where(eq(redeemCodes.userId, userId)).execute();
+      console.log(`Deleted redeem codes for user: ${userId}`);
 
       // Finally delete the user record
       const deletedUser = await db.delete(users).where(eq(users.id, userId)).execute();
+      console.log(`Deleted user record: ${userId}`);
 
+      console.log(`Successfully completed deletion of user: ${userId}`);
 
     } catch (error: any) {
+      console.error(`Error deleting user ${userId}:`, error);
       throw new Error(`Failed to delete user ${userId}: ${error.message}`);
     }
   }

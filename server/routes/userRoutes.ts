@@ -23,6 +23,7 @@ export function registerUserRoutes(app: Express) {
       res.set('Cache-Control', 'no-cache');
       return res.json({ success: true, message: `Plan updated to ${plan}` });
     } catch (error) {
+      console.error("Error updating plan:", error);
       return res.status(500).json({ message: "Failed to update plan" });
     }
   });
@@ -42,6 +43,7 @@ export function registerUserRoutes(app: Express) {
       
       return res.json(translatedCategories);
     } catch (error) {
+      console.error("Error fetching categories:", error);
       return res.status(500).json({ message: "Failed to fetch categories" });
     }
   });
@@ -66,6 +68,7 @@ export function registerUserRoutes(app: Express) {
       const category = await storage.createCategory({ userId, name, icon, color, type });
       return res.json(category);
     } catch (error) {
+      console.error("Error creating category:", error);
       return res.status(400).json({ message: "Failed to create category" });
     }
   });
@@ -98,6 +101,7 @@ export function registerUserRoutes(app: Express) {
       const category = await storage.updateCategory(categoryId, userId, { name, icon, color, type });
       return res.json(category);
     } catch (error) {
+      console.error("Error updating category:", error);
       return res.status(400).json({ message: "Failed to update category" });
     }
   });
@@ -121,6 +125,7 @@ export function registerUserRoutes(app: Express) {
       await storage.deleteCategory(categoryId, userId);
       return res.json({ success: true });
     } catch (error) {
+      console.error("Error deleting category:", error);
       return res.status(500).json({ message: "Failed to delete category" });
     }
   });
@@ -155,6 +160,7 @@ export function registerUserRoutes(app: Express) {
         return res.json(existingCategories);
       }
     } catch (error) {
+      console.error("Error initializing categories:", error);
       return res.status(500).json({ message: "Failed to initialize categories" });
     }
   });

@@ -35,6 +35,7 @@ export function registerRedeemRoutes(app: Express) {
       });
 
     } catch (error) {
+      console.error("Get my codes error:", error);
       return res.status(500).json({
         error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error"
@@ -61,6 +62,7 @@ export function registerRedeemRoutes(app: Express) {
       });
 
     } catch (error) {
+      console.error("Get redeem status error:", error);
       return res.status(500).json({
         error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error"
@@ -82,6 +84,7 @@ export function registerRedeemRoutes(app: Express) {
       const currentRedeemedCodes = await storage.getUserRedeemedCodes(userId);
       const currentCodeCount = currentRedeemedCodes.length;
 
+      console.log(`User ${userId} currently has ${currentCodeCount} redeemed codes`);
 
       // Validation: Check if user already has maximum codes
       if (currentCodeCount >= 2) {
@@ -159,6 +162,7 @@ export function registerRedeemRoutes(app: Express) {
         activatedAt: new Date()
       });
 
+      console.log(`User ${userId} upgraded to ${plan} plan with ${totalCodesAfterRedemption} total codes`);
 
       return res.json({
         success: true,
@@ -171,6 +175,7 @@ export function registerRedeemRoutes(app: Express) {
       });
 
     } catch (error) {
+      console.error("Redeem codes error:", error);
       return res.status(500).json({
         error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error"

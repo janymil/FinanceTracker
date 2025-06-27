@@ -50,7 +50,9 @@ export function registerAuthRoutes(app: Express) {
             currency: null // Explicitly set to null to trigger currency setup modal
           };
           user = await storage.upsertUser(userData);
+          console.log(`Created new user in database: ${userId}`);
         } catch (error) {
+          console.error('Error creating user in database:', error);
           return res.status(500).json({ 
             message: 'Failed to create user account'
           });
@@ -59,6 +61,8 @@ export function registerAuthRoutes(app: Express) {
 
       return res.json(user);
     } catch (error) {
+      console.error("Error fetching user:", error);
+      console.error("Stack trace:", error.stack);
       return res.status(500).json({ message: "Failed to fetch user" });
     }
   });
@@ -87,6 +91,8 @@ export function registerAuthRoutes(app: Express) {
       
       return res.json(updatedUser);
     } catch (error) {
+      console.error("Error updating user:", error);
+      console.error("Stack trace:", error.stack);
       return res.status(500).json({ message: "Failed to update user" });
     }
   });

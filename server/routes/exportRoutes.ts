@@ -77,6 +77,7 @@ export function registerExportRoutes(app: Express) {
           importedCount++;
 
         } catch (error) {
+          console.error(`Error importing transaction ${i + 1}:`, error);
           errors.push({
             row: i + 1,
             field: 'general',
@@ -95,6 +96,7 @@ export function registerExportRoutes(app: Express) {
       });
 
     } catch (error) {
+      console.error("Error importing transactions:", error);
       return res.status(500).json({ message: "Failed to import transactions" });
     }
   });
@@ -102,18 +104,22 @@ export function registerExportRoutes(app: Express) {
   // Dedicated PDF export endpoint
   app.post('/api/export-pdf', isAuthenticated, async (req: any, res) => {
     try {
+      console.log('PDF Export Request:', req.body);
       
       const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
       const user = await storage.getUser(userId);
+      console.log('PDF Export User:', user?.plan);
 
       if (!user || user.plan === 'free') {
+        console.log('PDF Export Error: Plan restriction');
         return res.status(403).json({ message: "PDF export requires Standard or Premium subscription" });
       }
 
       const { month, year } = req.body;
+      console.log('PDF Export Parameters:', { month, year });
 
       // Parse month and year
       const targetYear = year || new Date().getFullYear();
@@ -130,6 +136,7 @@ export function registerExportRoutes(app: Express) {
       try {
         goals = await storage.getUserGoals(userId);
       } catch (error) {
+        console.log('Goals not available for user:', userId);
       }
 
       // Filter transactions for the specified month
@@ -193,6 +200,7 @@ export function registerExportRoutes(app: Express) {
         userName: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email || 'User'
       };
 
+      console.log('PDF Data prepared:', JSON.stringify(pdfData, null, 2));
 
       // Generate PDF
       const pdfBuffer = await generatePdfReport(pdfData);
@@ -203,6 +211,8 @@ export function registerExportRoutes(app: Express) {
       return res.send(pdfBuffer);
 
     } catch (error) {
+      console.error("Error generating PDF:", error);
+      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
       return res.status(500).json({ 
         message: "Failed to generate PDF report", 
         error: error instanceof Error ? error.message : 'Unknown error' 
@@ -246,6 +256,7 @@ export function registerExportRoutes(app: Express) {
         try {
           exportData.budgets = await storage.getUserBudgets(userId);
         } catch (error) {
+          console.log('Budgets not available for user:', userId);
           exportData.budgets = [];
         }
       }
@@ -254,6 +265,7 @@ export function registerExportRoutes(app: Express) {
         try {
           exportData.goals = await storage.getUserGoals(userId);
         } catch (error) {
+          console.log('Goals not available for user:', userId);
           exportData.goals = [];
         }
       }
@@ -286,6 +298,7 @@ export function registerExportRoutes(app: Express) {
       }
 
     } catch (error) {
+      console.error("Error exporting data:", error);
       return res.status(500).json({ message: "Failed to export data" });
     }
   });
@@ -295,6 +308,7 @@ export function registerExportRoutes(app: Express) {
   try {
     bunnyStorage = new BunnyStorage();
   } catch (error) {
+    console.log('Bunny.net storage not configured:', error);
   }
 
   // Create backup endpoint
@@ -320,7 +334,9 @@ export function registerExportRoutes(app: Express) {
       let goals: any[] = [];
       try {
         goals = await storage.getUserGoals(userId);
+        console.log(`Backup: Found ${goals.length} goals for user ${userId}`);
       } catch (error) {
+        console.log('Goals not available for user:', userId);
       }
 
       const backupData = {
@@ -341,9 +357,12 @@ export function registerExportRoutes(app: Express) {
       };
 
       // Use the existing createBackup method from BunnyStorage
+      console.log('BACKUP DEBUG: Starting backup creation for user:', userId);
+      console.log('BACKUP DEBUG: Backup data size:', JSON.stringify(backupData).length, 'characters');
       
       const filename = await bunnyStorage.createBackup(userId, backupData);
       
+      console.log('BACKUP DEBUG: Backup created successfully with filename:', filename);
 
       return res.json({ 
         success: true, 
@@ -352,6 +371,8 @@ export function registerExportRoutes(app: Express) {
       });
 
     } catch (error) {
+      console.error("BACKUP ERROR: Error creating backup:", error);
+      console.error("BACKUP ERROR: Error details:", error.message);
       return res.status(500).json({ message: "Failed to create backup", error: error.message });
     }
   });
@@ -419,6 +440,7 @@ export function registerExportRoutes(app: Express) {
       });
 
     } catch (error) {
+      console.error("Error getting backup status:", error);
       return res.status(500).json({ message: "Failed to get backup status" });
     }
   });
@@ -457,6 +479,7 @@ export function registerExportRoutes(app: Express) {
       });
 
     } catch (error) {
+      console.error("Error getting available backups:", error);
       return res.status(500).json({ message: "Failed to get available backups" });
     }
   });
@@ -477,6 +500,7 @@ export function registerExportRoutes(app: Express) {
       return res.json({ success: true, message: "Backup settings updated" });
 
     } catch (error) {
+      console.error("Error updating backup settings:", error);
       return res.status(500).json({ message: "Failed to update backup settings" });
     }
   });
@@ -503,6 +527,7 @@ export function registerExportRoutes(app: Express) {
         return res.status(400).json({ message: "Backup filename required" });
       }
 
+      console.log(`RESTORE DEBUG: Restoring backup file: ${filename} for user: ${userId}`);
 
       // Use the existing downloadFile method with proper path
       const filePath = `backups/user-${userId}/${filename}`;
@@ -537,6 +562,7 @@ export function registerExportRoutes(app: Express) {
           await storage.deleteGoal(goal.id, userId);
         }
       } catch (error) {
+        console.log('Goals not available for deletion:', error);
       }
 
       // Restore transactions
@@ -585,9 +611,11 @@ export function registerExportRoutes(app: Express) {
             restoredData.goals++;
           }
         } catch (error) {
+          console.log('Goals not available for restoration:', error);
         }
       }
 
+      console.log(`RESTORE DEBUG: Successfully restored backup: ${filename} with data:`, restoredData);
 
       return res.json({ 
         success: true, 
@@ -598,6 +626,9 @@ export function registerExportRoutes(app: Express) {
       });
 
     } catch (error) {
+      console.error("RESTORE ERROR: Error restoring backup:", error);
+      console.error("RESTORE ERROR: Error details:", error.message);
+      console.error("RESTORE ERROR: Error stack:", error.stack);
       return res.status(500).json({ message: "Failed to restore backup", error: error.message });
     }
   });

@@ -17,6 +17,7 @@ export const adminAuth = (req: AdminRequest, res: Response, next: NextFunction) 
     req.session = {};
   }
   
+  console.log('Admin auth check:', {
     sessionExists: !!req.session,
     isAuthenticated: req.session?.isAdminAuthenticated,
     sessionId: req.sessionID
@@ -32,6 +33,7 @@ export const adminAuth = (req: AdminRequest, res: Response, next: NextFunction) 
 export const adminLogin = async (req: AdminRequest, res: Response) => {
   const { password } = req.body;
   
+  console.log('Admin login attempt for FinanzerPro admin portal');
   
   if (!password) {
     return res.status(400).json({ message: 'Password required' });
@@ -47,11 +49,14 @@ export const adminLogin = async (req: AdminRequest, res: Response) => {
     req.session.isAdminAuthenticated = true;
     req.session.save((err: any) => {
       if (err) {
+        console.error('Session save error:', err);
         return res.status(500).json({ message: 'Session save failed' });
       }
+      console.log('Admin login successful, session saved');
       return res.json({ message: 'Admin login successful' });
     });
   } else {
+    console.log('Invalid admin password provided');
     return res.status(401).json({ message: 'Invalid admin password' });
   }
 };

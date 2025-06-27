@@ -22,6 +22,7 @@ export function registerRealtimeRoutes(app: Express) {
 
     // Handle client disconnect
     req.on('close', () => {
+      console.log(`SSE client ${clientId} disconnected`);
     });
   });
 

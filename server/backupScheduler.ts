@@ -19,6 +19,7 @@ class BackupScheduler {
   }
 
   private async initializeScheduler() {
+    console.log('Backup scheduler initialized');
     
     // Schedule existing users
     await this.scheduleAllActiveUsers();
@@ -38,7 +39,9 @@ class BackupScheduler {
         await this.scheduleUserBackup(user.userId);
       }
       
+      console.log(`Scheduled backups for ${activeBackupUsers.length} users`);
     } catch (error) {
+      console.error('Failed to schedule active users:', error);
     }
   }
 
@@ -75,7 +78,9 @@ class BackupScheduler {
         nextBackupDate: nextBackupTime
       });
 
+      console.log(`Scheduled backup for user ${userId} at ${nextBackupTime.toISOString()}`);
     } catch (error) {
+      console.error(`Failed to schedule backup for user ${userId}:`, error);
     }
   }
 
@@ -144,15 +149,18 @@ class BackupScheduler {
 
   private async performBackup(userId: string, retryCount = 0) {
     if (this.activeBackups.has(userId)) {
+      console.log(`Backup already in progress for user ${userId}`);
       return;
     }
 
     try {
       this.activeBackups.add(userId);
+      console.log(`Starting backup for user ${userId} (attempt ${retryCount + 1})`);
 
       // Check if user still has premium plan
       const user = await storage.getUser(userId);
       if (!user || user.plan !== 'premium') {
+        console.log(`User ${userId} no longer has premium plan, skipping backup`);
         return;
       }
 
@@ -168,6 +176,7 @@ class BackupScheduler {
         try {
           await bunnyStorage.cleanupOldBackups(userId, settings.retentionDays);
         } catch (error) {
+          console.error(`Failed to cleanup old backups for user ${userId}:`, error);
           // Don't fail the backup process if cleanup fails
         }
       }
@@ -181,11 +190,13 @@ class BackupScheduler {
         status: 'active'
       });
 
+      console.log(`Backup completed successfully for user ${userId}: ${backupFilename}`);
       
       // Schedule next backup
       await this.scheduleUserBackup(userId);
       
     } catch (error) {
+      console.error(`Backup failed for user ${userId} (attempt ${retryCount + 1}):`, error);
       
       // Update status to error
       await storage.updateBackupSettings(userId, {
@@ -198,6 +209,7 @@ class BackupScheduler {
           this.performBackup(userId, retryCount + 1);
         }, this.RETRY_DELAY);
       } else {
+        console.error(`Backup failed permanently for user ${userId} after ${this.RETRY_ATTEMPTS} attempts`);
       }
     } finally {
       this.activeBackups.delete(userId);
@@ -254,10 +266,12 @@ class BackupScheduler {
       
       for (const user of overdueUsers) {
         if (!this.activeBackups.has(user.userId) && !this.scheduledBackups.has(user.userId)) {
+          console.log(`Found overdue backup for user ${user.userId}, scheduling immediate backup`);
           this.performBackup(user.userId);
         }
       }
     } catch (error) {
+      console.error('Failed to check for missed backups:', error);
     }
   }
 
