@@ -11,8 +11,6 @@ if (process.env.NODE_ENV === 'development') {
     delete process.env.VITE_CLERK_PUBLISHABLE_KEY;
     delete process.env.CLERK_SECRET_KEY;
     config({ path: envLocalPath, override: true });
-    console.log('Development environment: Using .env.local for Clerk keys');
-    console.log('Loaded dev keys:', {
       publishable: process.env.VITE_CLERK_PUBLISHABLE_KEY?.substring(0, 20) + '...',
       secret: process.env.CLERK_SECRET_KEY?.substring(0, 20) + '...'
     });
@@ -20,8 +18,6 @@ if (process.env.NODE_ENV === 'development') {
 } else {
   // Production: use system environment variables only, ignore .env.local
   config(); // Load .env as fallback
-  console.log('Production environment: Using system environment variables');
-  console.log('Production keys:', {
     publishable: process.env.VITE_CLERK_PUBLISHABLE_KEY?.substring(0, 20) + '...',
     secret: process.env.CLERK_SECRET_KEY?.substring(0, 20) + '...'
   });
@@ -48,7 +44,6 @@ app.use((req, res, next) => {
       try {
         return originalSetHeader.call(this, name, value);
       } catch (error: any) {
-        console.error(`Header conflict prevented for ${name}:`, error.message);
         return this;
       }
     }
@@ -62,7 +57,6 @@ app.use((req, res, next) => {
       try {
         return originalWriteHead.call(this, statusCode, headers as any);
       } catch (error: any) {
-        console.error(`WriteHead conflict prevented:`, error.message);
         return this;
       }
     }
@@ -85,7 +79,6 @@ app.post('/api/clerk-webhooks', async (req, res) => {
     
     const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
     if (!webhookSecret) {
-      console.error('CLERK_WEBHOOK_SECRET is not configured');
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Webhook secret not configured' }));
       return;
@@ -113,14 +106,12 @@ app.post('/api/clerk-webhooks', async (req, res) => {
         'svix-signature': svix_signature,
       });
     } catch (err) {
-      console.error('Webhook verification failed:', err);
       res.writeHead(400, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Webhook verification failed' }));
       return;
     }
 
     const { type, data } = evt as any;
-    console.log(`Clerk webhook received: ${type} for user ${data.id}`);
 
     // Import storage here to avoid circular imports
     const { storage } = await import('./storage');
@@ -136,14 +127,12 @@ app.post('/api/clerk-webhooks', async (req, res) => {
         await handleUserDeletedInline(data, storage);
         break;
       default:
-        console.log(`Unhandled webhook event type: ${type}`);
     }
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ received: true }));
     
   } catch (error) {
-    console.error('Clerk webhook error:', error);
     res.writeHead(500, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Internal server error' }));
   }
@@ -170,9 +159,7 @@ async function handleUserCreatedInline(userData: any, storage: any) {
     };
 
     await storage.createUser(newUser);
-    console.log(`User created in database: ${id} (${primaryEmail})`);
   } catch (error) {
-    console.error('Error creating user from webhook:', error);
     throw error;
   }
 }
@@ -183,7 +170,6 @@ async function handleUserUpdatedInline(userData: any, storage: any) {
     const existingUser = await storage.getUser(id);
     
     if (!existingUser) {
-      console.log(`User ${id} not found in database, creating from update event`);
       return await handleUserCreatedInline(userData, storage);
     }
     
@@ -201,9 +187,7 @@ async function handleUserUpdatedInline(userData: any, storage: any) {
     };
 
     await storage.updateUser(id, updatedUser);
-    console.log(`User updated in database: ${id} (${primaryEmail})`);
   } catch (error) {
-    console.error('Error updating user from webhook:', error);
     throw error;
   }
 }
@@ -214,14 +198,11 @@ async function handleUserDeletedInline(userData: any, storage: any) {
     const existingUser = await storage.getUser(id);
     
     if (!existingUser) {
-      console.log(`User ${id} not found in database, nothing to delete`);
       return;
     }
 
     await storage.deleteUserCompletely(id);
-    console.log(`User deleted from database: ${id}`);
   } catch (error) {
-    console.error('Error deleting user from webhook:', error);
     throw error;
   }
 }
@@ -293,7 +274,6 @@ app.use((req, res, next) => {
         res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
       }
     } catch (error) {
-      console.error('Error setting security headers:', error);
     }
   }
   
@@ -307,7 +287,6 @@ app.use((req, res, next) => {
         res.setHeader('X-Admin-Portal', 'FinanzerPro-Official');
       }
     } catch (error) {
-      console.error('Error setting admin headers:', error);
     }
   }
   

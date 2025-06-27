@@ -491,7 +491,6 @@ export class PDFGeneratorService {
       return Buffer.from(pdfBuffer);
       
     } catch (error) {
-      console.error('Error generating PDF:', error);
       throw new Error('Failed to generate PDF report');
     } finally {
       if (browser) {

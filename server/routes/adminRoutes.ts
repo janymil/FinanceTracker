@@ -21,10 +21,8 @@ export function registerAdminRoutes(app: Express) {
   app.get('/api/admin-analytics/users', adminAuth, async (req: any, res: Response) => {
     try {
       const users = await storage.getAllUsers();
-      console.log(`Admin analytics - Fetched ${users.length} users:`, users.map(u => ({ id: u.id, email: u.email, plan: u.plan })));
       return res.json(users);
     } catch (error) {
-      console.error("Error fetching users for admin:", error);
       return res.status(500).json({ message: "Failed to fetch users" });
     }
   });
@@ -42,7 +40,6 @@ export function registerAdminRoutes(app: Express) {
       }));
       return res.json(stats);
     } catch (error) {
-      console.error("Error fetching user stats for admin:", error);
       return res.status(500).json({ message: "Failed to fetch user stats" });
     }
   });
@@ -80,10 +77,8 @@ export function registerAdminRoutes(app: Express) {
 
             await storage.updateUser(user.id, updatedUserData);
             updatedUsers.push(user.id);
-            console.log(`Synced user ${user.id} with Clerk data: ${primaryEmail}`);
           }
         } catch (userError: any) {
-          console.error(`Failed to sync user ${user.id}:`, userError);
           errors.push({ userId: user.id, error: userError.message });
         }
       }
@@ -96,7 +91,6 @@ export function registerAdminRoutes(app: Express) {
         details: errors
       });
     } catch (error: any) {
-      console.error("Error syncing users with Clerk:", error);
       return res.status(500).json({ 
         success: false, 
         message: "Failed to sync users with Clerk",
@@ -126,7 +120,6 @@ export function registerAdminRoutes(app: Express) {
         }
       });
     } catch (error) {
-      console.error("Error updating user plan:", error);
       return res.status(500).json({ message: "Failed to update user plan" });
     }
   });
@@ -147,7 +140,6 @@ export function registerAdminRoutes(app: Express) {
       };
       return res.json(overview);
     } catch (error) {
-      console.error("Error fetching system overview for admin:", error);
       return res.status(500).json({ message: "Failed to fetch system overview" });
     }
   });
@@ -175,7 +167,6 @@ export function registerAdminRoutes(app: Express) {
         user: updatedUser
       });
     } catch (error) {
-      console.error("Error updating user:", error);
       return res.status(500).json({ message: "Failed to update user" });
     }
   });
@@ -184,28 +175,23 @@ export function registerAdminRoutes(app: Express) {
   app.delete('/api/admin-analytics/users/:userId', adminAuth, async (req: any, res: Response) => {
     try {
       const { userId } = req.params;
-      console.log(`Admin attempting to delete user: ${userId}`);
       
       // Check if user exists first
       const user = await storage.getUser(userId);
       if (!user) {
-        console.log(`User ${userId} not found in database`);
         return res.status(404).json({ 
           success: false, 
           message: "User not found" 
         });
       }
       
-      console.log(`Deleting user: ${userId} (${user.email})`);
       await storage.deleteUserCompletely(userId);
-      console.log(`Successfully deleted user: ${userId}`);
       
       return res.json({ 
         success: true, 
         message: "User deleted successfully"
       });
     } catch (error: any) {
-      console.error("Error deleting user:", error);
       return res.status(500).json({ 
         success: false, 
         message: error.message || "Failed to delete user" 
@@ -223,7 +209,6 @@ export function registerAdminRoutes(app: Express) {
       }, {} as Record<string, number>);
       return res.json(planStats);
     } catch (error) {
-      console.error("Error fetching plan stats for admin:", error);
       return res.status(500).json({ message: "Failed to fetch plan stats" });
     }
   });

@@ -27,7 +27,6 @@ const upload = multer({
 
 // Validate Google Cloud environment variables
 if (!process.env.GOOGLE_CLOUD_PROJECT_ID || !process.env.GOOGLE_CLOUD_PRIVATE_KEY || !process.env.GOOGLE_CLOUD_CLIENT_EMAIL) {
-  console.error('Missing required Google Cloud environment variables');
   throw new Error('Google Cloud Vision configuration is incomplete');
 }
 
@@ -64,7 +63,6 @@ async function getUserPlan(userId: string): Promise<UserPlan> {
     }
     return { plan: 'free' };
   } catch (error) {
-    console.error('Error fetching user plan:', error);
     return { plan: 'free' };
   }
 }
@@ -110,7 +108,6 @@ export async function performOCR(imageBuffer: Buffer): Promise<string> {
     const fullTextAnnotation = result.fullTextAnnotation;
     return fullTextAnnotation?.text || '';
   } catch (error) {
-    console.error('OCR Error:', error);
     throw new Error('Failed to process image with OCR');
   }
 }
@@ -176,7 +173,6 @@ export async function extractStructuredData(ocrText: string): Promise<{
     
     return extractedData;
   } catch (error) {
-    console.error('OpenAI extraction error:', error);
     return {
       error: 'Failed to extract structured data'
     };
@@ -224,7 +220,6 @@ export const uploadReceiptHandler = [
           const categorization = await categorizeExpense(descriptionForCategorization, amountForCategorization);
           predictedCategory = categorization.category;
         } catch (categoryError) {
-          console.error('AI categorization failed:', categoryError);
           // Continue without categorization
         }
       }
@@ -239,7 +234,6 @@ export const uploadReceiptHandler = [
         try {
           imageUrl = await uploadToBunny(fileName, req.file.buffer, req.file.mimetype);
         } catch (uploadError) {
-          console.error('Upload to Bunny.net failed:', uploadError);
           // Continue without storing the image, but still return OCR results
         }
       }
@@ -261,7 +255,6 @@ export const uploadReceiptHandler = [
       return res.json(response);
 
     } catch (error) {
-      console.error('Receipt upload error:', error);
       
       if (error instanceof multer.MulterError) {
         if (error.code === 'LIMIT_FILE_SIZE') {

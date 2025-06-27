@@ -4,7 +4,6 @@ import crypto from 'crypto';
 // Get encryption key from Replit Secrets or generate a fallback for development
 const getEncryptionKey = (): Buffer => {
   if (!process.env.ENCRYPTION_KEY) {
-    console.warn('ENCRYPTION_KEY not found in environment variables. Using temporary key for development.');
     return crypto.randomBytes(32);
   }
   

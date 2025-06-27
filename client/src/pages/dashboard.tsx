@@ -872,13 +872,7 @@ export default function Dashboard() {
                 transactions={transactions as any}
                 summary={financialSummary}
               />
-              
-              <LazyAutoCategorization transactions={transactions as any} />
             </div>
-
-            <LazyAIFinancialTips 
-              summary={!summaryLoading ? financialSummary : undefined}
-            />
 
           </div>
         )}

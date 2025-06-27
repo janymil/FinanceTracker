@@ -32,7 +32,6 @@ export function registerBudgetRoutes(app: Express) {
       const budget = await storage.createBudget(budgetData);
       return res.json(budget);
     } catch (error) {
-      console.error("Error creating budget:", error);
       return res.status(400).json({ message: "Failed to create budget" });
     }
   });
@@ -68,7 +67,6 @@ export function registerBudgetRoutes(app: Express) {
       const budget = await storage.updateBudget(id, updateData);
       return res.json(budget);
     } catch (error) {
-      console.error("Error updating budget:", error);
       return res.status(400).json({ message: "Failed to update budget" });
     }
   });
@@ -90,7 +88,6 @@ export function registerBudgetRoutes(app: Express) {
       await storage.deleteBudget(id, userId);
       return res.json({ success: true });
     } catch (error) {
-      console.error("Error deleting budget:", error);
       return res.status(500).json({ message: "Failed to delete budget" });
     }
   });
@@ -123,7 +120,6 @@ export function registerBudgetRoutes(app: Express) {
       
       return res.json(translatedBudgets);
     } catch (error) {
-      console.error("Error fetching budgets:", error);
       return res.status(500).json({ message: "Failed to fetch budgets" });
     }
   });

@@ -64,11 +64,9 @@ async function handleSubscriptionChange(user: any, newPlan: string, res: Respons
       }
     });
 
-    console.log('Subscription modification session created:', session.id);
     return res.json({ url: session.url });
 
   } catch (error) {
-    console.error('Error updating subscription:', error);
     return res.status(500).json({ error: "Failed to update subscription" });
   }
 }
@@ -84,7 +82,6 @@ export function registerStripeRoutes(app: Express) {
       const { plan } = req.body;
       const userId = getUserId(req);
       
-      console.log('Checkout session request - Plan:', plan, 'User ID:', userId);
       
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
@@ -102,7 +99,6 @@ export function registerStripeRoutes(app: Express) {
           const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
           if (subscription.status === 'active') {
             // Existing paid subscriber - redirect directly to subscription update page
-            console.log('Creating portal session with subscription update flow for:', user.stripeSubscriptionId);
             
             const portalSession = await stripe.billingPortal.sessions.create({
               customer: user.stripeCustomerId,
@@ -115,12 +111,9 @@ export function registerStripeRoutes(app: Express) {
               }
             });
 
-            console.log('Portal session created with URL:', portalSession.url);
-            console.log('Flow data configured for subscription:', user.stripeSubscriptionId);
             return res.json({ url: portalSession.url });
           }
         } catch (error) {
-          console.error('Error checking existing subscription:', error);
           // Continue to checkout if subscription check fails
         }
       }
@@ -141,12 +134,6 @@ export function registerStripeRoutes(app: Express) {
         'premium-yearly': process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID
       };
       
-      console.log('Environment variables check:');
-      console.log('STRIPE_STANDARD_MONTHLY_PRICE_ID:', process.env.STRIPE_STANDARD_MONTHLY_PRICE_ID);
-      console.log('STRIPE_STANDARD_YEARLY_PRICE_ID:', process.env.STRIPE_STANDARD_YEARLY_PRICE_ID);
-      console.log('STRIPE_PREMIUM_MONTHLY_PRICE_ID:', process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID);
-      console.log('STRIPE_PREMIUM_YEARLY_PRICE_ID:', process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID);
-      console.log('Plan price IDs object:', planPriceIds);
 
       let sessionConfig: any;
 
@@ -169,12 +156,8 @@ export function registerStripeRoutes(app: Express) {
       } else {
         // For paid plans, create subscription using real Stripe Price IDs
         const priceId = planPriceIds[plan as keyof typeof planPriceIds];
-        console.log('Available plans:', Object.keys(planPriceIds));
-        console.log('Requested plan:', plan);
-        console.log('Found price ID:', priceId);
         
         if (!priceId) {
-          console.error('Invalid plan requested:', plan, 'Available plans:', Object.keys(planPriceIds));
           return res.status(400).json({ error: "Invalid plan selected" });
         }
         
@@ -204,19 +187,14 @@ export function registerStripeRoutes(app: Express) {
 
       const session = await stripe.checkout.sessions.create(sessionConfig);
       
-      console.log('Stripe session created successfully');
-      console.log('Session ID:', session.id);
-      console.log('Session URL:', session.url);
       
       if (!session.url) {
-        console.error('No URL returned from Stripe session');
         return res.status(500).json({ error: "No redirect URL received from Stripe" });
       }
 
       return res.json({ url: session.url });
 
     } catch (error) {
-      console.error('Error creating checkout session:', error);
       return res.status(500).json({ error: "Failed to create checkout session" });
     }
   });
@@ -277,9 +255,7 @@ export function registerStripeRoutes(app: Express) {
         try {
           // Cancel the existing subscription
           await stripe.subscriptions.cancel(session.metadata.existingSubscriptionId);
-          console.log(`Cancelled existing subscription: ${session.metadata.existingSubscriptionId}`);
         } catch (cancelError) {
-          console.error('Error cancelling existing subscription:', cancelError);
           // Continue with the process even if cancellation fails
         }
       }
@@ -289,9 +265,7 @@ export function registerStripeRoutes(app: Express) {
         try {
           // Cancel the existing subscription
           await stripe.subscriptions.cancel(session.metadata.existingSubscriptionId);
-          console.log(`Cancelled existing subscription: ${session.metadata.existingSubscriptionId}`);
         } catch (cancelError) {
-          console.error('Error cancelling existing subscription:', cancelError);
           // Continue with the process even if cancellation fails
         }
       }
@@ -309,18 +283,15 @@ export function registerStripeRoutes(app: Express) {
           );
         }
         
-        console.log(`Successfully upgraded user ${userId} to ${dbPlan} plan (${billingInterval})`);
         
         // Redirect to dashboard with success message
         return res.redirect(`/dashboard?upgrade=success&plan=${dbPlan}&interval=${billingInterval}`);
         
       } catch (dbError) {
-        console.error('Error updating user plan in database:', dbError);
         return res.redirect('/?error=plan_update_failed');
       }
 
     } catch (error) {
-      console.error('Error processing subscription success:', error);
       return res.redirect('/?error=subscription_processing_failed');
     }
   });
@@ -372,11 +343,9 @@ export function registerStripeRoutes(app: Express) {
         await storage.updateUserPlan(session.metadata.userId, planConfig.plan as 'free' | 'standard' | 'premium', planConfig.interval as 'monthly' | 'yearly');
       }
 
-      console.log(`Successfully changed subscription ${subscription_id} to ${plan}`);
       return res.redirect(`/dashboard?upgrade=success&plan=${planConfig?.plan}&interval=${planConfig?.interval}`);
 
     } catch (error) {
-      console.error('Error processing subscription change:', error);
       return res.redirect('/?error=subscription_change_failed');
     }
   });
@@ -428,7 +397,6 @@ export function registerStripeRoutes(app: Express) {
           proration_behavior: 'create_prorations',
         });
 
-        console.log(`Subscription ${subscriptionId} upgraded immediately from weight ${currentWeight} to ${newWeight}`);
         return res.json({ success: true, type: "upgrade" });
 
       } else {
@@ -448,12 +416,10 @@ export function registerStripeRoutes(app: Express) {
           phases: schedulePhases,
         });
 
-        console.log(`Subscription ${subscriptionId} scheduled to downgrade from weight ${currentWeight} to ${newWeight} at period end`);
         return res.json({ success: true, type: "downgrade" });
       }
 
     } catch (error: any) {
-      console.error('Error switching subscription plan:', error);
       return res.status(500).json({ success: false, error: error.message || "Failed to switch plan" });
     }
   });
@@ -509,7 +475,6 @@ export function registerStripeRoutes(app: Express) {
       return res.json({ hasSchedule: false });
 
     } catch (error: any) {
-      console.error('Error fetching subscription schedule:', error);
       return res.status(500).json({ error: "Failed to fetch subscription schedule" });
     }
   });
@@ -536,7 +501,6 @@ export function registerStripeRoutes(app: Express) {
       return await handleSubscriptionChange(user, plan, res);
 
     } catch (error) {
-      console.error('Error changing subscription:', error);
       return res.status(500).json({ error: "Failed to change subscription" });
     }
   });
@@ -555,7 +519,6 @@ export function registerStripeRoutes(app: Express) {
       return res.json({ success: true, message: "Subscription cancelled successfully" });
 
     } catch (error) {
-      console.error('Error cancelling subscription:', error);
       return res.status(500).json({ error: "Failed to cancel subscription" });
     }
   });
@@ -573,14 +536,12 @@ export function registerStripeRoutes(app: Express) {
       // For development, we'll skip webhook signature verification
       event = req.body;
     } catch (err) {
-      console.log('Webhook signature verification failed:', err);
       return res.status(400).send('Webhook signature verification failed');
     }
 
     // Handle the checkout.session.completed event
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
-      console.log('Checkout session completed:', session.id);
 
       try {
         // Extract plan from metadata
@@ -607,11 +568,9 @@ export function registerStripeRoutes(app: Express) {
               await storage.updateUserStripeInfo(userId, session.customer as string, session.subscription as string);
             }
             
-            console.log(`Updated user ${userId} to plan ${dbPlan} (${billingInterval})`);
           }
         }
       } catch (error) {
-        console.error('Error processing webhook:', error);
       }
     }
 
@@ -626,21 +585,18 @@ export function registerStripeRoutes(app: Express) {
 
     try {
       const userId = getUserId(req);
-      console.log("Customer portal: User ID from request:", userId);
       
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
 
       const user = await storage.getUser(userId);
-      console.log("Customer portal: User found:", user ? "yes" : "no", user ? `plan: ${user.plan}` : "");
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
       if (!user.stripeCustomerId) {
-        console.log("Customer portal: No Stripe customer ID found for user");
         return res.status(400).json({ message: "No active subscription found. Please subscribe first." });
       }
 
@@ -655,7 +611,6 @@ export function registerStripeRoutes(app: Express) {
 
       return res.json({ url: portalSession.url });
     } catch (error) {
-      console.error('Error creating customer portal session:', error);
       return res.status(500).json({ message: "Failed to create portal session" });
     }
   });

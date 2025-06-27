@@ -28,7 +28,6 @@ export function registerMobileUploadRoutes(app: any) {
       // Use the actual user ID from the Bearer token
       const userId = token;
       
-      console.log('Creating session for user:', userId);
       
       const sessionId = crypto.randomUUID();
       
@@ -48,7 +47,6 @@ export function registerMobileUploadRoutes(app: any) {
       
       return res.json({ sessionId });
     } catch (error) {
-      console.error('Session creation error:', error);
       return res.status(500).json({ error: 'Failed to create session' });
     }
   });
@@ -83,11 +81,9 @@ export function registerMobileUploadRoutes(app: any) {
           throw new Error('Invalid JWT format');
         }
       } catch (error) {
-        console.error('Failed to extract user ID from JWT:', error);
         return res.status(401).json({ error: 'Invalid session token' });
       }
 
-      console.log('Processing mobile upload for user:', userId, 'file size:', file.buffer.length);
 
       // Validate file buffer
       if (!file.buffer || file.buffer.length === 0) {
@@ -103,7 +99,6 @@ export function registerMobileUploadRoutes(app: any) {
       // Process OCR directly without HTTP calls to avoid timeout issues in production
       let ocrResult;
       try {
-        console.log('Processing OCR directly...');
         
         // Import OCR processing functions
         const { performOCR, extractStructuredData, uploadToBunny } = await import('../uploadReceipt');
@@ -119,11 +114,9 @@ export function registerMobileUploadRoutes(app: any) {
 
         // Perform OCR
         const recognizedText = await performOCR(file.buffer);
-        console.log('OCR completed successfully');
 
         // Extract structured data using OpenAI
         const extractedData = await extractStructuredData(recognizedText);
-        console.log('Data extraction completed');
 
         // AI Categorization for standard+ users
         let predictedCategory: string | undefined;
@@ -133,9 +126,7 @@ export function registerMobileUploadRoutes(app: any) {
             const amountForCategorization = extractedData.amount || 0;
             const categorization = await categorizeExpense(descriptionForCategorization, amountForCategorization);
             predictedCategory = categorization.category;
-            console.log('AI categorization completed');
           } catch (categoryError) {
-            console.error('AI categorization failed:', categoryError);
           }
         }
 
@@ -148,9 +139,7 @@ export function registerMobileUploadRoutes(app: any) {
           
           try {
             imageUrl = await uploadToBunny(fileName, file.buffer, file.mimetype);
-            console.log('Image upload to Bunny.net completed');
           } catch (uploadError) {
-            console.error('Upload to Bunny.net failed:', uploadError);
           }
         }
 
@@ -168,10 +157,8 @@ export function registerMobileUploadRoutes(app: any) {
           ocrResult.category = predictedCategory;
         }
 
-        console.log('Direct OCR processing completed successfully');
         
       } catch (error) {
-        console.error('Direct OCR processing failed:', error);
         mobileUploadSessions.set(sessionId, {
           userId: userId,
           status: 'error',
@@ -201,7 +188,6 @@ export function registerMobileUploadRoutes(app: any) {
         message: 'Receipt processed successfully' 
       });
     } catch (error) {
-      console.error('Mobile upload error:', error);
       return res.status(500).json({ error: 'Upload failed' });
     }
   });
@@ -222,7 +208,6 @@ export function registerMobileUploadRoutes(app: any) {
         error: session.error || null
       });
     } catch (error) {
-      console.error('Status check error:', error);
       return res.status(500).json({ error: 'Status check failed' });
     }
   });

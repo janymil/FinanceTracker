@@ -234,7 +234,6 @@ export function registerImportRoutes(app: Express) {
       
       return res.json(logs);
     } catch (error) {
-      console.error("Error fetching import logs:", error);
       return res.status(500).json({ message: "Failed to fetch import logs" });
     }
   });
@@ -276,8 +275,6 @@ export function registerImportRoutes(app: Express) {
       // Validate the import data structure
       const validationResult = importDataSchema.safeParse(importData);
       if (!validationResult.success) {
-        console.error("Import data validation failed:", validationResult.error.issues);
-        console.error("Import data structure:", JSON.stringify(importData, null, 2));
         return res.status(400).json({ 
           message: "Invalid data structure", 
           errors: validationResult.error.issues 
@@ -467,7 +464,6 @@ export function registerImportRoutes(app: Express) {
       // Clear all AI caches after successful import to trigger fresh AI insights
       // Cache system removed - direct Fly.io calls only
       
-      console.log(`Cleared all AI caches for user ${userId} after data import`);
 
       return res.json({
         success: true,
@@ -477,7 +473,6 @@ export function registerImportRoutes(app: Express) {
       });
 
     } catch (error) {
-      console.error("Error importing data:", error);
       
       // Log failed import
       try {
@@ -506,7 +501,6 @@ export function registerImportRoutes(app: Express) {
           );
         }
       } catch (logError) {
-        console.error("Failed to log import error:", logError);
       }
       
       return res.status(500).json({ 

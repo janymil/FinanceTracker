@@ -27,7 +27,6 @@ export function cookieConsentMiddleware(req: Request, res: Response, next: NextF
       // Handle both string and already parsed object
       consent = typeof consentCookie === 'string' ? JSON.parse(consentCookie) : consentCookie;
     } catch (error) {
-      console.warn('Invalid cookie consent format:', error);
     }
   }
   
@@ -36,7 +35,6 @@ export function cookieConsentMiddleware(req: Request, res: Response, next: NextF
     try {
       consent = JSON.parse(req.headers['x-cookie-consent'] as string);
     } catch (error) {
-      console.warn('Invalid header consent format:', error);
     }
   }
   

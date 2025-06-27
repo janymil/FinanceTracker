@@ -61,13 +61,11 @@ export function registerAIRoutes(app: Express) {
             transactionId: transaction.id
           });
         } catch (error) {
-          console.error(`Failed to categorize transaction ${transaction.id}:`, error);
         }
       }
 
       return res.json({ suggestions });
     } catch (error) {
-      console.error("Error in auto-categorization:", error);
       return res.status(500).json({ message: "Failed to auto-categorize transactions" });
     }
   });
@@ -95,7 +93,6 @@ export function registerAIRoutes(app: Express) {
       const result = await categorizeExpense(description, amount);
       return res.json({ category: result.category });
     } catch (error) {
-      console.error("Error categorizing expense:", error);
       return res.status(500).json({ message: "Failed to categorize expense" });
     }
   });
@@ -170,10 +167,8 @@ export function registerAIRoutes(app: Express) {
       const tipResults = await runAI('financial-tips', userId, aiPayload);
 
       // Handle AI processor response format
-      console.log('TIP ENDPOINT: AI processor response type:', typeof tipResults, 'isArray:', Array.isArray(tipResults));
       
       if (tipResults?.error) {
-        console.error('TIP ENDPOINT: AI processor returned error:', tipResults.error);
         return res.status(500).json({ message: "AI service temporarily unavailable" });
       }
 
@@ -181,22 +176,13 @@ export function registerAIRoutes(app: Express) {
       if (Array.isArray(tipResults) && tipResults.length > 0) {
         // AI processor returns array of tips directly
         responseData = { tips: tipResults };
-        console.log('TIP ENDPOINT: Using array format, tips count:', tipResults.length);
       } else if (tipResults && typeof tipResults === 'object' && tipResults.tip) {
         // Legacy single tip format
         responseData = { tip: tipResults.tip };
-        console.log('TIP ENDPOINT: Using legacy tip format');
       } else if (tipResults && typeof tipResults === 'object' && tipResults.tips) {
         // Wrapped tips format
         responseData = tipResults;
-        console.log('TIP ENDPOINT: Using wrapped tips format');
       } else {
-        console.error('TIP ENDPOINT: Unexpected response format:', {
-          type: typeof tipResults,
-          isArray: Array.isArray(tipResults),
-          keys: tipResults ? Object.keys(tipResults) : 'null',
-          content: tipResults
-        });
         return res.status(500).json({ message: "Failed to generate financial tip" });
       }
 
@@ -205,7 +191,6 @@ export function registerAIRoutes(app: Express) {
 
       return res.json(responseData);
     } catch (error) {
-      console.error("Error generating financial tip:", error);
       return res.status(500).json({ message: "Failed to generate financial tip" });
     }
   });
@@ -258,7 +243,6 @@ export function registerAIRoutes(app: Express) {
 
       return res.json(insights);
     } catch (error) {
-      console.error("Error generating spending insights:", error);
       return res.status(500).json({ message: "Failed to generate spending insights" });
     }
   });
@@ -282,7 +266,6 @@ export function registerAIRoutes(app: Express) {
 
       const transactions = await storage.getUserTransactions(userId, 100);
 
-      console.log('AI financial health score: Making Fly.io API call via centralized processor');
       
       const aiPayload = {
         summary,
@@ -312,7 +295,6 @@ export function registerAIRoutes(app: Express) {
       // Cache the result for 24 hours
       await cache.set(aiPayload, aiScore, false, 24);
       
-      console.log('Financial health: Fly.io response structure:', {
         hasScore: typeof aiScore?.score === 'number',
         score: aiScore?.score,
         hasStatus: !!aiScore?.status,
@@ -322,7 +304,6 @@ export function registerAIRoutes(app: Express) {
 
       return res.json(aiScore);
     } catch (error) {
-      console.error("Error generating AI financial health score:", error);
       return res.status(500).json({ message: "Failed to generate AI financial health score" });
     }
   });
@@ -379,7 +360,6 @@ export function registerAIRoutes(app: Express) {
 
       return res.json(predictions);
     } catch (error) {
-      console.error("Error generating trend predictions:", error);
       return res.status(500).json({ message: "Failed to generate trend predictions" });
     }
   });
@@ -399,7 +379,6 @@ export function registerAIRoutes(app: Express) {
 
       const { transactions, summary, budgets } = req.body;
 
-      console.log('DEBUG: Raw daily recommendations request data:', {
         transactionCount: transactions?.length || 0,
         firstTransactionStructure: transactions?.[0] || 'none',
         summaryReceived: summary || 'none',
@@ -447,14 +426,12 @@ export function registerAIRoutes(app: Express) {
       // Try to get cached result using date-based key
       const cachedResult = await cache.get(cacheKey);
       if (cachedResult) {
-        console.log('Daily recommendations: Using cached result for date:', todayKey);
         return res.json(cachedResult);
       }
 
       // Generate new AI response
       let recommendations = await runAI('daily-recommendations', userId, aiPayload);
       
-      console.log('Daily recommendations: Received response from Fly.io:', {
         hasRecommendations: Array.isArray(recommendations?.recommendations),
         recommendationCount: recommendations?.recommendations?.length || 0,
         hasInsights: Array.isArray(recommendations?.insights),
@@ -464,7 +441,6 @@ export function registerAIRoutes(app: Express) {
         actualInsights: recommendations?.insights
       });
 
-      console.log('Daily recommendations: Fly.io response structure:', {
         hasRecommendations: !!recommendations?.recommendations,
         recommendationCount: recommendations?.recommendations?.length || 0,
         hasInsights: !!recommendations?.insights,
@@ -474,11 +450,9 @@ export function registerAIRoutes(app: Express) {
 
       // Cache the result for 24 hours using date-based key
       await cache.set(cacheKey, recommendations, false, 24);
-      console.log('Daily recommendations: Cached new result for date:', todayKey);
 
       return res.json(recommendations);
     } catch (error) {
-      console.error("Error generating daily recommendations:", error);
       return res.status(500).json({ message: "Failed to generate daily recommendations" });
     }
   });
@@ -593,19 +567,12 @@ export function registerAIRoutes(app: Express) {
       const healthData = await runAI('financial-health-score', userId, aiPayload);
 
       // Debug: Log the response structure to understand the data flow
-      console.log('=== FINANCIAL HEALTH DEBUG ===');
-      console.log('Raw AI Response:', JSON.stringify(healthData, null, 2));
-      console.log('Has insights:', healthData?.insights?.length || 0);
-      console.log('Has achievements:', healthData?.achievements?.length || 0);
-      console.log('Has warnings:', healthData?.warnings?.length || 0);
-      console.log('================================');
 
       // Cache the result for 24 hours
       await cache.set(aiPayload, healthData, false, 24);
 
       return res.json(healthData);
     } catch (error) {
-      console.error("Error generating financial health score:", error);
       return res.status(500).json({ message: "Failed to generate financial health score" });
     }
   });
@@ -634,7 +601,6 @@ export function registerAIRoutes(app: Express) {
       
       return res.json(mascot);
     } catch (error) {
-      console.error("Error fetching mascot:", error);
       return res.status(500).json({ message: "Failed to fetch mascot" });
     }
   });
@@ -753,9 +719,7 @@ export function registerAIRoutes(app: Express) {
         
         // Create permanent URL for the stored image
         permanentImageUrl = `/uploads/mascots/${filename}`;
-        console.log(`Mascot image stored permanently at: ${permanentImageUrl}`);
       } catch (storageError) {
-        console.error("Failed to store image locally, using temporary URL:", storageError);
         // Fallback to temporary URL if local storage fails
         permanentImageUrl = tempImageUrl;
       }
@@ -771,7 +735,6 @@ export function registerAIRoutes(app: Express) {
             const oldFilePath = path.join(process.cwd(), existingMascot.imageUrl);
             await fs.unlink(oldFilePath);
           } catch (error) {
-            console.warn("Failed to delete old mascot image:", error);
           }
         }
         
@@ -797,7 +760,6 @@ export function registerAIRoutes(app: Express) {
 
       return res.json(mascot);
     } catch (error) {
-      console.error("Error generating mascot:", error);
       return res.status(500).json({ message: "Failed to generate mascot" });
     }
   });
@@ -828,7 +790,6 @@ export function registerAIRoutes(app: Express) {
 
       return res.json(mascot);
     } catch (error) {
-      console.error("Error toggling mascot:", error);
       return res.status(500).json({ message: "Failed to toggle mascot" });
     }
   });
@@ -851,7 +812,6 @@ export function registerAIRoutes(app: Express) {
       const { transactions } = req.body;
 
       // Always call Fly.io even with empty data for testing
-      console.log('EXPENSE PREDICTIONS: Processing with', transactions.length, 'transactions');
 
       // Filter expense transactions for consistent cache hashing
       const expenseTransactions = transactions
@@ -891,7 +851,6 @@ export function registerAIRoutes(app: Express) {
 
       return res.json(predictions);
     } catch (error) {
-      console.error("Error generating expense predictions:", error);
       return res.status(500).json({ message: "Failed to generate expense predictions" });
     }
   });
@@ -946,7 +905,6 @@ Answer questions about features, subscription plans, how to use the app, trouble
 
       return res.json({ response: assistantResponse });
     } catch (error) {
-      console.error("Error in help chat:", error);
       return res.status(500).json({ message: "Failed to get help response" });
     }
   });
@@ -961,7 +919,6 @@ Answer questions about features, subscription plans, how to use the app, trouble
 
       const { transactions, summary, budgets, goals, selectedMonth } = req.body;
 
-      console.log('🔥 Contextual tips API request received:', {
         userId: userId?.substring(0, 8) + '...',
         selectedMonth,
         transactionCount: transactions?.length || 0,
@@ -1060,7 +1017,6 @@ Answer questions about features, subscription plans, how to use the app, trouble
 
       return res.json({ tips });
     } catch (error) {
-      console.error("Error generating contextual financial tips:", error);
       return res.status(500).json({ message: "Failed to generate contextual financial tips" });
     }
   });
