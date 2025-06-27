@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useTranslation } from 'react-i18next';
 import { 
   Bell, 
   Clock, 
@@ -90,6 +91,7 @@ interface UnifiedReminder {
 export default function UnifiedRemindersWidget() {
   const { toast } = useToast();
   const { isReady, user } = useClerkUserReady();
+  const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReminder, setEditingReminder] = useState<ExpenseReminder | null>(null);
   
@@ -284,57 +286,57 @@ export default function UnifiedRemindersWidget() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5" />
-                Upcoming Payments & Reminders
+                {t('upcomingReminders.title')}
                 <Badge className="bg-blue-600 text-white">
                   <Crown className="h-3 w-3 mr-1" />
-                  Standard+
+                  {t('plans.standard')}+
                 </Badge>
               </CardTitle>
               <CardDescription>
-                Automatic reminders from transactions and manual payment reminders
+                {t('upcomingReminders.description')}
               </CardDescription>
             </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" onClick={resetForm}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Reminder
+                  {t('upcomingReminders.addReminder')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-md">
                 <DialogHeader>
                   <DialogTitle>
-                    {editingReminder ? "Edit Reminder" : "Create Payment Reminder"}
+                    {editingReminder ? t('upcomingReminders.editReminder') : t('upcomingReminders.createReminder')}
                   </DialogTitle>
                   <DialogDescription>
-                    Set up a reminder for an upcoming expense, payment, or income
+                    {t('upcomingReminders.reminderDescription')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="title">Title *</Label>
+                    <Label htmlFor="title">{t('upcomingReminders.form.title')} *</Label>
                     <Input
                       id="title"
                       value={newReminder.title}
                       onChange={(e) => setNewReminder({ ...newReminder, title: e.target.value })}
-                      placeholder="e.g., Rent payment, Insurance bill"
+                      placeholder={t('upcomingReminders.form.titlePlaceholder')}
                     />
                   </div>
                   
                   <div>
-                    <Label htmlFor="description">Description</Label>
+                    <Label htmlFor="description">{t('upcomingReminders.form.description')}</Label>
                     <Textarea
                       id="description"
                       value={newReminder.description}
                       onChange={(e) => setNewReminder({ ...newReminder, description: e.target.value })}
-                      placeholder="Additional notes about this payment"
+                      placeholder={t('upcomingReminders.form.descriptionPlaceholder')}
                       rows={2}
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="amount">Amount</Label>
+                      <Label htmlFor="amount">{t('upcomingReminders.form.amount')}</Label>
                       <Input
                         id="amount"
                         type="number"
@@ -345,7 +347,7 @@ export default function UnifiedRemindersWidget() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="dueDate">Due Date *</Label>
+                      <Label htmlFor="dueDate">{t('upcomingReminders.form.dueDate')} *</Label>
                       <Input
                         id="dueDate"
                         type="date"
@@ -357,25 +359,25 @@ export default function UnifiedRemindersWidget() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="category">Category</Label>
+                      <Label htmlFor="category">{t('upcomingReminders.form.category')}</Label>
                       <Select 
                         value={newReminder.categoryId} 
                         onValueChange={(value) => setNewReminder({ ...newReminder, categoryId: value })}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
+                          <SelectValue placeholder={t('upcomingReminders.form.selectCategory')} />
                         </SelectTrigger>
                         <SelectContent>
                           {allCategories.map((category: Category) => (
                             <SelectItem key={category.id} value={category.id.toString()}>
-                              {category.name} ({category.type})
+                              {category.name} ({t(`transactions.${category.type}`)})
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
-                      <Label htmlFor="reminderDays">Remind me</Label>
+                      <Label htmlFor="reminderDays">{t('upcomingReminders.form.remindMe')}</Label>
                       <Select 
                         value={newReminder.reminderDaysBefore.toString()} 
                         onValueChange={(value) => setNewReminder({ ...newReminder, reminderDaysBefore: parseInt(value) })}
@@ -384,10 +386,10 @@ export default function UnifiedRemindersWidget() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="0">On due date</SelectItem>
-                          <SelectItem value="1">1 day before</SelectItem>
-                          <SelectItem value="3">3 days before</SelectItem>
-                          <SelectItem value="7">1 week before</SelectItem>
+                          <SelectItem value="0">{t('upcomingReminders.form.onDueDate')}</SelectItem>
+                          <SelectItem value="1">{t('upcomingReminders.form.dayBefore', { count: 1 })}</SelectItem>
+                          <SelectItem value="3">{t('upcomingReminders.form.daysBefore', { count: 3 })}</SelectItem>
+                          <SelectItem value="7">{t('upcomingReminders.form.weekBefore')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
