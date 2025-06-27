@@ -64,6 +64,29 @@ export default function DailyRecommendations({ summary, transactions = [], budge
   const { currency } = useCurrency();
   const { t, i18n } = useTranslation();
 
+  // Map AI response types to translation keys
+  const mapCategoryType = (type: string): string => {
+    const typeMapping: { [key: string]: string } = {
+      'expense_management': 'spending',
+      'spending_adjustment': 'spending', 
+      'budget_review': 'budgeting',
+      'budget_optimization': 'budgeting',
+      'income_optimization': 'saving',
+      'saving_goal': 'saving',
+      'financial_goal': 'goal',
+      'habit_building': 'habit',
+      'expense_tracking': 'spending',
+      'spending': 'spending',
+      'saving': 'saving',
+      'budgeting': 'budgeting',
+      'goal': 'goal',
+      'habit': 'habit',
+      'general': 'habit'
+    };
+    
+    return typeMapping[type] || 'habit'; // fallback to 'habit' for unknown types
+  };
+
   // Get user's plan from database
   const { data: databaseUser, isLoading: userLoading } = useQuery({
     queryKey: ["auth-user", user?.id],
@@ -221,7 +244,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                               {rec.title}
                             </h5>
                             <Badge variant="outline" className="text-xs capitalize">
-                              {rec.type ? t(`dailyRecommendations.categories.${rec.type}`) : rec.type}
+                              {rec.type ? t(`dailyRecommendations.categories.${mapCategoryType(rec.type)}`) : t('dailyRecommendations.categories.habit')}
                             </Badge>
                           </div>
 
