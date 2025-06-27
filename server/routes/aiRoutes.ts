@@ -607,21 +607,18 @@ export function registerAIRoutes(app: Express) {
       // Try to get cached result using stable key
       const cachedResult = await cache.get(cacheKey);
       if (cachedResult) {
-        // Transform AI analysis into frontend-expected format
-        const response = transformAIResponseForMascot(cachedResult);
-        return res.json(response);
+        // Return cached data directly - it's already in correct format from Fly.io
+        return res.json(cachedResult);
       }
 
       // Use unified AI processor for financial health score
       const healthData = await runAI('financial-health-score', userId, aiPayload);
 
-      // Transform AI analysis into frontend-expected format
-      const response = transformAIResponseForMascot(healthData);
-
       // Cache the result for 24 hours using stable key
       await cache.set(cacheKey, healthData, false, 24);
 
-      return res.json(response);
+      // Return data directly - Fly.io processor already formats it correctly
+      return res.json(healthData);
     } catch (error) {
       console.error("Error generating financial health score:", error);
       return res.status(500).json({ message: "Failed to generate financial health score" });
