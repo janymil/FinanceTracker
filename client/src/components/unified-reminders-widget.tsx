@@ -492,7 +492,7 @@ export default function UnifiedRemindersWidget() {
                       disabled={!newReminder.title || !newReminder.dueDate}
                       className="flex-1"
                     >
-                      {editingReminder ? t('common.update') : t('common.create')} {t('upcomingReminders.reminder')}
+                      {editingReminder ? t('upcomingReminders.editReminder') : t('upcomingReminders.createReminder')}
                     </Button>
                   </div>
                 </div>
