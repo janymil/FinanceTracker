@@ -83,15 +83,13 @@ export default function FinancialHealthMascot() {
   const [showDetails, setShowDetails] = useState(false);
 
   const { data: healthData, isLoading } = useQuery<FinancialHealthData>({
-    queryKey: ["/api/financial-health", Date.now()],
+    queryKey: ["/api/financial-health", user?.id],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/financial-health");
       return response.json();
     },
     enabled: isReady && !!user?.id,
-    refetchInterval: 30000, // Refresh every 30 seconds
-    staleTime: 0,
-    gcTime: 0,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
 
