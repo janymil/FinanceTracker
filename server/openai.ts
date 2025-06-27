@@ -1620,38 +1620,11 @@ export async function generateFinancialHealthScore(
       messages: [
         {
           role: "system",
-          content: `Respond in ${getLanguageLabel(normalizedLanguage)}. You are an expert financial health analyst. Analyze the user's financial data and provide a comprehensive health assessment.
+          content: `You are a financial health analyst. Analyze the user's financial data and provide a comprehensive health assessment. Return JSON: {"score": number, "trend": "improving/stable/declining", "category": "excellent/good/fair/poor", "insights": ["array of 2-3 specific insights"], "achievements": ["array of 1-2 positive achievements"], "warnings": ["array of 1-2 areas needing attention"]}
 
-Calculate a financial health score (0-100) based on:
-- Income vs expenses ratio
-- Budget adherence 
-- Spending patterns
-- Emergency fund adequacy
-- Debt management
-- Savings rate
+ALWAYS provide meaningful content for insights, achievements, and warnings based on the financial data. Never return empty arrays.
 
-Categorize the score:
-- 80-100: excellent
-- 60-79: good  
-- 40-59: fair
-- 0-39: poor
-
-Determine trend based on recent spending patterns:
-- improving: positive financial trajectory
-- declining: concerning financial habits
-- stable: consistent financial behavior
-
-Provide specific insights, achievements, and actionable warnings.
-
-Respond with JSON in this exact format:
-{
-  "score": 75,
-  "trend": "improving",
-  "category": "good",
-  "insights": ["Specific financial insights"],
-  "achievements": ["Recent positive financial behaviors"],
-  "warnings": ["Areas needing attention"]
-}`
+Respond in ${getLanguageLabel(normalizedLanguage)}.`
         },
         {
           role: "user",
@@ -1692,9 +1665,9 @@ Analyze this financial data and provide a comprehensive health assessment.`
       score: Math.max(0, Math.min(100, result.score || 50)),
       trend: result.trend || 'stable',
       category: result.category || 'fair',
-      insights: Array.isArray(result.insights) ? result.insights : [],
-      achievements: Array.isArray(result.achievements) ? result.achievements : [],
-      warnings: Array.isArray(result.warnings) ? result.warnings : []
+      insights: Array.isArray(result.insights) && result.insights.length > 0 ? result.insights : null,
+      achievements: Array.isArray(result.achievements) && result.achievements.length > 0 ? result.achievements : null,
+      warnings: Array.isArray(result.warnings) && result.warnings.length > 0 ? result.warnings : null
     };
 
     // Cache the result with 24 hours TTL
