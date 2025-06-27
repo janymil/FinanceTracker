@@ -9,6 +9,7 @@ import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useTranslation } from "react-i18next";
+import { getLocalizedCategoryName } from "@/lib/categoryHelpers";
 
 // Types
 interface Budget {
@@ -108,6 +109,12 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
       const response = await apiRequest("GET", "/api/transactions");
       return response.json();
     },
+  });
+
+  // Fetch categories for localization
+  const { data: categories } = useQuery({
+    queryKey: ['/api/categories'],
+    enabled: isReady && !isLimited,
   });
 
   const budgetsWithSpending = useMemo((): BudgetWithSpending[] => {
@@ -221,7 +228,7 @@ export default function BudgetOverview({ className, isLimited = false }: BudgetO
                     <div className="flex items-center space-x-3">
                       <span className="text-lg">{getCategoryIcon(budget.categoryIcon)}</span>
                       <span className="font-medium text-gray-900 dark:text-white">
-                        {budget.categoryName}
+                        {getLocalizedCategoryName(budget.categoryName, categories as any[] | undefined, t)}
                       </span>
                     </div>
                     <span className="text-sm text-gray-600 dark:text-gray-400">{percentage}%</span>
