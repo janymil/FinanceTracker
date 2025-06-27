@@ -22,11 +22,27 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface FinancialHealthData {
   score: number;
-  trend: 'improving' | 'declining' | 'stable';
+  status: string;
+  color: string;
   category: 'excellent' | 'good' | 'fair' | 'poor';
-  insights: string[];
-  achievements: string[];
-  warnings: string[];
+  icon: string;
+  factors?: Array<{
+    name: string;
+    score: number;
+    max: number;
+    status: string;
+    aiInsight?: string;
+  }>;
+  aiAnalysis?: {
+    personalizedFactors: string[];
+    riskAssessment: string;
+    recommendations: Array<{
+      action: string;
+      impact: string;
+      priority: 'high' | 'medium' | 'low';
+    }>;
+    confidence: number;
+  };
 }
 
 interface MascotState {

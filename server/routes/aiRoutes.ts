@@ -320,21 +320,7 @@ export function registerAIRoutes(app: Express) {
         fullResponse: aiScore
       });
 
-      // Transform the AI response to match the frontend FinancialHealthData interface
-      console.log('DEBUG: Raw AI response structure:', JSON.stringify(aiScore, null, 2));
-      
-      const transformedResponse = {
-        score: aiScore?.score || 50,
-        trend: aiScore?.trend || 'stable',
-        category: aiScore?.category || 'fair',
-        insights: aiScore?.insights || aiScore?.aiAnalysis?.personalizedFactors || [],
-        achievements: aiScore?.achievements || (aiScore?.aiAnalysis?.recommendations?.filter(r => r.priority === 'high')?.map(r => r.action) || []),
-        warnings: aiScore?.warnings || (aiScore?.aiAnalysis?.recommendations?.filter(r => r.priority === 'medium')?.map(r => r.action) || [])
-      };
-
-      console.log('DEBUG: Transformed response for frontend:', JSON.stringify(transformedResponse, null, 2));
-      
-      return res.json(transformedResponse);
+      return res.json(aiScore);
     } catch (error) {
       console.error("Error generating AI financial health score:", error);
       return res.status(500).json({ message: "Failed to generate AI financial health score" });
