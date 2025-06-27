@@ -592,88 +592,31 @@ export function registerAIRoutes(app: Express) {
         language: language
       };
 
-      // Create stable cache key based on core financial metrics (not exact transaction details)
-      const cacheKey = {
-        summary: aiPayload.summary,
-        transactionCount: processedTransactions.length,
-        budgetCount: processedBudgets.length,
-        language: language,
-        month: new Date().toISOString().slice(0, 7) // YYYY-MM format
-      };
+
+
+
 
       // Initialize UnifiedAICache with 24 hours TTL
       const cache = new UnifiedAICache('financial-health-score', userId);
 
-      // Try to get cached result using stable key
-      const cachedResult = await cache.get(cacheKey);
+      // Try to get cached result
+      const cachedResult = await cache.get(aiPayload);
       if (cachedResult) {
-        // Clean cached data too
-        const cleanText = (text: string): string => {
-          if (!text || typeof text !== 'string') return '';
-          return text
-            .replace(/Personal Financial Pattern\s*:?\s*/gi, '')
-            .replace(/AI Recommendation\s*:?\s*/gi, '')
-            .replace(/Smart Recommendation\s*:?\s*/gi, '')
-            .replace(/Recommendation\s*:?\s*/gi, '')
-            .replace(/Financial Pattern\s*:?\s*/gi, '')
-            .replace(/Pattern\s*:?\s*/gi, '')
-            .replace(/Analysis\s*:?\s*/gi, '')
-            .replace(/Insight\s*:?\s*/gi, '')
-            .replace(/^\d+\.\s*/, '') // Remove numbered list prefixes
-            .replace(/^[-•]\s*/, '') // Remove bullet points
-            .replace(/\s+/g, ' ')
-            .trim();
-        };
-
-        if (cachedResult.insights && Array.isArray(cachedResult.insights)) {
-          cachedResult.insights = cachedResult.insights.map(cleanText).filter(text => text.length > 10);
-        }
-        if (cachedResult.achievements && Array.isArray(cachedResult.achievements)) {
-          cachedResult.achievements = cachedResult.achievements.map(cleanText).filter(text => text.length > 10);
-        }
-        if (cachedResult.warnings && Array.isArray(cachedResult.warnings)) {
-          cachedResult.warnings = cachedResult.warnings.map(cleanText).filter(text => text.length > 10);
-        }
-
-        return res.json(cachedResult);
+        // Transform AI analysis into frontend-expected format
+        const response = transformAIResponseForMascot(cachedResult);
+        return res.json(response);
       }
 
       // Use unified AI processor for financial health score
       const healthData = await runAI('financial-health-score', userId, aiPayload);
 
-      // Clean text from insights to remove headers
-      const cleanText = (text: string): string => {
-        if (!text || typeof text !== 'string') return '';
-        return text
-          .replace(/Personal Financial Pattern\s*:?\s*/gi, '')
-          .replace(/AI Recommendation\s*:?\s*/gi, '')
-          .replace(/Smart Recommendation\s*:?\s*/gi, '')
-          .replace(/Recommendation\s*:?\s*/gi, '')
-          .replace(/Financial Pattern\s*:?\s*/gi, '')
-          .replace(/Pattern\s*:?\s*/gi, '')
-          .replace(/Analysis\s*:?\s*/gi, '')
-          .replace(/Insight\s*:?\s*/gi, '')
-          .replace(/^\d+\.\s*/, '') // Remove numbered list prefixes
-          .replace(/^[-•]\s*/, '') // Remove bullet points
-          .replace(/\s+/g, ' ')
-          .trim();
-      };
+      // Transform AI analysis into frontend-expected format
+      const response = transformAIResponseForMascot(healthData);
 
-      // Clean the insights array
-      if (healthData.insights && Array.isArray(healthData.insights)) {
-        healthData.insights = healthData.insights.map(cleanText).filter(text => text.length > 10);
-      }
-      if (healthData.achievements && Array.isArray(healthData.achievements)) {
-        healthData.achievements = healthData.achievements.map(cleanText).filter(text => text.length > 10);
-      }
-      if (healthData.warnings && Array.isArray(healthData.warnings)) {
-        healthData.warnings = healthData.warnings.map(cleanText).filter(text => text.length > 10);
-      }
+      // Cache the result for 24 hours
+      await cache.set(aiPayload, healthData, false, 24);
 
-      // Cache the result for 24 hours using stable key
-      await cache.set(cacheKey, healthData, false, 24);
-
-      return res.json(healthData);
+      return res.json(response);
     } catch (error) {
       console.error("Error generating financial health score:", error);
       return res.status(500).json({ message: "Failed to generate financial health score" });
@@ -682,98 +625,61 @@ export function registerAIRoutes(app: Express) {
 
   // Helper function to transform AI response for mascot component
   function transformAIResponseForMascot(aiData: any) {
-    // Check if data is already in the correct format (from Fly.io processor)
-    if (aiData && aiData.insights && Array.isArray(aiData.insights)) {
-      // Data is already in frontend format, just return it
-      return {
-        score: aiData.score || 50,
-        trend: aiData.trend || 'stable',
-        category: aiData.category || 'fair',
-        insights: aiData.insights || [],
-        achievements: aiData.achievements || [],
-        warnings: aiData.warnings || [],
-        factors: aiData.factors || [],
-        aiAnalysis: aiData.aiAnalysis || {}
-      };
-    }
-
-    // Fallback transformation for raw AI data format
+    // Extract insights from different AI response fields
     const insights: string[] = [];
     const achievements: string[] = [];
     const warnings: string[] = [];
 
-    // Aggressive text cleaning function
-    const cleanText = (text: string): string => {
-      if (!text || typeof text !== 'string') return '';
-      
-      return text
-        // Remove all variations of repetitive headers
-        .replace(/Personal Financial Pattern\s*:?\s*/gi, '')
-        .replace(/AI Recommendation\s*:?\s*/gi, '')
-        .replace(/Smart Recommendation\s*:?\s*/gi, '')
-        .replace(/Recommendation\s*:?\s*/gi, '')
-        .replace(/Financial Pattern\s*:?\s*/gi, '')
-        .replace(/Pattern\s*:?\s*/gi, '')
-        .replace(/Analysis\s*:?\s*/gi, '')
-        .replace(/Insight\s*:?\s*/gi, '')
-        // Clean up multiple spaces and line breaks
-        .replace(/\s+/g, ' ')
-        .trim();
-    };
-
-    // If aiData has personalizedFactors
-    if (aiData?.aiAnalysis?.personalizedFactors && Array.isArray(aiData.aiAnalysis.personalizedFactors)) {
-      aiData.aiAnalysis.personalizedFactors.forEach((factor: string) => {
-        const cleaned = cleanText(factor);
-        if (cleaned && cleaned.length > 20 && insights.length < 8) {
-          insights.push(cleaned);
-        }
-      });
+    // Add personalized factors as insights
+    if (aiData.aiAnalysis?.personalizedFactors) {
+      insights.push(...aiData.aiAnalysis.personalizedFactors);
     }
 
-    // If aiData has recommendations
-    if (aiData?.aiAnalysis?.recommendations && Array.isArray(aiData.aiAnalysis.recommendations)) {
-      aiData.aiAnalysis.recommendations.forEach((rec: string) => {
-        const cleaned = cleanText(rec);
-        if (cleaned && cleaned.length > 20 && insights.length < 8) {
-          insights.push(cleaned);
-        }
-      });
-    }
-
-    // If aiData has factors array
-    if (aiData?.factors && Array.isArray(aiData.factors)) {
+    // Add factor insights
+    if (aiData.factors) {
       aiData.factors.forEach((factor: any) => {
         if (factor.aiInsight) {
-          const cleaned = cleanText(factor.aiInsight);
-          if (cleaned && cleaned.length > 20 && insights.length < 8) {
-            insights.push(cleaned);
-          }
-        }
-        
-        // Extract achievements
-        if (factor.status === 'good' || factor.status === 'excellent') {
-          const percentage = Math.round((factor.score / factor.max) * 100);
-          achievements.push(`${factor.name}: ${percentage}%`);
-        }
-        
-        // Extract warnings
-        if (factor.status === 'poor' || factor.status === 'below average') {
-          const percentage = Math.round((factor.score / factor.max) * 100);
-          warnings.push(`${factor.name}: ${percentage}%`);
+          insights.push(`${factor.name}: ${factor.aiInsight}`);
         }
       });
+    }
+
+    // Add recommendations as insights
+    if (aiData.aiAnalysis?.recommendations) {
+      insights.push(...aiData.aiAnalysis.recommendations);
+    }
+
+    // Extract achievements from positive factors
+    if (aiData.factors) {
+      aiData.factors.forEach((factor: any) => {
+        if (factor.status === 'good' || factor.status === 'excellent') {
+          achievements.push(`Strong ${factor.name} (${factor.score}/${factor.max})`);
+        }
+      });
+    }
+
+    // Extract warnings from negative factors and risk assessment
+    if (aiData.factors) {
+      aiData.factors.forEach((factor: any) => {
+        if (factor.status === 'poor' || factor.status === 'below average') {
+          warnings.push(`Improve ${factor.name} (${factor.score}/${factor.max})`);
+        }
+      });
+    }
+
+    if (aiData.aiAnalysis?.riskAssessment) {
+      warnings.push(aiData.aiAnalysis.riskAssessment);
     }
 
     return {
-      score: aiData?.score || 50,
-      trend: aiData?.trend || 'stable',
-      category: aiData?.category || 'fair',
-      insights: insights.slice(0, 8),
-      achievements: achievements.slice(0, 4),
-      warnings: warnings.slice(0, 5),
-      factors: aiData?.factors || [],
-      aiAnalysis: aiData?.aiAnalysis || {}
+      score: aiData.score || 50,
+      trend: aiData.trend || 'stable',
+      category: aiData.category || 'fair',
+      insights: insights.slice(0, 10), // Limit to 10 insights
+      achievements: achievements.slice(0, 5), // Limit to 5 achievements
+      warnings: warnings.slice(0, 5), // Limit to 5 warnings
+      factors: aiData.factors || [],
+      aiAnalysis: aiData.aiAnalysis || {}
     };
   }
 
