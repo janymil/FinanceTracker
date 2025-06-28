@@ -27,6 +27,7 @@ import {
   Zap
 } from "lucide-react";
 import { format, isToday, isTomorrow, isWithinInterval, addDays } from "date-fns";
+import { getCurrentLanguageForAPI } from "@/lib/languageUtils";
 import RequirePlan from "@/components/require-plan";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -307,6 +308,17 @@ export default function TransactionRemindersWidget() {
     return source === 'automatic' ? Zap : User;
   };
 
+  const formatReminderDescription = (reminder: UnifiedReminder) => {
+    if (reminder.isRecurring && reminder.source === 'automatic') {
+      // For recurring transactions, description contains frequency
+      const frequency = reminder.description;
+      const typeKey = reminder.type === 'expense' ? 'Recurring expense' : 'Recurring income';
+      const frequencyKey = frequency === 'weekly' ? 'weekly' : frequency === 'monthly' ? 'monthly' : frequency;
+      return `${t(typeKey)} (${t(frequencyKey)})`;
+    }
+    return reminder.description;
+  };
+
   const allCategories = Array.isArray(categories) ? (categories as Category[]) : [];
   const isLoading = transactionLoading || expenseLoading;
 
@@ -553,7 +565,7 @@ export default function TransactionRemindersWidget() {
                             {reminder.priority}
                           </Badge>
                         </div>
-                        <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">{reminder.description}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">{formatReminderDescription(reminder)}</p>
                         <div className="flex items-center gap-2 text-xs text-gray-500 mt-1 flex-wrap">
                           <Calendar className="h-3 w-3 shrink-0" />
                           <span className="shrink-0">{format(reminder.dueDate, 'MMM dd, yyyy')}</span>
