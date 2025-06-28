@@ -385,38 +385,38 @@ export default function FinancialHealthMascot() {
                   <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="overview" className="text-xs">
                       <Crown className="h-3 w-3 mr-1" />
-                      Overview
+                      {t('mascot.tabs.overview')}
                     </TabsTrigger>
                     <TabsTrigger value="insights" className="text-xs">
                       <Brain className="h-3 w-3 mr-1" />
-                      Insights
+                      {t('mascot.tabs.insights')}
                     </TabsTrigger>
                     <TabsTrigger value="recommendations" className="text-xs">
                       <Target className="h-3 w-3 mr-1" />
-                      Actions
+                      {t('mascot.tabs.actions')}
                     </TabsTrigger>
                     <TabsTrigger value="achievements" className="text-xs">
                       <CheckCircle className="h-3 w-3 mr-1" />
-                      Strengths
+                      {t('mascot.tabs.strengths')}
                     </TabsTrigger>
                   </TabsList>
 
                   {/* Overview Tab */}
                   <TabsContent value="overview" className="mt-4 space-y-3">
                     <div className="bg-gradient-to-r from-indigo-50 to-cyan-50 dark:from-indigo-900/20 dark:to-cyan-900/20 p-3 rounded-lg">
-                      <h5 className="text-sm font-medium text-indigo-700 dark:text-indigo-400 mb-2">Quick Summary</h5>
+                      <h5 className="text-sm font-medium text-indigo-700 dark:text-indigo-400 mb-2">{t('mascot.quickSummary')}</h5>
                       <div className="grid grid-cols-3 gap-2 text-center">
                         <div className="bg-white dark:bg-gray-800 p-2 rounded">
                           <div className="text-sm font-bold text-green-600">{healthData.achievements?.length || 0}</div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400">Strengths</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">{t('mascot.tabs.strengths')}</div>
                         </div>
                         <div className="bg-white dark:bg-gray-800 p-2 rounded">
                           <div className="text-sm font-bold text-blue-600">{healthData.insights?.length || 0}</div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400">Insights</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">{t('mascot.tabs.insights')}</div>
                         </div>
                         <div className="bg-white dark:bg-gray-800 p-2 rounded">
                           <div className="text-sm font-bold text-amber-600">{healthData.warnings?.length || 0}</div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400">Actions</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">{t('mascot.tabs.actions')}</div>
                         </div>
                       </div>
                     </div>
@@ -487,7 +487,7 @@ export default function FinancialHealthMascot() {
                                 <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 p-3 rounded-lg">
                                   <div className="flex items-center gap-2 mb-2">
                                     <DollarSign className="h-4 w-4 text-red-600" />
-                                    <span className="text-xs font-medium text-red-700 dark:text-red-400">Spending Patterns</span>
+                                    <span className="text-xs font-medium text-red-700 dark:text-red-400">{t('mascot.categories.spendingPatterns')}</span>
                                   </div>
                                   <div className="space-y-2">
                                     {spendingInsights.map((insight, index) => (
@@ -511,7 +511,7 @@ export default function FinancialHealthMascot() {
                                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-3 rounded-lg">
                                   <div className="flex items-center gap-2 mb-2">
                                     <PiggyBank className="h-4 w-4 text-green-600" />
-                                    <span className="text-xs font-medium text-green-700 dark:text-green-400">Savings & Budget</span>
+                                    <span className="text-xs font-medium text-green-700 dark:text-green-400">{t('mascot.categories.savingsBudget')}</span>
                                   </div>
                                   <div className="space-y-2">
                                     {savingInsights.map((insight, index) => (
@@ -535,7 +535,7 @@ export default function FinancialHealthMascot() {
                                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 rounded-lg">
                                   <div className="flex items-center gap-2 mb-2">
                                     <BarChart3 className="h-4 w-4 text-blue-600" />
-                                    <span className="text-xs font-medium text-blue-700 dark:text-blue-400">Trends & Patterns</span>
+                                    <span className="text-xs font-medium text-blue-700 dark:text-blue-400">{t('mascot.categories.trendsPatterns')}</span>
                                   </div>
                                   <div className="space-y-2">
                                     {trendInsights.map((insight, index) => (
@@ -559,7 +559,7 @@ export default function FinancialHealthMascot() {
                                 <div className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 p-3 rounded-lg">
                                   <div className="flex items-center gap-2 mb-2">
                                     <Lightbulb className="h-4 w-4 text-purple-600" />
-                                    <span className="text-xs font-medium text-purple-700 dark:text-purple-400">General Insights</span>
+                                    <span className="text-xs font-medium text-purple-700 dark:text-purple-400">{t('mascot.categories.generalInsights')}</span>
                                   </div>
                                   <div className="space-y-2">
                                     {otherInsights.map((insight, index) => (

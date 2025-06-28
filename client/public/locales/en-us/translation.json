@@ -760,5 +760,32 @@
   "incomeAnalysis": "Income Analysis",
   "expensePatterns": "Expense Patterns",
   "financialHealth": "Financial Health",
-  "riskAssessment": "Risk Assessment"
+  "riskAssessment": "Risk Assessment",
+  "mascot": {
+    "tabs": {
+      "overview": "Overview",
+      "insights": "Insights",
+      "actions": "Actions",
+      "strengths": "Strengths"
+    },
+    "quickSummary": "Quick Summary",
+    "categories": {
+      "spendingPatterns": "Spending Patterns",
+      "savingsBudget": "Savings & Budget",
+      "trendsPatterns": "Trends & Patterns",
+      "generalInsights": "General Insights",
+      "urgentActions": "🚨 Urgent Action Required",
+      "budgetManagement": "💰 Budget Management",
+      "smartSuggestions": "💡 Smart Suggestions",
+      "generalRecommendations": "📋 General Recommendations"
+    },
+    "emptyStates": {
+      "noAchievements": "No achievements yet",
+      "keepBuilding": "Keep building your financial habits!",
+      "noInsights": "No insights available",
+      "addTransactions": "Add more transactions to get AI insights",
+      "noRecommendations": "No recommendations available",
+      "healthLooksGood": "Your financial health looks good!"
+    }
+  }
 }
