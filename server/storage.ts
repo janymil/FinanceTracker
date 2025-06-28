@@ -17,6 +17,7 @@ import {
   redeemCodes,
   importLogs,
   aiCache,
+  paymentFailures,
   // contextualFinancialTips, // Removed - using unified ai_cache
   type User,
   type InsertUser,
@@ -51,6 +52,8 @@ import {
   type InsertImportLog,
   type AiCache,
   type InsertAiCache,
+  type PaymentFailure,
+  type InsertPaymentFailure,
   // Removed: contextualFinancialTips types - using unified ai_cache
 } from "@shared/schema";
 import { db } from "./db";
@@ -181,6 +184,16 @@ export interface IStorage {
   getAICacheEntry(userId: string, functionKey: string, inputHash: string): Promise<AiCache | null>;
   setAICacheEntry(userId: string, functionKey: string, inputHash: string, input: any, output: any, month?: string, isError?: boolean): Promise<void>;
   getRecentAICacheEntry(userId: string, functionKey: string): Promise<any>;
+
+  // Payment failure operations for grace period handling
+  createPaymentFailure(failure: InsertPaymentFailure): Promise<PaymentFailure>;
+  getPaymentFailures(userId: string): Promise<PaymentFailure[]>;
+  updatePaymentFailureNotification(failureId: number, notificationSent: boolean): Promise<void>;
+  resolvePaymentFailure(failureId: number): Promise<void>;
+  setUserGracePeriod(userId: string, graceExpiresAt: Date, failureCount: number): Promise<User>;
+  clearUserGracePeriod(userId: string): Promise<User>;
+  getUsersInGracePeriod(): Promise<User[]>;
+  getUsersWithExpiredGrace(): Promise<User[]>;
 }
 
 export class DatabaseStorage implements IStorage {

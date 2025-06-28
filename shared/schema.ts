@@ -44,6 +44,25 @@ export const users = pgTable("users", {
   settings: text("settings"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  // Payment failure tracking for grace period handling
+  paymentFailureDate: timestamp("payment_failure_date"),
+  graceExpiresAt: timestamp("grace_expires_at"),
+  paymentFailureCount: integer("payment_failure_count").default(0),
+  lastPaymentFailureNotified: timestamp("last_payment_failure_notified"),
+});
+
+// Payment failure log table for tracking payment issues
+export const paymentFailures = pgTable("payment_failures", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  stripeInvoiceId: varchar("stripe_invoice_id"),
+  stripeCustomerId: varchar("stripe_customer_id"),
+  failureReason: text("failure_reason"),
+  attemptCount: integer("attempt_count").default(1),
+  failedAt: timestamp("failed_at").defaultNow(),
+  notificationSent: boolean("notification_sent").default(false),
+  resolved: boolean("resolved").default(false),
+  resolvedAt: timestamp("resolved_at"),
 });
 
 // Categories for transactions, budgets, and goals
@@ -447,5 +466,15 @@ export const insertRedeemCodeSchema = createInsertSchema(redeemCodes).omit({
   createdAt: true,
   redeemedAt: true,
 });
+
+// Payment failure tracking schemas
+export const insertPaymentFailureSchema = createInsertSchema(paymentFailures).omit({
+  id: true,
+  failedAt: true,
+});
+
+// Type exports for payment failures
+export type PaymentFailure = typeof paymentFailures.$inferSelect;
+export type InsertPaymentFailure = z.infer<typeof insertPaymentFailureSchema>;
 
 // Removed: contextualFinancialTips schemas - using unified ai_cache system
