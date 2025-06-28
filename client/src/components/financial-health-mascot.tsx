@@ -409,26 +409,33 @@ export default function FinancialHealthMascot() {
                   <div className="mb-4">
                     <h4 className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-2 flex items-center gap-2">
                       <Brain className="h-4 w-4" />
-                      AI-Powered Insights
+                      {t('aiInsights.title')}
                     </h4>
-                    <div className="space-y-2">
-                      {healthData.insights.map((insight, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded border-l-3 border-blue-400"
-                        >
-                          <div className="flex items-start gap-2">
-                            <Lightbulb className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                            <div className="text-xs text-blue-800 dark:text-blue-200">
-                              <div className="font-medium mb-1">Personal Financial Pattern</div>
-                              <div className="text-blue-600 dark:text-blue-300">{insight}</div>
-                            </div>
+                    
+                    {/* Grouped Insights Display */}
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded border-l-3 border-blue-400">
+                      <div className="flex items-start gap-2 mb-2">
+                        <Lightbulb className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div className="text-xs text-blue-800 dark:text-blue-200">
+                          <div className="font-medium mb-2">{t('aiInsights.groupedInsights')}</div>
+                          <div className="space-y-2">
+                            {healthData.insights.map((insight, index) => (
+                              <motion.div
+                                key={index}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                className="flex items-start gap-2 py-1"
+                              >
+                                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                                <div className="text-blue-600 dark:text-blue-300 text-xs leading-relaxed">
+                                  {insight}
+                                </div>
+                              </motion.div>
+                            ))}
                           </div>
-                        </motion.div>
-                      ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}

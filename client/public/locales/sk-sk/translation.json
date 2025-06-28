@@ -638,7 +638,23 @@
       "low": "nízka"
     }
   },
-
+  "aiInsights": {
+    "title": "Pozornosti poháňané AI",
+    "groupedInsights": "Zoskupené Pozornosti",
+    "smartInsights": "💡 Inteligentné Pozornosti",
+    "spendingPatterns": "📊 Vzory Míňania",
+    "savingOpportunities": "💰 Príležitosti na Úsporu",
+    "budgetOptimization": "📋 Optimalizácia Rozpočtu",
+    "financialHealth": "❤️ Finančné Zdravie",
+    "actionableAdvice": "⚡ Realizovateľné Rady",
+    "generateInsights": "Generovať AI Pozornosti",
+    "generating": "Generujem pozornosti...",
+    "noInsights": "Žiadne pozornosti nie sú dostupné",
+    "addMoreData": "Pridajte viac transakcií pre personalizované AI pozornosti",
+    "confidence": "spoľahlivosť",
+    "category": "Kategória",
+    "insight": "Pozornosť"
+  },
   "common": {
     "auto": "Auto",
     "manual": "Manuálne",
@@ -770,5 +786,5 @@
   "incomeAnalysis": "Analýza príjmov", 
   "expensePatterns": "Vzory výdavkov",
   "financialHealth": "Finančné zdravie",
-  "riskAssessment": "Hodnotenie rizika",
+  "riskAssessment": "Hodnotenie rizika"
 }
