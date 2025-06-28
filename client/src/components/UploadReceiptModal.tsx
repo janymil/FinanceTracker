@@ -748,7 +748,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     disabled={!formData.amount || !formData.description || !formData.categoryId}
                   >
                     <Save className="h-4 w-4 mr-2" />
-                    Save Transaction
+                    {t("upload.save_transaction")}
                   </Button>
                 </div>
               )}
@@ -757,7 +757,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
               {uploadState.recognizedText && (
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Recognized Text:
+                    {t("upload.recognized_text")}
                   </label>
                   <pre className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-sm overflow-x-auto whitespace-pre-wrap border max-h-32 overflow-y-auto">
 {uploadState.recognizedText}
@@ -781,14 +781,14 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                 variant="outline"
                 className="flex-1"
               >
-                Upload another receipt
+                {t("upload.upload_another")}
               </Button>
               <Button
                 onClick={handleModalClose}
                 variant="secondary"
                 className="flex-1"
               >
-                Close
+                {t("upload.close")}
               </Button>
             </div>
           )}
