@@ -740,6 +740,8 @@
     "monthly_income_over_time": "Mesačné príjmy v priebehu času",
     "deleted_title": "Príjem Vymazaný",
     "deleted_description": "Transakcia príjmu bola úspešne vymazaná",
+    "total_income": "Celkové Príjmy",
+    "income_sources": "Zdroje Príjmov",
     "income_by_category": "Príjmy podľa kategórie",
     "distribution_of_income_sources": "Rozdelenie zdrojov príjmov",
     "search_placeholder": "Vyhľadať príjmy...",

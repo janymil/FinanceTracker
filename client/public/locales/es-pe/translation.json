@@ -644,6 +644,8 @@
     "monthly_income_over_time": "Ingresos mensuales a lo largo del tiempo",
     "deleted_title": "Ingreso Eliminado",
     "deleted_description": "La transacción de ingreso ha sido eliminada exitosamente",
+    "total_income": "Ingresos Totales",
+    "income_sources": "Fuentes de Ingresos",
     "income_by_category": "Ingresos por Categoría",
     "distribution_of_income_sources": "Distribución de fuentes de ingresos",
     "search_placeholder": "Buscar ingresos...",
