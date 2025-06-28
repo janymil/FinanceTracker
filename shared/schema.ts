@@ -47,6 +47,7 @@ export const users = pgTable("users", {
   // Payment failure tracking for grace period handling
   paymentFailureDate: timestamp("payment_failure_date"),
   graceExpiresAt: timestamp("grace_expires_at"),
+  gracePeriodActive: boolean("grace_period_active").default(false),
   paymentFailureCount: integer("payment_failure_count").default(0),
   lastPaymentFailureNotified: timestamp("last_payment_failure_notified"),
 });
@@ -61,6 +62,7 @@ export const paymentFailures = pgTable("payment_failures", {
   attemptCount: integer("attempt_count").default(1),
   failedAt: timestamp("failed_at").defaultNow(),
   notificationSent: boolean("notification_sent").default(false),
+  lastNotified: timestamp("last_notified"),
   resolved: boolean("resolved").default(false),
   resolvedAt: timestamp("resolved_at"),
 });

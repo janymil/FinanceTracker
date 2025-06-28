@@ -2219,6 +2219,96 @@ export class DatabaseStorage implements IStorage {
   // Removed: Contextual Financial Tips operations - using unified ai_cache system
 
   // Removed: Legacy cache methods - using unified ai_cache system
+
+  // Payment failure operations for grace period handling
+  async createPaymentFailure(failure: InsertPaymentFailure): Promise<PaymentFailure> {
+    const [result] = await db.insert(paymentFailures).values(failure).returning();
+    return result;
+  }
+
+  async getPaymentFailures(userId: string): Promise<PaymentFailure[]> {
+    const results = await db
+      .select()
+      .from(paymentFailures)
+      .where(eq(paymentFailures.userId, userId))
+      .orderBy(desc(paymentFailures.failedAt));
+    return results;
+  }
+
+  async updatePaymentFailureNotification(failureId: number, notificationSent: boolean): Promise<void> {
+    await db
+      .update(paymentFailures)
+      .set({ notificationSent, lastNotified: new Date() })
+      .where(eq(paymentFailures.id, failureId));
+  }
+
+  async resolvePaymentFailure(failureId: number): Promise<void> {
+    await db
+      .update(paymentFailures)
+      .set({ resolved: true, resolvedAt: new Date() })
+      .where(eq(paymentFailures.id, failureId));
+  }
+
+  async setUserGracePeriod(userId: string, graceExpiresAt: Date, failureCount: number): Promise<User> {
+    const [result] = await db
+      .update(users)
+      .set({
+        graceExpiresAt,
+        gracePeriodActive: true,
+        paymentFailureCount: failureCount
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return result;
+  }
+
+  async clearUserGracePeriod(userId: string): Promise<User> {
+    const [result] = await db
+      .update(users)
+      .set({
+        graceExpiresAt: null,
+        gracePeriodActive: false,
+        paymentFailureCount: 0
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return result;
+  }
+
+  async getUsersInGracePeriod(): Promise<User[]> {
+    const results = await db
+      .select()
+      .from(users)
+      .where(
+        and(
+          eq(users.gracePeriodActive, true),
+          gt(users.graceExpiresAt, new Date())
+        )
+      );
+    return results;
+  }
+
+  async getUsersWithExpiredGrace(): Promise<User[]> {
+    const results = await db
+      .select()
+      .from(users)
+      .where(
+        and(
+          eq(users.gracePeriodActive, true),
+          lte(users.graceExpiresAt, new Date())
+        )
+      );
+    return results;
+  }
+
+  async getUserByStripeCustomerId(stripeCustomerId: string): Promise<User | null> {
+    const results = await db
+      .select()
+      .from(users)
+      .where(eq(users.stripeCustomerId, stripeCustomerId))
+      .limit(1);
+    return results[0] || null;
+  }
 }
 
 export const storage = new DatabaseStorage();
