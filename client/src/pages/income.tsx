@@ -87,20 +87,22 @@ export default function Income() {
   const { t, i18n } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Helper function to format dates with translated month names
+  // Helper function to format dates with proper locale
   const formatTransactionDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const shortMonthNames = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
+    const currentLang = i18n.language || 'en-us';
+    let locale = 'en-us';
     
-    const monthIndex = date.getMonth();
-    const monthName = t(shortMonthNames[monthIndex]);
-    const day = date.getDate();
-    const year = date.getFullYear();
+    if (currentLang.startsWith('es')) {
+      locale = 'es';
+    } else if (currentLang.startsWith('sk')) {
+      locale = 'sk';
+    }
     
-    return `${day} ${monthName} ${year}`;
+    return new Date(dateString).toLocaleDateString(locale, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   };
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -308,18 +310,17 @@ export default function Income() {
     .sort(([a], [b]) => a.localeCompare(b))
     .slice(-6)
     .map(([month, amount]) => {
-      const date = new Date(month + '-01');
-      const shortMonthNames = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-      ];
+      const currentLang = i18n.language || 'en-us';
+      let locale = 'en-us';
       
-      const monthIndex = date.getMonth();
-      const monthName = t(shortMonthNames[monthIndex]);
-      const year = date.getFullYear();
+      if (currentLang.startsWith('es')) {
+        locale = 'es';
+      } else if (currentLang.startsWith('sk')) {
+        locale = 'sk';
+      }
       
       return {
-        month: `${monthName} ${year}`,
+        month: new Date(month + '-01').toLocaleDateString(locale, { month: 'short', year: 'numeric' }),
         amount: amount as number
       };
     });
