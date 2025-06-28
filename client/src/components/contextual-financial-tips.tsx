@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Lightbulb, TrendingDown, PiggyBank, AlertCircle, CheckCircle } from 'lucide-react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import { getCurrentLanguageForAPI } from '../../../lib/languageUtils';
 
 interface ContextualTipsProps {
   summary: {
@@ -120,7 +121,10 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
           // goals data handled by backend when available
           selectedMonth: currentMonth
         }, {
-          headers: authHeaders
+          headers: {
+            ...authHeaders,
+            'x-user-language': getCurrentLanguageForAPI()
+          }
         });
         
         const fetchedTips = res.data.tips || [];

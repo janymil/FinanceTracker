@@ -46,17 +46,13 @@ export async function runAI(task: string, userId: string, payload: Record<string
     
     // Check if result is empty or error
     if (result?.error || !result || (Array.isArray(result) && result.length === 0)) {
-      console.log(`[AI ${task}] Fly.io returned empty/error result, triggering local fallback`);
+
       throw new Error('Empty or error response from Fly.io');
     }
 
-    console.log(`[AI ${task}] SUCCESS: Fly.io response received`);
-    console.log(`[AI ${task}] Language sent to Fly.io:`, payload.language);
-    console.log(`[AI ${task}] First tip content check:`, JSON.stringify(result?.tips?.[0], null, 2));
     return result;
 
   } catch (error: any) {
-    console.error(`[AI ${task}] Fly.io failed, attempting local fallback:`, error.message);
     
     try {
       let fallbackResult;
