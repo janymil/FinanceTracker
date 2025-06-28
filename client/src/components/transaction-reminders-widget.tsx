@@ -27,7 +27,6 @@ import {
   Zap
 } from "lucide-react";
 import { format, isToday, isTomorrow, isWithinInterval, addDays } from "date-fns";
-import { getCurrentLanguageForAPI } from "@/lib/languageUtils";
 import RequirePlan from "@/components/require-plan";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -319,6 +318,25 @@ export default function TransactionRemindersWidget() {
     return reminder.description;
   };
 
+  const getDateLocale = () => {
+    const currentLang = i18n.language || 'en';
+    if (currentLang.startsWith('es')) {
+      return 'es-pe';
+    } else if (currentLang.startsWith('sk')) {
+      return 'sk-sk';
+    } else {
+      return 'en-us';
+    }
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString(getDateLocale(), {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric'
+    });
+  };
+
   const allCategories = Array.isArray(categories) ? (categories as Category[]) : [];
   const isLoading = transactionLoading || expenseLoading;
 
@@ -568,7 +586,7 @@ export default function TransactionRemindersWidget() {
                         <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">{formatReminderDescription(reminder)}</p>
                         <div className="flex items-center gap-2 text-xs text-gray-500 mt-1 flex-wrap">
                           <Calendar className="h-3 w-3 shrink-0" />
-                          <span className="shrink-0">{format(reminder.dueDate, 'MMM dd, yyyy')}</span>
+                          <span className="shrink-0">{formatDate(reminder.dueDate)}</span>
                           {reminder.categoryName && (
                             <>
                               <span className="hidden sm:inline">•</span>
