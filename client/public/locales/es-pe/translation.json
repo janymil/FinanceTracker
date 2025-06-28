@@ -539,7 +539,48 @@
     "new_generated": "¡Nueva mascota generada!",
     "generate_failed": "Falló al generar mascota",
     "toggle_failed": "Falló al alternar mascota",
-    "show": "Mostrar Mascota"
+    "show": "Mostrar Mascota",
+    "tabs": {
+      "overview": "Resumen",
+      "insights": "Perspectivas",
+      "actions": "Acciones",
+      "strengths": "Fortalezas"
+    },
+    "quickSummary": "Resumen Rápido",
+    "categories": {
+      "spendingPatterns": "Patrones de Gasto",
+      "savingsBudget": "Ahorros y Presupuesto",
+      "trendsPatterns": "Tendencias y Patrones",
+      "generalInsights": "Perspectivas Generales",
+      "urgentActions": "🚨 Acción Urgente Requerida",
+      "budgetManagement": "💰 Gestión de Presupuesto",
+      "smartSuggestions": "💡 Sugerencias Inteligentes",
+      "generalRecommendations": "📋 Recomendaciones Generales"
+    },
+    "emptyStates": {
+      "noAchievements": "Aún no hay logros",
+      "keepBuilding": "¡Sigue construyendo tus hábitos financieros!",
+      "noInsights": "No hay perspectivas disponibles",
+      "addTransactions": "Agrega más transacciones para obtener perspectivas IA",
+      "noRecommendations": "No hay recomendaciones disponibles",
+      "healthLooksGood": "¡Tu salud financiera se ve bien!"
+    },
+    "poweredByAI": "Impulsado por IA",
+    "advancedAnalysis": "Análisis financiero avanzado para usuarios Standard y Premium",
+    "requirePlan": {
+      "feature": "Mascota de Salud Financiera Mejorada por IA",
+      "description": "Obtén un compañero de IA personalizado que analiza tu comportamiento financiero y proporciona perspectivas inteligentes",
+      "benefits": {
+        "aiAnalysis": "Análisis de salud financiera impulsado por IA",
+        "personalizedInsights": "Perspectivas y recomendaciones personalizadas",
+        "emotionalFeedback": "Retroalimentación emocional en tiempo real basada en patrones de gasto",
+        "achievementTracking": "Seguimiento y celebración de logros",
+        "smartWarnings": "Advertencias inteligentes y elementos de acción"
+      }
+    },
+    "aiFinancialAnalysis": "Análisis Financiero IA",
+    "healthScore": "Puntuación de Salud",
+    "aiInsights": "Perspectivas IA"
   },
   "aiAnalysisSection": "Sección de Análisis IA",
   "analysisInProgress": "Análisis en progreso...",
@@ -698,22 +739,6 @@
   "AI Categorization Error": "Error de Categorización IA",
   "AI Categorization Complete": "Categorización IA Completa",
   "Suggested category: {{category}}": "Categoría sugerida: {{category}}",
-
-  "mascot": {
-    "settings": "Configuración de Mascota",
-    "show_mascot": "Mostrar Mascota",
-    "current_mood": "Estado Actual",
-    "health_score": "Puntuación de Salud",
-    "generate_new": "Generar Nueva",
-    "health_changed": "¡Tu salud financiera ha cambiado significativamente!",
-    "alt_text": "Mascota financiera en estado {{mood}}",
-    "image_expired": "Imagen de mascota expirada",
-    "click_generate": "Haz clic en 'Generar Nueva' para crear una mascota fresca",
-    "generate_prompt": "Haz clic para generar tu mascota financiera",
-    "new_generated": "¡Nueva mascota generada!",
-    "generate_failed": "Error al generar mascota",
-    "toggle_failed": "Error al alternar mascota"
-  },
   "{{confidence}}% confidence": "{{confidence}}% confianza",
   "autoCategorization": {
     "title": "Categorización IA",

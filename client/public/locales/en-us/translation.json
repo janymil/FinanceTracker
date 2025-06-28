@@ -555,7 +555,48 @@
     "new_generated": "New mascot generated!",
     "generate_failed": "Failed to generate mascot",
     "toggle_failed": "Failed to toggle mascot",
-    "show": "Show Mascot"
+    "show": "Show Mascot",
+    "tabs": {
+      "overview": "Overview",
+      "insights": "Insights",
+      "actions": "Actions",
+      "strengths": "Strengths"
+    },
+    "quickSummary": "Quick Summary",
+    "categories": {
+      "spendingPatterns": "Spending Patterns",
+      "savingsBudget": "Savings & Budget",
+      "trendsPatterns": "Trends & Patterns",
+      "generalInsights": "General Insights",
+      "urgentActions": "🚨 Urgent Action Required",
+      "budgetManagement": "💰 Budget Management",
+      "smartSuggestions": "💡 Smart Suggestions",
+      "generalRecommendations": "📋 General Recommendations"
+    },
+    "emptyStates": {
+      "noAchievements": "No achievements yet",
+      "keepBuilding": "Keep building your financial habits!",
+      "noInsights": "No insights available",
+      "addTransactions": "Add more transactions to get AI insights",
+      "noRecommendations": "No recommendations available",
+      "healthLooksGood": "Your financial health looks good!"
+    },
+    "poweredByAI": "Powered by AI",
+    "advancedAnalysis": "Advanced financial analysis for Standard & Premium users",
+    "requirePlan": {
+      "feature": "AI-Enhanced Financial Health Mascot",
+      "description": "Get a personalized AI companion that analyzes your financial behavior and provides intelligent insights",
+      "benefits": {
+        "aiAnalysis": "AI-powered financial health analysis",
+        "personalizedInsights": "Personalized insights and recommendations",
+        "emotionalFeedback": "Real-time emotional feedback based on spending patterns",
+        "achievementTracking": "Achievement tracking and celebration",
+        "smartWarnings": "Smart warnings and action items"
+      }
+    },
+    "aiFinancialAnalysis": "AI Financial Analysis",
+    "healthScore": "Health Score",
+    "aiInsights": "AI Insights"
   },
 
   "AI Expense Prediction": "AI Expense Prediction",
@@ -793,49 +834,6 @@
   "expensePatterns": "Expense Patterns",
   "financialHealth": "Financial Health",
   "riskAssessment": "Risk Assessment",
-  "mascot": {
-    "tabs": {
-      "overview": "Overview",
-      "insights": "Insights",
-      "actions": "Actions",
-      "strengths": "Strengths"
-    },
-    "quickSummary": "Quick Summary",
-    "categories": {
-      "spendingPatterns": "Spending Patterns",
-      "savingsBudget": "Savings & Budget",
-      "trendsPatterns": "Trends & Patterns",
-      "generalInsights": "General Insights",
-      "urgentActions": "🚨 Urgent Action Required",
-      "budgetManagement": "💰 Budget Management",
-      "smartSuggestions": "💡 Smart Suggestions",
-      "generalRecommendations": "📋 General Recommendations"
-    },
-    "emptyStates": {
-      "noAchievements": "No achievements yet",
-      "keepBuilding": "Keep building your financial habits!",
-      "noInsights": "No insights available",
-      "addTransactions": "Add more transactions to get AI insights",
-      "noRecommendations": "No recommendations available",
-      "healthLooksGood": "Your financial health looks good!"
-    },
-    "poweredByAI": "Powered by AI",
-    "advancedAnalysis": "Advanced financial analysis for Standard & Premium users",
-    "requirePlan": {
-      "feature": "AI-Enhanced Financial Health Mascot",
-      "description": "Get a personalized AI companion that analyzes your financial behavior and provides intelligent insights",
-      "benefits": {
-        "aiAnalysis": "AI-powered financial health analysis",
-        "personalizedInsights": "Personalized insights and recommendations",
-        "emotionalFeedback": "Real-time emotional feedback based on spending patterns",
-        "achievementTracking": "Achievement tracking and celebration",
-        "smartWarnings": "Smart warnings and action items"
-      }
-    },
-    "aiFinancialAnalysis": "AI Financial Analysis",
-    "healthScore": "Health Score",
-    "aiInsights": "AI Insights"
-  },
   "3. AI-Powered Features and Data Processing": "AI-Powered Features and Data Processing",
   "FinanzerPro uses artificial intelligence to provide personalized financial insights and recommendations. Here's how we handle your data for AI processing:": "FinanzerPro uses artificial intelligence to provide personalized financial insights and recommendations. Here's how we handle your data for AI processing:",
   "AI Service Provider:": "AI Service Provider:",
