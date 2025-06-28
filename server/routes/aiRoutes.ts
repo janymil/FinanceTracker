@@ -1080,16 +1080,6 @@ Answer questions about features, subscription plans, how to use the app, trouble
 
       const formattedMonth = formatMonth(selectedMonth);
 
-      // Get user language from consistent header detection
-      const detectedLanguage = getUserLanguage(req);
-      console.log('🔥 Contextual tips language detection:', {
-        detectedLanguage,
-        headers: {
-          'x-user-language': req.headers['x-user-language'],
-          'accept-language': req.headers['accept-language']
-        }
-      });
-
       // Prepare payload for centralized AI processor
       const aiPayload = {
         summary: {
@@ -1119,10 +1109,8 @@ Answer questions about features, subscription plans, how to use the app, trouble
           progress: goal.progress || ((goal.currentAmount / goal.targetAmount) * 100)
         })) || [],
         selectedMonth: formattedMonth,
-        language: detectedLanguage
+        language: getUserLanguage(req)
       };
-
-      console.log('🔥 Contextual tips aiPayload language:', aiPayload.language);
 
       // Initialize UnifiedAICache with 72 hours TTL
       const cache = new UnifiedAICache('contextual-tips', userId);
