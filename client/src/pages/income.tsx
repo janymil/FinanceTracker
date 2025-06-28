@@ -87,7 +87,7 @@ export default function Income() {
   const { t, i18n } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Helper function to format dates with proper locale  
+  // Helper function to format dates with proper locale
   const formatTransactionDate = (dateString: string) => {
     const currentLang = i18n.language || 'en-us';
     let locale = 'en-us';
