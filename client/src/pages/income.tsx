@@ -662,7 +662,7 @@ export default function Income() {
                     <div>
                       <p className="font-medium">{transaction.description}</p>
                       <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        <span>{format(new Date(transaction.date), 'MMM dd, yyyy', { locale: getDateLocale() })}</span>
+                        <span>{format(new Date(transaction.date), i18n.language.startsWith('es') ? 'd MMM yyyy' : i18n.language.startsWith('sk') ? 'd. MMM yyyy' : 'MMM dd, yyyy', { locale: getDateLocale() })}</span>
                         {transaction.categoryName && (
                           <>
                             <span>•</span>
