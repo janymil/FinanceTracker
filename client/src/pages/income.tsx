@@ -552,7 +552,7 @@ export default function Income() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Transactions</p>
+                <p className="text-sm font-medium text-muted-foreground">{t("common.transactions")}</p>
                 <p className="text-2xl font-bold">{filteredIncomes.length}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-green-600" />
@@ -565,8 +565,8 @@ export default function Income() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Income Trend</CardTitle>
-            <CardDescription>Monthly income over time</CardDescription>
+            <CardTitle>{t("income.income_trend")}</CardTitle>
+            <CardDescription>{t("income.monthly_income_over_time")}</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -574,7 +574,7 @@ export default function Income() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
-                <Tooltip formatter={(value) => [`${displayCurrency}${value}`, 'Income']} />
+                <Tooltip formatter={(value) => [`${displayCurrency}${value}`, t("types.income")]} />
                 <Line type="monotone" dataKey="amount" stroke="#10b981" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
@@ -583,8 +583,8 @@ export default function Income() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Income by Category</CardTitle>
-            <CardDescription>Distribution of income sources</CardDescription>
+            <CardTitle>{t("income.income_by_category")}</CardTitle>
+            <CardDescription>{t("income.distribution_of_income_sources")}</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -622,22 +622,22 @@ export default function Income() {
         onDateRangeChange={setDateRange}
         availableCategories={availableCategories}
         showTypeFilter={false}
-        searchPlaceholder="Search income..."
+        searchPlaceholder={t("income.search_placeholder")}
       />
 
       {/* Income List */}
       <Card>
         <CardHeader>
-          <CardTitle>Income Transactions</CardTitle>
+          <CardTitle>{t("income.income_transactions")}</CardTitle>
           <CardDescription>
-            {filteredIncomes.length} of {incomeTransactions.length} transactions
+            {filteredIncomes.length} {t("common.of")} {incomeTransactions.length} {t("common.transactions")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {filteredIncomes.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-muted-foreground">No income transactions found</p>
+                <p className="text-muted-foreground">{t("income.no_transactions_found")}</p>
               </div>
             ) : (
               filteredIncomes.map((transaction: Transaction) => (
@@ -707,14 +707,14 @@ export default function Income() {
         <Dialog open={!!editingTransaction} onOpenChange={() => setEditingTransaction(null)}>
           <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Edit Income</DialogTitle>
+              <DialogTitle>{t("income.edit_income")}</DialogTitle>
               <DialogDescription>
-                Update the income transaction details
+                {t("income.edit_description")}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div className="grid w-full items-center gap-1.5">
-                <Label htmlFor="editAmount">Amount *</Label>
+                <Label htmlFor="editAmount">{t("common.amount")} *</Label>
                 <Input
                   id="editAmount"
                   type="number"
