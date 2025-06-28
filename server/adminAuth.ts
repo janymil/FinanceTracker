@@ -48,6 +48,11 @@ export const adminLogin = async (req: AdminRequest, res: Response) => {
   if (password === ADMIN_PASSWORD) {
     req.session.isAdminAuthenticated = true;
     console.log('Admin login successful, session updated');
+    console.log('Session after login:', {
+      sessionExists: !!req.session,
+      isAuthenticated: req.session?.isAdminAuthenticated,
+      sessionId: req.sessionID
+    });
     return res.json({ message: 'Admin login successful' });
   } else {
     console.log('Invalid admin password provided');

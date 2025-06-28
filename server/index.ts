@@ -230,32 +230,22 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// Configure session middleware ONLY for routes that need user sessions
-app.use((req, res, next) => {
-  // Skip sessions for most API routes, static assets, and webhooks
-  // BUT keep sessions for admin-analytics routes
-  if ((req.path.startsWith('/api/') && !req.path.startsWith('/api/admin-analytics')) || 
-      req.path.startsWith('/uploads/') ||
-      req.path.includes('.') || // Static files (css, js, images, xml, txt)
-      req.path === '/sitemap.xml' ||
-      req.path === '/robots.txt') {
-    return next();
-  }
-  
-  // Only create sessions for dashboard and account pages that need user state
-  session({
-    secret: process.env.SESSION_SECRET || 'admin-session-secret-fallback',
-    resave: true, // Force session save for active sessions
-    saveUninitialized: false, // Don't create sessions unless needed
-    cookie: {
-      secure: false, // Allow HTTP in all environments for admin sessions
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: 'lax'
-    },
-    name: 'admin.session.id' // Unique session name for admin
-  })(req, res, next);
+// Configure session middleware for admin analytics
+const adminSessionMiddleware = session({
+  secret: process.env.SESSION_SECRET || 'admin-session-secret-fallback',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false,
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax'
+  },
+  name: 'admin.session.id'
 });
+
+// Apply session middleware only to admin routes
+app.use('/api/admin-analytics', adminSessionMiddleware);
 
 app.use(cookieConsentMiddleware);
 
