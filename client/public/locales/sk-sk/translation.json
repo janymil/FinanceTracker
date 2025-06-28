@@ -805,7 +805,15 @@
     "expense_updated": "Výdavok Aktualizovaný",
     "expense_updated_description": "Transakcia výdavku bola úspešne aktualizovaná",
     "expense_deleted": "Výdavok Vymazaný",
-    "expense_deleted_description": "Transakcia výdavku bola úspešne odstránená"
+    "expense_deleted_description": "Transakcia výdavku bola úspešne odstránená",
+    "transaction_list_title": "Transakcie Výdavkov ({{count}})",
+    "filtered_transactions": "Filtrované transakcie výdavkov",
+    "all_transactions": "Všetky vaše transakcie výdavkov",
+    "loading": "Načítavam výdavky...",
+    "no_expenses_found": "Nenašli sa Žiadne Výdavky",
+    "adjust_filters": "Skúste upraviť vaše filtre alebo hľadané výrazy",
+    "add_first_expense": "Pridajte svoju prvú transakciu výdavku na začiatok",
+    "note": "Poznámka"
   },
 
   "types": {

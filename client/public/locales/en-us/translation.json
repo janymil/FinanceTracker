@@ -720,7 +720,15 @@
     "expense_updated": "Expense Updated",
     "expense_updated_description": "Expense transaction has been updated successfully",
     "expense_deleted": "Expense Deleted",
-    "expense_deleted_description": "Expense transaction has been removed successfully"
+    "expense_deleted_description": "Expense transaction has been removed successfully",
+    "transaction_list_title": "Expense Transactions ({{count}})",
+    "filtered_transactions": "Filtered expense transactions",
+    "all_transactions": "All your expense transactions",
+    "loading": "Loading expenses...",
+    "no_expenses_found": "No Expenses Found",
+    "adjust_filters": "Try adjusting your filters or search terms",
+    "add_first_expense": "Add your first expense transaction to get started",
+    "note": "Note"
   },
 
   "types": {

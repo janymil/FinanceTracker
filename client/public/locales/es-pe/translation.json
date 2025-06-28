@@ -709,7 +709,15 @@
     "expense_updated": "Gasto Actualizado",
     "expense_updated_description": "La transacción de gasto ha sido actualizada exitosamente",
     "expense_deleted": "Gasto Eliminado",
-    "expense_deleted_description": "La transacción de gasto ha sido eliminada exitosamente"
+    "expense_deleted_description": "La transacción de gasto ha sido eliminada exitosamente",
+    "transaction_list_title": "Transacciones de Gastos ({{count}})",
+    "filtered_transactions": "Transacciones de gastos filtradas",
+    "all_transactions": "Todas tus transacciones de gastos",
+    "loading": "Cargando gastos...",
+    "no_expenses_found": "No se Encontraron Gastos",
+    "adjust_filters": "Intenta ajustar tus filtros o términos de búsqueda",
+    "add_first_expense": "Agrega tu primera transacción de gasto para comenzar",
+    "note": "Nota"
   },
 
   "types": {
