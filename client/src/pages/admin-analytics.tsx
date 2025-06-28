@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Users, UserPlus, Edit, Trash2, Crown, Shield, TrendingUp, Search, Filter, RefreshCw } from "lucide-react";
+import { Users, UserPlus, Edit, Trash2, Crown, Shield, TrendingUp, Search, Filter, RefreshCw, Zap, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
@@ -1038,6 +1038,269 @@ export default function AdminAnalytics() {
             </CardContent>
           </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="ai-cache" className="space-y-6">
+          {/* Global AI Cache Statistics */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-blue-600" />
+                Global AI Cache Statistics
+              </CardTitle>
+              <CardDescription>
+                Overview of AI cache performance across all functions and users
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {aiCacheGlobalLoading ? (
+                <div className="text-center py-6">Loading global statistics...</div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">{aiCacheGlobal?.totalEntries || 0}</div>
+                    <div className="text-sm text-gray-500">Total Entries</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">{aiCacheGlobal?.totalUsers || 0}</div>
+                    <div className="text-sm text-gray-500">Active Users</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-600">{aiCacheGlobal?.totalFunctions || 0}</div>
+                    <div className="text-sm text-gray-500">AI Functions</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-orange-600">{aiCacheGlobal?.totalHits || 0}</div>
+                    <div className="text-sm text-gray-500">Total Hits</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-red-600">{aiCacheGlobal?.errorRate || 0}%</div>
+                    <div className="text-sm text-gray-500">Error Rate</div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Cache Management Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Cache Management Actions</CardTitle>
+              <CardDescription>Manage and clean up AI cache entries</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-3 flex-wrap">
+                <Button 
+                  onClick={cleanupExpiredCache}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Clock className="h-4 w-4" />
+                  Cleanup Expired
+                </Button>
+                <Button 
+                  onClick={() => {
+                    refetchGlobal();
+                    refetchFunctions();
+                    refetchUsers();
+                  }}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Refresh Data
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* AI Functions Cache Statistics */}
+          <Card>
+            <CardHeader>
+              <CardTitle>AI Functions Cache Statistics</CardTitle>
+              <CardDescription>Cache performance breakdown by AI function</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {aiCacheFunctionsLoading ? (
+                <div className="text-center py-6">Loading function statistics...</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Function
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          TTL (hours)
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Entries
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Total Hits
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Avg Hits
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Errors
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Users
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {aiCacheFunctions.map((func: any) => (
+                        <tr key={func.functionKey} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <code className="bg-gray-100 px-2 py-1 rounded text-xs">
+                              {func.functionKey}
+                            </code>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {ttlConfig[func.functionKey] || 'N/A'}h
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {func.totalEntries}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {func.totalHits}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {func.avgHitsPerEntry}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <span className={func.errorEntries > 0 ? 'text-red-600' : 'text-green-600'}>
+                              {func.errorEntries}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {func.uniqueUsers}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <Button
+                              onClick={() => clearFunctionCache(func.functionKey)}
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 border-red-300 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              Clear
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {aiCacheFunctions.length === 0 && (
+                    <div className="text-center py-6 text-gray-500">No cache entries found</div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* User Cache Statistics */}
+          <Card>
+            <CardHeader>
+              <CardTitle>User Cache Statistics</CardTitle>
+              <CardDescription>Cache usage breakdown by individual users</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {aiCacheUsersLoading ? (
+                <div className="text-center py-6">Loading user statistics...</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          User
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Plan
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Entries
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Total Hits
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Avg Hits
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Functions
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Last Access
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {aiCacheUsers.map((user: any) => (
+                        <tr key={user.userId} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div>
+                              <div className="font-medium">{user.userEmail}</div>
+                              <div className="text-xs text-gray-500 font-mono">{user.userId}</div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={cn(
+                              "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                              user.userPlan === 'premium' && "bg-purple-100 text-purple-800",
+                              user.userPlan === 'standard' && "bg-blue-100 text-blue-800",
+                              user.userPlan === 'free' && "bg-gray-100 text-gray-800"
+                            )}>
+                              {user.userPlan}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {user.totalEntries}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {user.totalHits}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {user.avgHitsPerEntry}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {user.uniqueFunctions}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {user.lastAccessed ? new Date(user.lastAccessed).toLocaleDateString() : 'Never'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <Button
+                              onClick={() => clearUserCache(user.userId)}
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 border-red-300 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              Clear
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {aiCacheUsers.length === 0 && (
+                    <div className="text-center py-6 text-gray-500">No user cache data found</div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
