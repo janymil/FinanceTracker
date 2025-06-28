@@ -145,7 +145,7 @@ export default function Transactions() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("Error"),
         description: error.message,
         variant: "destructive",
       });
@@ -168,8 +168,8 @@ export default function Transactions() {
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
-        title: "Transaction Updated",
-        description: "Transaction has been updated successfully",
+        title: t("Transaction Updated"),
+        description: t("Transaction has been updated successfully"),
       });
     },
     onError: (error: any) => {
@@ -210,8 +210,8 @@ export default function Transactions() {
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
-        title: "Transaction Updated",
-        description: "Transaction has been updated successfully",
+        title: t("Transaction Updated"),
+        description: t("Transaction has been updated successfully"),
       });
     },
     onError: (error: any) => {
@@ -234,8 +234,8 @@ export default function Transactions() {
       queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
       queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       toast({
-        title: "Transaction Deleted",
-        description: "Transaction has been removed successfully",
+        title: t("Transaction Deleted"),
+        description: t("Transaction has been removed successfully"),
       });
     },
     onError: (error: any) => {
