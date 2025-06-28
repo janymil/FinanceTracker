@@ -199,10 +199,10 @@ export default function AuthPage() {
               </div>
               <div className="ml-3">
                 <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
-                  Account Creation Process
+                  {t("auth.accountCreationProcess")}
                 </h4>
                 <p className="text-sm text-blue-800 dark:text-blue-200">
-                  After clicking "Sign Up", we'll create your secure account and send a verification email. This typically takes 6-8 seconds.
+                  {t("auth.accountCreationDescription")}
                 </p>
                 <div className="mt-2 flex items-center text-xs text-blue-700 dark:text-blue-300">
                   <div className="flex space-x-1">
@@ -210,7 +210,7 @@ export default function AuthPage() {
                     <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
                     <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                   </div>
-                  <span className="ml-2">Creating secure account...</span>
+                  <span className="ml-2">{t("auth.creatingSecureAccount")}</span>
                 </div>
               </div>
             </div>
@@ -218,10 +218,10 @@ export default function AuthPage() {
 
           <div className="space-y-4">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-              Take Control of Your Finances
+              {t("auth.takeControlOfFinances")}
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300">
-              Track expenses, manage budgets, and achieve your financial goals with our comprehensive platform.
+              {t("auth.trackExpensesDescription")}
             </p>
           </div>
 
@@ -231,8 +231,8 @@ export default function AuthPage() {
                 <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Smart Expense Tracking</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Categorize and monitor your spending automatically</p>
+                <h3 className="font-semibold text-gray-900 dark:text-white">{t("auth.smartExpenseTracking")}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{t("auth.smartExpenseTrackingDesc")}</p>
               </div>
             </div>
 
@@ -241,8 +241,8 @@ export default function AuthPage() {
                 <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Financial Analytics</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Get insights and predictions about your financial future</p>
+                <h3 className="font-semibold text-gray-900 dark:text-white">{t("auth.financialAnalytics")}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{t("auth.financialAnalyticsDesc")}</p>
               </div>
             </div>
 
@@ -251,8 +251,8 @@ export default function AuthPage() {
                 <Shield className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Secure & Private</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Industry-standard security keeps your data protected</p>
+                <h3 className="font-semibold text-gray-900 dark:text-white">{t("auth.securePrivate")}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{t("auth.securePrivateDesc")}</p>
               </div>
             </div>
           </div>
