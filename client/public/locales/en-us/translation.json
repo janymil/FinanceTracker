@@ -728,7 +728,28 @@
     "no_expenses_found": "No Expenses Found",
     "adjust_filters": "Try adjusting your filters or search terms",
     "add_first_expense": "Add your first expense transaction to get started",
-    "note": "Note"
+    "note": "Note",
+    "form": {
+      "amount": "Amount",
+      "date": "Date",
+      "description": "Description",
+      "description_placeholder": "Expense description",
+      "category": "Category",
+      "category_placeholder": "Select an expense category",
+      "smart_bill_assistant": "Smart Bill Assistant",
+      "payment_url": "Payment URL (Optional)",
+      "payment_url_placeholder": "https://example.com/pay",
+      "payment_url_help": "Link to where you can pay this bill",
+      "reference_note": "Reference Note (Optional)",
+      "reference_note_placeholder": "Account #123456, Reference: ABC789",
+      "reference_note_help": "Account number or other reference information",
+      "make_recurring": "Make this a recurring expense",
+      "frequency": "Frequency",
+      "frequency_placeholder": "Select frequency",
+      "end_date": "End Date (Optional)",
+      "add_expense": "Add Expense",
+      "update": "Update"
+    }
   },
 
   "types": {

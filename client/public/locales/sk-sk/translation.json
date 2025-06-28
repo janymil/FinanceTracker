@@ -813,7 +813,28 @@
     "no_expenses_found": "Nenašli sa Žiadne Výdavky",
     "adjust_filters": "Skúste upraviť vaše filtre alebo hľadané výrazy",
     "add_first_expense": "Pridajte svoju prvú transakciu výdavku na začiatok",
-    "note": "Poznámka"
+    "note": "Poznámka",
+    "form": {
+      "amount": "Suma",
+      "date": "Dátum",
+      "description": "Popis",
+      "description_placeholder": "Popis výdavku",
+      "category": "Kategória",
+      "category_placeholder": "Vyberte kategóriu výdavku",
+      "smart_bill_assistant": "Inteligentný Asistent Faktúr",
+      "payment_url": "URL Platby (Voliteľné)",
+      "payment_url_placeholder": "https://priklad.com/platit",
+      "payment_url_help": "Odkaz kde môžete zaplatiť túto faktúru",
+      "reference_note": "Referenčná Poznámka (Voliteľné)",
+      "reference_note_placeholder": "Účet #123456, Referencia: ABC789",
+      "reference_note_help": "Číslo účtu alebo iné referenčné informácie",
+      "make_recurring": "Urobiť z tohto opakujúci sa výdavok",
+      "frequency": "Frekvencia",
+      "frequency_placeholder": "Vyberte frekvenciu",
+      "end_date": "Dátum Ukončenia (Voliteľné)",
+      "add_expense": "Pridať Výdavok",
+      "update": "Aktualizovať"
+    }
   },
 
   "types": {

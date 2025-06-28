@@ -717,7 +717,28 @@
     "no_expenses_found": "No se Encontraron Gastos",
     "adjust_filters": "Intenta ajustar tus filtros o términos de búsqueda",
     "add_first_expense": "Agrega tu primera transacción de gasto para comenzar",
-    "note": "Nota"
+    "note": "Nota",
+    "form": {
+      "amount": "Cantidad",
+      "date": "Fecha",
+      "description": "Descripción",
+      "description_placeholder": "Descripción del gasto",
+      "category": "Categoría",
+      "category_placeholder": "Selecciona una categoría de gasto",
+      "smart_bill_assistant": "Asistente Inteligente de Facturas",
+      "payment_url": "URL de Pago (Opcional)",
+      "payment_url_placeholder": "https://ejemplo.com/pagar",
+      "payment_url_help": "Enlace donde puedes pagar esta factura",
+      "reference_note": "Nota de Referencia (Opcional)",
+      "reference_note_placeholder": "Cuenta #123456, Referencia: ABC789",
+      "reference_note_help": "Número de cuenta u otra información de referencia",
+      "make_recurring": "Hacer este un gasto recurrente",
+      "frequency": "Frecuencia",
+      "frequency_placeholder": "Selecciona frecuencia",
+      "end_date": "Fecha de Finalización (Opcional)",
+      "add_expense": "Agregar Gasto",
+      "update": "Actualizar"
+    }
   },
 
   "types": {
