@@ -672,6 +672,20 @@
     "goal": "goal"
   },
 
+  "dashboard": {
+    "total_income": "Total Income",
+    "total_expenses": "Total Expenses",
+    "net_balance": "Net Balance",
+    "budget_status": "Budget Status",
+    "loading": "Loading...",
+    "no_budget_set": "No Budget Set",
+    "healthy": "Healthy",
+    "moderate": "Moderate",
+    "critical": "Critical",
+    "utilized": "utilized",
+    "remaining": "Remaining"
+  },
+
   "plans": {
     "standard": "Standard"
   },

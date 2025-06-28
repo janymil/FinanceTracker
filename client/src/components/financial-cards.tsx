@@ -267,16 +267,16 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
                 {t('dashboard.budget_status')}
               </p>
               <p className={`text-2xl font-bold ${budgetInfo.textColor}`}>
-                {budgetInfo.status === 'loading' ? t('Loading...') :
-                 budgetInfo.status === 'no-budget' ? t('No Budget Set') :
-                 budgetInfo.status === 'healthy' ? t('Healthy') :
-                 budgetInfo.status === 'moderate' ? t('Moderate') :
-                 budgetInfo.status === 'critical' ? t('Critical') : ''}
+                {budgetInfo.status === 'loading' ? t('dashboard.loading') :
+                 budgetInfo.status === 'no-budget' ? t('dashboard.no_budget_set') :
+                 budgetInfo.status === 'healthy' ? t('dashboard.healthy') :
+                 budgetInfo.status === 'moderate' ? t('dashboard.moderate') :
+                 budgetInfo.status === 'critical' ? t('dashboard.critical') : ''}
               </p>
               <p className={`text-xs mt-1 ${budgetInfo.textColor} opacity-80`}>
-                {budgetInfo.status === 'loading' ? t('Loading...') :
-                 budgetInfo.status === 'no-budget' ? t('No Budget Set') :
-                 `${Math.round(budgetInfo.percentage)}% ${t('utilized')}. ${t('Remaining')}: ${formatCurrency(budgetInfo.remaining)}`}
+                {budgetInfo.status === 'loading' ? t('dashboard.loading') :
+                 budgetInfo.status === 'no-budget' ? t('dashboard.no_budget_set') :
+                 `${Math.round(budgetInfo.percentage)}% ${t('dashboard.utilized')}. ${t('dashboard.remaining')}: ${formatCurrency(budgetInfo.remaining)}`}
               </p>
             </div>
             <div className={`p-3 rounded-lg ${

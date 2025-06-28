@@ -661,6 +661,20 @@
     "goal": "meta"
   },
 
+  "dashboard": {
+    "total_income": "Ingresos Totales",
+    "total_expenses": "Gastos Totales",
+    "net_balance": "Balance Neto",
+    "budget_status": "Estado del Presupuesto",
+    "loading": "Cargando...",
+    "no_budget_set": "Sin Presupuesto Establecido",
+    "healthy": "Saludable",
+    "moderate": "Moderado",
+    "critical": "Crítico",
+    "utilized": "utilizado",
+    "remaining": "Restante"
+  },
+
   "plans": {
     "standard": "Estándar"
   },

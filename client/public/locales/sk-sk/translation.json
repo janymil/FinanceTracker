@@ -757,6 +757,20 @@
     "goal": "cieľ"
   },
 
+  "dashboard": {
+    "total_income": "Celkové Príjmy",
+    "total_expenses": "Celkové Výdavky",
+    "net_balance": "Čistý Zostatok",
+    "budget_status": "Stav Rozpočtu",
+    "loading": "Načítava sa...",
+    "no_budget_set": "Žiadny Rozpočet Nastavený",
+    "healthy": "Zdravý",
+    "moderate": "Mierny",
+    "critical": "Kritický",
+    "utilized": "využité",
+    "remaining": "Zostávajúce"
+  },
+
   "plans": {
     "standard": "Štandard"
   },

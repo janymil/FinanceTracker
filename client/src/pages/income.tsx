@@ -540,7 +540,7 @@ export default function Income() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Income Sources</p>
+                <p className="text-sm font-medium text-muted-foreground">{t("income.income_sources")}</p>
                 <p className="text-2xl font-bold">{availableCategories.length}</p>
               </div>
               <BarChart3 className="h-8 w-8 text-blue-600" />
