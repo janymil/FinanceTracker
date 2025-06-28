@@ -78,9 +78,9 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
   let locale = 'en-us';
   
   if (currentLang.startsWith('es')) {
-    locale = 'es-pe';
+    locale = 'es';
   } else if (currentLang.startsWith('sk')) {
-    locale = 'sk-sk';
+    locale = 'sk';
   }
   
   const formatDate = (dateString: string) => {
