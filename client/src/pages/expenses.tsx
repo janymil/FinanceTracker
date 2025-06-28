@@ -445,7 +445,7 @@ export default function Expenses() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="amount">Amount</Label>
+                      <Label htmlFor="amount">{t("expenses.form.amount")}</Label>
                       <Input
                         id="amount"
                         type="number"
@@ -456,7 +456,7 @@ export default function Expenses() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="date">Date</Label>
+                      <Label htmlFor="date">{t("expenses.form.date")}</Label>
                       <Input
                         id="date"
                         type="date"
@@ -467,23 +467,23 @@ export default function Expenses() {
                   </div>
 
                   <div>
-                    <Label htmlFor="description">Description</Label>
+                    <Label htmlFor="description">{t("expenses.form.description")}</Label>
                     <Input
                       id="description"
                       value={newExpense.description}
                       onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
-                      placeholder="Expense description"
+                      placeholder={t("expenses.form.description_placeholder")}
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="category">Category</Label>
+                    <Label htmlFor="category">{t("expenses.form.category")}</Label>
                     <Select 
                       value={newExpense.categoryId || ""} 
                       onValueChange={(value) => setNewExpense({ ...newExpense, categoryId: value })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select an expense category">
+                        <SelectValue placeholder={t("expenses.form.category_placeholder")}>
                           {newExpense.categoryId && expenseCategories.find(cat => cat.id.toString() === newExpense.categoryId)?.name}
                         </SelectValue>
                       </SelectTrigger>
@@ -503,31 +503,31 @@ export default function Expenses() {
                       {/* Smart Bill Assistant */}
                       <div className="space-y-4">
                         <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Smart Bill Assistant
+                          {t("expenses.form.smart_bill_assistant")}
                         </div>
                         <div>
-                          <Label htmlFor="paymentUrl">Payment URL (Optional)</Label>
+                          <Label htmlFor="paymentUrl">{t("expenses.form.payment_url")}</Label>
                           <Input
                             id="paymentUrl"
                             type="url"
                             value={newExpense.paymentUrl}
                             onChange={(e) => setNewExpense({ ...newExpense, paymentUrl: e.target.value })}
-                            placeholder="https://example.com/pay"
+                            placeholder={t("expenses.form.payment_url_placeholder")}
                           />
                           <p className="text-xs text-gray-500 mt-1">
-                            Link to where you can pay this bill
+                            {t("expenses.form.payment_url_help")}
                           </p>
                         </div>
                         <div>
-                          <Label htmlFor="referenceNote">Reference Note (Optional)</Label>
+                          <Label htmlFor="referenceNote">{t("expenses.form.reference_note")}</Label>
                           <Input
                             id="referenceNote"
                             value={newExpense.referenceNote}
                             onChange={(e) => setNewExpense({ ...newExpense, referenceNote: e.target.value })}
-                            placeholder="Account #123456, Reference: ABC789"
+                            placeholder={t("expenses.form.reference_note_placeholder")}
                           />
                           <p className="text-xs text-gray-500 mt-1">
-                            Account number or other reference information
+                            {t("expenses.form.reference_note_help")}
                           </p>
                         </div>
                       </div>
@@ -544,7 +544,7 @@ export default function Expenses() {
                           />
                           <label htmlFor="recurring" className="flex items-center text-sm font-medium">
                             <Repeat className="h-4 w-4 mr-2" />
-                            Make this a recurring expense
+                            {t("expenses.form.make_recurring")}
                           </label>
                         </div>
 
