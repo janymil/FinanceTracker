@@ -604,7 +604,10 @@
     "save_transaction": "Guardar Transacción",
     "recognized_text": "Texto Reconocido:",
     "upload_another": "Subir otro recibo",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "modal_title": "Subir Recibo",
+    "modal_subtitle": "Sube una foto del recibo para extraer automáticamente los datos de la transacción",
+    "button_text": "Subir Imagen"
   },
 
   "upcomingReminders": {

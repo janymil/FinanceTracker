@@ -700,7 +700,9 @@
     "save_transaction": "Uložiť Transakciu",
     "recognized_text": "Rozpoznaný Text:",
     "upload_another": "Nahrať ďalší účet",
-    "close": "Zavrieť"
+    "close": "Zavrieť",
+    "modal_title": "Nahrať Účet",
+    "modal_subtitle": "Nahrajte fotografiu účtu na automatické extrakcie údajov transakcie"
   },
 
   "upcomingReminders": {

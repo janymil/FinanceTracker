@@ -532,10 +532,10 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Camera className="h-5 w-5" />
-            {t("Upload Receipt")}
+            {t("upload.modal_title")}
           </DialogTitle>
           <DialogDescription>
-            {t("Upload a receipt photo to automatically extract transaction data")}
+            {t("upload.modal_subtitle")}
           </DialogDescription>
         </DialogHeader>
         

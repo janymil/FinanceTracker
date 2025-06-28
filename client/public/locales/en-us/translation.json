@@ -614,7 +614,10 @@
     "save_transaction": "Save Transaction",
     "recognized_text": "Recognized Text:",
     "upload_another": "Upload another receipt",
-    "close": "Close"
+    "close": "Close",
+    "modal_title": "Upload Receipt",
+    "modal_subtitle": "Upload a receipt photo to automatically extract transaction data",
+    "button_text": "Upload Image"
   },
 
   "upcomingReminders": {
