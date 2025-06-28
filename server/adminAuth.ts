@@ -47,14 +47,8 @@ export const adminLogin = async (req: AdminRequest, res: Response) => {
   // Simple password check - in production, use hashed passwords
   if (password === ADMIN_PASSWORD) {
     req.session.isAdminAuthenticated = true;
-    req.session.save((err: any) => {
-      if (err) {
-        console.error('Session save error:', err);
-        return res.status(500).json({ message: 'Session save failed' });
-      }
-      console.log('Admin login successful, session saved');
-      return res.json({ message: 'Admin login successful' });
-    });
+    console.log('Admin login successful, session updated');
+    return res.json({ message: 'Admin login successful' });
   } else {
     console.log('Invalid admin password provided');
     return res.status(401).json({ message: 'Invalid admin password' });
