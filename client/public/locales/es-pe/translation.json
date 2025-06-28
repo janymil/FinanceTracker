@@ -69,6 +69,7 @@
   "Payment URL (Optional)": "URL de Pago (Opcional)",
   "Link to where you can pay this bill": "Enlace donde puedes pagar esta factura",
   "Reference Note (Optional)": "Nota de Referencia (Opcional)",
+  "Note": "Nota",
   "Account #123456, Reference: ABC789": "Cuenta #123456, Referencia: ABC789",
   "Account number or other reference information": "Número de cuenta u otra información de referencia",
   "Make this a recurring transaction": "Hacer esta una transacción recurrente",

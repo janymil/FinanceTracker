@@ -69,6 +69,7 @@
   "Payment URL (Optional)": "URL platby (Voliteľné)",
   "Link to where you can pay this bill": "Odkaz kde môžete zaplatiť tento účet",
   "Reference Note (Optional)": "Referenčná poznámka (Voliteľné)",
+  "Note": "Poznámka",
   "Account #123456, Reference: ABC789": "Účet #123456, Referencia: ABC789",
   "Account number or other reference information": "Číslo účtu alebo iné referenčné informácie",
   "Make this a recurring transaction": "Urobiť z toho opakujúcu sa transakciu",
