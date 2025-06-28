@@ -33,6 +33,38 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import RequirePlan from "./require-plan";
 
+// Helper function to translate AI factor names
+const translateFactorName = (factorText: string, t: any): string => {
+  // Map of English factor names to translation keys
+  const factorTranslations: { [key: string]: string } = {
+    'Budget Management': 'factors.budgetManagement',
+    'Adaptive Spending Control': 'factors.adaptiveSpendingControl',
+    'Expense Volatility': 'factors.expenseVolatility',
+    'Financial Resilience': 'factors.financialResilience',
+    'Savings Rate': 'factors.savingsRate',
+    'Debt Management': 'factors.debtManagement',
+    'Income Stability': 'factors.incomeStability',
+    'Emergency Fund': 'factors.emergencyFund',
+    'Investment Portfolio': 'factors.investmentPortfolio',
+    'Risk Assessment': 'factors.riskAssessment',
+    'Cash Flow': 'factors.cashFlow',
+    'Financial Planning': 'factors.financialPlanning'
+  };
+
+  // Extract factor name and score from strings like "Improve Budget Management (5/15)"
+  let translatedText = factorText;
+  
+  for (const [englishName, translationKey] of Object.entries(factorTranslations)) {
+    if (factorText.includes(englishName)) {
+      const translatedName = t(translationKey);
+      translatedText = factorText.replace(englishName, translatedName);
+      break;
+    }
+  }
+  
+  return translatedText;
+};
+
 interface FinancialHealthData {
   score: number;
   trend: 'improving' | 'declining' | 'stable';
