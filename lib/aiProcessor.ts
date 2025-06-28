@@ -61,7 +61,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
       
       switch (task) {
         case 'contextual-tips':
-          fallbackResult = await generateContextualFinancialTips(userId, payload);
+          fallbackResult = await generateContextualFinancialTips(userId, payload, payload.language || 'en-us');
           break;
         case 'financial-tips':
           fallbackResult = await generateFinancialTips(userId, payload);
