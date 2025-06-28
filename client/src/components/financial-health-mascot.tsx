@@ -555,7 +555,7 @@ export default function FinancialHealthMascot() {
                                         className="flex items-start gap-2"
                                       >
                                         <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                        <div className="text-green-600 dark:text-green-300 text-xs leading-relaxed">{insight}</div>
+                                        <div className="text-green-600 dark:text-green-300 text-xs leading-relaxed">{translateFactorName(insight, t)}</div>
                                       </motion.div>
                                     ))}
                                   </div>
@@ -579,7 +579,7 @@ export default function FinancialHealthMascot() {
                                         className="flex items-start gap-2"
                                       >
                                         <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                        <div className="text-blue-600 dark:text-blue-300 text-xs leading-relaxed">{insight}</div>
+                                        <div className="text-blue-600 dark:text-blue-300 text-xs leading-relaxed">{translateFactorName(insight, t)}</div>
                                       </motion.div>
                                     ))}
                                   </div>
@@ -603,7 +603,7 @@ export default function FinancialHealthMascot() {
                                         className="flex items-start gap-2"
                                       >
                                         <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                        <div className="text-purple-600 dark:text-purple-300 text-xs leading-relaxed">{insight}</div>
+                                        <div className="text-purple-600 dark:text-purple-300 text-xs leading-relaxed">{translateFactorName(insight, t)}</div>
                                       </motion.div>
                                     ))}
                                   </div>
