@@ -1758,7 +1758,8 @@ app.post("/execute-gpt-task", async (req, res) => {
           };
         }
         
-        result = await generateContextualFinancialTips(contextualPayload, payload.language || 'en-us');
+        contextualPayload.language = payload.language || 'en-us';
+        result = await generateContextualFinancialTips(contextualPayload);
         break;
       
       case "financial-tips":
