@@ -649,6 +649,7 @@
     "add_income": "Agregar Ingreso",
     "add_new_income": "Agregar Nuevo Ingreso",
     "add_description": "Registrar una nueva transacción de ingreso",
+    "description_placeholder": "Ingrese descripción del ingreso (ej: salario, bono, venta)",
     "income_trend": "Tendencia de Ingresos",
     "monthly_income_over_time": "Ingresos mensuales a lo largo del tiempo",
     "deleted_title": "Ingreso Eliminado",
