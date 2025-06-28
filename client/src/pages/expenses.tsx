@@ -707,7 +707,7 @@ export default function Expenses() {
                         <Cell key={`cell-${index}`} fill={entry.fill} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => [`$${value}`, 'Amount']} />
+                    <Tooltip formatter={(value) => [`${displayCurrency}${value}`, t("expenses.charts.amount_label")]} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -735,43 +735,43 @@ export default function Expenses() {
             onDateRangeChange={setDateRange}
             availableCategories={availableCategories}
             showTypeFilter={false}
-            searchPlaceholder="Search expenses..."
+            searchPlaceholder={t("expenses.search_placeholder")}
           />
         </div>
 
         {/* Expense List */}
         <Card>
           <CardHeader>
-            <CardTitle>Expense Transactions ({filteredExpenses.length})</CardTitle>
+            <CardTitle>{t("expenses.transaction_list_title", { count: filteredExpenses.length })}</CardTitle>
             <CardDescription>
               {searchTerm || filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all" 
-                ? "Filtered expense transactions" 
-                : "All your expense transactions"}
+                ? t("expenses.filtered_transactions") 
+                : t("expenses.all_transactions")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">Loading expenses...</p>
+                <p className="text-gray-600 dark:text-gray-300 mt-2">{t("expenses.loading")}</p>
               </div>
             ) : filteredExpenses.length === 0 ? (
               <div className="text-center py-8">
                 <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  No Expenses Found
+                  {t("expenses.no_expenses_found")}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
                   {searchTerm || filterCategory !== "all" || dateRange !== "all"
-                    ? "Try adjusting your filters or search terms"
-                    : "Add your first expense transaction to get started"}
+                    ? t("expenses.adjust_filters")
+                    : t("expenses.add_first_expense")}
                 </p>
                 <Button 
                   onClick={() => setIsDialogOpen(true)}
                   className="bg-red-600 hover:bg-red-700"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Expense
+                  {t("expenses.add_expense")}
                 </Button>
               </div>
             ) : (
@@ -804,7 +804,7 @@ export default function Expenses() {
                         </div>
                         {transaction.referenceNote && (
                           <div className="text-sm text-gray-600 dark:text-gray-300 mt-1 italic">
-                            Note: {transaction.referenceNote}
+                            {t("expenses.note")}: {transaction.referenceNote}
                           </div>
                         )}
                       </div>
