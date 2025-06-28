@@ -244,7 +244,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
                 {formatCurrency(animatedValues.balance)}
               </p>
               <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                {summary?.totalTransactionCount || 0} {t('total')} {(summary?.totalTransactionCount || 0) === 1 ? t('transaction') : t('transactions')}
+                {summary?.totalTransactionCount || 0} {t('total')} {(summary?.totalTransactionCount || 0) === 1 ? t('transaction') : t('transactionPlural')}
               </p>
             </div>
             <div className="bg-blue-100 dark:bg-blue-800/40 p-3 rounded-lg">
