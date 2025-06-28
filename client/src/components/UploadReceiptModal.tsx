@@ -56,6 +56,7 @@ function generateUUID() {
 }
 
 export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "Upload Image" }: UploadReceiptModalProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { getToken } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -531,10 +532,10 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Camera className="h-5 w-5" />
-            Upload Receipt
+            {t("Upload Receipt")}
           </DialogTitle>
           <DialogDescription>
-            Upload a receipt photo to automatically extract transaction data
+            {t("Upload a receipt photo to automatically extract transaction data")}
           </DialogDescription>
         </DialogHeader>
         
@@ -561,9 +562,9 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
               <div className="space-y-4">
                 <Upload className="h-12 w-12 text-gray-400 mx-auto" />
                 <div>
-                  <p className="text-lg font-medium">Upload receipt image</p>
+                  <p className="text-lg font-medium">{t("Upload receipt image")}</p>
                   <p className="text-sm text-gray-500">
-                    JPG, PNG or other image formats
+                    {t("JPG, PNG or other image formats")}
                   </p>
                 </div>
                 
@@ -574,7 +575,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     className="w-full flex items-center gap-2"
                   >
                     <Camera className="h-4 w-4" />
-                    Take Photo
+                    {t("Take Photo")}
                   </Button>
                   <Button
                     onClick={() => fileInputRef.current?.click()}
@@ -582,7 +583,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     className="w-full flex items-center gap-2"
                   >
                     <Upload className="h-4 w-4" />
-                    Choose from Gallery
+                    {t("Choose from Gallery")}
                   </Button>
                 </div>
                 
@@ -593,7 +594,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     className="flex-1 flex items-center gap-2"
                   >
                     <Upload className="h-4 w-4" />
-                    Select file
+                    {t("Select file")}
                   </Button>
                   <Button
                     onClick={handleQRUpload}
@@ -601,7 +602,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     className="flex-1 flex items-center gap-2"
                   >
                     <QrCode className="h-4 w-4" />
-                    Scan with Phone
+                    {t("Scan with Phone")}
                   </Button>
                 </div>
               </div>
@@ -613,7 +614,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
             <div className="text-center space-y-4 py-6">
               <div className="flex items-center gap-2 justify-center text-blue-600">
                 <Smartphone className="h-5 w-5" />
-                <span className="font-medium">Scan QR Code with Your Phone</span>
+                <span className="font-medium">{t("Scan QR Code with Your Phone")}</span>
               </div>
               
               <div className="bg-white p-4 rounded-lg border shadow-sm mx-auto w-fit">
