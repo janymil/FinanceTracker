@@ -90,19 +90,29 @@ export default function Income() {
   // Helper function to format dates with proper locale
   const formatTransactionDate = (dateString: string) => {
     const currentLang = i18n.language || 'en-us';
-    let locale = 'en-us';
+    const date = new Date(dateString);
     
-    if (currentLang.startsWith('es')) {
-      locale = 'es';
-    } else if (currentLang.startsWith('sk')) {
-      locale = 'sk';
-    }
+    // Use manual month mapping to ensure consistent translations
+    const monthNames = {
+      'es': [
+        'ene', 'feb', 'mar', 'abr', 'may', 'jun',
+        'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
+      ],
+      'sk': [
+        'jan', 'feb', 'mar', 'apr', 'máj', 'jún',
+        'júl', 'aug', 'sep', 'okt', 'nov', 'dec'
+      ],
+      'en': [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      ]
+    };
     
-    return new Date(dateString).toLocaleDateString(locale, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    const langKey = currentLang.startsWith('es') ? 'es' : 
+                    currentLang.startsWith('sk') ? 'sk' : 'en';
+    
+    const monthName = monthNames[langKey][date.getMonth()];
+    return `${date.getDate()} ${monthName} ${date.getFullYear()}`;
   };
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
