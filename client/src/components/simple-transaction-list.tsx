@@ -247,7 +247,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                       {transaction.isRecurring && (
                         <Badge variant="outline" className="text-xs shrink-0 border-blue-200 text-blue-700 dark:border-blue-700 dark:text-blue-300 flex items-center ml-2">
                           <Repeat className="h-3 w-3 mr-1" />
-                          {transaction.recurringFrequency ? t(transaction.recurringFrequency === 'weekly' ? 'Weekly' : transaction.recurringFrequency === 'monthly' ? 'Monthly' : transaction.recurringFrequency === 'yearly' ? 'Yearly' : 'Daily') : t('recurring.title', 'Recurring')}
+                          {transaction.recurringFrequency ? t(`common.${transaction.recurringFrequency}`) : t('common.recurring')}
                         </Badge>
                       )}
                       {transaction.imageUrl && (
@@ -257,7 +257,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                       )}
                     </div>
                     <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
-                      <span className="truncate">{transaction.categoryName || 'Uncategorized'}</span>
+                      <span className="truncate">{transaction.categoryName || t('common.uncategorized')}</span>
                       <span className="shrink-0">•</span>
                       <span className="shrink-0">{formatDate(transaction.date)}</span>
                       {transaction.ocrVendor && transaction.ocrVendor !== transaction.description && (
@@ -271,7 +271,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                     </div>
                     {transaction.referenceNote && (
                       <div className="text-sm text-gray-600 dark:text-gray-300 mt-1 italic">
-                        Note: {transaction.referenceNote}
+                        {t('common.note')}: {transaction.referenceNote}
                       </div>
                     )}
                   </div>
