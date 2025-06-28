@@ -174,7 +174,7 @@ export default function Transactions() {
     },
     onError: (error: any) => {
       toast({
-        title: "Edit Failed",
+        title: t("Edit Failed"),
         description: error.message,
         variant: "destructive",
       });
