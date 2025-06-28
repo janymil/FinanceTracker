@@ -599,7 +599,7 @@ export default function Transactions() {
                         />
                         <label htmlFor="recurring" className="flex items-center text-sm font-medium">
                           <Repeat className="h-4 w-4 mr-2" />
-                          Make this a recurring transaction
+                          {t("Make this a recurring transaction")}
                         </label>
                       </div>
 
