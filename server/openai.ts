@@ -1292,10 +1292,11 @@ export async function generateContextualFinancialTips(
     // Initialize UnifiedAICache with 72 hours TTL
     const cache = new UnifiedAICache('contextual-tips', userId, selectedMonth);
 
-    // Check cache first
-    const cachedResult = await cache.get(data);
+    // Check cache first with language-aware key
+    const cacheKey = { ...data, language: normalizedLanguage };
+    const cachedResult = await cache.get(cacheKey);
     if (cachedResult) {
-      console.log('Contextual financial tips: Using cached result (local fallback)');
+      console.log('Contextual financial tips: Using cached result (local fallback) with language:', normalizedLanguage);
       return cachedResult;
     }
     
@@ -1532,8 +1533,8 @@ You are an expert financial advisor who provides personalized, contextual recomm
 
     console.log('Contextual financial tips generated successfully (local fallback)');
     
-    // Cache the result for 72 hours
-    await cache.set(data, { tips }, false, 72);
+    // Cache the result for 72 hours with language key
+    await cache.set(cacheKey, { tips }, false, 72);
     
     return { tips };
 
