@@ -100,11 +100,7 @@ export default function TermsOfService() {
               <li>{t("We use encryption to protect your data")}</li>
               <li>{t("AI features process anonymized data only (see Privacy Policy for details)")}</li>
             </ul>
-            <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg mt-4">
-              <p className="text-sm">
-                <strong>{t("AI Data Processing:")}</strong> {t("By using AI-powered features, you consent to anonymized transaction data processing by OpenAI as detailed in our Privacy Policy. You can opt-out anytime in account settings.")}
-              </p>
-            </div>
+
           </section>
 
           <section className="mb-8">
