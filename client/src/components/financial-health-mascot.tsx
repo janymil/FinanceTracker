@@ -234,14 +234,14 @@ export default function FinancialHealthMascot() {
   return (
     <RequirePlan
       plan="standard"
-      feature="AI-Enhanced Financial Health Mascot"
-      description="Get a personalized AI companion that analyzes your financial behavior and provides intelligent insights"
+      feature={t('mascot.requirePlan.feature')}
+      description={t('mascot.requirePlan.description')}
       benefits={[
-        "AI-powered financial health analysis",
-        "Personalized insights and recommendations",
-        "Real-time emotional feedback based on spending patterns",
-        "Achievement tracking and celebration",
-        "Smart warnings and action items"
+        t('mascot.requirePlan.benefits.aiAnalysis'),
+        t('mascot.requirePlan.benefits.personalizedInsights'),
+        t('mascot.requirePlan.benefits.emotionalFeedback'),
+        t('mascot.requirePlan.benefits.achievementTracking'),
+        t('mascot.requirePlan.benefits.smartWarnings')
       ]}
     >
       <Card className={`relative overflow-hidden transition-all duration-300 ${config?.borderColor || 'border-gray-300'} border-2`}>

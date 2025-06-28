@@ -788,6 +788,17 @@
       "healthLooksGood": "Your financial health looks good!"
     },
     "poweredByAI": "Powered by AI",
-    "advancedAnalysis": "Advanced financial analysis for Standard & Premium users"
+    "advancedAnalysis": "Advanced financial analysis for Standard & Premium users",
+    "requirePlan": {
+      "feature": "AI-Enhanced Financial Health Mascot",
+      "description": "Get a personalized AI companion that analyzes your financial behavior and provides intelligent insights",
+      "benefits": {
+        "aiAnalysis": "AI-powered financial health analysis",
+        "personalizedInsights": "Personalized insights and recommendations",
+        "emotionalFeedback": "Real-time emotional feedback based on spending patterns",
+        "achievementTracking": "Achievement tracking and celebration",
+        "smartWarnings": "Smart warnings and action items"
+      }
+    }
   }
 }

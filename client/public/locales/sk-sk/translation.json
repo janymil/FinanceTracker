@@ -814,6 +814,17 @@
       "healthLooksGood": "Vaše finančné zdravie vyzerá dobre!"
     },
     "poweredByAI": "Poháňané AI",
-    "advancedAnalysis": "Pokročilá finančná analýza pre používateľov Standard a Premium"
+    "advancedAnalysis": "Pokročilá finančná analýza pre používateľov Standard a Premium",
+    "requirePlan": {
+      "feature": "AI-Vylepšená Maskotka Finančného Zdravia",
+      "description": "Získajte personalizovaného AI spoločníka, ktorý analyzuje vaše finančné správanie a poskytuje inteligentné poznatky",
+      "benefits": {
+        "aiAnalysis": "Analýza finančného zdravia poháňaná AI",
+        "personalizedInsights": "Personalizované poznatky a odporúčania",
+        "emotionalFeedback": "Emocionálna spätná väzba v reálnom čase založená na vzoroch výdavkov",
+        "achievementTracking": "Sledovanie a oslavovanie úspechov",
+        "smartWarnings": "Inteligentné upozornenia a akčné položky"
+      }
+    }
   }
 }
