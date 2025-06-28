@@ -630,9 +630,17 @@
     "end_date": "Fecha de Fin",
     "optional": "opcional",
     "reference_note": "Nota de Referencia",
+    "reference_note_placeholder": "Agregar una referencia o nota (opcional)",
+    "recurring": "Recurrente",
     "note": "Nota",
     "of": "de",
     "transactions": "transacciones"
+  },
+
+  "frequencies": {
+    "weekly": "Semanal",
+    "monthly": "Mensual", 
+    "yearly": "Anual"
   },
 
   "income": {

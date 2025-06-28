@@ -726,9 +726,17 @@
     "end_date": "Dátum ukončenia",
     "optional": "voliteľné",
     "reference_note": "Referenčná poznámka",
+    "reference_note_placeholder": "Pridajte referenciu alebo poznámku (voliteľné)",
+    "recurring": "Opakujúci sa",
     "note": "Poznámka",
     "of": "z",
     "transactions": "transakcií"
+  },
+
+  "frequencies": {
+    "weekly": "Týždenne",
+    "monthly": "Mesačne", 
+    "yearly": "Ročne"
   },
 
   "income": {
@@ -737,6 +745,7 @@
     "add_income": "Pridať Príjem",
     "add_new_income": "Pridať Nový Príjem",
     "add_description": "Zaznamenať novú transakciu príjmu",
+    "description_placeholder": "Napíšte popis príjmu (napr. plat, odmena, predaj)",
     "income_trend": "Trend Príjmov",
     "monthly_income_over_time": "Mesačné príjmy v priebehu času",
     "deleted_title": "Príjem Vymazaný",

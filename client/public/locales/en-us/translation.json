@@ -641,9 +641,17 @@
     "end_date": "End Date",
     "optional": "optional",
     "reference_note": "Reference Note",
+    "reference_note_placeholder": "Add a reference or note (optional)",
+    "recurring": "Recurring",
     "note": "Note",
     "of": "of",
     "transactions": "transactions"
+  },
+
+  "frequencies": {
+    "weekly": "Weekly",
+    "monthly": "Monthly", 
+    "yearly": "Yearly"
   },
 
   "income": {
@@ -652,6 +660,7 @@
     "add_income": "Add Income",
     "add_new_income": "Add New Income",
     "add_description": "Record a new income transaction",
+    "description_placeholder": "Enter income description (e.g., salary, bonus, sale)",
     "income_trend": "Income Trend",
     "monthly_income_over_time": "Monthly income over time",
     "deleted_title": "Income Deleted",
