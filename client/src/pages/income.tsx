@@ -448,13 +448,13 @@ export default function Income() {
                     />
                   </div>
                   <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="category">Category</Label>
+                    <Label htmlFor="category">{t("common.category")}</Label>
                     <Select 
                       value={newIncome.categoryId} 
                       onValueChange={(value) => setNewIncome({...newIncome, categoryId: value})}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder={t("common.select_category")} />
                       </SelectTrigger>
                       <SelectContent>
                         {incomeCategories.map((category: Category) => (
@@ -471,12 +471,12 @@ export default function Income() {
                       checked={newIncome.isRecurring}
                       onCheckedChange={(checked) => setNewIncome({...newIncome, isRecurring: checked as boolean})}
                     />
-                    <Label htmlFor="recurring">Recurring income</Label>
+                    <Label htmlFor="recurring">{t("common.recurring")} {t("types.income")}</Label>
                   </div>
                   {newIncome.isRecurring && (
                     <>
                       <div className="grid w-full items-center gap-1.5">
-                        <Label htmlFor="frequency">Frequency</Label>
+                        <Label htmlFor="frequency">{t("common.frequency")}</Label>
                         <Select 
                           value={newIncome.recurringFrequency} 
                           onValueChange={(value) => setNewIncome({...newIncome, recurringFrequency: value as any})}
@@ -485,14 +485,14 @@ export default function Income() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="weekly">Weekly</SelectItem>
-                            <SelectItem value="monthly">Monthly</SelectItem>
-                            <SelectItem value="yearly">Yearly</SelectItem>
+                            <SelectItem value="weekly">{t("frequencies.weekly")}</SelectItem>
+                            <SelectItem value="monthly">{t("frequencies.monthly")}</SelectItem>
+                            <SelectItem value="yearly">{t("frequencies.yearly")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="grid w-full items-center gap-1.5">
-                        <Label htmlFor="endDate">End Date (optional)</Label>
+                        <Label htmlFor="endDate">{t("common.end_date")} ({t("common.optional")})</Label>
                         <Input
                           id="endDate"
                           type="date"
@@ -503,16 +503,16 @@ export default function Income() {
                     </>
                   )}
                   <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="referenceNote">Reference Note</Label>
+                    <Label htmlFor="referenceNote">{t("common.reference_note")}</Label>
                     <Input
                       id="referenceNote"
-                      placeholder="Optional reference note"
+                      placeholder={t("common.reference_note_placeholder")}
                       value={newIncome.referenceNote}
                       onChange={(e) => setNewIncome({...newIncome, referenceNote: e.target.value})}
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={createIncomeMutation.isPending}>
-                    {createIncomeMutation.isPending ? "Adding..." : "Add Income"}
+                    {createIncomeMutation.isPending ? t("income.adding") : t("income.add_income")}
                   </Button>
                 </form>
               </DialogContent>
@@ -528,7 +528,7 @@ export default function Income() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Income</p>
+                <p className="text-sm font-medium text-muted-foreground">{t("income.total_income")}</p>
                 <p className="text-2xl font-bold">{displayCurrency}{totalIncome.toFixed(2)}</p>
               </div>
               <DollarSign className="h-8 w-8 text-green-600" />
