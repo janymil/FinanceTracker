@@ -584,8 +584,8 @@ export default function FinancialHealthMascot() {
                     ) : (
                       <div className="text-center py-6">
                         <Brain className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600 dark:text-gray-400">No insights available</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Add more transactions to get AI insights</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{t('mascot.emptyStates.noInsights')}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{t('mascot.emptyStates.addTransactions')}</p>
                       </div>
                     )}
                   </TabsContent>
@@ -725,8 +725,8 @@ export default function FinancialHealthMascot() {
                     ) : (
                       <div className="text-center py-6">
                         <Target className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600 dark:text-gray-400">No recommendations available</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Your financial health looks good!</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{t('mascot.emptyStates.noRecommendations')}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{t('mascot.emptyStates.healthLooksGood')}</p>
                       </div>
                     )}
                   </TabsContent>
