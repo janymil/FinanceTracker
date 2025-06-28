@@ -469,7 +469,7 @@ export default function Transactions() {
                   // Refresh transactions after receipt processing
                   refetchTransactions();
                 }}
-                buttonText="Upload Image"
+                buttonText={t("Upload Image")}
               />
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
@@ -491,7 +491,7 @@ export default function Transactions() {
                     }}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Transaction
+                    {t("Add Transaction")}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -655,7 +655,7 @@ export default function Transactions() {
                               placeholder="https://example.com/pay"
                             />
                             <p className="text-xs text-gray-500 mt-1">
-                              Link to where you can pay this bill
+                              {t("Link to where you can pay this bill")}
                             </p>
                           </div>
                           <div>
@@ -667,7 +667,7 @@ export default function Transactions() {
                               placeholder={t("Account #123456, Reference: ABC789")}
                             />
                             <p className="text-xs text-gray-500 mt-1">
-                              Account number or other reference information
+                              {t("Account number or other reference information")}
                             </p>
                           </div>
                         </div>
@@ -677,7 +677,7 @@ export default function Transactions() {
 
                   <div className="flex justify-end gap-2 pt-4">
                     <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                      Cancel
+                      {t("Cancel")}
                     </Button>
                     <Button 
                       onClick={handleSubmit}
@@ -785,7 +785,7 @@ export default function Transactions() {
             {isLoading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">Loading transactions...</p>
+                <p className="text-gray-600 dark:text-gray-300 mt-2">{t("Loading transactions...")}</p>
               </div>
             ) : filteredTransactions.length === 0 ? (
               <div className="text-center py-8">
@@ -800,7 +800,7 @@ export default function Transactions() {
                 </p>
                 <Button onClick={() => setIsDialogOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Transaction
+                  {t("Add Transaction")}
                 </Button>
               </div>
             ) : (
