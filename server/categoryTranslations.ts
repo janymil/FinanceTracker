@@ -79,6 +79,18 @@ export const categoryTranslations = {
     'en-us': 'Other Income',
     'es-pe': 'Otros ingresos',
     'sk-sk': 'Iné príjmy'
+  },
+  
+  // UI Translation words for mascot
+  'Strong': {
+    'en-us': 'Strong',
+    'es-pe': 'Fuerte',
+    'sk-sk': 'Silné'
+  },
+  'Improve': {
+    'en-us': 'Improve',
+    'es-pe': 'Mejorar',
+    'sk-sk': 'Zlepšiť'
   }
 };
 
