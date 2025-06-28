@@ -594,7 +594,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     className="flex-1 flex items-center gap-2"
                   >
                     <Upload className="h-4 w-4" />
-                    {t("Select file")}
+                    {t("upload.select_file")}
                   </Button>
                   <Button
                     onClick={handleQRUpload}
@@ -602,7 +602,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     className="flex-1 flex items-center gap-2"
                   >
                     <QrCode className="h-4 w-4" />
-                    {t("Scan with Phone")}
+                    {t("upload.scan_phone")}
                   </Button>
                 </div>
               </div>
@@ -614,7 +614,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
             <div className="text-center space-y-4 py-6">
               <div className="flex items-center gap-2 justify-center text-blue-600">
                 <Smartphone className="h-5 w-5" />
-                <span className="font-medium">{t("Scan QR Code with Your Phone")}</span>
+                <span className="font-medium">{t("upload.scan_qr")}</span>
               </div>
               
               <div className="bg-white p-4 rounded-lg border shadow-sm mx-auto w-fit">
@@ -626,15 +626,15 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
               </div>
               
               <div className="text-sm text-gray-600 space-y-1">
-                <p>{t("1. Scan this QR code with your phone camera")}</p>
-                <p>{t("2. Take a photo of your receipt")}</p>
-                <p>{t("3. The data will appear here automatically")}</p>
+                <p>{t("upload.qr_step_1")}</p>
+                <p>{t("upload.qr_step_2")}</p>
+                <p>{t("upload.qr_step_3")}</p>
               </div>
               
               {qrUploadState.isPolling && (
                 <div className="flex items-center gap-2 justify-center text-gray-500">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
-                  <span className="text-sm">{t("Waiting for mobile upload...")}</span>
+                  <span className="text-sm">{t("upload.waiting_upload")}</span>
                 </div>
               )}
               
@@ -643,7 +643,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                 variant="outline"
                 className="text-sm"
               >
-                {t("Cancel QR Scan")}
+                {t("upload.cancel_qr")}
               </Button>
             </div>
           )}
