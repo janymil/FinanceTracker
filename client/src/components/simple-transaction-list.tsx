@@ -74,31 +74,21 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
   };
 
   const { i18n } = useTranslation();
+  const currentLang = i18n.language || 'en-us';
+  let locale = 'en-us';
+  
+  if (currentLang.startsWith('es')) {
+    locale = 'es';
+  } else if (currentLang.startsWith('sk')) {
+    locale = 'sk';
+  }
   
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const currentLang = i18n.language;
-    
-    const monthNames = {
-      'es': [
-        'ene', 'feb', 'mar', 'abr', 'may', 'jun',
-        'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
-      ],
-      'sk': [
-        'jan', 'feb', 'mar', 'apr', 'máj', 'jún',
-        'júl', 'aug', 'sep', 'okt', 'nov', 'dec'
-      ],
-      'en': [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-      ]
-    };
-    
-    const langKey = currentLang.startsWith('es') ? 'es' : 
-                    currentLang.startsWith('sk') ? 'sk' : 'en';
-    
-    const monthName = monthNames[langKey][date.getMonth()];
-    return `${monthName} ${date.getDate()}, ${date.getFullYear()}`;
+    return new Date(dateString).toLocaleDateString(locale, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   };
 
   const handleDelete = async (transactionId: number) => {
