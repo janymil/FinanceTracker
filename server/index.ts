@@ -232,8 +232,9 @@ app.use(cookieParser());
 
 // Configure session middleware ONLY for routes that need user sessions
 app.use((req, res, next) => {
-  // Skip sessions for API routes, static assets, and webhooks
-  if (req.path.startsWith('/api/') || 
+  // Skip sessions for most API routes, static assets, and webhooks
+  // BUT keep sessions for admin-analytics routes
+  if ((req.path.startsWith('/api/') && !req.path.startsWith('/api/admin-analytics')) || 
       req.path.startsWith('/uploads/') ||
       req.path.includes('.') || // Static files (css, js, images, xml, txt)
       req.path === '/sitemap.xml' ||
