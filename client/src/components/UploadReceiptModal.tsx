@@ -8,7 +8,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Camera, Upload, FileText, AlertCircle, CheckCircle, Save, Edit, ImageIcon, QrCode, Smartphone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@clerk/clerk-react";
-import { useTranslation } from "react-i18next";
 import QRCode from "qrcode";
 
 interface UploadReceiptModalProps {
@@ -58,7 +57,6 @@ function generateUUID() {
 export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "Upload Image" }: UploadReceiptModalProps) {
   const { toast } = useToast();
   const { getToken } = useAuth();
-  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -532,10 +530,10 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Camera className="h-5 w-5" />
-            {t("uploadReceipts")}
+            Upload Receipt
           </DialogTitle>
           <DialogDescription>
-            {t("uploadReceiptDescription")}
+            Upload a receipt photo to automatically extract transaction data
           </DialogDescription>
         </DialogHeader>
         
@@ -562,9 +560,9 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
               <div className="space-y-4">
                 <Upload className="h-12 w-12 text-gray-400 mx-auto" />
                 <div>
-                  <p className="text-lg font-medium">{t("uploadReceiptImage")}</p>
+                  <p className="text-lg font-medium">Upload receipt image</p>
                   <p className="text-sm text-gray-500">
-                    {t("supportedImageFormats")}
+                    JPG, PNG or other image formats
                   </p>
                 </div>
                 
@@ -575,7 +573,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     className="w-full flex items-center gap-2"
                   >
                     <Camera className="h-4 w-4" />
-                    {t("takePhoto")}
+                    Take Photo
                   </Button>
                   <Button
                     onClick={() => fileInputRef.current?.click()}
@@ -583,7 +581,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     className="w-full flex items-center gap-2"
                   >
                     <Upload className="h-4 w-4" />
-                    {t("chooseFromGallery")}
+                    Choose from Gallery
                   </Button>
                 </div>
                 
@@ -594,7 +592,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     className="flex-1 flex items-center gap-2"
                   >
                     <Upload className="h-4 w-4" />
-                    {t("selectFile")}
+                    Select file
                   </Button>
                   <Button
                     onClick={handleQRUpload}
@@ -602,7 +600,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     className="flex-1 flex items-center gap-2"
                   >
                     <QrCode className="h-4 w-4" />
-                    {t("scanWithPhone")}
+                    Scan with Phone
                   </Button>
                 </div>
               </div>
@@ -614,7 +612,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
             <div className="text-center space-y-4 py-6">
               <div className="flex items-center gap-2 justify-center text-blue-600">
                 <Smartphone className="h-5 w-5" />
-                <span className="font-medium">{t("scanQRCodeWithPhone")}</span>
+                <span className="font-medium">Scan QR Code with Your Phone</span>
               </div>
               
               <div className="bg-white p-4 rounded-lg border shadow-sm mx-auto w-fit">
@@ -626,15 +624,15 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
               </div>
               
               <div className="text-sm text-gray-600 space-y-1">
-                <p>{t("qrStep1")}</p>
-                <p>{t("qrStep2")}</p>
-                <p>{t("qrStep3")}</p>
+                <p>1. Scan this QR code with your phone camera</p>
+                <p>2. Take a photo of your receipt</p>
+                <p>3. The data will appear here automatically</p>
               </div>
               
               {qrUploadState.isPolling && (
                 <div className="flex items-center gap-2 justify-center text-gray-500">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
-                  <span className="text-sm">{t("waitingForMobileUpload")}</span>
+                  <span className="text-sm">Waiting for mobile upload...</span>
                 </div>
               )}
               
@@ -643,7 +641,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                 variant="outline"
                 className="text-sm"
               >
-                {t("cancelQRScan")}
+                Cancel QR Scan
               </Button>
             </div>
           )}
@@ -666,7 +664,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
               {uploadState.imageUrl && (
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {t("receiptImage")}
+                    Receipt Image:
                   </label>
                   <div className="relative">
                     <img 
@@ -683,12 +681,12 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                 <div className="space-y-4">
                   <h4 className="font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                     <Edit className="h-4 w-4" />
-                    {t("editTransactionDetails")}
+                    Edit Transaction Details
                   </h4>
                   
                   <div className="space-y-3">
                     <div>
-                      <Label htmlFor="amount">{t("Amount")} *</Label>
+                      <Label htmlFor="amount">Amount *</Label>
                       <Input
                         id="amount"
                         type="number"
@@ -700,17 +698,17 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     </div>
                     
                     <div>
-                      <Label htmlFor="description">{t("Description")} *</Label>
+                      <Label htmlFor="description">Description *</Label>
                       <Input
                         id="description"
                         value={formData.description}
                         onChange={(e) => handleFormChange('description', e.target.value)}
-                        placeholder={t("transactionDescription")}
+                        placeholder="Transaction description"
                       />
                     </div>
                     
                     <div>
-                      <Label htmlFor="date">{t("Date")} *</Label>
+                      <Label htmlFor="date">Date *</Label>
                       <Input
                         id="date"
                         type="date"
@@ -720,10 +718,10 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     </div>
                     
                     <div>
-                      <Label htmlFor="category">{t("Category")} *</Label>
+                      <Label htmlFor="category">Category *</Label>
                       <Select value={formData.categoryId} onValueChange={(value) => handleFormChange('categoryId', value)}>
                         <SelectTrigger>
-                          <SelectValue placeholder={t("selectCategory")} />
+                          <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
                           {categories.map((category) => (
@@ -737,7 +735,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
 
                     {uploadState.category && (
                       <div className="text-sm text-blue-600 bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
-                        💡 {t("aiSuggestedCategory")} {uploadState.category}
+                        💡 AI suggested category: {uploadState.category}
                       </div>
                     )}
                   </div>
@@ -748,7 +746,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     disabled={!formData.amount || !formData.description || !formData.categoryId}
                   >
                     <Save className="h-4 w-4 mr-2" />
-                    {t("saveTransaction")}
+                    Save Transaction
                   </Button>
                 </div>
               )}
@@ -757,7 +755,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
               {uploadState.recognizedText && (
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {t("recognizedText")}
+                    Recognized Text:
                   </label>
                   <pre className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-sm overflow-x-auto whitespace-pre-wrap border max-h-32 overflow-y-auto">
 {uploadState.recognizedText}
@@ -781,14 +779,14 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                 variant="outline"
                 className="flex-1"
               >
-                {t("uploadAnotherReceipt")}
+                Upload another receipt
               </Button>
               <Button
                 onClick={handleModalClose}
                 variant="secondary"
                 className="flex-1"
               >
-                {t("close")}
+                Close
               </Button>
             </div>
           )}

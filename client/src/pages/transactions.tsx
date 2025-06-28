@@ -510,7 +510,7 @@ export default function Transactions() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="amount">{t("Amount")}</Label>
+                      <Label htmlFor="amount">Amount</Label>
                       <Input
                         id="amount"
                         type="number"
@@ -521,7 +521,7 @@ export default function Transactions() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="date">{t("Date")}</Label>
+                      <Label htmlFor="date">Date</Label>
                       <Input
                         id="date"
                         type="date"
@@ -532,7 +532,7 @@ export default function Transactions() {
                   </div>
 
                   <div>
-                    <Label htmlFor="description">{t("Description")}</Label>
+                    <Label htmlFor="description">Description</Label>
                     <Input
                       id="description"
                       value={newTransaction.description}
@@ -542,7 +542,7 @@ export default function Transactions() {
                   </div>
 
                   <div>
-                    <Label>{t("Type")}</Label>
+                    <Label>Type</Label>
                     <div className="flex gap-2 mt-2">
                       <Button
                         variant={newTransaction.type === "income" ? "default" : "outline"}
@@ -564,7 +564,7 @@ export default function Transactions() {
                   </div>
 
                   <div>
-                    <Label htmlFor="category">{t("Category")}</Label>
+                    <Label htmlFor="category">Category</Label>
                     <Select 
                       value={newTransaction.categoryId || ""} 
                       onValueChange={(value) => setNewTransaction({ ...newTransaction, categoryId: value })}
