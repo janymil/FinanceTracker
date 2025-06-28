@@ -675,7 +675,7 @@ export function registerAIRoutes(app: Express) {
     if (aiData.factors) {
       aiData.factors.forEach((factor: any) => {
         if (factor.status === 'good' || factor.status === 'excellent') {
-          achievements.push(`Strong ${factor.name} (${factor.score}/${factor.max})`);
+          achievements.push(`${factor.name} (${factor.score}/${factor.max})`);
         }
       });
     }
@@ -684,7 +684,7 @@ export function registerAIRoutes(app: Express) {
     if (aiData.factors) {
       aiData.factors.forEach((factor: any) => {
         if (factor.status === 'poor' || factor.status === 'below average') {
-          warnings.push(`Improve ${factor.name} (${factor.score}/${factor.max})`);
+          warnings.push(`${factor.name} (${factor.score}/${factor.max})`);
         }
       });
     }

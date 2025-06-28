@@ -446,8 +446,8 @@ export default function FinancialHealthMascot() {
                     ) : (
                       <div className="text-center py-6">
                         <Crown className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{t('mascot.noAchievements')}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{t('mascot.keepBuilding')}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{t('mascot.emptyStates.noAchievements')}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{t('mascot.emptyStates.keepBuilding')}</p>
                       </div>
                     )}
                   </TabsContent>
