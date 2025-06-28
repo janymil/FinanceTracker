@@ -449,6 +449,8 @@
   "Budget Status": "Estado del Presupuesto",
   "transaction": "transacción",
   "transactionPlural": "transacciones",
+  "Auto": "Auto",
+  "Manual": "Manual",
   "total": "total",
   "No Budget Set": "Sin Presupuesto Establecido",
   "Financial Trends": "Tendencias Financieras",

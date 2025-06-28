@@ -565,7 +565,7 @@ export default function TransactionRemindersWidget() {
                           )}
                           <span className="hidden sm:inline">•</span>
                           <span className={`${reminder.source === 'automatic' ? 'text-blue-600' : 'text-purple-600'} text-xs`}>
-                            {reminder.source === 'automatic' ? 'Auto' : 'Manual'}
+                            {reminder.source === 'automatic' ? t('Auto') : t('Manual')}
                           </span>
                         </div>
                       </div>

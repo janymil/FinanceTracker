@@ -960,7 +960,7 @@ export class DatabaseStorage implements IStorage {
         const reminder = {
           id: `recurring_${recurring.id}`,
           title: recurring.description,
-          description: `Recurring ${recurring.type} (${recurring.recurringFrequency})`,
+          description: recurring.recurringFrequency, // Just send the frequency, let client translate
           amount: recurring.amount,
           dueDate: nextOccurrence,
           type: recurring.type as 'income' | 'expense',
