@@ -695,8 +695,8 @@ export function registerStripeRoutes(app: Express) {
         return;
       }
 
-      // Get the subscription to check attempt count
-      const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
+      // Log the payment failure for potential recovery
+      // Note: Could check subscription.latest_invoice.attempt_count for retry logic
       
       // Stripe typically attempts 4 times before giving up
       // We'll downgrade after the first failure to be safe
