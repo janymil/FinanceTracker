@@ -200,7 +200,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
                 {formatCurrency(animatedValues.income)}
               </p>
               <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                {summary?.incomeTransactionCount || 0} {(summary?.incomeTransactionCount || 0) === 1 ? t('transaction') : t('transactions')}
+                {summary?.incomeTransactionCount || 0} {(summary?.incomeTransactionCount || 0) === 1 ? t('transaction') : t('transaction') === 'transaction' ? 'transactions' : t('transaction') === 'transacción' ? 'transacciones' : 'transakcie'}
               </p>
             </div>
             <div className="bg-green-100 dark:bg-green-800/40 p-3 rounded-lg">
@@ -222,7 +222,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
                 {formatCurrency(Math.abs(animatedValues.expenses))}
               </p>
               <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                {summary?.expenseTransactionCount || 0} {(summary?.expenseTransactionCount || 0) === 1 ? t('transaction') : t('transactions')}
+                {summary?.expenseTransactionCount || 0} {(summary?.expenseTransactionCount || 0) === 1 ? t('transaction') : t('transaction') === 'transaction' ? 'transactions' : t('transaction') === 'transacción' ? 'transacciones' : 'transakcie'}
               </p>
             </div>
             <div className="bg-red-100 dark:bg-red-800/40 p-3 rounded-lg">
