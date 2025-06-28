@@ -87,22 +87,30 @@ export default function Income() {
   const { t, i18n } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Helper function to format dates with proper locale  
+  // Helper function to format dates with Spanish month names
   const formatTransactionDate = (dateString: string) => {
+    const date = new Date(dateString);
     const currentLang = i18n.language || 'en-us';
-    let locale = 'en-us';
     
     if (currentLang.startsWith('es')) {
-      locale = 'es';
+      const spanishMonths = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+      const month = spanishMonths[date.getMonth()];
+      const day = date.getDate();
+      const year = date.getFullYear();
+      return `${month} ${day}, ${year}`;
     } else if (currentLang.startsWith('sk')) {
-      locale = 'sk';
+      const slovakMonths = ['jan', 'feb', 'mar', 'apr', 'máj', 'jún', 'júl', 'aug', 'sep', 'okt', 'nov', 'dec'];
+      const month = slovakMonths[date.getMonth()];
+      const day = date.getDate();
+      const year = date.getFullYear();
+      return `${day}. ${month} ${year}`;
+    } else {
+      return new Date(dateString).toLocaleDateString('en-us', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
     }
-    
-    return new Date(dateString).toLocaleDateString(locale, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
   };
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
