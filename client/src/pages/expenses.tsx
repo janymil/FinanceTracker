@@ -146,7 +146,7 @@ export default function Expenses() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -182,13 +182,13 @@ export default function Expenses() {
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
-        title: "Expense Updated",
-        description: "Expense transaction has been updated successfully",
+        title: t("expenses.expense_updated"),
+        description: t("expenses.expense_updated_description"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -209,13 +209,13 @@ export default function Expenses() {
       queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
       queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       toast({
-        title: "Expense Deleted",
-        description: "Expense transaction has been removed successfully",
+        title: t("expenses.expense_deleted"),
+        description: t("expenses.expense_deleted_description"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -395,10 +395,10 @@ export default function Expenses() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Expense Management
+                {t("expenses.title")}
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
-                Track and manage all your expenses and spending
+                {t("expenses.subtitle")}
               </p>
             </div>
             <div className="flex gap-2">
@@ -429,16 +429,16 @@ export default function Expenses() {
                     }}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Expense
+                    {t("expenses.add_expense")}
                   </Button>
                 </DialogTrigger>
               <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
-                    {editingTransaction ? "Edit Expense" : "Add New Expense"}
+                    {editingTransaction ? t("expenses.edit_expense") : t("expenses.add_new_expense")}
                   </DialogTitle>
                   <DialogDescription>
-                    {editingTransaction ? "Update the expense details" : "Record a new expense transaction"}
+                    {editingTransaction ? t("expenses.edit_description") : t("expenses.add_description")}
                   </DialogDescription>
                 </DialogHeader>
                 
