@@ -763,5 +763,12 @@
     "failedToCreate": "Nepodarilo sa vytvoriť pripomienku",
     "failedToComplete": "Nepodarilo sa dokončiť pripomienku",
     "failedToDelete": "Nepodarilo sa zmazať pripomienku"
-  }
+  },
+  "aiPoweredInsights": "AI-Powered Insights",
+  "premium": "Premium",
+  "spendingManagement": "Správa výdavkov",
+  "incomeAnalysis": "Analýza príjmov", 
+  "expensePatterns": "Vzory výdavkov",
+  "financialHealth": "Finančné zdravie",
+  "riskAssessment": "Hodnotenie rizika",
 }

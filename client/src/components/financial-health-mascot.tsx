@@ -6,21 +6,24 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Heart, 
+import {
+  Heart,
+  TrendingUp,
+  TrendingDown,
   AlertTriangle,
   CheckCircle,
-  Zap,
+  XCircle,
+  Lightbulb,
   Target,
-  Smile,
-  Frown,
-  Meh,
-  Star,
-  Crown,
+  DollarSign,
+  PiggyBank,
+  Shield,
   Brain,
-  Lightbulb
+  Crown,
+  Zap,
+  Calendar,
+  User,
+  BarChart3
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import RequirePlan from "./require-plan";
@@ -114,7 +117,7 @@ export default function FinancialHealthMascot() {
 
   const MascotFace = ({ emotion, size = 'large' }: { emotion: string; size?: 'small' | 'large' }) => {
     const iconSize = size === 'large' ? 'h-16 w-16' : 'h-8 w-8';
-    
+
     switch (emotion) {
       case 'excited':
         return <Star className={`${iconSize} text-yellow-500`} />;
@@ -224,13 +227,13 @@ export default function FinancialHealthMascot() {
   const config = mascotConfigs[healthData.category] || mascotConfigs.fair;
 
   return (
-    <RequirePlan 
-      plan="standard" 
+    <RequirePlan
+      plan="standard"
       feature="AI-Enhanced Financial Health Mascot"
       description="Get a personalized AI companion that analyzes your financial behavior and provides intelligent insights"
       benefits={[
         "AI-powered financial health analysis",
-        "Personalized insights and recommendations", 
+        "Personalized insights and recommendations",
         "Real-time emotional feedback based on spending patterns",
         "Achievement tracking and celebration",
         "Smart warnings and action items"
@@ -256,7 +259,7 @@ export default function FinancialHealthMascot() {
                 </Badge>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2">
               {healthData.trend === 'improving' && (
                 <motion.div
