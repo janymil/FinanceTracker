@@ -450,14 +450,14 @@ export function registerAIRoutes(app: Express) {
       // Initialize UnifiedAICache with 24 hours TTL
       const cache = new UnifiedAICache('daily-recommendations', userId);
 
-      // Create stable date-based cache key instead of using full transaction data
+      // Create stable date-based cache key that includes language to prevent cross-language caching
       const todayKey = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-      const cacheKey = { date: todayKey, userId: userId, language: userLanguage };
+      const cacheKey = { date: todayKey, userId: userId, language: language };
 
       // Try to get cached result using date-based key
       const cachedResult = await cache.get(cacheKey);
       if (cachedResult) {
-        console.log('Daily recommendations: Using cached result for date:', todayKey);
+        console.log('Daily recommendations: Using cached result for date:', todayKey, 'language:', language);
         return res.json(cachedResult);
       }
 
@@ -482,9 +482,9 @@ export function registerAIRoutes(app: Express) {
         fullResponse: recommendations
       });
 
-      // Cache the result for 24 hours using date-based key
+      // Cache the result for 24 hours using date-based key with language
       await cache.set(cacheKey, recommendations, false, 24);
-      console.log('Daily recommendations: Cached new result for date:', todayKey);
+      console.log('Daily recommendations: Cached new result for date:', todayKey, 'language:', language);
 
       return res.json(recommendations);
     } catch (error) {
