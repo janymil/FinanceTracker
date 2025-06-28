@@ -4,13 +4,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 import { DollarSign, TrendingUp, Shield } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { SEO } from "@/components/SEO";
+import { useTranslation } from "react-i18next";
 
 export default function AuthPage() {
   const [location, setLocation] = useLocation();
   const { user: clerkUser, isLoaded } = useUser();
   const [activeTab, setActiveTab] = useState("sign-up");
   const [hasRedirected, setHasRedirected] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const { t } = useTranslation();
 
   // Extract current language from URL to build language-aware redirect URLs
   // If no language in URL, use saved preference or browser language
@@ -92,13 +96,39 @@ export default function AuthPage() {
             </TabsList>
 
             <TabsContent value="sign-up" className="space-y-4">
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-                <SignUp 
+              {/* Terms Acceptance */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-4">
+                <div className="flex items-start space-x-3">
+                  <Checkbox 
+                    id="terms-acceptance" 
+                    checked={termsAccepted}
+                    onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+                    className="mt-1"
+                  />
+                  <label htmlFor="terms-acceptance" className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed cursor-pointer">
+                    {t("I agree to the")} <a href={`/${currentLang}/terms-of-service`} target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">{t("Terms of Service")}</a> {t("and")} <a href={`/${currentLang}/privacy-policy`} target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">{t("Privacy Policy")}</a>
+                  </label>
+                </div>
+              </div>
+
+              {/* SignUp Form with Terms Blocking */}
+              <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 relative ${!termsAccepted ? 'opacity-50 pointer-events-none' : ''}`}>
+                {!termsAccepted && (
+                  <div className="absolute inset-0 bg-gray-200/50 dark:bg-gray-700/50 rounded-lg z-10 flex items-center justify-center backdrop-blur-sm">
+                    <div className="text-center p-4">
+                      <Shield className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        {t("Please accept Terms & Privacy Policy to continue")}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                <div className={!termsAccepted ? 'pointer-events-none' : ''}>
+                  <SignUp 
                   routing="virtual"
                   signInUrl="#sign-in"
                   initialValues={{
                     emailAddress: "",
-                    password: "",
                     firstName: "",
                     lastName: ""
                   }}
@@ -136,6 +166,7 @@ export default function AuthPage() {
                     }
                   }}
                 />
+                </div>
               </div>
             </TabsContent>
 
