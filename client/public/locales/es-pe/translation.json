@@ -698,6 +698,22 @@
   "AI Categorization Error": "Error de Categorización IA",
   "AI Categorization Complete": "Categorización IA Completa",
   "Suggested category: {{category}}": "Categoría sugerida: {{category}}",
+
+  "mascot": {
+    "settings": "Configuración de Mascota",
+    "show_mascot": "Mostrar Mascota",
+    "current_mood": "Estado Actual",
+    "health_score": "Puntuación de Salud",
+    "generate_new": "Generar Nueva",
+    "health_changed": "¡Tu salud financiera ha cambiado significativamente!",
+    "alt_text": "Mascota financiera en estado {{mood}}",
+    "image_expired": "Imagen de mascota expirada",
+    "click_generate": "Haz clic en 'Generar Nueva' para crear una mascota fresca",
+    "generate_prompt": "Haz clic para generar tu mascota financiera",
+    "new_generated": "¡Nueva mascota generada!",
+    "generate_failed": "Error al generar mascota",
+    "toggle_failed": "Error al alternar mascota"
+  },
   "{{confidence}}% confidence": "{{confidence}}% confianza",
   "autoCategorization": {
     "title": "Categorización IA",

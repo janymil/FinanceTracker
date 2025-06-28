@@ -596,6 +596,22 @@
   "AI Categorization Complete": "AI Kategorizácia Dokončená",
   "Suggested category: {{category}}": "Navrhovaná kategória: {{category}}",
   "{{confidence}}% confidence": "{{confidence}}% spoľahlivosť",
+
+  "mascot": {
+    "settings": "Nastavenia Maskota",
+    "show_mascot": "Zobraziť Maskota",
+    "current_mood": "Aktuálna Nálada",
+    "health_score": "Skóre Zdravia",
+    "generate_new": "Vygenerovať Nového",
+    "health_changed": "Vaše finančné zdravie sa výrazne zmenilo!",
+    "alt_text": "Finančný maskot v nálade {{mood}}",
+    "image_expired": "Obrázok maskota vypršal",
+    "click_generate": "Kliknite na 'Vygenerovať Nového' pre vytvorenie nového maskota",
+    "generate_prompt": "Kliknite pre vygenerovanie vášho finančného maskota",
+    "new_generated": "Nový maskot vygenerovaný!",
+    "generate_failed": "Nepodarilo sa vygenerovať maskota",
+    "toggle_failed": "Nepodarilo sa prepnúť maskota"
+  },
   "autoCategorization": {
     "title": "AI Kategorizácia",
     "description": "Automaticky kategorizuje vaše transakcie",
