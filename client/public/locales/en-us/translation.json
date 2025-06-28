@@ -736,5 +736,22 @@
       "medium": "medium",
       "low": "low"
     }
+  },
+  "aiInsights": {
+    "title": "AI-Powered Insights",
+    "groupedInsights": "Grouped Insights",
+    "smartInsights": "💡 Smart Insights",
+    "spendingPatterns": "📊 Spending Patterns",
+    "savingOpportunities": "💰 Saving Opportunities",
+    "budgetOptimization": "📋 Budget Optimization",
+    "financialHealth": "❤️ Financial Health",
+    "actionableAdvice": "⚡ Actionable Advice",
+    "generateInsights": "Generate AI Insights",
+    "generating": "Generating insights...",
+    "noInsights": "No insights available",
+    "addMoreData": "Add more transactions to get personalized AI insights",
+    "confidence": "confidence",
+    "category": "Category",
+    "insight": "Insight"
   }
 }

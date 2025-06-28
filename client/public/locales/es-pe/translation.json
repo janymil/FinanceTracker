@@ -714,5 +714,22 @@
       "medium": "media",
       "low": "baja"
     }
+  },
+  "aiInsights": {
+    "title": "Perspectivas Impulsadas por IA",
+    "groupedInsights": "Perspectivas Agrupadas",
+    "smartInsights": "💡 Perspectivas Inteligentes",
+    "spendingPatterns": "📊 Patrones de Gasto",
+    "savingOpportunities": "💰 Oportunidades de Ahorro",
+    "budgetOptimization": "📋 Optimización de Presupuesto",
+    "financialHealth": "❤️ Salud Financiera",
+    "actionableAdvice": "⚡ Consejos Accionables",
+    "generateInsights": "Generar Perspectivas IA",
+    "generating": "Generando perspectivas...",
+    "noInsights": "No hay perspectivas disponibles",
+    "addMoreData": "Agrega más transacciones para obtener perspectivas personalizadas de IA",
+    "confidence": "confianza",
+    "category": "Categoría",
+    "insight": "Perspectiva"
   }
 }
