@@ -2216,6 +2216,16 @@ export class DatabaseStorage implements IStorage {
     return entry[0] || null;
   }
 
+  // Get all AI cache entries (admin function)
+  async getAllAICacheEntries(): Promise<any[]> {
+    const entries = await db
+      .select()
+      .from(aiCache)
+      .orderBy(desc(aiCache.lastAccessed));
+
+    return entries;
+  }
+
   // Removed: Contextual Financial Tips operations - using unified ai_cache system
 
   // Removed: Legacy cache methods - using unified ai_cache system

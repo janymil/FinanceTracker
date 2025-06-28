@@ -106,6 +106,131 @@ export default function AdminAnalytics() {
     enabled: isAuthenticated,
   });
 
+  // AI Cache Management Queries
+  const { data: aiCacheGlobal, isLoading: aiCacheGlobalLoading, refetch: refetchGlobal } = useQuery({
+    queryKey: ['admin-ai-cache-global'],
+    queryFn: () => adminFetch('/api/admin-analytics/ai-cache/global'),
+    enabled: isAuthenticated,
+  });
+
+  const { data: aiCacheFunctions = [], isLoading: aiCacheFunctionsLoading, refetch: refetchFunctions } = useQuery({
+    queryKey: ['admin-ai-cache-functions'],
+    queryFn: () => adminFetch('/api/admin-analytics/ai-cache/functions'),
+    enabled: isAuthenticated,
+  });
+
+  const { data: aiCacheUsers = [], isLoading: aiCacheUsersLoading, refetch: refetchUsers } = useQuery({
+    queryKey: ['admin-ai-cache-users'],
+    queryFn: () => adminFetch('/api/admin-analytics/ai-cache/users'),
+    enabled: isAuthenticated,
+  });
+
+  const { data: ttlConfig = {}, isLoading: ttlConfigLoading } = useQuery({
+    queryKey: ['admin-ai-cache-ttl-config'],
+    queryFn: () => adminFetch('/api/admin-analytics/ai-cache/ttl-config'),
+    enabled: isAuthenticated,
+  });
+
+  // AI Cache Management Functions
+  const clearFunctionCache = async (functionKey: string) => {
+    try {
+      const response = await fetch(`/api/admin-analytics/ai-cache/function/${functionKey}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to clear function cache');
+      }
+
+      const result = await response.json();
+      toast({
+        title: "Success",
+        description: result.message,
+      });
+
+      // Refetch all cache data
+      refetchGlobal();
+      refetchFunctions();
+      refetchUsers();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to clear function cache",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const clearUserCache = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/admin-analytics/ai-cache/user/${userId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to clear user cache');
+      }
+
+      const result = await response.json();
+      toast({
+        title: "Success",
+        description: result.message,
+      });
+
+      // Refetch all cache data
+      refetchGlobal();
+      refetchFunctions();
+      refetchUsers();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to clear user cache",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const cleanupExpiredCache = async () => {
+    try {
+      const response = await fetch('/api/admin-analytics/ai-cache/expired', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to cleanup expired cache');
+      }
+
+      const result = await response.json();
+      toast({
+        title: "Success",
+        description: result.message,
+      });
+
+      // Refetch all cache data
+      refetchGlobal();
+      refetchFunctions();
+      refetchUsers();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to cleanup expired cache",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoggingIn(true);
@@ -521,9 +646,10 @@ export default function AdminAnalytics() {
         </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 h-auto">
+        <TabsList className="grid w-full grid-cols-4 h-auto">
           <TabsTrigger value="overview" className="text-xs md:text-sm px-2 py-2">Overview</TabsTrigger>
           <TabsTrigger value="users" className="text-xs md:text-sm px-2 py-2">Users</TabsTrigger>
+          <TabsTrigger value="ai-cache" className="text-xs md:text-sm px-2 py-2">AI Cache</TabsTrigger>
           <TabsTrigger value="analytics" className="text-xs md:text-sm px-2 py-2">Analytics</TabsTrigger>
         </TabsList>
 

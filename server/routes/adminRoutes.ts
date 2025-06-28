@@ -227,4 +227,236 @@ export function registerAdminRoutes(app: Express) {
       return res.status(500).json({ message: "Failed to fetch plan stats" });
     }
   });
+
+  // === AI CACHE MANAGEMENT ROUTES ===
+
+  // Get global AI cache statistics
+  app.get('/api/admin-analytics/ai-cache/global', adminAuth, async (req: any, res: Response) => {
+    try {
+      const { UnifiedAICache } = await import('../../lib/unifiedAICache');
+      const globalStats = await UnifiedAICache.getGlobalStats();
+      
+      // Get cache entries by function
+      const entries = await storage.getAllAICacheEntries();
+      const functionStats = entries.reduce((acc, entry) => {
+        if (!acc[entry.functionKey]) {
+          acc[entry.functionKey] = {
+            totalEntries: 0,
+            totalHits: 0,
+            errorEntries: 0,
+            avgHitsPerEntry: 0
+          };
+        }
+        acc[entry.functionKey].totalEntries++;
+        acc[entry.functionKey].totalHits += entry.hitCount;
+        if (entry.isError) acc[entry.functionKey].errorEntries++;
+        return acc;
+      }, {} as Record<string, any>);
+
+      // Calculate averages
+      Object.keys(functionStats).forEach(key => {
+        functionStats[key].avgHitsPerEntry = functionStats[key].totalEntries > 0 
+          ? Math.round((functionStats[key].totalHits / functionStats[key].totalEntries) * 100) / 100
+          : 0;
+      });
+
+      return res.json({
+        ...globalStats,
+        functionStats
+      });
+    } catch (error) {
+      console.error("Error fetching AI cache global stats:", error);
+      return res.status(500).json({ message: "Failed to fetch AI cache stats" });
+    }
+  });
+
+  // Get AI cache statistics by function
+  app.get('/api/admin-analytics/ai-cache/functions', adminAuth, async (req: any, res: Response) => {
+    try {
+      const entries = await storage.getAllAICacheEntries();
+      
+      const functionStats = entries.reduce((acc, entry) => {
+        if (!acc[entry.functionKey]) {
+          acc[entry.functionKey] = {
+            functionKey: entry.functionKey,
+            totalEntries: 0,
+            totalHits: 0,
+            errorEntries: 0,
+            users: new Set(),
+            avgHitsPerEntry: 0,
+            lastAccessed: null,
+            oldestEntry: null,
+            newestEntry: null
+          };
+        }
+        
+        const stat = acc[entry.functionKey];
+        stat.totalEntries++;
+        stat.totalHits += entry.hitCount;
+        if (entry.isError) stat.errorEntries++;
+        stat.users.add(entry.userId);
+        
+        if (!stat.lastAccessed || entry.lastAccessed > stat.lastAccessed) {
+          stat.lastAccessed = entry.lastAccessed;
+        }
+        if (!stat.oldestEntry || entry.createdAt < stat.oldestEntry) {
+          stat.oldestEntry = entry.createdAt;
+        }
+        if (!stat.newestEntry || entry.createdAt > stat.newestEntry) {
+          stat.newestEntry = entry.createdAt;
+        }
+        
+        return acc;
+      }, {} as Record<string, any>);
+
+      // Convert Set to count and calculate averages
+      const result = Object.values(functionStats).map((stat: any) => ({
+        ...stat,
+        uniqueUsers: stat.users.size,
+        avgHitsPerEntry: stat.totalEntries > 0 
+          ? Math.round((stat.totalHits / stat.totalEntries) * 100) / 100
+          : 0,
+        users: undefined // Remove Set object
+      }));
+
+      return res.json(result);
+    } catch (error) {
+      console.error("Error fetching AI cache function stats:", error);
+      return res.status(500).json({ message: "Failed to fetch AI cache function stats" });
+    }
+  });
+
+  // Get AI cache statistics by user
+  app.get('/api/admin-analytics/ai-cache/users', adminAuth, async (req: any, res: Response) => {
+    try {
+      const entries = await storage.getAllAICacheEntries();
+      const users = await storage.getAllUsers();
+      
+      const userCacheStats = entries.reduce((acc, entry) => {
+        if (!acc[entry.userId]) {
+          acc[entry.userId] = {
+            userId: entry.userId,
+            totalEntries: 0,
+            totalHits: 0,
+            errorEntries: 0,
+            functions: new Set(),
+            avgHitsPerEntry: 0,
+            lastAccessed: null
+          };
+        }
+        
+        const stat = acc[entry.userId];
+        stat.totalEntries++;
+        stat.totalHits += entry.hitCount;
+        if (entry.isError) stat.errorEntries++;
+        stat.functions.add(entry.functionKey);
+        
+        if (!stat.lastAccessed || entry.lastAccessed > stat.lastAccessed) {
+          stat.lastAccessed = entry.lastAccessed;
+        }
+        
+        return acc;
+      }, {} as Record<string, any>);
+
+      // Add user details and calculate averages
+      const result = Object.values(userCacheStats).map((stat: any) => {
+        const user = users.find(u => u.id === stat.userId);
+        return {
+          ...stat,
+          userEmail: user?.email || 'Unknown',
+          userPlan: user?.plan || 'free',
+          uniqueFunctions: stat.functions.size,
+          avgHitsPerEntry: stat.totalEntries > 0 
+            ? Math.round((stat.totalHits / stat.totalEntries) * 100) / 100
+            : 0,
+          functions: undefined // Remove Set object
+        };
+      });
+
+      return res.json(result);
+    } catch (error) {
+      console.error("Error fetching AI cache user stats:", error);
+      return res.status(500).json({ message: "Failed to fetch AI cache user stats" });
+    }
+  });
+
+  // Clear AI cache by function
+  app.delete('/api/admin-analytics/ai-cache/function/:functionKey', adminAuth, async (req: any, res: Response) => {
+    try {
+      const { functionKey } = req.params;
+      const { UnifiedAICache } = await import('../../lib/unifiedAICache');
+      
+      const deletedCount = await UnifiedAICache.clearFunctionCache(functionKey);
+      
+      console.log(`Admin cleared ${deletedCount} cache entries for function: ${functionKey}`);
+      return res.json({ 
+        success: true, 
+        deletedCount,
+        message: `Cleared ${deletedCount} cache entries for function ${functionKey}` 
+      });
+    } catch (error) {
+      console.error("Error clearing AI cache by function:", error);
+      return res.status(500).json({ message: "Failed to clear cache by function" });
+    }
+  });
+
+  // Clear AI cache by user
+  app.delete('/api/admin-analytics/ai-cache/user/:userId', adminAuth, async (req: any, res: Response) => {
+    try {
+      const { userId } = req.params;
+      const { UnifiedAICache } = await import('../../lib/unifiedAICache');
+      
+      const deletedCount = await UnifiedAICache.clearUserCache(userId);
+      
+      console.log(`Admin cleared ${deletedCount} cache entries for user: ${userId}`);
+      return res.json({ 
+        success: true, 
+        deletedCount,
+        message: `Cleared ${deletedCount} cache entries for user ${userId}` 
+      });
+    } catch (error) {
+      console.error("Error clearing AI cache by user:", error);
+      return res.status(500).json({ message: "Failed to clear cache by user" });
+    }
+  });
+
+  // Clean up expired cache entries
+  app.delete('/api/admin-analytics/ai-cache/expired', adminAuth, async (req: any, res: Response) => {
+    try {
+      const { UnifiedAICache } = await import('../../lib/unifiedAICache');
+      
+      const deletedCount = await UnifiedAICache.cleanupExpired();
+      
+      console.log(`Admin cleaned up ${deletedCount} expired cache entries`);
+      return res.json({ 
+        success: true, 
+        deletedCount,
+        message: `Cleaned up ${deletedCount} expired cache entries` 
+      });
+    } catch (error) {
+      console.error("Error cleaning up expired cache:", error);
+      return res.status(500).json({ message: "Failed to clean up expired cache" });
+    }
+  });
+
+  // Get current TTL configuration
+  app.get('/api/admin-analytics/ai-cache/ttl-config', adminAuth, async (req: any, res: Response) => {
+    try {
+      // Return the current TTL configuration from UnifiedAICache
+      const defaultTTLConfig = {
+        'financial-tips': 168, // 7 days
+        'daily-recommendations': 24, // 1 day
+        'contextual-tips': 72, // 3 days
+        'expense-predictions': 48, // 2 days
+        'financial-health-score': 24, // 1 day
+        'spending-insights': 72, // 3 days
+        'trend-predictions': 48, // 2 days
+      };
+      
+      return res.json(defaultTTLConfig);
+    } catch (error) {
+      console.error("Error fetching TTL config:", error);
+      return res.status(500).json({ message: "Failed to fetch TTL configuration" });
+    }
+  });
 }
