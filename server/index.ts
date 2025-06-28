@@ -30,6 +30,7 @@ if (process.env.NODE_ENV === 'development') {
 import express, { type Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import session from "express-session";
+import ConnectPgSimple from "connect-pg-simple";
 import * as pathModule from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -230,8 +231,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// Configure session middleware for admin analytics
+// Import database configuration for session store
+import { pool } from "./db";
+
+// Configure PostgreSQL session store
+const PgSession = ConnectPgSimple(session);
+
+// Configure session middleware for admin analytics with PostgreSQL store
 const adminSessionMiddleware = session({
+  store: new PgSession({
+    pool: pool as any, // Use the actual pool connection
+    tableName: 'sessions', // Use existing sessions table
+    createTableIfMissing: false, // Table already exists
+    schemaName: 'public'
+  }),
   secret: process.env.SESSION_SECRET || 'admin-session-secret-fallback',
   resave: false,
   saveUninitialized: false,
