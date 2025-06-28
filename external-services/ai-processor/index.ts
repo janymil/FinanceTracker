@@ -259,18 +259,18 @@ export async function generateContextualFinancialTips(data: {
     // Analyze spending by category - use the correct field mapping
     const categorySpending = new Map();
     const categorizedCount = transactions.filter(t => {
-      const category = t.categoryName;
+      const category = t.category || t.categoryName;
       return category && category !== 'Uncategorized';
     }).length;
     const uncategorizedCount = transactions.filter(t => {
-      const category = t.categoryName;
+      const category = t.category || t.categoryName;
       return !category || category === 'Uncategorized';
     }).length;
     
     transactions.forEach(t => {
       const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : (t.amount || 0);
       if (amount > 0) {
-        const category = t.categoryName || 'Uncategorized';
+        const category = t.category || t.categoryName || 'Uncategorized';
         const current = categorySpending.get(category) || 0;
         categorySpending.set(category, current + amount);
       }
