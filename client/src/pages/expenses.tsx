@@ -407,7 +407,7 @@ export default function Expenses() {
                   // Refresh expenses after receipt processing
                   refetchTransactions();
                 }}
-                buttonText="Upload Image"
+                buttonText={t("upload.button_text")}
               />
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
