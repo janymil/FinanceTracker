@@ -67,7 +67,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
           fallbackResult = await generateFinancialTips(userId, payload);
           break;
         case 'daily-recommendations':
-          fallbackResult = await generateDailyRecommendations(userId, payload);
+          fallbackResult = await generateDailyRecommendations(userId, payload, payload.language || 'en-us');
           break;
         case 'spending-insights':
           fallbackResult = await generateSpendingInsights(userId, payload.transactions);
