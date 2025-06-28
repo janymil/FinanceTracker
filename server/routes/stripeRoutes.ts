@@ -577,46 +577,288 @@ export function registerStripeRoutes(app: Express) {
       return res.status(400).send('Webhook signature verification failed');
     }
 
-    // Handle the checkout.session.completed event
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object;
-      console.log('Checkout session completed:', session.id);
+    console.log(`Received webhook event: ${event.type}`);
 
-      try {
-        // Extract plan from metadata
-        const plan = session.metadata?.plan;
-        const userId = session.metadata?.userId;
-
-        if (userId && plan) {
-          // Map plan names to database values  
-          const planMapping = {
-            'free': { plan: 'free', interval: 'monthly' },
-            'standard': { plan: 'standard', interval: 'monthly' },
-            'standard-yearly': { plan: 'standard', interval: 'yearly' },
-            'premium': { plan: 'premium', interval: 'monthly' },
-            'premium-yearly': { plan: 'premium', interval: 'yearly' }
-          };
-
-          const planConfig = planMapping[plan as keyof typeof planMapping];
-          if (planConfig) {
-            const { plan: dbPlan, interval: billingInterval } = planConfig;
-            await storage.updateUserPlan(userId, dbPlan as 'free' | 'standard' | 'premium', billingInterval as 'monthly' | 'yearly');
-            
-            // Store Stripe customer info
-            if (session.customer) {
-              await storage.updateUserStripeInfo(userId, session.customer as string, session.subscription as string);
-            }
-            
-            console.log(`Updated user ${userId} to plan ${dbPlan} (${billingInterval})`);
-          }
-        }
-      } catch (error) {
-        console.error('Error processing webhook:', error);
+    try {
+      switch (event.type) {
+        case 'checkout.session.completed':
+          await handleCheckoutSessionCompleted(event.data.object);
+          break;
+        
+        case 'invoice.payment_failed':
+          await handleInvoicePaymentFailed(event.data.object);
+          break;
+        
+        case 'invoice.payment_succeeded':
+          await handleInvoicePaymentSucceeded(event.data.object);
+          break;
+        
+        case 'customer.subscription.updated':
+          await handleSubscriptionUpdated(event.data.object);
+          break;
+        
+        case 'customer.subscription.deleted':
+          await handleSubscriptionDeleted(event.data.object);
+          break;
+        
+        case 'customer.subscription.created':
+          await handleSubscriptionCreated(event.data.object);
+          break;
+        
+        case 'invoice.payment_action_required':
+          await handlePaymentActionRequired(event.data.object);
+          break;
+        
+        default:
+          console.log(`Unhandled webhook event type: ${event.type}`);
       }
+    } catch (error) {
+      console.error('Error processing webhook:', error);
+      return res.status(500).json({ error: 'Webhook processing failed' });
     }
 
     return res.json({ received: true });
   });
+
+  // Helper function to get user by Stripe customer ID
+  async function getUserByStripeCustomerId(customerId: string) {
+    try {
+      return await storage.getUserByStripeCustomerId(customerId);
+    } catch (error) {
+      console.error('Error finding user by Stripe customer ID:', error);
+      return null;
+    }
+  }
+
+  // Helper function to map Stripe price ID to plan details
+  function mapStripePriceToPlan(priceId: string) {
+    const priceMapping: { [key: string]: { plan: 'free' | 'standard' | 'premium', interval: 'monthly' | 'yearly' } } = {
+      [process.env.STRIPE_STANDARD_MONTHLY_PRICE_ID || '']: { plan: 'standard', interval: 'monthly' },
+      [process.env.STRIPE_STANDARD_YEARLY_PRICE_ID || '']: { plan: 'standard', interval: 'yearly' },
+      [process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || '']: { plan: 'premium', interval: 'monthly' },
+      [process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID || '']: { plan: 'premium', interval: 'yearly' }
+    };
+    
+    return priceMapping[priceId] || { plan: 'free', interval: 'monthly' };
+  }
+
+  // Handle initial successful checkout
+  async function handleCheckoutSessionCompleted(session: any) {
+    console.log('Checkout session completed:', session.id);
+
+    try {
+      // Extract plan from metadata
+      const plan = session.metadata?.plan;
+      const userId = session.metadata?.userId;
+
+      if (userId && plan) {
+        // Map plan names to database values  
+        const planMapping = {
+          'free': { plan: 'free', interval: 'monthly' },
+          'standard': { plan: 'standard', interval: 'monthly' },
+          'standard-yearly': { plan: 'standard', interval: 'yearly' },
+          'premium': { plan: 'premium', interval: 'monthly' },
+          'premium-yearly': { plan: 'premium', interval: 'yearly' }
+        };
+
+        const planConfig = planMapping[plan as keyof typeof planMapping];
+        if (planConfig) {
+          const { plan: dbPlan, interval: billingInterval } = planConfig;
+          await storage.updateUserPlan(userId, dbPlan as 'free' | 'standard' | 'premium', billingInterval as 'monthly' | 'yearly');
+          
+          // Store Stripe customer info
+          if (session.customer) {
+            await storage.updateUserStripeInfo(userId, session.customer as string, session.subscription as string);
+          }
+          
+          console.log(`Updated user ${userId} to plan ${dbPlan} (${billingInterval})`);
+        }
+      }
+    } catch (error) {
+      console.error('Error processing checkout session completed:', error);
+    }
+  }
+
+  // Handle recurring payment failures
+  async function handleInvoicePaymentFailed(invoice: any) {
+    console.log('Invoice payment failed:', invoice.id, 'for customer:', invoice.customer);
+
+    if (!stripe) {
+      console.error('Stripe not initialized');
+      return;
+    }
+
+    try {
+      const user = await getUserByStripeCustomerId(invoice.customer);
+      if (!user) {
+        console.log('No user found for customer:', invoice.customer);
+        return;
+      }
+
+      // Get the subscription to check attempt count
+      const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
+      
+      // Stripe typically attempts 4 times before giving up
+      // We'll downgrade after the first failure to be safe
+      console.log(`Payment failed for user ${user.id}, downgrading to free plan`);
+      
+      await storage.updateUserPlan(user.id, 'free', 'monthly');
+      
+      // Log the payment failure for potential recovery
+      console.log(`User ${user.id} downgraded to free due to payment failure. Invoice: ${invoice.id}`);
+      
+    } catch (error) {
+      console.error('Error handling payment failure:', error);
+    }
+  }
+
+  // Handle successful recurring payments
+  async function handleInvoicePaymentSucceeded(invoice: any) {
+    console.log('Invoice payment succeeded:', invoice.id, 'for customer:', invoice.customer);
+
+    if (!stripe) {
+      console.error('Stripe not initialized');
+      return;
+    }
+
+    try {
+      const user = await getUserByStripeCustomerId(invoice.customer);
+      if (!user) {
+        console.log('No user found for customer:', invoice.customer);
+        return;
+      }
+
+      // Get subscription details to determine plan
+      const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
+      const priceId = subscription.items.data[0]?.price.id;
+      
+      if (priceId) {
+        const planConfig = mapStripePriceToPlan(priceId);
+        
+        // Ensure user has the correct plan (in case they were downgraded)
+        await storage.updateUserPlan(user.id, planConfig.plan, planConfig.interval);
+        
+        console.log(`Confirmed user ${user.id} on ${planConfig.plan} plan (${planConfig.interval})`);
+      }
+      
+    } catch (error) {
+      console.error('Error handling successful payment:', error);
+    }
+  }
+
+  // Handle subscription status changes
+  async function handleSubscriptionUpdated(subscription: any) {
+    console.log('Subscription updated:', subscription.id, 'status:', subscription.status);
+
+    try {
+      const user = await getUserByStripeCustomerId(subscription.customer);
+      if (!user) {
+        console.log('No user found for customer:', subscription.customer);
+        return;
+      }
+
+      // Handle different subscription statuses
+      switch (subscription.status) {
+        case 'active':
+          // Subscription is active, ensure user has correct plan
+          const priceId = subscription.items.data[0]?.price.id;
+          if (priceId) {
+            const planConfig = mapStripePriceToPlan(priceId);
+            await storage.updateUserPlan(user.id, planConfig.plan, planConfig.interval);
+            console.log(`User ${user.id} subscription active: ${planConfig.plan} (${planConfig.interval})`);
+          }
+          break;
+          
+        case 'past_due':
+          // Payment is overdue, but subscription still exists
+          console.log(`User ${user.id} subscription past due, keeping current plan for now`);
+          break;
+          
+        case 'canceled':
+        case 'unpaid':
+          // Subscription cancelled or unpaid, downgrade to free
+          await storage.updateUserPlan(user.id, 'free', 'monthly');
+          console.log(`User ${user.id} downgraded to free due to subscription status: ${subscription.status}`);
+          break;
+          
+        default:
+          console.log(`Unhandled subscription status: ${subscription.status} for user ${user.id}`);
+      }
+      
+    } catch (error) {
+      console.error('Error handling subscription update:', error);
+    }
+  }
+
+  // Handle subscription deletion (cancellation)
+  async function handleSubscriptionDeleted(subscription: any) {
+    console.log('Subscription deleted:', subscription.id);
+
+    try {
+      const user = await getUserByStripeCustomerId(subscription.customer);
+      if (!user) {
+        console.log('No user found for customer:', subscription.customer);
+        return;
+      }
+
+      // Downgrade user to free plan
+      await storage.updateUserPlan(user.id, 'free', 'monthly');
+      
+      // Clear Stripe subscription ID
+      await storage.updateUserStripeInfo(user.id, user.stripeCustomerId || '', '');
+      
+      console.log(`User ${user.id} subscription deleted, downgraded to free plan`);
+      
+    } catch (error) {
+      console.error('Error handling subscription deletion:', error);
+    }
+  }
+
+  // Handle new subscription creation
+  async function handleSubscriptionCreated(subscription: any) {
+    console.log('Subscription created:', subscription.id);
+
+    try {
+      const user = await getUserByStripeCustomerId(subscription.customer);
+      if (!user) {
+        console.log('No user found for customer:', subscription.customer);
+        return;
+      }
+
+      // Get plan details from subscription
+      const priceId = subscription.items.data[0]?.price.id;
+      if (priceId) {
+        const planConfig = mapStripePriceToPlan(priceId);
+        
+        await storage.updateUserPlan(user.id, planConfig.plan, planConfig.interval);
+        await storage.updateUserStripeInfo(user.id, subscription.customer, subscription.id);
+        
+        console.log(`User ${user.id} new subscription: ${planConfig.plan} (${planConfig.interval})`);
+      }
+      
+    } catch (error) {
+      console.error('Error handling subscription creation:', error);
+    }
+  }
+
+  // Handle payment requiring user action (3D Secure, etc.)
+  async function handlePaymentActionRequired(invoice: any) {
+    console.log('Payment action required for invoice:', invoice.id);
+
+    try {
+      const user = await getUserByStripeCustomerId(invoice.customer);
+      if (!user) {
+        console.log('No user found for customer:', invoice.customer);
+        return;
+      }
+
+      // For now, just log it. In a full implementation, you'd send an email notification
+      console.log(`User ${user.id} needs to complete payment action for invoice ${invoice.id}`);
+      
+    } catch (error) {
+      console.error('Error handling payment action required:', error);
+    }
+  }
 
   // Stripe Customer Portal
   app.post('/api/create-customer-portal-session', isAuthenticated, async (req: any, res) => {
