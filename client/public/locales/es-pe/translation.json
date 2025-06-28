@@ -584,6 +584,23 @@
     "standard": "Estándar"
   },
 
+  "upload": {
+    "drag_drop": "Arrastra y suelta una imagen aquí, o haz clic para navegar",
+    "processing": "Procesando tu recibo...",
+    "analysing": "Analizando imagen con IA...",
+    "try_again": "Intentar de Nuevo",
+    "upload_receipt": "Subir Recibo",
+    "or": "o",
+    "select_file": "Seleccionar archivo",
+    "scan_phone": "Escanear con Teléfono",
+    "scan_qr": "Escanea Código QR con tu Teléfono",
+    "qr_step_1": "1. Escanea este código QR con la cámara de tu teléfono",
+    "qr_step_2": "2. Toma una foto de tu recibo",
+    "qr_step_3": "3. Los datos aparecerán aquí automáticamente",
+    "waiting_upload": "Esperando subida desde móvil...",
+    "cancel_qr": "Cancelar Escaneo QR"
+  },
+
   "upcomingReminders": {
     "title": "Recordatorios Próximos",
     "description": "Recordatorios automáticos de transacciones y recordatorios de pago manual",

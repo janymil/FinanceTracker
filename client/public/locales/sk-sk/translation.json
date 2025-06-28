@@ -680,6 +680,23 @@
     "standard": "Štandard"
   },
 
+  "upload": {
+    "drag_drop": "Pretiahnite a pustite obrázok sem, alebo kliknite na prehliadanie",
+    "processing": "Spracovávam váš účet...",
+    "analysing": "Analyzujem obrázok pomocou AI...",
+    "try_again": "Skúsiť Znovu",
+    "upload_receipt": "Nahrať Účet",
+    "or": "alebo",
+    "select_file": "Vybrať súbor",
+    "scan_phone": "Skenovať Telefónom",
+    "scan_qr": "Naskenujte QR kód svojim telefónom",
+    "qr_step_1": "1. Naskenujte tento QR kód kamerou vášho telefónu",
+    "qr_step_2": "2. Odfotografujte váš účet",
+    "qr_step_3": "3. Údaje sa tu zobrazia automaticky",
+    "waiting_upload": "Čakám na nahranie z mobilu...",
+    "cancel_qr": "Zrušiť QR Skenovanie"
+  },
+
   "upcomingReminders": {
     "title": "Nadchádzajúce Pripomienky",
     "description": "Automatické pripomienky z transakcií a manuálne platobné pripomienky",

@@ -594,6 +594,23 @@
     "standard": "Standard"
   },
 
+  "upload": {
+    "drag_drop": "Drag and drop an image here, or click to browse",
+    "processing": "Processing your receipt...",
+    "analysing": "Analysing image with AI...",
+    "try_again": "Try Again",
+    "upload_receipt": "Upload Receipt",
+    "or": "or",
+    "select_file": "Select file",
+    "scan_phone": "Scan with Phone",
+    "scan_qr": "Scan QR Code with Your Phone",
+    "qr_step_1": "1. Scan this QR code with your phone camera",
+    "qr_step_2": "2. Take a photo of your receipt",
+    "qr_step_3": "3. The data will appear here automatically",
+    "waiting_upload": "Waiting for mobile upload...",
+    "cancel_qr": "Cancel QR Scan"
+  },
+
   "upcomingReminders": {
     "title": "Upcoming Reminders",
     "customReminder": "Custom Reminder",
