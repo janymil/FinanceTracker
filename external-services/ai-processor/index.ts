@@ -389,64 +389,55 @@ export async function generateContextualFinancialTips(data: {
       scenarios.push(`🟦 Recurring expenses: ${recurringPercent.toFixed(0)}% of expenses are recurring ($${recurringTotal.toFixed(2)} from ${recurringTransactions.length} transactions).`);
     }
 
-    // Build detailed prompt with scenario analysis
-    const prompt = `You are an expert financial advisor analyzing a user's financial data for ${selectedMonth}. Provide 2-4 specific, actionable financial tips based on their actual data and identified scenarios.
+    // Build financial data summary for AI analysis
+    const financialData = {
+      selectedMonth,
+      totalIncome: summary.totalIncome,
+      totalExpenses: summary.totalExpenses,
+      netBalance,
+      savingsRate: savingsRate.toFixed(1),
+      transactionCount: summary.transactionCount,
+      topSpendingCategories: topSpendingCategories.map(([cat, amount]) => ({
+        category: cat,
+        amount: amount,
+        percentage: ((amount/summary.totalExpenses)*100).toFixed(1)
+      })),
+      budgets: budgets.map(b => ({
+        category: b.categoryName,
+        spent: b.spent,
+        budgetAmount: b.budgetAmount,
+        remaining: b.remaining,
+        status: b.remaining >= 0 ? 'under' : 'over',
+        period: b.period || 'monthly'
+      })),
+      goals: goals.map(g => ({
+        name: g.name,
+        currentAmount: g.currentAmount,
+        targetAmount: g.targetAmount,
+        progressPercent: ((g.currentAmount/g.targetAmount)*100).toFixed(0),
+        targetDate: g.targetDate
+      })),
+      transactionAnalysis: {
+        total: transactions.length,
+        income: incomeTransactions.length,
+        expense: expenseTransactions.length,
+        recurring: recurringTransactions.length,
+        categorized: categorizedCount,
+        categorizationRate: transactions.length > 0 ? ((categorizedCount/transactions.length)*100).toFixed(0) : 0,
+        mostActiveCategory: Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[0] || 'None',
+        mostActiveCategoryCount: Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[1] || 0
+      },
+      scenarios: scenarios,
+      recentTransactions: transactions.slice(0, 8).map(t => ({
+        date: t.date,
+        description: t.description,
+        amount: t.amount,
+        category: t.categoryName || 'Uncategorized',
+        recurring: t.recurring || false
+      }))
+    };
 
-FINANCIAL OVERVIEW:
-- Total Income: $${summary.totalIncome.toLocaleString()}
-- Total Expenses: $${summary.totalExpenses.toLocaleString()}
-- Net Balance: $${netBalance.toLocaleString()}
-- Savings Rate: ${savingsRate.toFixed(1)}%
-- Number of Transactions: ${summary.transactionCount}
-
-TOP SPENDING CATEGORIES:
-${topSpendingCategories.map(([cat, amount]) => `- ${cat}: $${amount.toLocaleString()} (${((amount/summary.totalExpenses)*100).toFixed(1)}%)`).join('\n')}
-
-BUDGET STATUS:
-${budgets.length > 0 ? budgets.map(b => `- ${b.categoryName}: $${b.spent.toLocaleString()}/$${b.budgetAmount.toLocaleString()} (${b.remaining >= 0 ? 'under' : 'over'} budget by $${Math.abs(b.remaining).toLocaleString()}) - ${b.period || 'monthly'}`).join('\n') : '- No budgets set'}
-
-FINANCIAL GOALS:
-${goals.length > 0 ? goals.map(g => `- ${g.name}: $${g.currentAmount.toLocaleString()}/$${g.targetAmount.toLocaleString()} (${((g.currentAmount/g.targetAmount)*100).toFixed(0)}% complete) - Target: ${g.targetDate}`).join('\n') : '- No goals set'}
-
-TRANSACTION ANALYSIS:
-- Total Transactions: ${transactions.length}
-- Income Transactions: ${incomeTransactions.length}
-- Expense Transactions: ${expenseTransactions.length}
-- Recurring Transactions: ${recurringTransactions.length}
-- Categorized Transactions: ${categorizedCount}/${transactions.length} (${transactions.length > 0 ? ((categorizedCount/transactions.length)*100).toFixed(0) : 0}%)
-- Most Active Category: ${Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[0] || 'None'} (${Array.from(transactionFrequency.entries()).sort((a,b) => b[1] - a[1])[0]?.[1] || 0} transactions)
-
-IDENTIFIED FINANCIAL SCENARIOS:
-${scenarios.length > 0 ? scenarios.join('\n') : '- No specific scenarios identified this month'}
-
-RECENT TRANSACTIONS (last 8):
-${transactions.slice(0, 8).map(t => `- ${t.date}: ${t.description} - $${t.amount.toLocaleString()} (${t.categoryName || 'Uncategorized'})${t.recurring ? ' [Recurring]' : ''}`).join('\n')}
-
-CONTEXTUAL ANALYSIS REQUIREMENTS:
-1. Address specific scenarios identified above with targeted, data-driven advice
-2. For budget overruns: Analyze transaction patterns and suggest specific reduction strategies
-3. For goal progress: Calculate required monthly contributions and suggest optimization
-4. For savings rate issues: Provide concrete steps with dollar targets based on their income
-5. For spending patterns: Identify specific categories and transaction behaviors to modify
-6. For income irregularities: Recommend buffer strategies based on their variability patterns
-7. For positive improvements: Reinforce successful behaviors and suggest expansion strategies
-8. Use their actual transaction data, amounts, and patterns in all recommendations
-9. Provide specific dollar amounts, percentages, and realistic timeframes
-10. Make every tip immediately actionable with clear, measurable next steps
-
-Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
-{
-  "tips": [
-    {
-      "id": "tip_1",
-      "title": "Scenario-specific actionable title",
-      "description": "Detailed description addressing specific scenarios with concrete steps and amounts",
-      "category": "spending|saving|budgeting|income",
-      "priority": "high|medium|low",
-      "actionable": true
-    }
-  ]
-}`;
+    const prompt = JSON.stringify(financialData);
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -461,13 +452,11 @@ ABSOLUTE REQUIREMENT: ALL text content must be in ${getLanguageLabel(language)} 
 - categories → ${getLanguageLabel(language)}
 - ALL JSON values → ${getLanguageLabel(language)}
 
-You are an expert financial advisor providing contextual recommendations. Return valid JSON with tips in ${getLanguageLabel(language)} language ONLY.`
+You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips ${getLanguageLabel(language)} language ONLY.`
         },
         {
           role: "user",
-          content: `${prompt}
-
-REMINDER: Respond in ${getLanguageLabel(language)} language ONLY. All titles, descriptions, and categories must be in ${getLanguageLabel(language)}.`
+          content: prompt
         }
       ],
       response_format: { type: "json_object" },
