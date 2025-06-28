@@ -453,7 +453,7 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
       messages: [
         {
           role: "system",
-          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(data.language || 'en-us')}. ${getLanguageLabel(data.language || 'en-us') !== 'English' ? 'Never use English words.' : ''} ALL text content (titles, descriptions, categories) must be in ${getLanguageLabel(data.language || 'en-us')}. 
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(language)}. ${getLanguageLabel(language) !== 'English' ? 'Never use English words.' : ''} ALL text content (titles, descriptions, categories) must be in ${getLanguageLabel(language)}. 
           
 You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.`
         },
