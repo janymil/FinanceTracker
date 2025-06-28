@@ -595,21 +595,24 @@ export default function FinancialHealthMascot() {
                     {healthData?.warnings && healthData.warnings.length > 0 ? (
                       <div className="space-y-3">
                         {(() => {
-                          // Categorize recommendations for better organization
+                          // Categorize recommendations for better organization with multilingual support
+                          const urgentKeywords = ['urgent', 'critical', 'immediately', 'urgente', 'crítico', 'inmediatamente', 'naliehavé', 'kritické', 'okamžite'];
+                          const budgetKeywords = ['budget', 'limit', 'overspend', 'presupuesto', 'límite', 'gastos', 'rozpočet', 'limit', 'prekročenie'];
+                          const improvementKeywords = ['improve', 'consider', 'try', 'better', 'mejorar', 'considerar', 'intentar', 'mejor', 'zlepšiť', 'zvážiť', 'skúsiť', 'lepšie'];
+                          
+                          const containsKeywords = (text: string, keywords: string[]) => {
+                            const lowerText = text.toLowerCase();
+                            return keywords.some(keyword => lowerText.includes(keyword));
+                          };
+                          
                           const urgentItems = healthData.warnings.filter(warning => 
-                            warning.toLowerCase().includes('urgent') || 
-                            warning.toLowerCase().includes('critical') ||
-                            warning.toLowerCase().includes('immediately')
+                            containsKeywords(warning, urgentKeywords)
                           );
                           const budgetItems = healthData.warnings.filter(warning => 
-                            warning.toLowerCase().includes('budget') || 
-                            warning.toLowerCase().includes('limit') ||
-                            warning.toLowerCase().includes('overspend')
+                            containsKeywords(warning, budgetKeywords)
                           );
                           const improvementItems = healthData.warnings.filter(warning => 
-                            warning.toLowerCase().includes('improve') || 
-                            warning.toLowerCase().includes('consider') ||
-                            warning.toLowerCase().includes('try')
+                            containsKeywords(warning, improvementKeywords)
                           );
                           const otherItems = healthData.warnings.filter(warning => 
                             !urgentItems.includes(warning) && 
