@@ -29,6 +29,7 @@ import {
   Frown,
   Star
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import RequirePlan from "./require-plan";
 
@@ -355,10 +356,10 @@ export default function FinancialHealthMascot() {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3 }}
-                className="mt-4 space-y-3"
+                className="mt-4"
               >
                 {/* AI Financial Metrics */}
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg mb-3">
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg mb-4">
                   <h4 className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-3 flex items-center gap-2">
                     <Zap className="h-4 w-4" />
                     AI Financial Analysis
@@ -379,308 +380,358 @@ export default function FinancialHealthMascot() {
                   </div>
                 </div>
 
-                {/* Achievements */}
-                {healthData?.achievements && healthData.achievements.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium text-green-700 dark:text-green-400 mb-2 flex items-center gap-2">
-                      <Crown className="h-4 w-4" />
-                      Financial Strengths
-                    </h4>
-                    <div className="space-y-2">
-                      {healthData.achievements.map((achievement, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="bg-green-50 dark:bg-green-900/20 p-2 rounded border-l-3 border-green-400"
-                        >
-                          <div className="text-xs text-green-800 dark:text-green-200 font-medium">
-                            ✅ {achievement}
-                          </div>
-                        </motion.div>
-                      ))}
+                {/* Tabbed Interface for AI Outputs */}
+                <Tabs defaultValue="overview" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="overview" className="text-xs">
+                      <Crown className="h-3 w-3 mr-1" />
+                      Overview
+                    </TabsTrigger>
+                    <TabsTrigger value="insights" className="text-xs">
+                      <Brain className="h-3 w-3 mr-1" />
+                      Insights
+                    </TabsTrigger>
+                    <TabsTrigger value="recommendations" className="text-xs">
+                      <Target className="h-3 w-3 mr-1" />
+                      Actions
+                    </TabsTrigger>
+                    <TabsTrigger value="achievements" className="text-xs">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Strengths
+                    </TabsTrigger>
+                  </TabsList>
+
+                  {/* Overview Tab */}
+                  <TabsContent value="overview" className="mt-4 space-y-3">
+                    <div className="bg-gradient-to-r from-indigo-50 to-cyan-50 dark:from-indigo-900/20 dark:to-cyan-900/20 p-3 rounded-lg">
+                      <h5 className="text-sm font-medium text-indigo-700 dark:text-indigo-400 mb-2">Quick Summary</h5>
+                      <div className="grid grid-cols-3 gap-2 text-center">
+                        <div className="bg-white dark:bg-gray-800 p-2 rounded">
+                          <div className="text-sm font-bold text-green-600">{healthData.achievements?.length || 0}</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">Strengths</div>
+                        </div>
+                        <div className="bg-white dark:bg-gray-800 p-2 rounded">
+                          <div className="text-sm font-bold text-blue-600">{healthData.insights?.length || 0}</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">Insights</div>
+                        </div>
+                        <div className="bg-white dark:bg-gray-800 p-2 rounded">
+                          <div className="text-sm font-bold text-amber-600">{healthData.warnings?.length || 0}</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">Actions</div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  </TabsContent>
 
-                {/* AI Insights - Grouped and Enhanced */}
-                {healthData?.insights && healthData.insights.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-3 flex items-center gap-2">
-                      <Brain className="h-4 w-4" />
-                      AI Financial Insights
-                    </h4>
-                    
-                    {/* Group insights by type for better organization */}
-                    <div className="space-y-3">
-                      {(() => {
-                        // Categorize insights for better grouping
-                        const spendingInsights = healthData.insights.filter(insight => 
-                          insight.toLowerCase().includes('spend') || 
-                          insight.toLowerCase().includes('expense') ||
-                          insight.toLowerCase().includes('cost')
-                        );
-                        const savingInsights = healthData.insights.filter(insight => 
-                          insight.toLowerCase().includes('sav') || 
-                          insight.toLowerCase().includes('budget') ||
-                          insight.toLowerCase().includes('money')
-                        );
-                        const trendInsights = healthData.insights.filter(insight => 
-                          insight.toLowerCase().includes('trend') || 
-                          insight.toLowerCase().includes('pattern') ||
-                          insight.toLowerCase().includes('increase') ||
-                          insight.toLowerCase().includes('decrease')
-                        );
-                        const otherInsights = healthData.insights.filter(insight => 
-                          !spendingInsights.includes(insight) && 
-                          !savingInsights.includes(insight) && 
-                          !trendInsights.includes(insight)
-                        );
-
-                        return (
-                          <>
-                            {/* Spending Patterns */}
-                            {spendingInsights.length > 0 && (
-                              <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 p-3 rounded-lg">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <DollarSign className="h-4 w-4 text-red-600" />
-                                  <span className="text-xs font-medium text-red-700 dark:text-red-400">Spending Patterns</span>
-                                </div>
-                                <div className="space-y-2">
-                                  {spendingInsights.map((insight, index) => (
-                                    <motion.div
-                                      key={`spending-${index}`}
-                                      initial={{ opacity: 0, x: -10 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ delay: index * 0.1 }}
-                                      className="flex items-start gap-2"
-                                    >
-                                      <div className="w-1.5 h-1.5 bg-red-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                      <div className="text-red-600 dark:text-red-300 text-xs leading-relaxed">{insight}</div>
-                                    </motion.div>
-                                  ))}
-                                </div>
+                  {/* Achievements Tab */}
+                  <TabsContent value="achievements" className="mt-4 space-y-3">
+                    {healthData?.achievements && healthData.achievements.length > 0 ? (
+                      <div className="space-y-2">
+                        {healthData.achievements.map((achievement, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                            className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border-l-4 border-green-400"
+                          >
+                            <div className="flex items-start gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                              <div className="text-xs text-green-800 dark:text-green-200 font-medium leading-relaxed">
+                                {achievement}
                               </div>
-                            )}
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-6">
+                        <Crown className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600 dark:text-gray-400">No achievements yet</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Keep building your financial habits!</p>
+                      </div>
+                    )}
+                  </TabsContent>
 
-                            {/* Savings & Budget */}
-                            {savingInsights.length > 0 && (
-                              <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-3 rounded-lg">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <PiggyBank className="h-4 w-4 text-green-600" />
-                                  <span className="text-xs font-medium text-green-700 dark:text-green-400">Savings & Budget</span>
-                                </div>
-                                <div className="space-y-2">
-                                  {savingInsights.map((insight, index) => (
-                                    <motion.div
-                                      key={`saving-${index}`}
-                                      initial={{ opacity: 0, x: -10 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ delay: index * 0.1 }}
-                                      className="flex items-start gap-2"
-                                    >
-                                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                      <div className="text-green-600 dark:text-green-300 text-xs leading-relaxed">{insight}</div>
-                                    </motion.div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
+                  {/* Insights Tab */}
+                  <TabsContent value="insights" className="mt-4 space-y-3">
+                    {healthData?.insights && healthData.insights.length > 0 ? (
+                      <div className="space-y-3">
+                        {(() => {
+                          // Categorize insights for better grouping
+                          const spendingInsights = healthData.insights.filter(insight => 
+                            insight.toLowerCase().includes('spend') || 
+                            insight.toLowerCase().includes('expense') ||
+                            insight.toLowerCase().includes('cost')
+                          );
+                          const savingInsights = healthData.insights.filter(insight => 
+                            insight.toLowerCase().includes('sav') || 
+                            insight.toLowerCase().includes('budget') ||
+                            insight.toLowerCase().includes('money')
+                          );
+                          const trendInsights = healthData.insights.filter(insight => 
+                            insight.toLowerCase().includes('trend') || 
+                            insight.toLowerCase().includes('pattern') ||
+                            insight.toLowerCase().includes('increase') ||
+                            insight.toLowerCase().includes('decrease')
+                          );
+                          const otherInsights = healthData.insights.filter(insight => 
+                            !spendingInsights.includes(insight) && 
+                            !savingInsights.includes(insight) && 
+                            !trendInsights.includes(insight)
+                          );
 
-                            {/* Trends & Patterns */}
-                            {trendInsights.length > 0 && (
-                              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 rounded-lg">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <BarChart3 className="h-4 w-4 text-blue-600" />
-                                  <span className="text-xs font-medium text-blue-700 dark:text-blue-400">Trends & Patterns</span>
+                          return (
+                            <>
+                              {/* Spending Patterns */}
+                              {spendingInsights.length > 0 && (
+                                <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 p-3 rounded-lg">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <DollarSign className="h-4 w-4 text-red-600" />
+                                    <span className="text-xs font-medium text-red-700 dark:text-red-400">Spending Patterns</span>
+                                  </div>
+                                  <div className="space-y-2">
+                                    {spendingInsights.map((insight, index) => (
+                                      <motion.div
+                                        key={`spending-${index}`}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className="flex items-start gap-2"
+                                      >
+                                        <div className="w-1.5 h-1.5 bg-red-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                                        <div className="text-red-600 dark:text-red-300 text-xs leading-relaxed">{insight}</div>
+                                      </motion.div>
+                                    ))}
+                                  </div>
                                 </div>
-                                <div className="space-y-2">
-                                  {trendInsights.map((insight, index) => (
-                                    <motion.div
-                                      key={`trend-${index}`}
-                                      initial={{ opacity: 0, x: -10 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ delay: index * 0.1 }}
-                                      className="flex items-start gap-2"
-                                    >
-                                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                      <div className="text-blue-600 dark:text-blue-300 text-xs leading-relaxed">{insight}</div>
-                                    </motion.div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
+                              )}
 
-                            {/* General Insights */}
-                            {otherInsights.length > 0 && (
-                              <div className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 p-3 rounded-lg">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <Lightbulb className="h-4 w-4 text-purple-600" />
-                                  <span className="text-xs font-medium text-purple-700 dark:text-purple-400">General Insights</span>
+                              {/* Savings & Budget */}
+                              {savingInsights.length > 0 && (
+                                <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-3 rounded-lg">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <PiggyBank className="h-4 w-4 text-green-600" />
+                                    <span className="text-xs font-medium text-green-700 dark:text-green-400">Savings & Budget</span>
+                                  </div>
+                                  <div className="space-y-2">
+                                    {savingInsights.map((insight, index) => (
+                                      <motion.div
+                                        key={`saving-${index}`}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className="flex items-start gap-2"
+                                      >
+                                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                                        <div className="text-green-600 dark:text-green-300 text-xs leading-relaxed">{insight}</div>
+                                      </motion.div>
+                                    ))}
+                                  </div>
                                 </div>
-                                <div className="space-y-2">
-                                  {otherInsights.map((insight, index) => (
-                                    <motion.div
-                                      key={`other-${index}`}
-                                      initial={{ opacity: 0, x: -10 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ delay: index * 0.1 }}
-                                      className="flex items-start gap-2"
-                                    >
-                                      <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                      <div className="text-purple-600 dark:text-purple-300 text-xs leading-relaxed">{insight}</div>
-                                    </motion.div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                )}
+                              )}
 
-                {/* Smart Recommendations & Action Items */}
-                {healthData?.warnings && healthData.warnings.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-3 flex items-center gap-2">
-                      <Target className="h-4 w-4" />
-                      AI Recommendations & Action Items
-                    </h4>
-                    
-                    <div className="space-y-3">
-                      {(() => {
-                        // Categorize recommendations for better organization
-                        const urgentItems = healthData.warnings.filter(warning => 
-                          warning.toLowerCase().includes('urgent') || 
-                          warning.toLowerCase().includes('critical') ||
-                          warning.toLowerCase().includes('immediately')
-                        );
-                        const budgetItems = healthData.warnings.filter(warning => 
-                          warning.toLowerCase().includes('budget') || 
-                          warning.toLowerCase().includes('limit') ||
-                          warning.toLowerCase().includes('overspend')
-                        );
-                        const improvementItems = healthData.warnings.filter(warning => 
-                          warning.toLowerCase().includes('improve') || 
-                          warning.toLowerCase().includes('consider') ||
-                          warning.toLowerCase().includes('try')
-                        );
-                        const otherItems = healthData.warnings.filter(warning => 
-                          !urgentItems.includes(warning) && 
-                          !budgetItems.includes(warning) && 
-                          !improvementItems.includes(warning)
-                        );
+                              {/* Trends & Patterns */}
+                              {trendInsights.length > 0 && (
+                                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 rounded-lg">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <BarChart3 className="h-4 w-4 text-blue-600" />
+                                    <span className="text-xs font-medium text-blue-700 dark:text-blue-400">Trends & Patterns</span>
+                                  </div>
+                                  <div className="space-y-2">
+                                    {trendInsights.map((insight, index) => (
+                                      <motion.div
+                                        key={`trend-${index}`}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className="flex items-start gap-2"
+                                      >
+                                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                                        <div className="text-blue-600 dark:text-blue-300 text-xs leading-relaxed">{insight}</div>
+                                      </motion.div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
 
-                        return (
-                          <>
-                            {/* Urgent Actions */}
-                            {urgentItems.length > 0 && (
-                              <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <AlertTriangle className="h-4 w-4 text-red-600" />
-                                  <span className="text-xs font-semibold text-red-700 dark:text-red-400">🚨 Urgent Action Required</span>
+                              {/* General Insights */}
+                              {otherInsights.length > 0 && (
+                                <div className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 p-3 rounded-lg">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Lightbulb className="h-4 w-4 text-purple-600" />
+                                    <span className="text-xs font-medium text-purple-700 dark:text-purple-400">General Insights</span>
+                                  </div>
+                                  <div className="space-y-2">
+                                    {otherInsights.map((insight, index) => (
+                                      <motion.div
+                                        key={`other-${index}`}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className="flex items-start gap-2"
+                                      >
+                                        <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                                        <div className="text-purple-600 dark:text-purple-300 text-xs leading-relaxed">{insight}</div>
+                                      </motion.div>
+                                    ))}
+                                  </div>
                                 </div>
-                                <div className="space-y-2">
-                                  {urgentItems.map((item, index) => (
-                                    <motion.div
-                                      key={`urgent-${index}`}
-                                      initial={{ opacity: 0, scale: 0.95 }}
-                                      animate={{ opacity: 1, scale: 1 }}
-                                      transition={{ delay: index * 0.1 }}
-                                      className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-red-500"
-                                    >
-                                      <div className="text-xs text-red-800 dark:text-red-200 font-medium leading-relaxed">
-                                        {item}
-                                      </div>
-                                    </motion.div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      <div className="text-center py-6">
+                        <Brain className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600 dark:text-gray-400">No insights available</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Add more transactions to get AI insights</p>
+                      </div>
+                    )}
+                  </TabsContent>
 
-                            {/* Budget Alerts */}
-                            {budgetItems.length > 0 && (
-                              <div className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <Shield className="h-4 w-4 text-yellow-600" />
-                                  <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-400">💰 Budget Management</span>
-                                </div>
-                                <div className="space-y-2">
-                                  {budgetItems.map((item, index) => (
-                                    <motion.div
-                                      key={`budget-${index}`}
-                                      initial={{ opacity: 0, x: -10 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ delay: index * 0.1 }}
-                                      className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-yellow-500"
-                                    >
-                                      <div className="text-xs text-yellow-800 dark:text-yellow-200 font-medium leading-relaxed">
-                                        {item}
-                                      </div>
-                                    </motion.div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
+                  {/* Recommendations Tab */}
+                  <TabsContent value="recommendations" className="mt-4 space-y-3">
+                    {healthData?.warnings && healthData.warnings.length > 0 ? (
+                      <div className="space-y-3">
+                        {(() => {
+                          // Categorize recommendations for better organization
+                          const urgentItems = healthData.warnings.filter(warning => 
+                            warning.toLowerCase().includes('urgent') || 
+                            warning.toLowerCase().includes('critical') ||
+                            warning.toLowerCase().includes('immediately')
+                          );
+                          const budgetItems = healthData.warnings.filter(warning => 
+                            warning.toLowerCase().includes('budget') || 
+                            warning.toLowerCase().includes('limit') ||
+                            warning.toLowerCase().includes('overspend')
+                          );
+                          const improvementItems = healthData.warnings.filter(warning => 
+                            warning.toLowerCase().includes('improve') || 
+                            warning.toLowerCase().includes('consider') ||
+                            warning.toLowerCase().includes('try')
+                          );
+                          const otherItems = healthData.warnings.filter(warning => 
+                            !urgentItems.includes(warning) && 
+                            !budgetItems.includes(warning) && 
+                            !improvementItems.includes(warning)
+                          );
 
-                            {/* Improvement Suggestions */}
-                            {improvementItems.length > 0 && (
-                              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <Lightbulb className="h-4 w-4 text-blue-600" />
-                                  <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">💡 Smart Suggestions</span>
+                          return (
+                            <>
+                              {/* Urgent Actions */}
+                              {urgentItems.length > 0 && (
+                                <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <AlertTriangle className="h-4 w-4 text-red-600" />
+                                    <span className="text-xs font-semibold text-red-700 dark:text-red-400">🚨 Urgent Action Required</span>
+                                  </div>
+                                  <div className="space-y-2">
+                                    {urgentItems.map((item, index) => (
+                                      <motion.div
+                                        key={`urgent-${index}`}
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-red-500"
+                                      >
+                                        <div className="text-xs text-red-800 dark:text-red-200 font-medium leading-relaxed">
+                                          {item}
+                                        </div>
+                                      </motion.div>
+                                    ))}
+                                  </div>
                                 </div>
-                                <div className="space-y-2">
-                                  {improvementItems.map((item, index) => (
-                                    <motion.div
-                                      key={`improvement-${index}`}
-                                      initial={{ opacity: 0, x: -10 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ delay: index * 0.1 }}
-                                      className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-blue-500"
-                                    >
-                                      <div className="text-xs text-blue-800 dark:text-blue-200 font-medium leading-relaxed">
-                                        {item}
-                                      </div>
-                                    </motion.div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
+                              )}
 
-                            {/* General Recommendations */}
-                            {otherItems.length > 0 && (
-                              <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <Target className="h-4 w-4 text-gray-600" />
-                                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-400">📋 General Recommendations</span>
+                              {/* Budget Alerts */}
+                              {budgetItems.length > 0 && (
+                                <div className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Shield className="h-4 w-4 text-yellow-600" />
+                                    <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-400">💰 Budget Management</span>
+                                  </div>
+                                  <div className="space-y-2">
+                                    {budgetItems.map((item, index) => (
+                                      <motion.div
+                                        key={`budget-${index}`}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-yellow-500"
+                                      >
+                                        <div className="text-xs text-yellow-800 dark:text-yellow-200 font-medium leading-relaxed">
+                                          {item}
+                                        </div>
+                                      </motion.div>
+                                    ))}
+                                  </div>
                                 </div>
-                                <div className="space-y-2">
-                                  {otherItems.map((item, index) => (
-                                    <motion.div
-                                      key={`other-${index}`}
-                                      initial={{ opacity: 0, x: -10 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ delay: index * 0.1 }}
-                                      className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-gray-500"
-                                    >
-                                      <div className="text-xs text-gray-800 dark:text-gray-200 font-medium leading-relaxed">
-                                        {item}
-                                      </div>
-                                    </motion.div>
-                                  ))}
+                              )}
+
+                              {/* Improvement Suggestions */}
+                              {improvementItems.length > 0 && (
+                                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Lightbulb className="h-4 w-4 text-blue-600" />
+                                    <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">💡 Smart Suggestions</span>
+                                  </div>
+                                  <div className="space-y-2">
+                                    {improvementItems.map((item, index) => (
+                                      <motion.div
+                                        key={`improvement-${index}`}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-blue-500"
+                                      >
+                                        <div className="text-xs text-blue-800 dark:text-blue-200 font-medium leading-relaxed">
+                                          {item}
+                                        </div>
+                                      </motion.div>
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                )}
+                              )}
+
+                              {/* General Recommendations */}
+                              {otherItems.length > 0 && (
+                                <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Target className="h-4 w-4 text-gray-600" />
+                                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-400">📋 General Recommendations</span>
+                                  </div>
+                                  <div className="space-y-2">
+                                    {otherItems.map((item, index) => (
+                                      <motion.div
+                                        key={`other-${index}`}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-gray-500"
+                                      >
+                                        <div className="text-xs text-gray-800 dark:text-gray-200 font-medium leading-relaxed">
+                                          {item}
+                                        </div>
+                                      </motion.div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      <div className="text-center py-6">
+                        <Target className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600 dark:text-gray-400">No recommendations available</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Your financial health looks good!</p>
+                      </div>
+                    )}
+                  </TabsContent>
+
+                </Tabs>
 
                 {/* Premium AI Badge */}
                 <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-3 rounded-lg text-center">
