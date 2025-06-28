@@ -23,7 +23,11 @@ import {
   Zap,
   Calendar,
   User,
-  BarChart3
+  BarChart3,
+  Meh,
+  Smile,
+  Frown,
+  Star
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import RequirePlan from "./require-plan";
