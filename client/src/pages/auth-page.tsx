@@ -13,7 +13,18 @@ export default function AuthPage() {
   const { user: clerkUser, isLoaded } = useUser();
   const [activeTab, setActiveTab] = useState("sign-up");
   const [hasRedirected, setHasRedirected] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  // Get Clerk localization based on current language
+  const getClerkLocalization = () => {
+    const currentLang = i18n.language;
+    if (currentLang.startsWith('es')) {
+      return esES;
+    } else if (currentLang.startsWith('sk')) {
+      return skSK;
+    }
+    return undefined; // English is default
+  };
 
   // Extract current language from URL to build language-aware redirect URLs
   // If no language in URL, use saved preference or browser language
