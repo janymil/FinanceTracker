@@ -525,7 +525,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
       <DialogTrigger asChild>
         <Button variant="outline" className="flex items-center gap-2">
           <ImageIcon className="h-4 w-4" />
-          {buttonText}
+          {buttonText || t("upload.button_text")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

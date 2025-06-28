@@ -30,7 +30,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import { es, sk, enUS } from "date-fns/locale";
+import { es, sk, enUS as en } from "date-fns/locale";
 import MonthFilter from "@/components/month-filter";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -96,7 +96,7 @@ export default function Income() {
     } else if (currentLang.startsWith('sk')) {
       return sk;
     } else {
-      return enUS;
+      return en;
     }
   };
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -413,7 +413,7 @@ export default function Income() {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-2">
-            <UploadReceiptModal onReceiptProcessed={handleReceiptProcessed} />
+            <UploadReceiptModal onReceiptProcessed={handleReceiptProcessed} buttonText={t("upload.button_text")} />
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="w-full sm:w-auto">
