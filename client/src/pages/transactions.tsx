@@ -139,8 +139,8 @@ export default function Transactions() {
       queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       setIsDialogOpen(false);
       toast({
-        title: "Transaction Added",
-        description: "Transaction has been created successfully",
+        title: t("Transaction Added"),
+        description: t("transactions.transactionAddedSuccess"),
       });
     },
     onError: (error: any) => {
