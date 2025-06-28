@@ -86,7 +86,7 @@ interface UnifiedReminder {
 }
 
 export default function TransactionRemindersWidget() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const { user, isLoaded, isSignedIn } = useUser();
   const queryClient = useQueryClient();
