@@ -453,18 +453,26 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
       messages: [
         {
           role: "system",
-          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(language)}. ${getLanguageLabel(language) !== 'English' ? 'Never use English words.' : ''} ALL text content (titles, descriptions, categories) must be in ${getLanguageLabel(language)}. 
-          
-You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.`
+          content: `CRITICAL LANGUAGE RULE: You MUST respond ONLY in ${getLanguageLabel(language)}. ${getLanguageLabel(language) !== 'English' ? 'NEVER use any English words.' : ''} 
+
+ABSOLUTE REQUIREMENT: ALL text content must be in ${getLanguageLabel(language)} language:
+- tip titles → ${getLanguageLabel(language)}
+- tip descriptions → ${getLanguageLabel(language)}
+- categories → ${getLanguageLabel(language)}
+- ALL JSON values → ${getLanguageLabel(language)}
+
+You are an expert financial advisor providing contextual recommendations. Return valid JSON with tips in ${getLanguageLabel(language)} language ONLY.`
         },
         {
           role: "user",
-          content: prompt
+          content: `${prompt}
+
+REMINDER: Respond in ${getLanguageLabel(language)} language ONLY. All titles, descriptions, and categories must be in ${getLanguageLabel(language)}.`
         }
       ],
       response_format: { type: "json_object" },
       max_tokens: 1200,
-      temperature: 0.3 // Moderate creativity for personalized recommendations
+      temperature: 0.2 // Lower temperature for more consistent language compliance
     });
 
     const responseText = response.choices[0].message.content || '{}';
