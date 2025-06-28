@@ -645,7 +645,7 @@ export function registerAIRoutes(app: Express) {
     const warnings: string[] = [];
 
     // Add personalized factors as insights
-    if (aiData.aiAnalysis?.personalizedFactors) {
+    if (aiData.aiAnalysis?.personalizedFactors && Array.isArray(aiData.aiAnalysis.personalizedFactors)) {
       insights.push(...aiData.aiAnalysis.personalizedFactors);
     }
 
@@ -660,7 +660,15 @@ export function registerAIRoutes(app: Express) {
 
     // Add recommendations as insights
     if (aiData.aiAnalysis?.recommendations) {
-      insights.push(...aiData.aiAnalysis.recommendations);
+      if (Array.isArray(aiData.aiAnalysis.recommendations)) {
+        aiData.aiAnalysis.recommendations.forEach((rec: any) => {
+          if (typeof rec === 'string') {
+            insights.push(rec);
+          } else if (rec.action) {
+            insights.push(rec.action);
+          }
+        });
+      }
     }
 
     // Extract achievements from positive factors
