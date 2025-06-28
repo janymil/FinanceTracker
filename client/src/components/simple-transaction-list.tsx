@@ -73,17 +73,17 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
     }).format(Math.abs(parseFloat(amount)));
   };
 
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language || 'en-us';
+  let locale = 'en-us';
+  
+  if (currentLang.startsWith('es')) {
+    locale = 'es-pe';
+  } else if (currentLang.startsWith('sk')) {
+    locale = 'sk-sk';
+  }
+  
   const formatDate = (dateString: string) => {
-    const { i18n } = useTranslation();
-    const currentLang = i18n.language || 'en-us';
-    let locale = 'en-us';
-    
-    if (currentLang.startsWith('es')) {
-      locale = 'es-pe';
-    } else if (currentLang.startsWith('sk')) {
-      locale = 'sk-sk';
-    }
-    
     return new Date(dateString).toLocaleDateString(locale, {
       month: 'short',
       day: 'numeric',
