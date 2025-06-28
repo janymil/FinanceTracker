@@ -1078,10 +1078,11 @@ export async function generateDailyRecommendations(
     // Initialize UnifiedAICache with 24 hours TTL
     const cache = new UnifiedAICache('daily-recommendations', userId);
 
-    // Check cache first
-    const cachedResult = await cache.get(financialData);
+    // Check cache first with language-aware key
+    const cacheKey = { ...financialData, language: language };
+    const cachedResult = await cache.get(cacheKey);
     if (cachedResult) {
-      console.log('Daily recommendations: Using cached result');
+      console.log('Daily recommendations: Using cached result with language:', language);
       return cachedResult;
     }
 
@@ -1227,9 +1228,9 @@ You are an expert financial advisor who provides personalized, actionable recomm
       insights
     };
 
-    // Cache the result with 24 hours TTL
-    await cache.set(financialData, result, false, 24);
-    console.log('Daily recommendations generated successfully and cached');
+    // Cache the result with 24 hours TTL and language key
+    await cache.set(cacheKey, result, false, 24);
+    console.log('Daily recommendations generated successfully and cached with language:', language);
     
     return result;
 
