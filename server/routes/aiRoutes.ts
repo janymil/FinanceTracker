@@ -286,6 +286,9 @@ export function registerAIRoutes(app: Express) {
 
       console.log('AI financial health score: Making Fly.io API call via centralized processor');
       
+      // Get user language from consistent header detection
+      const language = getUserLanguage(req);
+      
       const aiPayload = {
         summary,
         budgets: budgets,
@@ -296,7 +299,8 @@ export function registerAIRoutes(app: Express) {
           categoryName: t.categoryName || 'Uncategorized',
           type: t.type
         })),
-        useAdvancedFactors
+        useAdvancedFactors,
+        language: language
       };
 
       // Initialize UnifiedAICache with 24 hours TTL
