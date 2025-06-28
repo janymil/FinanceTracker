@@ -550,7 +550,7 @@ export default function Transactions() {
                         onClick={() => setNewTransaction({ ...newTransaction, type: "income" })}
                       >
                         <ArrowUpRight className="h-4 w-4 mr-2" />
-                        Income
+                        {t("Income")}
                       </Button>
                       <Button
                         variant={newTransaction.type === "expense" ? "default" : "outline"}
@@ -558,7 +558,7 @@ export default function Transactions() {
                         onClick={() => setNewTransaction({ ...newTransaction, type: "expense" })}
                       >
                         <ArrowDownLeft className="h-4 w-4 mr-2" />
-                        Expense
+                        {t("Expense")}
                       </Button>
                     </div>
                   </div>
@@ -643,7 +643,7 @@ export default function Transactions() {
                       {newTransaction.type === "expense" && (
                         <div className="space-y-4 border-t pt-4">
                           <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Smart Bill Assistant
+                            {t("Smart Bill Assistant")}
                           </div>
                           <div>
                             <Label htmlFor="paymentUrl">Payment URL (Optional)</Label>
@@ -701,7 +701,7 @@ export default function Transactions() {
                   <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Income</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("Total Income")}</p>
                   <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                     {displayCurrency}{totalIncome.toFixed(2)}
                   </p>
@@ -717,7 +717,7 @@ export default function Transactions() {
                   <TrendingDown className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Expenses</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("Total Expenses")}</p>
                   <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                     {currency || '$'}{totalExpenses.toFixed(2)}
                   </p>
@@ -733,7 +733,7 @@ export default function Transactions() {
                   <DollarSign className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Net Balance</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("Net Balance")}</p>
                   <p className={`text-2xl font-bold ${(totalIncome - totalExpenses) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                     {currency || '$'}{(totalIncome - totalExpenses).toFixed(2)}
                   </p>
@@ -841,7 +841,7 @@ export default function Transactions() {
                         </div>
                         {transaction.referenceNote && (
                           <div className="text-sm text-gray-600 dark:text-gray-300 mt-1 italic">
-                            Note: {transaction.referenceNote}
+                            {t("Note")}: {transaction.referenceNote}
                           </div>
                         )}
                       </div>

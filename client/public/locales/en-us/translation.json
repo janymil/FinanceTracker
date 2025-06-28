@@ -69,6 +69,7 @@
   "Payment URL (Optional)": "Payment URL (Optional)",
   "Link to where you can pay this bill": "Link to where you can pay this bill",
   "Reference Note (Optional)": "Reference Note (Optional)",
+  "Note": "Note",
   "Account #123456, Reference: ABC789": "Account #123456, Reference: ABC789",
   "Account number or other reference information": "Account number or other reference information",
   "Make this a recurring transaction": "Make this a recurring transaction",
