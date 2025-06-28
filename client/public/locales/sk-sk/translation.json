@@ -825,6 +825,9 @@
         "achievementTracking": "Sledovanie a oslavovanie úspechov",
         "smartWarnings": "Inteligentné upozornenia a akčné položky"
       }
-    }
+    },
+    "aiFinancialAnalysis": "AI Finančná Analýza",
+    "healthScore": "Skóre Zdravia",
+    "aiInsights": "AI Poznatky"
   }
 }

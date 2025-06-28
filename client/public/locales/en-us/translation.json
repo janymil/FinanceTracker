@@ -799,6 +799,9 @@
         "achievementTracking": "Achievement tracking and celebration",
         "smartWarnings": "Smart warnings and action items"
       }
-    }
+    },
+    "aiFinancialAnalysis": "AI Financial Analysis",
+    "healthScore": "Health Score",
+    "aiInsights": "AI Insights"
   }
 }
