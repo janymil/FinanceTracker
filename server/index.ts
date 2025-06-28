@@ -231,20 +231,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// Import database configuration for session store
-import { pool } from "./db";
-
-// Configure PostgreSQL session store
-const PgSession = ConnectPgSimple(session);
-
-// Configure session middleware for admin analytics with PostgreSQL store
-const adminSessionMiddleware = session({
-  store: new PgSession({
-    pool: pool as any, // Use the actual pool connection
-    tableName: 'sessions', // Use existing sessions table
-    createTableIfMissing: false, // Table already exists
-    schemaName: 'public'
-  }),
+// Session middleware setup - original working configuration
+app.use(session({
   secret: process.env.SESSION_SECRET || 'admin-session-secret-fallback',
   resave: false,
   saveUninitialized: false,
@@ -252,13 +240,9 @@ const adminSessionMiddleware = session({
     secure: false,
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: 'lax'
   },
   name: 'admin.session.id'
-});
-
-// Apply session middleware only to admin routes
-app.use('/api/admin-analytics', adminSessionMiddleware);
+}));
 
 app.use(cookieConsentMiddleware);
 
