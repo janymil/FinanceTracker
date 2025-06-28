@@ -14,6 +14,7 @@ export default function AuthPage() {
   const [activeTab, setActiveTab] = useState("sign-up");
   const [hasRedirected, setHasRedirected] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showTermsError, setShowTermsError] = useState(false);
   const { t } = useTranslation();
 
   // Extract current language from URL to build language-aware redirect URLs
@@ -105,6 +106,14 @@ export default function AuthPage() {
                     firstName: "",
                     lastName: ""
                   }}
+                  beforeSignUp={async (signUpAttempt) => {
+                    if (!termsAccepted) {
+                      setShowTermsError(true);
+                      throw new Error("You must accept the Terms of Service and Privacy Policy to continue.");
+                    }
+                    setShowTermsError(false);
+                    return signUpAttempt;
+                  }}
                   appearance={{
                     elements: {
                       formButtonPrimary: "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 w-full disabled:opacity-75 disabled:transform-none disabled:cursor-wait disabled:animate-pulse",
@@ -139,20 +148,30 @@ export default function AuthPage() {
                     }
                   }}
                 />
-              </div>
-              
-              {/* Terms Acceptance - Standard SaaS Position */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-                <div className="flex items-start space-x-3">
-                  <Checkbox 
-                    id="terms-acceptance" 
-                    checked={termsAccepted}
-                    onCheckedChange={(checked) => setTermsAccepted(checked === true)}
-                    className="mt-1"
-                  />
-                  <label htmlFor="terms-acceptance" className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed cursor-pointer">
-                    {t("I agree to the")} <a href={`/${currentLang}/terms-of-service`} target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">{t("Terms of Service")}</a> {t("and")} <a href={`/${currentLang}/privacy-policy`} target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">{t("Privacy Policy")}</a>
-                  </label>
+                
+                {/* Terms Acceptance - Integrated into Clerk form */}
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                  <div className="flex items-start space-x-3">
+                    <Checkbox 
+                      id="terms-acceptance" 
+                      checked={termsAccepted}
+                      onCheckedChange={(checked) => {
+                        setTermsAccepted(checked === true);
+                        setShowTermsError(false);
+                      }}
+                      className="mt-1"
+                    />
+                    <label htmlFor="terms-acceptance" className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed cursor-pointer">
+                      {t("I agree to the")} <a href={`/${currentLang}/terms-of-service`} target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">{t("Terms of Service")}</a> {t("and")} <a href={`/${currentLang}/privacy-policy`} target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">{t("Privacy Policy")}</a>
+                    </label>
+                  </div>
+                  {showTermsError && (
+                    <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                      <p className="text-sm text-red-600 dark:text-red-400">
+                        {t("Please accept Terms & Privacy Policy to continue")}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </TabsContent>
