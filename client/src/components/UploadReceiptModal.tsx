@@ -614,7 +614,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
             <div className="text-center space-y-4 py-6">
               <div className="flex items-center gap-2 justify-center text-blue-600">
                 <Smartphone className="h-5 w-5" />
-                <span className="font-medium">Scan QR Code with Your Phone</span>
+                <span className="font-medium">{t("Scan QR Code with Your Phone")}</span>
               </div>
               
               <div className="bg-white p-4 rounded-lg border shadow-sm mx-auto w-fit">
@@ -626,15 +626,15 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
               </div>
               
               <div className="text-sm text-gray-600 space-y-1">
-                <p>1. Scan this QR code with your phone camera</p>
-                <p>2. Take a photo of your receipt</p>
-                <p>3. The data will appear here automatically</p>
+                <p>{t("1. Scan this QR code with your phone camera")}</p>
+                <p>{t("2. Take a photo of your receipt")}</p>
+                <p>{t("3. The data will appear here automatically")}</p>
               </div>
               
               {qrUploadState.isPolling && (
                 <div className="flex items-center gap-2 justify-center text-gray-500">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
-                  <span className="text-sm">Waiting for mobile upload...</span>
+                  <span className="text-sm">{t("Waiting for mobile upload...")}</span>
                 </div>
               )}
               
@@ -643,7 +643,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                 variant="outline"
                 className="text-sm"
               >
-                Cancel QR Scan
+                {t("Cancel QR Scan")}
               </Button>
             </div>
           )}
@@ -666,7 +666,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
               {uploadState.imageUrl && (
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Receipt Image:
+                    {t("Receipt Image:")}
                   </label>
                   <div className="relative">
                     <img 
@@ -683,7 +683,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                 <div className="space-y-4">
                   <h4 className="font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                     <Edit className="h-4 w-4" />
-                    Edit Transaction Details
+                    {t("Edit Transaction Details")}
                   </h4>
                   
                   <div className="space-y-3">
