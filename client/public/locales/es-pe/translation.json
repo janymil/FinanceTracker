@@ -812,49 +812,6 @@
   "expensePatterns": "Patrones de Gastos",
   "financialHealth": "Salud Financiera",
   "riskAssessment": "Evaluación de Riesgo",
-  "mascot": {
-    "tabs": {
-      "overview": "Resumen",
-      "insights": "Perspectivas",
-      "actions": "Acciones",
-      "strengths": "Fortalezas"
-    },
-    "quickSummary": "Resumen Rápido",
-    "categories": {
-      "spendingPatterns": "Patrones de Gasto",
-      "savingsBudget": "Ahorros y Presupuesto",
-      "trendsPatterns": "Tendencias y Patrones",
-      "generalInsights": "Perspectivas Generales",
-      "urgentActions": "🚨 Acción Urgente Requerida",
-      "budgetManagement": "💰 Gestión de Presupuesto",
-      "smartSuggestions": "💡 Sugerencias Inteligentes",
-      "generalRecommendations": "📋 Recomendaciones Generales"
-    },
-    "emptyStates": {
-      "noAchievements": "Aún no hay logros",
-      "keepBuilding": "¡Sigue construyendo tus hábitos financieros!",
-      "noInsights": "No hay perspectivas disponibles",
-      "addTransactions": "Agrega más transacciones para obtener perspectivas de IA",
-      "noRecommendations": "No hay recomendaciones disponibles",
-      "healthLooksGood": "¡Tu salud financiera se ve bien!"
-    },
-    "poweredByAI": "Impulsado por IA",
-    "advancedAnalysis": "Análisis financiero avanzado para usuarios Standard y Premium",
-    "requirePlan": {
-      "feature": "Mascota de Salud Financiera Mejorada con IA",
-      "description": "Obtén un compañero de IA personalizado que analiza tu comportamiento financiero y proporciona perspectivas inteligentes",
-      "benefits": {
-        "aiAnalysis": "Análisis de salud financiera impulsado por IA",
-        "personalizedInsights": "Perspectivas y recomendaciones personalizadas",
-        "emotionalFeedback": "Retroalimentación emocional en tiempo real basada en patrones de gasto",
-        "achievementTracking": "Seguimiento y celebración de logros",
-        "smartWarnings": "Advertencias inteligentes y elementos de acción"
-      }
-    },
-    "aiFinancialAnalysis": "Análisis Financiero de IA",
-    "healthScore": "Puntuación de Salud",
-    "aiInsights": "Perspectivas de IA"
-  },
   "3. AI-Powered Features and Data Processing": "3. Funciones Impulsadas por IA y Procesamiento de Datos",
   "FinanzerPro uses artificial intelligence to provide personalized financial insights and recommendations. Here's how we handle your data for AI processing:": "FinanzerPro utiliza inteligencia artificial para proporcionar perspectivas financieras personalizadas y recomendaciones. Así es como manejamos tus datos para el procesamiento de IA:",
   "AI Service Provider:": "Proveedor de Servicios de IA:",
