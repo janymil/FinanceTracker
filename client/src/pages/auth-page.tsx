@@ -13,8 +13,6 @@ export default function AuthPage() {
   const { user: clerkUser, isLoaded } = useUser();
   const [activeTab, setActiveTab] = useState("sign-up");
   const [hasRedirected, setHasRedirected] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [showTermsError, setShowTermsError] = useState(false);
   const { t } = useTranslation();
 
   // Extract current language from URL to build language-aware redirect URLs
@@ -53,30 +51,7 @@ export default function AuthPage() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // Global callback for terms acceptance change from within Clerk form
-  useEffect(() => {
-    (window as any).clerkTermsAcceptanceChanged = (checked: boolean) => {
-      setTermsAccepted(checked);
-      setShowTermsError(false);
-    };
-    
-    // Intercept Clerk form submissions to validate terms
-    const interceptClerkSubmit = (e: Event) => {
-      if (!termsAccepted) {
-        e.preventDefault();
-        e.stopPropagation();
-        setShowTermsError(true);
-      }
-    };
-    
-    // Add event listener to capture form submissions
-    document.addEventListener('submit', interceptClerkSubmit, true);
-    
-    return () => {
-      delete (window as any).clerkTermsAcceptanceChanged;
-      document.removeEventListener('submit', interceptClerkSubmit, true);
-    };
-  }, [termsAccepted]);
+
 
   // Redirect if already logged in - prevent multiple redirects
   useEffect(() => {
@@ -133,23 +108,6 @@ export default function AuthPage() {
                   }}
                   appearance={{
                     elements: {
-                      footer: `
-                        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
-                          <div style="display: flex; align-items: flex-start; gap: 12px;">
-                            <input 
-                              type="checkbox" 
-                              id="clerk-terms-acceptance" 
-                              ${termsAccepted ? 'checked' : ''}
-                              onchange="window.clerkTermsAcceptanceChanged(this.checked)"
-                              style="margin-top: 4px;"
-                            />
-                            <label for="clerk-terms-acceptance" style="font-size: 14px; color: #374151; line-height: 1.5; cursor: pointer;">
-                              I agree to the <a href="/${currentLang}/terms-of-service" target="_blank" style="color: #2563eb; text-decoration: underline;">Terms of Service</a> and <a href="/${currentLang}/privacy-policy" target="_blank" style="color: #2563eb; text-decoration: underline;">Privacy Policy</a>
-                            </label>
-                          </div>
-                          ${showTermsError ? '<div style="margin-top: 12px; padding: 12px; background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #dc2626; font-size: 14px;">Please accept Terms & Privacy Policy to continue</div>' : ''}
-                        </div>
-                      `,
                       formButtonPrimary: "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 w-full disabled:opacity-75 disabled:transform-none disabled:cursor-wait disabled:animate-pulse",
                       card: "shadow-none border-0 bg-transparent w-full max-w-none",
                       rootBox: "w-full max-w-none",
