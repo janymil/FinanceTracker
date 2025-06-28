@@ -148,13 +148,13 @@ export default function Income() {
         referenceNote: "",
       });
       toast({
-        title: "Income Added",
-        description: "Income has been created successfully",
+        title: t("income.added_title"),
+        description: t("income.added_description"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -176,13 +176,13 @@ export default function Income() {
       queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       setEditingTransaction(null);
       toast({
-        title: "Income Updated",
-        description: "Income has been updated successfully",
+        title: t("income.updated_title"),
+        description: t("income.updated_description"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -203,13 +203,13 @@ export default function Income() {
       queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
       queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       toast({
-        title: "Income Deleted",
-        description: "Income has been deleted successfully",
+        title: t("income.deleted_title"),
+        description: t("income.deleted_description"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
