@@ -694,7 +694,13 @@
     "qr_step_2": "2. Odfotografujte váš účet",
     "qr_step_3": "3. Údaje sa tu zobrazia automaticky",
     "waiting_upload": "Čakám na nahranie z mobilu...",
-    "cancel_qr": "Zrušiť QR Skenovanie"
+    "cancel_qr": "Zrušiť QR Skenovanie",
+    "edit_details": "Upraviť Detaily Transakcie",
+    "amount_required": "Suma *",
+    "save_transaction": "Uložiť Transakciu",
+    "recognized_text": "Rozpoznaný Text:",
+    "upload_another": "Nahrať ďalší účet",
+    "close": "Zavrieť"
   },
 
   "upcomingReminders": {

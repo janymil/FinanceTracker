@@ -608,7 +608,13 @@
     "qr_step_2": "2. Take a photo of your receipt",
     "qr_step_3": "3. The data will appear here automatically",
     "waiting_upload": "Waiting for mobile upload...",
-    "cancel_qr": "Cancel QR Scan"
+    "cancel_qr": "Cancel QR Scan",
+    "edit_details": "Edit Transaction Details",
+    "amount_required": "Amount *",
+    "save_transaction": "Save Transaction",
+    "recognized_text": "Recognized Text:",
+    "upload_another": "Upload another receipt",
+    "close": "Close"
   },
 
   "upcomingReminders": {

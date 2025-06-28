@@ -598,7 +598,13 @@
     "qr_step_2": "2. Toma una foto de tu recibo",
     "qr_step_3": "3. Los datos aparecerán aquí automáticamente",
     "waiting_upload": "Esperando subida desde móvil...",
-    "cancel_qr": "Cancelar Escaneo QR"
+    "cancel_qr": "Cancelar Escaneo QR",
+    "edit_details": "Editar Detalles de Transacción",
+    "amount_required": "Cantidad *",
+    "save_transaction": "Guardar Transacción",
+    "recognized_text": "Texto Reconocido:",
+    "upload_another": "Subir otro recibo",
+    "close": "Cerrar"
   },
 
   "upcomingReminders": {

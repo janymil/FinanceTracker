@@ -683,12 +683,12 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                 <div className="space-y-4">
                   <h4 className="font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                     <Edit className="h-4 w-4" />
-                    Edit Transaction Details
+                    {t("upload.edit_details")}
                   </h4>
                   
                   <div className="space-y-3">
                     <div>
-                      <Label htmlFor="amount">Amount *</Label>
+                      <Label htmlFor="amount">{t("upload.amount_required")}</Label>
                       <Input
                         id="amount"
                         type="number"
