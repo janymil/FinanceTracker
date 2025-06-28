@@ -786,5 +786,32 @@
   "incomeAnalysis": "Analýza príjmov", 
   "expensePatterns": "Vzory výdavkov",
   "financialHealth": "Finančné zdravie",
-  "riskAssessment": "Hodnotenie rizika"
+  "riskAssessment": "Hodnotenie rizika",
+  "mascot": {
+    "tabs": {
+      "overview": "Prehľad",
+      "insights": "Poznatky",
+      "actions": "Akcie",
+      "strengths": "Silné stránky"
+    },
+    "quickSummary": "Rýchly súhrn",
+    "categories": {
+      "spendingPatterns": "Vzory výdavkov",
+      "savingsBudget": "Sporenie a rozpočet",
+      "trendsPatterns": "Trendy a vzory",
+      "generalInsights": "Všeobecné poznatky",
+      "urgentActions": "🚨 Vyžaduje sa naliehavá akcia",
+      "budgetManagement": "💰 Správa rozpočtu",
+      "smartSuggestions": "💡 Inteligentné návrhy",
+      "generalRecommendations": "📋 Všeobecné odporúčania"
+    },
+    "emptyStates": {
+      "noAchievements": "Zatiaľ žiadne úspechy",
+      "keepBuilding": "Pokračujte v budovaní svojich finančných návykov!",
+      "noInsights": "Žiadne poznatky nie sú dostupné",
+      "addTransactions": "Pridajte viac transakcií pre AI poznatky",
+      "noRecommendations": "Žiadne odporúčania nie sú dostupné",
+      "healthLooksGood": "Vaše finančné zdravie vyzerá dobre!"
+    }
+  }
 }

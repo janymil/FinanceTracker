@@ -738,5 +738,32 @@
   "incomeAnalysis": "Análisis de Ingresos",
   "expensePatterns": "Patrones de Gastos",
   "financialHealth": "Salud Financiera",
-  "riskAssessment": "Evaluación de Riesgo"
+  "riskAssessment": "Evaluación de Riesgo",
+  "mascot": {
+    "tabs": {
+      "overview": "Resumen",
+      "insights": "Perspectivas",
+      "actions": "Acciones",
+      "strengths": "Fortalezas"
+    },
+    "quickSummary": "Resumen Rápido",
+    "categories": {
+      "spendingPatterns": "Patrones de Gasto",
+      "savingsBudget": "Ahorros y Presupuesto",
+      "trendsPatterns": "Tendencias y Patrones",
+      "generalInsights": "Perspectivas Generales",
+      "urgentActions": "🚨 Acción Urgente Requerida",
+      "budgetManagement": "💰 Gestión de Presupuesto",
+      "smartSuggestions": "💡 Sugerencias Inteligentes",
+      "generalRecommendations": "📋 Recomendaciones Generales"
+    },
+    "emptyStates": {
+      "noAchievements": "Aún no hay logros",
+      "keepBuilding": "¡Sigue construyendo tus hábitos financieros!",
+      "noInsights": "No hay perspectivas disponibles",
+      "addTransactions": "Agrega más transacciones para obtener perspectivas de IA",
+      "noRecommendations": "No hay recomendaciones disponibles",
+      "healthLooksGood": "¡Tu salud financiera se ve bien!"
+    }
+  }
 }
