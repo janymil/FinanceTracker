@@ -90,12 +90,12 @@ export default function Income() {
   // Helper function to format dates with proper locale
   const formatTransactionDate = (dateString: string) => {
     const currentLang = i18n.language || 'en-us';
-    let locale = 'en-us';
+    let locale = 'en-US';
     
     if (currentLang.startsWith('es')) {
-      locale = 'es';
+      locale = 'es-ES';
     } else if (currentLang.startsWith('sk')) {
-      locale = 'sk';
+      locale = 'sk-SK';
     }
     
     return new Date(dateString).toLocaleDateString(locale, {
@@ -311,12 +311,12 @@ export default function Income() {
     .slice(-6)
     .map(([month, amount]) => {
       const currentLang = i18n.language || 'en-us';
-      let locale = 'en-us';
+      let locale = 'en-US';
       
       if (currentLang.startsWith('es')) {
-        locale = 'es';
+        locale = 'es-ES';
       } else if (currentLang.startsWith('sk')) {
-        locale = 'sk';
+        locale = 'sk-SK';
       }
       
       return {
