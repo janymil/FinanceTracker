@@ -551,7 +551,7 @@ export default function Expenses() {
                         {newExpense.isRecurring && (
                           <div className="grid grid-cols-2 gap-4 pl-6">
                             <div>
-                              <Label htmlFor="frequency">Frequency</Label>
+                              <Label htmlFor="frequency">{t("expenses.form.frequency")}</Label>
                               <Select
                                 value={newExpense.recurringFrequency}
                                 onValueChange={(value) => setNewExpense({ 
@@ -560,17 +560,17 @@ export default function Expenses() {
                                 })}
                               >
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select frequency" />
+                                  <SelectValue placeholder={t("expenses.form.frequency_placeholder")} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="weekly">Weekly</SelectItem>
-                                  <SelectItem value="monthly">Monthly</SelectItem>
-                                  <SelectItem value="yearly">Yearly</SelectItem>
+                                  <SelectItem value="weekly">{t("expenses.form.weekly")}</SelectItem>
+                                  <SelectItem value="monthly">{t("expenses.form.monthly")}</SelectItem>
+                                  <SelectItem value="yearly">{t("expenses.form.yearly")}</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
                             <div>
-                              <Label htmlFor="endDate">End Date (Optional)</Label>
+                              <Label htmlFor="endDate">{t("expenses.form.end_date")}</Label>
                               <Input
                                 id="endDate"
                                 type="date"
@@ -589,14 +589,14 @@ export default function Expenses() {
 
                   <div className="flex justify-end gap-2 pt-4">
                     <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                      Cancel
+                      {t("common.cancel")}
                     </Button>
                     <Button 
                       onClick={handleSubmit}
                       disabled={!newExpense.amount || !newExpense.description}
                       className="bg-red-600 hover:bg-red-700"
                     >
-                      {editingTransaction ? "Update" : "Add Expense"}
+                      {editingTransaction ? t("expenses.form.update") : t("expenses.form.add_expense")}
                     </Button>
                   </div>
                 </div>
@@ -614,7 +614,7 @@ export default function Expenses() {
                   <DollarSign className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Expenses</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("expenses.total_expenses")}</p>
                   <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                     {displayCurrency}{totalExpenses.toFixed(2)}
                   </p>
@@ -630,7 +630,7 @@ export default function Expenses() {
                   <TrendingDown className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Average Expense</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("expenses.average_expense")}</p>
                   <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                     {displayCurrency}{averageExpense.toFixed(2)}
                   </p>
@@ -646,7 +646,7 @@ export default function Expenses() {
                   <BarChart3 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Expense Count</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("expenses.expense_count")}</p>
                   <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                     {filteredExpenses.length}
                   </p>
@@ -662,8 +662,8 @@ export default function Expenses() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardHeader>
-              <CardTitle>Expense Trend</CardTitle>
-              <CardDescription>Monthly expenses over time</CardDescription>
+              <CardTitle>{t("expenses.charts.trend_title")}</CardTitle>
+              <CardDescription>{t("expenses.charts.trend_description")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-64">
@@ -672,7 +672,7 @@ export default function Expenses() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
-                    <Tooltip formatter={(value) => [`${displayCurrency}${value}`, 'Expenses']} />
+                    <Tooltip formatter={(value) => [`${displayCurrency}${value}`, t("expenses.charts.expenses_label")]} />
                     <Line 
                       type="monotone" 
                       dataKey="amount" 
@@ -688,8 +688,8 @@ export default function Expenses() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Expenses by Category</CardTitle>
-              <CardDescription>Distribution of spending categories</CardDescription>
+              <CardTitle>{t("expenses.charts.category_title")}</CardTitle>
+              <CardDescription>{t("expenses.charts.category_description")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-64">
