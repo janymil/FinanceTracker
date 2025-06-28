@@ -448,6 +448,7 @@
   "Net Balance": "Čistý Zostatok",
   "Budget Status": "Stav Rozpočtu",
   "transaction": "transakcia",
+  "transactionPlural": "transakcie",
   "AI Expense Prediction": "AI Predikcia Výdavkov",
   "Machine learning predictions based on your spending patterns": "Predikcie strojového učenia na základe vašich vzorcov míňania",
   "By Category": "Podľa Kategórie",
