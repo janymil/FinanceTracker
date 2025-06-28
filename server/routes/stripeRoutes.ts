@@ -679,7 +679,7 @@ export function registerStripeRoutes(app: Express) {
     }
   }
 
-  // Handle recurring payment failures
+  // Handle recurring payment failures with grace period
   async function handleInvoicePaymentFailed(invoice: any) {
     console.log('Invoice payment failed:', invoice.id, 'for customer:', invoice.customer);
 
@@ -695,24 +695,57 @@ export function registerStripeRoutes(app: Express) {
         return;
       }
 
-      // Log the payment failure for potential recovery
-      // Note: Could check subscription.latest_invoice.attempt_count for retry logic
-      
-      // Stripe typically attempts 4 times before giving up
-      // We'll downgrade after the first failure to be safe
-      console.log(`Payment failed for user ${user.id}, downgrading to free plan`);
-      
-      await storage.updateUserPlan(user.id, 'free', 'monthly');
-      
-      // Log the payment failure for potential recovery
-      console.log(`User ${user.id} downgraded to free due to payment failure. Invoice: ${invoice.id}`);
+      console.log(`Processing payment failure for user: ${user.id}`);
+
+      // Get current failure count and increment
+      const currentFailureCount = user.paymentFailureCount || 0;
+      const newFailureCount = currentFailureCount + 1;
+
+      // Calculate grace period expiry (7 days from now)
+      const graceExpiresAt = new Date();
+      graceExpiresAt.setDate(graceExpiresAt.getDate() + 7);
+
+      // Create payment failure record
+      await storage.createPaymentFailure({
+        userId: user.id,
+        stripeInvoiceId: invoice.id,
+        stripeCustomerId: invoice.customer,
+        failureReason: invoice.last_payment_error?.message || "Payment failed",
+        attemptCount: invoice.attempt_count || 1,
+        notificationSent: false,
+        resolved: false
+      });
+
+      // Set user grace period instead of immediate downgrade
+      await storage.setUserGracePeriod(user.id, graceExpiresAt, newFailureCount);
+
+      // Send email notification if email service is available
+      if (user.email) {
+        try {
+          const { sendPaymentFailureNotification } = await import('../emailService');
+          const notificationSent = await sendPaymentFailureNotification(
+            user.email,
+            user.firstName || "User",
+            invoice.last_payment_error?.message || "Payment method declined",
+            graceExpiresAt
+          );
+
+          if (notificationSent) {
+            console.log(`Payment failure notification sent to: ${user.email}`);
+          }
+        } catch (emailError) {
+          console.log('Email service not available, skipping notification');
+        }
+      }
+
+      console.log(`User ${user.id} entered grace period until ${graceExpiresAt.toISOString()}`);
       
     } catch (error) {
       console.error('Error handling payment failure:', error);
     }
   }
 
-  // Handle successful recurring payments
+  // Handle successful recurring payments - clear grace period
   async function handleInvoicePaymentSucceeded(invoice: any) {
     console.log('Invoice payment succeeded:', invoice.id, 'for customer:', invoice.customer);
 
@@ -728,6 +761,8 @@ export function registerStripeRoutes(app: Express) {
         return;
       }
 
+      console.log(`Payment success for user: ${user.id}`);
+
       // Get subscription details to determine plan
       const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
       const priceId = subscription.items.data[0]?.price.id;
@@ -740,6 +775,19 @@ export function registerStripeRoutes(app: Express) {
         
         console.log(`Confirmed user ${user.id} on ${planConfig.plan} plan (${planConfig.interval})`);
       }
+
+      // Clear grace period and reset failure count
+      await storage.clearUserGracePeriod(user.id);
+
+      // Resolve any pending payment failures
+      const failures = await storage.getPaymentFailures(user.id);
+      for (const failure of failures) {
+        if (!failure.resolved) {
+          await storage.resolvePaymentFailure(failure.id);
+        }
+      }
+
+      console.log(`Grace period cleared for user: ${user.id}`);
       
     } catch (error) {
       console.error('Error handling successful payment:', error);
