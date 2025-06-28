@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Router } from 'wouter';
 import { HelmetProvider } from 'react-helmet-async';
 import { I18nextProvider } from 'react-i18next';
+import { esES } from '@clerk/localizations';
+import { skSK } from '@clerk/localizations';
 import App from './App.tsx';
 import './index.css';
 import { clearStaleSession } from './utils/sessionCleanup';
@@ -91,6 +93,19 @@ const getUserLanguage = (): string => {
 const userLanguage = getUserLanguage();
 const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
 
+// Get Clerk localization based on user language
+const getClerkLocalization = () => {
+  const savedLanguage = localStorage.getItem('preferredLanguage');
+  const currentLang = savedLanguage || detectLanguageFromBrowser();
+  
+  if (currentLang.startsWith('es')) {
+    return esES;
+  } else if (currentLang.startsWith('sk')) {
+    return skSK;
+  }
+  return undefined; // English is default
+};
+
 const root = createRoot(container);
 root.render(
   <I18nextProvider i18n={i18n}>
@@ -99,6 +114,7 @@ root.render(
         publishableKey={clerkPubKey}
         afterSignInUrl={dashboardRedirectUrl}
         afterSignUpUrl={dashboardRedirectUrl}
+        localization={getClerkLocalization()}
         appearance={{
           layout: {
             logoImageUrl: '/icon.png',
