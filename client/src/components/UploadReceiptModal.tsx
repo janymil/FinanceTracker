@@ -688,7 +688,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                   
                   <div className="space-y-3">
                     <div>
-                      <Label htmlFor="amount">Amount *</Label>
+                      <Label htmlFor="amount">{t("Amount")} *</Label>
                       <Input
                         id="amount"
                         type="number"
@@ -700,17 +700,17 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     </div>
                     
                     <div>
-                      <Label htmlFor="description">Description *</Label>
+                      <Label htmlFor="description">{t("Description")} *</Label>
                       <Input
                         id="description"
                         value={formData.description}
                         onChange={(e) => handleFormChange('description', e.target.value)}
-                        placeholder="Transaction description"
+                        placeholder={t("Transaction description")}
                       />
                     </div>
                     
                     <div>
-                      <Label htmlFor="date">Date *</Label>
+                      <Label htmlFor="date">{t("Date")} *</Label>
                       <Input
                         id="date"
                         type="date"
@@ -720,10 +720,10 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     </div>
                     
                     <div>
-                      <Label htmlFor="category">Category *</Label>
+                      <Label htmlFor="category">{t("Category")} *</Label>
                       <Select value={formData.categoryId} onValueChange={(value) => handleFormChange('categoryId', value)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
+                          <SelectValue placeholder={t("Select category")} />
                         </SelectTrigger>
                         <SelectContent>
                           {categories.map((category) => (
@@ -737,7 +737,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
 
                     {uploadState.category && (
                       <div className="text-sm text-blue-600 bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
-                        💡 AI suggested category: {uploadState.category}
+                        💡 {t("AI suggested category:")} {uploadState.category}
                       </div>
                     )}
                   </div>
@@ -748,7 +748,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                     disabled={!formData.amount || !formData.description || !formData.categoryId}
                   >
                     <Save className="h-4 w-4 mr-2" />
-                    Save Transaction
+                    {t("Save Transaction")}
                   </Button>
                 </div>
               )}
@@ -757,7 +757,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
               {uploadState.recognizedText && (
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Recognized Text:
+                    {t("Recognized Text:")}
                   </label>
                   <pre className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-sm overflow-x-auto whitespace-pre-wrap border max-h-32 overflow-y-auto">
 {uploadState.recognizedText}
@@ -781,14 +781,14 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
                 variant="outline"
                 className="flex-1"
               >
-                Upload another receipt
+                {t("Upload another receipt")}
               </Button>
               <Button
                 onClick={handleModalClose}
                 variant="secondary"
                 className="flex-1"
               >
-                Close
+                {t("Close")}
               </Button>
             </div>
           )}
