@@ -91,11 +91,15 @@ export default function Income() {
   // Helper function to get date locale
   const getDateLocale = () => {
     const currentLang = i18n.language;
+    console.log('Current language:', currentLang);
     if (currentLang.startsWith('es')) {
+      console.log('Using Spanish locale:', es);
       return es;
     } else if (currentLang.startsWith('sk')) {
+      console.log('Using Slovak locale:', sk);
       return sk;
     } else {
+      console.log('Using English locale:', en);
       return en;
     }
   };
