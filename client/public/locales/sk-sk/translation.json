@@ -636,7 +636,6 @@
   "SaveTransaction": "Uložiť Transakciu",
   "RecognizedText:": "Rozpoznaný Text:",
   "Uploadanotherreceipt": "Nahrať ďalšiu účtenku",
-  "Upload a receipt photo to automatically extract transaction data": "Nahrajte fotografiu účtenky na automatické extrahovanie dát transakcie",
   "autoCategorization": {
     "title": "AI Kategorizácia",
     "description": "Automaticky kategorizuje vaše transakcie",
