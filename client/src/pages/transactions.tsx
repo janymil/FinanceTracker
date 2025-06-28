@@ -606,7 +606,7 @@ export default function Transactions() {
                       {newTransaction.isRecurring && (
                         <div className="grid grid-cols-2 gap-4 pl-6">
                           <div>
-                            <Label htmlFor="frequency">Frequency</Label>
+                            <Label htmlFor="frequency">{t("Frequency")}</Label>
                             <Select
                               value={newTransaction.recurringFrequency}
                               onValueChange={(value) => setNewTransaction({ 
@@ -625,7 +625,7 @@ export default function Transactions() {
                             </Select>
                           </div>
                           <div>
-                            <Label htmlFor="endDate">End Date (Optional)</Label>
+                            <Label htmlFor="endDate">{t("End Date (Optional)")}</Label>
                             <Input
                               id="endDate"
                               type="date"
@@ -646,7 +646,7 @@ export default function Transactions() {
                             {t("Smart Bill Assistant")}
                           </div>
                           <div>
-                            <Label htmlFor="paymentUrl">Payment URL (Optional)</Label>
+                            <Label htmlFor="paymentUrl">{t("Payment URL (Optional)")}</Label>
                             <Input
                               id="paymentUrl"
                               type="url"
