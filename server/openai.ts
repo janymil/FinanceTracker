@@ -88,7 +88,9 @@ export async function categorizeExpense(description: string, amount: number, lan
       messages: [
         {
           role: "system",
-          content: `Respond in ${getLanguageLabel(normalizedLanguage)}. You are an expert financial categorization assistant. Analyze the expense description and amount to determine the most appropriate category.
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (category, confidence, reasoning) must be in ${getLanguageLabel(normalizedLanguage)}.
+
+You are an expert financial categorization assistant. Analyze the expense description and amount to determine the most appropriate category.
 
 Available categories:
 - Food & Dining (restaurants, groceries, takeout)
@@ -252,7 +254,9 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
         messages: [
           {
             role: "system",
-            content: `Respond in ${getLanguageLabel(normalizedLanguage)}. You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
+            content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (analysis, insights, recommendations) must be in ${getLanguageLabel(normalizedLanguage)}.
+
+You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
 
 1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
 2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
@@ -754,7 +758,9 @@ Analysis Requirements:
       messages: [
         {
           role: "system",
-          content: `Respond in ${getLanguageLabel(language)}. You are an advanced financial forecasting AI that analyzes spending patterns and predicts future financial trends with high accuracy. Use sophisticated pattern recognition and statistical analysis to provide reliable predictions.`
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(language)}. ${getLanguageLabel(language) !== 'English' ? 'Never use English words.' : ''} ALL text content (predictions, insights, analysis) must be in ${getLanguageLabel(language)}.
+
+You are an advanced financial forecasting AI that analyzes spending patterns and predicts future financial trends with high accuracy. Use sophisticated pattern recognition and statistical analysis to provide reliable predictions.`
         },
         {
           role: "user",
@@ -985,7 +991,9 @@ ANALYSIS GUIDELINES:
       messages: [
         {
           role: "system",
-          content: `Respond in ${getLanguageLabel(language)}. You are an advanced financial forecasting AI specializing in expense prediction analysis. You analyze spending patterns, identify trends, and generate accurate predictions based on historical transaction data. Focus on realistic, data-driven predictions with appropriate confidence levels.`
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(language)}. ${getLanguageLabel(language) !== 'English' ? 'Never use English words.' : ''} ALL text content (predictions, analysis, insights) must be in ${getLanguageLabel(language)}.
+
+You are an advanced financial forecasting AI specializing in expense prediction analysis. You analyze spending patterns, identify trends, and generate accurate predictions based on historical transaction data. Focus on realistic, data-driven predictions with appropriate confidence levels.`
         },
         {
           role: "user",
@@ -1174,7 +1182,9 @@ Only provide recommendations and insights based on the actual financial data pro
       messages: [
         {
           role: "system",
-          content: `Respond in ${getLanguageLabel(language)}. You are an expert financial advisor who provides personalized, actionable recommendations based on real user data. Always return valid JSON.`
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(language)}. ${getLanguageLabel(language) !== 'English' ? 'Never use English words.' : ''} ALL text content (recommendations, insights, descriptions) must be in ${getLanguageLabel(language)}.
+
+You are an expert financial advisor who provides personalized, actionable recommendations based on real user data. Always return valid JSON.`
         },
         {
           role: "user",
@@ -1491,7 +1501,9 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
       messages: [
         {
           role: "system",
-          content: `Respond in ${getLanguageLabel(normalizedLanguage)}. You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.`
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (tips, titles, descriptions) must be in ${getLanguageLabel(normalizedLanguage)}.
+
+You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.`
         },
         {
           role: "user",
@@ -1620,7 +1632,9 @@ export async function generateFinancialHealthScore(
       messages: [
         {
           role: "system",
-          content: `You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (status, factors, aiInsight, recommendations) must be in ${getLanguageLabel(normalizedLanguage)}.
+
+You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
 
 Your analysis should consider:
 - Spending patterns and volatility
@@ -1631,8 +1645,6 @@ Your analysis should consider:
 - Personalized weight adjustments based on user's situation
 
 Provide a comprehensive financial health score from 0-100 with detailed factor breakdown.
-
-Respond in ${getLanguageLabel(normalizedLanguage)}.
 
 Respond with JSON in this format:
 {
