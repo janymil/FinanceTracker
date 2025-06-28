@@ -17,15 +17,15 @@ export function registerAdminRoutes(app: Express) {
     return res.json({ authenticated: !!req.session?.isAdminAuthenticated });
   });
 
-  // Admin dashboard - get all users
+  // Admin dashboard - get all users with payment details
   app.get('/api/admin-analytics/users', adminAuth, async (req: any, res: Response) => {
     try {
-      const users = await storage.getAllUsers();
-      console.log(`Admin analytics - Fetched ${users.length} users:`, users.map(u => ({ id: u.id, email: u.email, plan: u.plan })));
-      return res.json(users);
+      const usersWithPaymentData = await storage.getAdminUserPaymentDetails();
+      console.log(`Admin analytics - Fetched ${usersWithPaymentData.length} users with payment data`);
+      return res.json(usersWithPaymentData);
     } catch (error) {
-      console.error("Error fetching users for admin:", error);
-      return res.status(500).json({ message: "Failed to fetch users" });
+      console.error("Error fetching users with payment data for admin:", error);
+      return res.status(500).json({ message: "Failed to fetch users with payment data" });
     }
   });
 

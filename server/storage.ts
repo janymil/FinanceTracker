@@ -2309,6 +2309,113 @@ export class DatabaseStorage implements IStorage {
       .limit(1);
     return results[0] || null;
   }
+
+  // Admin method to get comprehensive user payment information
+  async getAdminUserPaymentDetails(): Promise<Array<User & { 
+    paymentFailures: Array<{
+      id: number;
+      stripeInvoiceId: string | null;
+      failureReason: string | null;
+      attemptCount: number | null;
+      failedAt: Date | null;
+      notificationSent: boolean | null;
+      resolved: boolean | null;
+    }>;
+    graceStatus: 'active' | 'expired' | 'none';
+    daysUntilExpiry: number | null;
+  }>> {
+    // Get all users with their payment failure data
+    const usersWithFailures = await db
+      .select({
+        // User fields
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        plan: users.plan,
+        stripeCustomerId: users.stripeCustomerId,
+        stripeSubscriptionId: users.stripeSubscriptionId,
+        gracePeriodActive: users.gracePeriodActive,
+        graceExpiresAt: users.graceExpiresAt,
+        paymentFailureCount: users.paymentFailureCount,
+        lastPaymentFailureNotified: users.lastPaymentFailureNotified,
+        createdAt: users.createdAt,
+        profileImageUrl: users.profileImageUrl,
+        phone: users.phone,
+        settings: users.settings,
+        updatedAt: users.updatedAt,
+        activatedAt: users.activatedAt,
+        // Payment failure fields
+        failureId: paymentFailures.id,
+        stripeInvoiceId: paymentFailures.stripeInvoiceId,
+        failureReason: paymentFailures.failureReason,
+        attemptCount: paymentFailures.attemptCount,
+        failedAt: paymentFailures.failedAt,
+        notificationSent: paymentFailures.notificationSent,
+        resolved: paymentFailures.resolved,
+      })
+      .from(users)
+      .leftJoin(paymentFailures, eq(users.id, paymentFailures.userId))
+      .orderBy(users.createdAt, paymentFailures.failedAt);
+
+    // Group payment failures by user
+    const userMap = new Map();
+    
+    for (const row of usersWithFailures) {
+      const userId = row.id;
+      
+      if (!userMap.has(userId)) {
+        const user = {
+          id: row.id,
+          email: row.email,
+          firstName: row.firstName,
+          lastName: row.lastName,
+          plan: row.plan,
+          stripeCustomerId: row.stripeCustomerId,
+          stripeSubscriptionId: row.stripeSubscriptionId,
+          gracePeriodActive: row.gracePeriodActive,
+          graceExpiresAt: row.graceExpiresAt,
+          paymentFailureCount: row.paymentFailureCount,
+          lastPaymentFailureNotified: row.lastPaymentFailureNotified,
+          createdAt: row.createdAt,
+          profileImageUrl: row.profileImageUrl,
+          phone: row.phone,
+          settings: row.settings,
+          updatedAt: row.updatedAt,
+          activatedAt: row.activatedAt,
+          paymentFailures: [],
+          graceStatus: 'none' as 'active' | 'expired' | 'none',
+          daysUntilExpiry: null as number | null,
+        };
+
+        // Calculate grace status
+        if (row.gracePeriodActive && row.graceExpiresAt) {
+          const now = new Date();
+          const daysUntilExpiry = Math.ceil((row.graceExpiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          user.daysUntilExpiry = daysUntilExpiry;
+          user.graceStatus = daysUntilExpiry > 0 ? 'active' : 'expired';
+        }
+
+        userMap.set(userId, user);
+      }
+
+      // Add payment failure if exists
+      if (row.failureId) {
+        const user = userMap.get(userId);
+        user.paymentFailures.push({
+          id: row.failureId,
+          stripeInvoiceId: row.stripeInvoiceId,
+          failureReason: row.failureReason,
+          attemptCount: row.attemptCount,
+          failedAt: row.failedAt,
+          notificationSent: row.notificationSent,
+          resolved: row.resolved,
+        });
+      }
+    }
+
+    return Array.from(userMap.values());
+  }
 }
 
 export const storage = new DatabaseStorage();

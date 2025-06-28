@@ -344,6 +344,98 @@ export default function AdminAnalytics() {
     return new Date(dateString).toLocaleDateString();
   };
 
+  // Payment information helper functions
+  const getPaymentStatusBadge = (user: any) => {
+    if (user.plan === 'free') {
+      return <Badge variant="secondary">Free Plan</Badge>;
+    }
+    
+    if (user.graceStatus === 'active') {
+      return <Badge variant="destructive">Grace Period</Badge>;
+    } else if (user.graceStatus === 'expired') {
+      return <Badge variant="destructive">Grace Expired</Badge>;
+    } else if (user.stripeCustomerId) {
+      return <Badge variant="default">Active Subscription</Badge>;
+    } else {
+      return <Badge variant="outline">No Payment Info</Badge>;
+    }
+  };
+
+  const getGracePeriodInfo = (user: any) => {
+    if (!user.gracePeriodActive) {
+      return <span className="text-sm text-gray-500">None</span>;
+    }
+
+    const daysRemaining = user.daysUntilExpiry;
+    if (daysRemaining > 0) {
+      return (
+        <div className="text-sm">
+          <div className="text-orange-600 font-medium">{daysRemaining} days left</div>
+          <div className="text-xs text-gray-500">
+            Expires: {formatDate(user.graceExpiresAt)}
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="text-sm">
+          <div className="text-red-600 font-medium">Expired</div>
+          <div className="text-xs text-gray-500">
+            {formatDate(user.graceExpiresAt)}
+          </div>
+        </div>
+      );
+    }
+  };
+
+  const getPaymentFailureInfo = (user: any) => {
+    const failureCount = user.paymentFailureCount || 0;
+    const unresolved = user.paymentFailures?.filter((f: any) => !f.resolved).length || 0;
+    
+    if (failureCount === 0) {
+      return <span className="text-sm text-green-600">No failures</span>;
+    }
+
+    return (
+      <div className="text-sm">
+        <div className="text-red-600 font-medium">
+          {failureCount} total
+        </div>
+        {unresolved > 0 && (
+          <div className="text-xs text-red-500">
+            {unresolved} unresolved
+          </div>
+        )}
+        {user.lastPaymentFailureNotified && (
+          <div className="text-xs text-gray-500">
+            Last notified: {formatDate(user.lastPaymentFailureNotified)}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const getStripeInfo = (user: any) => {
+    if (!user.stripeCustomerId) {
+      return <span className="text-sm text-gray-500">No Stripe ID</span>;
+    }
+
+    return (
+      <div className="text-xs font-mono space-y-1">
+        <div title={user.stripeCustomerId}>
+          <span className="text-gray-500">Customer:</span><br />
+          <span className="text-blue-600">{user.stripeCustomerId.substring(0, 12)}...</span>
+        </div>
+        {user.stripeSubscriptionId && (
+          <div title={user.stripeSubscriptionId}>
+            <span className="text-gray-500">Subscription:</span><br />
+            <span className="text-green-600">{user.stripeSubscriptionId.substring(0, 12)}...</span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Show login form if not authenticated
   if (!isAuthenticated) {
     return (
@@ -646,6 +738,10 @@ export default function AdminAnalytics() {
                     <TableHead className="min-w-48">User</TableHead>
                     <TableHead className="min-w-48">Email</TableHead>
                     <TableHead className="min-w-24">Plan</TableHead>
+                    <TableHead className="min-w-32">Payment Status</TableHead>
+                    <TableHead className="min-w-28">Grace Period</TableHead>
+                    <TableHead className="min-w-24">Failures</TableHead>
+                    <TableHead className="min-w-32">Stripe Info</TableHead>
                     <TableHead className="min-w-24">Created</TableHead>
                     <TableHead className="min-w-24">Actions</TableHead>
                   </TableRow>
@@ -690,6 +786,18 @@ export default function AdminAnalytics() {
                         </div>
                       </TableCell>
                       <TableCell>{getPlanBadge(user.plan)}</TableCell>
+                      <TableCell>
+                        {getPaymentStatusBadge(user)}
+                      </TableCell>
+                      <TableCell>
+                        {getGracePeriodInfo(user)}
+                      </TableCell>
+                      <TableCell>
+                        {getPaymentFailureInfo(user)}
+                      </TableCell>
+                      <TableCell>
+                        {getStripeInfo(user)}
+                      </TableCell>
                       <TableCell>{formatDate(user.createdAt)}</TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-1">
