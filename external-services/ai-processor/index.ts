@@ -1800,7 +1800,7 @@ app.post("/execute-gpt-task", async (req, res) => {
             warnings: ['Please add more transaction data for accurate analysis']
           };
         } else {
-          result = await generateFinancialHealthScore(payload, payload.language || 'en-us');
+          result = await generateAIFinancialHealthScore(payload, payload.language || 'en-us');
         }
         break;
 
