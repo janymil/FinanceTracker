@@ -134,6 +134,13 @@ export default function DailyRecommendations({ summary, transactions = [], budge
 
   const recommendations = recommendationsData?.recommendations || [];
   const insights = recommendationsData?.insights || [];
+  
+  // DEBUG: Log the actual data being displayed
+  console.log('FRONTEND DEBUG - Recommendations data:', {
+    language: i18n.language,
+    recommendationsData,
+    firstRec: recommendations[0]
+  });
 
   const toggleTaskCompletion = (taskId: string) => {
     setCompletedTasks(prev => {
@@ -241,7 +248,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
                           <div className="flex items-center gap-2">
                             {getPriorityIcon(rec.priority)}
                             <h5 className={`font-medium text-sm ${isCompleted ? 'line-through' : ''}`}>
-                              {rec.title}
+                              {rec.title} {/* DEBUG: {i18n.language} */}
                             </h5>
                             <Badge variant="outline" className="text-xs capitalize">
                               {rec.type ? t(`dailyRecommendations.categories.${mapCategoryType(rec.type)}`) : t('dailyRecommendations.categories.habit')}
