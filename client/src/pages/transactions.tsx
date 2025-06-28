@@ -537,7 +537,7 @@ export default function Transactions() {
                       id="description"
                       value={newTransaction.description}
                       onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })}
-                      placeholder="Transaction description"
+                      placeholder={t("Transaction description")}
                     />
                   </div>
 
@@ -659,12 +659,12 @@ export default function Transactions() {
                             </p>
                           </div>
                           <div>
-                            <Label htmlFor="referenceNote">Reference Note (Optional)</Label>
+                            <Label htmlFor="referenceNote">{t("Reference Note (Optional)")}</Label>
                             <Input
                               id="referenceNote"
                               value={newTransaction.referenceNote}
                               onChange={(e) => setNewTransaction({ ...newTransaction, referenceNote: e.target.value })}
-                              placeholder="Account #123456, Reference: ABC789"
+                              placeholder={t("Account #123456, Reference: ABC789")}
                             />
                             <p className="text-xs text-gray-500 mt-1">
                               Account number or other reference information
@@ -683,7 +683,7 @@ export default function Transactions() {
                       onClick={handleSubmit}
                       disabled={!newTransaction.amount || !newTransaction.description}
                     >
-                      {editingTransaction ? "Update" : "Add"}
+                      {editingTransaction ? t("Update") : t("Add")}
                     </Button>
                   </div>
                 </div>
@@ -767,7 +767,7 @@ export default function Transactions() {
             onDateRangeChange={setDateRange}
             availableCategories={availableCategories}
             showTypeFilter={true}
-            searchPlaceholder="Search transactions..."
+            searchPlaceholder={t("Search transactions...")}
           />
         </div>
 
@@ -777,8 +777,8 @@ export default function Transactions() {
             <CardTitle>Transactions ({filteredTransactions.length})</CardTitle>
             <CardDescription>
               {searchTerm || filterType !== "all" || filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all" 
-                ? "Filtered transactions" 
-                : "All your transactions"}
+                ? t("Filtered transactions") 
+                : t("All your transactions")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -791,12 +791,12 @@ export default function Transactions() {
               <div className="text-center py-8">
                 <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  No Transactions Found
+                  {t("No Transactions Found")}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
                   {searchTerm || filterType !== "all" || filterCategory !== "all" || dateRange !== "all"
-                    ? "Try adjusting your filters or search terms"
-                    : "Add your first transaction to get started"}
+                    ? t("Try adjusting your filters or search terms")
+                    : t("Add your first transaction to get started")}
                 </p>
                 <Button onClick={() => setIsDialogOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
