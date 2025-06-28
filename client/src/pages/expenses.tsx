@@ -140,8 +140,8 @@ export default function Expenses() {
         referenceNote: "",
       });
       toast({
-        title: "Expense Added",
-        description: "Expense transaction has been created successfully",
+        title: t("expenses.expense_added"),
+        description: t("expenses.expense_added_description"),
       });
     },
     onError: (error: any) => {
