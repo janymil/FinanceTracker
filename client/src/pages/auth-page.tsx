@@ -76,9 +76,9 @@ export default function AuthPage() {
   return (
     <>
       <SEO 
-        title="Sign In & Sign Up - Join FinanzerPro | Smart Personal Finance"
-        description="Create your FinanzerPro account or sign in to access your personal finance dashboard. Start tracking expenses, managing budgets, and achieving your financial goals today."
-        keywords="finanzerpro login, sign up finance app, personal finance account, expense tracker registration, budget app login"
+        title={t("seo.authTitle")}
+        description={t("seo.authDescription")}
+        keywords={t("seo.authKeywords")}
         canonical="https://finanzerpro.com/auth"
       />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
@@ -92,8 +92,8 @@ export default function AuthPage() {
             window.location.hash = value;
           }} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="sign-up">Sign Up</TabsTrigger>
-              <TabsTrigger value="sign-in">Sign In</TabsTrigger>
+              <TabsTrigger value="sign-up">{t("auth.signUp")}</TabsTrigger>
+              <TabsTrigger value="sign-in">{t("auth.signIn")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="sign-up" className="space-y-4">

@@ -858,5 +858,27 @@
   "AI features process anonymized data only (see Privacy Policy for details)": "AI funkcie spracovávajú iba anonymizované údaje (pozrite si Politiku ochrany súkromia pre podrobnosti)",
   "I agree to the": "Súhlasím s",
   "and": "a",
-  "Please accept Terms & Privacy Policy to continue": "Prosím prijmite Podmienky a Politiku ochrany súkromia pre pokračovanie"
+  "Please accept Terms & Privacy Policy to continue": "Prosím prijmite Podmienky a Politiku ochrany súkromia pre pokračovanie",
+  
+  "auth": {
+    "signUp": "Registrácia",
+    "signIn": "Prihlásenie",
+    "accountCreationProcess": "Proces Vytvorenia Účtu",
+    "accountCreationDescription": "Po kliknutí na \"Registrácia\", vytvoríme váš bezpečný účet a pošleme overovací email. Toto typicky trvá 6-8 sekúnd.",
+    "creatingSecureAccount": "Vytváranie bezpečného účtu...",
+    "takeControlOfFinances": "Prevezmi Kontrolu nad Svojimi Financiami",
+    "trackExpensesDescription": "Sleduj výdavky, spravuj rozpočty a dosiahni svoje finančné ciele s našou komplexnou platformou.",
+    "smartExpenseTracking": "Inteligentné Sledovanie Výdavkov",
+    "smartExpenseTrackingDesc": "Kategorizuj a monitoruj svoje výdavky automaticky",
+    "financialAnalytics": "Finančné Analýzy",
+    "financialAnalyticsDesc": "Získaj poznatky a predpovede o svojej finančnej budúcnosti",
+    "securePrivate": "Bezpečné a Súkromné",
+    "securePrivateDesc": "Bezpečnosť priemyselného štandardu udržuje vaše údaje chránené"
+  },
+  
+  "seo": {
+    "authTitle": "Prihlásenie | Registrácia - FinanzerPro",
+    "authDescription": "Vytvor si svoj FinanzerPro účet alebo sa prihlás pre prístup k tvojmu osobnému finančnému panelu. Začni sledovať výdavky, spravovať rozpočty a dosiahnuť svoje finančné ciele už dnes.",
+    "authKeywords": "finanzerpro prihlásenie, registrácia finančná aplikácia, osobný finančný účet, registrácia sledovač výdavkov, prihlásenie rozpočtová aplikácia"
+  }
 }

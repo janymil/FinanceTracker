@@ -832,5 +832,27 @@
   "AI features process anonymized data only (see Privacy Policy for details)": "AI features process anonymized data only (see Privacy Policy for details)",
   "I agree to the": "I agree to the",
   "and": "and",
-  "Please accept Terms & Privacy Policy to continue": "Please accept Terms & Privacy Policy to continue"
+  "Please accept Terms & Privacy Policy to continue": "Please accept Terms & Privacy Policy to continue",
+  
+  "auth": {
+    "signUp": "Sign Up",
+    "signIn": "Sign In",
+    "accountCreationProcess": "Account Creation Process",
+    "accountCreationDescription": "After clicking \"Sign Up\", we'll create your secure account and send a verification email. This typically takes 6-8 seconds.",
+    "creatingSecureAccount": "Creating secure account...",
+    "takeControlOfFinances": "Take Control of Your Finances",
+    "trackExpensesDescription": "Track expenses, manage budgets, and achieve your financial goals with our comprehensive platform.",
+    "smartExpenseTracking": "Smart Expense Tracking",
+    "smartExpenseTrackingDesc": "Categorize and monitor your spending automatically",
+    "financialAnalytics": "Financial Analytics",
+    "financialAnalyticsDesc": "Get insights and predictions about your financial future",
+    "securePrivate": "Secure & Private",
+    "securePrivateDesc": "Industry-standard security keeps your data protected"
+  },
+  
+  "seo": {
+    "authTitle": "Sign In | Sign Up - FinanzerPro",
+    "authDescription": "Create your FinanzerPro account or sign in to access your personal finance dashboard. Start tracking expenses, managing budgets, and achieving your financial goals today.",
+    "authKeywords": "finanzerpro login, sign up finance app, personal finance account, expense tracker registration, budget app login"
+  }
 }

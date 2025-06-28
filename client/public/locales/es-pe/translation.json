@@ -810,5 +810,27 @@
   "AI features process anonymized data only (see Privacy Policy for details)": "Las funciones de IA procesan solo datos anonimizados (ver Política de Privacidad para detalles)",
   "I agree to the": "Acepto los",
   "and": "y",
-  "Please accept Terms & Privacy Policy to continue": "Por favor acepta los Términos y Política de Privacidad para continuar"
+  "Please accept Terms & Privacy Policy to continue": "Por favor acepta los Términos y Política de Privacidad para continuar",
+  
+  "auth": {
+    "signUp": "Registrarse",
+    "signIn": "Iniciar Sesión",
+    "accountCreationProcess": "Proceso de Creación de Cuenta",
+    "accountCreationDescription": "Después de hacer clic en \"Registrarse\", crearemos tu cuenta segura y enviaremos un email de verificación. Esto típicamente toma 6-8 segundos.",
+    "creatingSecureAccount": "Creando cuenta segura...",
+    "takeControlOfFinances": "Toma Control de tus Finanzas",
+    "trackExpensesDescription": "Rastrea gastos, gestiona presupuestos y alcanza tus metas financieras con nuestra plataforma integral.",
+    "smartExpenseTracking": "Seguimiento Inteligente de Gastos",
+    "smartExpenseTrackingDesc": "Categoriza y monitorea tu gasto automáticamente",
+    "financialAnalytics": "Análisis Financieros",
+    "financialAnalyticsDesc": "Obtén insights y predicciones sobre tu futuro financiero",
+    "securePrivate": "Seguro y Privado",
+    "securePrivateDesc": "Seguridad de estándar industrial mantiene tus datos protegidos"
+  },
+  
+  "seo": {
+    "authTitle": "Iniciar Sesión | Registrarse - FinanzerPro",
+    "authDescription": "Crea tu cuenta de FinanzerPro o inicia sesión para acceder a tu panel de finanzas personales. Comienza a rastrear gastos, gestionar presupuestos y alcanzar tus metas financieras hoy.",
+    "authKeywords": "finanzerpro login, registrarse app finanzas, cuenta finanzas personales, registro rastreador gastos, login app presupuesto"
+  }
 }
