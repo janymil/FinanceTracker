@@ -622,6 +622,7 @@
     "SaveTransaction": "Save Transaction",
     "RecognizedText:": "Recognized Text:",
     "Uploadanotherreceipt": "Upload another receipt",
+    "Upload a receipt photo to automatically extract transaction data": "Upload a receipt photo to automatically extract transaction data",
     "editReminder": "Edit Reminder",
     "reminderDescription": "Optional description",
     "noReminders": "No upcoming reminders",

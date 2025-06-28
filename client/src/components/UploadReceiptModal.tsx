@@ -535,7 +535,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "U
             {t("uploadReceipts")}
           </DialogTitle>
           <DialogDescription>
-            Upload a receipt photo to automatically extract transaction data
+            {t("Upload a receipt photo to automatically extract transaction data")}
           </DialogDescription>
         </DialogHeader>
         
