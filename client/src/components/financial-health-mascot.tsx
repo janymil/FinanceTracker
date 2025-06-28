@@ -595,132 +595,25 @@ export default function FinancialHealthMascot() {
                     {healthData?.warnings && healthData.warnings.length > 0 ? (
                       <div className="space-y-3">
                         {(() => {
-                          // Categorize recommendations for better organization with multilingual support
-                          const urgentKeywords = ['urgent', 'critical', 'immediately', 'urgente', 'crítico', 'inmediatamente', 'naliehavé', 'kritické', 'okamžite'];
-                          const budgetKeywords = ['budget', 'limit', 'overspend', 'presupuesto', 'límite', 'gastos', 'rozpočet', 'limit', 'prekročenie'];
-                          const improvementKeywords = ['improve', 'consider', 'try', 'better', 'mejorar', 'considerar', 'intentar', 'mejor', 'zlepšiť', 'zvážiť', 'skúsiť', 'lepšie'];
-                          
-                          const containsKeywords = (text: string, keywords: string[]) => {
-                            const lowerText = text.toLowerCase();
-                            return keywords.some(keyword => lowerText.includes(keyword));
-                          };
-                          
-                          const urgentItems = healthData.warnings.filter(warning => 
-                            containsKeywords(warning, urgentKeywords)
-                          );
-                          const budgetItems = healthData.warnings.filter(warning => 
-                            containsKeywords(warning, budgetKeywords)
-                          );
-                          const improvementItems = healthData.warnings.filter(warning => 
-                            containsKeywords(warning, improvementKeywords)
-                          );
-                          const otherItems = healthData.warnings.filter(warning => 
-                            !urgentItems.includes(warning) && 
-                            !budgetItems.includes(warning) && 
-                            !improvementItems.includes(warning)
-                          );
+                          // Show all warnings in a single list - let AI categorization handle the organization
+                          const allItems = healthData.warnings;
 
                           return (
-                            <>
-                              {/* Urgent Actions */}
-                              {urgentItems.length > 0 && (
-                                <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <AlertTriangle className="h-4 w-4 text-red-600" />
-                                    <span className="text-xs font-semibold text-red-700 dark:text-red-400">{t('mascot.categories.urgentActions')}</span>
+                            <div className="space-y-2">
+                              {allItems.map((item, index) => (
+                                <motion.div
+                                  key={index}
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: index * 0.1 }}
+                                  className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-3 rounded-lg border-l-4 border-blue-500"
+                                >
+                                  <div className="text-xs text-blue-800 dark:text-blue-200 font-medium leading-relaxed">
+                                    {item}
                                   </div>
-                                  <div className="space-y-2">
-                                    {urgentItems.map((item, index) => (
-                                      <motion.div
-                                        key={`urgent-${index}`}
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-red-500"
-                                      >
-                                        <div className="text-xs text-red-800 dark:text-red-200 font-medium leading-relaxed">
-                                          {item}
-                                        </div>
-                                      </motion.div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Budget Alerts */}
-                              {budgetItems.length > 0 && (
-                                <div className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <Shield className="h-4 w-4 text-yellow-600" />
-                                    <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-400">{t('mascot.categories.budgetManagement')}</span>
-                                  </div>
-                                  <div className="space-y-2">
-                                    {budgetItems.map((item, index) => (
-                                      <motion.div
-                                        key={`budget-${index}`}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-yellow-500"
-                                      >
-                                        <div className="text-xs text-yellow-800 dark:text-yellow-200 font-medium leading-relaxed">
-                                          {item}
-                                        </div>
-                                      </motion.div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Improvement Suggestions */}
-                              {improvementItems.length > 0 && (
-                                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <Lightbulb className="h-4 w-4 text-blue-600" />
-                                    <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">{t('mascot.categories.smartSuggestions')}</span>
-                                  </div>
-                                  <div className="space-y-2">
-                                    {improvementItems.map((item, index) => (
-                                      <motion.div
-                                        key={`improvement-${index}`}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-blue-500"
-                                      >
-                                        <div className="text-xs text-blue-800 dark:text-blue-200 font-medium leading-relaxed">
-                                          {item}
-                                        </div>
-                                      </motion.div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* General Recommendations */}
-                              {otherItems.length > 0 && (
-                                <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <Target className="h-4 w-4 text-gray-600" />
-                                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-400">{t('mascot.categories.generalRecommendations')}</span>
-                                  </div>
-                                  <div className="space-y-2">
-                                    {otherItems.map((item, index) => (
-                                      <motion.div
-                                        key={`other-${index}`}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-gray-500"
-                                      >
-                                        <div className="text-xs text-gray-800 dark:text-gray-200 font-medium leading-relaxed">
-                                          {item}
-                                        </div>
-                                      </motion.div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
+                                </motion.div>
+                              ))}
+                            </div>
                             </>
                           );
                         })()}
