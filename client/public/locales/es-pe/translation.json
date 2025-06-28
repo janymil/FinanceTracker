@@ -731,5 +731,12 @@
     "confidence": "confianza",
     "category": "Categoría",
     "insight": "Perspectiva"
-  }
+  },
+  "aiPoweredInsights": "Perspectivas Impulsadas por IA",
+  "premium": "Premium",
+  "spendingManagement": "Gestión de Gastos",
+  "incomeAnalysis": "Análisis de Ingresos",
+  "expensePatterns": "Patrones de Gastos",
+  "financialHealth": "Salud Financiera",
+  "riskAssessment": "Evaluación de Riesgo"
 }

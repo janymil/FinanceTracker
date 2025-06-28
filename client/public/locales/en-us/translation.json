@@ -753,5 +753,12 @@
     "confidence": "confidence",
     "category": "Category",
     "insight": "Insight"
-  }
+  },
+  "aiPoweredInsights": "AI-Powered Insights",
+  "premium": "Premium",
+  "spendingManagement": "Spending Management",
+  "incomeAnalysis": "Income Analysis",
+  "expensePatterns": "Expense Patterns",
+  "financialHealth": "Financial Health",
+  "riskAssessment": "Risk Assessment"
 }
