@@ -194,7 +194,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-green-700 dark:text-green-300 mb-1">
-                {t('Total Income')}
+                {t('dashboard.total_income')}
               </p>
               <p className="text-2xl font-bold text-green-800 dark:text-green-200 transition-all duration-300 ease-out">
                 {formatCurrency(animatedValues.income)}
@@ -216,7 +216,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-red-700 dark:text-red-300 mb-1">
-                {t('Total Expenses')}
+                {t('dashboard.total_expenses')}
               </p>
               <p className="text-2xl font-bold text-red-800 dark:text-red-200 transition-all duration-300 ease-out">
                 {formatCurrency(Math.abs(animatedValues.expenses))}
@@ -238,7 +238,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">
-                {t('Net Balance')}
+                {t('dashboard.net_balance')}
               </p>
               <p className="text-2xl font-bold text-blue-800 dark:text-blue-200 transition-all duration-300 ease-out">
                 {formatCurrency(animatedValues.balance)}
@@ -264,7 +264,7 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
           <div className="flex items-center justify-between">
             <div>
               <p className={`text-sm font-medium mb-1 ${budgetInfo.textColor}`}>
-                {t('Budget Status')}
+                {t('dashboard.budget_status')}
               </p>
               <p className={`text-2xl font-bold ${budgetInfo.textColor}`}>
                 {budgetInfo.status === 'loading' ? t('Loading...') :

@@ -731,6 +731,15 @@
   },
 
   "income": {
+    "title": "Príjmy",
+    "subtitle": "Sledujte a spravujte svoje zdroje príjmov",
+    "add_income": "Pridať Príjem",
+    "add_new_income": "Pridať Nový Príjem",
+    "add_description": "Zaznamenať novú transakciu príjmu",
+    "income_trend": "Trend Príjmov",
+    "monthly_income_over_time": "Mesačné príjmy v priebehu času",
+    "deleted_title": "Príjem Vymazaný",
+    "deleted_description": "Transakcia príjmu bola úspešne vymazaná",
     "income_by_category": "Príjmy podľa kategórie",
     "distribution_of_income_sources": "Rozdelenie zdrojov príjmov",
     "search_placeholder": "Vyhľadať príjmy...",

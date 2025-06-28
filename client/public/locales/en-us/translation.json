@@ -646,6 +646,15 @@
   },
 
   "income": {
+    "title": "Income",
+    "subtitle": "Track and manage your income sources",
+    "add_income": "Add Income",
+    "add_new_income": "Add New Income",
+    "add_description": "Record a new income transaction",
+    "income_trend": "Income Trend",
+    "monthly_income_over_time": "Monthly income over time",
+    "deleted_title": "Income Deleted",
+    "deleted_description": "Income transaction has been deleted successfully",
     "income_by_category": "Income by Category",
     "distribution_of_income_sources": "Distribution of income sources",
     "search_placeholder": "Search income...",
