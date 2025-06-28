@@ -812,6 +812,8 @@
       "addTransactions": "Pridajte viac transakcií pre AI poznatky",
       "noRecommendations": "Žiadne odporúčania nie sú dostupné",
       "healthLooksGood": "Vaše finančné zdravie vyzerá dobre!"
-    }
+    },
+    "poweredByAI": "Poháňané AI",
+    "advancedAnalysis": "Pokročilá finančná analýza pre používateľov Standard a Premium"
   }
 }

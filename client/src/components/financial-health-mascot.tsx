@@ -738,11 +738,11 @@ export default function FinancialHealthMascot() {
                   <div className="flex items-center justify-center gap-2 mb-1">
                     <Zap className="h-4 w-4 text-purple-600" />
                     <span className="text-xs font-medium text-purple-700 dark:text-purple-300">
-                      Powered by AI
+                      {t('mascot.poweredByAI')}
                     </span>
                   </div>
                   <div className="text-xs text-purple-600 dark:text-purple-400">
-                    Advanced financial analysis for Standard & Premium users
+                    {t('mascot.advancedAnalysis')}
                   </div>
                 </div>
               </motion.div>

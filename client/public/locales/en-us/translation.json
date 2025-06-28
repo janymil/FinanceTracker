@@ -786,6 +786,8 @@
       "addTransactions": "Add more transactions to get AI insights",
       "noRecommendations": "No recommendations available",
       "healthLooksGood": "Your financial health looks good!"
-    }
+    },
+    "poweredByAI": "Powered by AI",
+    "advancedAnalysis": "Advanced financial analysis for Standard & Premium users"
   }
 }
