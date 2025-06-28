@@ -176,11 +176,11 @@ export async function generateFinancialTips(
     if (!financialData.timestamp) {
       const cachedResult = await cache.get(financialData);
       if (cachedResult) {
-        console.log('Financial tips: Using cached result');
+
         return cachedResult;
       }
     } else {
-      console.log('Bypassing cache for fresh AI financial tips');
+
     }
     const { totalIncome, totalExpenses, transactionsByCategory, recentTransactions } = financialData;
 
@@ -222,7 +222,6 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
     let result;
     try {
       const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'https://finanzerpro.fly.dev';
-      console.log(`Calling AI processor at ${AI_PROCESSOR_URL}/execute-gpt-task`);
       
       const aiResponse = await fetch(`${AI_PROCESSOR_URL}/execute-gpt-task`, {
         method: 'POST',
@@ -242,9 +241,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
       }
 
       const aiData = await aiResponse.json();
-      console.log('AI processor response received successfully');
       result = Array.isArray(aiData) ? aiData[0] : (aiData.tip || aiData);
-      console.log('Successfully received response from AI processor');
     } catch (aiProcessorError) {
       console.warn('AI processor service unavailable, falling back to direct OpenAI:', aiProcessorError.message);
       
@@ -321,7 +318,6 @@ Return comprehensive analysis in JSON:
 
     // Cache the result with 168 hours (7 days) TTL
     await cache.set(financialData, processedTips, false, 168);
-    console.log('Financial tips generated successfully and cached');
     
     return processedTips;
   } catch (error) {
@@ -366,7 +362,6 @@ export async function generateSpendingInsights(
     // Check cache first
     const cachedResult = await cache.get(inputData);
     if (cachedResult) {
-      console.log('Spending insights: Using cached result');
       return cachedResult;
     }
 
@@ -449,7 +444,6 @@ Generate financial insights based on this spending data.`
 
     // Cache the result with 72 hours TTL
     await cache.set(inputData, processedInsights, false, 72);
-    console.log('Spending insights generated successfully and cached');
     
     return processedInsights;
   } catch (error) {
@@ -647,7 +641,6 @@ export async function generateTrendPredictions(
   try {
     // Return zeros for empty data instead of AI-generated examples
     if (!transactions || transactions.length === 0) {
-      console.log('No transaction data available - returning zero predictions');
       return {
         categoryPredictions: [],
         financialForecast: {
@@ -669,7 +662,6 @@ export async function generateTrendPredictions(
     // Check cache first
     const cachedResult = await cache.get(inputData);
     if (cachedResult) {
-      console.log('Trend predictions: Using cached result');
       return cachedResult;
     }
 
@@ -789,7 +781,6 @@ You are an advanced financial forecasting AI that analyzes spending patterns and
 
     // Cache the result with 48 hours TTL
     await cache.set(inputData, predictions, false, 48);
-    console.log('Trend predictions generated successfully and cached');
     
     return predictions;
 
@@ -865,7 +856,6 @@ export async function generateExpensePredictions(
     // Check cache first
     const cachedResult = await cache.get(cacheInput);
     if (cachedResult) {
-      console.log('Expense predictions: Using cached result');
       return cachedResult;
     }
 
@@ -1035,7 +1025,6 @@ You are an advanced financial forecasting AI specializing in expense prediction 
 
     // Cache the result with 48 hours TTL
     await cache.set(cacheInput, finalResult, false, 48);
-    console.log('Expense predictions generated successfully and cached');
     
     return finalResult;
 
@@ -1082,11 +1071,9 @@ export async function generateDailyRecommendations(
     const cacheKey = { ...financialData, language: language };
     const cachedResult = await cache.get(cacheKey);
     if (cachedResult) {
-      console.log('Daily recommendations: Using cached result with language:', language);
       return cachedResult;
     }
 
-    console.log('Generating new daily recommendations with OpenAI');
 
     // Limit data to last 3 months and 100 transactions for efficiency
     const threeMonthsAgo = new Date();
@@ -1230,7 +1217,6 @@ You are an expert financial advisor who provides personalized, actionable recomm
 
     // Cache the result with 24 hours TTL and language key
     await cache.set(cacheKey, result, false, 24);
-    console.log('Daily recommendations generated successfully and cached with language:', language);
     
     return result;
 
@@ -1296,7 +1282,6 @@ export async function generateContextualFinancialTips(
     const cacheKey = { ...data, language: normalizedLanguage };
     const cachedResult = await cache.get(cacheKey);
     if (cachedResult) {
-      console.log('Contextual financial tips: Using cached result (local fallback) with language:', normalizedLanguage);
       return cachedResult;
     }
     
@@ -1531,9 +1516,7 @@ You are an expert financial advisor who provides personalized, contextual recomm
         }))
       : [];
 
-    console.log('Contextual financial tips generated successfully (local fallback)');
-    console.log(`[SERVER FALLBACK] Language used: ${normalizedLanguage}`);
-    console.log(`[SERVER FALLBACK] First tip content check:`, JSON.stringify(tips[0], null, 2));
+
     
     // Cache the result for 72 hours with language key
     await cache.set(cacheKey, { tips }, false, 72);
@@ -1614,7 +1597,6 @@ export async function generateFinancialHealthScore(
     // Check cache first
     const cachedResult = await cache.get(stableData);
     if (cachedResult) {
-      console.log('Financial health score: Using cached result');
       return cachedResult;
     }
 
@@ -1726,7 +1708,6 @@ Provide an AI-powered financial health score that adapts to this user's specific
 
     // Cache the result with 24 hours TTL
     await cache.set(stableData, healthData, false, 24);
-    console.log('Financial health score generated successfully and cached');
     
     return healthData;
   } catch (error) {
