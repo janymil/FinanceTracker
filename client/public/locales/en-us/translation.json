@@ -264,7 +264,7 @@
   "We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the \"Last updated\" date.": "We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the \"Last updated\" date.",
   "9. Contact Us": "Contact Us",
   "If you have any questions about this Privacy Policy, please contact us at:": "If you have any questions about this Privacy Policy, please contact us at:",
-  "Email: info@finanzerpro.com": "Email: info@finanzerpro.com",
+  "Email: info@finanzerpro.com": "info@finanzerpro.com",
 
   "Cookie Policy": "Cookie Policy",
   "Last updated: June 14, 2025": "Last updated: June 14, 2025",
@@ -835,7 +835,7 @@
   "I agree to the": "I agree to the",
   "and": "and",
   "Please accept Terms & Privacy Policy to continue": "Please accept Terms & Privacy Policy to continue",
-  
+
   "auth": {
     "signUp": "Sign Up",
     "signIn": "Sign In",
@@ -851,7 +851,7 @@
     "securePrivate": "Secure & Private",
     "securePrivateDesc": "Industry-standard security keeps your data protected"
   },
-  
+
   "seo": {
     "authTitle": "Sign In | Sign Up - FinanzerPro",
     "authDescription": "Create your FinanzerPro account or sign in to access your personal finance dashboard. Start tracking expenses, managing budgets, and achieving your financial goals today.",
@@ -892,6 +892,10 @@
     "transactionUpdated": "Transaction Updated",
     "transactionUpdatedSuccess": "Transaction has been updated successfully",
     "editFailed": "Edit Failed",
-    "transactionAddedSuccess": "Transaction has been created successfully"
+    "transactionAddedSuccess": "Transaction has been created successfully",
+    "Clear all filters": "Clear all filters",
+  "weekly": "weekly",
+  "monthly": "monthly",
+  "yearly": "yearly"
   }
 }

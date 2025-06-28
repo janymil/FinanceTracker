@@ -74,7 +74,7 @@ export default function TransactionFilters({
               />
             </div>
           </div>
-          
+
           <Button
             variant="outline"
             size="sm"
@@ -107,7 +107,7 @@ export default function TransactionFilters({
                       <SelectItem value="income">{t("Income")}</SelectItem>
                       <SelectItem value="expense">{t("Expense")}</SelectItem>
                     </SelectContent>
-                  </Select>
+                                    </Select>
                 </div>
               )}
 
@@ -170,7 +170,7 @@ export default function TransactionFilters({
                 </Select>
               </div>
             </div>
-            
+
             {/* Clear filters button */}
             {hasActiveFilters && (
               <div className="mt-4 flex justify-end">

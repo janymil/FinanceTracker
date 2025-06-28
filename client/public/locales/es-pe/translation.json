@@ -426,7 +426,7 @@
   "Add Expense Category": "Agregar Categoría de Gastos",
   "No Income Categories": "Sin Categorías de Ingresos",
   "Create your first income category to organize your revenue sources": "Crea tu primera categoría de ingresos para organizar tus fuentes de ingresos",
-  "Add Income Category": "Agregar Categoría de Ingresos",
+  "Add Income Category": "Agregar Categororía de Ingresos",
   "transactions": "transacciones",
   "In use": "En uso",
 
@@ -813,7 +813,7 @@
   "I agree to the": "Acepto los",
   "and": "y",
   "Please accept Terms & Privacy Policy to continue": "Por favor acepta los Términos y Política de Privacidad para continuar",
-  
+
   "auth": {
     "signUp": "Registrarse",
     "signIn": "Iniciar Sesión",
@@ -829,7 +829,7 @@
     "securePrivate": "Seguro y Privado",
     "securePrivateDesc": "Seguridad de estándar industrial mantiene tus datos protegidos"
   },
-  
+
   "seo": {
     "authTitle": "Iniciar Sesión | Registrarse - FinanzerPro",
     "authDescription": "Crea tu cuenta de FinanzerPro o inicia sesión para acceder a tu panel de finanzas personales. Comienza a rastrear gastos, gestionar presupuestos y alcanzar tus metas financieras hoy.",
@@ -870,6 +870,10 @@
     "transactionUpdated": "Transacción Actualizada",
     "transactionUpdatedSuccess": "La transacción ha sido actualizada exitosamente",
     "editFailed": "Error al Editar",
-    "transactionAddedSuccess": "La transacción ha sido creada exitosamente"
+    "transactionAddedSuccess": "La transacción ha sido creada exitosamente",
+    "Clear all filters": "Borrar todos los filtros",
+    "weekly": "semanal",
+    "monthly": "mensual",
+    "yearly": "anual"
   }
 }

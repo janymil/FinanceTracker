@@ -341,7 +341,7 @@
   "May": "Máj",
   "Jun": "Jún",
   "Jul": "Júl",
-  "Aug": "Aug",
+  "Aug": "August",
   "Sep": "Sep",
   "Oct": "Okt",
   "Nov": "Nov",
@@ -848,6 +848,7 @@
   "Your name, email, account details, or any identifying information is never shared with AI services": "Vaše meno, email, podrobnosti účtu alebo akékoľvek identifikačné informácie sa nikdy nezdieľajú s AI službami",
   "Important:": "Dôležité:",
   "AI processing only occurs for Standard and Premium subscribers who have AI features enabled. Free plan users do not have their data processed by AI services.": "AI spracovanie sa vykonáva iba pre predplatiteľov Standard a Premium, ktorí majú povolené AI funkcie. Používatelia bezplatného plánu nemajú svoje údaje spracovávané AI službami.",
+Adding recurring frequency translations to the Slovak language file.
   "4. Information Sharing": "4. Zdieľanie informácií",
   "AI Processing:": "AI spracovanie:",
   "OpenAI for anonymized financial insights (as detailed in section 3 above)": "OpenAI pre anonymizované finančné poznatky (ako je podrobne uvedené v sekcii 3 vyššie)",
@@ -861,7 +862,7 @@
   "I agree to the": "Súhlasím s",
   "and": "a",
   "Please accept Terms & Privacy Policy to continue": "Prosím prijmite Podmienky a Politiku ochrany súkromia pre pokračovanie",
-  
+
   "auth": {
     "signUp": "Registrácia",
     "signIn": "Prihlásenie",
@@ -877,7 +878,7 @@
     "securePrivate": "Bezpečné a Súkromné",
     "securePrivateDesc": "Bezpečnosť priemyselného štandardu udržuje vaše údaje chránené"
   },
-  
+
   "seo": {
     "authTitle": "Prihlásenie | Registrácia - FinanzerPro",
     "authDescription": "Vytvor si svoj FinanzerPro účet alebo sa prihlás pre prístup k tvojmu osobnému finančnému panelu. Začni sledovať výdavky, spravovať rozpočty a dosiahnuť svoje finančné ciele už dnes.",
@@ -918,6 +919,9 @@
     "transactionUpdated": "Transakcia Aktualizovaná",
     "transactionUpdatedSuccess": "Transakcia bola úspešne aktualizovaná",
     "editFailed": "Chyba pri Úprave",
-    "transactionAddedSuccess": "Transakcia bola úspešne vytvorená"
+    "transactionAddedSuccess": "Transakcia bola úspešne vytvorená",
+    "weekly": "týždenne",
+    "monthly": "mesačne",
+    "yearly": "ročne"
   }
 }

@@ -231,7 +231,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                           {transaction.isRecurring && (
                             <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 dark:border-blue-800 dark:text-blue-300">
                               <Repeat className="h-3 w-3 mr-1" />
-                              Recurring
+                              {t("Recurring")}
                             </Badge>
                           )}
                         </div>

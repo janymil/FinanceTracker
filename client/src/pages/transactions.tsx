@@ -834,7 +834,7 @@ export default function Transactions() {
                             <>
                               <span className="hidden sm:inline">•</span>
                               <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs">
-                                🔄 {transaction.recurringFrequency}
+                                🔄 {transaction.recurringFrequency ? t(transaction.recurringFrequency) : t("Recurring")}
                               </Badge>
                             </>
                           )}
