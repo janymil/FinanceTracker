@@ -870,5 +870,27 @@
     "riskAssessment": "Risk Assessment",
     "cashFlow": "Cash Flow",
     "financialPlanning": "Financial Planning"
+  },
+  "transactions": {
+    "allTransactions": "All Transactions",
+    "manageTransactionsDesc": "Manage all your income and expense transactions",
+    "uploadImage": "Upload Image",
+    "editTransaction": "Edit Transaction",
+    "updateTransactionDetails": "Update the transaction details",
+    "recordNewTransaction": "Record a new transaction",
+    "recordNewTransactionWithCount": "Record a new transaction ({{count}} entries)",
+    "transactionsCount": "Transactions ({{count}})",
+    "filteredTransactions": "Filtered transactions",
+    "allYourTransactions": "All your transactions",
+    "loadingTransactions": "Loading transactions...",
+    "noTransactionsFound": "No Transactions Found",
+    "tryAdjustingFilters": "Try adjusting your filters or search terms",
+    "addFirstTransaction": "Add your first transaction to get started",
+    "transactionDeleted": "Transaction Deleted",
+    "transactionDeletedSuccess": "Transaction has been removed successfully",
+    "transactionUpdated": "Transaction Updated",
+    "transactionUpdatedSuccess": "Transaction has been updated successfully",
+    "editFailed": "Edit Failed",
+    "transactionAddedSuccess": "Transaction has been created successfully"
   }
 }

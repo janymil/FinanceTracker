@@ -896,5 +896,27 @@
     "riskAssessment": "Hodnotenie Rizika",
     "cashFlow": "Peňažný Tok",
     "financialPlanning": "Finančné Plánovanie"
+  },
+  "transactions": {
+    "allTransactions": "Všetky Transakcie",
+    "manageTransactionsDesc": "Spravujte všetky svoje transakcie príjmov a výdavkov",
+    "uploadImage": "Nahrať Obrázok",
+    "editTransaction": "Upraviť Transakciu",
+    "updateTransactionDetails": "Aktualizovať detaily transakcie",
+    "recordNewTransaction": "Zaznamenať novú transakciu",
+    "recordNewTransactionWithCount": "Zaznamenať novú transakciu ({{count}} záznamov)",
+    "transactionsCount": "Transakcie ({{count}})",
+    "filteredTransactions": "Filtrované transakcie",
+    "allYourTransactions": "Všetky vaše transakcie",
+    "loadingTransactions": "Načítavam transakcie...",
+    "noTransactionsFound": "Nenašli sa Žiadne Transakcie",
+    "tryAdjustingFilters": "Skúste upraviť svoje filtre alebo vyhľadávacie výrazy",
+    "addFirstTransaction": "Pridajte svoju prvú transakciu pre začiatok",
+    "transactionDeleted": "Transakcia Zmazaná",
+    "transactionDeletedSuccess": "Transakcia bola úspešne odstránená",
+    "transactionUpdated": "Transakcia Aktualizovaná",
+    "transactionUpdatedSuccess": "Transakcia bola úspešne aktualizovaná",
+    "editFailed": "Chyba pri Úprave",
+    "transactionAddedSuccess": "Transakcia bola úspešne vytvorená"
   }
 }

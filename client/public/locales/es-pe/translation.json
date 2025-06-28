@@ -848,5 +848,27 @@
     "riskAssessment": "Evaluación de Riesgo",
     "cashFlow": "Flujo de Efectivo",
     "financialPlanning": "Planificación Financiera"
+  },
+  "transactions": {
+    "allTransactions": "Todas las Transacciones",
+    "manageTransactionsDesc": "Gestiona todas tus transacciones de ingresos y gastos",
+    "uploadImage": "Subir Imagen",
+    "editTransaction": "Editar Transacción",
+    "updateTransactionDetails": "Actualizar los detalles de la transacción",
+    "recordNewTransaction": "Registrar una nueva transacción",
+    "recordNewTransactionWithCount": "Registrar una nueva transacción ({{count}} entradas)",
+    "transactionsCount": "Transacciones ({{count}})",
+    "filteredTransactions": "Transacciones filtradas",
+    "allYourTransactions": "Todas tus transacciones",
+    "loadingTransactions": "Cargando transacciones...",
+    "noTransactionsFound": "No se Encontraron Transacciones",
+    "tryAdjustingFilters": "Intenta ajustar tus filtros o términos de búsqueda",
+    "addFirstTransaction": "Agrega tu primera transacción para comenzar",
+    "transactionDeleted": "Transacción Eliminada",
+    "transactionDeletedSuccess": "La transacción ha sido eliminada exitosamente",
+    "transactionUpdated": "Transacción Actualizada",
+    "transactionUpdatedSuccess": "La transacción ha sido actualizada exitosamente",
+    "editFailed": "Error al Editar",
+    "transactionAddedSuccess": "La transacción ha sido creada exitosamente"
   }
 }

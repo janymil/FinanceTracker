@@ -168,13 +168,13 @@ export default function Transactions() {
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
-        title: t("Transaction Updated"),
-        description: t("Transaction has been updated successfully"),
+        title: t("transactions.transactionUpdated"),
+        description: t("transactions.transactionUpdatedSuccess"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: t("Edit Failed"),
+        title: t("transactions.editFailed"),
         description: error.message,
         variant: "destructive",
       });
@@ -210,8 +210,8 @@ export default function Transactions() {
       setEditingTransaction(null);
       setIsDialogOpen(false);
       toast({
-        title: t("Transaction Updated"),
-        description: t("Transaction has been updated successfully"),
+        title: t("transactions.transactionUpdated"),
+        description: t("transactions.transactionUpdatedSuccess"),
       });
     },
     onError: (error: any) => {
@@ -234,8 +234,8 @@ export default function Transactions() {
       queryClient.invalidateQueries({ queryKey: ["transaction-reminders"] });
       queryClient.invalidateQueries({ queryKey: ["financial-summary"] });
       toast({
-        title: t("Transaction Deleted"),
-        description: t("Transaction has been removed successfully"),
+        title: t("transactions.transactionDeleted"),
+        description: t("transactions.transactionDeletedSuccess"),
       });
     },
     onError: (error: any) => {
@@ -457,10 +457,10 @@ export default function Transactions() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                All Transactions
+                {t("transactions.allTransactions")}
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm sm:text-base">
-                Manage all your income and expense transactions
+                {t("transactions.manageTransactionsDesc")}
               </p>
             </div>
             <div className="flex gap-2 flex-wrap sm:flex-nowrap">
@@ -469,7 +469,7 @@ export default function Transactions() {
                   // Refresh transactions after receipt processing
                   refetchTransactions();
                 }}
-                buttonText={t("Upload Image")}
+                buttonText={t("transactions.uploadImage")}
               />
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
@@ -497,13 +497,13 @@ export default function Transactions() {
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>
-                      {editingTransaction ? t("Edit Transaction") : t("Add New Transaction")}
+                      {editingTransaction ? t("transactions.editTransaction") : t("Add New Transaction")}
                     </DialogTitle>
                     <DialogDescription>
-                      {editingTransaction ? t("Update the transaction details") : 
+                      {editingTransaction ? t("transactions.updateTransactionDetails") : 
                        user?.primaryEmailAddress ? 
-                       t("Record a new transaction", {entries: transactions?.length || 0}) :
-                       t("Record a new income or expense transaction")}
+                       t("transactions.recordNewTransactionWithCount", {count: transactions?.length || 0}) :
+                       t("transactions.recordNewTransaction")}
                     </DialogDescription>
                   </DialogHeader>
 
@@ -774,29 +774,29 @@ export default function Transactions() {
         {/* Transactions List */}
         <Card>
           <CardHeader>
-            <CardTitle>Transactions ({filteredTransactions.length})</CardTitle>
+            <CardTitle>{t("transactions.transactionsCount", {count: filteredTransactions.length})}</CardTitle>
             <CardDescription>
               {searchTerm || filterType !== "all" || filterCategory !== "all" || filterRecurring !== "all" || dateRange !== "all" 
-                ? t("Filtered transactions") 
-                : t("All your transactions")}
+                ? t("transactions.filteredTransactions") 
+                : t("transactions.allYourTransactions")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">{t("Loading transactions...")}</p>
+                <p className="text-gray-600 dark:text-gray-300 mt-2">{t("transactions.loadingTransactions")}</p>
               </div>
             ) : filteredTransactions.length === 0 ? (
               <div className="text-center py-8">
                 <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  {t("No Transactions Found")}
+                  {t("transactions.noTransactionsFound")}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
                   {searchTerm || filterType !== "all" || filterCategory !== "all" || dateRange !== "all"
-                    ? t("Try adjusting your filters or search terms")
-                    : t("Add your first transaction to get started")}
+                    ? t("transactions.tryAdjustingFilters")
+                    : t("transactions.addFirstTransaction")}
                 </p>
                 <Button onClick={() => setIsDialogOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
