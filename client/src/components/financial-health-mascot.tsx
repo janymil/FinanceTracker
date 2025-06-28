@@ -624,7 +624,7 @@ export default function FinancialHealthMascot() {
                                 <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
                                   <div className="flex items-center gap-2 mb-2">
                                     <AlertTriangle className="h-4 w-4 text-red-600" />
-                                    <span className="text-xs font-semibold text-red-700 dark:text-red-400">🚨 Urgent Action Required</span>
+                                    <span className="text-xs font-semibold text-red-700 dark:text-red-400">{t('mascot.categories.urgentActions')}</span>
                                   </div>
                                   <div className="space-y-2">
                                     {urgentItems.map((item, index) => (
@@ -649,7 +649,7 @@ export default function FinancialHealthMascot() {
                                 <div className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
                                   <div className="flex items-center gap-2 mb-2">
                                     <Shield className="h-4 w-4 text-yellow-600" />
-                                    <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-400">💰 Budget Management</span>
+                                    <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-400">{t('mascot.categories.budgetManagement')}</span>
                                   </div>
                                   <div className="space-y-2">
                                     {budgetItems.map((item, index) => (
@@ -674,7 +674,7 @@ export default function FinancialHealthMascot() {
                                 <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
                                   <div className="flex items-center gap-2 mb-2">
                                     <Lightbulb className="h-4 w-4 text-blue-600" />
-                                    <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">💡 Smart Suggestions</span>
+                                    <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">{t('mascot.categories.smartSuggestions')}</span>
                                   </div>
                                   <div className="space-y-2">
                                     {improvementItems.map((item, index) => (
@@ -699,7 +699,7 @@ export default function FinancialHealthMascot() {
                                 <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
                                   <div className="flex items-center gap-2 mb-2">
                                     <Target className="h-4 w-4 text-gray-600" />
-                                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-400">📋 General Recommendations</span>
+                                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-400">{t('mascot.categories.generalRecommendations')}</span>
                                   </div>
                                   <div className="space-y-2">
                                     {otherItems.map((item, index) => (
