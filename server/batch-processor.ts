@@ -121,3 +121,7 @@ setInterval(processBatchedOperations, 5 * 60 * 1000);
 setTimeout(processBatchedOperations, 30000); // Run after 30 seconds of startup
 
 console.log('Batch processor initialized - running every 5 minutes');
+
+// Initialize grace period processor for payment failure handling
+import { graceProcessor } from './graceProcessor';
+graceProcessor.start();
