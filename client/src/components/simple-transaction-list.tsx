@@ -74,17 +74,20 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
   };
 
   const { i18n } = useTranslation();
-  const currentLang = i18n.language || 'en-us';
-  let locale = 'en-us';
   
-  if (currentLang.startsWith('es')) {
-    locale = 'es';
-  } else if (currentLang.startsWith('sk')) {
-    locale = 'sk';
-  }
+  const getDateLocale = () => {
+    const currentLang = i18n.language || 'en-us';
+    if (currentLang.startsWith('es')) {
+      return 'es-pe';
+    } else if (currentLang.startsWith('sk')) {
+      return 'sk-sk';
+    } else {
+      return 'en-us';
+    }
+  };
   
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(locale, {
+    return new Date(dateString).toLocaleDateString(getDateLocale(), {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
