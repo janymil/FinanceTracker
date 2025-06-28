@@ -216,7 +216,7 @@ export default function Transactions() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("Error"),
         description: error.message,
         variant: "destructive",
       });
@@ -240,7 +240,7 @@ export default function Transactions() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("Error"),
         description: error.message,
         variant: "destructive",
       });
@@ -497,13 +497,13 @@ export default function Transactions() {
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>
-                      {editingTransaction ? "Edit Transaction" : "Add New Transaction"}
+                      {editingTransaction ? t("Edit Transaction") : t("Add New Transaction")}
                     </DialogTitle>
                     <DialogDescription>
-                      {editingTransaction ? "Update the transaction details" : 
+                      {editingTransaction ? t("Update the transaction details") : 
                        user?.primaryEmailAddress ? 
-                       `Record a new transaction (${transactions?.length || 0}/100 entries used)` :
-                       "Record a new income or expense transaction"}
+                       t("Record a new transaction", {entries: transactions?.length || 0}) :
+                       t("Record a new income or expense transaction")}
                     </DialogDescription>
                   </DialogHeader>
 
@@ -570,7 +570,7 @@ export default function Transactions() {
                       onValueChange={(value) => setNewTransaction({ ...newTransaction, categoryId: value })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a category">
+                        <SelectValue placeholder={t("Select a category")}>
                           {newTransaction.categoryId && (categories as Category[]).find(cat => cat.id.toString() === newTransaction.categoryId)?.name}
                         </SelectValue>
                       </SelectTrigger>
@@ -615,12 +615,12 @@ export default function Transactions() {
                               })}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Select frequency" />
+                                <SelectValue placeholder={t("Select frequency")} />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="weekly">Weekly</SelectItem>
-                                <SelectItem value="monthly">Monthly</SelectItem>
-                                <SelectItem value="yearly">Yearly</SelectItem>
+                                <SelectItem value="weekly">{t("Weekly")}</SelectItem>
+                                <SelectItem value="monthly">{t("Monthly")}</SelectItem>
+                                <SelectItem value="yearly">{t("Yearly")}</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
