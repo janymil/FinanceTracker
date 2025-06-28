@@ -1205,10 +1205,10 @@ You are an expert financial advisor who provides personalized, actionable recomm
           id: rec.id || `rec-${index + 1}`,
           type: rec.type || 'general',
           priority: rec.priority || 'medium',
-          title: rec.title,
-          description: rec.description,
-          action: rec.action,
-          impact: rec.impact,
+          title: rec.title || 'Financial Task',
+          description: rec.description || 'Complete this financial task',
+          action: rec.action || 'Take action on this recommendation',
+          impact: rec.impact || 'Positive financial impact',
           timeToComplete: rec.timeToComplete || '10 minutes'
         }))
       : [];

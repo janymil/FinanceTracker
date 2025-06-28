@@ -109,13 +109,9 @@ export default function DailyRecommendations({ summary, transactions = [], budge
   // Create stable date-based cache key that matches backend 24-hour TTL
   const todayKey = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
   
-  // Get current URL language for cache key (more reliable than i18n.language for manual URL changes)
-  const [location] = useLocation();
-  const urlLanguage = location.startsWith('/es') ? 'es' : location.startsWith('/sk') ? 'sk' : 'en';
-  
   // Fetch AI recommendations from backend
   const { data: recommendationsData, isLoading: recommendationsLoading, error: recommendationsError, refetch } = useQuery({
-    queryKey: ['daily-recommendations', user?.id, todayKey, urlLanguage], // Cache by user, date, and URL language
+    queryKey: ['daily-recommendations', user?.id, todayKey, i18n.language], // Cache by user, date, and language
     enabled: isUserReady && isPremiumUser && hasTransactionData,
     staleTime: 5 * 60 * 1000, // 5 minutes cache
     refetchOnWindowFocus: false,

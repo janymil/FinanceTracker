@@ -1467,10 +1467,10 @@ You are an expert financial advisor who provides personalized, actionable recomm
           id: rec.id || `rec-${index + 1}`,
           type: rec.type || 'general',
           priority: rec.priority || 'medium',
-          title: rec.title,
-          description: rec.description,
-          action: rec.action,
-          impact: rec.impact,
+          title: rec.title || 'Financial Task',
+          description: rec.description || 'Complete this financial task',
+          action: rec.action || 'Take action on this recommendation',
+          impact: rec.impact || 'Positive financial impact',
           timeToComplete: rec.timeToComplete || '10 minutes'
         }))
       : [];
@@ -1478,10 +1478,10 @@ You are an expert financial advisor who provides personalized, actionable recomm
     const insights = Array.isArray(aiResponse.insights)
       ? aiResponse.insights.map((insight, index) => ({
           id: insight.id || `insight-${index + 1}`,
-          insight: insight.insight,
-          basedOn: insight.basedOn,
+          insight: insight.insight || 'Financial insight based on your data',
+          basedOn: insight.basedOn || 'Transaction analysis',
           confidence: Number(insight.confidence) || 0.7,
-          timeframe: insight.timeframe
+          timeframe: insight.timeframe || 'Recent activity'
         }))
       : [];
 
