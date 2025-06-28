@@ -728,7 +728,7 @@ export default function Income() {
                 />
               </div>
               <div className="grid w-full items-center gap-1.5">
-                <Label htmlFor="editDescription">Description *</Label>
+                <Label htmlFor="editDescription">{t("common.description")} *</Label>
                 <Input
                   id="editDescription"
                   value={editingTransaction.description}
@@ -740,7 +740,7 @@ export default function Income() {
                 />
               </div>
               <div className="grid w-full items-center gap-1.5">
-                <Label htmlFor="editDate">Date</Label>
+                <Label htmlFor="editDate">{t("common.date")}</Label>
                 <Input
                   id="editDate"
                   type="date"
@@ -752,7 +752,7 @@ export default function Income() {
                 />
               </div>
               <div className="grid w-full items-center gap-1.5">
-                <Label htmlFor="editCategory">Category</Label>
+                <Label htmlFor="editCategory">{t("common.category")}</Label>
                 <Select 
                   value={editingTransaction.categoryId?.toString() || ""} 
                   onValueChange={(value) => setEditingTransaction({
@@ -761,7 +761,7 @@ export default function Income() {
                   })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder={t("common.select_category")} />
                   </SelectTrigger>
                   <SelectContent>
                     {incomeCategories.map((category: Category) => (
@@ -781,12 +781,12 @@ export default function Income() {
                     isRecurring: checked as boolean
                   })}
                 />
-                <Label htmlFor="editRecurring">Recurring income</Label>
+                <Label htmlFor="editRecurring">{t("income.recurring_income")}</Label>
               </div>
               {editingTransaction.isRecurring && (
                 <>
                   <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="editFrequency">Frequency</Label>
+                    <Label htmlFor="editFrequency">{t("common.frequency")}</Label>
                     <Select 
                       value={editingTransaction.recurringFrequency} 
                       onValueChange={(value) => setEditingTransaction({
@@ -798,14 +798,14 @@ export default function Income() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                        <SelectItem value="yearly">Yearly</SelectItem>
+                        <SelectItem value="weekly">{t("common.weekly")}</SelectItem>
+                        <SelectItem value="monthly">{t("common.monthly")}</SelectItem>
+                        <SelectItem value="yearly">{t("common.yearly")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="editEndDate">End Date (optional)</Label>
+                    <Label htmlFor="editEndDate">{t("common.end_date")} ({t("common.optional")})</Label>
                     <Input
                       id="editEndDate"
                       type="date"
@@ -819,7 +819,7 @@ export default function Income() {
                 </>
               )}
               <div className="grid w-full items-center gap-1.5">
-                <Label htmlFor="editReferenceNote">Reference Note</Label>
+                <Label htmlFor="editReferenceNote">{t("common.reference_note")}</Label>
                 <Input
                   id="editReferenceNote"
                   value={editingTransaction.referenceNote || ""}
@@ -831,7 +831,7 @@ export default function Income() {
               </div>
               <div className="flex space-x-2">
                 <Button type="submit" className="flex-1" disabled={editIncomeMutation.isPending}>
-                  {editIncomeMutation.isPending ? "Updating..." : "Update Income"}
+                  {editIncomeMutation.isPending ? t("common.updating") : t("income.update_income")}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => setEditingTransaction(null)}>
                   Cancel
