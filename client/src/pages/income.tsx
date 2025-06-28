@@ -90,14 +90,14 @@ export default function Income() {
   // Helper function to format dates with proper locale
   const formatTransactionDate = (dateString: string) => {
     const currentLang = i18n.language || 'en-us';
-    let locale = 'en-us';
-    
-    if (currentLang.startsWith('es')) {
+    let locale = 'en-US';
+
+    if (currentLang.startsWith('es') || currentLang === 'es-pe') {
       locale = 'es';
-    } else if (currentLang.startsWith('sk')) {
-      locale = 'sk';
+    } else if (currentLang.startsWith('sk') || currentLang === 'sk-sk') {
+      locale = 'sk-SK';
     }
-    
+
     return new Date(dateString).toLocaleDateString(locale, {
       month: 'short',
       day: 'numeric',
@@ -236,18 +236,18 @@ export default function Income() {
 
   // Filter transactions for income only
   const incomeTransactions = allTransactions.filter((transaction: Transaction) => transaction.type === "income");
-  
+
   // Apply additional filters
   const filteredIncomes = incomeTransactions.filter((transaction: Transaction) => {
     const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          transaction.categoryName?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesCategory = filterCategory === "all" || transaction.categoryName === filterCategory;
-    
+
     const matchesRecurring = filterRecurring === "all" || 
                            (filterRecurring === "recurring" && transaction.isRecurring) ||
                            (filterRecurring === "one-time" && !transaction.isRecurring);
-    
+
     // Month filter takes precedence over date range
     if (selectedMonth) {
       const transactionDate = new Date(transaction.date);
@@ -256,14 +256,14 @@ export default function Income() {
                           transactionDate.getMonth() === parseInt(month) - 1;
       return matchesSearch && matchesCategory && matchesRecurring && monthMatches;
     }
-    
+
     let matchesDate = true;
     if (dateRange !== "all") {
       const transactionDate = new Date(transaction.date);
       const today = new Date();
       const currentYear = today.getFullYear();
       const currentMonth = today.getMonth();
-      
+
       switch (dateRange) {
         case "this-month":
           matchesDate = transactionDate.getFullYear() === currentYear && 
@@ -284,7 +284,7 @@ export default function Income() {
           break;
       }
     }
-    
+
     return matchesSearch && matchesCategory && matchesRecurring && matchesDate;
   });
 
@@ -297,12 +297,12 @@ export default function Income() {
   const monthlyIncomeData = incomeTransactions.reduce((acc: any, transaction: Transaction) => {
     const date = new Date(transaction.date);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    
+
     if (!acc[monthKey]) {
       acc[monthKey] = 0;
     }
     acc[monthKey] += parseFloat(transaction.amount);
-    
+
     return acc;
   }, {});
 
@@ -311,14 +311,14 @@ export default function Income() {
     .slice(-6)
     .map(([month, amount]) => {
       const currentLang = i18n.language || 'en-us';
-      let locale = 'en-us';
-      
-      if (currentLang.startsWith('es')) {
+      let locale = 'en-US';
+
+      if (currentLang.startsWith('es') || currentLang === 'es-pe') {
         locale = 'es';
-      } else if (currentLang.startsWith('sk')) {
-        locale = 'sk';
+      } else if (currentLang.startsWith('sk') || currentLang === 'sk-sk') {
+        locale = 'sk-SK';
       }
-      
+
       return {
         month: new Date(month + '-01').toLocaleDateString(locale, { month: 'short', year: 'numeric' }),
         amount: amount as number
@@ -344,7 +344,7 @@ export default function Income() {
 
   const handleEdit = (transaction: Transaction) => {
     const category = categories.find((cat: Category) => cat.name === transaction.categoryName);
-    
+
     setEditingTransaction({
       ...transaction,
       categoryId: category?.id || transaction.categoryId,
@@ -362,14 +362,14 @@ export default function Income() {
       });
       return;
     }
-    
+
     createIncomeMutation.mutate(newIncome);
   };
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingTransaction) return;
-    
+
     const updateData = {
       id: editingTransaction.id,
       amount: parseFloat(editingTransaction.amount),
@@ -427,7 +427,7 @@ export default function Income() {
             <h1 className="text-2xl md:text-3xl font-bold">{t("income.title")}</h1>
             <p className="text-muted-foreground">{t("income.subtitle")}</p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-2">
             <UploadReceiptModal onReceiptProcessed={handleReceiptProcessed} buttonText={t("upload.button_text")} />
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
