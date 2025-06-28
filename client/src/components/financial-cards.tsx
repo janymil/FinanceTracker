@@ -23,7 +23,7 @@ interface FinancialCardsProps {
 
 export default function FinancialCards({ summary, isLoading, budgetsData, selectedMonth }: FinancialCardsProps) {
   const { currency } = useCurrency();
-  const { t, i18n } = useTranslation();
+  const { t, i18n, ready } = useTranslation();
   
 
   
