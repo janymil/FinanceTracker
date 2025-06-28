@@ -452,7 +452,7 @@ export function registerAIRoutes(app: Express) {
 
       // Create stable date-based cache key instead of using full transaction data
       const todayKey = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-      const cacheKey = { date: todayKey, userId: userId };
+      const cacheKey = { date: todayKey, userId: userId, language: userLanguage };
 
       // Try to get cached result using date-based key
       const cachedResult = await cache.get(cacheKey);

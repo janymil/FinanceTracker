@@ -122,10 +122,7 @@ export default function DailyRecommendations({ summary, transactions = [], budge
           summary: summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 },
           budgets: budgets || []
         });
-        const data = await response.json();
-        console.log('Daily recommendations received:', data);
-        console.log('First recommendation:', data?.recommendations?.[0]);
-        return data;
+        return response.json();
       } catch (error) {
         console.error('Failed to fetch daily recommendations:', error);
         throw error;
