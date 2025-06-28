@@ -1080,10 +1080,6 @@ Answer questions about features, subscription plans, how to use the app, trouble
 
       const formattedMonth = formatMonth(selectedMonth);
 
-      // Get user language and log for debugging
-      const userLanguage = getUserLanguage(req);
-      console.log('[AI contextual-tips] User language detected:', userLanguage);
-
       // Prepare payload for centralized AI processor
       const aiPayload = {
         summary: {
@@ -1113,14 +1109,8 @@ Answer questions about features, subscription plans, how to use the app, trouble
           progress: goal.progress || ((goal.currentAmount / goal.targetAmount) * 100)
         })) || [],
         selectedMonth: formattedMonth,
-        language: userLanguage
+        language: getUserLanguage(req)
       };
-
-      console.log('[AI contextual-tips] Payload being sent to Fly.io:', {
-        language: aiPayload.language,
-        transactionCount: aiPayload.transactions.length,
-        hasLanguage: !!aiPayload.language
-      });
 
       // Initialize UnifiedAICache with 72 hours TTL
       const cache = new UnifiedAICache('contextual-tips', userId);

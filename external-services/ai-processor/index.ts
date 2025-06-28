@@ -238,9 +238,6 @@ export async function generateContextualFinancialTips(data: {
   try {
     const { summary, transactions, budgets, goals, selectedMonth, language = 'en-us' } = data;
     
-    console.log('[contextual-tips] Language received at Fly.io:', language);
-    console.log('[contextual-tips] getLanguageLabel result:', getLanguageLabel(language));
-    
     // Return basic tip if no meaningful data
     if (transactions.length === 0 && summary.totalIncome === 0 && summary.totalExpenses === 0) {
       return {
