@@ -53,6 +53,31 @@ export default function AuthPage() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  // Global callback for terms acceptance change from within Clerk form
+  useEffect(() => {
+    (window as any).clerkTermsAcceptanceChanged = (checked: boolean) => {
+      setTermsAccepted(checked);
+      setShowTermsError(false);
+    };
+    
+    // Intercept Clerk form submissions to validate terms
+    const interceptClerkSubmit = (e: Event) => {
+      if (!termsAccepted) {
+        e.preventDefault();
+        e.stopPropagation();
+        setShowTermsError(true);
+      }
+    };
+    
+    // Add event listener to capture form submissions
+    document.addEventListener('submit', interceptClerkSubmit, true);
+    
+    return () => {
+      delete (window as any).clerkTermsAcceptanceChanged;
+      document.removeEventListener('submit', interceptClerkSubmit, true);
+    };
+  }, [termsAccepted]);
+
   // Redirect if already logged in - prevent multiple redirects
   useEffect(() => {
     if (isLoaded && clerkUser && !hasRedirected) {
@@ -106,16 +131,25 @@ export default function AuthPage() {
                     firstName: "",
                     lastName: ""
                   }}
-                  beforeSignUp={async (signUpAttempt) => {
-                    if (!termsAccepted) {
-                      setShowTermsError(true);
-                      throw new Error("You must accept the Terms of Service and Privacy Policy to continue.");
-                    }
-                    setShowTermsError(false);
-                    return signUpAttempt;
-                  }}
                   appearance={{
                     elements: {
+                      footer: `
+                        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+                          <div style="display: flex; align-items: flex-start; gap: 12px;">
+                            <input 
+                              type="checkbox" 
+                              id="clerk-terms-acceptance" 
+                              ${termsAccepted ? 'checked' : ''}
+                              onchange="window.clerkTermsAcceptanceChanged(this.checked)"
+                              style="margin-top: 4px;"
+                            />
+                            <label for="clerk-terms-acceptance" style="font-size: 14px; color: #374151; line-height: 1.5; cursor: pointer;">
+                              I agree to the <a href="/${currentLang}/terms-of-service" target="_blank" style="color: #2563eb; text-decoration: underline;">Terms of Service</a> and <a href="/${currentLang}/privacy-policy" target="_blank" style="color: #2563eb; text-decoration: underline;">Privacy Policy</a>
+                            </label>
+                          </div>
+                          ${showTermsError ? '<div style="margin-top: 12px; padding: 12px; background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #dc2626; font-size: 14px;">Please accept Terms & Privacy Policy to continue</div>' : ''}
+                        </div>
+                      `,
                       formButtonPrimary: "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 w-full disabled:opacity-75 disabled:transform-none disabled:cursor-wait disabled:animate-pulse",
                       card: "shadow-none border-0 bg-transparent w-full max-w-none",
                       rootBox: "w-full max-w-none",
@@ -148,31 +182,6 @@ export default function AuthPage() {
                     }
                   }}
                 />
-                
-                {/* Terms Acceptance - Integrated into Clerk form */}
-                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
-                  <div className="flex items-start space-x-3">
-                    <Checkbox 
-                      id="terms-acceptance" 
-                      checked={termsAccepted}
-                      onCheckedChange={(checked) => {
-                        setTermsAccepted(checked === true);
-                        setShowTermsError(false);
-                      }}
-                      className="mt-1"
-                    />
-                    <label htmlFor="terms-acceptance" className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed cursor-pointer">
-                      {t("I agree to the")} <a href={`/${currentLang}/terms-of-service`} target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">{t("Terms of Service")}</a> {t("and")} <a href={`/${currentLang}/privacy-policy`} target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">{t("Privacy Policy")}</a>
-                    </label>
-                  </div>
-                  {showTermsError && (
-                    <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                      <p className="text-sm text-red-600 dark:text-red-400">
-                        {t("Please accept Terms & Privacy Policy to continue")}
-                      </p>
-                    </div>
-                  )}
-                </div>
               </div>
             </TabsContent>
 
