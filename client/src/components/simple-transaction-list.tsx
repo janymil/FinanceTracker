@@ -74,16 +74,10 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
   };
 
   const { i18n } = useTranslation();
-  const currentLang = i18n.language || 'en-us';
-  let locale = 'en-us';
-  
-  if (currentLang.startsWith('es')) {
-    locale = 'es';
-  } else if (currentLang.startsWith('sk')) {
-    locale = 'sk';
-  }
   
   const formatDate = (dateString: string) => {
+    // Use the actual detected language directly for proper locale formatting
+    const locale = i18n.language || 'en-us';
     return new Date(dateString).toLocaleDateString(locale, {
       month: 'short',
       day: 'numeric',
