@@ -834,7 +834,7 @@ export default function Income() {
                   {editIncomeMutation.isPending ? t("common.updating") : t("income.update_income")}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => setEditingTransaction(null)}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
               </div>
             </form>

@@ -712,7 +712,34 @@
     "cancel": "Zrušiť",
     "create": "Vytvoriť",
     "update": "Aktualizovať",
-    "error": "Chyba"
+    "updating": "Aktualizuje sa...",
+    "error": "Chyba",
+    "amount": "Suma",
+    "description": "Popis",
+    "date": "Dátum",
+    "category": "Kategória",
+    "select_category": "Vyberte kategóriu",
+    "frequency": "Frekvencia",
+    "weekly": "Týždenne",
+    "monthly": "Mesačne",
+    "yearly": "Ročne",
+    "end_date": "Dátum ukončenia",
+    "optional": "voliteľné",
+    "reference_note": "Referenčná poznámka",
+    "of": "z",
+    "transactions": "transakcií"
+  },
+
+  "income": {
+    "income_by_category": "Príjmy podľa kategórie",
+    "distribution_of_income_sources": "Rozdelenie zdrojov príjmov",
+    "search_placeholder": "Vyhľadať príjmy...",
+    "income_transactions": "Transakcie príjmov",
+    "no_transactions_found": "Nenašli sa žiadne transakcie príjmov",
+    "edit_income": "Upraviť príjem",
+    "edit_description": "Aktualizovať podrobnosti transakcie príjmu",
+    "recurring_income": "Opakujúci sa príjem",
+    "update_income": "Aktualizovať príjem"
   },
 
   "types": {

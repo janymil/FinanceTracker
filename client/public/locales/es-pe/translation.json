@@ -616,7 +616,34 @@
     "cancel": "Cancelar",
     "create": "Crear",
     "update": "Actualizar",
-    "error": "Error"
+    "updating": "Actualizando...",
+    "error": "Error",
+    "amount": "Monto",
+    "description": "Descripción",
+    "date": "Fecha",
+    "category": "Categoría",
+    "select_category": "Selecciona categoría",
+    "frequency": "Frecuencia",
+    "weekly": "Semanal",
+    "monthly": "Mensual",
+    "yearly": "Anual",
+    "end_date": "Fecha de Fin",
+    "optional": "opcional",
+    "reference_note": "Nota de Referencia",
+    "of": "de",
+    "transactions": "transacciones"
+  },
+
+  "income": {
+    "income_by_category": "Ingresos por Categoría",
+    "distribution_of_income_sources": "Distribución de fuentes de ingresos",
+    "search_placeholder": "Buscar ingresos...",
+    "income_transactions": "Transacciones de Ingresos",
+    "no_transactions_found": "No se encontraron transacciones de ingresos",
+    "edit_income": "Editar Ingreso",
+    "edit_description": "Actualizar los detalles de la transacción de ingreso",
+    "recurring_income": "Ingreso recurrente",
+    "update_income": "Actualizar Ingreso"
   },
 
   "types": {
