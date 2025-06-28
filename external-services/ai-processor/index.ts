@@ -137,7 +137,9 @@ export async function categorizeExpense(description: string, amount: number, lan
       messages: [
         {
           role: "system",
-          content: `You are an expert financial categorization assistant. Respond in ${getLanguageLabel(language)}. Analyze the expense description and amount to determine the most appropriate category.
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(language)}. ${getLanguageLabel(language) !== 'English' ? 'Never use English words.' : ''} ALL text content (category, confidence, reasoning) must be in ${getLanguageLabel(language)}.
+          
+You are an expert financial categorization assistant. Analyze the expense description and amount to determine the most appropriate category.
 
 Available categories:
 - Food & Dining (restaurants, groceries, takeout)
@@ -451,7 +453,9 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
       messages: [
         {
           role: "system",
-          content: `Respond in ${getLanguageLabel(data.language || 'en-us')}. You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.`
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(data.language || 'en-us')}. ${getLanguageLabel(data.language || 'en-us') !== 'English' ? 'Never use English words.' : ''} ALL text content (titles, descriptions, categories) must be in ${getLanguageLabel(data.language || 'en-us')}. 
+          
+You are an expert financial advisor who provides personalized, contextual recommendations based on real user financial data. Always return valid JSON with actionable tips.`
         },
         {
           role: "user",
@@ -582,7 +586,9 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
         messages: [
           {
             role: "system",
-            content: `You are an AI Financial Analyst providing premium-level insights. Respond in ${getLanguageLabel(normalizedLanguage)}. Your analysis must demonstrate these EXACT capabilities that users pay for:
+            content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (titles, descriptions, analysis) must be in ${getLanguageLabel(normalizedLanguage)}.
+
+You are an AI Financial Analyst providing premium-level insights. Your analysis must demonstrate these EXACT capabilities that users pay for:
 
 1. SPENDING PATTERN ANALYSIS: Identify spending trends, seasonal patterns, category concentrations, and behavioral insights
 2. PERSONALIZED SAVING RECOMMENDATIONS: Calculate specific saving opportunities based on their exact income/expense ratios
