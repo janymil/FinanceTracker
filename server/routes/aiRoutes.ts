@@ -623,9 +623,13 @@ export function registerAIRoutes(app: Express) {
 
       // Use unified AI processor for financial health score
       const healthData = await runAI('financial-health-score', userId, aiPayload);
+      
+      console.log('Financial health mascot: Raw AI response:', JSON.stringify(healthData, null, 2));
 
       // Transform AI analysis into frontend-expected format
       const response = transformAIResponseForMascot(healthData);
+      
+      console.log('Financial health mascot: Transformed response:', JSON.stringify(response, null, 2));
 
       // Cache the result for 24 hours
       await cache.set(aiPayload, healthData, false, 24);
