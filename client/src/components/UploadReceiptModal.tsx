@@ -55,7 +55,7 @@ function generateUUID() {
   });
 }
 
-export default function UploadReceiptModal({ onReceiptProcessed, buttonText = "Upload Image" }: UploadReceiptModalProps) {
+export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: UploadReceiptModalProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { getToken } = useAuth();

@@ -630,6 +630,7 @@
     "end_date": "Fecha de Fin",
     "optional": "opcional",
     "reference_note": "Nota de Referencia",
+    "note": "Nota",
     "of": "de",
     "transactions": "transacciones"
   },

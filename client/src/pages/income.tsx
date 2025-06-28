@@ -85,8 +85,20 @@ export default function Income() {
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Helper function to get date locale
+  const getDateLocale = () => {
+    const currentLang = i18n.language;
+    if (currentLang.startsWith('es')) {
+      return es;
+    } else if (currentLang.startsWith('sk')) {
+      return sk;
+    } else {
+      return enUS;
+    }
+  };
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
@@ -650,7 +662,7 @@ export default function Income() {
                     <div>
                       <p className="font-medium">{transaction.description}</p>
                       <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        <span>{format(new Date(transaction.date), 'MMM dd, yyyy')}</span>
+                        <span>{format(new Date(transaction.date), 'MMM dd, yyyy', { locale: getDateLocale() })}</span>
                         {transaction.categoryName && (
                           <>
                             <span>•</span>
@@ -662,14 +674,14 @@ export default function Income() {
                             <span>•</span>
                             <div className="flex items-center">
                               <Repeat className="h-3 w-3 mr-1" />
-                              <span>{transaction.recurringFrequency}</span>
+                              <span>{t(`common.${transaction.recurringFrequency}`)}</span>
                             </div>
                           </>
                         )}
                       </div>
                       {transaction.referenceNote && (
                         <div className="text-sm text-gray-600 dark:text-gray-300 mt-1 italic">
-                          Note: {transaction.referenceNote}
+                          {t("common.note")}: {transaction.referenceNote}
                         </div>
                       )}
                     </div>

@@ -726,6 +726,7 @@
     "end_date": "Dátum ukončenia",
     "optional": "voliteľné",
     "reference_note": "Referenčná poznámka",
+    "note": "Poznámka",
     "of": "z",
     "transactions": "transakcií"
   },
