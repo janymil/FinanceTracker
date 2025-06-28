@@ -748,7 +748,9 @@ export async function generateSpendingInsights(transactions: Array<{
       messages: [
         {
           role: "system",
-          content: `Respond in ${getLanguageLabel(normalizedLanguage)}. You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights. Generate 2-4 insights focusing on unusual spending patterns, budget optimization opportunities, positive financial behaviors, and spending trends. Each insight should have a unique ID, type (warning/suggestion/achievement/trend), clear title and description, impact level (high/medium/low), category if relevant, amount if relevant, actionable recommendation, and whether it's actionable (boolean). Respond with JSON array format.`
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (titles, descriptions, recommendations) must be in ${getLanguageLabel(normalizedLanguage)}.
+          
+You are a financial analysis expert. Analyze spending transactions to identify patterns, trends, and insights. Generate 2-4 insights focusing on unusual spending patterns, budget optimization opportunities, positive financial behaviors, and spending trends. Each insight should have a unique ID, type (warning/suggestion/achievement/trend), clear title and description, impact level (high/medium/low), category if relevant, amount if relevant, actionable recommendation, and whether it's actionable (boolean). Respond with JSON array format.`
         },
         {
           role: "user",
