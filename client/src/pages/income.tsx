@@ -383,7 +383,7 @@ export default function Income() {
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Loading income data...</div>
+          <div className="text-lg">{t("income.loading")}</div>
         </div>
       </div>
     );
@@ -395,8 +395,8 @@ export default function Income() {
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Income</h1>
-            <p className="text-muted-foreground">Track and manage your income streams</p>
+            <h1 className="text-2xl md:text-3xl font-bold">{t("income.title")}</h1>
+            <p className="text-muted-foreground">{t("income.subtitle")}</p>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-2">
@@ -405,19 +405,19 @@ export default function Income() {
               <DialogTrigger asChild>
                 <Button className="w-full sm:w-auto">
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Income
+                  {t("income.add_income")}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Add New Income</DialogTitle>
+                  <DialogTitle>{t("income.add_new_income")}</DialogTitle>
                   <DialogDescription>
-                    Record a new income transaction
+                    {t("income.add_description")}
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="amount">Amount *</Label>
+                    <Label htmlFor="amount">{t("common.amount")} *</Label>
                     <Input
                       id="amount"
                       type="number"
@@ -429,17 +429,17 @@ export default function Income() {
                     />
                   </div>
                   <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="description">Description *</Label>
+                    <Label htmlFor="description">{t("common.description")} *</Label>
                     <Input
                       id="description"
-                      placeholder="Enter description"
+                      placeholder={t("income.description_placeholder")}
                       value={newIncome.description}
                       onChange={(e) => setNewIncome({...newIncome, description: e.target.value})}
                       required
                     />
                   </div>
                   <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="date">Date</Label>
+                    <Label htmlFor="date">{t("common.date")}</Label>
                     <Input
                       id="date"
                       type="date"
