@@ -404,67 +404,280 @@ export default function FinancialHealthMascot() {
                   </div>
                 )}
 
-                {/* AI Insights */}
+                {/* AI Insights - Grouped and Enhanced */}
                 {healthData?.insights && healthData.insights.length > 0 && (
                   <div className="mb-4">
-                    <h4 className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-2 flex items-center gap-2">
+                    <h4 className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-3 flex items-center gap-2">
                       <Brain className="h-4 w-4" />
-                      {t('aiInsights.title')}
+                      AI Financial Insights
                     </h4>
                     
-                    {/* Grouped Insights Display */}
-                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded border-l-3 border-blue-400">
-                      <div className="flex items-start gap-2 mb-2">
-                        <Lightbulb className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                        <div className="text-xs text-blue-800 dark:text-blue-200">
-                          <div className="font-medium mb-2">{t('aiInsights.groupedInsights')}</div>
-                          <div className="space-y-2">
-                            {healthData.insights.map((insight, index) => (
-                              <motion.div
-                                key={index}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                                className="flex items-start gap-2 py-1"
-                              >
-                                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                <div className="text-blue-600 dark:text-blue-300 text-xs leading-relaxed">
-                                  {insight}
+                    {/* Group insights by type for better organization */}
+                    <div className="space-y-3">
+                      {(() => {
+                        // Categorize insights for better grouping
+                        const spendingInsights = healthData.insights.filter(insight => 
+                          insight.toLowerCase().includes('spend') || 
+                          insight.toLowerCase().includes('expense') ||
+                          insight.toLowerCase().includes('cost')
+                        );
+                        const savingInsights = healthData.insights.filter(insight => 
+                          insight.toLowerCase().includes('sav') || 
+                          insight.toLowerCase().includes('budget') ||
+                          insight.toLowerCase().includes('money')
+                        );
+                        const trendInsights = healthData.insights.filter(insight => 
+                          insight.toLowerCase().includes('trend') || 
+                          insight.toLowerCase().includes('pattern') ||
+                          insight.toLowerCase().includes('increase') ||
+                          insight.toLowerCase().includes('decrease')
+                        );
+                        const otherInsights = healthData.insights.filter(insight => 
+                          !spendingInsights.includes(insight) && 
+                          !savingInsights.includes(insight) && 
+                          !trendInsights.includes(insight)
+                        );
+
+                        return (
+                          <>
+                            {/* Spending Patterns */}
+                            {spendingInsights.length > 0 && (
+                              <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 p-3 rounded-lg">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <DollarSign className="h-4 w-4 text-red-600" />
+                                  <span className="text-xs font-medium text-red-700 dark:text-red-400">Spending Patterns</span>
                                 </div>
-                              </motion.div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
+                                <div className="space-y-2">
+                                  {spendingInsights.map((insight, index) => (
+                                    <motion.div
+                                      key={`spending-${index}`}
+                                      initial={{ opacity: 0, x: -10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: index * 0.1 }}
+                                      className="flex items-start gap-2"
+                                    >
+                                      <div className="w-1.5 h-1.5 bg-red-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                                      <div className="text-red-600 dark:text-red-300 text-xs leading-relaxed">{insight}</div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Savings & Budget */}
+                            {savingInsights.length > 0 && (
+                              <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-3 rounded-lg">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <PiggyBank className="h-4 w-4 text-green-600" />
+                                  <span className="text-xs font-medium text-green-700 dark:text-green-400">Savings & Budget</span>
+                                </div>
+                                <div className="space-y-2">
+                                  {savingInsights.map((insight, index) => (
+                                    <motion.div
+                                      key={`saving-${index}`}
+                                      initial={{ opacity: 0, x: -10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: index * 0.1 }}
+                                      className="flex items-start gap-2"
+                                    >
+                                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                                      <div className="text-green-600 dark:text-green-300 text-xs leading-relaxed">{insight}</div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Trends & Patterns */}
+                            {trendInsights.length > 0 && (
+                              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 rounded-lg">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <BarChart3 className="h-4 w-4 text-blue-600" />
+                                  <span className="text-xs font-medium text-blue-700 dark:text-blue-400">Trends & Patterns</span>
+                                </div>
+                                <div className="space-y-2">
+                                  {trendInsights.map((insight, index) => (
+                                    <motion.div
+                                      key={`trend-${index}`}
+                                      initial={{ opacity: 0, x: -10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: index * 0.1 }}
+                                      className="flex items-start gap-2"
+                                    >
+                                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                                      <div className="text-blue-600 dark:text-blue-300 text-xs leading-relaxed">{insight}</div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* General Insights */}
+                            {otherInsights.length > 0 && (
+                              <div className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 p-3 rounded-lg">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Lightbulb className="h-4 w-4 text-purple-600" />
+                                  <span className="text-xs font-medium text-purple-700 dark:text-purple-400">General Insights</span>
+                                </div>
+                                <div className="space-y-2">
+                                  {otherInsights.map((insight, index) => (
+                                    <motion.div
+                                      key={`other-${index}`}
+                                      initial={{ opacity: 0, x: -10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: index * 0.1 }}
+                                      className="flex items-start gap-2"
+                                    >
+                                      <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                                      <div className="text-purple-600 dark:text-purple-300 text-xs leading-relaxed">{insight}</div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 )}
 
-                {/* AI Recommendations */}
+                {/* Smart Recommendations & Action Items */}
                 {healthData?.warnings && healthData.warnings.length > 0 && (
                   <div className="mb-4">
-                    <h4 className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2 flex items-center gap-2">
+                    <h4 className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-3 flex items-center gap-2">
                       <Target className="h-4 w-4" />
-                      Smart Recommendations
+                      AI Recommendations & Action Items
                     </h4>
-                    <div className="space-y-2">
-                      {healthData.warnings.map((warning, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded border-l-3 border-amber-400"
-                        >
-                          <div className="flex items-start gap-2">
-                            <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                            <div className="text-xs text-amber-800 dark:text-amber-200">
-                              <div className="font-medium mb-1">AI Recommendation</div>
-                              <div className="text-amber-600 dark:text-amber-300">{warning}</div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
+                    
+                    <div className="space-y-3">
+                      {(() => {
+                        // Categorize recommendations for better organization
+                        const urgentItems = healthData.warnings.filter(warning => 
+                          warning.toLowerCase().includes('urgent') || 
+                          warning.toLowerCase().includes('critical') ||
+                          warning.toLowerCase().includes('immediately')
+                        );
+                        const budgetItems = healthData.warnings.filter(warning => 
+                          warning.toLowerCase().includes('budget') || 
+                          warning.toLowerCase().includes('limit') ||
+                          warning.toLowerCase().includes('overspend')
+                        );
+                        const improvementItems = healthData.warnings.filter(warning => 
+                          warning.toLowerCase().includes('improve') || 
+                          warning.toLowerCase().includes('consider') ||
+                          warning.toLowerCase().includes('try')
+                        );
+                        const otherItems = healthData.warnings.filter(warning => 
+                          !urgentItems.includes(warning) && 
+                          !budgetItems.includes(warning) && 
+                          !improvementItems.includes(warning)
+                        );
+
+                        return (
+                          <>
+                            {/* Urgent Actions */}
+                            {urgentItems.length > 0 && (
+                              <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <AlertTriangle className="h-4 w-4 text-red-600" />
+                                  <span className="text-xs font-semibold text-red-700 dark:text-red-400">🚨 Urgent Action Required</span>
+                                </div>
+                                <div className="space-y-2">
+                                  {urgentItems.map((item, index) => (
+                                    <motion.div
+                                      key={`urgent-${index}`}
+                                      initial={{ opacity: 0, scale: 0.95 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      transition={{ delay: index * 0.1 }}
+                                      className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-red-500"
+                                    >
+                                      <div className="text-xs text-red-800 dark:text-red-200 font-medium leading-relaxed">
+                                        {item}
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Budget Alerts */}
+                            {budgetItems.length > 0 && (
+                              <div className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Shield className="h-4 w-4 text-yellow-600" />
+                                  <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-400">💰 Budget Management</span>
+                                </div>
+                                <div className="space-y-2">
+                                  {budgetItems.map((item, index) => (
+                                    <motion.div
+                                      key={`budget-${index}`}
+                                      initial={{ opacity: 0, x: -10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: index * 0.1 }}
+                                      className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-yellow-500"
+                                    >
+                                      <div className="text-xs text-yellow-800 dark:text-yellow-200 font-medium leading-relaxed">
+                                        {item}
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Improvement Suggestions */}
+                            {improvementItems.length > 0 && (
+                              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Lightbulb className="h-4 w-4 text-blue-600" />
+                                  <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">💡 Smart Suggestions</span>
+                                </div>
+                                <div className="space-y-2">
+                                  {improvementItems.map((item, index) => (
+                                    <motion.div
+                                      key={`improvement-${index}`}
+                                      initial={{ opacity: 0, x: -10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: index * 0.1 }}
+                                      className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-blue-500"
+                                    >
+                                      <div className="text-xs text-blue-800 dark:text-blue-200 font-medium leading-relaxed">
+                                        {item}
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* General Recommendations */}
+                            {otherItems.length > 0 && (
+                              <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Target className="h-4 w-4 text-gray-600" />
+                                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-400">📋 General Recommendations</span>
+                                </div>
+                                <div className="space-y-2">
+                                  {otherItems.map((item, index) => (
+                                    <motion.div
+                                      key={`other-${index}`}
+                                      initial={{ opacity: 0, x: -10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: index * 0.1 }}
+                                      className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-gray-500"
+                                    >
+                                      <div className="text-xs text-gray-800 dark:text-gray-200 font-medium leading-relaxed">
+                                        {item}
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 )}
