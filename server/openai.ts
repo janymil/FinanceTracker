@@ -467,7 +467,7 @@ export async function generateAIFinancialHealthScore(financialData: {
     type: string;
   }>;
   useAdvancedFactors?: boolean;
-}): Promise<{
+}, language: string = 'en-us'): Promise<{
   score: number;
   status: string;
   color: string;
@@ -503,7 +503,9 @@ export async function generateAIFinancialHealthScore(financialData: {
       messages: [
         {
           role: "system",
-          content: `You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(language)}. ${getLanguageLabel(language) !== 'English' ? 'Never use English words.' : ''} ALL text content (status, factors, aiInsight, recommendations) must be in ${getLanguageLabel(language)}.
+
+You are an advanced financial health AI that calculates personalized financial health scores using sophisticated analysis beyond traditional metrics.
 
 Your analysis should consider:
 - Spending patterns and volatility

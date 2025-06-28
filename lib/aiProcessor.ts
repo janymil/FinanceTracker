@@ -71,7 +71,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
           fallbackResult = await generateSpendingInsights(userId, payload.transactions);
           break;
         case 'financial-health-score':
-          fallbackResult = await generateAIFinancialHealthScore(userId, payload);
+          fallbackResult = await generateAIFinancialHealthScore(payload, payload.language || 'en-us');
           break;
         case 'trend-predictions':
           fallbackResult = await generateTrendPredictions(userId, payload.transactions, payload.budgets);
