@@ -51,6 +51,8 @@ export async function runAI(task: string, userId: string, payload: Record<string
     }
 
     console.log(`[AI ${task}] SUCCESS: Fly.io response received`);
+    console.log(`[AI ${task}] Language sent to Fly.io:`, payload.language);
+    console.log(`[AI ${task}] First tip content check:`, JSON.stringify(result?.tips?.[0], null, 2));
     return result;
 
   } catch (error: any) {

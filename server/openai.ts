@@ -1532,6 +1532,8 @@ You are an expert financial advisor who provides personalized, contextual recomm
       : [];
 
     console.log('Contextual financial tips generated successfully (local fallback)');
+    console.log(`[SERVER FALLBACK] Language used: ${normalizedLanguage}`);
+    console.log(`[SERVER FALLBACK] First tip content check:`, JSON.stringify(tips[0], null, 2));
     
     // Cache the result for 72 hours with language key
     await cache.set(cacheKey, { tips }, false, 72);
