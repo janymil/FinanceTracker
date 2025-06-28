@@ -75,12 +75,12 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
 
   const { i18n } = useTranslation();
   const currentLang = i18n.language || 'en-us';
-  let locale = 'en-us';
+  let locale = 'en-US';
   
   if (currentLang.startsWith('es')) {
-    locale = 'es-pe';
+    locale = 'es-ES';
   } else if (currentLang.startsWith('sk')) {
-    locale = 'sk-sk';
+    locale = 'sk-SK';
   }
   
   const formatDate = (dateString: string) => {
