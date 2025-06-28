@@ -1461,17 +1461,47 @@ You are an expert financial advisor who provides personalized, actionable recomm
 
     const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
 
+    // Language-aware fallback values
+    const getFallbacks = (lang: string) => {
+      if (lang === 'es-pe') {
+        return {
+          title: 'Tarea Financiera',
+          description: 'Completa esta tarea financiera',
+          action: 'Toma acción en esta recomendación',
+          impact: 'Impacto financiero positivo',
+          timeToComplete: '10 minutos'
+        };
+      } else if (lang === 'sk-sk') {
+        return {
+          title: 'Finančná úloha',
+          description: 'Dokončite túto finančnú úlohu',
+          action: 'Konajte podľa tohto odporúčania',
+          impact: 'Pozitívny finančný dopad',
+          timeToComplete: '10 minút'
+        };
+      }
+      return {
+        title: 'Financial Task',
+        description: 'Complete this financial task',
+        action: 'Take action on this recommendation',
+        impact: 'Positive financial impact',
+        timeToComplete: '10 minutes'
+      };
+    };
+
+    const fallbacks = getFallbacks(normalizedLanguage);
+
     // Ensure proper data structure
     const recommendations = Array.isArray(aiResponse.recommendations) 
       ? aiResponse.recommendations.map((rec, index) => ({
           id: rec.id || `rec-${index + 1}`,
           type: rec.type || 'general',
           priority: rec.priority || 'medium',
-          title: rec.title || 'Financial Task',
-          description: rec.description || 'Complete this financial task',
-          action: rec.action || 'Take action on this recommendation',
-          impact: rec.impact || 'Positive financial impact',
-          timeToComplete: rec.timeToComplete || '10 minutes'
+          title: rec.title || fallbacks.title,
+          description: rec.description || fallbacks.description,
+          action: rec.action || fallbacks.action,
+          impact: rec.impact || fallbacks.impact,
+          timeToComplete: rec.timeToComplete || fallbacks.timeToComplete
         }))
       : [];
 
