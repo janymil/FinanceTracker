@@ -832,5 +832,20 @@
     "authTitle": "Iniciar Sesión | Registrarse - FinanzerPro",
     "authDescription": "Crea tu cuenta de FinanzerPro o inicia sesión para acceder a tu panel de finanzas personales. Comienza a rastrear gastos, gestionar presupuestos y alcanzar tus metas financieras hoy.",
     "authKeywords": "finanzerpro login, registrarse app finanzas, cuenta finanzas personales, registro rastreador gastos, login app presupuesto"
+  },
+
+  "factors": {
+    "budgetManagement": "Gestión de Presupuesto",
+    "adaptiveSpendingControl": "Control de Gasto Adaptativo",
+    "expenseVolatility": "Volatilidad de Gastos", 
+    "financialResilience": "Resistencia Financiera",
+    "savingsRate": "Tasa de Ahorro",
+    "debtManagement": "Gestión de Deudas",
+    "incomeStability": "Estabilidad de Ingresos",
+    "emergencyFund": "Fondo de Emergencia",
+    "investmentPortfolio": "Cartera de Inversión",
+    "riskAssessment": "Evaluación de Riesgo",
+    "cashFlow": "Flujo de Efectivo",
+    "financialPlanning": "Planificación Financiera"
   }
 }

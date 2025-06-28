@@ -880,5 +880,20 @@
     "authTitle": "Prihlásenie | Registrácia - FinanzerPro",
     "authDescription": "Vytvor si svoj FinanzerPro účet alebo sa prihlás pre prístup k tvojmu osobnému finančnému panelu. Začni sledovať výdavky, spravovať rozpočty a dosiahnuť svoje finančné ciele už dnes.",
     "authKeywords": "finanzerpro prihlásenie, registrácia finančná aplikácia, osobný finančný účet, registrácia sledovač výdavkov, prihlásenie rozpočtová aplikácia"
+  },
+
+  "factors": {
+    "budgetManagement": "Správa Rozpočtu",
+    "adaptiveSpendingControl": "Adaptívna Kontrola Výdavkov",
+    "expenseVolatility": "Volatilita Výdavkov", 
+    "financialResilience": "Finančná Odolnosť",
+    "savingsRate": "Miera Úspor",
+    "debtManagement": "Správa Dlhov",
+    "incomeStability": "Stabilita Príjmov",
+    "emergencyFund": "Núdzový Fond",
+    "investmentPortfolio": "Investičné Portfólio",
+    "riskAssessment": "Hodnotenie Rizika",
+    "cashFlow": "Peňažný Tok",
+    "financialPlanning": "Finančné Plánovanie"
   }
 }

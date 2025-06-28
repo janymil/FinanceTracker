@@ -854,5 +854,20 @@
     "authTitle": "Sign In | Sign Up - FinanzerPro",
     "authDescription": "Create your FinanzerPro account or sign in to access your personal finance dashboard. Start tracking expenses, managing budgets, and achieving your financial goals today.",
     "authKeywords": "finanzerpro login, sign up finance app, personal finance account, expense tracker registration, budget app login"
+  },
+
+  "factors": {
+    "budgetManagement": "Budget Management",
+    "adaptiveSpendingControl": "Adaptive Spending Control",
+    "expenseVolatility": "Expense Volatility", 
+    "financialResilience": "Financial Resilience",
+    "savingsRate": "Savings Rate",
+    "debtManagement": "Debt Management",
+    "incomeStability": "Income Stability",
+    "emergencyFund": "Emergency Fund",
+    "investmentPortfolio": "Investment Portfolio",
+    "riskAssessment": "Risk Assessment",
+    "cashFlow": "Cash Flow",
+    "financialPlanning": "Financial Planning"
   }
 }

@@ -531,7 +531,7 @@ export default function FinancialHealthMascot() {
                                         className="flex items-start gap-2"
                                       >
                                         <div className="w-1.5 h-1.5 bg-red-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                        <div className="text-red-600 dark:text-red-300 text-xs leading-relaxed">{insight}</div>
+                                        <div className="text-red-600 dark:text-red-300 text-xs leading-relaxed">{translateFactorName(insight, t)}</div>
                                       </motion.div>
                                     ))}
                                   </div>
@@ -668,7 +668,7 @@ export default function FinancialHealthMascot() {
                                         className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-red-500"
                                       >
                                         <div className="text-xs text-red-800 dark:text-red-200 font-medium leading-relaxed">
-                                          {item}
+                                          {translateFactorName(item, t)}
                                         </div>
                                       </motion.div>
                                     ))}
@@ -693,7 +693,7 @@ export default function FinancialHealthMascot() {
                                         className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-yellow-500"
                                       >
                                         <div className="text-xs text-yellow-800 dark:text-yellow-200 font-medium leading-relaxed">
-                                          {item}
+                                          {translateFactorName(item, t)}
                                         </div>
                                       </motion.div>
                                     ))}
@@ -718,7 +718,7 @@ export default function FinancialHealthMascot() {
                                         className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-blue-500"
                                       >
                                         <div className="text-xs text-blue-800 dark:text-blue-200 font-medium leading-relaxed">
-                                          {item}
+                                          {translateFactorName(item, t)}
                                         </div>
                                       </motion.div>
                                     ))}
@@ -743,7 +743,7 @@ export default function FinancialHealthMascot() {
                                         className="bg-white dark:bg-gray-800 p-2 rounded border-l-4 border-gray-500"
                                       >
                                         <div className="text-xs text-gray-800 dark:text-gray-200 font-medium leading-relaxed">
-                                          {item}
+                                          {translateFactorName(item, t)}
                                         </div>
                                       </motion.div>
                                     ))}
