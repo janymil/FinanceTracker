@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/clerk-react";
 import { useTranslation } from "react-i18next";
 
+
 interface Transaction {
   id: number;
   amount: string;
@@ -73,9 +74,19 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      day: '2-digit',
-      month: '2-digit',
+    const { i18n } = useTranslation();
+    const currentLang = i18n.language || 'en-us';
+    let locale = 'en-us';
+    
+    if (currentLang.startsWith('es')) {
+      locale = 'es-pe';
+    } else if (currentLang.startsWith('sk')) {
+      locale = 'sk-sk';
+    }
+    
+    return new Date(dateString).toLocaleDateString(locale, {
+      month: 'short',
+      day: 'numeric',
       year: 'numeric',
     });
   };
