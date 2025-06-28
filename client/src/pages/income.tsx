@@ -29,8 +29,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { es, sk, enUS as en } from "date-fns/locale";
+
 import MonthFilter from "@/components/month-filter";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -88,20 +87,22 @@ export default function Income() {
   const { t, i18n } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Helper function to get date locale
-  const getDateLocale = () => {
-    const currentLang = i18n.language;
-    console.log('Current language:', currentLang);
+  // Helper function to format dates with proper locale
+  const formatTransactionDate = (dateString: string) => {
+    const currentLang = i18n.language || 'en-us';
+    let locale = 'en-us';
+    
     if (currentLang.startsWith('es')) {
-      console.log('Using Spanish locale:', es);
-      return es;
+      locale = 'es';
     } else if (currentLang.startsWith('sk')) {
-      console.log('Using Slovak locale:', sk);
-      return sk;
-    } else {
-      console.log('Using English locale:', en);
-      return en;
+      locale = 'sk';
     }
+    
+    return new Date(dateString).toLocaleDateString(locale, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   };
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -308,10 +309,21 @@ export default function Income() {
   const chartData = Object.entries(monthlyIncomeData)
     .sort(([a], [b]) => a.localeCompare(b))
     .slice(-6)
-    .map(([month, amount]) => ({
-      month: format(new Date(month + '-01'), 'MMM yyyy'),
-      amount: amount as number
-    }));
+    .map(([month, amount]) => {
+      const currentLang = i18n.language || 'en-us';
+      let locale = 'en-us';
+      
+      if (currentLang.startsWith('es')) {
+        locale = 'es';
+      } else if (currentLang.startsWith('sk')) {
+        locale = 'sk';
+      }
+      
+      return {
+        month: new Date(month + '-01').toLocaleDateString(locale, { month: 'short', year: 'numeric' }),
+        amount: amount as number
+      };
+    });
 
   // Calculate category distribution
   const categoryData = incomeTransactions.reduce((acc: any, transaction: Transaction) => {
@@ -666,7 +678,7 @@ export default function Income() {
                     <div>
                       <p className="font-medium">{transaction.description}</p>
                       <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        <span>{format(new Date(transaction.date), i18n.language.startsWith('es') ? 'd MMM yyyy' : i18n.language.startsWith('sk') ? 'd. MMM yyyy' : 'MMM dd, yyyy', { locale: getDateLocale() })}</span>
+                        <span>{formatTransactionDate(transaction.date)}</span>
                         {transaction.categoryName && (
                           <>
                             <span>•</span>
