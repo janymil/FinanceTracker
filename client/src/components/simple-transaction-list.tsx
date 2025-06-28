@@ -75,20 +75,39 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
 
   const { i18n } = useTranslation();
   const currentLang = i18n.language || 'en-us';
-  let locale = 'en-US';
+  let locale = 'en-us';
   
   if (currentLang.startsWith('es')) {
-    locale = 'es-ES';
+    locale = 'es';
   } else if (currentLang.startsWith('sk')) {
-    locale = 'sk-SK';
+    locale = 'sk';
   }
   
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(locale, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    const date = new Date(dateString);
+    
+    if (currentLang.startsWith('es')) {
+      // Manual Spanish formatting
+      const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+      const day = date.getDate();
+      const month = months[date.getMonth()];
+      const year = date.getFullYear();
+      return `${day} ${month} ${year}`;
+    } else if (currentLang.startsWith('sk')) {
+      // Manual Slovak formatting  
+      const months = ['jan', 'feb', 'mar', 'apr', 'máj', 'jún', 'júl', 'aug', 'sep', 'okt', 'nov', 'dec'];
+      const day = date.getDate();
+      const month = months[date.getMonth()];
+      const year = date.getFullYear();
+      return `${day}. ${month} ${year}`;
+    } else {
+      // English default
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    }
   };
 
   const handleDelete = async (transactionId: number) => {
