@@ -19,6 +19,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSam
 import { enUS, es, sk } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/context/CurrencyContext";
+import { formatDate, formatDetailedDate } from "@/lib/dateUtils";
 
 interface Transaction {
   id: number;
@@ -244,7 +245,7 @@ export default function CalendarPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl">
-                    {format(currentMonth, 'MMMM yyyy', { locale: getDateFnsLocale() })}
+                    {formatDate(currentMonth, { year: 'numeric', month: 'long' })}
                   </CardTitle>
                   <div className="flex space-x-2">
                     <Button
