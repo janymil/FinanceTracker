@@ -263,7 +263,7 @@ export default function CollaborativeGoalDetailPage() {
                 <Input
                   type="number"
                   step="0.01"
-                  placeholder="Amount ($)"
+                  placeholder={t('collaborative_goal_detail.forms.amount_placeholder')}
                   value={contributionAmount}
                   onChange={(e) => setContributionAmount(e.target.value)}
                   required
@@ -271,7 +271,7 @@ export default function CollaborativeGoalDetailPage() {
               </div>
               <div>
                 <Textarea
-                  placeholder="Optional note..."
+                  placeholder={t('collaborative_goal_detail.forms.note_placeholder')}
                   value={contributionNote}
                   onChange={(e) => setContributionNote(e.target.value)}
                   rows={3}
@@ -283,7 +283,7 @@ export default function CollaborativeGoalDetailPage() {
                 disabled={isContributionPending}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                {isContributionPending ? 'Adding...' : 'Add Contribution'}
+                {isContributionPending ? t('collaborative_goal_detail.forms.adding') : t('collaborative_goal_detail.forms.add_contribution_button')}
               </Button>
             </form>
           </CardContent>
@@ -294,7 +294,7 @@ export default function CollaborativeGoalDetailPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Mail className="h-5 w-5 mr-2" />
-              Invite Friends
+              {t('collaborative_goal_detail.forms.invite_friends')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -302,7 +302,7 @@ export default function CollaborativeGoalDetailPage() {
               <div>
                 <Input
                   type="email"
-                  placeholder="Friend's email address"
+                  placeholder={t('collaborative_goal_detail.forms.email_placeholder')}
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   required
@@ -314,11 +314,11 @@ export default function CollaborativeGoalDetailPage() {
                 disabled={isInvitePending}
               >
                 <Mail className="h-4 w-4 mr-2" />
-                {isInvitePending ? 'Sending...' : 'Send Invitation'}
+                {isInvitePending ? t('collaborative_goal_detail.forms.sending') : t('collaborative_goal_detail.forms.send_invitation')}
               </Button>
             </form>
             <p className="text-xs text-muted-foreground mt-2">
-              We'll automatically detect if they have an account or send them an invitation to join.
+              {t('collaborative_goal_detail.forms.invite_description')}
             </p>
           </CardContent>
         </Card>
@@ -329,7 +329,7 @@ export default function CollaborativeGoalDetailPage() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Users className="h-5 w-5 mr-2" />
-            Participants
+            {t('collaborative_goal_detail.participants.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -356,7 +356,7 @@ export default function CollaborativeGoalDetailPage() {
               ))
             ) : (
               <div className="col-span-full text-center text-muted-foreground py-8">
-                No participants yet
+                {t('collaborative_goal_detail.participants.no_participants')}
               </div>
             )}
           </div>
