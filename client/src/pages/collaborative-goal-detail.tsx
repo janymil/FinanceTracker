@@ -100,7 +100,19 @@ export default function CollaborativeGoalDetailPage() {
 
   const [goal, setGoal] = useState<Goal | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [contributions, setContributions] = useState([]);
+  const [contributions, setContributions] = useState<Array<{
+    id: number;
+    userId: string;
+    amount: string;
+    description?: string;
+    createdAt: string;
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+    };
+  }>>([]);
   const [showAddContribution, setShowAddContribution] = useState(false);
   const [showInviteFriends, setShowInviteFriends] = useState(false);
   const [contributionAmount, setContributionAmount] = useState("");
