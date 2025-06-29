@@ -12,11 +12,13 @@ import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { ArrowLeft, Users, Target, Calendar, Plus, DollarSign, Activity, Trophy, Mail } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 export default function CollaborativeGoalDetailPage() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [contributionAmount, setContributionAmount] = useState("");
   const [contributionNote, setContributionNote] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
@@ -66,14 +68,14 @@ export default function CollaborativeGoalDetailPage() {
         setContributionAmount("");
         setContributionNote("");
         toast({
-          title: "Contribution Added",
-          description: "Your contribution has been recorded successfully.",
+          title: t('collaborative_goal_detail.messages.contribution_added'),
+          description: t('collaborative_goal_detail.messages.contribution_success'),
         });
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to add contribution. Please try again.",
+        title: t('collaborative_goal_detail.messages.error'),
+        description: t('collaborative_goal_detail.messages.contribution_failed'),
         variant: "destructive",
       });
     } finally {
@@ -96,21 +98,21 @@ export default function CollaborativeGoalDetailPage() {
         setInviteEmail("");
         if (result.existingUser) {
           toast({
-            title: "Friend Added",
-            description: `${result.email} has been added to the goal.`,
+            title: t('collaborative_goal_detail.messages.friend_added'),
+            description: t('collaborative_goal_detail.messages.friend_added_description', { email: result.email }),
           });
         } else {
           toast({
-            title: "Invitation Sent",
-            description: `An invitation email has been sent to ${result.email}.`,
+            title: t('collaborative_goal_detail.messages.invitation_sent'),
+            description: t('collaborative_goal_detail.messages.invitation_sent_description', { email: result.email }),
           });
         }
         fetchGoal(); // Refresh goal data
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to send invitation. Please try again.",
+        title: t('collaborative_goal_detail.messages.error'),
+        description: error.message || t('collaborative_goal_detail.messages.invitation_failed'),
         variant: "destructive",
       });
     } finally {
@@ -134,10 +136,10 @@ export default function CollaborativeGoalDetailPage() {
   if (!goal) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Goal Not Found</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">The collaborative goal you're looking for doesn't exist.</p>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('collaborative_goal_detail.errors.goal_not_found')}</h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">{t('collaborative_goal_detail.errors.goal_not_found_description')}</p>
         <Link href="/collaborative-goals">
-          <Button>Back to Collaborative Goals</Button>
+          <Button>{t('collaborative_goal_detail.buttons.back_to_goals')}</Button>
         </Link>
       </div>
     );
