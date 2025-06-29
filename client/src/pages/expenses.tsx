@@ -77,7 +77,7 @@ export default function Expenses() {
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
