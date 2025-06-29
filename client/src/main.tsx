@@ -93,14 +93,14 @@ const getUserLanguage = (): string => {
 const userLanguage = getUserLanguage();
 const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
 
-// Get Clerk localization based on user language
+// Get Clerk localization based on user language - minimal approach
 const getClerkLocalization = () => {
   const savedLanguage = localStorage.getItem('preferredLanguage');
   const currentLang = savedLanguage || detectLanguageFromBrowser();
   
-  if (currentLang.startsWith('es')) {
+  if (currentLang === 'es') {
     return esES;
-  } else if (currentLang.startsWith('sk')) {
+  } else if (currentLang === 'sk') {
     return skSK;
   }
   return undefined; // English is default
@@ -115,15 +115,6 @@ root.render(
         afterSignInUrl={dashboardRedirectUrl}
         afterSignUpUrl={dashboardRedirectUrl}
         localization={getClerkLocalization()}
-        appearance={{
-          layout: {
-            logoImageUrl: '/icon.png',
-            showOptionalFields: false,
-          },
-          variables: {
-            colorPrimary: '#3b82f6',
-          }
-        }}
       >
         <QueryClientProvider client={queryClient}>
           <Router>
