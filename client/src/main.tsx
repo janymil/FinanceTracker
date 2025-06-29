@@ -1,8 +1,7 @@
-import { StrictMode } from 'react';
+import { StrictMode, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ClerkProvider } from '@clerk/clerk-react';
-import { esES } from '@clerk/localizations';
-import { skSK } from '@clerk/localizations';
+import { esES, skSK } from '@clerk/localizations';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Router } from 'wouter';
 import { HelmetProvider } from 'react-helmet-async';
@@ -93,7 +92,13 @@ const getUserLanguage = (): string => {
 const userLanguage = getUserLanguage();
 const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
 
-// No Clerk localization - use native default forms
+// Clerk localization using useMemo pattern
+const userLang = navigator.language;
+const localization = useMemo(() => {
+  if (userLang.startsWith('es')) return esES;
+  if (userLang.startsWith('sk')) return skSK;
+  return undefined; // Default English
+}, [userLang]);
 
 const root = createRoot(container);
 root.render(
@@ -103,6 +108,7 @@ root.render(
         publishableKey={clerkPubKey}
         afterSignInUrl={dashboardRedirectUrl}
         afterSignUpUrl={dashboardRedirectUrl}
+        localization={localization}
       >
         <QueryClientProvider client={queryClient}>
           <Router>
