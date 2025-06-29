@@ -1283,5 +1283,73 @@
       "fill_required_fields": "Please fill in all required fields",
       "enter_email": "Please enter an email address"
     }
+  },
+
+  "collaborative_goal_detail": {
+    "messages": {
+      "contribution_added": "Contribution Added",
+      "contribution_success": "Your contribution has been recorded successfully.",
+      "contribution_failed": "Failed to add contribution. Please try again.",
+      "friend_added": "Friend Added",
+      "friend_added_description": "{{email}} has been added to the goal.",
+      "invitation_sent": "Invitation Sent",
+      "invitation_sent_description": "An invitation email has been sent to {{email}}.",
+      "invitation_failed": "Failed to send invitation. Please try again.",
+      "invalid_amount": "Invalid Amount",
+      "invalid_amount_description": "Please enter a valid contribution amount.",
+      "invalid_email": "Invalid Email",
+      "invalid_email_description": "Please enter a valid email address.",
+      "error": "Error"
+    },
+    "errors": {
+      "goal_not_found": "Goal Not Found",
+      "goal_not_found_description": "The collaborative goal you're looking for doesn't exist."
+    },
+    "buttons": {
+      "back": "Back",
+      "back_to_goals": "Back to Collaborative Goals"
+    },
+    "statuses": {
+      "active": "Active",
+      "completed": "Completed",
+      "paused": "Paused",
+      "unknown": "Unknown"
+    },
+    "cards": {
+      "progress": "Progress",
+      "of": "of",
+      "participants": "Participants",
+      "active_members": "Active members",
+      "days_remaining": "Days Remaining",
+      "until": "Until",
+      "no_date_set": "No date set",
+      "category": "Category",
+      "general": "General",
+      "goal_type": "Goal type"
+    },
+    "forms": {
+      "add_contribution": "Add Contribution",
+      "amount_placeholder": "Amount ($)",
+      "note_placeholder": "Optional note...",
+      "adding": "Adding...",
+      "add_contribution_button": "Add Contribution",
+      "invite_friends": "Invite Friends",
+      "email_placeholder": "Friend's email address",
+      "sending": "Sending...",
+      "send_invitation": "Send Invitation",
+      "invite_description": "We'll automatically detect if they have an account or send them an invitation to join."
+    },
+    "participants": {
+      "title": "Participants",
+      "no_participants": "No participants yet"
+    },
+    "contributions": {
+      "title": "Recent Contributions",
+      "no_date": "No date"
+    },
+    "activities": {
+      "title": "Recent Activities",
+      "no_date": "No date"
+    }
   }
 }

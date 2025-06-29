@@ -1260,5 +1260,73 @@
       "fill_required_fields": "Por favor completa todos los campos requeridos",
       "enter_email": "Por favor ingresa una dirección de correo"
     }
+  },
+
+  "collaborative_goal_detail": {
+    "messages": {
+      "contribution_added": "Contribución Agregada",
+      "contribution_success": "Tu contribución ha sido registrada exitosamente.",
+      "contribution_failed": "Error al agregar contribución. Por favor intenta nuevamente.",
+      "friend_added": "Amigo Agregado",
+      "friend_added_description": "{{email}} ha sido agregado a la meta.",
+      "invitation_sent": "Invitación Enviada",
+      "invitation_sent_description": "Se ha enviado una invitación a {{email}}.",
+      "invitation_failed": "Error al enviar invitación. Por favor intenta nuevamente.",
+      "invalid_amount": "Monto Inválido",
+      "invalid_amount_description": "Por favor ingresa un monto de contribución válido.",
+      "invalid_email": "Email Inválido",
+      "invalid_email_description": "Por favor ingresa una dirección de email válida.",
+      "error": "Error"
+    },
+    "errors": {
+      "goal_not_found": "Meta No Encontrada",
+      "goal_not_found_description": "La meta colaborativa que buscas no existe."
+    },
+    "buttons": {
+      "back": "Volver",
+      "back_to_goals": "Volver a Metas Colaborativas"
+    },
+    "statuses": {
+      "active": "Activa",
+      "completed": "Completada",
+      "paused": "Pausada",
+      "unknown": "Desconocido"
+    },
+    "cards": {
+      "progress": "Progreso",
+      "of": "de",
+      "participants": "Participantes",
+      "active_members": "Miembros activos",
+      "days_remaining": "Días Restantes",
+      "until": "Hasta",
+      "no_date_set": "Sin fecha establecida",
+      "category": "Categoría",
+      "general": "General",
+      "goal_type": "Tipo de meta"
+    },
+    "forms": {
+      "add_contribution": "Agregar Contribución",
+      "amount_placeholder": "Monto ($)",
+      "note_placeholder": "Nota opcional...",
+      "adding": "Agregando...",
+      "add_contribution_button": "Agregar Contribución",
+      "invite_friends": "Invitar Amigos",
+      "email_placeholder": "Dirección de email del amigo",
+      "sending": "Enviando...",
+      "send_invitation": "Enviar Invitación",
+      "invite_description": "Detectaremos automáticamente si tienen una cuenta o les enviaremos una invitación para unirse."
+    },
+    "participants": {
+      "title": "Participantes",
+      "no_participants": "Aún no hay participantes"
+    },
+    "contributions": {
+      "title": "Contribuciones Recientes",
+      "no_date": "Sin fecha"
+    },
+    "activities": {
+      "title": "Actividades Recientes",
+      "no_date": "Sin fecha"
+    }
   }
 }

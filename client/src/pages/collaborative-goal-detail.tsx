@@ -369,7 +369,7 @@ export default function CollaborativeGoalDetailPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Activity className="h-5 w-5 mr-2" />
-              Recent Contributions
+              {t('collaborative_goal_detail.contributions.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -391,7 +391,7 @@ export default function CollaborativeGoalDetailPage() {
                         <p className="text-xs text-muted-foreground">{contribution.note}</p>
                       )}
                       <p className="text-xs text-muted-foreground">
-                        {contribution.createdAt ? format(new Date(contribution.createdAt), 'MMM dd, yyyy') : 'No date'}
+                        {contribution.createdAt ? format(new Date(contribution.createdAt), 'MMM dd, yyyy') : t('collaborative_goal_detail.contributions.no_date')}
                       </p>
                     </div>
                   </div>
@@ -411,7 +411,7 @@ export default function CollaborativeGoalDetailPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Activity className="h-5 w-5 mr-2" />
-              Recent Activities
+              {t('collaborative_goal_detail.activities.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -428,7 +428,7 @@ export default function CollaborativeGoalDetailPage() {
                     <p className="font-medium text-sm">{activity.title}</p>
                     <p className="text-xs text-muted-foreground">{activity.description}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {activity.createdAt ? format(new Date(activity.createdAt), 'MMM dd, yyyy HH:mm') : 'No date'}
+                      {activity.createdAt ? format(new Date(activity.createdAt), 'MMM dd, yyyy HH:mm') : t('collaborative_goal_detail.activities.no_date')}
                     </p>
                   </div>
                   {activity.amount && (
