@@ -1591,7 +1591,10 @@
     },
     "buttons": {
       "back": "Späť",
-      "back_to_goals": "Späť na Spoločné Ciele"
+      "back_to_goals": "Späť na Spoločné Ciele",
+      "cancel": "Zrušiť",
+      "share": "Zdieľať",
+      "copy_link": "Kopírovať Odkaz"
     },
     "statuses": {
       "active": "Aktívny",

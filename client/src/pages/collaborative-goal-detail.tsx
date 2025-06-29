@@ -497,7 +497,7 @@ export default function CollaborativeGoalDetailPage() {
                         {t('collaborative_goal_detail.forms.add_contribution')}
                       </Button>
                       <Button variant="outline" onClick={() => setShowAddContribution(false)}>
-                        Cancel
+                        {t('collaborative_goal_detail.buttons.cancel')}
                       </Button>
                     </div>
                   </div>
@@ -600,7 +600,7 @@ export default function CollaborativeGoalDetailPage() {
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2">
                   <Users className="w-5 h-5" />
-                  Participants ({goal.participants?.length || 0})
+                  {t('collaborative_goal_detail.hero.participants_count')} ({goal.participants?.length || 0})
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -617,11 +617,11 @@ export default function CollaborativeGoalDetailPage() {
                           {participant.firstName} {participant.lastName}
                         </div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          ${parseFloat(participant.currentContribution || '0').toLocaleString()} contributed
+                          ${parseFloat(participant.currentContribution || '0').toLocaleString()} {t('collaborative_goal_detail.sections.contributed')}
                         </div>
                       </div>
                       {participant.role === 'creator' && (
-                        <Badge variant="secondary">Creator</Badge>
+                        <Badge variant="secondary">{t('collaborative_goal_detail.sections.creator')}</Badge>
                       )}
                     </div>
                   ))}
@@ -634,7 +634,7 @@ export default function CollaborativeGoalDetailPage() {
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2">
                   <Activity className="w-5 h-5" />
-                  Recent Activity
+                  {t('collaborative_goal_detail.sections.recent_activity')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -650,7 +650,7 @@ export default function CollaborativeGoalDetailPage() {
                         <div className="text-sm">
                           <span className="font-medium">{contrib.firstName} {contrib.lastName}</span>
                           <span className="text-green-600 dark:text-green-400 ml-1">
-                            contributed ${parseFloat(contrib.amount).toLocaleString()}
+                            {t('collaborative_goal_detail.sections.contributed')} ${parseFloat(contrib.amount).toLocaleString()}
                           </span>
                         </div>
                         {contrib.description && (
