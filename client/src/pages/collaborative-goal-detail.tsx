@@ -420,7 +420,7 @@ export default function CollaborativeGoalDetailPage() {
                         <p className="text-xs text-muted-foreground">{contribution.note}</p>
                       )}
                       <p className="text-xs text-muted-foreground">
-                        {contribution.createdAt ? format(new Date(contribution.createdAt), 'MMM dd, yyyy') : t('collaborative_goal_detail.contributions.no_date')}
+                        {contribution.createdAt ? formatLocalizedDate(contribution.createdAt) : t('collaborative_goal_detail.contributions.no_date')}
                       </p>
                     </div>
                   </div>
@@ -457,7 +457,7 @@ export default function CollaborativeGoalDetailPage() {
                     <p className="font-medium text-sm">{activity.title}</p>
                     <p className="text-xs text-muted-foreground">{activity.description}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {activity.createdAt ? format(new Date(activity.createdAt), 'MMM dd, yyyy HH:mm') : t('collaborative_goal_detail.activities.no_date')}
+                      {activity.createdAt ? formatLocalizedDate(activity.createdAt) : t('collaborative_goal_detail.activities.no_date')}
                     </p>
                   </div>
                   {activity.amount && (
