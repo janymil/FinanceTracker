@@ -310,17 +310,22 @@ export default function Income() {
     .sort(([a], [b]) => a.localeCompare(b))
     .slice(-6)
     .map(([month, amount]) => {
+      const date = new Date(month + '-01');
       const currentLang = i18n.language || 'en-us';
-      let locale = 'en-us';
       
+      let monthName;
       if (currentLang.startsWith('es')) {
-        locale = 'es';
+        const spanishMonths = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+        monthName = `${spanishMonths[date.getMonth()]} ${date.getFullYear()}`;
       } else if (currentLang.startsWith('sk')) {
-        locale = 'sk';
+        const slovakMonths = ['jan', 'feb', 'mar', 'apr', 'máj', 'jún', 'júl', 'aug', 'sep', 'okt', 'nov', 'dec'];
+        monthName = `${slovakMonths[date.getMonth()]} ${date.getFullYear()}`;
+      } else {
+        monthName = date.toLocaleDateString('en-us', { month: 'short', year: 'numeric' });
       }
       
       return {
-        month: new Date(month + '-01').toLocaleDateString(locale, { month: 'short', year: 'numeric' }),
+        month: monthName,
         amount: amount as number
       };
     });
