@@ -421,7 +421,7 @@ export default function CollaborativeGoalDetailPage() {
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
                 <div className="flex items-center gap-3 mb-3">
                   <Target className="w-6 h-6" />
-                  <span className="font-semibold">Target</span>
+                  <span className="font-semibold">{t('collaborative_goal_detail.hero.target')}</span>
                 </div>
                 <div className="text-2xl font-bold">${parseFloat(goal.targetAmount).toLocaleString()}</div>
               </div>

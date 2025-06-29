@@ -1484,6 +1484,60 @@
       "link_copied": "Enlace Copiado",
       "link_copied_description": "El enlace de la meta ha sido copiado al portapapeles."
     },
+    "hero": {
+      "target": "Meta",
+      "raised": "Recaudado",
+      "complete": "completo",
+      "target_date": "Fecha Meta",
+      "days_left": "días restantes",
+      "add_contribution": "Agregar Contribución",
+      "participants_count": "Participantes"
+    },
+    "charts": {
+      "contribution_timeline": "Cronología de Contribuciones",
+      "top_contributors": "Mejores Contribuyentes",
+      "goal_details": "Detalles de la Meta",
+      "amount": "Cantidad",
+      "contribution": "Contribución"
+    },
+    "sections": {
+      "participants": "Participantes",
+      "recent_activity": "Actividad Reciente",
+      "contributed": "contribuyó",
+      "creator": "Creador",
+      "no_contributions": "Aún no hay contribuciones. ¡Sé el primero en contribuir!",
+      "no_participants": "Aún no hay participantes"
+    },
+    "goal_categories": {
+      "vacation": "Vacaciones",
+      "wedding": "Boda", 
+      "home": "Casa",
+      "education": "Educación",
+      "emergency": "Emergencia",
+      "investment": "Inversión"
+    },
+    "goal_fields": {
+      "destination": "Destino",
+      "duration": "Duración",
+      "activities": "Actividades",
+      "accommodation": "Alojamiento",
+      "venue": "Lugar",
+      "date": "Fecha",
+      "guestCount": "Número de Invitados",
+      "style": "Estilo",
+      "propertyType": "Tipo de Propiedad",
+      "location": "Ubicación",
+      "features": "Características",
+      "timeline": "Cronograma",
+      "course": "Curso",
+      "institution": "Institución",
+      "certification": "Certificación",
+      "purpose": "Propósito",
+      "coverage": "Cobertura",
+      "investmentType": "Tipo de Inversión",
+      "riskLevel": "Nivel de Riesgo",
+      "expectedReturn": "Retorno Esperado"
+    },
     "errors": {
       "goal_not_found": "Meta No Encontrada",
       "goal_not_found_description": "La meta colaborativa que buscas no existe."

@@ -1507,6 +1507,60 @@
       "link_copied": "Link Copied",
       "link_copied_description": "Goal sharing link has been copied to clipboard."
     },
+    "hero": {
+      "target": "Target",
+      "raised": "Raised",
+      "complete": "complete",
+      "target_date": "Target Date",
+      "days_left": "days left",
+      "add_contribution": "Add Contribution",
+      "participants_count": "Participants"
+    },
+    "charts": {
+      "contribution_timeline": "Contribution Timeline",
+      "top_contributors": "Top Contributors",
+      "goal_details": "Goal Details",
+      "amount": "Amount",
+      "contribution": "Contribution"
+    },
+    "sections": {
+      "participants": "Participants",
+      "recent_activity": "Recent Activity",
+      "contributed": "contributed",
+      "creator": "Creator",
+      "no_contributions": "No contributions yet. Be the first to contribute!",
+      "no_participants": "No participants yet"
+    },
+    "goal_categories": {
+      "vacation": "Vacation",
+      "wedding": "Wedding", 
+      "home": "Home",
+      "education": "Education",
+      "emergency": "Emergency",
+      "investment": "Investment"
+    },
+    "goal_fields": {
+      "destination": "Destination",
+      "duration": "Duration",
+      "activities": "Activities",
+      "accommodation": "Accommodation",
+      "venue": "Venue",
+      "date": "Date",
+      "guestCount": "Guest Count",
+      "style": "Style",
+      "propertyType": "Property Type",
+      "location": "Location",
+      "features": "Features",
+      "timeline": "Timeline",
+      "course": "Course",
+      "institution": "Institution",
+      "certification": "Certification",
+      "purpose": "Purpose",
+      "coverage": "Coverage",
+      "investmentType": "Investment Type",
+      "riskLevel": "Risk Level",
+      "expectedReturn": "Expected Return"
+    },
     "errors": {
       "goal_not_found": "Goal Not Found",
       "goal_not_found_description": "The collaborative goal you're looking for doesn't exist."

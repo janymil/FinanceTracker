@@ -1531,6 +1531,60 @@
       "link_copied": "Odkaz Skopírovaný",
       "link_copied_description": "Odkaz na cieľ bol skopírovaný do schránky."
     },
+    "hero": {
+      "target": "Cieľ",
+      "raised": "Získané",
+      "complete": "dokončené",
+      "target_date": "Cieľový Dátum",
+      "days_left": "dní zostáva",
+      "add_contribution": "Pridať Príspevok",
+      "participants_count": "Účastníci"
+    },
+    "charts": {
+      "contribution_timeline": "Časová Os Príspevkov",
+      "top_contributors": "Najlepší Prispievatelia",
+      "goal_details": "Detaily Cieľa",
+      "amount": "Suma",
+      "contribution": "Príspevok"
+    },
+    "sections": {
+      "participants": "Účastníci",
+      "recent_activity": "Nedávna Aktivita",
+      "contributed": "prispel",
+      "creator": "Tvorca",
+      "no_contributions": "Zatiaľ žiadne príspevky. Buďte prvý, kto prispeje!",
+      "no_participants": "Zatiaľ žiadni účastníci"
+    },
+    "goal_categories": {
+      "vacation": "Dovolenka",
+      "wedding": "Svadba", 
+      "home": "Dom",
+      "education": "Vzdelanie",
+      "emergency": "Núdzové",
+      "investment": "Investícia"
+    },
+    "goal_fields": {
+      "destination": "Destinácia",
+      "duration": "Trvanie",
+      "activities": "Aktivity",
+      "accommodation": "Ubytovanie",
+      "venue": "Miesto",
+      "date": "Dátum",
+      "guestCount": "Počet Hostí",
+      "style": "Štýl",
+      "propertyType": "Typ Nehnuteľnosti",
+      "location": "Lokalita",
+      "features": "Vlastnosti",
+      "timeline": "Časový Plán",
+      "course": "Kurz",
+      "institution": "Inštitúcia",
+      "certification": "Certifikácia",
+      "purpose": "Účel",
+      "coverage": "Pokrytie",
+      "investmentType": "Typ Investície",
+      "riskLevel": "Úroveň Rizika",
+      "expectedReturn": "Očakávaný Výnos"
+    },
     "errors": {
       "goal_not_found": "Cieľ sa Nenašiel",
       "goal_not_found_description": "Spoločný cieľ, ktorý hľadáte, neexistuje."
