@@ -1054,7 +1054,25 @@
 
     "forecasts": {
       "ai_forecasts_title": "Pronósticos Financieros IA",
-      "ai_forecasts_description": "Predicciones impulsadas por IA basadas en tus patrones de datos históricos"
+      "ai_forecasts_description": "Predicciones impulsadas por IA basadas en tus patrones de datos históricos",
+      "next_month_expenses": "Gastos del Próximo Mes",
+      "expected_savings": "Ahorros Esperados",
+      "budget_variance": "Varianza del Presupuesto",
+      "confidence": "confianza",
+      "based_on_ai": "Basado en análisis IA",
+      "over_budget": "Sobre presupuesto",
+      "under_budget": "Bajo presupuesto",
+      "no_data_title": "No Hay Datos Financieros Disponibles",
+      "no_data_description": "Agrega transacciones para generar pronósticos financieros impulsados por IA",
+      "no_data": "Sin datos",
+      "key_insights": "Perspectivas Clave",
+      "ai_recommendations": "Recomendaciones IA",
+      "risk_factors": "Factores de Riesgo",
+      "category_predictions_title": "Predicciones por Categoría",
+      "category_predictions_description": "Pronósticos IA para categorías de gasto individuales",
+      "predicted_amount": "Cantidad Predicha",
+      "no_predictions_title": "No Hay Predicciones Disponibles",
+      "no_predictions_description": "Agrega más transacciones para generar pronósticos financieros impulsados por IA"
     },
 
     "categories": {

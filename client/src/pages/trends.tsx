@@ -853,9 +853,9 @@ export default function Trends() {
                 {aiPredictions.categoryPredictions?.length > 0 && (
                   <Card>
                     <CardHeader>
-                      <CardTitle>Category-Specific Predictions</CardTitle>
+                      <CardTitle>{t('trends.forecasts.category_predictions_title')}</CardTitle>
                       <CardDescription>
-                        AI forecasts for individual spending categories
+                        {t('trends.forecasts.category_predictions_description')}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -874,11 +874,11 @@ export default function Trends() {
                             </div>
                             <div className="space-y-1">
                               <div className="flex justify-between text-sm">
-                                <span>Predicted Amount:</span>
+                                <span>{t('trends.forecasts.predicted_amount')}:</span>
                                 <span className="font-medium">{displayCurrency}{prediction.predictedAmount?.toLocaleString()}</span>
                               </div>
                               <div className="flex justify-between text-sm">
-                                <span>Confidence:</span>
+                                <span>{t('trends.forecasts.confidence')}:</span>
                                 <span className="font-medium">{Math.round((prediction.confidence || 0) * 100)}%</span>
                               </div>
                               {prediction.reasoning && (
@@ -897,19 +897,19 @@ export default function Trends() {
             ) : (
               <Card>
                 <CardHeader>
-                  <CardTitle>AI Financial Forecasts</CardTitle>
+                  <CardTitle>{t('trends.forecasts.ai_forecasts_title')}</CardTitle>
                   <CardDescription>
-                    Generate AI-powered predictions based on your transaction history
+                    {t('trends.forecasts.ai_forecasts_description')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-8">
                     <RefreshCw className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      No Predictions Available
+                      {t('trends.forecasts.no_predictions_title')}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-300">
-                      Add more transactions to generate AI-powered financial forecasts
+                      {t('trends.forecasts.no_predictions_description')}
                     </p>
                   </div>
                 </CardContent>

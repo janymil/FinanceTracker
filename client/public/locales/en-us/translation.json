@@ -1065,7 +1065,25 @@
 
     "forecasts": {
       "ai_forecasts_title": "AI Financial Forecasts",
-      "ai_forecasts_description": "AI-powered predictions based on your historical data patterns"
+      "ai_forecasts_description": "AI-powered predictions based on your historical data patterns",
+      "next_month_expenses": "Next Month Expenses",
+      "expected_savings": "Expected Savings",
+      "budget_variance": "Budget Variance",
+      "confidence": "confidence",
+      "based_on_ai": "Based on AI analysis",
+      "over_budget": "Over budget",
+      "under_budget": "Under budget",
+      "no_data_title": "No Financial Data Available",
+      "no_data_description": "Add transactions to generate AI-powered financial forecasts and predictions",
+      "no_data": "No data",
+      "key_insights": "Key Insights",
+      "ai_recommendations": "AI Recommendations",
+      "risk_factors": "Risk Factors",
+      "category_predictions_title": "Category-Specific Predictions",
+      "category_predictions_description": "AI forecasts for individual spending categories",
+      "predicted_amount": "Predicted Amount",
+      "no_predictions_title": "No Predictions Available",
+      "no_predictions_description": "Add more transactions to generate AI-powered financial forecasts"
     },
 
     "categories": {
