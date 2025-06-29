@@ -1114,6 +1114,10 @@
   "export": {
     "page_title": "Gestión de Datos",
     "page_description": "Exporta e importa tus datos financieros con opciones avanzadas",
+    
+    "tab_export": "Exportar",
+    "tab_import": "Importar", 
+    "tab_backup": "Respaldo",
     "export_tab": "Exportar",
     "import_tab": "Importar",
     
@@ -1164,6 +1168,17 @@
       "json": "JSON"
     },
     
+    "format_pdf": "PDF",
+    "format_csv": "CSV", 
+    "format_excel": "Excel",
+    "format_json": "JSON",
+    
+    "range_all": "Todo el Tiempo",
+    "range_month": "Este Mes", 
+    "range_quarter": "Este Trimestre",
+    "range_year": "Este Año",
+    "range_custom": "Rango Personalizado",
+    
     "coming_soon": "Funcionalidad de exportación próximamente",
     "coming_soon_desc": "Soporte para PDF, CSV, Excel, JSON y más",
     
@@ -1182,6 +1197,7 @@
     
     "step3_title": "Subir Tu Archivo",
     "drop_file_text": "Arrastra y suelta tu archivo aquí, o haz clic para navegar",
+    "supports_files": "Soporta archivos",
     
     "toast_import_failed": "Importación falló. Revisa el formato de tu archivo e inténtalo de nuevo.",
     "toast_backup_failed": "Error al crear respaldo. Inténtalo de nuevo.",

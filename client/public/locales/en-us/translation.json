@@ -1125,6 +1125,10 @@
   "export": {
     "page_title": "Data Management",
     "page_description": "Export and import your financial data with advanced options",
+    
+    "tab_export": "Export",
+    "tab_import": "Import", 
+    "tab_backup": "Backup",
     "export_tab": "Export",
     "import_tab": "Import",
     
@@ -1175,6 +1179,17 @@
       "json": "JSON"
     },
     
+    "format_pdf": "PDF",
+    "format_csv": "CSV", 
+    "format_excel": "Excel",
+    "format_json": "JSON",
+    
+    "range_all": "All Time",
+    "range_month": "This Month", 
+    "range_quarter": "This Quarter",
+    "range_year": "This Year",
+    "range_custom": "Custom Range",
+    
     "coming_soon": "Export functionality coming soon",
     "coming_soon_desc": "Support for PDF, CSV, Excel, JSON, and more",
     
@@ -1193,6 +1208,7 @@
     
     "step3_title": "Upload Your File",
     "drop_file_text": "Drag and drop your file here, or click to browse",
+    "supports_files": "Supports files",
     
     "toast_import_failed": "Import failed. Please check your file format and try again.",
     "toast_backup_failed": "Failed to create backup. Please try again.",

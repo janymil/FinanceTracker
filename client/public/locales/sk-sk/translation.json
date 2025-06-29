@@ -1170,6 +1170,10 @@
   "export": {
     "page_title": "Správa Údajov",
     "page_description": "Exportujte a importujte vaše finančné údaje s pokročilými možnosťami",
+    
+    "tab_export": "Exportovať",
+    "tab_import": "Importovať", 
+    "tab_backup": "Zálohovať",
     "export_tab": "Export",
     "import_tab": "Import",
     
@@ -1219,6 +1223,17 @@
       "excel": "Excel",
       "json": "JSON"
     },
+    
+    "format_pdf": "PDF",
+    "format_csv": "CSV", 
+    "format_excel": "Excel",
+    "format_json": "JSON",
+    
+    "range_all": "Všetky Časy",
+    "range_month": "Tento Mesiac", 
+    "range_quarter": "Tento Štvrťrok",
+    "range_year": "Tento Rok",
+    "range_custom": "Vlastný Rozsah",
     
     "coming_soon": "Funkcia exportu bude čoskoro dostupná",
     "coming_soon_desc": "Podpora pre PDF, CSV, Excel, JSON a viac",
