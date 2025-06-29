@@ -248,7 +248,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                     <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
                       <span className="truncate">{transaction.categoryName || 'Uncategorized'}</span>
                       <span className="shrink-0">•</span>
-                      <span className="shrink-0">{formatDateForDisplay(transaction.date)}</span>
+                      <span className="shrink-0">{formatDate(transaction.date)}</span>
                       {transaction.ocrVendor && transaction.ocrVendor !== transaction.description && (
                         <>
                           <span className="hidden md:inline shrink-0">•</span>

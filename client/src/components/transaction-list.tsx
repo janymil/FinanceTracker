@@ -11,6 +11,7 @@ import { Link, useLocation } from "wouter";
 import { useState, useMemo } from "react";
 import ReceiptModal from "@/components/receipt-modal";
 import { useTranslation } from "react-i18next";
+import { useDateFormat } from "@/hooks/useDateFormat";
 
 
 interface Transaction {
@@ -42,23 +43,8 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
   const [, setLocation] = useLocation();
   const [expandedTransactions, setExpandedTransactions] = useState<Set<number>>(new Set());
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-  const { t, i18n } = useTranslation();
-
-  // Helper function to format dates properly
-  const formatDateForDisplay = (dateString: string) => {
-    const dateObj = new Date(dateString);
-    const day = String(dateObj.getDate()).padStart(2, '0');
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const year = dateObj.getFullYear();
-    
-    if (i18n.language.startsWith('es')) {
-      return `${day}/${month}/${year}`;
-    } else if (i18n.language.startsWith('sk')) {
-      return `${day}.${month}.${year}`;
-    } else {
-      return `${month}/${day}/${year}`;
-    }
-  };
+  const { t } = useTranslation();
+  const { formatDate } = useDateFormat();
 
   // Filter and search transactions
   const filteredTransactions = useMemo(() => {
@@ -249,7 +235,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                         <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                           <span>{transaction.categoryName || 'Uncategorized'}</span>
                           <span>•</span>
-                          <span>{formatDateForDisplay(transaction.date)}</span>
+                          <span>{formatDate(transaction.date)}</span>
                           {transaction.ocrVendor && transaction.ocrVendor !== transaction.description && (
                             <>
                               <span>•</span>
@@ -354,7 +340,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                               <div>
                                 <span className="font-medium">Receipt Date:</span>
                                 <span className="ml-1 text-gray-600 dark:text-gray-400">
-                                  {formatDateForDisplay(transaction.ocrDetectedDate)}
+                                  {formatDate(transaction.ocrDetectedDate)}
                                 </span>
                               </div>
                             )}
