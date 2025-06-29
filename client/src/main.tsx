@@ -93,44 +93,16 @@ const getUserLanguage = (): string => {
 const userLanguage = getUserLanguage();
 const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
 
-// Get language-aware URLs for terms and privacy policy
-const getLanguageAwareUrls = () => {
-  const urlPath = window.location.pathname;
-  const urlLang = urlPath.match(/^\/([a-z]{2})\//)?.[1];
-  const savedLanguage = localStorage.getItem('preferredLanguage');
-  const browserLanguage = detectLanguageFromBrowser();
-  
-  const currentLang = urlLang || savedLanguage || browserLanguage;
-  const lang = currentLang === 'es' || currentLang?.startsWith('es') ? 'es' :
-               currentLang === 'sk' || currentLang?.startsWith('sk') ? 'sk' : 'en';
-  
-  return {
-    termsOfServiceUrl: `/${lang}/terms-of-service`,
-    privacyPolicyUrl: `/${lang}/privacy-policy`,
-  };
-};
-
 // Get Clerk localization based on user language
 const getClerkLocalization = () => {
-  // Get language from URL path first, then localStorage, then browser
-  const urlPath = window.location.pathname;
-  const urlLang = urlPath.match(/^\/([a-z]{2})\//)?.[1];
   const savedLanguage = localStorage.getItem('preferredLanguage');
-  const browserLanguage = detectLanguageFromBrowser();
+  const currentLang = savedLanguage || detectLanguageFromBrowser();
   
-  // Priority: URL > localStorage > browser
-  const currentLang = urlLang || savedLanguage || browserLanguage;
-  
-  console.log('Clerk localization detection:', { urlLang, savedLanguage, browserLanguage, currentLang });
-  
-  if (currentLang === 'es' || currentLang?.startsWith('es')) {
-    console.log('Using Spanish localization for Clerk');
+  if (currentLang.startsWith('es')) {
     return esES;
-  } else if (currentLang === 'sk' || currentLang?.startsWith('sk')) {
-    console.log('Using Slovak localization for Clerk');
+  } else if (currentLang.startsWith('sk')) {
     return skSK;
   }
-  console.log('Using English (default) localization for Clerk');
   return undefined; // English is default
 };
 
@@ -150,41 +122,6 @@ root.render(
           },
           variables: {
             colorPrimary: '#3b82f6',
-            colorBackground: '#ffffff',
-            colorText: '#262626',
-            colorInputBackground: '#ffffff',
-            colorInputText: '#262626',
-          },
-          elements: {
-            checkbox: {
-              backgroundColor: '#ffffff',
-              borderColor: '#e2e8f0',
-              color: '#262626',
-              '&:checked': {
-                backgroundColor: '#3b82f6',
-                borderColor: '#3b82f6',
-              }
-            },
-            checkboxLabel: {
-              color: '#000000 !important',
-              opacity: '1',
-              visibility: 'visible',
-            },
-            termsOfServiceLabel: {
-              color: '#000000 !important',
-              opacity: '1',
-              visibility: 'visible',
-            },
-            privacyPolicyLabel: {
-              color: '#000000 !important',
-              opacity: '1',
-              visibility: 'visible',
-            },
-            termsPageText: {
-              color: '#000000 !important',
-              opacity: '1',
-              visibility: 'visible',
-            }
           }
         }}
       >
