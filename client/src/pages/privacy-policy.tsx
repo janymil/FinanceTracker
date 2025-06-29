@@ -196,10 +196,30 @@ export default function PrivacyPolicy() {
               </div>
 
               <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">{t("gdpr.dpo.title")}</h3>
+                <p className="mb-4">{t("gdpr.dpo.description")}</p>
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
+                  <p className="text-sm"><strong>{t("gdpr.dpo.contact")}</strong> dpo@finanzerpro.com</p>
+                  <p className="text-sm"><strong>{t("gdpr.dpo.responsibilities")}</strong> {t("gdpr.dpo.responsibilities_desc")}</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">{t("gdpr.eu_representative.title")}</h3>
+                <p className="mb-4">{t("gdpr.eu_representative.description")}</p>
+                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                  <p className="text-sm"><strong>{t("gdpr.eu_representative.company")}</strong> FinanzerPro EU Services S.L.</p>
+                  <p className="text-sm"><strong>{t("gdpr.eu_representative.address")}</strong> Calle de la Tecnología 45, 28002 Madrid, Spain</p>
+                  <p className="text-sm"><strong>{t("gdpr.eu_representative.email")}</strong> eu-representative@finanzerpro.com</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
                 <h3 className="text-lg font-semibold mb-3">{t("gdpr.exercise_rights.title")}</h3>
                 <p className="mb-4">{t("gdpr.exercise_rights.description")}</p>
                 <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded">
                   <p className="text-sm"><strong>{t("gdpr.exercise_rights.email")}</strong> privacy@finanzerpro.com</p>
+                  <p className="text-sm"><strong>{t("gdpr.exercise_rights.dpo_email")}</strong> dpo@finanzerpro.com</p>
                   <p className="text-sm"><strong>{t("gdpr.exercise_rights.response_time")}</strong> {t("gdpr.exercise_rights.response_desc")}</p>
                 </div>
               </div>
@@ -287,6 +307,147 @@ export default function PrivacyPolicy() {
             </section>
           </div>
           )}
+
+          {/* Financial Services Compliance Section */}
+          <section className="mb-8 border-l-4 border-green-500 pl-4 bg-green-50 dark:bg-green-900/20 p-4 rounded-r-lg">
+            <h2 className="text-2xl font-semibold mb-4 text-green-800 dark:text-green-200">{t("financial_compliance.title")}</h2>
+            
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">{t("financial_compliance.bsa.title")}</h3>
+              <p className="mb-4">{t("financial_compliance.bsa.description")}</p>
+              <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                <ul className="list-disc list-inside space-y-2">
+                  <li>{t("financial_compliance.bsa.aml_procedures")}</li>
+                  <li>{t("financial_compliance.bsa.transaction_monitoring")}</li>
+                  <li>{t("financial_compliance.bsa.suspicious_activity")}</li>
+                  <li>{t("financial_compliance.bsa.record_keeping")}</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">{t("financial_compliance.pci_dss.title")}</h3>
+              <p className="mb-4">{t("financial_compliance.pci_dss.description")}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                  <h4 className="font-medium mb-2">{t("financial_compliance.pci_dss.data_encryption.title")}</h4>
+                  <p className="text-sm">{t("financial_compliance.pci_dss.data_encryption.description")}</p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                  <h4 className="font-medium mb-2">{t("financial_compliance.pci_dss.secure_networks.title")}</h4>
+                  <p className="text-sm">{t("financial_compliance.pci_dss.secure_networks.description")}</p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                  <h4 className="font-medium mb-2">{t("financial_compliance.pci_dss.access_control.title")}</h4>
+                  <p className="text-sm">{t("financial_compliance.pci_dss.access_control.description")}</p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                  <h4 className="font-medium mb-2">{t("financial_compliance.pci_dss.monitoring.title")}</h4>
+                  <p className="text-sm">{t("financial_compliance.pci_dss.monitoring.description")}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">{t("financial_compliance.data_security.title")}</h3>
+              <p className="mb-4">{t("financial_compliance.data_security.description")}</p>
+              <ul className="list-disc list-inside mb-4 space-y-2">
+                <li><strong>{t("financial_compliance.data_security.encryption")}</strong> {t("financial_compliance.data_security.encryption_desc")}</li>
+                <li><strong>{t("financial_compliance.data_security.tokenization")}</strong> {t("financial_compliance.data_security.tokenization_desc")}</li>
+                <li><strong>{t("financial_compliance.data_security.secure_transmission")}</strong> {t("financial_compliance.data_security.transmission_desc")}</li>
+                <li><strong>{t("financial_compliance.data_security.regular_audits")}</strong> {t("financial_compliance.data_security.audits_desc")}</li>
+              </ul>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">{t("financial_compliance.regulatory_disclosures.title")}</h3>
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded">
+                <p className="text-sm font-medium mb-2">{t("financial_compliance.regulatory_disclosures.not_advisor")}</p>
+                <p className="text-sm mb-2">{t("financial_compliance.regulatory_disclosures.educational_purposes")}</p>
+                <p className="text-sm">{t("financial_compliance.regulatory_disclosures.consult_professional")}</p>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">{t("financial_compliance.regulatory_oversight.title")}</h3>
+              <p className="mb-4">{t("financial_compliance.regulatory_oversight.description")}</p>
+              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                <p className="text-sm"><strong>{t("financial_compliance.regulatory_oversight.finra")}</strong> {t("financial_compliance.regulatory_oversight.finra_desc")}</p>
+                <p className="text-sm"><strong>{t("financial_compliance.regulatory_oversight.sec")}</strong> {t("financial_compliance.regulatory_oversight.sec_desc")}</p>
+                <p className="text-sm"><strong>{t("financial_compliance.regulatory_oversight.cfpb")}</strong> {t("financial_compliance.regulatory_oversight.cfpb_desc")}</p>
+              </div>
+            </div>
+          </section>
+
+          {/* EU AI Act Compliance Section */}
+          <section className="mb-8 border-l-4 border-purple-500 pl-4 bg-purple-50 dark:bg-purple-900/20 p-4 rounded-r-lg">
+            <h2 className="text-2xl font-semibold mb-4 text-purple-800 dark:text-purple-200">{t("ai_act_compliance.title")}</h2>
+            
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">{t("ai_act_compliance.classification.title")}</h3>
+              <p className="mb-4">{t("ai_act_compliance.classification.description")}</p>
+              <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                <p className="text-sm"><strong>{t("ai_act_compliance.classification.limited_risk")}</strong> {t("ai_act_compliance.classification.limited_desc")}</p>
+                <p className="text-sm mt-2"><strong>{t("ai_act_compliance.classification.transparency")}</strong> {t("ai_act_compliance.classification.transparency_desc")}</p>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">{t("ai_act_compliance.transparency.title")}</h3>
+              <p className="mb-4">{t("ai_act_compliance.transparency.description")}</p>
+              <ul className="list-disc list-inside mb-4 space-y-2">
+                <li>{t("ai_act_compliance.transparency.clear_disclosure")}</li>
+                <li>{t("ai_act_compliance.transparency.model_information")}</li>
+                <li>{t("ai_act_compliance.transparency.data_usage")}</li>
+                <li>{t("ai_act_compliance.transparency.decision_logic")}</li>
+              </ul>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">{t("ai_act_compliance.bias_fairness.title")}</h3>
+              <p className="mb-4">{t("ai_act_compliance.bias_fairness.description")}</p>
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
+                <p className="text-sm">{t("ai_act_compliance.bias_fairness.measures")}</p>
+              </div>
+            </div>
+          </section>
+
+          {/* International Data Transfers Section */}
+          <section className="mb-8 border-l-4 border-orange-500 pl-4 bg-orange-50 dark:bg-orange-900/20 p-4 rounded-r-lg">
+            <h2 className="text-2xl font-semibold mb-4 text-orange-800 dark:text-orange-200">{t("data_transfers.title")}</h2>
+            
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">{t("data_transfers.scc.title")}</h3>
+              <p className="mb-4">{t("data_transfers.scc.description")}</p>
+              <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                <ul className="list-disc list-inside space-y-2">
+                  <li>{t("data_transfers.scc.stripe_scc")}</li>
+                  <li>{t("data_transfers.scc.clerk_scc")}</li>
+                  <li>{t("data_transfers.scc.openai_scc")}</li>
+                  <li>{t("data_transfers.scc.bunny_scc")}</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">{t("data_transfers.adequacy.title")}</h3>
+              <p className="mb-4">{t("data_transfers.adequacy.description")}</p>
+              <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded">
+                <p className="text-sm">{t("data_transfers.adequacy.us_framework")}</p>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">{t("data_transfers.safeguards.title")}</h3>
+              <p className="mb-4">{t("data_transfers.safeguards.description")}</p>
+              <ul className="list-disc list-inside mb-4 space-y-2">
+                <li>{t("data_transfers.safeguards.technical")}</li>
+                <li>{t("data_transfers.safeguards.organizational")}</li>
+                <li>{t("data_transfers.safeguards.contractual")}</li>
+                <li>{t("data_transfers.safeguards.monitoring")}</li>
+              </ul>
+            </div>
+          </section>
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">{t("8. Cookies and Tracking")}</h2>
