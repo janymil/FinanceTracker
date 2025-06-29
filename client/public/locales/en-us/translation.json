@@ -1868,5 +1868,35 @@
     "loading": {
       "status": "Loading redemption status..."
     }
+  },
+
+  "cookies": {
+    "banner": {
+      "title": "We value your privacy",
+      "description": "We use cookies to enhance your experience on FinanzerPro. Some cookies are essential for the website to function, while others help us improve our service and understand how you use our site.",
+      "accept_all": "Accept All",
+      "reject_non_essential": "Reject Non-Essential",
+      "customize": "Customize",
+      "learn_more": "Learn More"
+    },
+    "preferences": {
+      "title": "Cookie Preferences",
+      "always_active": "Always Active",
+      "essential": {
+        "title": "Essential Cookies",
+        "description": "Required for the website to function properly. Cannot be disabled."
+      },
+      "functional": {
+        "title": "Functional Cookies",
+        "description": "Remember your preferences and provide enhanced features."
+      },
+      "analytics": {
+        "title": "Analytics Cookies",
+        "description": "Help us understand how you use our website to improve performance."
+      },
+      "save_preferences": "Save Preferences",
+      "accept_all": "Accept All",
+      "back": "Back"
+    }
   }
 }

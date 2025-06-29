@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { X, Cookie, Settings } from "lucide-react";
 import { Link } from "wouter";
+import { useTranslation } from 'react-i18next';
+import { getLocalizedPath } from './LanguageGuard';
 
 interface CookiePreferences {
   essential: boolean;
@@ -11,6 +13,7 @@ interface CookiePreferences {
 }
 
 export function CookieBanner() {
+  const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [preferences, setPreferences] = useState<CookiePreferences>({
@@ -88,17 +91,16 @@ export function CookieBanner() {
           <div className="flex-1">
             {!showSettings ? (
               <>
-                <h3 className="text-lg font-semibold mb-2">We value your privacy</h3>
+                <h3 className="text-lg font-semibold mb-2">{t('cookies.banner.title')}</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  We use cookies to enhance your experience on FinanceFlow. Some cookies are essential for 
-                  the website to function, while others help us improve our service and understand how you use our site.
+                  {t('cookies.banner.description')}
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <Button onClick={acceptAll} size="sm">
-                    Accept All
+                    {t('cookies.banner.accept_all')}
                   </Button>
                   <Button onClick={rejectAll} variant="outline" size="sm">
-                    Reject Non-Essential
+                    {t('cookies.banner.reject_non_essential')}
                   </Button>
                   <Button 
                     onClick={() => setShowSettings(true)} 
@@ -107,34 +109,34 @@ export function CookieBanner() {
                     className="gap-2"
                   >
                     <Settings className="h-4 w-4" />
-                    Customize
+                    {t('cookies.banner.customize')}
                   </Button>
-                  <Link href="/cookie-policy">
+                  <Link href={getLocalizedPath('/cookie-policy')}>
                     <Button variant="ghost" size="sm">
-                      Learn More
+                      {t('cookies.banner.learn_more')}
                     </Button>
                   </Link>
                 </div>
               </>
             ) : (
               <>
-                <h3 className="text-lg font-semibold mb-4">Cookie Preferences</h3>
+                <h3 className="text-lg font-semibold mb-4">{t('cookies.preferences.title')}</h3>
                 <div className="space-y-4 mb-4">
                   <div className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
-                      <h4 className="font-medium">Essential Cookies</h4>
+                      <h4 className="font-medium">{t('cookies.preferences.essential.title')}</h4>
                       <p className="text-sm text-muted-foreground">
-                        Required for the website to function properly. Cannot be disabled.
+                        {t('cookies.preferences.essential.description')}
                       </p>
                     </div>
-                    <div className="text-sm font-medium text-primary">Always Active</div>
+                    <div className="text-sm font-medium text-primary">{t('cookies.preferences.always_active')}</div>
                   </div>
                   
                   <div className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
-                      <h4 className="font-medium">Functional Cookies</h4>
+                      <h4 className="font-medium">{t('cookies.preferences.functional.title')}</h4>
                       <p className="text-sm text-muted-foreground">
-                        Remember your preferences and provide enhanced features.
+                        {t('cookies.preferences.functional.description')}
                       </p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
@@ -153,9 +155,9 @@ export function CookieBanner() {
                   
                   <div className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
-                      <h4 className="font-medium">Analytics Cookies</h4>
+                      <h4 className="font-medium">{t('cookies.preferences.analytics.title')}</h4>
                       <p className="text-sm text-muted-foreground">
-                        Help us understand how you use our website to improve performance.
+                        {t('cookies.preferences.analytics.description')}
                       </p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
@@ -175,17 +177,17 @@ export function CookieBanner() {
                 
                 <div className="flex flex-wrap gap-3">
                   <Button onClick={acceptSelected} size="sm">
-                    Save Preferences
+                    {t('cookies.preferences.save_preferences')}
                   </Button>
                   <Button onClick={acceptAll} variant="outline" size="sm">
-                    Accept All
+                    {t('cookies.preferences.accept_all')}
                   </Button>
                   <Button 
                     onClick={() => setShowSettings(false)} 
                     variant="ghost" 
                     size="sm"
                   >
-                    Back
+                    {t('cookies.preferences.back')}
                   </Button>
                 </div>
               </>

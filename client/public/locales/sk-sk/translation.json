@@ -1890,5 +1890,35 @@
     "loading": {
       "status": "Načítavam stav uplatnenia..."
     }
+  },
+
+  "cookies": {
+    "banner": {
+      "title": "Vážime si vaše súkromie",
+      "description": "Používame cookies na zlepšenie vašej skúsenosti s FinanzerPro. Niektoré cookies sú nevyhnutné pre fungovanie webovej stránky, zatiaľ čo iné nám pomáhajú zlepšovať našu službu a porozumieť tomu, ako používate našu stránku.",
+      "accept_all": "Prijať všetky",
+      "reject_non_essential": "Odmietnuť nepodstatné",
+      "customize": "Prispôsobiť",
+      "learn_more": "Dozvedieť sa viac"
+    },
+    "preferences": {
+      "title": "Predvoľby cookies",
+      "always_active": "Vždy aktívne",
+      "essential": {
+        "title": "Nevyhnutné cookies",
+        "description": "Potrebné pre správne fungovanie webovej stránky. Nemožno ich zakázať."
+      },
+      "functional": {
+        "title": "Funkčné cookies",
+        "description": "Zapamätajú si vaše predvoľby a poskytujú vylepšené funkcie."
+      },
+      "analytics": {
+        "title": "Analytické cookies",
+        "description": "Pomáhajú nám pochopiť, ako používate našu webovú stránku na zlepšenie výkonu."
+      },
+      "save_preferences": "Uložiť predvoľby",
+      "accept_all": "Prijať všetky",
+      "back": "Späť"
+    }
   }
 }

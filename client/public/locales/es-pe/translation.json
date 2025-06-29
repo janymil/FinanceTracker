@@ -1843,5 +1843,35 @@
     "loading": {
       "status": "Cargando estado de canje..."
     }
+  },
+
+  "cookies": {
+    "banner": {
+      "title": "Valoramos tu privacidad",
+      "description": "Utilizamos cookies para mejorar tu experiencia en FinanzerPro. Algunas cookies son esenciales para el funcionamiento del sitio web, mientras que otras nos ayudan a mejorar nuestro servicio y entender cómo usas nuestro sitio.",
+      "accept_all": "Aceptar Todas",
+      "reject_non_essential": "Rechazar No Esenciales",
+      "customize": "Personalizar",
+      "learn_more": "Saber Más"
+    },
+    "preferences": {
+      "title": "Preferencias de Cookies",
+      "always_active": "Siempre Activo",
+      "essential": {
+        "title": "Cookies Esenciales",
+        "description": "Requeridas para que el sitio web funcione correctamente. No se pueden desactivar."
+      },
+      "functional": {
+        "title": "Cookies Funcionales",
+        "description": "Recuerdan tus preferencias y proporcionan funciones mejoradas."
+      },
+      "analytics": {
+        "title": "Cookies de Analíticas",
+        "description": "Nos ayudan a entender cómo usas nuestro sitio web para mejorar el rendimiento."
+      },
+      "save_preferences": "Guardar Preferencias",
+      "accept_all": "Aceptar Todas",
+      "back": "Atrás"
+    }
   }
 }
