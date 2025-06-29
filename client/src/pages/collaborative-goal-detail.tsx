@@ -570,8 +570,8 @@ export default function CollaborativeGoalDetailPage() {
                         <SelectContent>
                           {goal.participants?.map((participant) => (
                             <SelectItem key={participant.id} value={participant.userId}>
-                              {participant.firstName && participant.lastName 
-                                ? `${participant.firstName} ${participant.lastName}` 
+                              {participant.user?.firstName && participant.user?.lastName 
+                                ? `${participant.user.firstName} ${participant.user.lastName}` 
                                 : t('collaborative_goal_detail.sections.unknown_user')
                               }
                             </SelectItem>
