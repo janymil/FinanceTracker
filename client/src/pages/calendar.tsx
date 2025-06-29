@@ -190,10 +190,7 @@ export default function CalendarPage() {
             </p>
           </div>
           
-          <Badge variant="outline" className="text-blue-600 border-blue-600">
-            <CalendarIcon className="h-3 w-3 mr-1" />
-            {t('calendar.standard_feature')}
-          </Badge>
+
         </div>
 
         {/* Monthly Summary */}
