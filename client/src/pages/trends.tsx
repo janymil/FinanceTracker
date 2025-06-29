@@ -50,6 +50,7 @@ export default function Trends() {
   const [financialSummary, setFinancialSummary] = useState<any>(null);
   const [aiPredictions, setAiPredictions] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   // Get auth headers for Clerk authentication
   const getAuthHeaders = async (): Promise<Record<string, string>> => {
@@ -64,6 +65,65 @@ export default function Trends() {
       console.warn('Failed to get Clerk token:', error);
     }
     return {};
+  };
+
+  // PDF Export function with premium plan requirement
+  const handlePDFExport = async () => {
+    // Check if user has premium plan access
+    const userMetadata = user?.publicMetadata as { plan?: string } | undefined;
+    const userPlan = userMetadata?.plan || 'free';
+    
+    if (userPlan === 'free') {
+      // Show upgrade prompt for free users
+      alert(t('plans.upgrade_required'));
+      return;
+    }
+
+    setPdfLoading(true);
+    try {
+      const headers = await getAuthHeaders();
+      
+      // Get current period in YYYY-MM format
+      const currentDate = new Date();
+      const period = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+      
+      console.log('Generating PDF for period:', period);
+
+      const response = await fetch('/api/generate-trends-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...headers
+        },
+        body: JSON.stringify({
+          period: period,
+          currency: displayCurrency
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'PDF generation failed');
+      }
+
+      // Download the PDF
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `financial-report-${period}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log('PDF downloaded successfully');
+    } catch (error) {
+      console.error('PDF export error:', error);
+      alert(t('trends.export_error') || 'Failed to generate PDF report');
+    } finally {
+      setPdfLoading(false);
+    }
   };
 
   // Fetch all data
@@ -465,9 +525,18 @@ export default function Trends() {
                   <SelectItem value="2years">{t('trends.periods.last_2_years')}</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                {t('trends.export')}
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handlePDFExport}
+                disabled={pdfLoading}
+              >
+                {pdfLoading ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                {pdfLoading ? t('trends.generating_pdf') : t('trends.export')}
               </Button>
             </div>
           </div>
