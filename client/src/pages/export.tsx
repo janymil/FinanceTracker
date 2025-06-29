@@ -984,7 +984,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Cloud className="h-5 w-5" />
-                    Cloud Backup Status
+{t('export.cloud_backup_status')}
                   </div>
                   <Button 
                     variant="outline" 
@@ -1006,9 +1006,9 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                   <div className="flex items-center gap-2">
                     <Check className="h-5 w-5 text-green-600" />
                     <div>
-                      <h4 className="font-medium text-green-800 dark:text-green-200">Automatic Backup Enabled</h4>
+                      <h4 className="font-medium text-green-800 dark:text-green-200">{t('export.automatic_backup_enabled')}</h4>
                       <p className="text-sm text-green-700 dark:text-green-300">
-                        Your data is automatically backed up daily at 2:00 AM
+                        {t('export.backup_schedule_description')}
                       </p>
                     </div>
                   </div>
@@ -1017,31 +1017,31 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                 {isLoadingBackupStatus ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin" />
-                    <span className="ml-2">Loading backup status...</span>
+                    <span className="ml-2">{t('export.loading_backup_status')}</span>
                   </div>
                 ) : hasBackupData ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="p-4 border rounded-lg">
-                      <div className="text-sm text-muted-foreground">Last Backup</div>
+                      <div className="text-sm text-muted-foreground">{t('export.last_backup')}</div>
                       <div className="text-lg font-semibold">
                         {backupStatusData.lastBackup && backupStatusData.lastBackup.date ? 
                           (() => {
                             try {
                               const date = new Date(backupStatusData.lastBackup.date);
-                              return isNaN(date.getTime()) ? 'Never' : format(date, 'MMM dd, yyyy');
+                              return isNaN(date.getTime()) ? t('export.never') : format(date, 'MMM dd, yyyy');
                             } catch {
-                              return 'Never';
+                              return t('export.never');
                             }
                           })() : 
-                          'Never'
+                          t('export.never')
                         }
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        Next scheduled: {backupStatusData.nextBackup ? 
+{t('export.next_scheduled')}: {backupStatusData.nextBackup ? 
                           (() => {
                             try {
                               const date = new Date(backupStatusData.nextBackup);
-                              return isNaN(date.getTime()) ? 'Tonight at 2:00 AM' : `${format(date, 'MMM dd')} at 2:00 AM`;
+                              return isNaN(date.getTime()) ? t('export.tonight_2am') : `${format(date, 'MMM dd')} ${t('export.at_2am')}`;
                             } catch {
                               return 'Tonight at 2:00 AM';
                             }
