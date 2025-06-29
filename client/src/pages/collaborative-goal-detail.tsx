@@ -154,8 +154,8 @@ export default function CollaborativeGoalDetailPage() {
     e.preventDefault();
     if (!contributionAmount || parseFloat(contributionAmount) <= 0) {
       toast({
-        title: "Invalid Amount",
-        description: "Please enter a valid contribution amount.",
+        title: t('collaborative_goal_detail.messages.invalid_amount'),
+        description: t('collaborative_goal_detail.messages.invalid_amount_description'),
         variant: "destructive",
       });
       return;
@@ -170,8 +170,8 @@ export default function CollaborativeGoalDetailPage() {
     e.preventDefault();
     if (!inviteEmail || !inviteEmail.includes('@')) {
       toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address.",
+        title: t('collaborative_goal_detail.messages.invalid_email'),
+        description: t('collaborative_goal_detail.messages.invalid_email_description'),
         variant: "destructive",
       });
       return;
@@ -187,7 +187,7 @@ export default function CollaborativeGoalDetailPage() {
           <Link href="/collaborative-goals">
             <Button variant="outline" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
+              {t('collaborative_goal_detail.buttons.back')}
             </Button>
           </Link>
           <div>
@@ -196,7 +196,7 @@ export default function CollaborativeGoalDetailPage() {
           </div>
         </div>
         <Badge variant={goal?.status === 'active' ? 'default' : 'secondary'}>
-          {goal?.status || 'unknown'}
+          {t(`collaborative_goal_detail.statuses.${goal?.status || 'unknown'}`)}
         </Badge>
       </div>
 
@@ -204,46 +204,46 @@ export default function CollaborativeGoalDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Progress</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('collaborative_goal_detail.cards.progress')}</CardTitle>
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${currentAmount.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">of ${targetAmount.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">{t('collaborative_goal_detail.cards.of')} ${targetAmount.toLocaleString()}</p>
             <Progress value={progressPercentage} className="mt-2" />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Participants</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('collaborative_goal_detail.cards.participants')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{goal?.participants?.length || 0}</div>
-            <p className="text-xs text-muted-foreground">Active members</p>
+            <p className="text-xs text-muted-foreground">{t('collaborative_goal_detail.cards.active_members')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Days Remaining</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('collaborative_goal_detail.cards.days_remaining')}</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{daysRemaining > 0 ? daysRemaining : 0}</div>
-            <p className="text-xs text-muted-foreground">Until {goal?.targetDate ? format(new Date(goal.targetDate), 'MMM dd, yyyy') : 'No date set'}</p>
+            <p className="text-xs text-muted-foreground">{t('collaborative_goal_detail.cards.until')} {goal?.targetDate ? format(new Date(goal.targetDate), 'MMM dd, yyyy') : t('collaborative_goal_detail.cards.no_date_set')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Category</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('collaborative_goal_detail.cards.category')}</CardTitle>
             <Trophy className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-bold capitalize">{goal?.category || 'General'}</div>
-            <p className="text-xs text-muted-foreground">Goal type</p>
+            <div className="text-lg font-bold capitalize">{goal?.category || t('collaborative_goal_detail.cards.general')}</div>
+            <p className="text-xs text-muted-foreground">{t('collaborative_goal_detail.cards.goal_type')}</p>
           </CardContent>
         </Card>
       </div>
@@ -254,7 +254,7 @@ export default function CollaborativeGoalDetailPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <DollarSign className="h-5 w-5 mr-2" />
-              Add Contribution
+              {t('collaborative_goal_detail.forms.add_contribution')}
             </CardTitle>
           </CardHeader>
           <CardContent>
