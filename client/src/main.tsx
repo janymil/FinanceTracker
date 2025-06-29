@@ -104,9 +104,9 @@ const customSlovak = {
     legalConsent: {
       ...(skSK.signUp?.legalConsent || {}),
       checkbox: {
-        label__onlyPrivacyPolicy: 'Súhlasím so <privacyPolicyLink>zásadami ochrany osobných údajov</privacyPolicyLink>',
-        label__onlyTermsOfService: 'Súhlasím s <termsOfServiceLink>obchodnými podmienkami</termsOfServiceLink>',
-        label__termsOfServiceAndPrivacyPolicy: 'Súhlasím s <termsOfServiceLink>obchodnými podmienkami</termsOfServiceLink> a <privacyPolicyLink>zásadami ochrany osobných údajov</privacyPolicyLink>'
+        label__onlyPrivacyPolicy: 'Súhlasím so {{privacyPolicyLink}}',
+        label__onlyTermsOfService: 'Súhlasím s {{termsOfServiceLink}}',
+        label__termsOfServiceAndPrivacyPolicy: 'Súhlasím s {{termsOfServiceLink}} a {{privacyPolicyLink}}'
       },
       continue: {
         subtitle: 'Pokračovaním súhlasíte s našimi zásadami.',
