@@ -1173,7 +1173,31 @@
     "and_more_errors": "... and {{count}} more",
     "recent_imports": "Recent Imports",
     "records_count": "{{count}} records",
-    "no_import_history": "No import history yet"
+    "no_import_history": "No import history yet",
+    
+    "backup_tab": "Backup",
+    "cloud_backup_status": "Cloud Backup Status",
+    "automatic_backup_enabled": "Automatic Backup Enabled",
+    "backup_schedule_description": "Your data is automatically backed up daily at 2:00 AM",
+    "loading_backup_status": "Loading backup status...",
+    "last_backup": "Last Backup",
+    "never": "Never",
+    "next_scheduled": "Next scheduled",
+    "tonight_2am": "Tonight at 2:00 AM",
+    "at_2am": "at 2:00 AM",
+    "storage_usage": "Storage Usage",
+    "days_old": "days old",
+    "no_backups": "No backups",
+    "backup_info": "Backup Info",
+    "provider": "Provider",
+    "region": "Region",
+    "global": "Global",
+    "files_stored": "files stored",
+    "no_backup_status": "No backup status available",
+    "creating_backup": "Creating Backup...",
+    "backup_now": "Backup Now",
+    "restoring": "Restoring...",
+    "restore": "Restore"
   },
 
   "upload": {

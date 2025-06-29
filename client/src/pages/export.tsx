@@ -1107,12 +1107,12 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                     {isCreatingBackup ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating Backup...
+{t('export.creating_backup')}
                       </>
                     ) : (
                       <>
                         <Cloud className="mr-2 h-4 w-4" />
-                        Backup Now
+{t('export.backup_now')}
                       </>
                     )}
                   </Button>
@@ -1139,12 +1139,12 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                     {isRestoring ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Restoring...
+{t('export.restoring')}
                       </>
                     ) : (
                       <>
                         <Download className="mr-2 h-4 w-4" />
-                        Restore
+{t('export.restore')}
                       </>
                     )}
                   </Button>
