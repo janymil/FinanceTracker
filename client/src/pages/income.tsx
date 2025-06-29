@@ -34,6 +34,7 @@ import MonthFilter from "@/components/month-filter";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
+import { formatChartMonth } from "../../../lib/dateUtils";
 import TransactionFilters from "@/components/TransactionFilters";
 
 // Helper functions for category localization
@@ -309,21 +310,10 @@ export default function Income() {
   const chartData = Object.entries(monthlyIncomeData)
     .sort(([a], [b]) => a.localeCompare(b))
     .slice(-6)
-    .map(([month, amount]) => {
-      const currentLang = i18n.language || 'en-us';
-      let locale = 'en-us';
-      
-      if (currentLang.startsWith('es')) {
-        locale = 'es';
-      } else if (currentLang.startsWith('sk')) {
-        locale = 'sk';
-      }
-      
-      return {
-        month: new Date(month + '-01').toLocaleDateString(locale, { month: 'short', year: 'numeric' }),
-        amount: amount as number
-      };
-    });
+    .map(([month, amount]) => ({
+      month: formatChartMonth(month),
+      amount: amount as number
+    }));
 
   // Calculate category distribution
   const categoryData = incomeTransactions.reduce((acc: any, transaction: Transaction) => {

@@ -32,7 +32,7 @@ import MonthFilter from "@/components/month-filter";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
-import { formatChartMonth } from "@/lib/dateUtils";
+import { formatChartMonth } from "../../../lib/dateUtils";
 import TransactionFilters from "@/components/TransactionFilters";
 
 // Helper functions for category localization

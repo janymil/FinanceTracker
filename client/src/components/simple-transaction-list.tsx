@@ -17,6 +17,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/clerk-react";
 import { useTranslation } from "react-i18next";
+import { formatTransactionDate } from "../../../lib/dateUtils";
 
 
 interface Transaction {
@@ -83,13 +84,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
     locale = 'sk';
   }
   
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(locale, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
+
 
   const handleDelete = async (transactionId: number) => {
     setIsDeleting(transactionId);
@@ -259,7 +254,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                     <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
                       <span className="truncate">{transaction.categoryName || 'Uncategorized'}</span>
                       <span className="shrink-0">•</span>
-                      <span className="shrink-0">{formatDate(transaction.date)}</span>
+                      <span className="shrink-0">{formatTransactionDate(transaction.date)}</span>
                       {transaction.ocrVendor && transaction.ocrVendor !== transaction.description && (
                         <>
                           <span className="hidden md:inline shrink-0">•</span>
