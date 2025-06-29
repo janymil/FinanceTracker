@@ -301,8 +301,11 @@ export function registerCollaborativeGoalRoutes(app: Express) {
             participant,
             emailSent
           });
-        } catch (error) {
-          return res.status(400).json({ message: "User is already part of this goal or cannot join" });
+        } catch (error: any) {
+          if (error.message === "Already a participant in this goal") {
+            return res.status(400).json({ message: "User is already a participant in this goal" });
+          }
+          return res.status(400).json({ message: "Failed to add user to goal" });
         }
       } else {
         // User doesn't exist - send invitation email
