@@ -2324,5 +2324,54 @@
       "title": "Kalifornské práva na súkromie",
       "notice": "Obyvatelia Kalifornie majú špecifické práva na súkromie podľa CCPA. Môžete požiadať o informácie o zbere údajov a odmietnuť predaj údajov."
     }
+  },
+
+  "privacy": {
+    "title": "Zásady ochrany súkromia",
+    "last_updated": "Posledná aktualizácia: 14. júna 2025",
+    "section1": {
+      "title": "1. Informácie, ktoré zhromažďujeme",
+      "description": "Zhromažďujeme informácie, ktoré nám poskytujete priamo, napríklad keď vytvárate alebo upravujete svoj účet, pridávate finančné transakcie, nastavujete rozpočty alebo nás kontaktujete pre podporu.",
+      "account_info": {
+        "title": "Informácie o účte:",
+        "description": "Emailová adresa, meno, heslo (šifrované)"
+      },
+      "financial_data": {
+        "title": "Finančné údaje:",
+        "description": "Podrobnosti transakcií, kategórie, rozpočty, ciele"
+      },
+      "usage_data": {
+        "title": "Údaje o používaní:",
+        "description": "Ako interagujete s našou službou, používané funkcie"
+      },
+      "device_info": {
+        "title": "Informácie o zariadení:",
+        "description": "Typ prehliadača, IP adresa, operačný systém"
+      }
+    },
+    "section2": {
+      "title": "2. Ako používame vaše informácie",
+      "description": "Informácie, ktoré zhromažďujeme, používame na:",
+      "services": "Poskytovanie, údržbu a zlepšovanie našich služieb finančného riadenia",
+      "transactions": "Spracovanie transakcií a zasielanie súvisiacich informácií",
+      "ai_insights": "Poskytovanie AI-poháňaných poznatkov a odporúčaní (Premium používatelia)",
+      "notifications": "Zasielanie technických oznámení, aktualizácií, bezpečnostných upozornení a správ podpory",
+      "support": "Odpoveď na vaše komentáre a otázky",
+      "analytics": "Analýza vzorcov používania na zlepšenie našej služby"
+    },
+    "section8": {
+      "title": "8. Súbory cookie a sledovanie",
+      "description": "Používame súbory cookie a podobné sledovacie technológie na poskytovanie a zlepšovanie našej služby. Pozrite si naše Zásady súborov cookie pre podrobné informácie."
+    },
+    "section9": {
+      "title": "9. Zmeny týchto zásad",
+      "description": "Môžeme túto zásadu ochrany súkromia čas od času aktualizovať. O akýchkoľvek zmenách vás budeme informovať zverejnením novej zásady na tejto stránke a aktualizáciou dátumu \"Posledná aktualizácia\"."
+    },
+    "section10": {
+      "title": "10. Kontaktujte nás",
+      "description": "Ak máte akékoľvek otázky týkajúce sa týchto Zásad ochrany súkromia, kontaktujte nás na:",
+      "email": "Email: info@finanzerpro.com",
+      "address": "Adresa: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120"
+    }
   }
 }
