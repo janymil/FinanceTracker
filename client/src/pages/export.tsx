@@ -488,9 +488,9 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
           }
         }} className="space-y-4">
           <TabsList className="grid w-full grid-cols-1 md:grid-cols-3">
-            <TabsTrigger value="export" className="text-xs md:text-sm">Export Data</TabsTrigger>
-            <TabsTrigger value="import" className="text-xs md:text-sm">Import Data</TabsTrigger>
-            <TabsTrigger value="backup" className="text-xs md:text-sm">Cloud Backup</TabsTrigger>
+            <TabsTrigger value="export" className="text-xs md:text-sm">{t('export.tab_export')}</TabsTrigger>
+            <TabsTrigger value="import" className="text-xs md:text-sm">{t('export.tab_import')}</TabsTrigger>
+            <TabsTrigger value="backup" className="text-xs md:text-sm">{t('export.tab_backup')}</TabsTrigger>
           </TabsList>
 
           {/* Export Tab */}
@@ -499,44 +499,44 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Download className="h-5 w-5" />
-                  Export Your Financial Data
+                  {t('export.export_title')}
                 </CardTitle>
                 <CardDescription>
-                  Download your transactions, budgets, and goals in various formats
+                  {t('export.export_description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium">Export Format</label>
+                      <label className="text-sm font-medium">{t('export.format_label')}</label>
                       <Select value={exportOptions.format} onValueChange={(value: any) => 
                         setExportOptions(prev => ({ ...prev, format: value }))}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="pdf">PDF Report</SelectItem>
-                          <SelectItem value="csv">CSV Spreadsheet</SelectItem>
-                          <SelectItem value="excel">Excel Workbook</SelectItem>
-                          <SelectItem value="json">JSON Data</SelectItem>
+                          <SelectItem value="pdf">{t('export.format_pdf')}</SelectItem>
+                          <SelectItem value="csv">{t('export.format_csv')}</SelectItem>
+                          <SelectItem value="excel">{t('export.format_excel')}</SelectItem>
+                          <SelectItem value="json">{t('export.format_json')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium">Date Range</label>
+                      <label className="text-sm font-medium">{t('export.date_range_label')}</label>
                       <Select value={exportOptions.dateRange} onValueChange={(value: any) => 
                         setExportOptions(prev => ({ ...prev, dateRange: value }))}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">All Time</SelectItem>
-                          <SelectItem value="month">This Month</SelectItem>
-                          <SelectItem value="quarter">This Quarter</SelectItem>
-                          <SelectItem value="year">This Year</SelectItem>
-                          <SelectItem value="custom">Custom Range</SelectItem>
+                          <SelectItem value="all">{t('export.range_all')}</SelectItem>
+                          <SelectItem value="month">{t('export.range_month')}</SelectItem>
+                          <SelectItem value="quarter">{t('export.range_quarter')}</SelectItem>
+                          <SelectItem value="year">{t('export.range_year')}</SelectItem>
+                          <SelectItem value="custom">{t('export.range_custom')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -544,7 +544,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                     {exportOptions.dateRange === "custom" && (
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <label className="text-sm font-medium">Start Date</label>
+                          <label className="text-sm font-medium">{t('export.start_date')}</label>
                           <input
                             type="date"
                             className="w-full px-3 py-2 border rounded-md"
