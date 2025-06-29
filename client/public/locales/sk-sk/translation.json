@@ -856,6 +856,73 @@
     "goal": "cieľ"
   },
 
+  "goals": {
+    "title": "Ciele",
+    "subtitle": "Nastavte a sledujte vaše finančné ciele",
+    "add_goal": "Pridať Cieľ",
+    "create_goal": "Vytvoriť Cieľ",
+    "edit_goal": "Upraviť Cieľ",
+    "update_goal": "Aktualizovať Cieľ",
+    "create_goal_desc": "Nastavte nový finančný cieľ na sledovanie vášho pokroku",
+    "edit_goal_desc": "Aktualizujte detaily vášho finančného cieľa a sledujte váš pokrok",
+    "form": {
+      "goal_name": "Názov Cieľa",
+      "goal_name_placeholder": "Núdzový Fond",
+      "target_amount": "Cieľová Suma ({{currency}})",
+      "current_amount": "Aktuálna Suma ({{currency}})",
+      "target_date": "Cieľový Dátum",
+      "category": "Kategória",
+      "select_category": "Vybrať kategóriu",
+      "description_optional": "Popis (Voliteľný)",
+      "description_placeholder": "Ušetriť na 6 mesiacov výdavkov"
+    },
+    "card": {
+      "progress": "Pokrok",
+      "current": "Aktuálne",
+      "target": "Cieľ",
+      "days_left": "{{days}} dní zostáva",
+      "due_today": "Splatné dnes",
+      "days_overdue": "{{days}} dní po termíne",
+      "amount_left": "{{amount}} zostáva"
+    },
+    "buttons": {
+      "edit": "Upraviť",
+      "duplicate": "Duplikovať"
+    },
+    "status": {
+      "completed": "Dokončené",
+      "overdue": "Po Termíne",
+      "on_track": "Na Správnej Ceste",
+      "in_progress": "V Priebehu",
+      "just_started": "Práve Začaté"
+    },
+    "delete": {
+      "title": "Vymazať Cieľ",
+      "description": "Ste si istí, že chcete vymazať \"{{name}}\"? Túto akciu nie je možné vrátiť späť.",
+      "confirm": "Vymazať"
+    },
+    "empty": {
+      "no_goals_yet": "Zatiaľ Žiadne Ciele",
+      "create_first_goal": "Vytvorte váš prvý finančný cieľ na začiatok sledovania pokroku",
+      "create_first_goal_button": "Vytvoriť Váš Prvý Cieľ"
+    },
+    "toasts": {
+      "goal_created": "Cieľ úspešne vytvorený!",
+      "goal_created_desc": "Váš nový finančný cieľ bol pridaný.",
+      "goal_updated": "Cieľ úspešne aktualizovaný!",
+      "goal_updated_desc": "Detaily vášho cieľa boli aktualizované.",
+      "goal_deleted": "Cieľ úspešne vymazaný!",
+      "goal_deleted_desc": "Váš cieľ bol odstránený."
+    },
+    "errors": {
+      "select_target_date": "Prosím vyberte cieľový dátum",
+      "valid_target_date": "Prosím zadajte platný cieľový dátum",
+      "failed_create": "Nepodarilo sa vytvoriť cieľ",
+      "failed_update": "Nepodarilo sa aktualizovať cieľ",
+      "failed_delete": "Nepodarilo sa vymazať cieľ"
+    }
+  },
+
   "dashboard": {
     "total_income": "Celkové Príjmy",
     "total_expenses": "Celkové Výdavky",

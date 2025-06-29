@@ -800,6 +800,73 @@
     "goal": "meta"
   },
 
+  "goals": {
+    "title": "Metas",
+    "subtitle": "Establece y rastrea tus metas financieras",
+    "add_goal": "Agregar Meta",
+    "create_goal": "Crear Meta",
+    "edit_goal": "Editar Meta",
+    "update_goal": "Actualizar Meta",
+    "create_goal_desc": "Configura una nueva meta financiera para rastrear tu progreso",
+    "edit_goal_desc": "Actualiza los detalles de tu meta financiera y rastrea tu progreso",
+    "form": {
+      "goal_name": "Nombre de la Meta",
+      "goal_name_placeholder": "Fondo de Emergencia",
+      "target_amount": "Cantidad Objetivo ({{currency}})",
+      "current_amount": "Cantidad Actual ({{currency}})",
+      "target_date": "Fecha Objetivo",
+      "category": "Categoría",
+      "select_category": "Seleccionar categoría",
+      "description_optional": "Descripción (Opcional)",
+      "description_placeholder": "Ahorrar para 6 meses de gastos"
+    },
+    "card": {
+      "progress": "Progreso",
+      "current": "Actual",
+      "target": "Objetivo",
+      "days_left": "{{days}} días restantes",
+      "due_today": "Vence hoy",
+      "days_overdue": "{{days}} días atrasados",
+      "amount_left": "{{amount}} restantes"
+    },
+    "buttons": {
+      "edit": "Editar",
+      "duplicate": "Duplicar"
+    },
+    "status": {
+      "completed": "Completado",
+      "overdue": "Atrasado",
+      "on_track": "En Camino",
+      "in_progress": "En Progreso",
+      "just_started": "Recién Iniciado"
+    },
+    "delete": {
+      "title": "Eliminar Meta",
+      "description": "¿Estás seguro de que quieres eliminar \"{{name}}\"? Esta acción no se puede deshacer.",
+      "confirm": "Eliminar"
+    },
+    "empty": {
+      "no_goals_yet": "Aún No Hay Metas",
+      "create_first_goal": "Crea tu primera meta financiera para comenzar a rastrear tu progreso",
+      "create_first_goal_button": "Crear Tu Primera Meta"
+    },
+    "toasts": {
+      "goal_created": "¡Meta creada exitosamente!",
+      "goal_created_desc": "Tu nueva meta financiera ha sido agregada.",
+      "goal_updated": "¡Meta actualizada exitosamente!",
+      "goal_updated_desc": "Los detalles de tu meta han sido actualizados.",
+      "goal_deleted": "¡Meta eliminada exitosamente!",
+      "goal_deleted_desc": "Tu meta ha sido removida."
+    },
+    "errors": {
+      "select_target_date": "Por favor selecciona una fecha objetivo",
+      "valid_target_date": "Por favor ingresa una fecha objetivo válida",
+      "failed_create": "Error al crear la meta",
+      "failed_update": "Error al actualizar la meta",
+      "failed_delete": "Error al eliminar la meta"
+    }
+  },
+
   "dashboard": {
     "total_income": "Ingresos Totales",
     "total_expenses": "Gastos Totales",

@@ -811,6 +811,73 @@
     "goal": "goal"
   },
 
+  "goals": {
+    "title": "Goals",
+    "subtitle": "Set and track your financial goals",
+    "add_goal": "Add Goal",
+    "create_goal": "Create Goal",
+    "edit_goal": "Edit Goal",
+    "update_goal": "Update Goal",
+    "create_goal_desc": "Set up a new financial goal to track your progress",
+    "edit_goal_desc": "Update your financial goal details and track your progress",
+    "form": {
+      "goal_name": "Goal Name",
+      "goal_name_placeholder": "Emergency Fund",
+      "target_amount": "Target Amount ({{currency}})",
+      "current_amount": "Current Amount ({{currency}})",
+      "target_date": "Target Date",
+      "category": "Category",
+      "select_category": "Select category",
+      "description_optional": "Description (Optional)",
+      "description_placeholder": "Save for 6 months of expenses"
+    },
+    "card": {
+      "progress": "Progress",
+      "current": "Current",
+      "target": "Target",
+      "days_left": "{{days}} days left",
+      "due_today": "Due today",
+      "days_overdue": "{{days}} days overdue",
+      "amount_left": "{{amount}} left"
+    },
+    "buttons": {
+      "edit": "Edit",
+      "duplicate": "Duplicate"
+    },
+    "status": {
+      "completed": "Completed",
+      "overdue": "Overdue",
+      "on_track": "On Track",
+      "in_progress": "In Progress",
+      "just_started": "Just Started"
+    },
+    "delete": {
+      "title": "Delete Goal",
+      "description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+      "confirm": "Delete"
+    },
+    "empty": {
+      "no_goals_yet": "No Goals Yet",
+      "create_first_goal": "Create your first financial goal to start tracking your progress",
+      "create_first_goal_button": "Create Your First Goal"
+    },
+    "toasts": {
+      "goal_created": "Goal created successfully!",
+      "goal_created_desc": "Your new financial goal has been added.",
+      "goal_updated": "Goal updated successfully!",
+      "goal_updated_desc": "Your goal details have been updated.",
+      "goal_deleted": "Goal deleted successfully!",
+      "goal_deleted_desc": "Your goal has been removed."
+    },
+    "errors": {
+      "select_target_date": "Please select a target date",
+      "valid_target_date": "Please enter a valid target date",
+      "failed_create": "Failed to create goal",
+      "failed_update": "Failed to update goal",
+      "failed_delete": "Failed to delete goal"
+    }
+  },
+
   "dashboard": {
     "total_income": "Total Income",
     "total_expenses": "Total Expenses",
