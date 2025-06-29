@@ -419,14 +419,14 @@ export default function Trends() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <TrendingUp className="h-8 w-8" />
-                Advanced Trends Analysis
+                {t('trends.title')}
                 <Badge className="bg-premium text-white">
                   <Crown className="h-3 w-3 mr-1" />
-                  Premium
+                  {t('plans.premium')}
                 </Badge>
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
-                Deep insights into your financial patterns and forecasting
+                {t('trends.subtitle')}
               </p>
             </div>
             <div className="flex items-center space-x-4">
@@ -436,15 +436,15 @@ export default function Trends() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="30days">Last 30 Days</SelectItem>
-                  <SelectItem value="12weeks">Last 12 Weeks</SelectItem>
-                  <SelectItem value="6months">Last 6 Months</SelectItem>
-                  <SelectItem value="2years">Last 2 Years</SelectItem>
+                  <SelectItem value="30days">{t('trends.periods.last_30_days')}</SelectItem>
+                  <SelectItem value="12weeks">{t('trends.periods.last_12_weeks')}</SelectItem>
+                  <SelectItem value="6months">{t('trends.periods.last_6_months')}</SelectItem>
+                  <SelectItem value="2years">{t('trends.periods.last_2_years')}</SelectItem>
                 </SelectContent>
               </Select>
               <Button variant="outline" size="sm">
                 <Download className="h-4 w-4 mr-2" />
-                Export
+                {t('trends.export')}
               </Button>
             </div>
           </div>
@@ -455,19 +455,19 @@ export default function Trends() {
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
             <TabsTrigger value="overview" className="flex items-center gap-1 text-xs md:text-sm">
               <LineChart className="h-3 w-3 md:h-4 md:w-4" />
-              <span>Overview</span>
+              <span>{t('trends.tabs.overview')}</span>
             </TabsTrigger>
             <TabsTrigger value="categories" className="flex items-center gap-1 text-xs md:text-sm">
               <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
-              <span>By Category</span>
+              <span>{t('trends.tabs.by_category')}</span>
             </TabsTrigger>
             <TabsTrigger value="patterns" className="flex items-center gap-1 text-xs md:text-sm">
               <TrendingUp className="h-3 w-3 md:h-4 md:w-4" />
-              <span>Patterns</span>
+              <span>{t('trends.tabs.patterns')}</span>
             </TabsTrigger>
             <TabsTrigger value="forecasts" className="flex items-center gap-1 text-xs md:text-sm">
               <RefreshCw className="h-3 w-3 md:h-4 md:w-4" />
-              <span>Forecasts</span>
+              <span>{t('trends.tabs.forecasts')}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -476,43 +476,43 @@ export default function Trends() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Trend Direction</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('trends.overview.trend_direction')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-green-600" />
-                    <span className="text-2xl font-bold">Positive</span>
+                    <span className="text-2xl font-bold">{t('trends.overview.positive')}</span>
                   </div>
                   <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Net balance trending upward
+                    {t('trends.overview.net_balance_upward')}
                   </p>
                 </CardContent>
               </Card>
               
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Best Period</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('trends.overview.best_period')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-green-600">
                     {generateTrendData.length > 0 ? generateTrendData.reduce((best, current) => 
                       current.netBalance > best.netBalance ? current : best
-                    ).period : 'N/A'}
+                    ).period : t('trends.overview.not_available')}
                   </div>
                   <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Highest net balance
+                    {t('trends.overview.highest_net_balance')}
                   </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Volatility</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('trends.overview.volatility')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-blue-600">Low</div>
+                  <div className="text-2xl font-bold text-blue-600">{t('trends.overview.low')}</div>
                   <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Stable spending patterns
+                    {t('trends.overview.stable_patterns')}
                   </p>
                 </CardContent>
               </Card>
@@ -520,9 +520,9 @@ export default function Trends() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Financial Trends Overview</CardTitle>
+                <CardTitle>{t('trends.overview.financial_trends_title')}</CardTitle>
                 <CardDescription>
-                  Income, expenses, and net balance over {selectedPeriod}
+                  {t('trends.overview.financial_trends_description', { period: selectedPeriod })}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -539,14 +539,14 @@ export default function Trends() {
                         dataKey="income"
                         stroke="hsl(var(--success))"
                         strokeWidth={3}
-                        name="Income"
+                        name={t('trends.chart.income')}
                       />
                       <Line
                         type="monotone"
                         dataKey="expenses"
                         stroke="hsl(var(--destructive))"
                         strokeWidth={3}
-                        name="Expenses"
+                        name={t('trends.chart.expenses')}
                       />
                       <Line
                         type="monotone"
@@ -554,7 +554,7 @@ export default function Trends() {
                         stroke="hsl(var(--primary))"
                         strokeWidth={2}
                         strokeDasharray="5 5"
-                        name="Net Balance"
+                        name={t('trends.chart.net_balance')}
                       />
                     </LineChart>
                   </ResponsiveContainer>
