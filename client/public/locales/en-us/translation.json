@@ -1495,6 +1495,11 @@
   "and": "and",
   "Please accept Terms & Privacy Policy to continue": "Please accept Terms & Privacy Policy to continue",
 
+  "nav": {
+    "help": "Help",
+    "contact": "Contact"
+  },
+
   "auth": {
     "signUp": "Sign Up",
     "signIn": "Sign In",

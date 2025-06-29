@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { TrendingUp, Sun, Moon } from "lucide-react";
 import { useLocation } from "wouter";
 import { useTheme } from "@/context/ThemeContext";
+import { useTranslation } from 'react-i18next';
 
 interface AnonymousHeaderProps {
   showHelpContact?: boolean;
@@ -10,6 +11,7 @@ interface AnonymousHeaderProps {
 export function AnonymousHeader({ showHelpContact = true }: AnonymousHeaderProps) {
   const [, setLocation] = useLocation();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
 
   const handleLogin = () => {
     setLocation('/auth#sign-in');
@@ -33,13 +35,13 @@ export function AnonymousHeader({ showHelpContact = true }: AnonymousHeaderProps
                   onClick={() => setLocation('/help')} 
                   className="hidden sm:block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Help
+                  {t('nav.help')}
                 </button>
                 <button 
                   onClick={() => setLocation('/contact')} 
                   className="hidden sm:block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Contact
+                  {t('nav.contact')}
                 </button>
               </>
             )}
@@ -55,7 +57,7 @@ export function AnonymousHeader({ showHelpContact = true }: AnonymousHeaderProps
               )}
             </button>
             <Button onClick={handleLogin} className="bg-primary hover:bg-primary/90">
-              Sign In
+              {t('auth.signIn')}
             </Button>
           </div>
         </div>
