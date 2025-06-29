@@ -197,7 +197,7 @@ export default function Categories() {
                   {getLocalizedCategoryName(category, t)}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {category.transactionCount} {t("transactions")}
+                  {category.transactionCount} {category.transactionCount === 1 ? t('transaction') : t('transactions_count')}
                 </p>
               </div>
             </div>

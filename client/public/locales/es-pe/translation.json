@@ -676,6 +676,8 @@
     "of": "de",
     "transactions": "transacciones"
   },
+  "transaction": "transacción",
+  "transactions_count": "transacciones",
 
   "frequencies": {
     "weekly": "Semanal",

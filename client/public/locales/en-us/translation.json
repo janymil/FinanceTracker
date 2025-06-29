@@ -687,6 +687,8 @@
     "of": "of",
     "transactions": "transactions"
   },
+  "transaction": "transaction",
+  "transactions_count": "transactions",
 
   "frequencies": {
     "weekly": "Weekly",
