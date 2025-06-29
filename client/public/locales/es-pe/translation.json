@@ -1472,6 +1472,11 @@
   "and": "y",
   "Please accept Terms & Privacy Policy to continue": "Por favor acepta los Términos y Política de Privacidad para continuar",
 
+  "nav": {
+    "help": "Ayuda",
+    "contact": "Contacto"
+  },
+
   "auth": {
     "signUp": "Registrarse",
     "signIn": "Iniciar Sesión",
