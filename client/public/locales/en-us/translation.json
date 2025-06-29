@@ -1812,5 +1812,61 @@
       "title": "Recent Activities",
       "no_date": "No date"
     }
+  },
+
+  "redeem": {
+    "seo": {
+      "title": "Redeem AppSumo Code - FinanzerPro",
+      "description": "Redeem your AppSumo codes to unlock Standard or Premium features in FinanzerPro."
+    },
+    "title": "Redeem AppSumo Code",
+    "description": "Enter your AppSumo redemption codes to unlock premium features",
+    "validation": {
+      "code1_required": "Code 1 is required"
+    },
+    "errors": {
+      "failed_to_redeem": "Failed to redeem codes",
+      "no_valid_codes": "No valid codes provided",
+      "unexpected_error": "An unexpected error occurred"
+    },
+    "toast": {
+      "some_codes_invalid": "Some codes were invalid",
+      "invalid_codes_list": "Invalid codes: {{codes}}",
+      "codes_redeemed_success": "Codes redeemed successfully!",
+      "upgraded_to_plan": "You've been upgraded to {{plan}} plan with {{totalCodes}} total codes.",
+      "redemption_failed": "Redemption failed"
+    },
+    "status": {
+      "your_redeemed_codes": "Your Redeemed Codes",
+      "current_plan": "Current Plan",
+      "can_redeem_more": "You can redeem {{count}} more code(s) {{additionalText}}",
+      "to_unlock_premium": "to unlock Premium",
+      "maximum_codes_redeemed": "Maximum codes redeemed - Premium plan activated!",
+      "no_codes_redeemed": "No codes redeemed yet. Redeem 1 code for Standard plan or 2 codes for Premium plan."
+    },
+    "form": {
+      "code1_label": "Code 1 (Required)",
+      "code1_placeholder": "Enter your first redemption code",
+      "code2_label": "Code 2 (Optional - for Premium)",
+      "code2_placeholder": "Enter your second redemption code"
+    },
+    "info": {
+      "how_it_works": "How it works",
+      "one_code_standard": "1 Code = Standard Plan (Enhanced features)",
+      "two_codes_premium": "2 Codes = Premium Plan (All features unlocked)",
+      "codes_single_use": "Codes are single-use and cannot be transferred"
+    },
+    "buttons": {
+      "redeeming": "Redeeming codes...",
+      "redeem_codes": "Redeem Codes",
+      "back_to_dashboard": "Back to Dashboard"
+    },
+    "success": {
+      "all_codes_redeemed": "All Codes Redeemed!",
+      "maximum_reached": "You've reached the maximum number of redemptions and have Premium access."
+    },
+    "loading": {
+      "status": "Loading redemption status..."
+    }
   }
 }

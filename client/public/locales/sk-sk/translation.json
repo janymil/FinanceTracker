@@ -1834,5 +1834,61 @@
       "title": "Nedávne Aktivity",
       "no_date": "Žiadny dátum"
     }
+  },
+
+  "redeem": {
+    "seo": {
+      "title": "Uplatniť AppSumo Kód - FinanzerPro",
+      "description": "Uplatnite svoje AppSumo kódy na odomknutie Štandardných alebo Prémiových funkcií vo FinanzerPro."
+    },
+    "title": "Uplatniť AppSumo Kód",
+    "description": "Zadajte svoje AppSumo kódy na uplatnenie na odomknutie prémiových funkcií",
+    "validation": {
+      "code1_required": "Kód 1 je povinný"
+    },
+    "errors": {
+      "failed_to_redeem": "Nepodarilo sa uplatniť kódy",
+      "no_valid_codes": "Neboli poskytnuté žiadne platné kódy",
+      "unexpected_error": "Vyskytla sa neočakávaná chyba"
+    },
+    "toast": {
+      "some_codes_invalid": "Niektoré kódy boli neplatné",
+      "invalid_codes_list": "Neplatné kódy: {{codes}}",
+      "codes_redeemed_success": "Kódy úspešne uplatnené!",
+      "upgraded_to_plan": "Boli ste aktualizovaní na plán {{plan}} s {{totalCodes}} celkovými kódmi.",
+      "redemption_failed": "Uplatnenie zlyhalo"
+    },
+    "status": {
+      "your_redeemed_codes": "Vaše Uplatnené Kódy",
+      "current_plan": "Aktuálny Plán",
+      "can_redeem_more": "Môžete uplatniť {{count}} ďalších kódov {{additionalText}}",
+      "to_unlock_premium": "na odomknutie Prémiového",
+      "maximum_codes_redeemed": "Maximálny počet kódov uplatnený - Prémiový plán aktivovaný!",
+      "no_codes_redeemed": "Zatiaľ žiadne uplatnené kódy. Uplatnite 1 kód pre Štandardný plán alebo 2 kódy pre Prémiový plán."
+    },
+    "form": {
+      "code1_label": "Kód 1 (Povinný)",
+      "code1_placeholder": "Zadajte svoj prvý kód na uplatnenie",
+      "code2_label": "Kód 2 (Voliteľný - pre Prémiový)",
+      "code2_placeholder": "Zadajte svoj druhý kód na uplatnenie"
+    },
+    "info": {
+      "how_it_works": "Ako to funguje",
+      "one_code_standard": "1 Kód = Štandardný Plán (Rozšírené funkcie)",
+      "two_codes_premium": "2 Kódy = Prémiový Plán (Všetky funkcie odomknuté)",
+      "codes_single_use": "Kódy sú na jedno použitie a nedajú sa preniesť"
+    },
+    "buttons": {
+      "redeeming": "Uplatňujem kódy...",
+      "redeem_codes": "Uplatniť Kódy",
+      "back_to_dashboard": "Späť na Prehľad"
+    },
+    "success": {
+      "all_codes_redeemed": "Všetky Kódy Uplatnené!",
+      "maximum_reached": "Dosiahli ste maximálny počet uplatnení a máte Prémiový prístup."
+    },
+    "loading": {
+      "status": "Načítavam stav uplatnenia..."
+    }
   }
 }

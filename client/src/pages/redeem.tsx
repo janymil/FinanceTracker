@@ -306,10 +306,10 @@ export default function RedeemPage() {
                       <Lock className="w-8 h-8 text-green-600 dark:text-green-400" />
                     </div>
                     <h3 className="text-lg font-semibold text-green-700 dark:text-green-300 mb-2">
-                      All Codes Redeemed!
+                      {t("redeem.success.all_codes_redeemed")}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      You've reached the maximum number of redemptions and have Premium access.
+                      {t("redeem.success.maximum_reached")}
                     </p>
                   </div>
                 )}
@@ -318,7 +318,7 @@ export default function RedeemPage() {
                 {statusLoading && (
                   <div className="text-center p-6">
                     <Loader2 className="mx-auto w-8 h-8 animate-spin text-gray-400" />
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Loading redemption status...</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{t("redeem.loading.status")}</p>
                   </div>
                 )}
               </div>
@@ -329,7 +329,7 @@ export default function RedeemPage() {
                   onClick={() => setLocation("/dashboard")}
                   className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                 >
-                  Back to Dashboard
+                  {t("redeem.buttons.back_to_dashboard")}
                 </Button>
               </div>
             </CardContent>

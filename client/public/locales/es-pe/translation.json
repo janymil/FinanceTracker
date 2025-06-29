@@ -1787,5 +1787,61 @@
       "title": "Actividades Recientes",
       "no_date": "Sin fecha"
     }
+  },
+
+  "redeem": {
+    "seo": {
+      "title": "Canjear Código AppSumo - FinanzerPro",
+      "description": "Canjea tus códigos AppSumo para desbloquear funciones Estándar o Premium en FinanzerPro."
+    },
+    "title": "Canjear Código AppSumo",
+    "description": "Ingresa tus códigos de canje AppSumo para desbloquear funciones premium",
+    "validation": {
+      "code1_required": "El Código 1 es requerido"
+    },
+    "errors": {
+      "failed_to_redeem": "Error al canjear códigos",
+      "no_valid_codes": "No se proporcionaron códigos válidos",
+      "unexpected_error": "Ocurrió un error inesperado"
+    },
+    "toast": {
+      "some_codes_invalid": "Algunos códigos no eran válidos",
+      "invalid_codes_list": "Códigos inválidos: {{codes}}",
+      "codes_redeemed_success": "¡Códigos canjeados exitosamente!",
+      "upgraded_to_plan": "Has sido actualizado al plan {{plan}} con {{totalCodes}} códigos totales.",
+      "redemption_failed": "Error al canjear"
+    },
+    "status": {
+      "your_redeemed_codes": "Tus Códigos Canjeados",
+      "current_plan": "Plan Actual",
+      "can_redeem_more": "Puedes canjear {{count}} código(s) más {{additionalText}}",
+      "to_unlock_premium": "para desbloquear Premium",
+      "maximum_codes_redeemed": "¡Códigos máximos canjeados - Plan Premium activado!",
+      "no_codes_redeemed": "Aún no hay códigos canjeados. Canjea 1 código para el plan Estándar o 2 códigos para el plan Premium."
+    },
+    "form": {
+      "code1_label": "Código 1 (Requerido)",
+      "code1_placeholder": "Ingresa tu primer código de canje",
+      "code2_label": "Código 2 (Opcional - para Premium)",
+      "code2_placeholder": "Ingresa tu segundo código de canje"
+    },
+    "info": {
+      "how_it_works": "Cómo funciona",
+      "one_code_standard": "1 Código = Plan Estándar (Funciones mejoradas)",
+      "two_codes_premium": "2 Códigos = Plan Premium (Todas las funciones desbloqueadas)",
+      "codes_single_use": "Los códigos son de un solo uso y no se pueden transferir"
+    },
+    "buttons": {
+      "redeeming": "Canjeando códigos...",
+      "redeem_codes": "Canjear Códigos",
+      "back_to_dashboard": "Volver al Tablero"
+    },
+    "success": {
+      "all_codes_redeemed": "¡Todos los Códigos Canjeados!",
+      "maximum_reached": "Has alcanzado el número máximo de canjes y tienes acceso Premium."
+    },
+    "loading": {
+      "status": "Cargando estado de canje..."
+    }
   }
 }
