@@ -307,7 +307,7 @@ export default function Budget() {
                     <Calendar className="h-5 w-5" />
                     {format(currentDate, "MMMM yyyy")}
                   </CardTitle>
-                  <CardDescription>Total budget for {format(currentDate, "MMMM yyyy")}: {displayCurrency}{totalBudget.toFixed(2)}</CardDescription>
+                  <CardDescription>{t('budget.total_budget_for')} {format(currentDate, "MMMM yyyy")}: {displayCurrency}{totalBudget.toFixed(2)}</CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={() => navigateMonth("prev")}>
@@ -330,25 +330,25 @@ export default function Budget() {
                     }}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    New Budget
+                    {t('budget.new_budget')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>
-                      {editingBudget ? "Edit Budget" : "Create New Budget"}
+                      {editingBudget ? t('budget.edit_budget') : t('budget.create_new_budget')}
                     </DialogTitle>
                     <DialogDescription>
-                      {editingBudget ? "Update the budget details" : "Set up a new budget for a category"}
+                      {editingBudget ? t('budget.update_budget_details') : t('budget.set_up_new_budget')}
                     </DialogDescription>
                   </DialogHeader>
                   
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="category">Category</Label>
+                      <Label htmlFor="category">{t('budget.category')}</Label>
                       <Select value={newBudget.categoryId} onValueChange={(value) => setNewBudget({ ...newBudget, categoryId: value })}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
+                          <SelectValue placeholder={t('budget.select_category')} />
                         </SelectTrigger>
                         <SelectContent>
                           {expenseCategories.map((category: Category) => (
@@ -361,7 +361,7 @@ export default function Budget() {
                     </div>
 
                     <div>
-                      <Label htmlFor="amount">Budget Amount</Label>
+                      <Label htmlFor="amount">{t('budget.budget_amount')}</Label>
                       <Input
                         id="amount"
                         type="number"
@@ -374,7 +374,7 @@ export default function Budget() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="startDate">Start Date</Label>
+                        <Label htmlFor="startDate">{t('budget.start_date')}</Label>
                         <Input
                           id="startDate"
                           type="date"
@@ -383,7 +383,7 @@ export default function Budget() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="endDate">End Date</Label>
+                        <Label htmlFor="endDate">{t('budget.end_date')}</Label>
                         <Input
                           id="endDate"
                           type="date"
@@ -395,13 +395,13 @@ export default function Budget() {
 
                     <div className="flex justify-end gap-2 pt-4">
                       <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                        Cancel
+                        {t('budget.cancel')}
                       </Button>
                       <Button 
                         onClick={handleSubmit}
                         disabled={!newBudget.amount || !newBudget.categoryId}
                       >
-                        {editingBudget ? "Update" : "Create"} Budget
+                        {editingBudget ? t('budget.update') : t('budget.create')} {t('budget.budget')}
                       </Button>
                     </div>
                   </div>
@@ -421,7 +421,7 @@ export default function Budget() {
                 <DollarSign className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Budget</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('budget.total_budget')}</p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   {displayCurrency}{totalBudget.toFixed(2)}
                 </p>
