@@ -93,7 +93,13 @@ const getUserLanguage = (): string => {
 const userLanguage = getUserLanguage();
 const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
 
-// Keep imports but don't use complex localization logic
+// Simple Clerk localization - URL-based only
+const getClerkLocalization = () => {
+  const path = window.location.pathname;
+  if (path.startsWith('/es')) return esES;
+  if (path.startsWith('/sk')) return skSK;
+  return undefined;
+};
 
 const root = createRoot(container);
 root.render(
@@ -103,6 +109,7 @@ root.render(
         publishableKey={clerkPubKey}
         afterSignInUrl={dashboardRedirectUrl}
         afterSignUpUrl={dashboardRedirectUrl}
+        localization={getClerkLocalization()}
       >
         <QueryClientProvider client={queryClient}>
           <Router>
