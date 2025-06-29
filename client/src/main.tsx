@@ -93,67 +93,18 @@ const getUserLanguage = (): string => {
 const userLanguage = getUserLanguage();
 const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
 
-// Get language-aware URLs for terms and privacy policy
-const getLanguageAwareUrls = () => {
-  const urlPath = window.location.pathname;
-  const urlLang = urlPath.match(/^\/([a-z]{2})\//)?.[1];
-  const savedLanguage = localStorage.getItem('preferredLanguage');
-  const browserLanguage = detectLanguageFromBrowser();
-  
-  const currentLang = urlLang || savedLanguage || browserLanguage;
-  const lang = currentLang === 'es' || currentLang?.startsWith('es') ? 'es' :
-               currentLang === 'sk' || currentLang?.startsWith('sk') ? 'sk' : 'en';
-  
-  return {
-    termsOfServiceUrl: `/${lang}/terms-of-service`,
-    privacyPolicyUrl: `/${lang}/privacy-policy`,
-  };
-};
-
 // Get Clerk localization based on user language
 const getClerkLocalization = () => {
-  // Get language from URL path first, then localStorage, then browser
-  const urlPath = window.location.pathname;
-  const urlLang = urlPath.match(/^\/([a-z]{2})\//)?.[1];
   const savedLanguage = localStorage.getItem('preferredLanguage');
-  const browserLanguage = detectLanguageFromBrowser();
+  const currentLang = savedLanguage || detectLanguageFromBrowser();
   
-  // Priority: URL > localStorage > browser
-  const currentLang = urlLang || savedLanguage || browserLanguage;
-  
-  console.log('Clerk localization detection:', { urlLang, savedLanguage, browserLanguage, currentLang });
-  
-  if (currentLang === 'es' || currentLang?.startsWith('es')) {
-    console.log('Using Spanish localization for Clerk');
+  if (currentLang.startsWith('es')) {
     return esES;
-  } else if (currentLang === 'sk' || currentLang?.startsWith('sk')) {
-    console.log('Using minimal Slovak localization for Clerk');
-    // Use minimal Slovak localization to avoid form display issues
-    return {
-      locale: 'sk-SK',
-      signUp: {
-        start: {
-          title: 'Vytvorte si účet',
-          subtitle: 'na pokračovanie do {{applicationName}}',
-          actionText: 'Máte už účet?',
-          actionLink: 'Prihlásiť sa'
-        }
-      },
-      signIn: {
-        start: {
-          title: 'Prihlásiť sa',
-          subtitle: 'do vášho účtu',
-          actionText: 'Nemáte účet?',
-          actionLink: 'Zaregistrovať sa'
-        }
-      }
-    };
+  } else if (currentLang.startsWith('sk')) {
+    return skSK;
   }
-  console.log('Using English (default) localization for Clerk');
   return undefined; // English is default
 };
-
-const languageAwareUrls = getLanguageAwareUrls();
 
 const root = createRoot(container);
 root.render(
@@ -168,8 +119,9 @@ root.render(
           layout: {
             logoImageUrl: '/icon.png',
             showOptionalFields: false,
-            termsPageUrl: languageAwareUrls.termsOfServiceUrl,
-            privacyPageUrl: languageAwareUrls.privacyPolicyUrl,
+          },
+          variables: {
+            colorPrimary: '#3b82f6',
           }
         }}
       >

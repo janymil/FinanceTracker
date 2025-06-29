@@ -126,9 +126,11 @@ export default function ProfilePage() {
                 </p>
               </div>
               
-              {/* Clerk UserProfile */}
-              <div className="w-full">
-                <UserProfile />
+              {/* Clerk UserProfile with improved mobile styling */}
+              <div className="clerk-profile-mobile w-full overflow-x-auto">
+                <div className="min-w-[600px] md:min-w-0">
+                  <UserProfile />
+                </div>
               </div>
             </CardContent>
           </Card>
