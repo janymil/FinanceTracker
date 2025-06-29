@@ -1,5 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +44,7 @@ interface AIInsightsProps {
 export default function AIInsights({ data }: AIInsightsProps) {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const { t } = useTranslation();
 
   const handleTakeAction = (insight: SpendingInsight) => {
     // Navigate based on insight type and recommendation
@@ -195,20 +198,21 @@ export default function AIInsights({ data }: AIInsightsProps) {
     return insights.slice(0, 5); // Limit to top 5 insights
   };
 
-  const { data: insightsData } = useQuery({
-    queryKey: ["/api/ai/insights"],
-    enabled: !!user && user.plan === 'premium',
+  const { data: insightsData, isLoading, error } = useQuery({
+    queryKey: ["/api/ai/insights", data?.transactions?.length],
+    enabled: !!user && user.plan === 'premium' && !!data?.transactions && data.transactions.length > 0,
     queryFn: async () => {
-      const response = await apiRequest('POST', '/api/ai/insights', {
-        transactions: data?.transactions
-      });
+      const response = await apiRequest('GET', '/api/ai/insights');
       return response.json();
     },
   });
 
+  // Use AI data if available, otherwise generate local insights
   const insights = Array.isArray(insightsData) && insightsData.length > 0 
     ? insightsData 
-    : [];
+    : generateInsights(data);
+
+
 
   const getInsightIcon = (type: string) => {
     switch (type) {
@@ -239,11 +243,11 @@ export default function AIInsights({ data }: AIInsightsProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Brain className="h-5 w-5" />
-          AI-Powered Insights
-          <Badge className="bg-premium text-white">Pro</Badge>
+          {t("ai_insights.title")}
+          <Badge className="bg-premium text-white">{t("plans.premium")}</Badge>
         </CardTitle>
         <CardDescription>
-          Personalized recommendations based on your spending patterns
+          {t("ai_insights.description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
