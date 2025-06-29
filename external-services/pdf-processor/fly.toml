@@ -2,6 +2,7 @@ app = "finanzerpro-pdf"
 primary_region = "iad"
 
 [build]
+  dockerfile = "Dockerfile"
 
 [env]
   PORT = "3000"
