@@ -3,7 +3,7 @@ FROM node:18-slim
 
 # Install system dependencies required for Puppeteer and Canvas
 RUN apt-get update \
-    && apt-get install -y wget gnupg ca-certificates \
+    && apt-get install -y wget gnupg ca-certificates curl \
     && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-archive-keyring.gpg \
     && sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-archive-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
     && apt-get update \
