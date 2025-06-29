@@ -158,10 +158,10 @@ export default function Reports() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                {t("Advanced Reports & Analytics")}
+                {t("reports.title")}
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
-                {t("AI-powered insights, interactive charts, and comprehensive financial analysis")}
+                {t("reports.subtitle")}
               </p>
             </div>
             <div className="flex items-center space-x-4">
@@ -171,11 +171,11 @@ export default function Reports() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="week">{t("This Week")}</SelectItem>
-                  <SelectItem value="month">{t("This Month")}</SelectItem>
-                  <SelectItem value="quarter">{t("This Quarter")}</SelectItem>
-                  <SelectItem value="year">{t("This Year")}</SelectItem>
-                  <SelectItem value="custom">{t("Custom Range")}</SelectItem>
+                  <SelectItem value="week">{t("reports.this_week")}</SelectItem>
+                  <SelectItem value="month">{t("reports.this_month")}</SelectItem>
+                  <SelectItem value="quarter">{t("reports.this_quarter")}</SelectItem>
+                  <SelectItem value="year">{t("reports.this_year")}</SelectItem>
+                  <SelectItem value="custom">{t("reports.custom_range")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -194,19 +194,19 @@ export default function Reports() {
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
             <TabsTrigger value="summary" className="flex items-center gap-1 text-xs md:text-sm">
               <FileText className="h-3 w-3 md:h-4 md:w-4" />
-              <span>{t("Summary")}</span>
+              <span>{t("reports.summary")}</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-1 text-xs md:text-sm">
               <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
-              <span>{t("Analytics")}</span>
+              <span>{t("reports.analytics")}</span>
             </TabsTrigger>
             <TabsTrigger value="categorization" className="flex items-center gap-1 text-xs md:text-sm">
               <Zap className="h-3 w-3 md:h-4 md:w-4" />
-              <span>{t("Auto-Tag")}</span>
+              <span>{t("reports.auto_tag")}</span>
             </TabsTrigger>
             <TabsTrigger value="insights" className="flex items-center gap-1 text-xs md:text-sm">
               <Brain className="h-3 w-3 md:h-4 md:w-4" />
-              <span>{t("AI Insights")}</span>
+              <span>{t("reports.ai_insights")}</span>
             </TabsTrigger>
           </TabsList>
 
