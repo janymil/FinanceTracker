@@ -684,7 +684,10 @@ export default function CollaborativeGoalDetailPage() {
                       </Avatar>
                       <div className="flex-1">
                         <div className="font-medium">
-                          {participant.firstName} {participant.lastName}
+                          {participant.firstName && participant.lastName 
+                            ? `${participant.firstName} ${participant.lastName}` 
+                            : t('collaborative_goal_detail.sections.unknown_user')
+                          }
                         </div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
                           ${parseFloat(participant.currentContribution || '0').toLocaleString()} {t('collaborative_goal_detail.sections.contributed')}
@@ -718,7 +721,12 @@ export default function CollaborativeGoalDetailPage() {
                       </Avatar>
                       <div className="flex-1">
                         <div className="text-sm">
-                          <span className="font-medium">{contrib.firstName} {contrib.lastName}</span>
+                          <span className="font-medium">
+                            {contrib.firstName && contrib.lastName 
+                              ? `${contrib.firstName} ${contrib.lastName}` 
+                              : t('collaborative_goal_detail.sections.unknown_user')
+                            }
+                          </span>
                           <span className="text-green-600 dark:text-green-400 ml-1">
                             {t('collaborative_goal_detail.sections.contributed')} ${parseFloat(contrib.amount).toLocaleString()}
                           </span>
@@ -748,7 +756,7 @@ export default function CollaborativeGoalDetailPage() {
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2">
                   <MessageCircle className="w-5 h-5" />
-                  Group Chat
+                  {t('collaborative_goal_detail.chat.group_chat')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -777,7 +785,7 @@ export default function CollaborativeGoalDetailPage() {
                     ))}
                     {messages.length === 0 && (
                       <div className="text-center py-4 text-gray-500 text-sm">
-                        No messages yet. Start a conversation!
+                        {t('collaborative_goal_detail.chat.no_messages')}
                       </div>
                     )}
                   </div>
@@ -785,7 +793,7 @@ export default function CollaborativeGoalDetailPage() {
                   {/* Message input */}
                   <div className="flex gap-2">
                     <Input
-                      placeholder="Type a message..."
+                      placeholder={t('collaborative_goal_detail.chat.type_message')}
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={(e) => {
