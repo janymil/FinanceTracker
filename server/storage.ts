@@ -11,6 +11,7 @@ import {
   collaborativeGoals,
   collaborativeGoalParticipants,
   goalContributions,
+  goalMessages,
   challengeActivities,
   milestoneAchievements,
   financialMascots,
@@ -40,6 +41,8 @@ import {
   type InsertCollaborativeGoalParticipant,
   type GoalContribution,
   type InsertGoalContribution,
+  type GoalMessage,
+  type InsertGoalMessage,
   type ChallengeActivity,
   type InsertChallengeActivity,
   type MilestoneAchievement,
@@ -2441,6 +2444,52 @@ export class DatabaseStorage implements IStorage {
     }
 
     return Array.from(userMap.values());
+  }
+
+  // Goal message methods
+  async createGoalMessage(message: InsertGoalMessage): Promise<GoalMessage> {
+    const [newMessage] = await db
+      .insert(goalMessages)
+      .values(message)
+      .returning();
+
+    return newMessage;
+  }
+
+  async getGoalMessages(goalId: number): Promise<Array<GoalMessage & { user: User }>> {
+    const messages = await db
+      .select({
+        message: goalMessages,
+        user: users,
+      })
+      .from(goalMessages)
+      .innerJoin(users, eq(goalMessages.userId, users.id))
+      .where(eq(goalMessages.goalId, goalId))
+      .orderBy(goalMessages.createdAt);
+
+    return messages.map(m => ({ ...m.message, user: m.user }));
+  }
+
+  async updateGoalMessage(messageId: number, updates: Partial<InsertGoalMessage>): Promise<GoalMessage | null> {
+    const [updatedMessage] = await db
+      .update(goalMessages)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(goalMessages.id, messageId))
+      .returning();
+
+    return updatedMessage || null;
+  }
+
+  async deleteGoalMessage(messageId: number): Promise<boolean> {
+    const result = await db
+      .delete(goalMessages)
+      .where(eq(goalMessages.id, messageId))
+      .returning();
+
+    return result.length > 0;
   }
 }
 

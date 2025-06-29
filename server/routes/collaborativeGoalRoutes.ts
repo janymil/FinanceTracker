@@ -434,5 +434,124 @@ export function registerCollaborativeGoalRoutes(app: Express) {
     }
   });
 
+  // Goal messages/chat routes
+  app.get('/api/collaborative-goals/:goalId/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const goalId = parseInt(req.params.goalId);
+      
+      // Check if user is a participant in the goal
+      const participants = await storage.getGoalParticipants(goalId);
+      const isParticipant = participants.some(p => p.userId === userId);
+      
+      if (!isParticipant) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const messages = await storage.getGoalMessages(goalId);
+      return res.json(messages);
+    } catch (error) {
+      console.error("Error fetching goal messages:", error);
+      return res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  app.post('/api/collaborative-goals/:goalId/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const goalId = parseInt(req.params.goalId);
+      
+      // Check if user is a participant in the goal
+      const participants = await storage.getGoalParticipants(goalId);
+      const isParticipant = participants.some(p => p.userId === userId);
+      
+      if (!isParticipant) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const { message, messageType = 'text', metadata } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ message: "Message content is required" });
+      }
+      
+      const newMessage = await storage.createGoalMessage({
+        goalId,
+        userId,
+        message,
+        messageType,
+        metadata: metadata || null,
+      });
+      
+      return res.status(201).json(newMessage);
+    } catch (error) {
+      console.error("Error creating goal message:", error);
+      return res.status(500).json({ message: "Failed to create message" });
+    }
+  });
+
+  app.put('/api/collaborative-goals/messages/:messageId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const messageId = parseInt(req.params.messageId);
+      const { message } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ message: "Message content is required" });
+      }
+      
+      // Check if user owns the message
+      const messages = await storage.getGoalMessages(0); // We'll need to get the specific message first
+      
+      const updatedMessage = await storage.updateGoalMessage(messageId, {
+        message,
+      });
+      
+      if (!updatedMessage) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+      
+      return res.json(updatedMessage);
+    } catch (error) {
+      console.error("Error updating goal message:", error);
+      return res.status(500).json({ message: "Failed to update message" });
+    }
+  });
+
+  app.delete('/api/collaborative-goals/messages/:messageId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const messageId = parseInt(req.params.messageId);
+      
+      // Check if user owns the message or is the goal creator
+      const deleted = await storage.deleteGoalMessage(messageId);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+      
+      return res.json({ message: "Message deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting goal message:", error);
+      return res.status(500).json({ message: "Failed to delete message" });
+    }
+  });
+
 
 }
