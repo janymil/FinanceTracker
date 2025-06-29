@@ -332,7 +332,7 @@ export default function CalendarPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">
-                  {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Select a Date'}
+                  {selectedDate ? format(selectedDate, 'MMMM d, yyyy', { locale: getDateFnsLocale() }) : t('calendar.select_date')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -340,20 +340,20 @@ export default function CalendarPage() {
                   <div className="space-y-4">
                     {selectedDayData.transactions.length === 0 ? (
                       <p className="text-gray-500 text-center py-8">
-                        No transactions on this date
+                        {t('calendar.no_transactions')}
                       </p>
                     ) : (
                       <>
                         {/* Day Summary */}
                         <div className="grid grid-cols-2 gap-4 pb-4 border-b">
                           <div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Income</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('Income')}</p>
                             <p className="text-lg font-semibold text-green-600">
                               {formatCurrency(selectedDayData.totalIncome)}
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Expenses</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('Expenses')}</p>
                             <p className="text-lg font-semibold text-red-600">
                               {formatCurrency(selectedDayData.totalExpenses)}
                             </p>
@@ -363,7 +363,7 @@ export default function CalendarPage() {
                         {/* Transactions List */}
                         <div className="space-y-3">
                           <h4 className="font-medium text-gray-900 dark:text-white">
-                            Transactions ({selectedDayData.transactions.length})
+                            {t('calendar.transactions_count', { count: selectedDayData.transactions.length })}
                           </h4>
                           <div className="space-y-2 max-h-80 overflow-y-auto">
                             {selectedDayData.transactions.map(transaction => (
@@ -403,7 +403,7 @@ export default function CalendarPage() {
                   </div>
                 ) : (
                   <p className="text-gray-500 text-center py-8">
-                    Click on a date to view transactions
+                    {t('calendar.click_date')}
                   </p>
                 )}
               </CardContent>

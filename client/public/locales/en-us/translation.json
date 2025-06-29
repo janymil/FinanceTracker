@@ -694,6 +694,28 @@
     "impact_low": "low impact"
   },
 
+  "calendar": {
+    "title": "Calendar View",
+    "description": "View your financial transactions in a calendar format",
+    "standard_feature": "Standard Feature",
+    "monthly_income": "Monthly Income",
+    "monthly_expenses": "Monthly Expenses",
+    "net_amount": "Net Amount",
+    "select_date": "Select a Date",
+    "no_transactions": "No transactions on this date",
+    "click_date": "Click on a date to view transactions",
+    "transactions_count": "Transactions ({{count}})",
+    "days": {
+      "sunday": "Sun",
+      "monday": "Mon",
+      "tuesday": "Tue",
+      "wednesday": "Wed",
+      "thursday": "Thu",
+      "friday": "Fri",
+      "saturday": "Sat"
+    }
+  },
+
   "charts": {
     "date": "Date",
     "income": "Income",

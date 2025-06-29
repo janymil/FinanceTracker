@@ -692,6 +692,28 @@
     "impact_low": "nízky vplyv"
   },
 
+  "calendar": {
+    "title": "Kalendárny Pohľad",
+    "description": "Zobrazenie finančných transakcií v kalendárnom formáte",
+    "standard_feature": "Štandardná Funkcia",
+    "monthly_income": "Mesačné Príjmy",
+    "monthly_expenses": "Mesačné Výdavky",
+    "net_amount": "Čistá Suma",
+    "select_date": "Vyberte Dátum",
+    "no_transactions": "Žiadne transakcie v tento deň",
+    "click_date": "Kliknite na dátum pre zobrazenie transakcií",
+    "transactions_count": "Transakcie ({{count}})",
+    "days": {
+      "sunday": "Ne",
+      "monday": "Po",
+      "tuesday": "Ut",
+      "wednesday": "St",
+      "thursday": "Št",
+      "friday": "Pi",
+      "saturday": "So"
+    }
+  },
+
   "charts": {
     "date": "Dátum",
     "income": "Príjem",

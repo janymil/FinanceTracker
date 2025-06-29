@@ -683,6 +683,28 @@
     "impact_low": "bajo impacto"
   },
 
+  "calendar": {
+    "title": "Vista de Calendario",
+    "description": "Ve tus transacciones financieras en formato de calendario",
+    "standard_feature": "Funcionalidad Estándar",
+    "monthly_income": "Ingresos Mensuales",
+    "monthly_expenses": "Gastos Mensuales",
+    "net_amount": "Cantidad Neta",
+    "select_date": "Selecciona una Fecha",
+    "no_transactions": "No hay transacciones en esta fecha",
+    "click_date": "Haz clic en una fecha para ver las transacciones",
+    "transactions_count": "Transacciones ({{count}})",
+    "days": {
+      "sunday": "Dom",
+      "monday": "Lun",
+      "tuesday": "Mar",
+      "wednesday": "Mié",
+      "thursday": "Jue",
+      "friday": "Vie",
+      "saturday": "Sáb"
+    }
+  },
+
   "charts": {
     "date": "Fecha",
     "income": "Ingreso",
