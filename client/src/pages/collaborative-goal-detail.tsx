@@ -220,6 +220,14 @@ export default function CollaborativeGoalDetailPage() {
         if (result.existingUser) {
           fetchGoal(); // Refresh to show new participant
         }
+      } else {
+        // Handle error response from server
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        toast({
+          title: t('collaborative_goal_detail.messages.error'),
+          description: errorData.message || t('collaborative_goal_detail.messages.invitation_failed'),
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('Error inviting friend:', error);
