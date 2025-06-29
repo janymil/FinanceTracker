@@ -8,18 +8,20 @@
     "dev": "npx tsx index.ts"
   },
   "dependencies": {
-    "express": "4.21.2",
-    "cors": "2.8.5",
-    "dotenv": "16.6.1",
-    "tsx": "4.20.3",
-    "typescript": "5.6.3",
-    "puppeteer": "24.11.1",
-    "chartjs-node-canvas": "5.0.0",
-    "qrcode": "1.5.4",
-    "@types/express": "4.17.21",
-    "@types/cors": "2.8.19",
-    "@types/qrcode": "1.5.5",
-    "@types/node": "20.16.11"
+    "express": "*",
+    "cors": "*", 
+    "dotenv": "*",
+    "tsx": "*",
+    "typescript": "*",
+    "puppeteer": "*",
+    "chartjs-node-canvas": "*",
+    "qrcode": "*",
+    "@types/express": "*",
+    "@types/cors": "*",
+    "@types/qrcode": "*",
+    "@types/node": "*",
+    "canvas": "*",
+    "chart.js": "*"
   },
   "engines": {
     "node": ">=18"
