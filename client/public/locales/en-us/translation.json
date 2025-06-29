@@ -1165,7 +1165,15 @@
     "toast_import_failed": "Import failed. Please check your file format and try again.",
     "toast_backup_failed": "Failed to create backup. Please try again.",
     "toast_export_failed": "Export failed. Please try again later.",
-    "toast_restore_failed": "Restore failed. Please check your backup file."
+    "toast_restore_failed": "Restore failed. Please check your backup file.",
+    
+    "imported_count": "{{count}} imported",
+    "collaborative": "Collaborative",
+    "warnings_count": "Warnings ({{count}})",
+    "and_more_errors": "... and {{count}} more",
+    "recent_imports": "Recent Imports",
+    "records_count": "{{count}} records",
+    "no_import_history": "No import history yet"
   },
 
   "upload": {

@@ -1210,7 +1210,15 @@
     "toast_import_failed": "Import zlyhal. Skontrolujte formát súboru a skúste znovu.",
     "toast_backup_failed": "Vytvorenie zálohy zlyhalo. Skúste znovu.",
     "toast_export_failed": "Export zlyhal. Skúste znovu neskôr.",
-    "toast_restore_failed": "Obnovenie zlyhalo. Skontrolujte váš súbor zálohy."
+    "toast_restore_failed": "Obnovenie zlyhalo. Skontrolujte váš súbor zálohy.",
+    
+    "imported_count": "{{count}} importovaných",
+    "collaborative": "Spolupracovný",
+    "warnings_count": "Upozornenia ({{count}})",
+    "and_more_errors": "... a {{count}} ďalších",
+    "recent_imports": "Nedávne Importy",
+    "records_count": "{{count}} záznamov",
+    "no_import_history": "Zatiaľ žiadna história importu"
   },
 
   "upload": {

@@ -1154,7 +1154,15 @@
     "toast_import_failed": "Importación falló. Revisa el formato de tu archivo e inténtalo de nuevo.",
     "toast_backup_failed": "Error al crear respaldo. Inténtalo de nuevo.",
     "toast_export_failed": "Exportación falló. Inténtalo más tarde.",
-    "toast_restore_failed": "Restauración falló. Revisa tu archivo de respaldo."
+    "toast_restore_failed": "Restauración falló. Revisa tu archivo de respaldo.",
+    
+    "imported_count": "{{count}} importado",
+    "collaborative": "Colaborativo",
+    "warnings_count": "Advertencias ({{count}})",
+    "and_more_errors": "... y {{count}} más",
+    "recent_imports": "Importaciones Recientes",
+    "records_count": "{{count}} registros",
+    "no_import_history": "No hay historial de importación aún"
   },
 
   "upload": {
