@@ -1,7 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ClerkProvider } from '@clerk/clerk-react';
-import { esES, skSK } from '@clerk/localizations';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Router } from 'wouter';
 import { HelmetProvider } from 'react-helmet-async';
@@ -92,9 +91,7 @@ const getUserLanguage = (): string => {
 const userLanguage = getUserLanguage();
 const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
 
-// Simple static localization based on user preference
-const savedLang = localStorage.getItem('preferredLanguage');
-const clerkLocalization = savedLang === 'sk' ? skSK : savedLang === 'es' ? esES : undefined;
+// No Clerk localization - use native default forms
 
 const root = createRoot(container);
 root.render(
@@ -104,7 +101,6 @@ root.render(
         publishableKey={clerkPubKey}
         afterSignInUrl={dashboardRedirectUrl}
         afterSignUpUrl={dashboardRedirectUrl}
-        localization={clerkLocalization}
       >
         <QueryClientProvider client={queryClient}>
           <Router>
