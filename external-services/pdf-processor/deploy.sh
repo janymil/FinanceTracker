@@ -47,8 +47,15 @@ fi
 
 echo "Building and deploying PDF processor..."
 
-# Deploy to Fly.io with verbose output
-flyctl deploy --ha=false --verbose
+# First try to build locally to test Dockerfile
+echo "Testing Dockerfile build locally..."
+if command -v docker &> /dev/null; then
+    docker build -t test-pdf-processor . || echo "Local Docker build failed, but continuing with Fly.io deployment..."
+fi
+
+# Deploy to Fly.io with explicit options
+echo "Deploying to Fly.io..."
+flyctl deploy --ha=false --local-only --verbose
 
 if [ $? -eq 0 ]; then
     echo ""

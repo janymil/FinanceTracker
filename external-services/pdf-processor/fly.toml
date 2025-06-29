@@ -1,14 +1,6 @@
 app = "finanzerpro-pdf"
 primary_region = "iad"
 
-[build]
-  dockerfile = "Dockerfile"
-
-[env]
-  NODE_ENV = "production"
-  PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
-  PUPPETEER_EXECUTABLE_PATH = "/usr/bin/google-chrome-stable"
-
 [http_service]
   internal_port = 3000
   force_https = true
@@ -16,9 +8,6 @@ primary_region = "iad"
   auto_start_machines = true
   min_machines_running = 0
   max_machines_running = 2
-  
-  # Increase timeout for PDF generation
-  timeout = "300s"
 
 [[http_service.checks]]
   grace_period = "30s"
@@ -31,7 +20,3 @@ primary_region = "iad"
   cpu_kind = "shared"
   cpus = 1
   memory_mb = 2048
-
-# Set machine restart policy
-[restart]
-  policy = "always"

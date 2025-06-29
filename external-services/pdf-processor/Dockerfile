@@ -1,75 +1,57 @@
-FROM node:18-slim
+FROM node:18-alpine
 
-# Install system dependencies required for Puppeteer and Canvas
-RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
+# Install system dependencies
+RUN apk update && apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
     ca-certificates \
+    ttf-freefont \
     curl \
-    fonts-liberation \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libdrm2 \
-    libgtk-3-0 \
-    libgtk-4-1 \
-    libnspr4 \
-    libnss3 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    xdg-utils \
-    libu2f-udev \
-    libvulkan1 \
-    build-essential \
-    libcairo2-dev \
-    libpango1.0-dev \
-    libjpeg-dev \
-    libgif-dev \
-    librsvg2-dev \
-    && rm -rf /var/lib/apt/lists/*
+    build-base \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    giflib-dev
 
-# Install Chrome browser
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-archive-keyring.gpg \
-    && sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-archive-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
-    && apt-get update \
-    && apt-get install -y google-chrome-stable \
-    && rm -rf /var/lib/apt/lists/*
-
-# Configure Puppeteer to use installed Chrome
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
-ENV NODE_ENV=production
+# Tell Puppeteer to skip installing Chromium since we're using Alpine's version
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Create app directory
 WORKDIR /app
 
-# Copy package files first for better caching
+# Copy package files
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production --no-audit --no-fund
+RUN npm ci --only=production
 
-# Install TypeScript globally for build
+# Install TypeScript
 RUN npm install -g typescript
 
-# Copy TypeScript config and source files
-COPY tsconfig.json ./
-COPY *.ts ./
+# Copy source code
+COPY . .
 
 # Build the application
 RUN npm run build
 
-# Create non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser -s /bin/false appuser
-RUN chown -R appuser:appuser /app
-USER appuser
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
 
-# Health check with standard port
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:3000/health || exit 1
+# Change ownership and switch to non-root user
+RUN chown -R nodejs:nodejs /app
+USER nodejs
 
-# Expose standard port 3000
+# Expose port
 EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
 
 # Start the application
 CMD ["node", "dist/index.js"]
