@@ -219,9 +219,9 @@ export default function Trends() {
 
     const categoryTrends = new Map();
 
-    transactions.forEach((t: any) => {
-      const categoryName = categoryMap.get(t.categoryId) || t('trends.uncategorized');
-      const monthKey = format(new Date(t.date), "yyyy-MM");
+    transactions.forEach((transaction: any) => {
+      const categoryName = categoryMap.get(transaction.categoryId) || t('trends.uncategorized');
+      const monthKey = format(new Date(transaction.date), "yyyy-MM");
       
       if (!categoryTrends.has(categoryName)) {
         categoryTrends.set(categoryName, new Map());
@@ -229,7 +229,7 @@ export default function Trends() {
       
       const categoryData = categoryTrends.get(categoryName);
       const currentAmount = categoryData.get(monthKey) || 0;
-      categoryData.set(monthKey, currentAmount + parseFloat(t.amount));
+      categoryData.set(monthKey, currentAmount + parseFloat(transaction.amount));
     });
 
     return Array.from(categoryTrends.entries()).map(([categoryName, monthData]) => {
@@ -288,7 +288,7 @@ export default function Trends() {
     const dayTotals = new Array(7).fill(0);
     
     transactions
-      .filter(t => t.type === 'expense')
+      .filter(transaction => transaction.type === 'expense')
       .forEach(transaction => {
         const date = new Date(transaction.date);
         const dayOfWeek = date.getDay();
@@ -309,7 +309,7 @@ export default function Trends() {
     const dayCounts = new Array(31).fill(0);
     
     transactions
-      .filter(t => t.type === 'expense')
+      .filter(transaction => transaction.type === 'expense')
       .forEach(transaction => {
         const date = new Date(transaction.date);
         const dayOfMonth = date.getDate() - 1; // 0-indexed
@@ -330,7 +330,7 @@ export default function Trends() {
     const categoryStats = new Map();
     
     transactions
-      .filter(t => t.type === 'expense')
+      .filter(transaction => transaction.type === 'expense')
       .forEach(transaction => {
         const categoryId = transaction.categoryId;
         const category = categories.find(c => c.id === categoryId);
