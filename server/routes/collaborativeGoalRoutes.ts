@@ -363,7 +363,7 @@ export function registerCollaborativeGoalRoutes(app: Express) {
             emailSent
           });
         } catch (error) {
-          return res.status(400).json({ message: "User is already part of this goal or cannot join" });
+          return res.status(400).json({ message: getLocalizedMessage(userLanguage, 'userAlreadyPartOfGoal') });
         }
       } else {
         // User doesn't exist - send invitation email
@@ -385,13 +385,13 @@ export function registerCollaborativeGoalRoutes(app: Express) {
         return res.json({ 
           existingUser: false, 
           email: email,
-          message: "Invitation email sent",
+          message: getLocalizedMessage(userLanguage, 'invitationEmailSent'),
           emailSent
         });
       }
     } catch (error) {
       console.error("Error inviting user:", error);
-      return res.status(500).json({ message: "Failed to send invitation" });
+      return res.status(500).json({ message: getLocalizedMessage(userLanguage, 'failedToSendEmail') });
     }
   });
 
