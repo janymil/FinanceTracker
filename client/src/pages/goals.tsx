@@ -183,7 +183,7 @@ export default function Goals() {
       });
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t('common.error'),
         description: error.message,
         variant: "destructive",
       });
@@ -226,7 +226,7 @@ export default function Goals() {
       });
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t('common.error'),
         description: error.message,
         variant: "destructive",
       });
@@ -254,7 +254,7 @@ export default function Goals() {
       });
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t('common.error'),
         description: error.message,
         variant: "destructive",
       });
@@ -658,18 +658,18 @@ export default function Goals() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Goal</AlertDialogTitle>
+                              <AlertDialogTitle>{t('goals.delete.title')}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete "{goal.name}"? This action cannot be undone.
+                                {t('goals.delete.description', { name: goal.name })}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                               <AlertDialogAction 
                                 onClick={() => handleDeleteGoal(goal.id)}
                                 className="bg-red-600 hover:bg-red-700"
                               >
-                                Delete
+                                {t('goals.delete.confirm')}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
