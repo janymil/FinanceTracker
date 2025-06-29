@@ -597,11 +597,18 @@ export default function Goals() {
                       <div className="mt-2">
                         <Badge variant="secondary" className="text-xs">
                           {(() => {
+                            // Debug logging
+                            console.log('Goal category:', goal.category);
+                            console.log('Available categories:', categories.map(c => ({ id: c.id, name: c.name })));
+                            
                             // Find the matching category by checking if the stored category matches the processed name
                             const matchingCategory = categories.find(cat => 
                               cat.name.toLowerCase().replace(/\s+/g, '_') === goal.category ||
-                              cat.name.toLowerCase() === goal.category.toLowerCase()
+                              cat.name.toLowerCase() === goal.category.toLowerCase() ||
+                              cat.name === goal.category
                             );
+                            
+                            console.log('Matching category found:', matchingCategory);
                             return matchingCategory ? matchingCategory.name : goal.category;
                           })()}
                         </Badge>
