@@ -683,6 +683,26 @@
     "impact_low": "bajo impacto"
   },
 
+  "charts": {
+    "date": "Fecha",
+    "income": "Ingreso",
+    "expenses": "Gastos",
+    "balance": "Balance",
+    "net_balance": "Balance Neto",
+    "amount": "Cantidad",
+    "percentage": "Porcentaje",
+    "positive_cash_flow": "Estás manteniendo un flujo de efectivo positivo",
+    "balance_trending_up": "Tu balance tiene tendencia ascendente",
+    "balance_declining": "Tu balance está disminuyendo - considera revisar gastos",
+    "unsupported_type": "Tipo de gráfico no soportado",
+    "ai_insights": "Perspectivas IA",
+    "data_point_details": "Detalles del Punto de Datos",
+    "all": "Todo",
+    "7d": "7D",
+    "30d": "30D",
+    "90d": "90D"
+  },
+
   "budget": {
     "total_budget_for": "Presupuesto total para",
     "new_budget": "Nuevo Presupuesto",

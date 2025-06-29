@@ -237,7 +237,7 @@ export default function InteractiveChart({
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
             <XAxis dataKey="date" className="text-xs" />
             <YAxis className="text-xs" />
-            <Tooltip content={<CustomTooltip currencySymbol={currency} />} />
+            <Tooltip content={<CustomTooltip currencySymbol={currency} t={t} />} />
             <Bar dataKey="income" fill="#10B981" />
             <Bar dataKey="expenses" fill="#EF4444" />
           </BarChart>
@@ -260,14 +260,14 @@ export default function InteractiveChart({
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip content={<CustomPieTooltip currencySymbol={currency} />} />
+            <Tooltip content={<CustomPieTooltip currencySymbol={currency} t={t} />} />
           </PieChart>
         );
 
       default:
         return (
           <div className="text-center text-gray-500">
-            Chart type not supported
+            {t("charts.unsupported_type")}
           </div>
         );
     }
@@ -284,7 +284,7 @@ export default function InteractiveChart({
           <div>
             <CardTitle className="flex items-center gap-2">
               {title}
-              <Badge className="bg-premium text-white">Pro</Badge>
+              <Badge className="bg-premium text-white">{t("plans.premium")}</Badge>
             </CardTitle>
             {description && <CardDescription>{description}</CardDescription>}
           </div>
@@ -296,10 +296,10 @@ export default function InteractiveChart({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="7d">7D</SelectItem>
-                <SelectItem value="30d">30D</SelectItem>
-                <SelectItem value="90d">90D</SelectItem>
+                <SelectItem value="all">{t("charts.all")}</SelectItem>
+                <SelectItem value="7d">{t("charts.7d")}</SelectItem>
+                <SelectItem value="30d">{t("charts.30d")}</SelectItem>
+                <SelectItem value="90d">{t("charts.90d")}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -342,7 +342,7 @@ export default function InteractiveChart({
             <div className="flex items-center gap-2 mb-2">
               <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                AI Insights
+                {t("charts.ai_insights")}
               </h4>
             </div>
             <ul className="space-y-1">
@@ -360,28 +360,28 @@ export default function InteractiveChart({
         {hoveredData && (
           <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-              Data Point Details
+              {t("charts.data_point_details")}
             </h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-gray-600 dark:text-gray-300">Date:</span>
+                <span className="text-gray-600 dark:text-gray-300">{t("charts.date")}:</span>
                 <span className="ml-2 font-medium">{hoveredData.date}</span>
               </div>
               {hoveredData.income && (
                 <div>
-                  <span className="text-gray-600 dark:text-gray-300">Income:</span>
+                  <span className="text-gray-600 dark:text-gray-300">{t("charts.income")}:</span>
                   <span className="ml-2 font-medium text-green-600">{currency}{hoveredData.income.toLocaleString()}</span>
                 </div>
               )}
               {hoveredData.expenses && (
                 <div>
-                  <span className="text-gray-600 dark:text-gray-300">Expenses:</span>
+                  <span className="text-gray-600 dark:text-gray-300">{t("charts.expenses")}:</span>
                   <span className="ml-2 font-medium text-red-600">{currency}{hoveredData.expenses.toLocaleString()}</span>
                 </div>
               )}
               {hoveredData.balance && (
                 <div>
-                  <span className="text-gray-600 dark:text-gray-300">Balance:</span>
+                  <span className="text-gray-600 dark:text-gray-300">{t("charts.balance")}:</span>
                   <span className="ml-2 font-medium">{currency}{hoveredData.balance.toLocaleString()}</span>
                 </div>
               )}

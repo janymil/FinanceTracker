@@ -694,6 +694,26 @@
     "impact_low": "low impact"
   },
 
+  "charts": {
+    "date": "Date",
+    "income": "Income",
+    "expenses": "Expenses",
+    "balance": "Balance",
+    "net_balance": "Net Balance",
+    "amount": "Amount",
+    "percentage": "Percentage",
+    "positive_cash_flow": "You're maintaining positive cash flow",
+    "balance_trending_up": "Your balance is trending upward",
+    "balance_declining": "Your balance is declining - consider reviewing expenses",
+    "unsupported_type": "Chart type not supported",
+    "ai_insights": "AI Insights",
+    "data_point_details": "Data Point Details",
+    "all": "All",
+    "7d": "7D",
+    "30d": "30D",
+    "90d": "90D"
+  },
+
   "budget": {
     "total_budget_for": "Total budget for",
     "new_budget": "New Budget",

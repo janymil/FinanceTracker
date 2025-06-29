@@ -691,6 +691,26 @@
     "impact_medium": "stredný vplyv",
     "impact_low": "nízky vplyv"
   },
+
+  "charts": {
+    "date": "Dátum",
+    "income": "Príjem",
+    "expenses": "Výdavky",
+    "balance": "Bilancia",
+    "net_balance": "Čistá Bilancia",
+    "amount": "Suma",
+    "percentage": "Percentuálny podiel",
+    "positive_cash_flow": "Udržiavaš pozitívny peňažný tok",
+    "balance_trending_up": "Tvoja bilancia má rastúci trend",
+    "balance_declining": "Tvoja bilancia klesá - zvaž kontrolu výdavkov",
+    "unsupported_type": "Typ grafu nie je podporovaný",
+    "ai_insights": "AI Poznatky",
+    "data_point_details": "Detaily Údajového Bodu",
+    "all": "Všetko",
+    "7d": "7D",
+    "30d": "30D",
+    "90d": "90D"
+  },
   "Auto-Categorization": "Auto-Kategorizácia",
   "AI-powered transaction categorization with machine learning": "AI kategorizácia transakcií so strojovým učením",
   "Smart Transaction Analysis": "Inteligentná Analýza Transakcií",
