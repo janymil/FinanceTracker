@@ -336,7 +336,11 @@ export default function CalendarPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">
-                  {selectedDate ? format(selectedDate, 'MMMM d, yyyy', { locale: getDateFnsLocale() }) : t('calendar.select_date')}
+                  {selectedDate ? (
+                    i18n.language.startsWith('sk') ? 
+                      `${selectedDate.getDate()} ${['januára', 'februára', 'marca', 'apríla', 'mája', 'júna', 'júla', 'augusta', 'septembra', 'októbra', 'novembra', 'decembra'][selectedDate.getMonth()]} ${selectedDate.getFullYear()}` :
+                      format(selectedDate, 'MMMM d, yyyy', { locale: getDateFnsLocale() })
+                  ) : t('calendar.select_date')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
