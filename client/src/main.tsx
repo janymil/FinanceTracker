@@ -127,8 +127,27 @@ const getClerkLocalization = () => {
     console.log('Using Spanish localization for Clerk');
     return esES;
   } else if (currentLang === 'sk' || currentLang?.startsWith('sk')) {
-    console.log('Using Slovak localization for Clerk');
-    return skSK;
+    console.log('Using minimal Slovak localization for Clerk');
+    // Use minimal Slovak localization to avoid form display issues
+    return {
+      locale: 'sk-SK',
+      signUp: {
+        start: {
+          title: 'Vytvorte si účet',
+          subtitle: 'na pokračovanie do {{applicationName}}',
+          actionText: 'Máte už účet?',
+          actionLink: 'Prihlásiť sa'
+        }
+      },
+      signIn: {
+        start: {
+          title: 'Prihlásiť sa',
+          subtitle: 'do vášho účtu',
+          actionText: 'Nemáte účet?',
+          actionLink: 'Zaregistrovať sa'
+        }
+      }
+    };
   }
   console.log('Using English (default) localization for Clerk');
   return undefined; // English is default
@@ -149,30 +168,8 @@ root.render(
           layout: {
             logoImageUrl: '/icon.png',
             showOptionalFields: false,
-          },
-          elements: {
-            // Ensure terms and conditions are visible
-            termsOfServiceLabel: {
-              display: 'block !important',
-              visibility: 'visible !important',
-              opacity: '1 !important',
-            },
-            privacyPolicyLabel: {
-              display: 'block !important',
-              visibility: 'visible !important',
-              opacity: '1 !important',
-            },
-            // Ensure checkbox is functional
-            checkbox: {
-              display: 'inline-block !important',
-              visibility: 'visible !important',
-              opacity: '1 !important',
-            },
-            // Fix any potential text hiding
-            formFieldLabel: {
-              visibility: 'visible !important',
-              opacity: '1 !important',
-            }
+            termsPageUrl: languageAwareUrls.termsOfServiceUrl,
+            privacyPageUrl: languageAwareUrls.privacyPolicyUrl,
           }
         }}
       >
