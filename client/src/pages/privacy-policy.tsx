@@ -209,9 +209,7 @@ export default function PrivacyPolicy() {
                 <p className="mb-4">{t("gdpr.eu_representative.description")}</p>
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded border border-yellow-200 dark:border-yellow-700">
                   <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                    <strong>Notice:</strong> EU representative appointment is currently in progress. 
-                    For GDPR inquiries, please contact our Data Protection Officer at dpo@finanzerpro.com 
-                    or use our general privacy contact: privacy@finanzerpro.com
+                    {t("gdpr.eu_representative.notice")}
                   </p>
                 </div>
               </div>
