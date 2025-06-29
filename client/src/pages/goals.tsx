@@ -597,14 +597,59 @@ export default function Goals() {
                       <div className="mt-2">
                         <Badge variant="secondary" className="text-xs">
                           {(() => {
-                            // Simple translation mapping for the specific case
-                            if (goal.category === 'fondo_de_emergencia') {
-                              // Check the current language and return appropriate translation
-                              const currentLang = window.location.pathname.split('/')[1]; // es, sk, en
-                              if (currentLang === 'sk') return 'Núdzový fond';
-                              if (currentLang === 'es') return 'Fondo de emergencia';
-                              return 'Emergency Fund'; // default English
+                            // Get current language from URL
+                            const currentLang = window.location.pathname.split('/')[1]; // es, sk, en
+                            const langCode = currentLang === 'es' ? 'es-pe' : currentLang === 'sk' ? 'sk-sk' : 'en-us';
+                            
+                            // Complete translation mapping from server categoryTranslations.ts
+                            const translations: Record<string, Record<string, string>> = {
+                              'Emergency Fund': {
+                                'en-us': 'Emergency Fund',
+                                'es-pe': 'Fondo de emergencia',
+                                'sk-sk': 'Núdzový fond'
+                              },
+                              'fondo_de_emergencia': {
+                                'en-us': 'Emergency Fund',
+                                'es-pe': 'Fondo de emergencia',
+                                'sk-sk': 'Núdzový fond'
+                              },
+                              'Vacation': {
+                                'en-us': 'Vacation',
+                                'es-pe': 'Vacaciones',
+                                'sk-sk': 'Dovolenka'
+                              },
+                              'House Down Payment': {
+                                'en-us': 'House Down Payment',
+                                'es-pe': 'Pago inicial de casa',
+                                'sk-sk': 'Záloha na dom'
+                              },
+                              'Car Purchase': {
+                                'en-us': 'Car Purchase',
+                                'es-pe': 'Compra de auto',
+                                'sk-sk': 'Kúpa auta'
+                              },
+                              'Debt Payoff': {
+                                'en-us': 'Debt Payoff',
+                                'es-pe': 'Pago de deudas',
+                                'sk-sk': 'Splácanie dlhov'
+                              },
+                              'Retirement': {
+                                'en-us': 'Retirement',
+                                'es-pe': 'Jubilación',
+                                'sk-sk': 'Dôchodok'
+                              },
+                              'Other': {
+                                'en-us': 'Other',
+                                'es-pe': 'Otro',
+                                'sk-sk': 'Iné'
+                              }
+                            };
+                            
+                            const translation = translations[goal.category];
+                            if (translation && translation[langCode]) {
+                              return translation[langCode];
                             }
+                            
                             return goal.category;
                           })()}
                         </Badge>
