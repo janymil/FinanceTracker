@@ -36,13 +36,26 @@ export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOpt
 
 /**
  * Format a date for transaction display (short format)
+ * Uses DD/MM/YYYY for Spanish, MM/DD/YYYY for English, DD.MM.YYYY for Slovak
  */
 export function formatTransactionDate(date: string | Date): string {
-  return formatDate(date, {
-    day: '2-digit',
-    month: '2-digit', 
-    year: 'numeric'
-  });
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const currentLang = getCurrentLanguageForAPI();
+  
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const year = dateObj.getFullYear();
+  
+  if (currentLang.startsWith('es')) {
+    // Spanish: DD/MM/YYYY
+    return `${day}/${month}/${year}`;
+  } else if (currentLang.startsWith('sk')) {
+    // Slovak: DD.MM.YYYY
+    return `${day}.${month}.${year}`;
+  } else {
+    // English: MM/DD/YYYY
+    return `${month}/${day}/${year}`;
+  }
 }
 
 /**

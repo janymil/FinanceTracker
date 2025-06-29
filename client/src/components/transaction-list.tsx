@@ -42,7 +42,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
   const [, setLocation] = useLocation();
   const [expandedTransactions, setExpandedTransactions] = useState<Set<number>>(new Set());
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Filter and search transactions
   const filteredTransactions = useMemo(() => {
@@ -233,7 +233,20 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                         <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                           <span>{transaction.categoryName || 'Uncategorized'}</span>
                           <span>•</span>
-                          <span>{formatTransactionDate(transaction.date)}</span>
+                          <span>{(() => {
+                            const dateObj = new Date(transaction.date);
+                            const day = String(dateObj.getDate()).padStart(2, '0');
+                            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                            const year = dateObj.getFullYear();
+                            
+                            if (i18n.language.startsWith('es')) {
+                              return `${day}/${month}/${year}`;
+                            } else if (i18n.language.startsWith('sk')) {
+                              return `${day}.${month}.${year}`;
+                            } else {
+                              return `${month}/${day}/${year}`;
+                            }
+                          })()}</span>
                           {transaction.ocrVendor && transaction.ocrVendor !== transaction.description && (
                             <>
                               <span>•</span>

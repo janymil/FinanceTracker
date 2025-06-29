@@ -50,7 +50,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
   const { user } = useUser();
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Fetch categories for edit form
   useEffect(() => {
@@ -246,7 +246,20 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                     <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
                       <span className="truncate">{transaction.categoryName || 'Uncategorized'}</span>
                       <span className="shrink-0">•</span>
-                      <span className="shrink-0">{formatTransactionDate(transaction.date)}</span>
+                      <span className="shrink-0">{(() => {
+                        const dateObj = new Date(transaction.date);
+                        const day = String(dateObj.getDate()).padStart(2, '0');
+                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const year = dateObj.getFullYear();
+                        
+                        if (i18n.language.startsWith('es')) {
+                          return `${day}/${month}/${year}`;
+                        } else if (i18n.language.startsWith('sk')) {
+                          return `${day}.${month}.${year}`;
+                        } else {
+                          return `${month}/${day}/${year}`;
+                        }
+                      })()}</span>
                       {transaction.ocrVendor && transaction.ocrVendor !== transaction.description && (
                         <>
                           <span className="hidden md:inline shrink-0">•</span>
