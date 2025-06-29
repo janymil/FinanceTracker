@@ -1511,7 +1511,7 @@
     "faq_q1": "¿Cómo actualizo mi plan?",
     "faq_a1": "Visita la configuración de tu cuenta y haz clic en \"Actualizar Plan\" para elegir entre los planes Estándar y Premium.",
     "faq_q2": "¿Están seguros mis datos financieros?",
-    "faq_a2": "Sí, utilizamos encriptación y medidas de seguridad estándar de la industria para proteger tus datos. Lee nuestra Política de Privacidad para más detalles.",
+    "faq_a2": "Sí, utilizamos autenticación segura, encriptación HTTPS en tránsito y controles de acceso para proteger tus datos. Lee nuestra Política de Privacidad para más detalles.",
     "faq_q3": "¿Puedo exportar mis datos?",
     "faq_a3": "Los usuarios Estándar y Premium pueden exportar sus datos en varios formatos a través de la página de Gestión de Datos."
   },
