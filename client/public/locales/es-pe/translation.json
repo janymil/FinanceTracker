@@ -2017,10 +2017,25 @@
       "contact": "Contacte su Autoridad Nacional de Protección de Datos",
       "details": "Visite el sitio web del Comité Europeo de Protección de Datos para información de contacto de todas las autoridades de protección de datos de la UE"
     },
+    "dpo": {
+      "title": "Oficial de Protección de Datos",
+      "description": "Hemos designado un Oficial de Protección de Datos para monitorear nuestro cumplimiento del RGPD:",
+      "contact": "Contacto del DPO:",
+      "responsibilities": "Responsabilidades:",
+      "responsibilities_desc": "Monitorear cumplimiento, realizar evaluaciones de impacto de privacidad y servir como punto de contacto para sujetos de datos y autoridades"
+    },
+    "eu_representative": {
+      "title": "Representante de la UE",
+      "description": "Para residentes de la UE, nuestro representante designado maneja asuntos del RGPD:",
+      "company": "Empresa:",
+      "address": "Dirección:",
+      "email": "Correo:"
+    },
     "exercise_rights": {
       "title": "Cómo Ejercer Sus Derechos",
       "description": "Para ejercer cualquiera de sus derechos como interesado, contáctenos:",
-      "email": "Correo:",
+      "email": "Correo de Privacidad General:",
+      "dpo_email": "Oficial de Protección de Datos:",
       "response_time": "Tiempo de Respuesta:",
       "response_desc": "Responderemos a su solicitud dentro de 30 días (extensible por 60 días para solicitudes complejas)"
     }

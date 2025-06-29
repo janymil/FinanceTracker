@@ -2064,10 +2064,25 @@
       "contact": "Kontaktujte vašu národnú autoritu na ochranu údajov",
       "details": "Navštívte webovú stránku Európskej rady pre ochranu údajov pre kontaktné informácie všetkých autorít na ochranu údajov v EÚ"
     },
+    "dpo": {
+      "title": "Poverník pre ochranu údajov",
+      "description": "Vymenovali sme povereníka pre ochranu údajov na monitorovanie našej súladu s GDPR:",
+      "contact": "Kontakt na DPO:",
+      "responsibilities": "Zodpovednosti:",
+      "responsibilities_desc": "Monitorovanie súladu, vykonávanie hodnotení vplyvu na súkromie a slúženie ako kontaktný bod pre subjekty údajov a orgány"
+    },
+    "eu_representative": {
+      "title": "Zástupca v EÚ",
+      "description": "Pre obyvateľov EÚ náš určený zástupca v EÚ riešol záležitosti GDPR:",
+      "company": "Spoločnosť:",
+      "address": "Adresa:",
+      "email": "Email:"
+    },
     "exercise_rights": {
       "title": "Ako uplatniť vaše práva",
       "description": "Na uplatnenie akéhokoľvek z vašich práv dotknutej osoby nás kontaktujte:",
-      "email": "Email:",
+      "email": "Všeobecný email pre súkromie:",
+      "dpo_email": "Poverník pre ochranu údajov:",
       "response_time": "Doba odozvy:",
       "response_desc": "Odpovieme na vašu žiadosť do 30 dní (predĺžiteľné o 60 dní pre komplexné žiadosti)"
     }
@@ -2144,6 +2159,116 @@
       "title": "Proces overenia",
       "description": "Na ochranu vášho súkromia overujeme vašu identitu pred spracovaním žiadostí:",
       "procedure": "Môžeme požiadať o dodatočné informácie na overenie vašej identity, ako sú podrobnosti účtu alebo informácie o nedávnych transakciách."
+    }
+  },
+
+  "financial_compliance": {
+    "title": "Súlad s finančnými službami",
+    "bsa": {
+      "title": "Súlad s Bank Secrecy Act (BSA)",
+      "description": "FinanzerPro dodržiava Bank Secrecy Act a nariadenia o boji proti praniu špinavých peňazí (AML):",
+      "aml_procedures": "Implementácia komplexných AML postupov a náležitej starostlivosti voči zákazníkom",
+      "transaction_monitoring": "Automatizované monitorovanie transakcií pre vzory podozrivej aktivity",
+      "suspicious_activity": "Povinné hlásenie podozrivej aktivity pre FinCEN keď je to potrebné",
+      "record_keeping": "Vedenie podrobných záznamov transakcií podľa požiadaviek federálneho zákona"
+    },
+    "pci_dss": {
+      "title": "Súlad s PCI DSS",
+      "description": "Dodržiavame štandardy bezpečnosti dát platobnej karty prostredníctvom nášho platobného procesora Stripe:",
+      "data_encryption": {
+        "title": "Šifrovanie dát",
+        "description": "Všetky platobné údaje sú šifrované pomocou priemyselného štandardu AES-256"
+      },
+      "secure_networks": {
+        "title": "Bezpečné siete",
+        "description": "Firewally a bezpečná sieťová architektúra chránia údaje držiteľa karty"
+      },
+      "access_control": {
+        "title": "Kontrola prístupu",
+        "description": "Prísne kontroly prístupu obmedzujú prístup k platobným údajom len na autorizovaný personál"
+      },
+      "monitoring": {
+        "title": "Monitorovanie siete",
+        "description": "Nepretržité monitorovanie a pravidelné bezpečnostné testovanie zabezpečujú ochranu údajov"
+      }
+    },
+    "data_security": {
+      "title": "Štandardy bezpečnosti finančných údajov",
+      "description": "Implementujeme viacero vrstiev bezpečnosti na ochranu vašich finančných informácií:",
+      "encryption": "End-to-End šifrovanie:",
+      "encryption_desc": "Všetky finančné údaje sú šifrované v prenose aj v pokoji pomocou AES-256",
+      "tokenization": "Tokenizácia údajov:",
+      "tokenization_desc": "Citlivé finančné údaje sú tokenizované na zabránenie neoprávnenému prístupu",
+      "secure_transmission": "Bezpečný prenos:",
+      "transmission_desc": "Všetky prenosy údajov používajú výlučne protokoly TLS 1.3 a HTTPS",
+      "regular_audits": "Pravidelné bezpečnostné audity:",
+      "audits_desc": "Nezávislé audity bezpečnosti tretích strán zabezpečujú pokračujúci súlad"
+    },
+    "regulatory_disclosures": {
+      "title": "Regulačné zverejnenia",
+      "not_advisor": "NIE JE FINANČNÝ PORADCA: FinanzerPro nie je registrovaný investičný poradca alebo finančný plánovač.",
+      "educational_purposes": "Naše AI-poháňané poznatky a odporúčania sú len pre vzdelávacie a informačné účely.",
+      "consult_professional": "Vždy sa poraďte s kvalifikovanými finančnými profesionálmi pred prijatím investičných alebo finančných rozhodnutí."
+    },
+    "regulatory_oversight": {
+      "title": "Regulačný dozor",
+      "description": "FinanzerPro pôsobí pod dozorom viacerých finančných regulačných orgánov:",
+      "finra": "FINRA:",
+      "finra_desc": "Dodržiavanie smerníc Financial Industry Regulatory Authority pre poskytovateľov technológií",
+      "sec": "SEC:",
+      "sec_desc": "Dodržiavanie nariadení Securities and Exchange Commission týkajúcich sa finančných technológií",
+      "cfpb": "CFPB:",
+      "cfpb_desc": "Súlad s Consumer Financial Protection Bureau pre spotrebiteľské finančné služby"
+    }
+  },
+
+  "ai_act_compliance": {
+    "title": "Súlad s EU AI Act (2024)",
+    "classification": {
+      "title": "Klasifikácia AI systému",
+      "description": "Podľa EU AI Act sú naše AI systémy klasifikované ako:",
+      "limited_risk": "AI systémy s obmedzeným rizikom:",
+      "limited_desc": "Naša finančná kategorizácia a AI poznatky vyžadujú zverejnenia transparentnosti",
+      "transparency": "Povinnosti transparentnosti:",
+      "transparency_desc": "Používatelia sú informovaní pri interakcii s AI systémami a ich schopnosťami"
+    },
+    "transparency": {
+      "title": "Požiadavky na transparentnosť AI",
+      "description": "Poskytujeme úplnú transparentnosť o našich AI systémoch:",
+      "clear_disclosure": "Jasné zverejnenie keď používatelia interagujú s AI-poháňanými funkciami",
+      "model_information": "Informácie o schopnostiach a obmedzeniach AI modelu",
+      "data_usage": "Vysvetlenie ako sú údaje používateľov spracovávané AI systémami",
+      "decision_logic": "Prehľad procesov a logiky rozhodovania AI"
+    },
+    "bias_fairness": {
+      "title": "AI zaujatosť a spravodlivosť",
+      "description": "Implementujeme opatrenia na zabezpečenie spravodlivej a nestrannej prevádzky AI:",
+      "measures": "Pravidelné testovanie zaujatosti, rozmanité trénovacie údaje a hodnotenia algoritmickej spravodlivosti zabezpečujú spravodlivý výkon AI naprieč všetkými demografiami používateľov."
+    }
+  },
+
+  "data_transfers": {
+    "title": "Medzinárodné prenosy údajov",
+    "scc": {
+      "title": "Štandardné zmluvné doložky (SCC)",
+      "description": "Používame EU-schválené štandardné zmluvné doložky pre všetky medzinárodné prenosy údajov:",
+      "stripe_scc": "Stripe (spracovanie platieb): EU-US prenosy údajov pokryté SCC a rozhodnutiami o primeranosti",
+      "clerk_scc": "Clerk (autentifikácia): SCC na mieste pre EU-US prenosy autentifikačných údajov používateľov",
+      "openai_scc": "OpenAI (AI služby): Dohody o spracovaní údajov so SCC pre AI analýzu",
+      "bunny_scc": "Bunny.net (úložisko súborov): Európske dátové centrá so SCC pre globálnu redundanciu"
+    },
+    "adequacy": {
+      "title": "Rozhodnutia o primeranosti",
+      "description": "Spoliehame sa na rozhodnutia Európskej komisie o primeranosti kde sú dostupné:",
+      "us_framework": "US-EU Data Privacy Framework poskytuje primeranú ochranu pre transatlantické toky údajov kde je to aplikovateľné."
+    },
+    "safeguards": {
+      "title": "Dodatočné ochranné opatrenia",
+      "description": "Okrem SCC implementujeme dodatočné ochranné opatrenia:",
+      "technical": "Technické ochranné opatrenia: Šifrovanie, pseudonymizácia a kontroly prístupu",
+      "organizational": "Organizačné opatrenia: Školenie personálu, politiky minimalizácie údajov",
+      "contractual": "Zmluvné ochrany: Dohody o spracovaní údajov so všetkými tretími stranami",
+      "monitoring": "Pokračujúce monitorovanie: Pravidelné hodnotenia súladu a postupy auditu"
     }
   },
 
