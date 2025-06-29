@@ -1,4 +1,3 @@
-
 FROM node:18-slim
 
 # Install system dependencies required for Puppeteer and Canvas
@@ -41,37 +40,36 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 ENV NODE_ENV=production
 
-# Create app directory and set proper permissions
+# Create app directory
 WORKDIR /app
-RUN chown -R node:node /app
-
-# Switch to non-root user
-USER node
 
 # Copy package files first for better caching
-COPY --chown=node:node package*.json ./
+COPY package*.json ./
 
 # Install dependencies
 RUN npm ci --only=production --no-audit --no-fund
 
 # Install TypeScript globally for build
-USER root
 RUN npm install -g typescript
-USER node
 
 # Copy TypeScript config and source files
-COPY --chown=node:node tsconfig.json ./
-COPY --chown=node:node *.ts ./
+COPY tsconfig.json ./
+COPY *.ts ./
 
 # Build the application
 RUN npm run build
 
-# Health check
+# Create non-root user for security
+RUN groupadd -r appuser && useradd -r -g appuser -s /bin/false appuser
+RUN chown -R appuser:appuser /app
+USER appuser
+
+# Health check with standard port
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:${PORT:-3000}/health || exit 1
+  CMD curl -f http://localhost:3000/health || exit 1
 
-# The port will be set by Fly.io via the PORT environment variable
-EXPOSE ${PORT:-3000}
+# Expose standard port 3000
+EXPOSE 3000
 
-# Start the application with error handling
-CMD ["sh", "-c", "node dist/index.js 2>&1"]
+# Start the application
+CMD ["node", "dist/index.js"]
