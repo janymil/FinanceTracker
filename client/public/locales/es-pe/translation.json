@@ -2277,5 +2277,54 @@
       "title": "Derechos de Privacidad de California",
       "notice": "Los residentes de California tienen derechos específicos de privacidad bajo la CCPA. Puede solicitar información sobre recopilación de datos y optar por no participar en la venta de datos."
     }
+  },
+
+  "privacy": {
+    "title": "Política de Privacidad",
+    "last_updated": "Última actualización: 14 de junio de 2025",
+    "section1": {
+      "title": "1. Información que Recopilamos",
+      "description": "Recopilamos información que nos proporciona directamente, como cuando crea o modifica su cuenta, agrega transacciones financieras, establece presupuestos o se comunica con nosotros para soporte.",
+      "account_info": {
+        "title": "Información de Cuenta:",
+        "description": "Dirección de correo electrónico, nombre, contraseña (cifrada)"
+      },
+      "financial_data": {
+        "title": "Datos Financieros:",
+        "description": "Detalles de transacciones, categorías, presupuestos, objetivos"
+      },
+      "usage_data": {
+        "title": "Datos de Uso:",
+        "description": "Cómo interactúa con nuestro servicio, características utilizadas"
+      },
+      "device_info": {
+        "title": "Información del Dispositivo:",
+        "description": "Tipo de navegador, dirección IP, sistema operativo"
+      }
+    },
+    "section2": {
+      "title": "2. Cómo Usamos Su Información",
+      "description": "Utilizamos la información que recopilamos para:",
+      "services": "Proporcionar, mantener y mejorar nuestros servicios de gestión financiera",
+      "transactions": "Procesar transacciones y enviar información relacionada",
+      "ai_insights": "Proporcionar perspectivas y recomendaciones impulsadas por IA (usuarios Premium)",
+      "notifications": "Enviar avisos técnicos, actualizaciones, alertas de seguridad y mensajes de soporte",
+      "support": "Responder a sus comentarios y preguntas",
+      "analytics": "Analizar patrones de uso para mejorar nuestro servicio"
+    },
+    "section8": {
+      "title": "8. Cookies y Seguimiento",
+      "description": "Utilizamos cookies y tecnologías de seguimiento similares para proporcionar y mejorar nuestro servicio. Consulte nuestra Política de Cookies para información detallada."
+    },
+    "section9": {
+      "title": "9. Cambios a Esta Política",
+      "description": "Podemos actualizar esta política de privacidad de vez en cuando. Le notificaremos de cualquier cambio publicando la nueva política en esta página y actualizando la fecha de \"Última actualización\"."
+    },
+    "section10": {
+      "title": "10. Contáctenos",
+      "description": "Si tiene alguna pregunta sobre esta Política de Privacidad, contáctenos en:",
+      "email": "Correo: info@finanzerpro.com",
+      "address": "Dirección: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120"
+    }
   }
 }

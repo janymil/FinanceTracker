@@ -24,33 +24,33 @@ export default function PrivacyPolicy() {
   return (
     <AppLayout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-4xl font-bold mb-8">{t("Privacy Policy")}</h1>
-        <p className="text-muted-foreground mb-8">{t("Last updated: June 14, 2025")}</p>
+        <h1 className="text-4xl font-bold mb-8">{t("privacy.title")}</h1>
+        <p className="text-muted-foreground mb-8">{t("privacy.last_updated")}</p>
 
         <div className="prose prose-lg dark:prose-invert max-w-none">
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("1. Information We Collect")}</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("privacy.section1.title")}</h2>
             <p className="mb-4">
-              {t("We collect information you provide directly to us, such as when you create or modify your account, add financial transactions, set budgets, or contact us for support.")}
+              {t("privacy.section1.description")}
             </p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li><strong>{t("Account Information:")}</strong> {t("Email address, name, password (encrypted)")}</li>
-              <li><strong>{t("Financial Data:")}</strong> {t("Transaction details, categories, budgets, goals")}</li>
-              <li><strong>{t("Usage Data:")}</strong> {t("How you interact with our service, features used")}</li>
-              <li><strong>{t("Device Information:")}</strong> {t("Browser type, IP address, operating system")}</li>
+              <li><strong>{t("privacy.section1.account_info.title")}</strong> {t("privacy.section1.account_info.description")}</li>
+              <li><strong>{t("privacy.section1.financial_data.title")}</strong> {t("privacy.section1.financial_data.description")}</li>
+              <li><strong>{t("privacy.section1.usage_data.title")}</strong> {t("privacy.section1.usage_data.description")}</li>
+              <li><strong>{t("privacy.section1.device_info.title")}</strong> {t("privacy.section1.device_info.description")}</li>
             </ul>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("2. How We Use Your Information")}</h2>
-            <p className="mb-4">{t("We use the information we collect to:")}</p>
+            <h2 className="text-2xl font-semibold mb-4">{t("privacy.section2.title")}</h2>
+            <p className="mb-4">{t("privacy.section2.description")}</p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li>{t("Provide, maintain, and improve our financial management services")}</li>
-              <li>{t("Process transactions and send related information")}</li>
-              <li>{t("Provide AI-powered insights and recommendations (Premium users)")}</li>
-              <li>{t("Send technical notices, updates, security alerts, and support messages")}</li>
-              <li>{t("Respond to your comments and questions")}</li>
-              <li>{t("Analyze usage patterns to improve our service")}</li>
+              <li>{t("privacy.section2.services")}</li>
+              <li>{t("privacy.section2.transactions")}</li>
+              <li>{t("privacy.section2.ai_insights")}</li>
+              <li>{t("privacy.section2.notifications")}</li>
+              <li>{t("privacy.section2.support")}</li>
+              <li>{t("privacy.section2.analytics")}</li>
             </ul>
           </section>
 
@@ -450,26 +450,26 @@ export default function PrivacyPolicy() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("8. Cookies and Tracking")}</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("privacy.section8.title")}</h2>
             <p className="mb-4">
-              {t("We use cookies and similar tracking technologies to provide and improve our service. See our Cookie Policy for detailed information.")}
+              {t("privacy.section8.description")}
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("9. Changes to This Policy")}</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("privacy.section9.title")}</h2>
             <p className="mb-4">
-              {t("We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the \"Last updated\" date.")}
+              {t("privacy.section9.description")}
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("10. Contact Us")}</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("privacy.section10.title")}</h2>
             <p className="mb-4">
-              {t("If you have any questions about this Privacy Policy, please contact us at:")}
+              {t("privacy.section10.description")}
             </p>
-            <p className="mb-2">{t("Email: info@finanzerpro.com")}</p>
-            <p>{t("Address: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120")}</p>
+            <p className="mb-2">{t("privacy.section10.email")}</p>
+            <p>{t("privacy.section10.address")}</p>
           </section>
         </div>
       </div>

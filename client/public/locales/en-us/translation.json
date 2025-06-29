@@ -2302,5 +2302,54 @@
       "title": "California Privacy Rights", 
       "notice": "California residents have specific privacy rights under CCPA. You can request information about data collection and opt-out of data sales."
     }
+  },
+
+  "privacy": {
+    "title": "Privacy Policy",
+    "last_updated": "Last updated: June 14, 2025",
+    "section1": {
+      "title": "1. Information We Collect",
+      "description": "We collect information you provide directly to us, such as when you create or modify your account, add financial transactions, set budgets, or contact us for support.",
+      "account_info": {
+        "title": "Account Information:",
+        "description": "Email address, name, password (encrypted)"
+      },
+      "financial_data": {
+        "title": "Financial Data:",
+        "description": "Transaction details, categories, budgets, goals"
+      },
+      "usage_data": {
+        "title": "Usage Data:",
+        "description": "How you interact with our service, features used"
+      },
+      "device_info": {
+        "title": "Device Information:",
+        "description": "Browser type, IP address, operating system"
+      }
+    },
+    "section2": {
+      "title": "2. How We Use Your Information",
+      "description": "We use the information we collect to:",
+      "services": "Provide, maintain, and improve our financial management services",
+      "transactions": "Process transactions and send related information",
+      "ai_insights": "Provide AI-powered insights and recommendations (Premium users)",
+      "notifications": "Send technical notices, updates, security alerts, and support messages",
+      "support": "Respond to your comments and questions",
+      "analytics": "Analyze usage patterns to improve our service"
+    },
+    "section8": {
+      "title": "8. Cookies and Tracking",
+      "description": "We use cookies and similar tracking technologies to provide and improve our service. See our Cookie Policy for detailed information."
+    },
+    "section9": {
+      "title": "9. Changes to This Policy",
+      "description": "We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the \"Last updated\" date."
+    },
+    "section10": {
+      "title": "10. Contact Us",
+      "description": "If you have any questions about this Privacy Policy, please contact us at:",
+      "email": "Email: info@finanzerpro.com",
+      "address": "Address: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120"
+    }
   }
 }
