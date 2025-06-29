@@ -1503,6 +1503,8 @@
       "invitation_email_sent": "An invitation email has been sent.",
       "invalid_amount": "Invalid Amount",
       "invalid_amount_description": "Please enter a valid contribution amount.",
+      "participant_required": "Contributor Required",
+      "participant_required_description": "Please select who is making this contribution.",
       "invalid_email": "Invalid Email",
       "invalid_email_description": "Please enter a valid email address.",
       "error": "Error",
@@ -1616,6 +1618,8 @@
     "forms": {
       "add_contribution": "Add Contribution",
       "contribute_description": "Contribute to \"{{goalName}}\" and help reach the target faster!",
+      "participant_label": "Contributor",
+      "select_participant": "Select who is contributing",
       "amount_label": "Amount ($)",
       "note_label": "Optional Note",
       "amount_placeholder": "Amount ($)",

@@ -192,6 +192,7 @@ export default function CollaborativeGoalDetailPage() {
         });
         setContributionAmount("");
         setContributionNote("");
+        setContributionParticipant("");
         setShowAddContribution(false);
         fetchGoal(); // Refresh data
       }
