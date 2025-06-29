@@ -767,10 +767,10 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                         4
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-medium mb-3">Import Options</h3>
+                        <h3 className="font-medium mb-3">{t('export.step4_title')}</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="text-sm font-medium mb-2 block">Merge Strategy</label>
+                            <label className="text-sm font-medium mb-2 block">{t('export.merge_strategy')}</label>
                             <Select 
                               value={importOptions.mergeStrategy} 
                               onValueChange={(value: any) => 
@@ -781,14 +781,14 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="append">Add to existing data</SelectItem>
-                                <SelectItem value="replace">Replace existing data</SelectItem>
-                                <SelectItem value="merge">Merge with existing</SelectItem>
+                                <SelectItem value="append">{t('export.add_to_existing')}</SelectItem>
+                                <SelectItem value="replace">{t('export.replace_existing')}</SelectItem>
+                                <SelectItem value="merge">{t('export.merge_existing')}</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
                           <div>
-                            <label className="text-sm font-medium mb-2 block">Duplicate Handling</label>
+                            <label className="text-sm font-medium mb-2 block">{t('export.duplicate_handling')}</label>
                             <Select 
                               value={importOptions.duplicateHandling} 
                               onValueChange={(value: any) => 
@@ -799,9 +799,9 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="skip">Skip duplicates</SelectItem>
-                                <SelectItem value="overwrite">Overwrite duplicates</SelectItem>
-                                <SelectItem value="rename">Rename duplicates</SelectItem>
+                                <SelectItem value="skip">{t('export.skip_duplicates')}</SelectItem>
+                                <SelectItem value="overwrite">{t('export.overwrite_duplicates')}</SelectItem>
+                                <SelectItem value="rename">{t('export.rename_duplicates')}</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -817,7 +817,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                               }
                             />
                             <label htmlFor="skipFirstRow" className="text-sm">
-                              Skip first row (if it contains headers)
+{t('export.skip_first_row')}
                             </label>
                           </div>
                           <div className="flex items-center space-x-2">
@@ -832,7 +832,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                               }
                             />
                             <label htmlFor="autoCategory" className="text-sm">
-                              Automatically create missing categories
+{t('export.auto_create_categories')}
                             </label>
                           </div>
                         </div>
@@ -846,7 +846,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                   <div className="border rounded-lg p-4 bg-blue-50 dark:bg-blue-950/20">
                     <div className="flex items-center gap-2 mb-2">
                       <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                      <span className="font-medium">Importing Data...</span>
+                      <span className="font-medium">{t('export.importing_data')}</span>
                     </div>
                     <Progress value={importProgress.percentage} className="mb-2" />
                     <p className="text-sm text-muted-foreground">
@@ -861,17 +861,17 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                     <div className="flex items-center gap-2 mb-3">
                       <CheckCircle className="h-5 w-5 text-green-500" />
                       <span className="font-medium text-green-900 dark:text-green-100">
-                        Import Completed Successfully
+{t('export.import_completed_successfully')}
                       </span>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                       <div>
-                        <div className="font-medium">Categories</div>
-                        <div className="text-green-600">{importResults.categories} created</div>
+                        <div className="font-medium">{t('export.categories')}</div>
+                        <div className="text-green-600">{t('export.created_count', { count: importResults.categories })}</div>
                       </div>
                       <div>
-                        <div className="font-medium">Income</div>
-                        <div className="text-green-600">{importResults.incomes} imported</div>
+                        <div className="font-medium">{t('types.income')}</div>
+                        <div className="text-green-600">{t('export.imported_count', { count: importResults.incomes })}</div>
                       </div>
                       <div>
                         <div className="font-medium">Expenses</div>
