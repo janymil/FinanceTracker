@@ -29,6 +29,7 @@ import {
   AreaChart
 } from "recharts";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useTranslation } from "react-i18next";
 
 interface ChartData {
   date: string;
@@ -49,19 +50,19 @@ interface InteractiveChartProps {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
-const CustomTooltip = ({ active, payload, label, currencySymbol }: any) => {
+const CustomTooltip = ({ active, payload, label, currencySymbol, t }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
-        <p className="text-sm font-medium text-gray-900 dark:text-white">{`Date: ${label}`}</p>
+        <p className="text-sm font-medium text-gray-900 dark:text-white">{`${t("charts.date")}: ${label}`}</p>
         {payload.map((entry: any, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
-            {`${entry.dataKey}: ${currencySymbol || '$'}${entry.value?.toLocaleString()}`}
+            {`${t(`charts.${entry.dataKey}`)}: ${currencySymbol || '$'}${entry.value?.toLocaleString()}`}
           </p>
         ))}
         {payload[0]?.payload?.balance && (
           <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
-            Net Balance: {currencySymbol || '$'}{payload[0].payload.balance.toLocaleString()}
+            {t("charts.net_balance")}: {currencySymbol || '$'}{payload[0].payload.balance.toLocaleString()}
           </p>
         )}
       </div>
@@ -70,17 +71,17 @@ const CustomTooltip = ({ active, payload, label, currencySymbol }: any) => {
   return null;
 };
 
-const CustomPieTooltip = ({ active, payload, currencySymbol }: any) => {
+const CustomPieTooltip = ({ active, payload, currencySymbol, t }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0];
     return (
       <div className="bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
         <p className="text-sm font-medium text-gray-900 dark:text-white">{data.payload.category}</p>
         <p className="text-sm" style={{ color: data.color }}>
-          Amount: {currencySymbol || '$'}{data.value?.toLocaleString()}
+          {t("charts.amount")}: {currencySymbol || '$'}{data.value?.toLocaleString()}
         </p>
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          Percentage: {((data.value / data.payload.total) * 100).toFixed(1)}%
+          {t("charts.percentage")}: {((data.value / data.payload.total) * 100).toFixed(1)}%
         </p>
       </div>
     );
@@ -97,6 +98,7 @@ export default function InteractiveChart({
 }: InteractiveChartProps) {
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
+  const { t } = useTranslation();
   const chartRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
   const [chartRange, setChartRange] = useState("all");
@@ -115,16 +117,16 @@ export default function InteractiveChart({
         const avgExpenses = totalExpenses / data.length;
 
         if (avgIncome > avgExpenses) {
-          newInsights.push("You're maintaining positive cash flow");
+          newInsights.push(t("charts.positive_cash_flow"));
         }
 
         const trend = data.length > 1 ? 
           ((data[data.length - 1].balance || 0) - (data[0].balance || 0)) / data.length : 0;
 
         if (trend > 0) {
-          newInsights.push("Your balance is trending upward");
+          newInsights.push(t("charts.balance_trending_up"));
         } else if (trend < 0) {
-          newInsights.push("Your balance is declining - consider reviewing expenses");
+          newInsights.push(t("charts.balance_declining"));
         }
       }
 
@@ -183,7 +185,7 @@ export default function InteractiveChart({
               tick={{ fontSize: 11 }}
               tickFormatter={(value) => `${currency}${(value / 1000).toFixed(0)}K`}
             />
-            <Tooltip content={<CustomTooltip currencySymbol={currency} />} />
+            <Tooltip content={<CustomTooltip currencySymbol={currency} t={t} />} />
             <Line 
               type="monotone" 
               dataKey="income" 
@@ -209,7 +211,7 @@ export default function InteractiveChart({
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
             <XAxis dataKey="date" className="text-xs" />
             <YAxis className="text-xs" />
-            <Tooltip content={<CustomTooltip currencySymbol={currency} />} />
+            <Tooltip content={<CustomTooltip currencySymbol={currency} t={t} />} />
             <Area 
               type="monotone" 
               dataKey="income" 
