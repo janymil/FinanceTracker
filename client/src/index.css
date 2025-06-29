@@ -270,53 +270,7 @@
   overflow-x: hidden !important;
 }
 
-/* Fix for Clerk terms and conditions text visibility */
-.cl-signUp-root .cl-footerAction,
-.cl-signIn-root .cl-footerAction,
-.cl-signUp-root .cl-footerActionText,
-.cl-signIn-root .cl-footerActionText,
-.cl-signUp-root .cl-internal-terms,
-.cl-signIn-root .cl-internal-terms,
-.cl-signUp-root [data-localization-key*="terms"],
-.cl-signIn-root [data-localization-key*="terms"],
-.cl-signUp-root [data-localization-key*="privacy"],
-.cl-signIn-root [data-localization-key*="privacy"] {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  max-width: none !important;
-  width: auto !important;
-  color: inherit !important;
-  font-size: inherit !important;
-  line-height: inherit !important;
-}
-
-/* Ensure Clerk checkboxes and labels are visible */
-.cl-signUp-root input[type="checkbox"],
-.cl-signIn-root input[type="checkbox"],
-.cl-signUp-root .cl-formField__checkbox,
-.cl-signIn-root .cl-formField__checkbox {
-  display: inline-block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* Additional broad rules for any Clerk terms/privacy text */
-.cl-signUp-root *[class*="terms"],
-.cl-signIn-root *[class*="terms"],
-.cl-signUp-root *[class*="privacy"],
-.cl-signIn-root *[class*="privacy"],
-.cl-signUp-root *[class*="agreement"],
-.cl-signIn-root *[class*="agreement"],
-.cl-signUp-root label,
-.cl-signIn-root label,
-.cl-signUp-root .cl-footerAction *,
-.cl-signIn-root .cl-footerAction * {
-  display: inherit !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  color: inherit !important;
-}
+/* Disabled Clerk CSS overrides to allow default terms text display */
 
 .clerk-profile-mobile * {
   max-width: 100% !important;
