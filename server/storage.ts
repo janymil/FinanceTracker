@@ -147,6 +147,7 @@ export interface IStorage {
   createCollaborativeGoal(goal: InsertCollaborativeGoal): Promise<CollaborativeGoal>;
   getUserCollaborativeGoals(userId: string): Promise<Array<CollaborativeGoal & { participants: CollaborativeGoalParticipant[], creator: User }>>;
   getCollaborativeGoal(goalId: number, userId: string): Promise<(CollaborativeGoal & { participants: Array<CollaborativeGoalParticipant & { user: User }>, creator: User, contributions: GoalContribution[], activities: ChallengeActivity[] }) | undefined>;
+  getGoalParticipant(goalId: number, userId: string): Promise<CollaborativeGoalParticipant | undefined>;
   joinCollaborativeGoal(goalId: number, userId: string, personalTarget?: number): Promise<CollaborativeGoalParticipant>;
   leaveCollaborativeGoal(goalId: number, userId: string): Promise<void>;
   updateCollaborativeGoal(goalId: number, userId: string, updates: Partial<InsertCollaborativeGoal>): Promise<CollaborativeGoal>;
@@ -1590,6 +1591,21 @@ export class DatabaseStorage implements IStorage {
     }
 
     return result;
+  }
+
+  async getGoalParticipant(goalId: number, userId: string): Promise<CollaborativeGoalParticipant | undefined> {
+    const [participant] = await db
+      .select()
+      .from(collaborativeGoalParticipants)
+      .where(
+        and(
+          eq(collaborativeGoalParticipants.goalId, goalId),
+          eq(collaborativeGoalParticipants.userId, userId),
+          eq(collaborativeGoalParticipants.status, "active")
+        )
+      );
+
+    return participant;
   }
 
   async getCollaborativeGoal(goalId: number, userId: string): Promise<(CollaborativeGoal & { participants: Array<CollaborativeGoalParticipant & { user: User }>, creator: User, contributions: GoalContribution[], activities: ChallengeActivity[] }) | undefined> {

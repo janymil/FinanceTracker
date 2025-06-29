@@ -275,7 +275,13 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       const existingUser = await storage.getUserByEmail(email);
       
       if (existingUser) {
-        // User exists - add them directly to the goal
+        // User exists - check if they're already a participant
+        const existingParticipant = await storage.getGoalParticipant(goalId, existingUser.id);
+        if (existingParticipant) {
+          return res.status(400).json({ message: "User is already a participant in this goal" });
+        }
+        
+        // User exists but not in this goal - add them directly to the goal
         try {
           const participant = await storage.joinCollaborativeGoal(goalId, existingUser.id);
           
@@ -301,11 +307,8 @@ export function registerCollaborativeGoalRoutes(app: Express) {
             participant,
             emailSent
           });
-        } catch (error: any) {
-          if (error.message === "Already a participant in this goal") {
-            return res.status(400).json({ message: "User is already a participant in this goal" });
-          }
-          return res.status(400).json({ message: "Failed to add user to goal" });
+        } catch (error) {
+          return res.status(400).json({ message: "User is already part of this goal or cannot join" });
         }
       } else {
         // User doesn't exist - send invitation email
