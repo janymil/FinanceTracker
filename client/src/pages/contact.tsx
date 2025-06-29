@@ -9,6 +9,7 @@ import { useLocation } from "wouter";
 import { SEO } from "@/components/SEO";
 import { AppLayout } from "@/components/AppLayout";
 import { useUser } from "@clerk/clerk-react";
+import { useTranslation } from "react-i18next";
 
 export default function Contact() {
   const { user } = useUser();
@@ -19,10 +20,11 @@ export default function Contact() {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
-    document.title = "Contact Us - FinanzerPro";
-  }, []);
+    document.title = `${t('contact.page_title')} - FinanzerPro`;
+  }, [t]);
 
   const handleLogin = () => {
     setLocation('/auth');
@@ -50,8 +52,8 @@ export default function Contact() {
 
       if (data.success) {
         toast({
-          title: "Message sent successfully",
-          description: "Thank you for contacting us. We'll get back to you within 24 hours.",
+          title: t('contact.success_title'),
+          description: t('contact.success_description'),
         });
 
         // Reset form
@@ -61,15 +63,15 @@ export default function Contact() {
         setMessage("");
       } else {
         toast({
-          title: "Failed to send message",
-          description: data.error || "Please try again later.",
+          title: t('contact.error_title'),
+          description: data.error || t('contact.error_description'),
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Failed to send message",
-        description: "Please check your connection and try again.",
+        title: t('contact.error_title'),
+        description: t('contact.error_network'),
         variant: "destructive",
       });
     } finally {
@@ -80,17 +82,16 @@ export default function Contact() {
   return (
     <AppLayout isPublicPage={true}>
       <SEO 
-        title="Contact Us - FinanzerPro Support | Get Help & Send Messages"
-        description="Contact FinanzerPro support team for assistance with personal finance management, expense tracking, budgeting, and technical support. Get answers to your questions quickly."
-        keywords="finanzerpro contact, customer support, help desk, finance app support, expense tracker help, budget app assistance"
+        title={t('contact.seo_title')}
+        description={t('contact.seo_description')}
+        keywords={t('contact.seo_keywords')}
         canonical="https://finanzerpro.com/contact"
       />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
+          <h1 className="text-4xl font-bold mb-4">{t('contact.page_title')}</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Have questions about FinanzerPro? We're here to help. Get in touch with our support team 
-            and we'll respond as quickly as possible.
+            {t('contact.page_description')}
           </p>
         </div>
 
@@ -98,9 +99,9 @@ export default function Contact() {
           {/* Contact Form */}
           <Card>
             <CardHeader>
-              <CardTitle>Send us a message</CardTitle>
+              <CardTitle>{t('contact.form_title')}</CardTitle>
               <CardDescription>
-                Fill out the form below and we'll get back to you within 24 hours.
+                {t('contact.form_description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -108,27 +109,27 @@ export default function Contact() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium mb-2">
-                      Name
+                      {t('contact.form_name')}
                     </label>
                     <Input
                       id="name"
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Your name"
+                      placeholder={t('contact.form_name_placeholder')}
                       required
                     />
                   </div>
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium mb-2">
-                      Email
+                      {t('contact.form_email')}
                     </label>
                     <Input
                       id="email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="your@email.com"
+                      placeholder={t('contact.form_email_placeholder')}
                       required
                     />
                   </div>
@@ -136,27 +137,27 @@ export default function Contact() {
 
                 <div>
                   <label htmlFor="subject" className="block text-sm font-medium mb-2">
-                    Subject
+                    {t('contact.form_subject')}
                   </label>
                   <Input
                     id="subject"
                     type="text"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
-                    placeholder="What's this about?"
+                    placeholder={t('contact.form_subject_placeholder')}
                     required
                   />
                 </div>
 
                 <div>
                   <label htmlFor="message" className="block text-sm font-medium mb-2">
-                    Message
+                    {t('contact.form_message')}
                   </label>
                   <Textarea
                     id="message"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Tell us how we can help..."
+                    placeholder={t('contact.form_message_placeholder')}
                     rows={5}
                     required
                   />
@@ -167,7 +168,7 @@ export default function Contact() {
                   className="w-full" 
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Sending..." : "Send Message"}
+                  {isSubmitting ? t('contact.form_sending') : t('contact.form_send')}
                 </Button>
               </form>
             </CardContent>
@@ -177,16 +178,16 @@ export default function Contact() {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Get in touch</CardTitle>
+                <CardTitle>{t('contact.info_title')}</CardTitle>
                 <CardDescription>
-                  Here are the different ways you can reach us.
+                  {t('contact.info_description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <Mail className="h-5 w-5 text-primary" />
                   <div>
-                    <p className="font-medium">Email</p>
+                    <p className="font-medium">{t('contact.info_email')}</p>
                     <p className="text-sm text-muted-foreground">info@finanzerpro.com</p>
                   </div>
                 </div>
@@ -194,7 +195,7 @@ export default function Contact() {
                 <div className="flex items-center space-x-3">
                   <MapPin className="h-5 w-5 text-primary" />
                   <div>
-                    <p className="font-medium">Address</p>
+                    <p className="font-medium">{t('contact.info_address')}</p>
                     <p className="text-sm text-muted-foreground">
                       NutriNova LLC<br />
                       2105 Vista Oeste NW<br />
@@ -206,10 +207,10 @@ export default function Contact() {
                 <div className="flex items-center space-x-3">
                   <Clock className="h-5 w-5 text-primary" />
                   <div>
-                    <p className="font-medium">Business Hours</p>
+                    <p className="font-medium">{t('contact.info_hours')}</p>
                     <p className="text-sm text-muted-foreground">
-                      Monday - Friday: 9:00 AM - 6:00 PM (PST)<br />
-                      Saturday - Sunday: 10:00 AM - 4:00 PM (PST)
+                      {t('contact.info_hours_weekdays')}<br />
+                      {t('contact.info_hours_weekends')}
                     </p>
                   </div>
                 </div>
@@ -218,27 +219,27 @@ export default function Contact() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Frequently Asked Questions</CardTitle>
+                <CardTitle>{t('contact.faq_title')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="font-medium mb-2">How do I upgrade my plan?</p>
+                  <p className="font-medium mb-2">{t('contact.faq_q1')}</p>
                   <p className="text-sm text-muted-foreground">
-                    Visit your account settings and click on "Upgrade Plan" to choose between Standard and Premium plans.
+                    {t('contact.faq_a1')}
                   </p>
                 </div>
 
                 <div>
-                  <p className="font-medium mb-2">Is my financial data secure?</p>
+                  <p className="font-medium mb-2">{t('contact.faq_q2')}</p>
                   <p className="text-sm text-muted-foreground">
-                    Yes, we use industry-standard encryption and security measures to protect your data. Read our Privacy Policy for details.
+                    {t('contact.faq_a2')}
                   </p>
                 </div>
 
                 <div>
-                  <p className="font-medium mb-2">Can I export my data?</p>
+                  <p className="font-medium mb-2">{t('contact.faq_q3')}</p>
                   <p className="text-sm text-muted-foreground">
-                    Standard and Premium users can export their data in various formats through the Data Management page.
+                    {t('contact.faq_a3')}
                   </p>
                 </div>
               </CardContent>
