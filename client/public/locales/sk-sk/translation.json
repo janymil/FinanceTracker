@@ -1893,6 +1893,14 @@
   },
 
   "cookies": {
+    "seo": {
+      "title": "Pravidlá používania cookies - FinanzerPro",
+      "description": "Dozviete sa o tom, ako FinanzerPro používa cookies na zlepšenie vašej skúsenosti a ochranu vášho súkromia."
+    },
+    "policy": {
+      "title": "Pravidlá používania cookies",
+      "last_updated": "Posledná aktualizácia: 14. júna 2025"
+    },
     "banner": {
       "title": "Vážime si vaše súkromie",
       "description": "Používame cookies na zlepšenie vašej skúsenosti s FinanzerPro. Niektoré cookies sú nevyhnutné pre fungovanie webovej stránky, zatiaľ čo iné nám pomáhajú zlepšovať našu službu a porozumieť tomu, ako používate našu stránku.",

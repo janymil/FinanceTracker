@@ -12,8 +12,8 @@ export default function CookiePolicy() {
   const { t } = useTranslation();
   
   useEffect(() => {
-    document.title = "Cookie Policy - FinanzerPro";
-  }, []);
+    document.title = t("cookies.seo.title");
+  }, [t]);
 
   const handleLogin = () => {
     setLocation("/auth");
@@ -21,9 +21,13 @@ export default function CookiePolicy() {
 
   return (
     <AppLayout>
+      <SEO 
+        title={t("cookies.seo.title")}
+        description={t("cookies.seo.description")}
+      />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-4xl font-bold mb-8">{t("Cookie Policy")}</h1>
-        <p className="text-muted-foreground mb-8">{t("Last updated: June 14, 2025")}</p>
+        <h1 className="text-4xl font-bold mb-8">{t("cookies.policy.title")}</h1>
+        <p className="text-muted-foreground mb-8">{t("cookies.policy.last_updated")}</p>
 
         <div className="prose prose-lg dark:prose-invert max-w-none">
           <section className="mb-8">

@@ -1846,6 +1846,14 @@
   },
 
   "cookies": {
+    "seo": {
+      "title": "Política de Cookies - FinanzerPro",
+      "description": "Aprende sobre cómo FinanzerPro utiliza cookies para mejorar tu experiencia y proteger tu privacidad."
+    },
+    "policy": {
+      "title": "Política de Cookies",
+      "last_updated": "Última actualización: 14 de junio de 2025"
+    },
     "banner": {
       "title": "Valoramos tu privacidad",
       "description": "Utilizamos cookies para mejorar tu experiencia en FinanzerPro. Algunas cookies son esenciales para el funcionamiento del sitio web, mientras que otras nos ayudan a mejorar nuestro servicio y entender cómo usas nuestro sitio.",
