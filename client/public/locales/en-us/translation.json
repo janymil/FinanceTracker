@@ -1073,9 +1073,11 @@
     "transactionUpdatedSuccess": "Transaction has been updated successfully",
     "editFailed": "Edit Failed",
     "transactionAddedSuccess": "Transaction has been created successfully",
-    "Clear all filters": "Clear all filters",
-  "weekly": "weekly",
-  "monthly": "monthly",
-  "yearly": "yearly"
+    "Clear all filters": "Clear all filters"
+  },
+  "recurring": {
+    "weekly": "Weekly",
+    "monthly": "Monthly", 
+    "yearly": "Yearly"
   }
 }

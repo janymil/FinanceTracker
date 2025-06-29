@@ -1050,9 +1050,11 @@
     "transactionUpdatedSuccess": "La transacción ha sido actualizada exitosamente",
     "editFailed": "Error al Editar",
     "transactionAddedSuccess": "La transacción ha sido creada exitosamente",
-    "Clear all filters": "Borrar todos los filtros",
-    "weekly": "semanal",
-    "monthly": "mensual",
-    "yearly": "anual"
+    "Clear all filters": "Borrar todos los filtros"
+  },
+  "recurring": {
+    "weekly": "Semanal",
+    "monthly": "Mensual", 
+    "yearly": "Anual"
   }
 }

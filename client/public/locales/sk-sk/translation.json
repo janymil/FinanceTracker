@@ -1097,9 +1097,11 @@
     "transactionUpdated": "Transakcia Aktualizovaná",
     "transactionUpdatedSuccess": "Transakcia bola úspešne aktualizovaná",
     "editFailed": "Chyba pri Úprave",
-    "transactionAddedSuccess": "Transakcia bola úspešne vytvorená",
-    "weekly": "týždenne",
-    "monthly": "mesačne",
-    "yearly": "ročne"
+    "transactionAddedSuccess": "Transakcia bola úspešne vytvorená"
+  },
+  "recurring": {
+    "weekly": "Týždenne",
+    "monthly": "Mesačne", 
+    "yearly": "Ročne"
   }
 }
