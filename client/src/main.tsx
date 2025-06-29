@@ -126,12 +126,21 @@ const getClerkLocalization = () => {
   if (currentLang === 'es' || currentLang?.startsWith('es')) {
     console.log('Using Spanish localization for Clerk');
     return esES;
-  } 
-  // Temporarily disable Slovak localization to test form display
-  // else if (currentLang === 'sk' || currentLang?.startsWith('sk')) {
-  //   console.log('Using Slovak localization for Clerk');
-  //   return skSK;
-  // }
+  } else if (currentLang === 'sk' || currentLang?.startsWith('sk')) {
+    console.log('Using Slovak localization for Clerk');
+    // Use custom Slovak config that preserves form functionality
+    return {
+      ...skSK,
+      signUp: {
+        ...skSK.signUp,
+        start: {
+          ...skSK.signUp?.start,
+          actionText: "Nemáte účet?",
+          actionLink: "Zaregistrujte sa",
+        }
+      }
+    };
+  }
   console.log('Using English (default) localization for Clerk');
   return undefined; // English is default
 };
