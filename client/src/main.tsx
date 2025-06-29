@@ -1,4 +1,4 @@
-import { StrictMode, useMemo } from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ClerkProvider } from '@clerk/clerk-react';
 import { esES, skSK } from '@clerk/localizations';
@@ -92,13 +92,9 @@ const getUserLanguage = (): string => {
 const userLanguage = getUserLanguage();
 const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
 
-// Clerk localization using useMemo pattern
+// Simple Clerk localization without hooks
 const userLang = navigator.language;
-const localization = useMemo(() => {
-  if (userLang.startsWith('es')) return esES;
-  if (userLang.startsWith('sk')) return skSK;
-  return undefined; // Default English
-}, [userLang]);
+const localization = userLang.startsWith('es') ? esES : userLang.startsWith('sk') ? skSK : undefined;
 
 const root = createRoot(container);
 root.render(
