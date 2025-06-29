@@ -1110,7 +1110,25 @@
 
     "forecasts": {
       "ai_forecasts_title": "AI finančné prognózy",
-      "ai_forecasts_description": "Predpovede poháňané AI na základe vašich historických dátových vzorov"
+      "ai_forecasts_description": "Predpovede poháňané AI na základe vašich historických dátových vzorov",
+      "next_month_expenses": "Výdavky na budúci mesiac",
+      "expected_savings": "Očakávané úspory",
+      "budget_variance": "Odchýlka rozpočtu",
+      "confidence": "spoľahlivosť",
+      "based_on_ai": "Na základe AI analýzy",
+      "over_budget": "Nad rozpočtom",
+      "under_budget": "Pod rozpočtom",
+      "no_data_title": "Žiadne finančné údaje nie sú k dispozícii",
+      "no_data_description": "Pridajte transakcie na generovanie finančných prognóz poháňaných AI",
+      "no_data": "Žiadne údaje",
+      "key_insights": "Kľúčové poznatky",
+      "ai_recommendations": "AI odporúčania",
+      "risk_factors": "Rizikové faktory",
+      "category_predictions_title": "Predpovede podľa kategórií",
+      "category_predictions_description": "AI prognózy pre jednotlivé kategórie výdavkov",
+      "predicted_amount": "Predpovedaná suma",
+      "no_predictions_title": "Žiadne predpovede nie sú k dispozícii",
+      "no_predictions_description": "Pridajte viac transakcií na generovanie finančných prognóz poháňaných AI"
     },
 
     "categories": {
