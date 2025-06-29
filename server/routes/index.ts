@@ -29,6 +29,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Contact form endpoint
   app.post('/api/contact', handleContactForm);
 
+  // System status endpoints
+  app.get('/api/encryption-status', (req, res) => {
+    const { DataEncryption } = require('../encryption');
+    const status = DataEncryption.getEncryptionStatus();
+    res.json(status);
+  });
+
   // Register all route modules
   registerMobileUploadRoutes(app);
   registerAuthRoutes(app);
