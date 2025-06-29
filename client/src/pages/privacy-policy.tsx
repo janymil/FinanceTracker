@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { SEO } from "@/components/SEO";
 import { AppLayout } from "@/components/AppLayout";
 import { useTranslation } from 'react-i18next';
+import { useGeolocation } from '../hooks/useGeolocation';
 
 export default function PrivacyPolicy() {
   const [, setLocation] = useLocation();
@@ -117,6 +118,91 @@ export default function PrivacyPolicy() {
               <li>{t("Request information about how your data is used")}</li>
             </ul>
           </section>
+
+          {/* GDPR Compliance Section - Only shown to EU users */}
+          <div className="gdpr-section">
+            <section className="mb-8 border-l-4 border-blue-500 pl-4 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-r-lg">
+              <h2 className="text-2xl font-semibold mb-4 text-blue-800 dark:text-blue-200">{t("gdpr.title")}</h2>
+              
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">{t("gdpr.legal_basis.title")}</h3>
+                <p className="mb-4">{t("gdpr.legal_basis.description")}</p>
+                <ul className="list-disc list-inside mb-4 space-y-2">
+                  <li><strong>{t("gdpr.legal_basis.contract")}</strong> {t("gdpr.legal_basis.contract_desc")}</li>
+                  <li><strong>{t("gdpr.legal_basis.legitimate_interest")}</strong> {t("gdpr.legal_basis.legitimate_desc")}</li>
+                  <li><strong>{t("gdpr.legal_basis.consent")}</strong> {t("gdpr.legal_basis.consent_desc")}</li>
+                  <li><strong>{t("gdpr.legal_basis.legal_obligation")}</strong> {t("gdpr.legal_basis.legal_desc")}</li>
+                </ul>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">{t("gdpr.data_subject_rights.title")}</h3>
+                <p className="mb-4">{t("gdpr.data_subject_rights.description")}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                    <h4 className="font-medium mb-2">{t("gdpr.rights.access.title")}</h4>
+                    <p className="text-sm">{t("gdpr.rights.access.description")}</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                    <h4 className="font-medium mb-2">{t("gdpr.rights.rectification.title")}</h4>
+                    <p className="text-sm">{t("gdpr.rights.rectification.description")}</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                    <h4 className="font-medium mb-2">{t("gdpr.rights.erasure.title")}</h4>
+                    <p className="text-sm">{t("gdpr.rights.erasure.description")}</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                    <h4 className="font-medium mb-2">{t("gdpr.rights.restriction.title")}</h4>
+                    <p className="text-sm">{t("gdpr.rights.restriction.description")}</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                    <h4 className="font-medium mb-2">{t("gdpr.rights.portability.title")}</h4>
+                    <p className="text-sm">{t("gdpr.rights.portability.description")}</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                    <h4 className="font-medium mb-2">{t("gdpr.rights.objection.title")}</h4>
+                    <p className="text-sm">{t("gdpr.rights.objection.description")}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">{t("gdpr.international_transfers.title")}</h3>
+                <p className="mb-4">{t("gdpr.international_transfers.description")}</p>
+                <ul className="list-disc list-inside mb-4 space-y-2">
+                  <li><strong>{t("gdpr.transfers.us_services")}</strong> {t("gdpr.transfers.us_desc")}</li>
+                  <li><strong>{t("gdpr.transfers.safeguards")}</strong> {t("gdpr.transfers.safeguards_desc")}</li>
+                  <li><strong>{t("gdpr.transfers.adequacy")}</strong> {t("gdpr.transfers.adequacy_desc")}</li>
+                </ul>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">{t("gdpr.breach_notification.title")}</h3>
+                <p className="mb-4">{t("gdpr.breach_notification.description")}</p>
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded">
+                  <p className="text-sm">{t("gdpr.breach_notification.procedure")}</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">{t("gdpr.supervisory_authority.title")}</h3>
+                <p className="mb-4">{t("gdpr.supervisory_authority.description")}</p>
+                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                  <p className="text-sm"><strong>{t("gdpr.supervisory_authority.contact")}</strong></p>
+                  <p className="text-sm">{t("gdpr.supervisory_authority.details")}</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">{t("gdpr.exercise_rights.title")}</h3>
+                <p className="mb-4">{t("gdpr.exercise_rights.description")}</p>
+                <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded">
+                  <p className="text-sm"><strong>{t("gdpr.exercise_rights.email")}</strong> privacy@finanzerpro.com</p>
+                  <p className="text-sm"><strong>{t("gdpr.exercise_rights.response_time")}</strong> {t("gdpr.exercise_rights.response_desc")}</p>
+                </div>
+              </div>
+            </section>
+          </div>
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">{t("8. Cookies and Tracking")}</h2>

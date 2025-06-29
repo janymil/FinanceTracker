@@ -1995,5 +1995,93 @@
       "accept_all": "Prijať všetky",
       "back": "Späť"
     }
+  },
+
+  "gdpr": {
+    "title": "Európske práva na súkromie (GDPR)",
+    "legal_basis": {
+      "title": "Právny základ pre spracovanie",
+      "description": "Podľa GDPR spracúvame vaše osobné údaje na základe nasledujúcich právnych základov:",
+      "contract": "Zmluvná nevyhnutnosť:",
+      "contract_desc": "Spracovanie potrebné na poskytovanie našich služieb finančného riadenia a plnenie zmluvy s vami",
+      "legitimate_interest": "Oprávnený záujem:",
+      "legitimate_desc": "Spracovanie na predchádzanie podvodom, zlepšovanie služieb a obchodné operácie",
+      "consent": "Súhlas:",
+      "consent_desc": "Spracovanie pre marketingové komunikácie a voliteľné funkcie (súhlas môžete kedykoľvek odvolať)",
+      "legal_obligation": "Právna povinnosť:",
+      "legal_desc": "Spracovanie vyžadované na splnenie právnych a regulačných požiadaviek"
+    },
+    "data_subject_rights": {
+      "title": "Vaše práva dotknutej osoby",
+      "description": "Ako obyvateľ EÚ máte podľa GDPR nasledujúce práva:"
+    },
+    "rights": {
+      "access": {
+        "title": "Právo na prístup",
+        "description": "Požiadať o kópiu vašich osobných údajov a informácie o tom, ako ich spracúvame"
+      },
+      "rectification": {
+        "title": "Právo na opravu",
+        "description": "Požiadať o opravu nepresných alebo neúplných osobných údajov"
+      },
+      "erasure": {
+        "title": "Právo na výmaz",
+        "description": "Požiadať o vymazanie vašich osobných údajov za určitých okolností"
+      },
+      "restriction": {
+        "title": "Právo na obmedzenie",
+        "description": "Požiadať o obmedzenie spracovávania v špecifických situáciách"
+      },
+      "portability": {
+        "title": "Právo na prenosnosť",
+        "description": "Získať vaše údaje v štruktúrovanom, strojovo čitateľnom formáte"
+      },
+      "objection": {
+        "title": "Právo na námietku",
+        "description": "Namietať proti spracovaniu založenému na oprávnených záujmoch alebo priamom marketingu"
+      }
+    },
+    "international_transfers": {
+      "title": "Medzinárodné prenosy údajov",
+      "description": "Niektorí naši poskytovatelia služieb sú umiestnení mimo EÚ. Zabezpečujeme primeranú ochranu prostredníctvom:"
+    },
+    "transfers": {
+      "us_services": "Služby so sídlom v USA:",
+      "us_desc": "OpenAI (spracovanie AI), Stripe (platby), Clerk (overovanie) s primeranými zárukam",
+      "safeguards": "Primerané záruky:",
+      "safeguards_desc": "Štandardné zmluvné doložky, rozhodnutia o primeranosti a certifikačné schémy",
+      "adequacy": "Rozhodnutia o primeranosti:",
+      "adequacy_desc": "Prenosy do krajín s primeranou ochranou údajov uznanou Európskou komisiou"
+    },
+    "breach_notification": {
+      "title": "Oznámenie narušenia údajov",
+      "description": "V prípade narušenia údajov ovplyvňujúceho vaše osobné údaje:",
+      "procedure": "Oznámime príslušnému dozornému orgánu do 72 hodín a informujeme dotknuté osoby bez zbytočného odkladu, ak narušenie predstavuje vysoké riziko pre vaše práva a slobody."
+    },
+    "supervisory_authority": {
+      "title": "Dozorný orgán",
+      "description": "Máte právo podať sťažnosť u vašej miestnej autorty na ochranu údajov:",
+      "contact": "Kontaktujte vašu národnú autoritu na ochranu údajov",
+      "details": "Navštívte webovú stránku Európskej rady pre ochranu údajov pre kontaktné informácie všetkých autorít na ochranu údajov v EÚ"
+    },
+    "exercise_rights": {
+      "title": "Ako uplatniť vaše práva",
+      "description": "Na uplatnenie akéhokoľvek z vašich práv dotknutej osoby nás kontaktujte:",
+      "email": "Email:",
+      "response_time": "Doba odozvy:",
+      "response_desc": "Odpovieme na vašu žiadosť do 30 dní (predĺžiteľné o 60 dní pre komplexné žiadosti)"
+    }
+  },
+
+  "compliance": {
+    "detecting_location": "Detekuje sa poloha...",
+    "gdpr": {
+      "title": "Európske práva na súkromie",
+      "notice": "Ako obyvateľ EÚ máte rozšírené práva na súkromie podľa GDPR. Pozrite si naše Zásady ochrany súkromia pre podrobnosti o vašich právach na prístup, opravu a vymazanie údajov."
+    },
+    "ccpa": {
+      "title": "Kalifornské práva na súkromie",
+      "notice": "Obyvatelia Kalifornie majú špecifické práva na súkromie podľa CCPA. Môžete požiadať o informácie o zbere údajov a odmietnuť predaj údajov."
+    }
   }
 }

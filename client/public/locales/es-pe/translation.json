@@ -1948,5 +1948,93 @@
       "accept_all": "Aceptar Todas",
       "back": "Atrás"
     }
+  },
+
+  "gdpr": {
+    "title": "Derechos de Privacidad Europeos (RGPD)",
+    "legal_basis": {
+      "title": "Base Legal para el Procesamiento",
+      "description": "Bajo el RGPD, procesamos sus datos personales basándose en las siguientes bases legales:",
+      "contract": "Necesidad Contractual:",
+      "contract_desc": "Procesamiento necesario para proporcionar nuestros servicios de gestión financiera y cumplir nuestro contrato con usted",
+      "legitimate_interest": "Interés Legítimo:",
+      "legitimate_desc": "Procesamiento para prevención de fraude, mejora del servicio y operaciones comerciales",
+      "consent": "Consentimiento:",
+      "consent_desc": "Procesamiento para comunicaciones de marketing y características opcionales (puede retirar el consentimiento en cualquier momento)",
+      "legal_obligation": "Obligación Legal:",
+      "legal_desc": "Procesamiento requerido para cumplir con requisitos legales y regulatorios"
+    },
+    "data_subject_rights": {
+      "title": "Sus Derechos como Interesado",
+      "description": "Como residente de la UE, tiene los siguientes derechos bajo el RGPD:"
+    },
+    "rights": {
+      "access": {
+        "title": "Derecho de Acceso",
+        "description": "Solicitar una copia de sus datos personales e información sobre cómo los procesamos"
+      },
+      "rectification": {
+        "title": "Derecho de Rectificación",
+        "description": "Solicitar corrección de datos personales inexactos o incompletos"
+      },
+      "erasure": {
+        "title": "Derecho al Olvido",
+        "description": "Solicitar eliminación de sus datos personales bajo ciertas circunstancias"
+      },
+      "restriction": {
+        "title": "Derecho a Restricción",
+        "description": "Solicitar limitación del procesamiento en situaciones específicas"
+      },
+      "portability": {
+        "title": "Derecho a Portabilidad",
+        "description": "Recibir sus datos en un formato estructurado y legible por máquina"
+      },
+      "objection": {
+        "title": "Derecho de Oposición",
+        "description": "Oponerse al procesamiento basado en intereses legítimos o para marketing directo"
+      }
+    },
+    "international_transfers": {
+      "title": "Transferencias Internacionales de Datos",
+      "description": "Algunos de nuestros proveedores de servicios están ubicados fuera de la UE. Aseguramos protección adecuada a través de:"
+    },
+    "transfers": {
+      "us_services": "Servicios con Sede en EE.UU.:",
+      "us_desc": "OpenAI (procesamiento IA), Stripe (pagos), Clerk (autenticación) con salvaguardas adecuadas",
+      "safeguards": "Salvaguardas Apropiadas:",
+      "safeguards_desc": "Cláusulas contractuales estándar, decisiones de adecuación y esquemas de certificación",
+      "adequacy": "Decisiones de Adecuación:",
+      "adequacy_desc": "Transferencias a países con protección de datos adecuada reconocida por la Comisión Europea"
+    },
+    "breach_notification": {
+      "title": "Notificación de Violación de Datos",
+      "description": "En caso de una violación de datos que afecte sus datos personales, nosotros:",
+      "procedure": "Notificaremos a la autoridad supervisora relevante dentro de 72 horas e informaremos a las personas afectadas sin demora indebida si la violación presenta un alto riesgo para sus derechos y libertades."
+    },
+    "supervisory_authority": {
+      "title": "Autoridad Supervisora",
+      "description": "Tiene derecho a presentar una queja ante su autoridad local de protección de datos:",
+      "contact": "Contacte su Autoridad Nacional de Protección de Datos",
+      "details": "Visite el sitio web del Comité Europeo de Protección de Datos para información de contacto de todas las autoridades de protección de datos de la UE"
+    },
+    "exercise_rights": {
+      "title": "Cómo Ejercer Sus Derechos",
+      "description": "Para ejercer cualquiera de sus derechos como interesado, contáctenos:",
+      "email": "Correo:",
+      "response_time": "Tiempo de Respuesta:",
+      "response_desc": "Responderemos a su solicitud dentro de 30 días (extensible por 60 días para solicitudes complejas)"
+    }
+  },
+
+  "compliance": {
+    "detecting_location": "Detectando ubicación...",
+    "gdpr": {
+      "title": "Derechos de Privacidad Europeos",
+      "notice": "Como residente de la UE, tiene derechos de privacidad mejorados bajo el RGPD. Consulte nuestra Política de Privacidad para detalles sobre sus derechos de acceso, rectificación y eliminación de datos."
+    },
+    "ccpa": {
+      "title": "Derechos de Privacidad de California",
+      "notice": "Los residentes de California tienen derechos específicos de privacidad bajo la CCPA. Puede solicitar información sobre recopilación de datos y optar por no participar en la venta de datos."
+    }
   }
 }

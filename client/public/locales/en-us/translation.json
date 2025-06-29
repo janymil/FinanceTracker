@@ -1973,5 +1973,93 @@
       "accept_all": "Accept All",
       "back": "Back"
     }
+  },
+
+  "gdpr": {
+    "title": "European Privacy Rights (GDPR)",
+    "legal_basis": {
+      "title": "Legal Basis for Processing",
+      "description": "Under GDPR, we process your personal data based on the following legal grounds:",
+      "contract": "Contractual Necessity:",
+      "contract_desc": "Processing necessary to provide our financial management services and perform our contract with you",
+      "legitimate_interest": "Legitimate Interest:",
+      "legitimate_desc": "Processing for fraud prevention, service improvement, and business operations",
+      "consent": "Consent:",
+      "consent_desc": "Processing for marketing communications and optional features (you may withdraw consent at any time)",
+      "legal_obligation": "Legal Obligation:",
+      "legal_desc": "Processing required to comply with legal and regulatory requirements"
+    },
+    "data_subject_rights": {
+      "title": "Your Data Subject Rights",
+      "description": "As an EU resident, you have the following rights under GDPR:"
+    },
+    "rights": {
+      "access": {
+        "title": "Right of Access",
+        "description": "Request a copy of your personal data and information about how we process it"
+      },
+      "rectification": {
+        "title": "Right to Rectification",
+        "description": "Request correction of inaccurate or incomplete personal data"
+      },
+      "erasure": {
+        "title": "Right to Erasure",
+        "description": "Request deletion of your personal data under certain circumstances"
+      },
+      "restriction": {
+        "title": "Right to Restriction",
+        "description": "Request limitation of processing in specific situations"
+      },
+      "portability": {
+        "title": "Right to Data Portability",
+        "description": "Receive your data in a structured, machine-readable format"
+      },
+      "objection": {
+        "title": "Right to Object",
+        "description": "Object to processing based on legitimate interests or for direct marketing"
+      }
+    },
+    "international_transfers": {
+      "title": "International Data Transfers",
+      "description": "Some of our service providers are located outside the EU. We ensure adequate protection through:"
+    },
+    "transfers": {
+      "us_services": "US-Based Services:",
+      "us_desc": "OpenAI (AI processing), Stripe (payments), Clerk (authentication) with adequate safeguards",
+      "safeguards": "Appropriate Safeguards:",
+      "safeguards_desc": "Standard contractual clauses, adequacy decisions, and certification schemes",
+      "adequacy": "Adequacy Decisions:",
+      "adequacy_desc": "Transfers to countries with adequate data protection as recognized by the EU Commission"
+    },
+    "breach_notification": {
+      "title": "Data Breach Notification",
+      "description": "In the event of a data breach affecting your personal data, we will:",
+      "procedure": "Notify the relevant supervisory authority within 72 hours and inform affected individuals without undue delay if the breach poses a high risk to your rights and freedoms."
+    },
+    "supervisory_authority": {
+      "title": "Supervisory Authority",
+      "description": "You have the right to lodge a complaint with your local data protection authority:",
+      "contact": "Contact your national Data Protection Authority",
+      "details": "Visit the European Data Protection Board website for contact information of all EU data protection authorities"
+    },
+    "exercise_rights": {
+      "title": "How to Exercise Your Rights",
+      "description": "To exercise any of your data subject rights, please contact us:",
+      "email": "Email:",
+      "response_time": "Response Time:",
+      "response_desc": "We will respond to your request within 30 days (extendable by 60 days for complex requests)"
+    }
+  },
+
+  "compliance": {
+    "detecting_location": "Detecting location...",
+    "gdpr": {
+      "title": "European Privacy Rights",
+      "notice": "As an EU resident, you have enhanced privacy rights under GDPR. See our Privacy Policy for details about your rights to access, rectify, and delete your data."
+    },
+    "ccpa": {
+      "title": "California Privacy Rights", 
+      "notice": "California residents have specific privacy rights under CCPA. You can request information about data collection and opt-out of data sales."
+    }
   }
 }
