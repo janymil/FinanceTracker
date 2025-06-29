@@ -1162,7 +1162,31 @@
     "and_more_errors": "... y {{count}} más",
     "recent_imports": "Importaciones Recientes",
     "records_count": "{{count}} registros",
-    "no_import_history": "No hay historial de importación aún"
+    "no_import_history": "No hay historial de importación aún",
+    
+    "backup_tab": "Respaldo",
+    "cloud_backup_status": "Estado de Respaldo en la Nube",
+    "automatic_backup_enabled": "Respaldo Automático Activado",
+    "backup_schedule_description": "Tus datos se respaldan automáticamente todos los días a las 2:00 AM",
+    "loading_backup_status": "Cargando estado del respaldo...",
+    "last_backup": "Último Respaldo",
+    "never": "Nunca",
+    "next_scheduled": "Próximo programado",
+    "tonight_2am": "Esta noche a las 2:00 AM",
+    "at_2am": "a las 2:00 AM",
+    "storage_usage": "Uso de Almacenamiento",
+    "days_old": "días de antigüedad",
+    "no_backups": "Sin respaldos",
+    "backup_info": "Información del Respaldo",
+    "provider": "Proveedor",
+    "region": "Región",
+    "global": "Global",
+    "files_stored": "archivos almacenados",
+    "no_backup_status": "No hay estado de respaldo disponible",
+    "creating_backup": "Creando Respaldo...",
+    "backup_now": "Respaldar Ahora",
+    "restoring": "Restaurando...",
+    "restore": "Restaurar"
   },
 
   "upload": {

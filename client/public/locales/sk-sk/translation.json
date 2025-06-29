@@ -1218,7 +1218,31 @@
     "and_more_errors": "... a {{count}} ďalších",
     "recent_imports": "Nedávne Importy",
     "records_count": "{{count}} záznamov",
-    "no_import_history": "Zatiaľ žiadna história importu"
+    "no_import_history": "Zatiaľ žiadna história importu",
+    
+    "backup_tab": "Záloha",
+    "cloud_backup_status": "Stav Zálohy v Cloude",
+    "automatic_backup_enabled": "Automatická Záloha Aktivovaná",
+    "backup_schedule_description": "Vaše údaje sa automaticky zálohujú každý deň o 2:00",
+    "loading_backup_status": "Načítavam stav zálohy...",
+    "last_backup": "Posledná Záloha",
+    "never": "Nikdy",
+    "next_scheduled": "Ďalšia naplánovaná",
+    "tonight_2am": "Dnes večer o 2:00",
+    "at_2am": "o 2:00",
+    "storage_usage": "Použitie Úložiska",
+    "days_old": "dní staré",
+    "no_backups": "Žiadne zálohy",
+    "backup_info": "Informácie o Zálohe",
+    "provider": "Poskytovateľ",
+    "region": "Región",
+    "global": "Globálny",
+    "files_stored": "súborov uložených",
+    "no_backup_status": "Stav zálohy nie je k dispozícii",
+    "creating_backup": "Vytváram Zálohu...",
+    "backup_now": "Zálohovať Teraz",
+    "restoring": "Obnovujem...",
+    "restore": "Obnoviť"
   },
 
   "upload": {
