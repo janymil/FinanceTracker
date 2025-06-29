@@ -221,8 +221,8 @@ export default function Goals() {
       setIsEditDialogOpen(false);
       setEditingGoal(null);
       toast({
-        title: "Goal Updated",
-        description: "Your financial goal has been updated successfully.",
+        title: t('goals.toasts.goal_updated'),
+        description: t('goals.toasts.goal_updated_desc'),
       });
     } catch (error: any) {
       toast({
@@ -244,13 +244,13 @@ export default function Goals() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete goal');
+        throw new Error(errorData.message || t('goals.errors.failed_delete'));
       }
       
       await fetchGoals(); // Refresh goals
       toast({
-        title: "Goal Deleted",
-        description: "Your financial goal has been deleted successfully.",
+        title: t('goals.toasts.goal_deleted'),
+        description: t('goals.toasts.goal_deleted_desc'),
       });
     } catch (error: any) {
       toast({
@@ -264,7 +264,7 @@ export default function Goals() {
   const duplicateGoal = async (goal: Goal) => {
     try {
       const duplicateData = {
-        name: `${goal.name} (Copy)`,
+        name: `${goal.name} (${t('goals.copy')})`,
         targetAmount: goal.targetAmount,
         targetDate: goal.targetDate,
         category: goal.category,
@@ -284,13 +284,13 @@ export default function Goals() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to duplicate goal');
+        throw new Error(errorData.message || t('goals.errors.failed_duplicate'));
       }
       
       await fetchGoals(); // Refresh goals
       toast({
-        title: "Goal Duplicated",
-        description: "Your financial goal has been duplicated successfully.",
+        title: t('goals.toasts.goal_duplicated'),
+        description: t('goals.toasts.goal_duplicated_desc'),
       });
     } catch (error: any) {
       toast({
@@ -356,11 +356,11 @@ export default function Goals() {
     const progress = (current / target) * 100;
     const daysLeft = Math.ceil((new Date(targetDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
     
-    if (progress >= 100) return { status: "Completed", color: "bg-green-500", textColor: "text-green-600" };
-    if (daysLeft < 0) return { status: "Overdue", color: "bg-red-500", textColor: "text-red-600" };
-    if (progress >= 75) return { status: "On Track", color: "bg-blue-500", textColor: "text-blue-600" };
-    if (progress >= 50) return { status: "In Progress", color: "bg-yellow-500", textColor: "text-yellow-600" };
-    return { status: "Just Started", color: "bg-gray-500", textColor: "text-gray-600" };
+    if (progress >= 100) return { status: t('goals.status.completed'), color: "bg-green-500", textColor: "text-green-600" };
+    if (daysLeft < 0) return { status: t('goals.status.overdue'), color: "bg-red-500", textColor: "text-red-600" };
+    if (progress >= 75) return { status: t('goals.status.on_track'), color: "bg-blue-500", textColor: "text-blue-600" };
+    if (progress >= 50) return { status: t('goals.status.in_progress'), color: "bg-yellow-500", textColor: "text-yellow-600" };
+    return { status: t('goals.status.just_started'), color: "bg-gray-500", textColor: "text-gray-600" };
   };
 
   return (
@@ -371,38 +371,38 @@ export default function Goals() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Financial Goals
+                {t('goals.title')}
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
-                Set and track your financial objectives with AI-powered insights
+                {t('goals.subtitle')}
               </p>
             </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-primary hover:bg-primary/90">
                   <Plus className="h-4 w-4 mr-2" />
-                  Create Goal
+                  {t('goals.create_goal')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                  <DialogTitle>Create New Goal</DialogTitle>
+                  <DialogTitle>{t('goals.create_new_goal')}</DialogTitle>
                   <DialogDescription>
-                    Set a new financial goal to track your progress towards your objectives.
+                    {t('goals.create_goal_desc')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="name">Goal Name</Label>
+                    <Label htmlFor="name">{t('goals.form.goal_name')}</Label>
                     <Input
                       id="name"
-                      placeholder="Emergency Fund"
+                      placeholder={t('goals.form.goal_name_placeholder')}
                       value={newGoal.name}
                       onChange={(e) => setNewGoal({ ...newGoal, name: e.target.value })}
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="amount">Target Amount ($)</Label>
+                    <Label htmlFor="amount">{t('goals.form.target_amount', { currency: displayCurrency })}</Label>
                     <Input
                       id="amount"
                       type="number"
@@ -412,7 +412,7 @@ export default function Goals() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="date">Target Date</Label>
+                    <Label htmlFor="date">{t('goals.form.target_date')}</Label>
                     <Input
                       id="date"
                       type="date"
@@ -421,10 +421,10 @@ export default function Goals() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="category">Category</Label>
+                    <Label htmlFor="category">{t('goals.form.category')}</Label>
                     <Select value={newGoal.category} onValueChange={(value) => setNewGoal({ ...newGoal, category: value })}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder={t('goals.form.select_category')} />
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map((category) => (
@@ -436,10 +436,10 @@ export default function Goals() {
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="description">Description (Optional)</Label>
+                    <Label htmlFor="description">{t('goals.form.description_optional')}</Label>
                     <Input
                       id="description"
-                      placeholder="Save for 6 months of expenses"
+                      placeholder={t('goals.form.description_placeholder')}
                       value={newGoal.description}
                       onChange={(e) => setNewGoal({ ...newGoal, description: e.target.value })}
                     />
@@ -447,10 +447,10 @@ export default function Goals() {
                 </div>
                 <div className="flex justify-end space-x-2">
                   <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button onClick={handleCreateGoal}>
-                    Create Goal
+                    {t('goals.create_goal')}
                   </Button>
                 </div>
               </DialogContent>
