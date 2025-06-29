@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ClerkProvider } from '@clerk/clerk-react';
+import { esES } from '@clerk/localizations';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Router } from 'wouter';
 import { HelmetProvider } from 'react-helmet-async';
