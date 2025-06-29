@@ -123,10 +123,15 @@ const getClerkLocalization = () => {
   
   console.log('Clerk localization detection:', { urlLang, savedLanguage, browserLanguage, currentLang });
   
-  // Disable all Clerk localizations to prevent form display issues
-  // Keep application's i18n system working for the interface
-  console.log('Using English (default) localization for Clerk to ensure form functionality');
-  return undefined; // Always use English for Clerk forms
+  if (currentLang === 'es' || currentLang?.startsWith('es')) {
+    console.log('Using Spanish localization for Clerk');
+    return esES;
+  } else if (currentLang === 'sk' || currentLang?.startsWith('sk')) {
+    console.log('Using Slovak localization for Clerk');
+    return skSK;
+  }
+  console.log('Using English (default) localization for Clerk');
+  return undefined; // English is default
 };
 
 const languageAwareUrls = getLanguageAwareUrls();
@@ -144,6 +149,30 @@ root.render(
           layout: {
             logoImageUrl: '/icon.png',
             showOptionalFields: false,
+          },
+          elements: {
+            // Ensure terms and conditions are visible
+            termsOfServiceLabel: {
+              display: 'block !important',
+              visibility: 'visible !important',
+              opacity: '1 !important',
+            },
+            privacyPolicyLabel: {
+              display: 'block !important',
+              visibility: 'visible !important',
+              opacity: '1 !important',
+            },
+            // Ensure checkbox is functional
+            checkbox: {
+              display: 'inline-block !important',
+              visibility: 'visible !important',
+              opacity: '1 !important',
+            },
+            // Fix any potential text hiding
+            formFieldLabel: {
+              visibility: 'visible !important',
+              opacity: '1 !important',
+            }
           }
         }}
       >
