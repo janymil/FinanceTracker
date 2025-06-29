@@ -16,11 +16,30 @@ import { useTranslation } from "react-i18next";
 export default function Trends() {
   const { isReady, user } = useClerkUserReady();
   const { currency } = useCurrency();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const displayCurrency = currency || '$';
   const [selectedPeriod, setSelectedPeriod] = useState("6months");
   const [viewType, setViewType] = useState("overview");
   const [selectedCategory, setSelectedCategory] = useState("all");
+
+  // Format chart month names with localization
+  const formatChartMonth = (dateString: string): string => {
+    const [year, month] = dateString.split('-');
+    const monthIndex = parseInt(month) - 1;
+    
+    const currentLang = i18n.language || 'en-us';
+    
+    if (currentLang.startsWith('es')) {
+      const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+      return `${monthNames[monthIndex]} ${year}`;
+    } else if (currentLang.startsWith('sk')) {
+      const monthNames = ['jan', 'feb', 'mar', 'apr', 'máj', 'jún', 'júl', 'aug', 'sep', 'okt', 'nov', 'dec'];
+      return `${monthNames[monthIndex]} ${year}`;
+    } else {
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return `${monthNames[monthIndex]} ${year}`;
+    }
+  };
 
   // State for data
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -161,7 +180,7 @@ export default function Trends() {
           const date = subMonths(now, i);
           periods.push({
             date,
-            label: format(date, "MMM yyyy"),
+            label: formatChartMonth(format(date, "yyyy-MM")),
             key: format(date, "yyyy-MM")
           });
         }
@@ -580,7 +599,7 @@ export default function Trends() {
                             'text-gray-600'
                           }
                         >
-                          {categoryTrend.trend}
+                          {t(`trends.trend.${categoryTrend.trend}`)}
                         </Badge>
                         {categoryTrend.trend === 'increasing' ? 
                           <TrendingUp className="h-4 w-4 text-red-600" /> : 
@@ -592,11 +611,11 @@ export default function Trends() {
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span>Total Spent:</span>
+                        <span>{t('trends.categories.total_spent')}</span>
                         <span className="font-medium">{formatCurrency(categoryTrend.totalAmount)}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span>Monthly Average:</span>
+                        <span>{t('trends.categories.monthly_average')}</span>
                         <span className="font-medium">{formatCurrency(categoryTrend.avgAmount)}</span>
                       </div>
                     </div>
