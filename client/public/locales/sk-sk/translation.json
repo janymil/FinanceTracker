@@ -1111,6 +1111,17 @@
     "forecasts": {
       "ai_forecasts_title": "AI finančné prognózy",
       "ai_forecasts_description": "Predpovede poháňané AI na základe vašich historických dátových vzorov"
+    },
+
+    "categories": {
+      "total_spent": "Celkom Minulé:",
+      "monthly_average": "Mesačný Priemer:"
+    },
+
+    "trend": {
+      "increasing": "rastúci",
+      "decreasing": "klesajúci", 
+      "stable": "stabilný"
     }
   },
 

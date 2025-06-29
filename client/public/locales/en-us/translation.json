@@ -1066,6 +1066,17 @@
     "forecasts": {
       "ai_forecasts_title": "AI Financial Forecasts",
       "ai_forecasts_description": "AI-powered predictions based on your historical data patterns"
+    },
+
+    "categories": {
+      "total_spent": "Total Spent:",
+      "monthly_average": "Monthly Average:"
+    },
+
+    "trend": {
+      "increasing": "increasing",
+      "decreasing": "decreasing", 
+      "stable": "stable"
     }
   },
 

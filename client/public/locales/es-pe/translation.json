@@ -1055,6 +1055,17 @@
     "forecasts": {
       "ai_forecasts_title": "Pronósticos Financieros IA",
       "ai_forecasts_description": "Predicciones impulsadas por IA basadas en tus patrones de datos históricos"
+    },
+
+    "categories": {
+      "total_spent": "Total Gastado:",
+      "monthly_average": "Promedio Mensual:"
+    },
+
+    "trend": {
+      "increasing": "creciente",
+      "decreasing": "decreciente", 
+      "stable": "estable"
     }
   },
 

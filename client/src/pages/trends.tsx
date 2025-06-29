@@ -190,7 +190,7 @@ export default function Trends() {
           const date = subMonths(now, i);
           periods.push({
             date,
-            label: format(date, "MMM yyyy"),
+            label: formatChartMonth(format(date, "yyyy-MM")),
             key: format(date, "yyyy-MM")
           });
         }
