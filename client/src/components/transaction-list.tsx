@@ -11,6 +11,7 @@ import { Link, useLocation } from "wouter";
 import { useState, useMemo } from "react";
 import ReceiptModal from "@/components/receipt-modal";
 import { useTranslation } from "react-i18next";
+import { formatTransactionDate } from "../../../lib/dateUtils";
 
 interface Transaction {
   id: number;
@@ -70,13 +71,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
     }).format(Math.abs(parseFloat(amount)));
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-  };
+  // Using centralized date formatting from lib/dateUtils
 
   const getCategoryIcon = (icon?: string) => {
     const iconMap: { [key: string]: string } = {
@@ -238,7 +233,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                         <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                           <span>{transaction.categoryName || 'Uncategorized'}</span>
                           <span>•</span>
-                          <span>{formatDate(transaction.date)}</span>
+                          <span>{formatTransactionDate(transaction.date)}</span>
                           {transaction.ocrVendor && transaction.ocrVendor !== transaction.description && (
                             <>
                               <span>•</span>
@@ -343,7 +338,7 @@ export default function TransactionList({ transactions, isLoading, isPremium }: 
                               <div>
                                 <span className="font-medium">Receipt Date:</span>
                                 <span className="ml-1 text-gray-600 dark:text-gray-400">
-                                  {formatDate(transaction.ocrDetectedDate)}
+                                  {formatTransactionDate(transaction.ocrDetectedDate)}
                                 </span>
                               </div>
                             )}
