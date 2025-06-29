@@ -66,21 +66,28 @@ interface Goal {
   participants: Array<{
     id: number;
     userId: string;
-    firstName: string;
-    lastName: string;
-    email: string;
     role: string;
     currentContribution: string;
     joinedAt: string;
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+    };
   }>;
   contributions: Array<{
     id: number;
     userId: string;
-    firstName: string;
-    lastName: string;
     amount: string;
     description?: string;
     createdAt: string;
+    user?: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+    };
   }>;
 }
 
@@ -345,8 +352,8 @@ export default function CollaborativeGoalDetailPage() {
   
   // Prepare chart data - group by user and sum their contributions
   const contributionsByUser = contributions.reduce((acc: any, contrib: any) => {
-    const userName = contrib.firstName && contrib.lastName 
-      ? `${contrib.firstName} ${contrib.lastName}` 
+    const userName = contrib.user?.firstName && contrib.user?.lastName 
+      ? `${contrib.user.firstName} ${contrib.user.lastName}` 
       : t('collaborative_goal_detail.sections.unknown_user');
     
     if (acc[userName]) {
@@ -364,7 +371,7 @@ export default function CollaborativeGoalDetailPage() {
 
   // Get top contributor
   const topContributor = contributions.length > 0 ? 
-    contributions.reduce((top, current) => 
+    contributions.reduce((top: any, current: any) => 
       parseFloat(current.amount) > parseFloat(top.amount) ? current : top
     ) : null;
 
@@ -710,13 +717,13 @@ export default function CollaborativeGoalDetailPage() {
                     <div key={participant.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <Avatar className="w-10 h-10">
                         <AvatarFallback>
-                          {participant.firstName?.[0]}{participant.lastName?.[0]}
+                          {participant.user?.firstName?.[0]}{participant.user?.lastName?.[0]}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
                         <div className="font-medium">
-                          {participant.firstName && participant.lastName 
-                            ? `${participant.firstName} ${participant.lastName}` 
+                          {participant.user?.firstName && participant.user?.lastName 
+                            ? `${participant.user.firstName} ${participant.user.lastName}` 
                             : t('collaborative_goal_detail.sections.unknown_user')
                           }
                         </div>
@@ -747,14 +754,14 @@ export default function CollaborativeGoalDetailPage() {
                     <div key={contrib.id} className="flex items-start gap-3 p-3 border rounded-lg">
                       <Avatar className="w-8 h-8">
                         <AvatarFallback className="text-xs">
-                          {contrib.firstName?.[0]}{contrib.lastName?.[0]}
+                          {contrib.user?.firstName?.[0]}{contrib.user?.lastName?.[0]}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
                         <div className="text-sm">
                           <span className="font-medium">
-                            {contrib.firstName && contrib.lastName 
-                              ? `${contrib.firstName} ${contrib.lastName}` 
+                            {contrib.user?.firstName && contrib.user?.lastName 
+                              ? `${contrib.user.firstName} ${contrib.user.lastName}` 
                               : t('collaborative_goal_detail.sections.unknown_user')
                             }
                           </span>
