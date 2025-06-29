@@ -80,7 +80,7 @@ export function registerGoalRoutes(app: Express) {
         return res.status(403).json({ message: "Goal not found or access denied" });
       }
 
-      const updateData: any = {};
+      const updateData: any = { userId }; // Include userId for security verification
       if (name !== undefined) updateData.name = String(name);
       if (targetAmount !== undefined) updateData.targetAmount = String(targetAmount);
       if (targetDate !== undefined) updateData.targetDate = new Date(targetDate);
