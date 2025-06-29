@@ -1,6 +1,59 @@
 import type { Express } from "express";
 import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
+import { getUserLanguage } from "../categoryTranslations";
+
+// Multilingual server messages
+const serverMessages = {
+  'en-us': {
+    authRequired: "Authentication required",
+    userAlreadyParticipant: "User is already a participant in this goal",
+    userAlreadyPartOfGoal: "User is already part of this goal or cannot join",
+    invitationEmailSent: "An invitation email has been sent",
+    userAddedToGoal: "User has been added to the goal successfully",
+    goalNotFound: "Goal not found",
+    permissionDenied: "Permission denied",
+    invalidData: "Invalid data provided",
+    failedToSendEmail: "Failed to send invitation email"
+  },
+  'es-pe': {
+    authRequired: "Se requiere autenticación",
+    userAlreadyParticipant: "El usuario ya es participante en esta meta",
+    userAlreadyPartOfGoal: "El usuario ya es parte de esta meta o no puede unirse",
+    invitationEmailSent: "Se ha enviado un correo de invitación",
+    userAddedToGoal: "El usuario ha sido agregado a la meta exitosamente",
+    goalNotFound: "Meta no encontrada",
+    permissionDenied: "Permiso denegado",
+    invalidData: "Datos inválidos proporcionados",
+    failedToSendEmail: "Error al enviar el correo de invitación"
+  },
+  'sk-sk': {
+    authRequired: "Vyžaduje sa autentifikácia",
+    userAlreadyParticipant: "Používateľ je už účastníkom tohto cieľa",
+    userAlreadyPartOfGoal: "Používateľ je už súčasťou tohto cieľa alebo sa nemôže pripojiť",
+    invitationEmailSent: "Pozvánovací e-mail bol odoslaný",
+    userAddedToGoal: "Používateľ bol úspešne pridaný do cieľa",
+    goalNotFound: "Cieľ nenájdený",
+    permissionDenied: "Prístup zamietnutý",
+    invalidData: "Poskytnuté neplatné údaje",
+    failedToSendEmail: "Nepodarilo sa odoslať pozvánovací e-mail"
+  }
+};
+
+function getLocalizedMessage(language: string, key: string): string {
+  const lang = language.toLowerCase();
+  
+  // Check if language is supported and has the key
+  if (lang === 'es-pe' && (serverMessages['es-pe'] as any)[key]) {
+    return (serverMessages['es-pe'] as any)[key];
+  }
+  if (lang === 'sk-sk' && (serverMessages['sk-sk'] as any)[key]) {
+    return (serverMessages['sk-sk'] as any)[key];
+  }
+  
+  // Fallback to English
+  return (serverMessages['en-us'] as any)[key] || key;
+}
 
 export function registerCollaborativeGoalRoutes(app: Express) {
   // Friend management routes
@@ -250,13 +303,15 @@ export function registerCollaborativeGoalRoutes(app: Express) {
     try {
       const userId = getUserId(req);
       if (!userId) {
-        return res.status(401).json({ message: "Authentication required" });
+        const userLanguage = getUserLanguage(req);
+        return res.status(401).json({ message: getLocalizedMessage(userLanguage, 'authRequired') });
       }
       const goalId = parseInt(req.params.id);
       const { email } = req.body;
+      const userLanguage = getUserLanguage(req);
 
       if (!email || !email.includes('@')) {
-        return res.status(400).json({ message: "Valid email address is required" });
+        return res.status(400).json({ message: getLocalizedMessage(userLanguage, 'invalidData') });
       }
 
       // Check if user has permission to invite to this goal (creator only)
