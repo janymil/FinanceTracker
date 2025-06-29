@@ -1035,6 +1035,85 @@
     "premium": "Premium"
   },
 
+  "trends": {
+    "title": "Pokročilá analýza trendov",
+    "subtitle": "Hlboké poznatky o vašich finančných vzorcoch a prognózach",
+    "export": "Exportovať",
+    "uncategorized": "Nekategorizované",
+    "other": "Iné",
+    
+    "periods": {
+      "last_30_days": "Posledných 30 dní",
+      "last_12_weeks": "Posledných 12 týždňov", 
+      "last_6_months": "Posledných 6 mesiacov",
+      "last_2_years": "Posledné 2 roky"
+    },
+
+    "tabs": {
+      "overview": "Prehľad",
+      "by_category": "Podľa kategórie",
+      "patterns": "Vzorce",
+      "forecasts": "Prognózy"
+    },
+
+    "overview": {
+      "trend_direction": "Smer trendu",
+      "positive": "Pozitívny",
+      "net_balance_upward": "Čistý zostatok s rastúcim trendom",
+      "best_period": "Najlepšie obdobie",
+      "not_available": "N/A",
+      "highest_net_balance": "Najvyšší čistý zostatok",
+      "volatility": "Volatilita",
+      "low": "Nízka",
+      "stable_patterns": "Stabilné vzorce výdavkov",
+      "financial_trends_title": "Prehľad finančných trendov",
+      "financial_trends_description": "Príjmy, výdavky a čistý zostatok za {{period}}"
+    },
+
+    "chart": {
+      "income": "Príjmy",
+      "expenses": "Výdavky", 
+      "net_balance": "Čistý zostatok",
+      "amount": "Suma"
+    },
+
+    "days": {
+      "sunday": "Nedeľa",
+      "monday": "Pondelok",
+      "tuesday": "Utorok",
+      "wednesday": "Streda", 
+      "thursday": "Štvrtok",
+      "friday": "Piatok",
+      "saturday": "Sobota"
+    },
+
+    "insights": {
+      "no_data": "Žiadne údaje o výdavkoch nie sú k dispozícii.",
+      "weekend_higher": "Cez víkendy míňate viac ({{weekendAmount}}) ako počas týždňa. {{maxDay}} je váš deň s najvyššími výdavkami.",
+      "weekday_higher": "Počas týždňa míňate viac ({{weekdayAmount}}) ako cez víkendy. {{maxDay}} je váš deň s najvyššími výdavkami.",
+      "month_start_higher": "Máte tendenciu míňať viac na začiatku mesiaca ({{firstWeekAvg}} priemer) ako na konci ({{lastWeekAvg}} priemer).",
+      "month_end_higher": "Máte tendenciu míňať viac na konci mesiaca ({{lastWeekAvg}} priemer) ako na začiatku ({{firstWeekAvg}} priemer).",
+      "consistent_spending": "Vaše výdavky sú relatívne konzistentné počas celého mesiaca."
+    },
+
+    "patterns": {
+      "day_of_week_title": "Vzorce podľa dňa v týždni",
+      "day_of_week_description": "Vaše správanie pri míňaní v rôzne dni",
+      "monthly_cycles_title": "Mesačné cykly výdavkov",
+      "monthly_cycles_description": "Ako sa vaše výdavky menia počas mesiaca",
+      "category_frequency_title": "Frekvencia výdavkov podľa kategórie",
+      "category_frequency_description": "Ako často míňate v každej kategórii",
+      "times_count": "{{count}} krát",
+      "total": "Celkom",
+      "average": "Priemer"
+    },
+
+    "forecasts": {
+      "ai_forecasts_title": "AI finančné prognózy",
+      "ai_forecasts_description": "Predpovede poháňané AI na základe vašich historických dátových vzorov"
+    }
+  },
+
   "upload": {
     "drag_drop": "Pretiahnite a pustite obrázok sem, alebo kliknite na prehliadanie",
     "processing": "Spracovávam váš účet...",

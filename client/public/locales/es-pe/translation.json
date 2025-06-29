@@ -979,6 +979,85 @@
     "premium": "Premium"
   },
 
+  "trends": {
+    "title": "Análisis Avanzado de Tendencias",
+    "subtitle": "Perspectivas profundas sobre tus patrones financieros y pronósticos",
+    "export": "Exportar",
+    "uncategorized": "Sin categoría",
+    "other": "Otro",
+    
+    "periods": {
+      "last_30_days": "Últimos 30 Días",
+      "last_12_weeks": "Últimas 12 Semanas", 
+      "last_6_months": "Últimos 6 Meses",
+      "last_2_years": "Últimos 2 Años"
+    },
+
+    "tabs": {
+      "overview": "Resumen",
+      "by_category": "Por Categoría",
+      "patterns": "Patrones",
+      "forecasts": "Pronósticos"
+    },
+
+    "overview": {
+      "trend_direction": "Dirección de Tendencia",
+      "positive": "Positiva",
+      "net_balance_upward": "Saldo neto con tendencia al alza",
+      "best_period": "Mejor Período",
+      "not_available": "N/D",
+      "highest_net_balance": "Mayor saldo neto",
+      "volatility": "Volatilidad",
+      "low": "Baja",
+      "stable_patterns": "Patrones de gasto estables",
+      "financial_trends_title": "Resumen de Tendencias Financieras",
+      "financial_trends_description": "Ingresos, gastos y saldo neto durante {{period}}"
+    },
+
+    "chart": {
+      "income": "Ingresos",
+      "expenses": "Gastos", 
+      "net_balance": "Saldo Neto",
+      "amount": "Cantidad"
+    },
+
+    "days": {
+      "sunday": "Domingo",
+      "monday": "Lunes",
+      "tuesday": "Martes",
+      "wednesday": "Miércoles", 
+      "thursday": "Jueves",
+      "friday": "Viernes",
+      "saturday": "Sábado"
+    },
+
+    "insights": {
+      "no_data": "No hay datos de gastos disponibles.",
+      "weekend_higher": "Gastas más los fines de semana ({{weekendAmount}}) que entre semana. {{maxDay}} es tu día de mayor gasto.",
+      "weekday_higher": "Gastas más entre semana ({{weekdayAmount}}) que los fines de semana. {{maxDay}} es tu día de mayor gasto.",
+      "month_start_higher": "Tiendes a gastar más al comienzo del mes ({{firstWeekAvg}} promedio) que al final ({{lastWeekAvg}} promedio).",
+      "month_end_higher": "Tiendes a gastar más al final del mes ({{lastWeekAvg}} promedio) que al comienzo ({{firstWeekAvg}} promedio).",
+      "consistent_spending": "Tu gasto es relativamente consistente durante todo el mes."
+    },
+
+    "patterns": {
+      "day_of_week_title": "Patrones por Día de la Semana",
+      "day_of_week_description": "Tu comportamiento de gasto en diferentes días",
+      "monthly_cycles_title": "Ciclos de Gasto Mensual",
+      "monthly_cycles_description": "Cómo varía tu gasto durante el mes",
+      "category_frequency_title": "Frecuencia de Gasto por Categoría",
+      "category_frequency_description": "Con qué frecuencia gastas en cada categoría",
+      "times_count": "{{count}} veces",
+      "total": "Total",
+      "average": "Promedio"
+    },
+
+    "forecasts": {
+      "ai_forecasts_title": "Pronósticos Financieros IA",
+      "ai_forecasts_description": "Predicciones impulsadas por IA basadas en tus patrones de datos históricos"
+    }
+  },
+
   "upload": {
     "drag_drop": "Arrastra y suelta una imagen aquí, o haz clic para navegar",
     "processing": "Procesando tu recibo...",
