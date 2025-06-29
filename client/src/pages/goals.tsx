@@ -460,24 +460,24 @@ export default function Goals() {
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
               <DialogContent className="sm:max-w-[500px] max-h-[80vh] flex flex-col">
                 <DialogHeader>
-                  <DialogTitle>Edit Goal</DialogTitle>
+                  <DialogTitle>{t('goals.edit_goal')}</DialogTitle>
                   <DialogDescription>
-                    Update your financial goal details and track your progress.
+                    {t('goals.edit_goal_desc')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="flex-1 overflow-y-auto px-1">
                   <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="edit-name">Goal Name</Label>
+                      <Label htmlFor="edit-name">{t('goals.form.goal_name')}</Label>
                       <Input
                         id="edit-name"
-                        placeholder="Emergency Fund"
+                        placeholder={t('goals.form.goal_name_placeholder')}
                         value={editGoal.name}
                         onChange={(e) => setEditGoal({ ...editGoal, name: e.target.value })}
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="edit-amount">Target Amount ($)</Label>
+                      <Label htmlFor="edit-amount">{t('goals.form.target_amount', { currency: displayCurrency })}</Label>
                       <Input
                         id="edit-amount"
                         type="number"
@@ -487,7 +487,7 @@ export default function Goals() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="edit-current">Current Amount ($)</Label>
+                      <Label htmlFor="edit-current">{t('goals.form.current_amount', { currency: displayCurrency })}</Label>
                       <Input
                         id="edit-current"
                         type="number"
@@ -497,7 +497,7 @@ export default function Goals() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="edit-date">Target Date</Label>
+                      <Label htmlFor="edit-date">{t('goals.form.target_date')}</Label>
                       <Input
                         id="edit-date"
                         type="date"
@@ -506,10 +506,10 @@ export default function Goals() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="edit-category">Category</Label>
+                      <Label htmlFor="edit-category">{t('goals.form.category')}</Label>
                       <Select value={editGoal.category} onValueChange={(value) => setEditGoal({ ...editGoal, category: value })}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
+                          <SelectValue placeholder={t('goals.form.select_category')} />
                         </SelectTrigger>
                         <SelectContent>
                           {categories.map((category) => (
@@ -521,10 +521,10 @@ export default function Goals() {
                       </Select>
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="edit-description">Description (Optional)</Label>
+                      <Label htmlFor="edit-description">{t('goals.form.description_optional')}</Label>
                       <Input
                         id="edit-description"
-                        placeholder="Save for 6 months of expenses"
+                        placeholder={t('goals.form.description_placeholder')}
                         value={editGoal.description}
                         onChange={(e) => setEditGoal({ ...editGoal, description: e.target.value })}
                       />
@@ -533,10 +533,10 @@ export default function Goals() {
                 </div>
                 <div className="flex justify-end space-x-2 pt-4 border-t">
                   <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button onClick={handleUpdateGoal}>
-                    Update Goal
+                    {t('goals.update_goal')}
                   </Button>
                 </div>
               </DialogContent>
@@ -564,14 +564,14 @@ export default function Goals() {
             <CardContent className="text-center py-12">
               <Target className="h-16 w-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                No Goals Yet
+                {t('goals.empty.no_goals_yet')}
               </h3>
               <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Create your first financial goal to start tracking your progress
+                {t('goals.empty.create_first_goal')}
               </p>
               <Button onClick={() => setIsDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create Your First Goal
+                {t('goals.empty.create_first_goal_button')}
               </Button>
             </CardContent>
           </Card>
@@ -598,7 +598,7 @@ export default function Goals() {
                       {/* Progress Bar */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm text-gray-600 dark:text-gray-300">Progress</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-300">{t('goals.card.progress')}</span>
                           <span className="text-sm font-medium">{progress.toFixed(1)}%</span>
                         </div>
                         <Progress value={progress} className="h-2" />
@@ -607,15 +607,15 @@ export default function Goals() {
                       {/* Amount Progress */}
                       <div className="flex items-center justify-between">
                         <div className="text-center">
-                          <p className="text-sm text-gray-600 dark:text-gray-300">Current</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{t('goals.card.current')}</p>
                           <p className="text-lg font-semibold text-green-600 dark:text-green-400">
-                            ${goal.currentAmount.toLocaleString()}
+                            {displayCurrency}{goal.currentAmount.toLocaleString()}
                           </p>
                         </div>
                         <div className="text-center">
-                          <p className="text-sm text-gray-600 dark:text-gray-300">Target</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{t('goals.card.target')}</p>
                           <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">
-                            ${goal.targetAmount.toLocaleString()}
+                            {displayCurrency}{goal.targetAmount.toLocaleString()}
                           </p>
                         </div>
                       </div>
@@ -624,11 +624,11 @@ export default function Goals() {
                       <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
                         <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                           <Calendar className="h-4 w-4 mr-1" />
-                          {daysLeft > 0 ? `${daysLeft} days left` : daysLeft === 0 ? 'Due today' : `${Math.abs(daysLeft)} days overdue`}
+                          {daysLeft > 0 ? t('goals.card.days_left', { days: daysLeft }) : daysLeft === 0 ? t('goals.card.due_today') : t('goals.card.days_overdue', { days: Math.abs(daysLeft) })}
                         </div>
                         <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                           <DollarSign className="h-4 w-4 mr-1" />
-                          ${(goal.targetAmount - goal.currentAmount).toLocaleString()} left
+                          {t('goals.card.amount_left', { amount: `${displayCurrency}${(goal.targetAmount - goal.currentAmount).toLocaleString()}` })}
                         </div>
                       </div>
 
@@ -641,7 +641,7 @@ export default function Goals() {
                           onClick={() => handleEditGoal(goal)}
                         >
                           <Edit2 className="h-4 w-4 mr-1" />
-                          Edit
+                          {t('goals.buttons.edit')}
                         </Button>
                         <Button 
                           size="sm" 
