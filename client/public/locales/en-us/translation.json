@@ -1503,7 +1503,9 @@
       "invalid_amount_description": "Please enter a valid contribution amount.",
       "invalid_email": "Invalid Email",
       "invalid_email_description": "Please enter a valid email address.",
-      "error": "Error"
+      "error": "Error",
+      "link_copied": "Link Copied",
+      "link_copied_description": "Goal sharing link has been copied to clipboard."
     },
     "errors": {
       "goal_not_found": "Goal Not Found",
@@ -1541,7 +1543,9 @@
       "email_placeholder": "Friend's email address",
       "sending": "Sending...",
       "send_invitation": "Send Invitation",
-      "invite_description": "We'll automatically detect if they have an account or send them an invitation to join."
+      "invite_description": "We'll automatically detect if they have an account or send them an invitation to join.",
+      "share_goal": "Share Goal",
+      "share_description": "Share this goal with friends and family to encourage them to join your savings journey!"
     },
     "participants": {
       "title": "Participants",

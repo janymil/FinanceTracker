@@ -318,37 +318,103 @@ export default function CollaborativeGoalDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Invite Friends */}
+        {/* Invite Friends - Only for creators */}
+        {goal?.createdBy === user?.id && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Mail className="h-5 w-5 mr-2" />
+                {t('collaborative_goal_detail.forms.invite_friends')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleInviteFriend} className="space-y-4">
+                <div>
+                  <Input
+                    type="email"
+                    placeholder={t('collaborative_goal_detail.forms.email_placeholder')}
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isInvitePending}
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  {isInvitePending ? t('collaborative_goal_detail.forms.sending') : t('collaborative_goal_detail.forms.send_invitation')}
+                </Button>
+              </form>
+              <p className="text-xs text-muted-foreground mt-2">
+                {t('collaborative_goal_detail.forms.invite_description')}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Social Sharing */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Mail className="h-5 w-5 mr-2" />
-              {t('collaborative_goal_detail.forms.invite_friends')}
+              <Users className="h-5 w-5 mr-2" />
+              {t('collaborative_goal_detail.forms.share_goal')}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleInviteFriend} className="space-y-4">
-              <div>
-                <Input
-                  type="email"
-                  placeholder={t('collaborative_goal_detail.forms.email_placeholder')}
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isInvitePending}
-              >
-                <Mail className="h-4 w-4 mr-2" />
-                {isInvitePending ? t('collaborative_goal_detail.forms.sending') : t('collaborative_goal_detail.forms.send_invitation')}
-              </Button>
-            </form>
-            <p className="text-xs text-muted-foreground mt-2">
-              {t('collaborative_goal_detail.forms.invite_description')}
+            <p className="text-sm text-muted-foreground mb-4">
+              {t('collaborative_goal_detail.forms.share_description')}
             </p>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const text = `Join me in saving for "${goal?.name}"! Target: $${parseFloat(goal?.targetAmount || '0').toLocaleString()}`;
+                  const url = window.location.href;
+                  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+                }}
+                className="flex-1"
+              >
+                🐦 Twitter
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const text = `Join me in saving for "${goal?.name}"! Target: $${parseFloat(goal?.targetAmount || '0').toLocaleString()}`;
+                  const url = window.location.href;
+                  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`, '_blank');
+                }}
+                className="flex-1"
+              >
+                📘 Facebook
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const text = `Join me in saving for "${goal?.name}"! Target: $${parseFloat(goal?.targetAmount || '0').toLocaleString()} - ${window.location.href}`;
+                  if (navigator.share) {
+                    navigator.share({
+                      title: `Collaborative Goal: ${goal?.name}`,
+                      text: text,
+                      url: window.location.href
+                    });
+                  } else {
+                    navigator.clipboard.writeText(text);
+                    toast({
+                      title: t('collaborative_goal_detail.messages.link_copied'),
+                      description: t('collaborative_goal_detail.messages.link_copied_description'),
+                    });
+                  }
+                }}
+                className="flex-1"
+              >
+                📱 Share
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

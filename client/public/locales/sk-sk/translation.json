@@ -1565,7 +1565,9 @@
       "email_placeholder": "E-mailová adresa priateľa",
       "sending": "Odosielam...",
       "send_invitation": "Odoslať Pozvánku",
-      "invite_description": "Automaticky zistíme, či majú účet, alebo im pošleme pozvánku na pripojenie."
+      "invite_description": "Automaticky zistíme, či majú účet, alebo im pošleme pozvánku na pripojenie.",
+      "share_goal": "Zdieľať Cieľ",
+      "share_description": "Zdieľajte tento cieľ s priateľmi a rodinou, aby ste ich povzbudili pripojiť sa k vašej úspornej ceste!"
     },
     "participants": {
       "title": "Účastníci",

@@ -1480,7 +1480,9 @@
       "invalid_amount_description": "Por favor ingresa un monto de contribución válido.",
       "invalid_email": "Email Inválido",
       "invalid_email_description": "Por favor ingresa una dirección de email válida.",
-      "error": "Error"
+      "error": "Error",
+      "link_copied": "Enlace Copiado",
+      "link_copied_description": "El enlace de la meta ha sido copiado al portapapeles."
     },
     "errors": {
       "goal_not_found": "Meta No Encontrada",
@@ -1518,7 +1520,9 @@
       "email_placeholder": "Dirección de email del amigo",
       "sending": "Enviando...",
       "send_invitation": "Enviar Invitación",
-      "invite_description": "Detectaremos automáticamente si tienen una cuenta o les enviaremos una invitación para unirse."
+      "invite_description": "Detectaremos automáticamente si tienen una cuenta o les enviaremos una invitación para unirse.",
+      "share_goal": "Compartir Meta",
+      "share_description": "¡Comparte esta meta con amigos y familiares para alentarlos a unirse a tu viaje de ahorro!"
     },
     "participants": {
       "title": "Participantes",
