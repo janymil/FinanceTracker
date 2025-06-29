@@ -5,14 +5,20 @@ import { getCurrentLanguageForAPI } from '../../../lib/languageUtils';
  * Returns locale codes compatible with toLocaleDateString()
  */
 export function getDateLocale(): string {
-  const currentLang = getCurrentLanguageForAPI();
+  // Get current language from browser or localStorage
+  let currentLang = 'en-us';
+  if (typeof window !== 'undefined') {
+    currentLang = (window as any).i18next?.language || localStorage.getItem('i18nextLng') || 'en-us';
+  } else {
+    currentLang = getCurrentLanguageForAPI();
+  }
   
   if (currentLang.startsWith('es')) {
-    return 'es-ES'; // Spanish format: DD/MM/YYYY
+    return 'es-pe'; // Spanish format: DD/MM/YYYY  
   } else if (currentLang.startsWith('sk')) {
-    return 'sk-SK'; // Slovak format
+    return 'sk-sk'; // Slovak format
   } else {
-    return 'en-US'; // English format: MM/DD/YYYY
+    return 'en-us'; // English format: MM/DD/YYYY
   }
 }
 
@@ -23,8 +29,66 @@ export function getDateLocale(): string {
  */
 export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOptions): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  const locale = getDateLocale();
   
+  // Get current language from browser context
+  let currentLang = 'en-us';
+  if (typeof window !== 'undefined') {
+    currentLang = (window as any).i18next?.language || localStorage.getItem('i18nextLng') || 'en-us';
+  } else {
+    currentLang = getCurrentLanguageForAPI();
+  }
+  
+  // Check if we need long month format
+  const needsLongMonth = options?.month === 'long';
+  const needsShortMonth = !needsLongMonth && (options?.month === 'short' || !options?.month);
+  
+  if (needsLongMonth || needsShortMonth) {
+    const day = dateObj.getDate();
+    const monthIndex = dateObj.getMonth();
+    const year = dateObj.getFullYear();
+    
+    if (currentLang.startsWith('es')) {
+      const spanishMonths = needsLongMonth 
+        ? ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+        : ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+      
+      if (options?.year === 'numeric' && options?.day) {
+        return `${day} ${spanishMonths[monthIndex]} ${year}`;
+      } else if (options?.year === 'numeric') {
+        return `${spanishMonths[monthIndex]} ${year}`;
+      } else {
+        return spanishMonths[monthIndex];
+      }
+    } else if (currentLang.startsWith('sk')) {
+      const slovakMonths = needsLongMonth 
+        ? ['január', 'február', 'marec', 'apríl', 'máj', 'jún', 'júl', 'august', 'september', 'október', 'november', 'december']
+        : ['jan', 'feb', 'mar', 'apr', 'máj', 'jún', 'júl', 'aug', 'sep', 'okt', 'nov', 'dec'];
+      
+      if (options?.year === 'numeric' && options?.day) {
+        return `${day} ${slovakMonths[monthIndex]} ${year}`;
+      } else if (options?.year === 'numeric') {
+        return `${slovakMonths[monthIndex]} ${year}`;
+      } else {
+        return slovakMonths[monthIndex];  
+      }
+    } else {
+      // English
+      const englishMonths = needsLongMonth 
+        ? ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      
+      if (options?.year === 'numeric' && options?.day) {
+        return `${englishMonths[monthIndex]} ${day}, ${year}`;
+      } else if (options?.year === 'numeric') {
+        return `${englishMonths[monthIndex]} ${year}`;
+      } else {
+        return englishMonths[monthIndex];
+      }
+    }
+  }
+  
+  // Fallback to browser's toLocaleDateString for other formats
+  const locale = getDateLocale();
   const defaultOptions: Intl.DateTimeFormatOptions = {
     day: 'numeric',
     month: 'short',
