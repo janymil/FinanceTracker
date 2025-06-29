@@ -243,6 +243,18 @@ export const goalContributions = pgTable("goal_contributions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Chat messages for collaborative goals
+export const goalMessages = pgTable("goal_messages", {
+  id: serial("id").primaryKey(),
+  goalId: integer("goal_id").notNull().references(() => collaborativeGoals.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  message: text("message").notNull(),
+  messageType: varchar("message_type", { length: 50 }).default("text").notNull(), // text, contribution, milestone, system
+  metadata: jsonb("metadata"), // Additional data like contribution amount, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Challenge activities and updates
 export const challengeActivities = pgTable("challenge_activities", {
   id: serial("id").primaryKey(),
@@ -375,6 +387,9 @@ export type CollaborativeGoalParticipant = typeof collaborativeGoalParticipants.
 export type InsertGoalContribution = typeof goalContributions.$inferInsert;
 export type GoalContribution = typeof goalContributions.$inferSelect;
 
+export type InsertGoalMessage = typeof goalMessages.$inferInsert;
+export type GoalMessage = typeof goalMessages.$inferSelect;
+
 export type InsertChallengeActivity = typeof challengeActivities.$inferInsert;
 export type ChallengeActivity = typeof challengeActivities.$inferSelect;
 
@@ -452,6 +467,12 @@ export const insertCollaborativeGoalParticipantSchema = createInsertSchema(colla
 export const insertGoalContributionSchema = createInsertSchema(goalContributions).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertGoalMessageSchema = createInsertSchema(goalMessages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertChallengeActivitySchema = createInsertSchema(challengeActivities).omit({

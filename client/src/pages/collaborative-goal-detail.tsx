@@ -564,6 +564,29 @@ export default function CollaborativeGoalDetailPage() {
               </Card>
             )}
 
+            {/* Contribution Timeline */}
+            {timelineData.length > 0 && (
+              <Card className="p-6">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
+                    {t('collaborative_goal_detail.charts.contribution_timeline')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={timelineData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => [`$${value}`, t('collaborative_goal_detail.charts.amount')]} />
+                      <Line type="monotone" dataKey="amount" stroke="#8884d8" strokeWidth={2} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Contributor Leaderboard */}
             {contributions.length > 0 && (
               <Card className="p-6">

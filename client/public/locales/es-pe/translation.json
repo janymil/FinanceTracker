@@ -1495,6 +1495,11 @@
       "add_contribution": "Agregar Contribución",
       "participants_count": "Participantes"
     },
+    "countdown": {
+      "days_remaining": "días restantes",
+      "due_today": "¡Vence hoy!",
+      "days_overdue": "días vencidos"
+    },
     "charts": {
       "contribution_timeline": "Cronología de Contribuciones",
       "top_contributors": "Mejores Contribuyentes",

@@ -1542,6 +1542,11 @@
       "add_contribution": "Pridať Príspevok",
       "participants_count": "Účastníci"
     },
+    "countdown": {
+      "days_remaining": "dní zostáva",
+      "due_today": "Splatné dnes!",
+      "days_overdue": "dní po termíne"
+    },
     "charts": {
       "contribution_timeline": "Časová Os Príspevkov",
       "top_contributors": "Najlepší Prispievatelia",
