@@ -1,12 +1,11 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ClerkProvider } from '@clerk/clerk-react';
+import { esES, skSK } from '@clerk/localizations';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Router } from 'wouter';
 import { HelmetProvider } from 'react-helmet-async';
 import { I18nextProvider } from 'react-i18next';
-import { esES } from '@clerk/localizations';
-import { skSK } from '@clerk/localizations';
 import App from './App.tsx';
 import './index.css';
 import { clearStaleSession } from './utils/sessionCleanup';
@@ -93,9 +92,9 @@ const getUserLanguage = (): string => {
 const userLanguage = getUserLanguage();
 const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
 
-// Static Clerk localization - check localStorage only
+// Simple static localization based on user preference
 const savedLang = localStorage.getItem('preferredLanguage');
-const clerkLocalization = savedLang === 'es' ? esES : savedLang === 'sk' ? skSK : undefined;
+const clerkLocalization = savedLang === 'sk' ? skSK : savedLang === 'es' ? esES : undefined;
 
 const root = createRoot(container);
 root.render(
