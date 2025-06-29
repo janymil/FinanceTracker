@@ -117,11 +117,111 @@ export const categoryTranslations = {
     'es-pe': 'Otro',
     'sk-sk': 'Iné'
   },
-  // Handle the specific database value
+  // Handle database values (processed category names from dropdown)
   'fondo_de_emergencia': {
     'en-us': 'Emergency Fund',
     'es-pe': 'Fondo de emergencia',
     'sk-sk': 'Núdzový fond'
+  },
+  'emergency_fund': {
+    'en-us': 'Emergency Fund',
+    'es-pe': 'Fondo de emergencia',
+    'sk-sk': 'Núdzový fond'
+  },
+  'núdzový_fond': {
+    'en-us': 'Emergency Fund',
+    'es-pe': 'Fondo de emergencia',
+    'sk-sk': 'Núdzový fond'
+  },
+  'vacation': {
+    'en-us': 'Vacation',
+    'es-pe': 'Vacaciones',
+    'sk-sk': 'Dovolenka'
+  },
+  'vacaciones': {
+    'en-us': 'Vacation',
+    'es-pe': 'Vacaciones',
+    'sk-sk': 'Dovolenka'
+  },
+  'dovolenka': {
+    'en-us': 'Vacation',
+    'es-pe': 'Vacaciones',
+    'sk-sk': 'Dovolenka'
+  },
+  'house_down_payment': {
+    'en-us': 'House Down Payment',
+    'es-pe': 'Pago inicial de casa',
+    'sk-sk': 'Záloha na dom'
+  },
+  'pago_inicial_de_casa': {
+    'en-us': 'House Down Payment',
+    'es-pe': 'Pago inicial de casa',
+    'sk-sk': 'Záloha na dom'
+  },
+  'záloha_na_dom': {
+    'en-us': 'House Down Payment',
+    'es-pe': 'Pago inicial de casa',
+    'sk-sk': 'Záloha na dom'
+  },
+  'car_purchase': {
+    'en-us': 'Car Purchase',
+    'es-pe': 'Compra de auto',
+    'sk-sk': 'Kúpa auta'
+  },
+  'compra_de_auto': {
+    'en-us': 'Car Purchase',
+    'es-pe': 'Compra de auto',
+    'sk-sk': 'Kúpa auta'
+  },
+  'kúpa_auta': {
+    'en-us': 'Car Purchase',
+    'es-pe': 'Compra de auto',
+    'sk-sk': 'Kúpa auta'
+  },
+  'debt_payoff': {
+    'en-us': 'Debt Payoff',
+    'es-pe': 'Pago de deudas',
+    'sk-sk': 'Splácanie dlhov'
+  },
+  'pago_de_deudas': {
+    'en-us': 'Debt Payoff',
+    'es-pe': 'Pago de deudas',
+    'sk-sk': 'Splácanie dlhov'
+  },
+  'splácanie_dlhov': {
+    'en-us': 'Debt Payoff',
+    'es-pe': 'Pago de deudas',
+    'sk-sk': 'Splácanie dlhov'
+  },
+  'retirement': {
+    'en-us': 'Retirement',
+    'es-pe': 'Jubilación',
+    'sk-sk': 'Dôchodok'
+  },
+  'jubilación': {
+    'en-us': 'Retirement',
+    'es-pe': 'Jubilación',
+    'sk-sk': 'Dôchodok'
+  },
+  'dôchodok': {
+    'en-us': 'Retirement',
+    'es-pe': 'Jubilación',
+    'sk-sk': 'Dôchodok'
+  },
+  'other': {
+    'en-us': 'Other',
+    'es-pe': 'Otro',
+    'sk-sk': 'Iné'
+  },
+  'otro': {
+    'en-us': 'Other',
+    'es-pe': 'Otro',
+    'sk-sk': 'Iné'
+  },
+  'iné': {
+    'en-us': 'Other',
+    'es-pe': 'Otro',
+    'sk-sk': 'Iné'
   }
 };
 
