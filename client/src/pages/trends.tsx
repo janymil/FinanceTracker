@@ -106,24 +106,23 @@ export default function Trends() {
         }
 
         // Fetch AI predictions for premium users - use correct endpoint
-        const predictionsRes = await fetch('/api/ai/trend-predictions', { 
-          method: 'POST',
-          headers: {
-            ...headers,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            transactions: [],
-            budgets: [],
-            summary: {}
-          })
+        const predictionsRes = await fetch('/api/trend-predictions', { 
+          method: 'GET',
+          headers
         });
         if (predictionsRes.ok) {
           const predictionsData = await predictionsRes.json();
           setAiPredictions(predictionsData);
-          console.log('AI predictions loaded');
+          console.log('AI predictions loaded:', predictionsData);
         } else {
-          console.error('Failed to fetch AI predictions:', predictionsRes.status);
+          console.error('Failed to fetch AI predictions:', predictionsRes.status, predictionsRes.statusText);
+          // Try to get error message
+          try {
+            const errorData = await predictionsRes.json();
+            console.error('Error details:', errorData);
+          } catch (e) {
+            console.error('Could not parse error response');
+          }
         }
       } catch (error) {
         console.error('Error fetching trends data:', error);
@@ -139,11 +138,13 @@ export default function Trends() {
   console.log("Trends Debug:", {
     isReady,
     userId: user?.id,
+    userPlan: user?.plan,
     loading,
-    transactionsLength: transactions.length,
-    categoriesLength: categories.length,
+    transactionsLength: transactions?.length || 0,
+    categoriesLength: categories?.length || 0,
     hasFinancialSummary: !!financialSummary,
-    hasAiPredictions: !!aiPredictions
+    hasAiPredictions: !!aiPredictions,
+    aiPredictionsData: aiPredictions
   });
 
   // Generate trend data based on period selection
