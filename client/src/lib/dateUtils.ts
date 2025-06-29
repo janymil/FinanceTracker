@@ -37,8 +37,7 @@ export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOpt
   } else {
     currentLang = getCurrentLanguageForAPI();
   }
-  
-  console.log('formatDate currentLang:', currentLang, 'options:', options);
+
   
   // Check if we need long month format
   const needsLongMonth = options?.month === 'long';

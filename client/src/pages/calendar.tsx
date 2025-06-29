@@ -245,7 +245,7 @@ export default function CalendarPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl">
-                    {formatDate(currentMonth, { year: 'numeric', month: 'long' })}
+                    {format(currentMonth, 'MMMM yyyy', { locale: getDateFnsLocale() })}
                   </CardTitle>
                   <div className="flex space-x-2">
                     <Button
