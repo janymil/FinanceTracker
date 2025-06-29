@@ -11,10 +11,12 @@ import { useState, useMemo, useEffect } from "react";
 import RequirePlan from "@/components/require-plan";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, Area, AreaChart } from "recharts";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useTranslation } from "react-i18next";
 
 export default function Trends() {
   const { isReady, user } = useClerkUserReady();
   const { currency } = useCurrency();
+  const { t } = useTranslation();
   const displayCurrency = currency || '$';
   const [selectedPeriod, setSelectedPeriod] = useState("6months");
   const [viewType, setViewType] = useState("overview");
@@ -218,7 +220,7 @@ export default function Trends() {
     const categoryTrends = new Map();
 
     transactions.forEach((t: any) => {
-      const categoryName = categoryMap.get(t.categoryId) || 'Uncategorized';
+      const categoryName = categoryMap.get(t.categoryId) || t('trends.uncategorized');
       const monthKey = format(new Date(t.date), "yyyy-MM");
       
       if (!categoryTrends.has(categoryName)) {
@@ -274,7 +276,15 @@ export default function Trends() {
   const getDayOfWeekData = () => {
     if (!transactions || !Array.isArray(transactions)) return [];
     
-    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayNames = [
+      t('trends.days.sunday'),
+      t('trends.days.monday'),
+      t('trends.days.tuesday'),
+      t('trends.days.wednesday'),
+      t('trends.days.thursday'),
+      t('trends.days.friday'),
+      t('trends.days.saturday')
+    ];
     const dayTotals = new Array(7).fill(0);
     
     transactions
@@ -324,7 +334,7 @@ export default function Trends() {
       .forEach(transaction => {
         const categoryId = transaction.categoryId;
         const category = categories.find(c => c.id === categoryId);
-        const categoryName = category?.name || 'Other';
+        const categoryName = category?.name || t('trends.other');
         
         if (!categoryStats.has(categoryName)) {
           categoryStats.set(categoryName, {
@@ -351,7 +361,7 @@ export default function Trends() {
   // Generate insights for day of week patterns
   const getDayOfWeekInsight = () => {
     const data = getDayOfWeekData();
-    if (data.length === 0) return "No spending data available.";
+    if (data.length === 0) return t('trends.insights.no_data');
     
     const maxSpending = Math.max(...data.map(d => d.amount));
     const maxDay = data.find(d => d.amount === maxSpending);
@@ -359,26 +369,38 @@ export default function Trends() {
     const weekdaySpending = data.slice(1, 6).reduce((sum, d) => sum + d.amount, 0);
     
     if (weekendSpending > weekdaySpending) {
-      return `You spend more on weekends (${formatCurrency(weekendSpending)}) than weekdays. ${maxDay?.day} is your highest spending day.`;
+      return t('trends.insights.weekend_higher', { 
+        weekendAmount: formatCurrency(weekendSpending),
+        maxDay: maxDay?.day 
+      });
     } else {
-      return `You spend more on weekdays (${formatCurrency(weekdaySpending)}) than weekends. ${maxDay?.day} is your highest spending day.`;
+      return t('trends.insights.weekday_higher', { 
+        weekdayAmount: formatCurrency(weekdaySpending),
+        maxDay: maxDay?.day 
+      });
     }
   };
 
   // Generate insights for monthly day patterns
   const getMonthlyDayInsight = () => {
     const data = getMonthlyDayData();
-    if (data.length === 0) return "No spending data available.";
+    if (data.length === 0) return t('trends.insights.no_data');
     
     const firstWeek = data.slice(0, 7).reduce((sum, d) => sum + d.amount, 0) / 7;
     const lastWeek = data.slice(-7).reduce((sum, d) => sum + d.amount, 0) / 7;
     
     if (firstWeek > lastWeek * 1.2) {
-      return `You tend to spend more at the beginning of the month (${formatCurrency(firstWeek)} avg) than at the end (${formatCurrency(lastWeek)} avg).`;
+      return t('trends.insights.month_start_higher', {
+        firstWeekAvg: formatCurrency(firstWeek),
+        lastWeekAvg: formatCurrency(lastWeek)
+      });
     } else if (lastWeek > firstWeek * 1.2) {
-      return `You tend to spend more at the end of the month (${formatCurrency(lastWeek)} avg) than at the beginning (${formatCurrency(firstWeek)} avg).`;
+      return t('trends.insights.month_end_higher', {
+        lastWeekAvg: formatCurrency(lastWeek),
+        firstWeekAvg: formatCurrency(firstWeek)
+      });
     } else {
-      return `Your spending is relatively consistent throughout the month.`;
+      return t('trends.insights.consistent_spending');
     }
   };
 
