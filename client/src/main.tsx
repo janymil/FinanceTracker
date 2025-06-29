@@ -93,13 +93,9 @@ const getUserLanguage = (): string => {
 const userLanguage = getUserLanguage();
 const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
 
-// Simple Clerk localization - URL-based only
-const getClerkLocalization = () => {
-  const path = window.location.pathname;
-  if (path.startsWith('/es')) return esES;
-  if (path.startsWith('/sk')) return skSK;
-  return undefined;
-};
+// Static Clerk localization - check localStorage only
+const savedLang = localStorage.getItem('preferredLanguage');
+const clerkLocalization = savedLang === 'es' ? esES : savedLang === 'sk' ? skSK : undefined;
 
 const root = createRoot(container);
 root.render(
@@ -109,7 +105,7 @@ root.render(
         publishableKey={clerkPubKey}
         afterSignInUrl={dashboardRedirectUrl}
         afterSignUpUrl={dashboardRedirectUrl}
-        localization={getClerkLocalization()}
+        localization={clerkLocalization}
       >
         <QueryClientProvider client={queryClient}>
           <Router>
