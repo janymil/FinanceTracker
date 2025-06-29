@@ -34,6 +34,7 @@ import MonthFilter from "@/components/month-filter";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
+import { useDateFormat } from "@/hooks/useDateFormat";
 
 import TransactionFilters from "@/components/TransactionFilters";
 
@@ -85,26 +86,9 @@ export default function Income() {
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
   const { toast } = useToast();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const { formatDate } = useDateFormat();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  // Helper function to format dates with proper locale
-  const formatTransactionDate = (dateString: string) => {
-    const currentLang = i18n.language || 'en-us';
-    let locale = 'en-us';
-    
-    if (currentLang.startsWith('es')) {
-      locale = 'es';
-    } else if (currentLang.startsWith('sk')) {
-      locale = 'sk';
-    }
-    
-    return new Date(dateString).toLocaleDateString(locale, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");

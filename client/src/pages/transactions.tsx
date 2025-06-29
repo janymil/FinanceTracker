@@ -36,6 +36,7 @@ import { format } from "date-fns";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
 import TransactionFilters from "@/components/TransactionFilters";
+import { useDateFormat } from "@/hooks/useDateFormat";
 
 interface Transaction {
   id: number;
@@ -72,23 +73,8 @@ export default function Transactions() {
   const { toast } = useToast();
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
-  const { t, i18n } = useTranslation();
-
-  // Helper function to format dates consistently
-  const formatDateForDisplay = (dateString: string) => {
-    const dateObj = new Date(dateString);
-    const day = String(dateObj.getDate()).padStart(2, '0');
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const year = dateObj.getFullYear();
-    
-    if (i18n.language.startsWith('es')) {
-      return `${day}/${month}/${year}`;
-    } else if (i18n.language.startsWith('sk')) {
-      return `${day}.${month}.${year}`;
-    } else {
-      return `${month}/${day}/${year}`;
-    }
-  };
+  const { t } = useTranslation();
+  const { formatDate } = useDateFormat();
 
   // Helper functions for category localization
   const isPredefinedCategory = (category: any): boolean => {
@@ -839,7 +825,7 @@ export default function Transactions() {
                           {transaction.description}
                         </p>
                         <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-sm text-gray-600 dark:text-gray-300 mt-1">
-                          <span className="shrink-0">{format(new Date(transaction.date), "MMM dd, yyyy")}</span>
+                          <span className="shrink-0">{formatDate(transaction.date)}</span>
                           {transaction.categoryName && (
                             <>
                               <span className="hidden sm:inline">•</span>

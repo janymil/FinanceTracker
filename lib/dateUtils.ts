@@ -37,10 +37,20 @@ export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOpt
 /**
  * Format a date for transaction display (short format)
  * Uses DD/MM/YYYY for Spanish, MM/DD/YYYY for English, DD.MM.YYYY for Slovak
+ * This version works in both server and client environments
  */
-export function formatTransactionDate(date: string | Date): string {
+export function formatTransactionDate(date: string | Date, language?: string): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  const currentLang = getCurrentLanguageForAPI();
+  
+  // Use provided language or try to detect from client-side context
+  let currentLang = language;
+  if (!currentLang && typeof window !== 'undefined') {
+    // Client-side: try to get from window.i18next or localStorage
+    currentLang = (window as any).i18next?.language || localStorage.getItem('i18nextLng') || 'en-us';
+  } else if (!currentLang) {
+    // Server-side fallback
+    currentLang = getCurrentLanguageForAPI();
+  }
   
   const day = String(dateObj.getDate()).padStart(2, '0');
   const month = String(dateObj.getMonth() + 1).padStart(2, '0');
