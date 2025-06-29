@@ -82,8 +82,8 @@ export const categoryTranslations = {
   },
   
   // Goal categories
-  'Emergency fund': {
-    'en-us': 'Emergency fund',
+  'Emergency Fund': {
+    'en-us': 'Emergency Fund',
     'es-pe': 'Fondo de emergencia',
     'sk-sk': 'Núdzový fond'
   },
