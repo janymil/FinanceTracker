@@ -1155,12 +1155,44 @@
     "include_goals": "Goals",
     "include_summary": "Financial Summary",
     "include_charts": "Charts & Visualizations",
+    "include_label": "Include",
+    
+    "format_label": "Format",
+    "date_range_label": "Date Range",
+    
+    "range": {
+      "all": "All Time",
+      "month": "This Month", 
+      "quarter": "This Quarter",
+      "year": "This Year",
+      "custom": "Custom Range"
+    },
+    
+    "format": {
+      "pdf": "PDF",
+      "csv": "CSV", 
+      "excel": "Excel",
+      "json": "JSON"
+    },
     
     "coming_soon": "Export functionality coming soon",
     "coming_soon_desc": "Support for PDF, CSV, Excel, JSON, and more",
     
     "import_title": "Import Financial Data",
     "import_description": "Import transactions, budgets, goals, and categories from CSV or JSON files",
+    
+    "step1_title": "Download Example File",
+    "step1_description": "Download our example CSV file to see the correct format for your data",
+    "download_example_csv": "Download Example CSV",
+    
+    "step2_title": "Choose File Format", 
+    "csv_file": "CSV File",
+    "csv_description": "Comma-separated values format (recommended)",
+    "json_file": "JSON File", 
+    "json_description": "JavaScript Object Notation format",
+    
+    "step3_title": "Upload Your File",
+    "drop_file_text": "Drag and drop your file here, or click to browse",
     
     "toast_import_failed": "Import failed. Please check your file format and try again.",
     "toast_backup_failed": "Failed to create backup. Please try again.",

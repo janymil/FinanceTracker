@@ -1200,12 +1200,44 @@
     "include_goals": "Ciele",
     "include_summary": "Finančný Súhrn",
     "include_charts": "Grafy a Vizualizácie",
+    "include_label": "Zahrnúť",
+    
+    "format_label": "Formát",
+    "date_range_label": "Rozsah Dátumov",
+    
+    "range": {
+      "all": "Všetky Časy",
+      "month": "Tento Mesiac", 
+      "quarter": "Tento Štvrťrok",
+      "year": "Tento Rok",
+      "custom": "Vlastný Rozsah"
+    },
+    
+    "format": {
+      "pdf": "PDF",
+      "csv": "CSV", 
+      "excel": "Excel",
+      "json": "JSON"
+    },
     
     "coming_soon": "Funkcia exportu bude čoskoro dostupná",
     "coming_soon_desc": "Podpora pre PDF, CSV, Excel, JSON a viac",
     
     "import_title": "Importovať Finančné Údaje",
     "import_description": "Importujte transakcie, rozpočty, ciele a kategórie z CSV alebo JSON súborov",
+    
+    "step1_title": "Stiahnuť Ukážkový Súbor",
+    "step1_description": "Stiahnite si náš ukážkový CSV súbor a pozrite si správny formát pre vaše údaje",
+    "download_example_csv": "Stiahnuť Ukážkový CSV",
+    
+    "step2_title": "Vybrať Formát Súboru", 
+    "csv_file": "CSV Súbor",
+    "csv_description": "Formát hodnôt oddelených čiarkami (odporúčané)",
+    "json_file": "JSON Súbor", 
+    "json_description": "Formát JavaScript Object Notation",
+    
+    "step3_title": "Nahrať Váš Súbor",
+    "drop_file_text": "Pretiahnite a pustite váš súbor sem, alebo kliknite na prehliadanie",
     
     "toast_import_failed": "Import zlyhal. Skontrolujte formát súboru a skúste znovu.",
     "toast_backup_failed": "Vytvorenie zálohy zlyhalo. Skúste znovu.",

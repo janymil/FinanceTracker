@@ -1144,12 +1144,44 @@
     "include_goals": "Metas",
     "include_summary": "Resumen Financiero",
     "include_charts": "Gráficos y Visualizaciones",
+    "include_label": "Incluir",
+    
+    "format_label": "Formato",
+    "date_range_label": "Rango de Fechas",
+    
+    "range": {
+      "all": "Todo el Tiempo",
+      "month": "Este Mes", 
+      "quarter": "Este Trimestre",
+      "year": "Este Año",
+      "custom": "Rango Personalizado"
+    },
+    
+    "format": {
+      "pdf": "PDF",
+      "csv": "CSV", 
+      "excel": "Excel",
+      "json": "JSON"
+    },
     
     "coming_soon": "Funcionalidad de exportación próximamente",
     "coming_soon_desc": "Soporte para PDF, CSV, Excel, JSON y más",
     
     "import_title": "Importar Datos Financieros",
     "import_description": "Importa transacciones, presupuestos, metas y categorías desde archivos CSV o JSON",
+    
+    "step1_title": "Descargar Archivo de Ejemplo",
+    "step1_description": "Descarga nuestro archivo CSV de ejemplo para ver el formato correcto para tus datos",
+    "download_example_csv": "Descargar CSV de Ejemplo",
+    
+    "step2_title": "Elegir Formato de Archivo", 
+    "csv_file": "Archivo CSV",
+    "csv_description": "Formato de valores separados por comas (recomendado)",
+    "json_file": "Archivo JSON", 
+    "json_description": "Formato de Notación de Objetos JavaScript",
+    
+    "step3_title": "Subir Tu Archivo",
+    "drop_file_text": "Arrastra y suelta tu archivo aquí, o haz clic para navegar",
     
     "toast_import_failed": "Importación falló. Revisa el formato de tu archivo e inténtalo de nuevo.",
     "toast_backup_failed": "Error al crear respaldo. Inténtalo de nuevo.",
