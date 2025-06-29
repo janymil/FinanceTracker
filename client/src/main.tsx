@@ -93,17 +93,16 @@ const getUserLanguage = (): string => {
 const userLanguage = getUserLanguage();
 const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
 
-// Get Clerk localization based on user language - minimal approach
+// Minimal Clerk localization - simplified detection
 const getClerkLocalization = () => {
-  const savedLanguage = localStorage.getItem('preferredLanguage');
-  const currentLang = savedLanguage || detectLanguageFromBrowser();
+  const currentUrl = window.location.pathname;
   
-  if (currentLang === 'es') {
+  if (currentUrl.startsWith('/es')) {
     return esES;
-  } else if (currentLang === 'sk') {
+  } else if (currentUrl.startsWith('/sk')) {
     return skSK;
   }
-  return undefined; // English is default
+  return undefined;
 };
 
 const root = createRoot(container);
