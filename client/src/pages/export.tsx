@@ -874,33 +874,33 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                         <div className="text-green-600">{t('export.imported_count', { count: importResults.incomes })}</div>
                       </div>
                       <div>
-                        <div className="font-medium">Expenses</div>
-                        <div className="text-green-600">{importResults.expenses} imported</div>
+                        <div className="font-medium">{t('types.expense')}</div>
+                        <div className="text-green-600">{t('export.imported_count', { count: importResults.expenses })}</div>
                       </div>
                       <div>
-                        <div className="font-medium">Budgets</div>
-                        <div className="text-green-600">{importResults.budgets} imported</div>
+                        <div className="font-medium">{t('nav.budgets')}</div>
+                        <div className="text-green-600">{t('export.imported_count', { count: importResults.budgets })}</div>
                       </div>
                       <div>
-                        <div className="font-medium">Goals</div>
-                        <div className="text-green-600">{importResults.goals} imported</div>
+                        <div className="font-medium">{t('nav.goals')}</div>
+                        <div className="text-green-600">{t('export.imported_count', { count: importResults.goals })}</div>
                       </div>
                       <div>
-                        <div className="font-medium">Collaborative</div>
-                        <div className="text-green-600">{importResults.collaborativeGoals} imported</div>
+                        <div className="font-medium">{t('export.collaborative')}</div>
+                        <div className="text-green-600">{t('export.imported_count', { count: importResults.collaborativeGoals })}</div>
                       </div>
                     </div>
                     {importResults.errors && importResults.errors.length > 0 && (
                       <div className="mt-3 p-2 bg-yellow-100 dark:bg-yellow-900/20 rounded">
                         <div className="font-medium text-yellow-800 dark:text-yellow-200 text-sm">
-                          Warnings ({importResults.errors.length}):
+{t('export.warnings_count', { count: importResults.errors.length })}:
                         </div>
                         <ul className="text-xs text-yellow-700 dark:text-yellow-300 mt-1 space-y-1">
                           {importResults.errors.slice(0, 3).map((error, index) => (
                             <li key={index}>• {error}</li>
                           ))}
                           {importResults.errors.length > 3 && (
-                            <li>• ... and {importResults.errors.length - 3} more</li>
+                            <li>• {t('export.and_more_errors', { count: importResults.errors.length - 3 })}</li>
                           )}
                         </ul>
                       </div>
@@ -911,7 +911,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                 {/* Import History */}
                 <div className="border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-medium">Recent Imports</h3>
+                    <h3 className="font-medium">{t('export.recent_imports')}</h3>
                     <Button
                       variant="outline"
                       size="sm"
@@ -940,14 +940,14 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                             </span>
                           </div>
                           <div className="text-muted-foreground">
-                            {log.summary?.totalRecords || 0} records
+{t('export.records_count', { count: log.summary?.totalRecords || 0 })}
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
                     <div className="text-center py-4 text-muted-foreground text-sm">
-                      No import history yet
+{t('export.no_import_history')}
                     </div>
                   )}
                 </div>
