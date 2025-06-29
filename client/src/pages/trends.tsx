@@ -18,6 +18,8 @@ export default function Trends() {
   const { currency } = useCurrency();
   const { t, i18n } = useTranslation();
   const displayCurrency = currency || '$';
+
+
   const [selectedPeriod, setSelectedPeriod] = useState("6months");
   const [viewType, setViewType] = useState("overview");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -863,13 +865,31 @@ export default function Trends() {
                         {aiPredictions.categoryPredictions.slice(0, 6).map((prediction, index) => (
                           <div key={index} className="p-4 border rounded-lg">
                             <div className="flex items-center justify-between mb-2">
-                              <h5 className="font-medium">{prediction.category}</h5>
+                              <h5 className="font-medium">{(() => {
+                                const categoryTranslations: Record<string, Record<string, string>> = {
+                                  'Food': { 'en-us': 'Food', 'es-pe': 'Comida', 'sk-sk': 'Jedlo' },
+                                  'Transportation': { 'en-us': 'Transportation', 'es-pe': 'Transporte', 'sk-sk': 'Doprava' },
+                                  'Housing': { 'en-us': 'Housing', 'es-pe': 'Vivienda', 'sk-sk': 'Bývanie' },
+                                  'Entertainment': { 'en-us': 'Entertainment', 'es-pe': 'Entretenimiento', 'sk-sk': 'Zábava' },
+                                  'Healthcare': { 'en-us': 'Healthcare', 'es-pe': 'Salud', 'sk-sk': 'Zdravotníctvo' },
+                                  'Shopping': { 'en-us': 'Shopping', 'es-pe': 'Compras', 'sk-sk': 'Nákupy' },
+                                  'Utilities': { 'en-us': 'Utilities', 'es-pe': 'Servicios públicos', 'sk-sk': 'Služby' },
+                                  'Education': { 'en-us': 'Education', 'es-pe': 'Educación', 'sk-sk': 'Vzdelávanie' },
+                                  'Travel': { 'en-us': 'Travel', 'es-pe': 'Viajes', 'sk-sk': 'Cestovanie' },
+                                  'Insurance': { 'en-us': 'Insurance', 'es-pe': 'Seguros', 'sk-sk': 'Poistenie' },
+                                  'Personal Care': { 'en-us': 'Personal Care', 'es-pe': 'Cuidado personal', 'sk-sk': 'Osobná starostlivosť' },
+                                  'Gifts': { 'en-us': 'Gifts', 'es-pe': 'Regalos', 'sk-sk': 'Darčeky' },
+                                  'Business': { 'en-us': 'Business', 'es-pe': 'Negocios', 'sk-sk': 'Podnikanie' },
+                                  'Other': { 'en-us': 'Other', 'es-pe': 'Otro', 'sk-sk': 'Iné' }
+                                };
+                                return categoryTranslations[prediction.category]?.[i18n.language] || prediction.category;
+                              })()}</h5>
                               <Badge variant="outline" className={
                                 prediction.trend === 'increasing' ? 'text-red-600' : 
                                 prediction.trend === 'decreasing' ? 'text-green-600' : 
                                 'text-gray-600'
                               }>
-                                {prediction.trend}
+                                {t(`trends.trend.${prediction.trend}`)}
                               </Badge>
                             </div>
                             <div className="space-y-1">
