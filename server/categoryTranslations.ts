@@ -222,6 +222,102 @@ export const categoryTranslations = {
     'en-us': 'Other',
     'es-pe': 'Otro',
     'sk-sk': 'Iné'
+  },
+  // Additional collaborative goal categories
+  'Wedding': {
+    'en-us': 'Wedding',
+    'es-pe': 'Boda',
+    'sk-sk': 'Svadba'
+  },
+  'wedding': {
+    'en-us': 'Wedding',
+    'es-pe': 'Boda',
+    'sk-sk': 'Svadba'
+  },
+  'boda': {
+    'en-us': 'Wedding',
+    'es-pe': 'Boda',
+    'sk-sk': 'Svadba'
+  },
+  'svadba': {
+    'en-us': 'Wedding',
+    'es-pe': 'Boda',
+    'sk-sk': 'Svadba'
+  },
+  'Home': {
+    'en-us': 'Home',
+    'es-pe': 'Casa',
+    'sk-sk': 'Dom'
+  },
+  'home': {
+    'en-us': 'Home',
+    'es-pe': 'Casa',
+    'sk-sk': 'Dom'
+  },
+  'casa': {
+    'en-us': 'Home',
+    'es-pe': 'Casa',
+    'sk-sk': 'Dom'
+  },
+  'dom': {
+    'en-us': 'Home',
+    'es-pe': 'Casa',
+    'sk-sk': 'Dom'
+  },
+  'education': {
+    'en-us': 'Education',
+    'es-pe': 'Educación',
+    'sk-sk': 'Vzdelanie'
+  },
+  'educación': {
+    'en-us': 'Education',
+    'es-pe': 'Educación',
+    'sk-sk': 'Vzdelanie'
+  },
+  'vzdelanie': {
+    'en-us': 'Education',
+    'es-pe': 'Educación',
+    'sk-sk': 'Vzdelanie'
+  },
+  'Emergency': {
+    'en-us': 'Emergency',
+    'es-pe': 'Emergencia',
+    'sk-sk': 'Núdzové'
+  },
+  'emergency': {
+    'en-us': 'Emergency',
+    'es-pe': 'Emergencia',
+    'sk-sk': 'Núdzové'
+  },
+  'emergencia': {
+    'en-us': 'Emergency',
+    'es-pe': 'Emergencia',
+    'sk-sk': 'Núdzové'
+  },
+  'núdzové': {
+    'en-us': 'Emergency',
+    'es-pe': 'Emergencia',
+    'sk-sk': 'Núdzové'
+  },
+  'Investment': {
+    'en-us': 'Investment',
+    'es-pe': 'Inversión',
+    'sk-sk': 'Investícia'
+  },
+  'investment': {
+    'en-us': 'Investment',
+    'es-pe': 'Inversión',
+    'sk-sk': 'Investícia'
+  },
+  'inversión': {
+    'en-us': 'Investment',
+    'es-pe': 'Inversión',
+    'sk-sk': 'Investícia'
+  },
+  'investícia': {
+    'en-us': 'Investment',
+    'es-pe': 'Inversión',
+    'sk-sk': 'Investícia'
   }
 };
 
