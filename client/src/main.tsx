@@ -149,8 +149,6 @@ root.render(
           layout: {
             logoImageUrl: '/icon.png',
             showOptionalFields: false,
-            termsPageUrl: languageAwareUrls.termsOfServiceUrl,
-            privacyPageUrl: languageAwareUrls.privacyPolicyUrl,
           }
         }}
       >
