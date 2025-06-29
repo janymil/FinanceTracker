@@ -591,6 +591,13 @@ export default function Goals() {
                         {status.status}
                       </Badge>
                     </div>
+                    {goal.category && (
+                      <div className="mt-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {goal.category}
+                        </Badge>
+                      </div>
+                    )}
                     <CardDescription>{goal.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
