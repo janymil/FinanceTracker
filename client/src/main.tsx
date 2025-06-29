@@ -134,6 +134,8 @@ const getClerkLocalization = () => {
   return undefined; // English is default
 };
 
+const languageAwareUrls = getLanguageAwareUrls();
+
 const root = createRoot(container);
 root.render(
   <I18nextProvider i18n={i18n}>
@@ -147,6 +149,8 @@ root.render(
           layout: {
             logoImageUrl: '/icon.png',
             showOptionalFields: false,
+            termsPageUrl: languageAwareUrls.termsOfServiceUrl,
+            privacyPageUrl: languageAwareUrls.privacyPolicyUrl,
           }
         }}
       >
