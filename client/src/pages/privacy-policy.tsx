@@ -207,10 +207,12 @@ export default function PrivacyPolicy() {
               <div className="mb-6">
                 <h3 className="text-lg font-semibold mb-3">{t("gdpr.eu_representative.title")}</h3>
                 <p className="mb-4">{t("gdpr.eu_representative.description")}</p>
-                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
-                  <p className="text-sm"><strong>{t("gdpr.eu_representative.company")}</strong> FinanzerPro EU Services S.L.</p>
-                  <p className="text-sm"><strong>{t("gdpr.eu_representative.address")}</strong> Calle de la Tecnología 45, 28002 Madrid, Spain</p>
-                  <p className="text-sm"><strong>{t("gdpr.eu_representative.email")}</strong> eu-representative@finanzerpro.com</p>
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded border border-yellow-200 dark:border-yellow-700">
+                  <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                    <strong>Notice:</strong> EU representative appointment is currently in progress. 
+                    For GDPR inquiries, please contact our Data Protection Officer at dpo@finanzerpro.com 
+                    or use our general privacy contact: privacy@finanzerpro.com
+                  </p>
                 </div>
               </div>
 

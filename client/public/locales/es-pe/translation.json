@@ -2071,9 +2071,7 @@
     "eu_representative": {
       "title": "Representante de la UE",
       "description": "Para residentes de la UE, nuestro representante designado maneja asuntos del RGPD:",
-      "company": "Empresa:",
-      "address": "Dirección:",
-      "email": "Correo:"
+      "notice": "Aviso: La designación del representante de la UE está actualmente en proceso. Para consultas de RGPD, contacte a nuestro Oficial de Protección de Datos en dpo@finanzerpro.com o use nuestro contacto general de privacidad: privacy@finanzerpro.com"
     },
     "exercise_rights": {
       "title": "Cómo Ejercer Sus Derechos",

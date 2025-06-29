@@ -2096,9 +2096,7 @@
     "eu_representative": {
       "title": "EU Representative",
       "description": "For EU residents, our designated EU representative handles GDPR matters:",
-      "company": "Company:",
-      "address": "Address:",
-      "email": "Email:"
+      "notice": "Notice: EU representative appointment is currently in progress. For GDPR inquiries, please contact our Data Protection Officer at dpo@finanzerpro.com or use our general privacy contact: privacy@finanzerpro.com"
     },
     "exercise_rights": {
       "title": "How to Exercise Your Rights",
