@@ -1544,7 +1544,10 @@
     },
     "buttons": {
       "back": "Volver",
-      "back_to_goals": "Volver a Metas Colaborativas"
+      "back_to_goals": "Volver a Metas Colaborativas",
+      "cancel": "Cancelar",
+      "share": "Compartir",
+      "copy_link": "Copiar Enlace"
     },
     "statuses": {
       "active": "Activa",
@@ -1566,6 +1569,9 @@
     },
     "forms": {
       "add_contribution": "Agregar Contribución",
+      "contribute_description": "¡Contribuye a \"{{goalName}}\" y ayuda a alcanzar la meta más rápido!",
+      "amount_label": "Cantidad ($)",
+      "note_label": "Nota Opcional",
       "amount_placeholder": "Monto ($)",
       "note_placeholder": "Nota opcional...",
       "adding": "Agregando...",

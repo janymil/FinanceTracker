@@ -475,7 +475,7 @@ export default function CollaborativeGoalDetailPage() {
                   </DialogHeader>
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium mb-2 block">Amount ($)</label>
+                      <label className="text-sm font-medium mb-2 block">{t('collaborative_goal_detail.forms.amount_label')}</label>
                       <Input
                         type="number"
                         step="0.01"
@@ -485,16 +485,16 @@ export default function CollaborativeGoalDetailPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium mb-2 block">Note (optional)</label>
+                      <label className="text-sm font-medium mb-2 block">{t('collaborative_goal_detail.forms.note_label')}</label>
                       <Textarea
-                        placeholder="Add a note about your contribution..."
+                        placeholder={t('collaborative_goal_detail.forms.note_placeholder')}
                         value={contributionNote}
                         onChange={(e) => setContributionNote(e.target.value)}
                       />
                     </div>
                     <div className="flex gap-2">
                       <Button onClick={handleAddContribution} className="flex-1">
-                        Add Contribution
+                        {t('collaborative_goal_detail.forms.add_contribution')}
                       </Button>
                       <Button variant="outline" onClick={() => setShowAddContribution(false)}>
                         Cancel

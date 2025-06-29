@@ -1567,7 +1567,10 @@
     },
     "buttons": {
       "back": "Back",
-      "back_to_goals": "Back to Collaborative Goals"
+      "back_to_goals": "Back to Collaborative Goals",
+      "cancel": "Cancel",
+      "share": "Share",
+      "copy_link": "Copy Link"
     },
     "statuses": {
       "active": "Active",
