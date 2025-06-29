@@ -315,24 +315,37 @@ export default function Expenses() {
   const totalExpenses = filteredExpenses.reduce((sum: number, t: Transaction) => sum + parseFloat(t.amount), 0);
   const averageExpense = filteredExpenses.length > 0 ? totalExpenses / filteredExpenses.length : 0;
 
-  // Chart data preparation with localized month names using translation keys
-  const getLocalizedMonthYear = (date: Date) => {
-    const shortMonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const monthIndex = date.getMonth();
-    const monthName = shortMonthNames[monthIndex];
-    return `${t(monthName)} ${date.getFullYear()}`;
-  };
-
+  // Chart data preparation with localized month names
   const monthlyExpenseData = expenseTransactions.reduce((acc: any, transaction: Transaction) => {
-    const month = getLocalizedMonthYear(new Date(transaction.date));
-    acc[month] = (acc[month] || 0) + parseFloat(transaction.amount);
+    const date = new Date(transaction.date);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    
+    if (!acc[monthKey]) {
+      acc[monthKey] = 0;
+    }
+    acc[monthKey] += parseFloat(transaction.amount);
+    
     return acc;
   }, {});
 
-  const chartData = Object.entries(monthlyExpenseData).map(([month, amount]) => ({
-    month,
-    amount: amount as number,
-  }));
+  const chartData = Object.entries(monthlyExpenseData)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .slice(-6)
+    .map(([month, amount]) => {
+      const currentLang = i18n.language || 'en-us';
+      let locale = 'en-us';
+      
+      if (currentLang.startsWith('es')) {
+        locale = 'es';
+      } else if (currentLang.startsWith('sk')) {
+        locale = 'sk';
+      }
+      
+      return {
+        month: new Date(month + '-01').toLocaleDateString(locale, { month: 'short', year: 'numeric' }),
+        amount: amount as number
+      };
+    });
 
   const categoryData = expenseTransactions.reduce((acc: any, transaction: Transaction) => {
     const category = transaction.categoryName || "Other";
