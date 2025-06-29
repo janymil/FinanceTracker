@@ -1043,15 +1043,15 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                               const date = new Date(backupStatusData.nextBackup);
                               return isNaN(date.getTime()) ? t('export.tonight_2am') : `${format(date, 'MMM dd')} ${t('export.at_2am')}`;
                             } catch {
-                              return 'Tonight at 2:00 AM';
+                              return t('export.tonight_2am');
                             }
                           })() : 
-                          'Tonight at 2:00 AM'
+                          t('export.tonight_2am')
                         }
                       </div>
                     </div>
                     <div className="p-4 border rounded-lg">
-                      <div className="text-sm text-muted-foreground">Storage Usage</div>
+                      <div className="text-sm text-muted-foreground">{t('export.storage_usage')}</div>
                       <div className="text-lg font-semibold">
                         {backupStatusData.realUsage?.total || '0 KB'}
                       </div>
@@ -1066,34 +1066,34 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                           (() => {
                             try {
                               const lastBackupDate = new Date(backupStatusData.lastBackup.date);
-                              if (isNaN(lastBackupDate.getTime())) return 'No backups';
+                              if (isNaN(lastBackupDate.getTime())) return t('export.no_backups');
                               const daysDiff = Math.round((new Date().getTime() - lastBackupDate.getTime()) / (1000 * 60 * 60 * 24));
-                              return `${daysDiff} days old`;
+                              return `${daysDiff} ${t('export.days_old')}`;
                             } catch {
-                              return 'No backups';
+                              return t('export.no_backups');
                             }
                           })() :
-                          'No backups'
+                          t('export.no_backups')
                         }
                       </div>
                     </div>
                     <div className="p-4 border rounded-lg">
-                      <div className="text-sm text-muted-foreground">Backup Info</div>
+                      <div className="text-sm text-muted-foreground">{t('export.backup_info')}</div>
                       <div className="text-sm space-y-1">
-                        <div>Provider: {backupStatusData.info?.provider || 'Bunny.net CDN'}</div>
-                        <div>Region: {backupStatusData.info?.region || 'Global'}</div>
+                        <div>{t('export.provider')}: {backupStatusData.info?.provider || 'Bunny.net CDN'}</div>
+                        <div>{t('export.region')}: {backupStatusData.info?.region || t('export.global')}</div>
                       </div>
                       <div className="flex items-center gap-1 mt-2">
                         <Shield className="h-3 w-3 text-green-500" />
                         <span className="text-xs text-green-600">
-                          {backupStatusData.realUsage?.files || 0} files stored
+                          {backupStatusData.realUsage?.files || 0} {t('export.files_stored')}
                         </span>
                       </div>
                     </div>
                   </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
-                    No backup status available
+{t('export.no_backup_status')}
                   </div>
                 )}
 
