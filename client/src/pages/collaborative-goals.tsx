@@ -549,7 +549,10 @@ export default function CollaborativeGoalsPage() {
                             <div className="flex items-center gap-2">
                               <Users className="h-4 w-4 text-gray-400" />
                               <span className="text-sm text-gray-600 dark:text-gray-400">
-                                {t('collaborative_goals.card.participants', { count: goal.participants.length })} 
+                                {goal.participants.length === 1 
+                                  ? t('collaborative_goals.card.participants', { count: goal.participants.length })
+                                  : t('collaborative_goals.card.participants_plural', { count: goal.participants.length })
+                                }
                               </span>
                             </div>
                             <div className="flex items-center gap-2">

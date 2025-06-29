@@ -1281,8 +1281,8 @@
       "complete": "{{percentage}}% dokončené",
       "days_left": "{{days}} dní zostáva",
       "overdue": "Po termíne",
-      "participants_one": "{{count}} účastník",
-      "participants_other": "{{count}} účastníkov"
+      "participants": "{{count}} účastník",
+      "participants_plural": "{{count}} účastníkov"
     },
     "empty_state": {
       "title": "Zatiaľ žiadne spoločné ciele",
