@@ -255,10 +255,10 @@ export default function AIInsights({ data }: AIInsightsProps) {
           <div className="text-center py-8">
             <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              No Insights Available
+              {t("ai_insights.no_insights")}
             </h3>
             <p className="text-gray-600 dark:text-gray-300">
-              Add more transactions to get personalized AI insights
+              {t("ai_insights.add_transactions")}
             </p>
           </div>
         ) : (
@@ -285,7 +285,7 @@ export default function AIInsights({ data }: AIInsightsProps) {
                             "border-gray-300 text-gray-700"
                           }
                         >
-                          {insight.impact} impact
+                          {t(`ai_insights.impact_${insight.impact}`)}
                         </Badge>
                       </div>
                       
@@ -302,7 +302,7 @@ export default function AIInsights({ data }: AIInsightsProps) {
                       
                       {insight.recommendation && (
                         <div className="mt-3 p-3 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">
-                          <p className="text-sm font-medium mb-1">Recommendation:</p>
+                          <p className="text-sm font-medium mb-1">{t("ai_insights.recommendation")}:</p>
                           <p className="text-sm text-gray-600 dark:text-gray-300">
                             {insight.recommendation}
                           </p>
@@ -313,7 +313,7 @@ export default function AIInsights({ data }: AIInsightsProps) {
                               className="mt-2"
                               onClick={() => handleTakeAction(insight)}
                             >
-                              Take Action
+                              {t("ai_insights.take_action")}
                               <ArrowRight className="h-3 w-3 ml-1" />
                             </Button>
                           )}

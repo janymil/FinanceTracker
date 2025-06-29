@@ -679,6 +679,18 @@
     "get_ai_insights": "Získaj AI poznatky, interaktívne grafy, nástroje exportu a automatickú kategorizáciu",
     "upgrade_now": "Vylepšiť Teraz"
   },
+
+  "ai_insights": {
+    "title": "AI-Poháňané Poznatky",
+    "description": "Personalizované odporúčania založené na tvojich vzoroch výdavkov",
+    "no_insights": "Žiadne Poznatky Dostupné",
+    "add_transactions": "Pridaj viac transakcií pre personalizované AI poznatky",
+    "recommendation": "Odporúčanie",
+    "take_action": "Prevziať Akciu",
+    "impact_high": "vysoký vplyv",
+    "impact_medium": "stredný vplyv",
+    "impact_low": "nízky vplyv"
+  },
   "Auto-Categorization": "Auto-Kategorizácia",
   "AI-powered transaction categorization with machine learning": "AI kategorizácia transakcií so strojovým učením",
   "Smart Transaction Analysis": "Inteligentná Analýza Transakcií",

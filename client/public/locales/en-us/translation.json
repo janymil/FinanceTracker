@@ -682,6 +682,18 @@
     "upgrade_now": "Upgrade Now"
   },
 
+  "ai_insights": {
+    "title": "AI-Powered Insights",
+    "description": "Personalized recommendations based on your spending patterns",
+    "no_insights": "No Insights Available",
+    "add_transactions": "Add more transactions to get personalized AI insights",
+    "recommendation": "Recommendation",
+    "take_action": "Take Action",
+    "impact_high": "high impact",
+    "impact_medium": "medium impact",
+    "impact_low": "low impact"
+  },
+
   "budget": {
     "total_budget_for": "Total budget for",
     "new_budget": "New Budget",

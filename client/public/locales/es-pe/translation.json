@@ -671,6 +671,18 @@
     "upgrade_now": "Actualizar Ahora"
   },
 
+  "ai_insights": {
+    "title": "Perspectivas Potenciadas por IA",
+    "description": "Recomendaciones personalizadas basadas en tus patrones de gastos",
+    "no_insights": "Sin Perspectivas Disponibles",
+    "add_transactions": "Agrega más transacciones para obtener perspectivas IA personalizadas",
+    "recommendation": "Recomendación",
+    "take_action": "Tomar Acción",
+    "impact_high": "alto impacto",
+    "impact_medium": "impacto medio",
+    "impact_low": "bajo impacto"
+  },
+
   "budget": {
     "total_budget_for": "Presupuesto total para",
     "new_budget": "Nuevo Presupuesto",
