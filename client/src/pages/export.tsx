@@ -649,10 +649,10 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                     </div>
                     <div className="flex-1">
                       <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
-                        Download Example Template
+                        {t('export.step1_title')}
                       </h3>
                       <p className="text-sm text-blue-700 dark:text-blue-200 mb-3">
-                        Download a simple CSV template with examples. System automatically creates category icons and colors.
+                        {t('export.step1_description')}
                       </p>
                       <Button 
                         variant="outline" 
@@ -661,7 +661,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                         className="border-blue-200 hover:bg-blue-100 dark:border-blue-800 dark:hover:bg-blue-900"
                       >
                         <Download className="h-4 w-4 mr-2" />
-                        Download Example CSV
+                        {t('export.download_example_csv')}
                       </Button>
                     </div>
                   </div>
@@ -674,7 +674,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                       2
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-medium mb-3">Choose Import Format</h3>
+                      <h3 className="font-medium mb-3">{t('export.step2_title')}</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div 
                           className={`p-3 border rounded-lg cursor-pointer transition-colors ${
@@ -687,9 +687,9 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                           <div className="flex items-center gap-2">
                             <FileText className="h-5 w-5 text-gray-600" />
                             <div>
-                              <div className="font-medium">CSV File</div>
+                              <div className="font-medium">{t('export.csv_file')}</div>
                               <div className="text-sm text-muted-foreground">
-                                Comma-separated values format
+                                {t('export.csv_description')}
                               </div>
                             </div>
                           </div>
@@ -705,9 +705,9 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                           <div className="flex items-center gap-2">
                             <Code className="h-5 w-5 text-gray-600" />
                             <div>
-                              <div className="font-medium">JSON File</div>
+                              <div className="font-medium">{t('export.json_file')}</div>
                               <div className="text-sm text-muted-foreground">
-                                Structured data format
+                                {t('export.json_description')}
                               </div>
                             </div>
                           </div>
@@ -724,7 +724,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                       3
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-medium mb-3">Upload Your Data File</h3>
+                      <h3 className="font-medium mb-3">{t('export.step3_title')}</h3>
                       <div 
                         className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer"
                         onClick={() => fileInputRef.current?.click()}
@@ -744,13 +744,13 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                             <>
                               <span className="font-medium text-green-600">{selectedFile.name}</span>
                               <br />
-                              <span className="text-xs">Click to change file</span>
+                              <span className="text-xs">{t('export.click_to_change_file')}</span>
                             </>
                           ) : (
                             <>
-                              Drop your {importOptions.source.toUpperCase()} file here or click to browse
+                              {t('export.drop_file_text', { format: importOptions.source.toUpperCase() })}
                               <br />
-                              <span className="text-xs">Supports .csv and .json files</span>
+                              <span className="text-xs">{t('export.supports_files')}</span>
                             </>
                           )}
                         </p>
