@@ -1188,5 +1188,100 @@
     "weekly": "Weekly",
     "monthly": "Monthly", 
     "yearly": "Yearly"
+  },
+  "collaborative_goals": {
+    "title": "Collaborative Savings Goals",
+    "subtitle": "Team up with friends to achieve your savings goals together",
+    "tabs": {
+      "my_goals": "My Goals",
+      "friends": "Friends",
+      "achievements": "Achievements"
+    },
+    "sections": {
+      "active_challenges": "Active Challenges",
+      "friends": "Friends & Connections",
+      "pending_requests": "Pending Requests",
+      "your_friends": "Your Friends ({{count}})",
+      "achievements": "Your Achievements"
+    },
+    "dialogs": {
+      "create": {
+        "title": "Create Collaborative Goal",
+        "description": "Set up a new savings challenge to complete with friends"
+      },
+      "add_friend": {
+        "title": "Add Friend",
+        "description": "Send a friend request by email address"
+      }
+    },
+    "form": {
+      "goal_name": "Goal Name",
+      "goal_name_placeholder": "e.g., Summer Vacation Fund",
+      "description": "Description",
+      "description_placeholder": "Describe your savings goal...",
+      "target_amount": "Target Amount ($)",
+      "target_date": "Target Date",
+      "category": "Category",
+      "select_category": "Select category",
+      "challenge_type": "Challenge Type",
+      "email_address": "Email Address",
+      "email_placeholder": "friend@example.com"
+    },
+    "categories": {
+      "vacation": "Vacation",
+      "emergency": "Emergency Fund",
+      "home": "Home Purchase",
+      "education": "Education",
+      "investment": "Investment",
+      "other": "Other"
+    },
+    "challenge_types": {
+      "collaborative": "Collaborative",
+      "competitive": "Competitive",
+      "milestone": "Milestone-based"
+    },
+    "buttons": {
+      "create_challenge": "Create Challenge",
+      "create_goal": "Create Goal",
+      "create_first_goal": "Create Your First Goal",
+      "view_challenge": "View Challenge",
+      "add_friend": "Add Friend",
+      "send_request": "Send Request",
+      "accept": "Accept",
+      "decline": "Decline",
+      "add_first_friend": "Add Your First Friend"
+    },
+    "card": {
+      "raised": "{{amount}} raised",
+      "goal": "{{amount}} goal",
+      "complete": "{{percentage}}% complete",
+      "days_left": "{{days}} days left",
+      "overdue": "Overdue",
+      "participants": "{{count}} participant",
+      "participants_plural": "{{count}} participants"
+    },
+    "empty_state": {
+      "title": "No collaborative goals yet",
+      "description": "Create your first collaborative savings goal and invite friends to join"
+    },
+    "empty_friends": {
+      "title": "No friends yet",
+      "description": "Add friends to start collaborative savings challenges together"
+    },
+    "empty_achievements": {
+      "title": "No achievements yet",
+      "description": "Complete collaborative goals to earn achievements and badges"
+    },
+    "status": {
+      "friends": "Friends"
+    },
+    "messages": {
+      "success": "Success!",
+      "error": "Error",
+      "friend_accepted": "Friend request accepted",
+      "friend_rejected": "Friend request rejected",
+      "fill_required_fields": "Please fill in all required fields",
+      "enter_email": "Please enter an email address"
+    }
   }
 }

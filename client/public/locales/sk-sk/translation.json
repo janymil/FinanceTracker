@@ -1212,5 +1212,100 @@
     "failed_to_create_budget": "Nepodarilo sa vytvoriť rozpočet",
     "failed_to_update_budget": "Nepodarilo sa aktualizovať rozpočet",
     "failed_to_delete_budget": "Nepodarilo sa zmazať rozpočet"
+  },
+  "collaborative_goals": {
+    "title": "Spoločné Úsporné Ciele",
+    "subtitle": "Spolupracujte s priateľmi na dosiahnutí úsporných cieľov",
+    "tabs": {
+      "my_goals": "Moje Ciele",
+      "friends": "Priatelia",
+      "achievements": "Úspechy"
+    },
+    "sections": {
+      "active_challenges": "Aktívne Výzvy",
+      "friends": "Priatelia a Spojenia",
+      "pending_requests": "Čakajúce Žiadosti",
+      "your_friends": "Vaši Priatelia ({{count}})",
+      "achievements": "Vaše Úspechy"
+    },
+    "dialogs": {
+      "create": {
+        "title": "Vytvoriť Spoločný Cieľ",
+        "description": "Nastavte novú úspornú výzvu na splnenie s priateľmi"
+      },
+      "add_friend": {
+        "title": "Pridať Priateľa",
+        "description": "Poslať žiadosť o priateľstvo cez e-mailovú adresu"
+      }
+    },
+    "form": {
+      "goal_name": "Názov Cieľa",
+      "goal_name_placeholder": "napr., Fond na Letné Prázdniny",
+      "description": "Popis",
+      "description_placeholder": "Opíšte váš úsporný cieľ...",
+      "target_amount": "Cieľová Suma ($)",
+      "target_date": "Cieľový Dátum",
+      "category": "Kategória",
+      "select_category": "Vybrať kategóriu",
+      "challenge_type": "Typ Výzvy",
+      "email_address": "E-mailová Adresa",
+      "email_placeholder": "priatel@priklad.sk"
+    },
+    "categories": {
+      "vacation": "Dovolenka",
+      "emergency": "Núdzový Fond",
+      "home": "Kúpa Domu",
+      "education": "Vzdelanie",
+      "investment": "Investícia",
+      "other": "Iné"
+    },
+    "challenge_types": {
+      "collaborative": "Spolupracovné",
+      "competitive": "Súťažné",
+      "milestone": "Míľnikové"
+    },
+    "buttons": {
+      "create_challenge": "Vytvoriť Výzvu",
+      "create_goal": "Vytvoriť Cieľ",
+      "create_first_goal": "Vytvoriť Váš Prvý Cieľ",
+      "view_challenge": "Zobraziť Výzvu",
+      "add_friend": "Pridať Priateľa",
+      "send_request": "Poslať Žiadosť",
+      "accept": "Prijať",
+      "decline": "Odmietnuť",
+      "add_first_friend": "Pridať Vášho Prvého Priateľa"
+    },
+    "card": {
+      "raised": "{{amount}} nazzbierané",
+      "goal": "{{amount}} cieľ",
+      "complete": "{{percentage}}% dokončené",
+      "days_left": "{{days}} dní zostáva",
+      "overdue": "Po termíne",
+      "participants_one": "{{count}} účastník",
+      "participants_other": "{{count}} účastníkov"
+    },
+    "empty_state": {
+      "title": "Zatiaľ žiadne spoločné ciele",
+      "description": "Vytvorte svoj prvý spoločný úsporný cieľ a pozvite priateľov"
+    },
+    "empty_friends": {
+      "title": "Zatiaľ žiadni priatelia",
+      "description": "Pridajte priateľov na začatie spoločných úsporných výziev"
+    },
+    "empty_achievements": {
+      "title": "Zatiaľ žiadne úspechy",
+      "description": "Dokončite spoločné ciele na získanie úspechov a odznakov"
+    },
+    "status": {
+      "friends": "Priatelia"
+    },
+    "messages": {
+      "success": "Úspech!",
+      "error": "Chyba",
+      "friend_accepted": "Žiadosť o priateľstvo prijatá",
+      "friend_rejected": "Žiadosť o priateľstvo odmietnutá",
+      "fill_required_fields": "Prosím vyplňte všetky povinné polia",
+      "enter_email": "Prosím zadajte e-mailovú adresu"
+    }
   }
 }

@@ -1165,5 +1165,100 @@
     "weekly": "Semanal",
     "monthly": "Mensual", 
     "yearly": "Anual"
+  },
+  "collaborative_goals": {
+    "title": "Metas de Ahorro Colaborativas",
+    "subtitle": "Únete con amigos para lograr tus metas de ahorro juntos",
+    "tabs": {
+      "my_goals": "Mis Metas",
+      "friends": "Amigos",
+      "achievements": "Logros"
+    },
+    "sections": {
+      "active_challenges": "Desafíos Activos",
+      "friends": "Amigos y Conexiones",
+      "pending_requests": "Solicitudes Pendientes",
+      "your_friends": "Tus Amigos ({{count}})",
+      "achievements": "Tus Logros"
+    },
+    "dialogs": {
+      "create": {
+        "title": "Crear Meta Colaborativa",
+        "description": "Configura un nuevo desafío de ahorro para completar con amigos"
+      },
+      "add_friend": {
+        "title": "Agregar Amigo",
+        "description": "Enviar una solicitud de amistad por dirección de correo"
+      }
+    },
+    "form": {
+      "goal_name": "Nombre de la Meta",
+      "goal_name_placeholder": "ej., Fondo de Vacaciones de Verano",
+      "description": "Descripción",
+      "description_placeholder": "Describe tu meta de ahorro...",
+      "target_amount": "Cantidad Objetivo ($)",
+      "target_date": "Fecha Objetivo",
+      "category": "Categoría",
+      "select_category": "Seleccionar categoría",
+      "challenge_type": "Tipo de Desafío",
+      "email_address": "Dirección de Correo",
+      "email_placeholder": "amigo@ejemplo.com"
+    },
+    "categories": {
+      "vacation": "Vacaciones",
+      "emergency": "Fondo de Emergencia",
+      "home": "Compra de Casa",
+      "education": "Educación",
+      "investment": "Inversión",
+      "other": "Otro"
+    },
+    "challenge_types": {
+      "collaborative": "Colaborativo",
+      "competitive": "Competitivo",
+      "milestone": "Basado en Hitos"
+    },
+    "buttons": {
+      "create_challenge": "Crear Desafío",
+      "create_goal": "Crear Meta",
+      "create_first_goal": "Crear Tu Primera Meta",
+      "view_challenge": "Ver Desafío",
+      "add_friend": "Agregar Amigo",
+      "send_request": "Enviar Solicitud",
+      "accept": "Aceptar",
+      "decline": "Rechazar",
+      "add_first_friend": "Agregar Tu Primer Amigo"
+    },
+    "card": {
+      "raised": "{{amount}} recaudado",
+      "goal": "{{amount}} objetivo",
+      "complete": "{{percentage}}% completado",
+      "days_left": "{{days}} días restantes",
+      "overdue": "Vencido",
+      "participants": "{{count}} participante",
+      "participants_plural": "{{count}} participantes"
+    },
+    "empty_state": {
+      "title": "Aún no hay metas colaborativas",
+      "description": "Crea tu primera meta de ahorro colaborativa e invita amigos a unirse"
+    },
+    "empty_friends": {
+      "title": "Aún no hay amigos",
+      "description": "Agrega amigos para comenzar desafíos de ahorro colaborativos juntos"
+    },
+    "empty_achievements": {
+      "title": "Aún no hay logros",
+      "description": "Completa metas colaborativas para ganar logros e insignias"
+    },
+    "status": {
+      "friends": "Amigos"
+    },
+    "messages": {
+      "success": "¡Éxito!",
+      "error": "Error",
+      "friend_accepted": "Solicitud de amistad aceptada",
+      "friend_rejected": "Solicitud de amistad rechazada",
+      "fill_required_fields": "Por favor completa todos los campos requeridos",
+      "enter_email": "Por favor ingresa una dirección de correo"
+    }
   }
 }
