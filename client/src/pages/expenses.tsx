@@ -315,9 +315,22 @@ export default function Expenses() {
   const totalExpenses = filteredExpenses.reduce((sum: number, t: Transaction) => sum + parseFloat(t.amount), 0);
   const averageExpense = filteredExpenses.length > 0 ? totalExpenses / filteredExpenses.length : 0;
 
-  // Chart data preparation
+  // Chart data preparation with localized month names
+  const getLocalizedMonthYear = (date: Date) => {
+    const currentLang = i18n.language;
+    if (currentLang.startsWith('es')) {
+      const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+      return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+    } else if (currentLang.startsWith('sk')) {
+      const monthNames = ['jan', 'feb', 'mar', 'apr', 'máj', 'jún', 'júl', 'aug', 'sep', 'okt', 'nov', 'dec'];
+      return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+    } else {
+      return format(date, "MMM yyyy");
+    }
+  };
+
   const monthlyExpenseData = expenseTransactions.reduce((acc: any, transaction: Transaction) => {
-    const month = format(new Date(transaction.date), "MMM yyyy");
+    const month = getLocalizedMonthYear(new Date(transaction.date));
     acc[month] = (acc[month] || 0) + parseFloat(transaction.amount);
     return acc;
   }, {});

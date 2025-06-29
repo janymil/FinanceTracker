@@ -729,6 +729,14 @@
     "adjust_filters": "Try adjusting your filters or search terms",
     "add_first_expense": "Add your first expense transaction to get started",
     "note": "Note",
+    "charts": {
+      "trend_title": "Monthly Expense Trend",
+      "trend_description": "Monthly expenses over time",
+      "category_title": "Expenses by Category", 
+      "category_description": "Distribution of spending categories",
+      "expenses_label": "Expenses",
+      "amount_label": "Amount"
+    },
     "form": {
       "amount": "Amount",
       "date": "Date",
@@ -746,6 +754,9 @@
       "make_recurring": "Make this a recurring expense",
       "frequency": "Frequency",
       "frequency_placeholder": "Select frequency",
+      "weekly": "Weekly",
+      "monthly": "Monthly", 
+      "yearly": "Yearly",
       "end_date": "End Date (Optional)",
       "add_expense": "Add Expense",
       "update": "Update"

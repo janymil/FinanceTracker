@@ -814,6 +814,14 @@
     "adjust_filters": "Skúste upraviť vaše filtre alebo hľadané výrazy",
     "add_first_expense": "Pridajte svoju prvú transakciu výdavku na začiatok",
     "note": "Poznámka",
+    "charts": {
+      "trend_title": "Mesačný Trend Výdavkov",
+      "trend_description": "Mesačné výdavky v priebehu času",
+      "category_title": "Výdavky podľa Kategórie",
+      "category_description": "Rozdelenie kategórií výdavkov",
+      "expenses_label": "Výdavky",
+      "amount_label": "Suma"
+    },
     "form": {
       "amount": "Suma",
       "date": "Dátum",
@@ -831,6 +839,9 @@
       "make_recurring": "Urobiť z tohto opakujúci sa výdavok",
       "frequency": "Frekvencia",
       "frequency_placeholder": "Vyberte frekvenciu",
+      "weekly": "Týždenne",
+      "monthly": "Mesačne",
+      "yearly": "Ročne",
       "end_date": "Dátum Ukončenia (Voliteľné)",
       "add_expense": "Pridať Výdavok",
       "update": "Aktualizovať"

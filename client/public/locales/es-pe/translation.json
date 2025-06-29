@@ -718,6 +718,14 @@
     "adjust_filters": "Intenta ajustar tus filtros o términos de búsqueda",
     "add_first_expense": "Agrega tu primera transacción de gasto para comenzar",
     "note": "Nota",
+    "charts": {
+      "trend_title": "Tendencia Mensual de Gastos",
+      "trend_description": "Gastos mensuales a lo largo del tiempo",
+      "category_title": "Gastos por Categoría",
+      "category_description": "Distribución de categorías de gastos",
+      "expenses_label": "Gastos",
+      "amount_label": "Cantidad"
+    },
     "form": {
       "amount": "Cantidad",
       "date": "Fecha",
@@ -735,6 +743,9 @@
       "make_recurring": "Hacer este un gasto recurrente",
       "frequency": "Frecuencia",
       "frequency_placeholder": "Selecciona frecuencia",
+      "weekly": "Semanal",
+      "monthly": "Mensual",
+      "yearly": "Anual",
       "end_date": "Fecha de Finalización (Opcional)",
       "add_expense": "Agregar Gasto",
       "update": "Actualizar"
