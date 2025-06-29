@@ -1307,5 +1307,73 @@
       "fill_required_fields": "Prosím vyplňte všetky povinné polia",
       "enter_email": "Prosím zadajte e-mailovú adresu"
     }
+  },
+
+  "collaborative_goal_detail": {
+    "messages": {
+      "contribution_added": "Príspevok Pridaný",
+      "contribution_success": "Váš príspevok bol úspešne zaznamenaný.",
+      "contribution_failed": "Chyba pri pridávaní príspevku. Prosím skúste znovu.",
+      "friend_added": "Priateľ Pridaný",
+      "friend_added_description": "{{email}} bol pridaný k cieľu.",
+      "invitation_sent": "Pozvánka Odoslaná",
+      "invitation_sent_description": "Pozvánka bola odoslaná na {{email}}.",
+      "invitation_failed": "Chyba pri odosielaní pozvánky. Prosím skúste znovu.",
+      "invalid_amount": "Neplatná Suma",
+      "invalid_amount_description": "Prosím zadajte platnú sumu príspevku.",
+      "invalid_email": "Neplatný Email",
+      "invalid_email_description": "Prosím zadajte platnú e-mailovú adresu.",
+      "error": "Chyba"
+    },
+    "errors": {
+      "goal_not_found": "Cieľ sa Nenašiel",
+      "goal_not_found_description": "Spoločný cieľ, ktorý hľadáte, neexistuje."
+    },
+    "buttons": {
+      "back": "Späť",
+      "back_to_goals": "Späť na Spoločné Ciele"
+    },
+    "statuses": {
+      "active": "Aktívny",
+      "completed": "Dokončený",
+      "paused": "Pozastavený",
+      "unknown": "Neznámy"
+    },
+    "cards": {
+      "progress": "Pokrok",
+      "of": "z",
+      "participants": "Účastníci",
+      "active_members": "Aktívni členovia",
+      "days_remaining": "Zostáva Dní",
+      "until": "Do",
+      "no_date_set": "Žiadny dátum nastavený",
+      "category": "Kategória",
+      "general": "Všeobecné",
+      "goal_type": "Typ cieľa"
+    },
+    "forms": {
+      "add_contribution": "Pridať Príspevok",
+      "amount_placeholder": "Suma ($)",
+      "note_placeholder": "Voliteľná poznámka...",
+      "adding": "Pridávam...",
+      "add_contribution_button": "Pridať Príspevok",
+      "invite_friends": "Pozvať Priateľov",
+      "email_placeholder": "E-mailová adresa priateľa",
+      "sending": "Odosielam...",
+      "send_invitation": "Odoslať Pozvánku",
+      "invite_description": "Automaticky zistíme, či majú účet, alebo im pošleme pozvánku na pripojenie."
+    },
+    "participants": {
+      "title": "Účastníci",
+      "no_participants": "Zatiaľ žiadni účastníci"
+    },
+    "contributions": {
+      "title": "Nedávne Príspevky",
+      "no_date": "Žiadny dátum"
+    },
+    "activities": {
+      "title": "Nedávne Aktivity",
+      "no_date": "Žiadny dátum"
+    }
   }
 }
