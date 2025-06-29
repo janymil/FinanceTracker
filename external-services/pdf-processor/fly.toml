@@ -2,6 +2,15 @@ app = "finanzerpro-pdf"
 primary_region = "iad"
 
 [build]
+  dockerfile = "Dockerfile"
+  [build.args]
+    BUILDKIT_INLINE_CACHE = "0"
+
+[env]
+  PORT = "3000"
+
+[processes]
+  app = "npx tsx index.ts"
 
 [http_service]
   internal_port = 3000
@@ -10,6 +19,7 @@ primary_region = "iad"
   auto_start_machines = true
   min_machines_running = 0
   max_machines_running = 2
+  processes = ["app"]
 
 [[http_service.checks]]
   grace_period = "30s"
