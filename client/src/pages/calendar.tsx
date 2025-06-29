@@ -245,7 +245,10 @@ export default function CalendarPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl">
-                    {format(currentMonth, 'MMMM yyyy', { locale: getDateFnsLocale() })}
+                    {i18n.language.startsWith('sk') ? 
+                      `${['január', 'február', 'marec', 'apríl', 'máj', 'jún', 'júl', 'august', 'september', 'október', 'november', 'december'][currentMonth.getMonth()]} ${currentMonth.getFullYear()}` :
+                      format(currentMonth, 'MMMM yyyy', { locale: getDateFnsLocale() })
+                    }
                   </CardTitle>
                   <div className="flex space-x-2">
                     <Button
