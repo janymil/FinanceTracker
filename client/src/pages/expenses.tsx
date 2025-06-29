@@ -32,6 +32,7 @@ import MonthFilter from "@/components/month-filter";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
+import { formatChartMonth } from "@/lib/dateUtils";
 import TransactionFilters from "@/components/TransactionFilters";
 
 // Helper functions for category localization
@@ -331,26 +332,10 @@ export default function Expenses() {
   const chartData = Object.entries(monthlyExpenseData)
     .sort(([a], [b]) => a.localeCompare(b))
     .slice(-6)
-    .map(([month, amount]) => {
-      const date = new Date(month + '-01');
-      const currentLang = i18n.language || 'en-us';
-      
-      let monthName;
-      if (currentLang.startsWith('es')) {
-        const spanishMonths = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-        monthName = `${spanishMonths[date.getMonth()]} ${date.getFullYear()}`;
-      } else if (currentLang.startsWith('sk')) {
-        const slovakMonths = ['jan', 'feb', 'mar', 'apr', 'máj', 'jún', 'júl', 'aug', 'sep', 'okt', 'nov', 'dec'];
-        monthName = `${slovakMonths[date.getMonth()]} ${date.getFullYear()}`;
-      } else {
-        monthName = date.toLocaleDateString('en-us', { month: 'short', year: 'numeric' });
-      }
-      
-      return {
-        month: monthName,
-        amount: amount as number
-      };
-    });
+    .map(([month, amount]) => ({
+      month: formatChartMonth(month),
+      amount: amount as number
+    }));
 
   const categoryData = expenseTransactions.reduce((acc: any, transaction: Transaction) => {
     const category = transaction.categoryName || "Other";
