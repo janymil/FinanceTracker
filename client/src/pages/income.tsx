@@ -300,7 +300,7 @@ export default function Income() {
       
       let monthName;
       if (currentLang.startsWith('es')) {
-        const spanishMonths = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+        const spanishMonths = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
         monthName = `${spanishMonths[date.getMonth()]} ${date.getFullYear()}`;
       } else if (currentLang.startsWith('sk')) {
         const slovakMonths = ['jan', 'feb', 'mar', 'apr', 'máj', 'jún', 'júl', 'aug', 'sep', 'okt', 'nov', 'dec'];
