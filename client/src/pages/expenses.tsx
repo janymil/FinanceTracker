@@ -32,6 +32,7 @@ import MonthFilter from "@/components/month-filter";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
+import { useDateFormat } from "@/hooks/useDateFormat";
 
 import TransactionFilters from "@/components/TransactionFilters";
 
@@ -79,6 +80,7 @@ export default function Expenses() {
   const displayCurrency = currency || '$';
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
+  const { formatDate } = useDateFormat();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -816,7 +818,7 @@ export default function Expenses() {
                           {transaction.description}
                         </p>
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 flex-wrap">
-                          <span className="shrink-0">{format(new Date(transaction.date), "MMM dd, yyyy")}</span>
+                          <span className="shrink-0">{formatDate(transaction.date)}</span>
                           {transaction.categoryName && (
                             <Badge variant="outline" className="text-red-600 border-red-600 text-xs">
                               {transaction.categoryName}

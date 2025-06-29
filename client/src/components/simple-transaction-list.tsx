@@ -17,6 +17,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/clerk-react";
 import { useTranslation } from "react-i18next";
+import { useDateFormat } from "@/hooks/useDateFormat";
 
 
 
@@ -50,23 +51,8 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
   const { user } = useUser();
   const { toast } = useToast();
-  const { t, i18n } = useTranslation();
-
-  // Helper function to format dates properly
-  const formatDateForDisplay = (dateString: string) => {
-    const dateObj = new Date(dateString);
-    const day = String(dateObj.getDate()).padStart(2, '0');
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const year = dateObj.getFullYear();
-    
-    if (i18n.language.startsWith('es')) {
-      return `${day}/${month}/${year}`;
-    } else if (i18n.language.startsWith('sk')) {
-      return `${day}.${month}.${year}`;
-    } else {
-      return `${month}/${day}/${year}`;
-    }
-  };
+  const { t } = useTranslation();
+  const { formatDate } = useDateFormat();
 
   // Fetch categories for edit form
   useEffect(() => {

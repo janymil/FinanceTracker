@@ -86,7 +86,7 @@ export default function Income() {
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { formatDate } = useDateFormat();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -668,7 +668,7 @@ export default function Income() {
                     <div>
                       <p className="font-medium">{transaction.description}</p>
                       <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        <span>{formatTransactionDate(transaction.date)}</span>
+                        <span>{formatDate(transaction.date)}</span>
                         {transaction.categoryName && (
                           <>
                             <span>•</span>
