@@ -43,13 +43,13 @@ export function formatTransactionDate(date: string | Date, language?: string): s
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   
   // Use provided language or try to detect from client-side context
-  let currentLang = language;
-  if (!currentLang && typeof window !== 'undefined') {
+  let currentLang: string = language || 'en-us';
+  if (!language && typeof window !== 'undefined') {
     // Client-side: try to get from window.i18next or localStorage
     currentLang = (window as any).i18next?.language || localStorage.getItem('i18nextLng') || 'en-us';
-  } else if (!currentLang) {
+  } else if (!language) {
     // Server-side fallback
-    currentLang = getCurrentLanguageForAPI();
+    currentLang = getCurrentLanguageForAPI() || 'en-us';
   }
   
   const day = String(dateObj.getDate()).padStart(2, '0');
