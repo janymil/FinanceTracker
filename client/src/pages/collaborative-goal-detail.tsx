@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { ArrowLeft, Users, Target, Calendar, Plus, DollarSign, Activity, Trophy, Mail, Share2, Heart, MapPin, Gift, Sparkles, TrendingUp, Clock, MessageCircle, Send } from "lucide-react";
@@ -97,6 +98,7 @@ export default function CollaborativeGoalDetailPage() {
   const [showInviteFriends, setShowInviteFriends] = useState(false);
   const [contributionAmount, setContributionAmount] = useState("");
   const [contributionNote, setContributionNote] = useState("");
+  const [contributionParticipant, setContributionParticipant] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [isInviting, setIsInviting] = useState(false);
   const [newMessage, setNewMessage] = useState("");
@@ -159,6 +161,15 @@ export default function CollaborativeGoalDetailPage() {
       return;
     }
 
+    if (!contributionParticipant) {
+      toast({
+        title: t('collaborative_goal_detail.messages.participant_required'),
+        description: t('collaborative_goal_detail.messages.participant_required_description'),
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       const headers = await getAuthHeaders();
       const response = await fetch(`/api/collaborative-goals/${id}/contributions`, {
@@ -169,7 +180,8 @@ export default function CollaborativeGoalDetailPage() {
         },
         body: JSON.stringify({
           amount: contributionAmount,
-          note: contributionNote
+          note: contributionNote,
+          participantId: contributionParticipant
         })
       });
 
@@ -548,6 +560,24 @@ export default function CollaborativeGoalDetailPage() {
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">{t('collaborative_goal_detail.forms.participant_label')}</label>
+                      <Select value={contributionParticipant} onValueChange={setContributionParticipant}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('collaborative_goal_detail.forms.select_participant')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {goal.participants?.map((participant) => (
+                            <SelectItem key={participant.id} value={participant.userId}>
+                              {participant.firstName && participant.lastName 
+                                ? `${participant.firstName} ${participant.lastName}` 
+                                : t('collaborative_goal_detail.sections.unknown_user')
+                              }
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <div>
                       <label className="text-sm font-medium mb-2 block">{t('collaborative_goal_detail.forms.amount_label')}</label>
                       <Input
