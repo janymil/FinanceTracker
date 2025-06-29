@@ -1478,6 +1478,8 @@
       "invitation_failed": "Error al enviar invitación. Por favor intenta nuevamente.",
       "invalid_amount": "Monto Inválido",
       "invalid_amount_description": "Por favor ingresa un monto de contribución válido.",
+      "participant_required": "Contribuyente Requerido",
+      "participant_required_description": "Por favor selecciona quién está haciendo esta contribución.",
       "invalid_email": "Email Inválido",
       "invalid_email_description": "Por favor ingresa una dirección de email válida.",
       "error": "Error",
@@ -1591,6 +1593,8 @@
     "forms": {
       "add_contribution": "Agregar Contribución",
       "contribute_description": "¡Contribuye a \"{{goalName}}\" y ayuda a alcanzar la meta más rápido!",
+      "participant_label": "Contribuyente",
+      "select_participant": "Selecciona quién está contribuyendo",
       "amount_label": "Cantidad ($)",
       "note_label": "Nota Opcional",
       "amount_placeholder": "Monto ($)",
