@@ -96,15 +96,15 @@ class GraceProcessor {
 
   // Start the grace period processor with interval
   start(): void {
-    console.log('Grace period processor initialized - running every hour');
+    console.log('Grace period processor initialized - running every 12 hours');
     
     // Run immediately
     this.processGracePeriods();
     
-    // Then run every hour
+    // Then run every 12 hours
     setInterval(() => {
       this.processGracePeriods();
-    }, 60 * 60 * 1000); // 1 hour
+    }, 12 * 60 * 60 * 1000); // 12 hours
   }
 }
 
