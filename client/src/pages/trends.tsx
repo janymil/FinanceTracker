@@ -747,23 +747,23 @@ export default function Trends() {
                        aiPredictions.financialForecast?.budgetVariance !== 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                            <h4 className="font-medium mb-2">Next Month Expenses</h4>
+                            <h4 className="font-medium mb-2">{t('trends.forecasts.next_month_expenses')}</h4>
                             <p className="text-2xl font-bold text-blue-600">
                               {displayCurrency}{aiPredictions.financialForecast?.nextMonthExpenses?.toLocaleString() || '0'}
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {Math.round((aiPredictions.financialForecast?.confidence || 0) * 100)}% confidence
+                              {Math.round((aiPredictions.financialForecast?.confidence || 0) * 100)}% {t('trends.forecasts.confidence')}
                             </p>
                           </div>
                           <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                            <h4 className="font-medium mb-2">Expected Savings</h4>
+                            <h4 className="font-medium mb-2">{t('trends.forecasts.expected_savings')}</h4>
                             <p className="text-2xl font-bold text-green-600">
                               {displayCurrency}{aiPredictions.financialForecast?.expectedSavings?.toLocaleString() || '0'}
                             </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Based on AI analysis</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('trends.forecasts.based_on_ai')}</p>
                           </div>
                           <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                            <h4 className="font-medium mb-2">Budget Variance</h4>
+                            <h4 className="font-medium mb-2">{t('trends.forecasts.budget_variance')}</h4>
                             <p className={`text-2xl font-bold ${
                               (aiPredictions.financialForecast?.budgetVariance || 0) >= 0 ? 'text-green-600' : 'text-red-600'
                             }`}>
@@ -771,7 +771,7 @@ export default function Trends() {
                               {aiPredictions.financialForecast?.budgetVariance?.toFixed(1) || '0'}%
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {(aiPredictions.financialForecast?.budgetVariance || 0) >= 0 ? 'Over budget' : 'Under budget'}
+                              {(aiPredictions.financialForecast?.budgetVariance || 0) >= 0 ? t('trends.forecasts.over_budget') : t('trends.forecasts.under_budget')}
                             </p>
                           </div>
                         </div>
@@ -779,26 +779,26 @@ export default function Trends() {
                         <div className="text-center py-8">
                           <RefreshCw className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                            No Financial Data Available
+                            {t('trends.forecasts.no_data_title')}
                           </h3>
                           <p className="text-gray-600 dark:text-gray-300 mb-4">
-                            Add transactions to generate AI-powered financial forecasts and predictions
+                            {t('trends.forecasts.no_data_description')}
                           </p>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 opacity-50">
                             <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                              <h4 className="font-medium mb-2">Next Month Expenses</h4>
+                              <h4 className="font-medium mb-2">{t('trends.forecasts.next_month_expenses')}</h4>
                               <p className="text-2xl font-bold text-gray-400">{displayCurrency}0</p>
-                              <p className="text-sm text-gray-400">No data</p>
+                              <p className="text-sm text-gray-400">{t('trends.forecasts.no_data')}</p>
                             </div>
                             <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                              <h4 className="font-medium mb-2">Expected Savings</h4>
+                              <h4 className="font-medium mb-2">{t('trends.forecasts.expected_savings')}</h4>
                               <p className="text-2xl font-bold text-gray-400">{displayCurrency}0</p>
-                              <p className="text-sm text-gray-400">No data</p>
+                              <p className="text-sm text-gray-400">{t('trends.forecasts.no_data')}</p>
                             </div>
                             <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                              <h4 className="font-medium mb-2">Budget Variance</h4>
+                              <h4 className="font-medium mb-2">{t('trends.forecasts.budget_variance')}</h4>
                               <p className="text-2xl font-bold text-gray-400">0%</p>
-                              <p className="text-sm text-gray-400">No data</p>
+                              <p className="text-sm text-gray-400">{t('trends.forecasts.no_data')}</p>
                             </div>
                           </div>
                         </div>
@@ -807,7 +807,7 @@ export default function Trends() {
                       {/* AI Insights */}
                       {aiPredictions.financialForecast?.keyInsights?.length > 0 && (
                         <div>
-                          <h4 className="font-medium mb-3">Key Insights</h4>
+                          <h4 className="font-medium mb-3">{t('trends.forecasts.key_insights')}</h4>
                           <div className="space-y-2">
                             {aiPredictions.financialForecast.keyInsights.map((insight, index) => (
                               <div key={index} className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -821,7 +821,7 @@ export default function Trends() {
                       {/* AI Recommendations */}
                       {aiPredictions.financialForecast?.recommendations?.length > 0 && (
                         <div>
-                          <h4 className="font-medium mb-3">AI Recommendations</h4>
+                          <h4 className="font-medium mb-3">{t('trends.forecasts.ai_recommendations')}</h4>
                           <div className="space-y-2">
                             {aiPredictions.financialForecast.recommendations.map((rec, index) => (
                               <div key={index} className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border-l-4 border-green-600">
@@ -835,7 +835,7 @@ export default function Trends() {
                       {/* Risk Factors */}
                       {aiPredictions.financialForecast?.riskFactors?.length > 0 && (
                         <div>
-                          <h4 className="font-medium mb-3">Risk Factors</h4>
+                          <h4 className="font-medium mb-3">{t('trends.forecasts.risk_factors')}</h4>
                           <div className="space-y-2">
                             {aiPredictions.financialForecast.riskFactors.map((risk, index) => (
                               <div key={index} className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border-l-4 border-red-600">
