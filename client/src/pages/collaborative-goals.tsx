@@ -535,13 +535,13 @@ export default function CollaborativeGoalsPage() {
                         <CardContent className="space-y-4">
                           <div>
                             <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
-                              <span>${goal.currentAmount} raised</span>
-                              <span>${goal.targetAmount} goal</span>
+                              <span>{t('collaborative_goals.card.raised', { amount: `$${goal.currentAmount}` })}</span>
+                              <span>{t('collaborative_goals.card.goal', { amount: `$${goal.targetAmount}` })}</span>
                             </div>
                             <Progress value={progress} className="h-3" />
                             <div className="flex justify-between text-xs text-gray-500 mt-1">
-                              <span>{progress.toFixed(1)}% complete</span>
-                              <span>{daysLeft > 0 ? `${daysLeft} days left` : "Overdue"}</span>
+                              <span>{t('collaborative_goals.card.complete', { percentage: progress.toFixed(1) })}</span>
+                              <span>{daysLeft > 0 ? t('collaborative_goals.card.days_left', { days: daysLeft }) : t('collaborative_goals.card.overdue')}</span>
                             </div>
                           </div>
 
@@ -549,7 +549,7 @@ export default function CollaborativeGoalsPage() {
                             <div className="flex items-center gap-2">
                               <Users className="h-4 w-4 text-gray-400" />
                               <span className="text-sm text-gray-600 dark:text-gray-400">
-                                {goal.participants.length} participant{goal.participants.length !== 1 ? 's' : ''}
+                                {t('collaborative_goals.card.participants', { count: goal.participants.length })}
                               </span>
                             </div>
                             <div className="flex items-center gap-2">
@@ -581,7 +581,7 @@ export default function CollaborativeGoalsPage() {
                               variant="outline" 
                               className="w-full"
                             >
-                              View Challenge
+                              {t('collaborative_goals.buttons.view_challenge')}
                             </Button>
                           </Link>
                         </CardContent>
@@ -594,30 +594,30 @@ export default function CollaborativeGoalsPage() {
 
             <TabsContent value="friends" className="space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Friends & Connections</h2>
+                <h2 className="text-xl font-semibold">{t('collaborative_goals.sections.friends')}</h2>
                 <Dialog open={addFriendOpen} onOpenChange={setAddFriendOpen}>
                   <DialogTrigger asChild>
                     <Button>
                       <UserPlus className="h-4 w-4 mr-2" />
-                      Add Friend
+                      {t('collaborative_goals.buttons.add_friend')}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Add Friend</DialogTitle>
+                      <DialogTitle>{t('collaborative_goals.dialogs.add_friend.title')}</DialogTitle>
                       <DialogDescription>
-                        Send a friend request by email address
+                        {t('collaborative_goals.dialogs.add_friend.description')}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="email">Email Address</Label>
+                        <Label htmlFor="email">{t('collaborative_goals.form.email_address')}</Label>
                         <Input
                           id="email"
                           type="email"
                           value={friendEmail}
                           onChange={(e) => setFriendEmail(e.target.value)}
-                          placeholder="friend@example.com"
+                          placeholder={t('collaborative_goals.form.email_placeholder')}
                         />
                       </div>
                     </div>
@@ -625,7 +625,7 @@ export default function CollaborativeGoalsPage() {
                       <Button 
                         onClick={handleSendFriendRequest}
                       >
-                        Send Request
+                        {t('collaborative_goals.buttons.send_request')}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -636,7 +636,7 @@ export default function CollaborativeGoalsPage() {
                 {/* Friend Requests */}
                 {friendRequests.length > 0 && (
                   <div>
-                    <h3 className="text-lg font-medium mb-4">Pending Requests</h3>
+                    <h3 className="text-lg font-medium mb-4">{t('collaborative_goals.sections.pending_requests')}</h3>
                     <div className="grid gap-4">
                       {friendRequests.map((request: FriendRequest) => (
                         <Card key={request.id}>
@@ -660,14 +660,14 @@ export default function CollaborativeGoalsPage() {
                                 size="sm" 
                                 onClick={() => acceptFriendRequest(request.id)}
                               >
-                                Accept
+                                {t('collaborative_goals.buttons.accept')}
                               </Button>
                               <Button 
                                 size="sm" 
                                 variant="outline"
                                 onClick={() => rejectFriendRequest(request.id)}
                               >
-                                Decline
+                                {t('collaborative_goals.buttons.decline')}
                               </Button>
                             </div>
                           </CardContent>
@@ -680,20 +680,20 @@ export default function CollaborativeGoalsPage() {
 
                 {/* Friends List */}
                 <div>
-                  <h3 className="text-lg font-medium mb-4">Your Friends ({friends.length})</h3>
+                  <h3 className="text-lg font-medium mb-4">{t('collaborative_goals.sections.your_friends', { count: friends.length })}</h3>
                   {friends.length === 0 ? (
                     <Card>
                       <CardContent className="flex flex-col items-center justify-center py-12">
                         <UserPlus className="h-12 w-12 text-gray-400 mb-4" />
                         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                          No friends yet
+                          {t('collaborative_goals.empty_friends.title')}
                         </h3>
                         <p className="text-gray-500 text-center mb-4">
-                          Add friends to start collaborative savings challenges together
+                          {t('collaborative_goals.empty_friends.description')}
                         </p>
                         <Button onClick={() => setAddFriendOpen(true)}>
                           <UserPlus className="h-4 w-4 mr-2" />
-                          Add Your First Friend
+                          {t('collaborative_goals.buttons.add_first_friend')}
                         </Button>
                       </CardContent>
                     </Card>
