@@ -14,6 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import RequirePlan from "@/components/require-plan";
 import { apiRequest } from "@/lib/queryClient";
+import { useTranslation } from "react-i18next";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface Goal {
   id: number;
@@ -38,6 +40,9 @@ export default function Goals() {
   const { isReady, user } = useClerkUserReady();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const { currency } = useCurrency();
+  const displayCurrency = currency || '$';
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -141,13 +146,13 @@ export default function Goals() {
     try {
       // Validate date before sending
       if (!goalData.targetDate || goalData.targetDate === '') {
-        throw new Error('Please select a target date');
+        throw new Error(t('goals.errors.select_target_date'));
       }
       
       // Ensure date is in proper format
       const targetDate = new Date(goalData.targetDate);
       if (isNaN(targetDate.getTime())) {
-        throw new Error('Please enter a valid target date');
+        throw new Error(t('goals.errors.valid_target_date'));
       }
       
       const authHeaders = await getAuthHeaders();
@@ -166,15 +171,15 @@ export default function Goals() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create goal');
+        throw new Error(errorData.message || t('goals.errors.failed_create'));
       }
       
       await fetchGoals(); // Refresh goals
       setIsDialogOpen(false);
       setNewGoal({ name: "", targetAmount: "", targetDate: "", category: "", description: "" });
       toast({
-        title: "Goal Created",
-        description: "Your financial goal has been created successfully.",
+        title: t('goals.toasts.goal_created'),
+        description: t('goals.toasts.goal_created_desc'),
       });
     } catch (error: any) {
       toast({
@@ -191,7 +196,7 @@ export default function Goals() {
       if (data.targetDate) {
         const targetDate = new Date(data.targetDate);
         if (isNaN(targetDate.getTime())) {
-          throw new Error('Please enter a valid target date');
+          throw new Error(t('goals.errors.valid_target_date'));
         }
         data.targetDate = targetDate.toISOString();
       }
@@ -209,7 +214,7 @@ export default function Goals() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update goal');
+        throw new Error(errorData.message || t('goals.errors.failed_update'));
       }
       
       await fetchGoals(); // Refresh goals
