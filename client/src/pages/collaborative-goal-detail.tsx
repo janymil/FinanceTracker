@@ -282,12 +282,23 @@ export default function CollaborativeGoalDetailPage() {
   const categoryInfo = GOAL_CATEGORIES[goal.category as keyof typeof GOAL_CATEGORIES] || GOAL_CATEGORIES.investment;
   const CategoryIcon = categoryInfo.icon;
 
+  // Calculate days remaining
+  const targetDate = new Date(goal.targetDate);
+  const today = new Date();
+  const daysRemaining = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  
   // Prepare chart data
   const contributionChartData = contributions.slice(-10).map((contrib: any, index) => ({
-    name: `${contrib.firstName} ${contrib.lastName}`,
+    name: `${contrib.firstName || 'Unknown'} ${contrib.lastName || 'User'}`,
     amount: parseFloat(contrib.amount),
     date: new Date(contrib.createdAt).toLocaleDateString()
   }));
+
+  // Get top contributor
+  const topContributor = contributions.length > 0 ? 
+    contributions.reduce((top: any, current: any) => 
+      parseFloat(current.amount) > parseFloat(top.amount) ? current : top
+    ) : null;
 
   const timelineData = contributions.reduce((acc: any[], contrib: any) => {
     const date = new Date(contrib.createdAt).toISOString().split('T')[0];
@@ -559,7 +570,7 @@ export default function CollaborativeGoalDetailPage() {
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-2">
                     <Trophy className="w-5 h-5" />
-                    Top Contributors
+                    {t('collaborative_goal_detail.charts.top_contributors')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -568,7 +579,7 @@ export default function CollaborativeGoalDetailPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`$${value}`, 'Contribution']} />
+                      <Tooltip formatter={(value) => [`$${value}`, t('collaborative_goal_detail.charts.contribution')]} />
                       <Bar dataKey="amount" fill="#8884d8" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>

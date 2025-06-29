@@ -1520,6 +1520,11 @@
       "add_contribution": "Add Contribution",
       "participants_count": "Participants"
     },
+    "countdown": {
+      "days_remaining": "days remaining",
+      "due_today": "Due today!",
+      "days_overdue": "days overdue"
+    },
     "charts": {
       "contribution_timeline": "Contribution Timeline",
       "top_contributors": "Top Contributors",
