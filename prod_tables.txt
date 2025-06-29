@@ -1,0 +1,22 @@
+
+ ai_cache
+ backup_settings
+ budgets
+ categories
+ challenge_activities
+ collaborative_goal_participants
+ collaborative_goals
+ expense_reminders
+ financial_mascots
+ friendships
+ goal_contributions
+ goal_messages
+ goals
+ import_logs
+ milestone_achievements
+ payment_failures
+ recurring_transactions
+ redeem_codes
+ sessions
+ transactions
+ users
