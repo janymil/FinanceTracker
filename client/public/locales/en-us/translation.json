@@ -2051,6 +2051,80 @@
     }
   },
 
+  "ccpa": {
+    "title": "California Consumer Privacy Rights (CCPA)",
+    "consumer_rights": {
+      "title": "Your Consumer Rights",
+      "description": "As a California resident, you have the following rights under the California Consumer Privacy Act (CCPA):"
+    },
+    "rights": {
+      "know": {
+        "title": "Right to Know",
+        "description": "Request information about the personal information we collect, use, disclose, and sell"
+      },
+      "delete": {
+        "title": "Right to Delete",
+        "description": "Request deletion of personal information we have collected from you"
+      },
+      "opt_out": {
+        "title": "Right to Opt-Out",
+        "description": "Opt-out of the sale of your personal information (Note: We do not sell personal information)"
+      },
+      "non_discrimination": {
+        "title": "Right to Non-Discrimination",
+        "description": "Receive equal service and pricing even if you exercise your privacy rights"
+      }
+    },
+    "categories_collected": {
+      "title": "Categories of Personal Information Collected",
+      "description": "We collect the following categories of personal information:"
+    },
+    "categories": {
+      "identifiers": "Identifiers:",
+      "identifiers_desc": "Name, email address, phone number, and unique identifiers",
+      "commercial": "Commercial Information:",
+      "commercial_desc": "Financial transaction records, spending patterns, and account information",
+      "internet": "Internet Activity:",
+      "internet_desc": "Usage patterns, preferences, and interaction with our service",
+      "geolocation": "Geolocation Data:",
+      "geolocation_desc": "General location information for compliance and service delivery",
+      "inferences": "Inferences:",
+      "inferences_desc": "AI-generated insights about spending habits and financial preferences"
+    },
+    "sale_sharing": {
+      "title": "Sale and Sharing of Personal Information",
+      "no_sale": "WE DO NOT SELL YOUR PERSONAL INFORMATION",
+      "description": "FinanzerPro does not sell, rent, or share your personal information with third parties for their marketing purposes."
+    },
+    "service_providers": {
+      "title": "Service Providers and Business Partners",
+      "description": "We share personal information with the following service providers for business purposes:"
+    },
+    "providers": {
+      "clerk": "Clerk (Authentication):",
+      "clerk_desc": "User authentication and account management services",
+      "stripe": "Stripe (Payment Processing):",
+      "stripe_desc": "Secure payment processing and subscription management",
+      "openai": "OpenAI (AI Services):",
+      "openai_desc": "AI-powered financial insights and categorization (anonymized data)",
+      "bunny": "Bunny.net (File Storage):",
+      "bunny_desc": "Secure cloud storage for receipts and export files"
+    },
+    "exercise_rights": {
+      "title": "How to Exercise Your Rights",
+      "description": "To exercise your CCPA rights, contact us using the information below:",
+      "email": "Email:",
+      "phone": "Phone:",
+      "response_time": "Response Time:",
+      "response_desc": "We will respond to verifiable requests within 45 days (extendable by 45 days)"
+    },
+    "verification": {
+      "title": "Verification Process",
+      "description": "To protect your privacy, we verify your identity before processing requests:",
+      "procedure": "We may request additional information to verify your identity, such as account details or recent transaction information."
+    }
+  },
+
   "compliance": {
     "detecting_location": "Detecting location...",
     "gdpr": {

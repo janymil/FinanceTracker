@@ -2073,6 +2073,80 @@
     }
   },
 
+  "ccpa": {
+    "title": "Kalifornské práva spotrebiteľov na súkromie (CCPA)",
+    "consumer_rights": {
+      "title": "Vaše práva ako spotrebiteľ",
+      "description": "Ako obyvateľ Kalifornie máte nasledujúce práva podľa kalifornského zákona o ochrane súkromia spotrebiteľov (CCPA):"
+    },
+    "rights": {
+      "know": {
+        "title": "Právo vedieť",
+        "description": "Požiadať o informácie o osobných údajoch, ktoré zhromažďujeme, používame, zverejňujeme a predávame"
+      },
+      "delete": {
+        "title": "Právo na vymazanie",
+        "description": "Požiadať o vymazanie osobných údajov, ktoré sme od vás zhromaždili"
+      },
+      "opt_out": {
+        "title": "Právo na odmietnutie",
+        "description": "Odmietnuť predaj vašich osobných údajov (Poznámka: Nepredávame osobné údaje)"
+      },
+      "non_discrimination": {
+        "title": "Právo na nediskrimináciu",
+        "description": "Dostávať rovnaké služby a ceny aj v prípade, že si uplatníte svoje práva na súkromie"
+      }
+    },
+    "categories_collected": {
+      "title": "Kategórie zhromažďovaných osobných informácií",
+      "description": "Zhromažďujeme nasledujúce kategórie osobných informácií:"
+    },
+    "categories": {
+      "identifiers": "Identifikátory:",
+      "identifiers_desc": "Meno, emailová adresa, telefónne číslo a jedinečné identifikátory",
+      "commercial": "Obchodné informácie:",
+      "commercial_desc": "Záznamy finančných transakcií, vzory utrácania a informácie o účte",
+      "internet": "Internetová aktivita:",
+      "internet_desc": "Vzory používania, preferencie a interakcia s našou službou",
+      "geolocation": "Geografické údaje:",
+      "geolocation_desc": "Všeobecné informácie o polohe pre dodržiavanie predpisov a poskytovanie služieb",
+      "inferences": "Inferencie:",
+      "inferences_desc": "AI generované poznatky o návykoch utrácania a finančných preferenciách"
+    },
+    "sale_sharing": {
+      "title": "Predaj a zdieľanie osobných informácií",
+      "no_sale": "NEPREDÁVAME VAŠE OSOBNÉ INFORMÁCIE",
+      "description": "FinanzerPro nepredáva, neprenajíma ani nezdieľa vaše osobné informácie s tretími stranami na ich marketingové účely."
+    },
+    "service_providers": {
+      "title": "Poskytovatelia služieb a obchodní partneri",
+      "description": "Zdieľame osobné informácie s nasledujúcimi poskytovateľmi služieb na obchodné účely:"
+    },
+    "providers": {
+      "clerk": "Clerk (Autentifikácia):",
+      "clerk_desc": "Služby autentifikácie používateľov a správy účtov",
+      "stripe": "Stripe (Spracovanie platieb):",
+      "stripe_desc": "Bezpečné spracovanie platieb a správa predplatného",
+      "openai": "OpenAI (AI služby):",
+      "openai_desc": "AI podporované finančné poznatky a kategorizácia (anonymizované údaje)",
+      "bunny": "Bunny.net (Úložisko súborov):",
+      "bunny_desc": "Bezpečné cloudové úložisko pre účtenky a exportované súbory"
+    },
+    "exercise_rights": {
+      "title": "Ako uplatniť svoje práva",
+      "description": "Na uplatnenie svojich práv CCPA nás kontaktujte pomocou nižšie uvedených informácií:",
+      "email": "Email:",
+      "phone": "Telefón:",
+      "response_time": "Doba odozvy:",
+      "response_desc": "Odpovieme na overiteľné žiadosti do 45 dní (predĺžiteľné o 45 dní)"
+    },
+    "verification": {
+      "title": "Proces overenia",
+      "description": "Na ochranu vášho súkromia overujeme vašu identitu pred spracovaním žiadostí:",
+      "procedure": "Môžeme požiadať o dodatočné informácie na overenie vašej identity, ako sú podrobnosti účtu alebo informácie o nedávnych transakciách."
+    }
+  },
+
   "compliance": {
     "detecting_location": "Detekuje sa poloha...",
     "gdpr": {

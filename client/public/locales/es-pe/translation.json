@@ -2026,6 +2026,80 @@
     }
   },
 
+  "ccpa": {
+    "title": "Derechos de Privacidad del Consumidor de California (CCPA)",
+    "consumer_rights": {
+      "title": "Sus Derechos como Consumidor",
+      "description": "Como residente de California, tiene los siguientes derechos bajo la Ley de Privacidad del Consumidor de California (CCPA):"
+    },
+    "rights": {
+      "know": {
+        "title": "Derecho a Saber",
+        "description": "Solicitar información sobre la información personal que recopilamos, usamos, divulgamos y vendemos"
+      },
+      "delete": {
+        "title": "Derecho a Eliminar",
+        "description": "Solicitar la eliminación de información personal que hemos recopilado de usted"
+      },
+      "opt_out": {
+        "title": "Derecho a Rechazar",
+        "description": "Optar por no participar en la venta de su información personal (Nota: No vendemos información personal)"
+      },
+      "non_discrimination": {
+        "title": "Derecho a No Discriminación",
+        "description": "Recibir igual servicio y precios incluso si ejercita sus derechos de privacidad"
+      }
+    },
+    "categories_collected": {
+      "title": "Categorías de Información Personal Recopilada",
+      "description": "Recopilamos las siguientes categorías de información personal:"
+    },
+    "categories": {
+      "identifiers": "Identificadores:",
+      "identifiers_desc": "Nombre, dirección de correo, número de teléfono e identificadores únicos",
+      "commercial": "Información Comercial:",
+      "commercial_desc": "Registros de transacciones financieras, patrones de gasto e información de cuenta",
+      "internet": "Actividad de Internet:",
+      "internet_desc": "Patrones de uso, preferencias e interacción con nuestro servicio",
+      "geolocation": "Datos de Geolocalización:",
+      "geolocation_desc": "Información general de ubicación para cumplimiento y entrega de servicios",
+      "inferences": "Inferencias:",
+      "inferences_desc": "Insights generados por IA sobre hábitos de gasto y preferencias financieras"
+    },
+    "sale_sharing": {
+      "title": "Venta e Intercambio de Información Personal",
+      "no_sale": "NO VENDEMOS SU INFORMACIÓN PERSONAL",
+      "description": "FinanzerPro no vende, alquila ni comparte su información personal con terceros para sus propósitos de marketing."
+    },
+    "service_providers": {
+      "title": "Proveedores de Servicios y Socios Comerciales",
+      "description": "Compartimos información personal con los siguientes proveedores de servicios para propósitos comerciales:"
+    },
+    "providers": {
+      "clerk": "Clerk (Autenticación):",
+      "clerk_desc": "Servicios de autenticación de usuarios y gestión de cuentas",
+      "stripe": "Stripe (Procesamiento de Pagos):",
+      "stripe_desc": "Procesamiento seguro de pagos y gestión de suscripciones",
+      "openai": "OpenAI (Servicios de IA):",
+      "openai_desc": "Insights financieros y categorización potenciados por IA (datos anonimizados)",
+      "bunny": "Bunny.net (Almacenamiento de Archivos):",
+      "bunny_desc": "Almacenamiento seguro en la nube para recibos y archivos de exportación"
+    },
+    "exercise_rights": {
+      "title": "Cómo Ejercer Sus Derechos",
+      "description": "Para ejercer sus derechos de CCPA, contáctenos usando la información a continuación:",
+      "email": "Correo:",
+      "phone": "Teléfono:",
+      "response_time": "Tiempo de Respuesta:",
+      "response_desc": "Responderemos a solicitudes verificables dentro de 45 días (extensible por 45 días)"
+    },
+    "verification": {
+      "title": "Proceso de Verificación",
+      "description": "Para proteger su privacidad, verificamos su identidad antes de procesar solicitudes:",
+      "procedure": "Podemos solicitar información adicional para verificar su identidad, como detalles de cuenta o información de transacciones recientes."
+    }
+  },
+
   "compliance": {
     "detecting_location": "Detectando ubicación...",
     "gdpr": {

@@ -11,7 +11,7 @@ import { useGeolocation } from '../hooks/useGeolocation';
 export default function PrivacyPolicy() {
   const [, setLocation] = useLocation();
   const { t } = useTranslation();
-  const { requiresGDPR, loading: locationLoading } = useGeolocation();
+  const { requiresGDPR, requiresCCPA, loading: locationLoading } = useGeolocation();
   
   useEffect(() => {
     document.title = "Privacy Policy - FinanzerPro";
@@ -201,6 +201,87 @@ export default function PrivacyPolicy() {
                 <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded">
                   <p className="text-sm"><strong>{t("gdpr.exercise_rights.email")}</strong> privacy@finanzerpro.com</p>
                   <p className="text-sm"><strong>{t("gdpr.exercise_rights.response_time")}</strong> {t("gdpr.exercise_rights.response_desc")}</p>
+                </div>
+              </div>
+            </section>
+          </div>
+          )}
+
+          {/* CCPA Compliance Section - Only shown to California/US users */}
+          {requiresCCPA && (
+          <div className="ccpa-section">
+            <section className="mb-8 border-l-4 border-yellow-500 pl-4 bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-r-lg">
+              <h2 className="text-2xl font-semibold mb-4 text-yellow-800 dark:text-yellow-200">{t("ccpa.title")}</h2>
+              
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">{t("ccpa.consumer_rights.title")}</h3>
+                <p className="mb-4">{t("ccpa.consumer_rights.description")}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                    <h4 className="font-medium mb-2">{t("ccpa.rights.know.title")}</h4>
+                    <p className="text-sm">{t("ccpa.rights.know.description")}</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                    <h4 className="font-medium mb-2">{t("ccpa.rights.delete.title")}</h4>
+                    <p className="text-sm">{t("ccpa.rights.delete.description")}</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                    <h4 className="font-medium mb-2">{t("ccpa.rights.opt_out.title")}</h4>
+                    <p className="text-sm">{t("ccpa.rights.opt_out.description")}</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 p-3 rounded">
+                    <h4 className="font-medium mb-2">{t("ccpa.rights.non_discrimination.title")}</h4>
+                    <p className="text-sm">{t("ccpa.rights.non_discrimination.description")}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">{t("ccpa.categories_collected.title")}</h3>
+                <p className="mb-4">{t("ccpa.categories_collected.description")}</p>
+                <ul className="list-disc list-inside mb-4 space-y-2">
+                  <li><strong>{t("ccpa.categories.identifiers")}</strong> {t("ccpa.categories.identifiers_desc")}</li>
+                  <li><strong>{t("ccpa.categories.commercial")}</strong> {t("ccpa.categories.commercial_desc")}</li>
+                  <li><strong>{t("ccpa.categories.internet")}</strong> {t("ccpa.categories.internet_desc")}</li>
+                  <li><strong>{t("ccpa.categories.geolocation")}</strong> {t("ccpa.categories.geolocation_desc")}</li>
+                  <li><strong>{t("ccpa.categories.inferences")}</strong> {t("ccpa.categories.inferences_desc")}</li>
+                </ul>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">{t("ccpa.sale_sharing.title")}</h3>
+                <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded">
+                  <p className="text-sm font-medium">{t("ccpa.sale_sharing.no_sale")}</p>
+                  <p className="text-sm mt-2">{t("ccpa.sale_sharing.description")}</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">{t("ccpa.service_providers.title")}</h3>
+                <p className="mb-4">{t("ccpa.service_providers.description")}</p>
+                <ul className="list-disc list-inside mb-4 space-y-2">
+                  <li><strong>{t("ccpa.providers.clerk")}</strong> {t("ccpa.providers.clerk_desc")}</li>
+                  <li><strong>{t("ccpa.providers.stripe")}</strong> {t("ccpa.providers.stripe_desc")}</li>
+                  <li><strong>{t("ccpa.providers.openai")}</strong> {t("ccpa.providers.openai_desc")}</li>
+                  <li><strong>{t("ccpa.providers.bunny")}</strong> {t("ccpa.providers.bunny_desc")}</li>
+                </ul>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">{t("ccpa.exercise_rights.title")}</h3>
+                <p className="mb-4">{t("ccpa.exercise_rights.description")}</p>
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
+                  <p className="text-sm"><strong>{t("ccpa.exercise_rights.email")}</strong> privacy@finanzerpro.com</p>
+                  <p className="text-sm"><strong>{t("ccpa.exercise_rights.phone")}</strong> +1 (505) 555-0123</p>
+                  <p className="text-sm"><strong>{t("ccpa.exercise_rights.response_time")}</strong> {t("ccpa.exercise_rights.response_desc")}</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">{t("ccpa.verification.title")}</h3>
+                <p className="mb-4">{t("ccpa.verification.description")}</p>
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded">
+                  <p className="text-sm">{t("ccpa.verification.procedure")}</p>
                 </div>
               </div>
             </section>
