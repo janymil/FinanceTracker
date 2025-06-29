@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getLocationWithCaching, LocationInfo } from '../../lib/geolocation';
+import { getLocationWithCaching, LocationInfo } from '../../../lib/geolocation';
 
 /**
  * React hook for geolocation-based compliance detection

@@ -11,6 +11,7 @@ import { useGeolocation } from '../hooks/useGeolocation';
 export default function PrivacyPolicy() {
   const [, setLocation] = useLocation();
   const { t } = useTranslation();
+  const { requiresGDPR, loading: locationLoading } = useGeolocation();
   
   useEffect(() => {
     document.title = "Privacy Policy - FinanzerPro";
@@ -120,6 +121,7 @@ export default function PrivacyPolicy() {
           </section>
 
           {/* GDPR Compliance Section - Only shown to EU users */}
+          {requiresGDPR && (
           <div className="gdpr-section">
             <section className="mb-8 border-l-4 border-blue-500 pl-4 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-r-lg">
               <h2 className="text-2xl font-semibold mb-4 text-blue-800 dark:text-blue-200">{t("gdpr.title")}</h2>
@@ -203,6 +205,7 @@ export default function PrivacyPolicy() {
               </div>
             </section>
           </div>
+          )}
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">{t("8. Cookies and Tracking")}</h2>
