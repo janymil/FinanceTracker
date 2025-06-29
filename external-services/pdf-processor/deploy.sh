@@ -3,14 +3,33 @@
 
 echo "=== DEPLOYING PDF PROCESSOR TO FLY.IO ==="
 
-# Navigate to pdf-processor directory
-cd "$(dirname "$0")"
+# Get the absolute path to the pdf-processor directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+echo "Working directory: $(pwd)"
+echo "Files in directory:"
+ls -la
+
+# Verify required files exist
+REQUIRED_FILES=("Dockerfile" "fly.toml" "package.json" "index.ts")
+for file in "${REQUIRED_FILES[@]}"; do
+    if [[ ! -f "$file" ]]; then
+        echo "Error: Required file '$file' not found in $(pwd)"
+        exit 1
+    fi
+done
+
+echo "✓ All required files found"
 
 # Check if flyctl is installed
 if ! command -v flyctl &> /dev/null; then
     echo "Error: flyctl is not installed. Please install Fly.io CLI first."
+    echo "Visit: https://fly.io/docs/hands-on/install-flyctl/"
     exit 1
 fi
+
+echo "✓ Fly.io CLI found"
 
 # Check if logged in to Fly.io
 if ! flyctl auth whoami &> /dev/null; then
@@ -18,11 +37,30 @@ if ! flyctl auth whoami &> /dev/null; then
     exit 1
 fi
 
+echo "✓ Authenticated with Fly.io"
+
+# Check if app exists, if not create it
+if ! flyctl status &> /dev/null; then
+    echo "App doesn't exist, launching new app..."
+    flyctl launch --no-deploy --ha=false
+fi
+
 echo "Building and deploying PDF processor..."
 
-# Deploy to Fly.io
-flyctl deploy --ha=false
+# Deploy to Fly.io with verbose output
+flyctl deploy --ha=false --verbose
 
-echo "Deployment complete!"
-echo "You can check the status with: flyctl status"
-echo "View logs with: flyctl logs"
+if [ $? -eq 0 ]; then
+    echo ""
+    echo "✓ Deployment successful!"
+    echo ""
+    echo "Next steps:"
+    echo "• Check status: flyctl status"
+    echo "• View logs: flyctl logs"
+    echo "• Test health: curl https://finanzerpro-pdf.fly.dev/health"
+else
+    echo ""
+    echo "✗ Deployment failed!"
+    echo "Check the logs above for error details."
+    exit 1
+fi

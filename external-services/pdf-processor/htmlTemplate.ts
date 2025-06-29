@@ -1,385 +1,9 @@
-export interface PDFData {
+export interface TemplateData {
   userData: {
     firstName: string;
     lastName: string;
     email: string;
   };
-  trendChart: string;
-  categoryChart: string;
-  qrCodeDataUrl: string;
-  insights: any;
-  transactions: any[];
-  budgets: any[];
-  goals: any[];
-  language: string;
-  period: string;
-}
-
-export function generateHTMLTemplate(data: PDFData): string {
-  const {
-    userData,
-    trendChart,
-    categoryChart,
-    qrCodeDataUrl,
-    insights,
-    transactions,
-    budgets,
-    goals,
-    language,
-    period
-  } = data;
-
-  const currentDate = new Date().toLocaleDateString();
-  const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount), 0);
-  const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount), 0);
-  const netBalance = totalIncome - totalExpenses;
-
-  return `
-    <!DOCTYPE html>
-    <html lang="${language}">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Financial Report - ${userData.firstName} ${userData.lastName}</title>
-      <style>
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-        
-        body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          line-height: 1.6;
-          color: #333;
-          background: #fff;
-        }
-        
-        .container {
-          max-width: 800px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-        
-        .header {
-          text-align: center;
-          margin-bottom: 40px;
-          border-bottom: 3px solid #8B5CF6;
-          padding-bottom: 20px;
-        }
-        
-        .logo {
-          font-size: 2.5em;
-          font-weight: bold;
-          color: #8B5CF6;
-          margin-bottom: 10px;
-        }
-        
-        .report-title {
-          font-size: 1.8em;
-          color: #333;
-          margin-bottom: 10px;
-        }
-        
-        .report-info {
-          color: #666;
-          font-size: 1.1em;
-        }
-        
-        .section {
-          margin-bottom: 40px;
-          break-inside: avoid;
-        }
-        
-        .section-title {
-          font-size: 1.5em;
-          color: #8B5CF6;
-          margin-bottom: 20px;
-          border-left: 4px solid #8B5CF6;
-          padding-left: 15px;
-        }
-        
-        .metrics-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 20px;
-          margin-bottom: 30px;
-        }
-        
-        .metric-card {
-          background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-          padding: 20px;
-          border-radius: 12px;
-          text-align: center;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .metric-label {
-          font-size: 0.9em;
-          color: #666;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-          margin-bottom: 8px;
-        }
-        
-        .metric-value {
-          font-size: 1.8em;
-          font-weight: bold;
-          color: #333;
-        }
-        
-        .metric-value.positive {
-          color: #10B981;
-        }
-        
-        .metric-value.negative {
-          color: #EF4444;
-        }
-        
-        .chart-container {
-          text-align: center;
-          margin: 30px 0;
-          background: #fff;
-          padding: 20px;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .chart-image {
-          max-width: 100%;
-          height: auto;
-          border-radius: 8px;
-        }
-        
-        .insights-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 20px;
-          margin-bottom: 30px;
-        }
-        
-        .insight-card {
-          background: #f8fafc;
-          padding: 20px;
-          border-radius: 12px;
-          border-left: 4px solid #8B5CF6;
-        }
-        
-        .insight-title {
-          font-weight: bold;
-          color: #333;
-          margin-bottom: 10px;
-          font-size: 1.1em;
-        }
-        
-        .insight-text {
-          color: #666;
-          line-height: 1.5;
-        }
-        
-        .transaction-list {
-          background: #fff;
-          border-radius: 12px;
-          overflow: hidden;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .transaction-header {
-          background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
-          color: white;
-          padding: 15px 20px;
-          font-weight: bold;
-        }
-        
-        .transaction-item {
-          padding: 15px 20px;
-          border-bottom: 1px solid #e5e7eb;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        
-        .transaction-item:last-child {
-          border-bottom: none;
-        }
-        
-        .transaction-details {
-          flex: 1;
-        }
-        
-        .transaction-description {
-          font-weight: 500;
-          color: #333;
-          margin-bottom: 4px;
-        }
-        
-        .transaction-category {
-          font-size: 0.9em;
-          color: #666;
-        }
-        
-        .transaction-amount {
-          font-weight: bold;
-          font-size: 1.1em;
-        }
-        
-        .transaction-amount.income {
-          color: #10B981;
-        }
-        
-        .transaction-amount.expense {
-          color: #EF4444;
-        }
-        
-        .footer {
-          margin-top: 60px;
-          padding-top: 20px;
-          border-top: 2px solid #e5e7eb;
-          text-align: center;
-        }
-        
-        .qr-section {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 20px;
-          margin-bottom: 20px;
-        }
-        
-        .qr-code {
-          width: 100px;
-          height: 100px;
-        }
-        
-        .qr-text {
-          color: #666;
-          line-height: 1.5;
-        }
-        
-        .generated-info {
-          color: #999;
-          font-size: 0.9em;
-        }
-        
-        @page {
-          size: A4;
-          margin: 20mm;
-        }
-        
-        @media print {
-          .section {
-            break-inside: avoid;
-          }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <!-- Header -->
-        <div class="header">
-          <div class="logo">FinanzerPro</div>
-          <div class="report-title">Financial Report</div>
-          <div class="report-info">
-            ${userData.firstName} ${userData.lastName} • ${currentDate} • ${period}
-          </div>
-        </div>
-
-        <!-- Executive Summary -->
-        <div class="section">
-          <h2 class="section-title">Executive Summary</h2>
-          <div class="metrics-grid">
-            <div class="metric-card">
-              <div class="metric-label">Total Income</div>
-              <div class="metric-value positive">$${totalIncome.toFixed(2)}</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">Total Expenses</div>
-              <div class="metric-value negative">$${totalExpenses.toFixed(2)}</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">Net Balance</div>
-              <div class="metric-value ${netBalance >= 0 ? 'positive' : 'negative'}">$${netBalance.toFixed(2)}</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Financial Trends -->
-        <div class="section">
-          <h2 class="section-title">Financial Trends</h2>
-          <div class="chart-container">
-            <img src="${trendChart}" alt="Financial Trends Chart" class="chart-image">
-          </div>
-        </div>
-
-        <!-- Category Analysis -->
-        <div class="section">
-          <h2 class="section-title">Spending Analysis</h2>
-          <div class="chart-container">
-            <img src="${categoryChart}" alt="Category Spending Chart" class="chart-image">
-          </div>
-        </div>
-
-        <!-- AI Insights -->
-        ${insights ? `
-        <div class="section">
-          <h2 class="section-title">AI Financial Insights</h2>
-          <div class="insights-grid">
-            ${insights.insights ? insights.insights.slice(0, 4).map((insight: string) => `
-              <div class="insight-card">
-                <div class="insight-title">Key Insight</div>
-                <div class="insight-text">${insight}</div>
-              </div>
-            `).join('') : ''}
-            
-            ${insights.recommendations ? insights.recommendations.slice(0, 2).map((rec: string) => `
-              <div class="insight-card">
-                <div class="insight-title">Recommendation</div>
-                <div class="insight-text">${rec}</div>
-              </div>
-            `).join('') : ''}
-          </div>
-        </div>
-        ` : ''}
-
-        <!-- Recent Transactions -->
-        <div class="section">
-          <h2 class="section-title">Recent Transactions</h2>
-          <div class="transaction-list">
-            <div class="transaction-header">Latest Financial Activity</div>
-            ${transactions.slice(0, 10).map(transaction => `
-              <div class="transaction-item">
-                <div class="transaction-details">
-                  <div class="transaction-description">${transaction.description || 'Transaction'}</div>
-                  <div class="transaction-category">${transaction.categoryName || 'Uncategorized'}</div>
-                </div>
-                <div class="transaction-amount ${transaction.type}">
-                  ${transaction.type === 'income' ? '+' : '-'}$${Math.abs(parseFloat(transaction.amount)).toFixed(2)}
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-          <div class="qr-section">
-            <img src="${qrCodeDataUrl}" alt="QR Code" class="qr-code">
-            <div class="qr-text">
-              Scan to access your interactive<br>
-              dashboard on FinanzerPro
-            </div>
-          </div>
-          <div class="generated-info">
-            Report generated on ${currentDate} by FinanzerPro AI Analytics
-          </div>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-}
-export interface TemplateData {
-  userData: any;
   trendChart: string;
   categoryChart: string;
   qrCodeDataUrl: string;
@@ -418,79 +42,327 @@ export function generateHTMLTemplate(data: TemplateData): string {
           margin: 0;
           padding: 20px;
           background: #f8f9fa;
-          color: #333;
+          color: #2d3748;
+          line-height: 1.6;
         }
+        
+        .container {
+          max-width: 800px;
+          margin: 0 auto;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
+        }
+        
         .header {
-          text-align: center;
-          margin-bottom: 30px;
-          padding: 20px;
-          background: linear-gradient(135deg, #8B5CF6, #EC4899);
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
-          border-radius: 10px;
-        }
-        .chart-container {
-          margin: 20px 0;
+          padding: 40px 30px;
           text-align: center;
-          page-break-inside: avoid;
         }
+        
+        .header h1 {
+          margin: 0 0 10px 0;
+          font-size: 2.5em;
+          font-weight: 300;
+        }
+        
+        .header p {
+          margin: 0;
+          opacity: 0.9;
+          font-size: 1.1em;
+        }
+        
+        .content {
+          padding: 40px 30px;
+        }
+        
+        .section {
+          margin-bottom: 40px;
+        }
+        
+        .section h2 {
+          color: #4a5568;
+          border-bottom: 2px solid #e2e8f0;
+          padding-bottom: 10px;
+          margin-bottom: 25px;
+          font-size: 1.8em;
+          font-weight: 600;
+        }
+        
+        .user-info {
+          background: #f7fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 25px;
+          margin-bottom: 30px;
+        }
+        
+        .user-info h3 {
+          margin: 0 0 15px 0;
+          color: #2d3748;
+          font-size: 1.3em;
+        }
+        
+        .user-info p {
+          margin: 8px 0;
+          color: #4a5568;
+        }
+        
+        .chart-container {
+          text-align: center;
+          margin: 30px 0;
+          padding: 20px;
+          background: #f7fafc;
+          border-radius: 8px;
+        }
+        
         .chart-container img {
           max-width: 100%;
           height: auto;
           border-radius: 8px;
-          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
-        .insights {
-          margin: 20px 0;
+        
+        .insights-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 20px;
+          margin: 25px 0;
+        }
+        
+        .insight-card {
+          background: #fff;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
           padding: 20px;
-          background: white;
-          border-radius: 10px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
+        
+        .insight-card h4 {
+          margin: 0 0 10px 0;
+          color: #2d3748;
+          font-size: 1.1em;
+        }
+        
+        .insight-card p {
+          margin: 0;
+          color: #4a5568;
+          font-size: 0.95em;
+        }
+        
+        .transactions-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 20px 0;
+          background: white;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .transactions-table th {
+          background: #4a5568;
+          color: white;
+          padding: 15px 12px;
+          text-align: left;
+          font-weight: 600;
+        }
+        
+        .transactions-table td {
+          padding: 12px;
+          border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .transactions-table tr:last-child td {
+          border-bottom: none;
+        }
+        
+        .transactions-table tr:nth-child(even) {
+          background: #f7fafc;
+        }
+        
+        .amount-positive {
+          color: #38a169;
+          font-weight: 600;
+        }
+        
+        .amount-negative {
+          color: #e53e3e;
+          font-weight: 600;
+        }
+        
         .qr-section {
           text-align: center;
-          margin-top: 30px;
-          padding: 20px;
-          background: white;
-          border-radius: 10px;
+          padding: 30px;
+          background: #f7fafc;
+          border-radius: 8px;
+          margin: 30px 0;
         }
+        
+        .qr-section img {
+          margin: 15px 0;
+          border-radius: 8px;
+        }
+        
         .footer {
+          background: #2d3748;
+          color: white;
+          padding: 30px;
           text-align: center;
-          margin-top: 30px;
-          color: #666;
-          font-size: 12px;
+          margin-top: 40px;
+        }
+        
+        .footer p {
+          margin: 5px 0;
+          opacity: 0.8;
+        }
+        
+        .budget-item, .goal-item {
+          background: #f7fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          padding: 15px;
+          margin: 10px 0;
+        }
+        
+        .budget-item h4, .goal-item h4 {
+          margin: 0 0 8px 0;
+          color: #2d3748;
+        }
+        
+        .progress-bar {
+          background: #e2e8f0;
+          border-radius: 10px;
+          height: 8px;
+          margin: 8px 0;
+          overflow: hidden;
+        }
+        
+        .progress-fill {
+          background: linear-gradient(90deg, #48bb78, #38a169);
+          height: 100%;
+          border-radius: 10px;
+          transition: width 0.3s ease;
         }
       </style>
     </head>
     <body>
-      <div class="header">
-        <h1>FinanzerPro Financial Report</h1>
-        <p>Generated for ${userData?.firstName || 'User'} ${userData?.lastName || ''}</p>
-        <p>Period: ${period}</p>
-      </div>
-
-      <div class="chart-container">
-        <h2>Financial Trends</h2>
-        <img src="${trendChart}" alt="Trend Chart" />
-      </div>
-
-      <div class="chart-container">
-        <h2>Spending by Category</h2>
-        <img src="${categoryChart}" alt="Category Chart" />
-      </div>
-
-      <div class="insights">
-        <h2>Financial Insights</h2>
-        ${insights.map(insight => `<p>• ${insight}</p>`).join('')}
-      </div>
-
-      <div class="qr-section">
-        <h3>Access Your Account</h3>
-        <img src="${qrCodeDataUrl}" alt="QR Code" style="width: 100px; height: 100px;" />
-        <p>Scan to access FinanzerPro</p>
-      </div>
-
-      <div class="footer">
-        <p>Generated by FinanzerPro • ${new Date().toLocaleDateString()}</p>
+      <div class="container">
+        <div class="header">
+          <h1>FinanzerPro</h1>
+          <p>Financial Report for ${userData.firstName} ${userData.lastName}</p>
+          <p>Report Period: ${period}</p>
+        </div>
+        
+        <div class="content">
+          <div class="section">
+            <div class="user-info">
+              <h3>Account Information</h3>
+              <p><strong>Name:</strong> ${userData.firstName} ${userData.lastName}</p>
+              <p><strong>Email:</strong> ${userData.email}</p>
+              <p><strong>Report Generated:</strong> ${new Date().toLocaleDateString()}</p>
+            </div>
+          </div>
+          
+          <div class="section">
+            <h2>Financial Trends</h2>
+            <div class="chart-container">
+              <img src="${trendChart}" alt="Financial Trends Chart" />
+            </div>
+          </div>
+          
+          <div class="section">
+            <h2>Spending by Category</h2>
+            <div class="chart-container">
+              <img src="${categoryChart}" alt="Category Spending Chart" />
+            </div>
+          </div>
+          
+          ${insights && insights.length > 0 ? `
+          <div class="section">
+            <h2>AI Financial Insights</h2>
+            <div class="insights-grid">
+              ${insights.map(insight => `
+                <div class="insight-card">
+                  <h4>${insight.title || 'Financial Insight'}</h4>
+                  <p>${insight.description || insight.insight || 'No description available'}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          ` : ''}
+          
+          ${budgets && budgets.length > 0 ? `
+          <div class="section">
+            <h2>Budget Overview</h2>
+            ${budgets.map(budget => `
+              <div class="budget-item">
+                <h4>${budget.categoryName || 'Budget'}</h4>
+                <p>Budgeted: $${budget.amount} | Spent: $${budget.spent || 0}</p>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: ${Math.min((budget.spent || 0) / budget.amount * 100, 100)}%"></div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          ` : ''}
+          
+          ${goals && goals.length > 0 ? `
+          <div class="section">
+            <h2>Financial Goals</h2>
+            ${goals.map(goal => `
+              <div class="goal-item">
+                <h4>${goal.name || 'Financial Goal'}</h4>
+                <p>Target: $${goal.targetAmount} | Current: $${goal.currentAmount || 0}</p>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: ${Math.min((goal.currentAmount || 0) / goal.targetAmount * 100, 100)}%"></div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          ` : ''}
+          
+          ${transactions && transactions.length > 0 ? `
+          <div class="section">
+            <h2>Recent Transactions</h2>
+            <table class="transactions-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${transactions.slice(0, 20).map(transaction => `
+                  <tr>
+                    <td>${new Date(transaction.date).toLocaleDateString()}</td>
+                    <td>${transaction.description}</td>
+                    <td>${transaction.categoryName || 'Uncategorized'}</td>
+                    <td class="${transaction.type === 'income' ? 'amount-positive' : 'amount-negative'}">
+                      ${transaction.type === 'income' ? '+' : '-'}$${Math.abs(parseFloat(transaction.amount)).toFixed(2)}
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          ` : ''}
+          
+          <div class="qr-section">
+            <h3>Access Your Dashboard</h3>
+            <p>Scan this QR code to quickly access your FinanzerPro dashboard</p>
+            <img src="${qrCodeDataUrl}" alt="Dashboard QR Code" />
+          </div>
+        </div>
+        
+        <div class="footer">
+          <p>&copy; ${new Date().getFullYear()} FinanzerPro - Smart Financial Management</p>
+          <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+        </div>
       </div>
     </body>
     </html>
