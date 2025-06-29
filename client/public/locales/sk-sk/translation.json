@@ -1031,7 +1031,8 @@
   },
 
   "plans": {
-    "standard": "Štandard"
+    "standard": "Štandard",
+    "premium": "Premium"
   },
 
   "upload": {

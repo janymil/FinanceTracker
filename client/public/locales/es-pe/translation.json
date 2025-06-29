@@ -975,7 +975,8 @@
   },
 
   "plans": {
-    "standard": "Estándar"
+    "standard": "Estándar",
+    "premium": "Premium"
   },
 
   "upload": {
