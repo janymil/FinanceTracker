@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -52,6 +53,7 @@ interface ImportOptions {
 }
 
 export default function ExportPage() {
+  const { t } = useTranslation();
   const { isReady, user } = useClerkUserReady();
   const { getToken } = useAuth();
   const { toast } = useToast();
@@ -127,8 +129,8 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     window.URL.revokeObjectURL(url);
     
     toast({
-      title: "Example Downloaded",
-      description: "Example CSV file has been downloaded to help you format your data.",
+      title: t('export.example_downloaded'),
+      description: t('export.example_downloaded_desc'),
     });
   };
 
@@ -148,8 +150,8 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
       setImportResults(null);
     } else {
       toast({
-        title: "Invalid File",
-        description: "Please select a CSV or JSON file.",
+        title: t('export.invalid_file'),
+        description: t('export.invalid_file_desc'),
         variant: "destructive",
       });
     }
@@ -191,17 +193,17 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     if (!selectedFile) return;
 
     setIsImporting(true);
-    setImportProgress({ percentage: 0, message: "Reading file..." });
+    setImportProgress({ percentage: 0, message: t('export.reading_file') });
 
     try {
       const token = await getToken();
       if (!token) {
-        throw new Error("Authentication required");
+        throw new Error(t('export.auth_required'));
       }
       
       const fileContent = await selectedFile.text();
       
-      setImportProgress({ percentage: 30, message: "Validating data..." });
+      setImportProgress({ percentage: 30, message: t('export.validating_data') });
 
       const response = await fetch('/api/import-data', {
         method: 'POST',
@@ -216,11 +218,11 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
         })
       });
 
-      setImportProgress({ percentage: 70, message: "Processing import..." });
+      setImportProgress({ percentage: 70, message: t('export.processing_import') });
 
       if (response.ok) {
         const result = await response.json();
-        setImportProgress({ percentage: 100, message: "Import completed!" });
+        setImportProgress({ percentage: 100, message: t('export.import_completed') });
         
         // Set cache invalidation flag for AI components
         if (result.cacheCleared) {
@@ -234,9 +236,11 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
         }, 500);
 
         toast({
-          title: "Import Successful",
-          description: `Successfully imported ${Object.values(result.summary).reduce((sum: number, val: any) => 
-            typeof val === 'number' ? sum + val : sum, 0)} items. AI insights will refresh automatically.`,
+          title: t('export.import_successful'),
+          description: t('export.import_successful_desc', { 
+            count: Object.values(result.summary).reduce((sum: number, val: any) => 
+              typeof val === 'number' ? sum + val : sum, 0) 
+          }),
         });
       } else {
         const errorData = await response.json();
