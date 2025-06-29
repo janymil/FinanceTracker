@@ -5,6 +5,7 @@ import { z } from "zod";
 import { useLocation } from "wouter";
 import { useAuth } from "@clerk/clerk-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,12 +14,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Gift, Sparkles, CheckCircle, Lock } from "lucide-react";
 import { SEO } from "@/components/SEO";
 
-const redeemSchema = z.object({
-  code1: z.string().min(1, "Code 1 is required"),
-  code2: z.string().optional(),
-});
-
-type RedeemForm = z.infer<typeof redeemSchema>;
+type RedeemForm = {
+  code1: string;
+  code2?: string;
+};
 
 interface RedeemStatus {
   redeemedCodes: Array<{
@@ -37,9 +36,16 @@ export default function RedeemPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [redeemStatus, setRedeemStatus] = useState<RedeemStatus | null>(null);
   const [statusLoading, setStatusLoading] = useState(true);
+
+  // Create schema with translations
+  const redeemSchema = z.object({
+    code1: z.string().min(1, t("redeem.validation.code1_required")),
+    code2: z.string().optional(),
+  });
 
   const form = useForm<RedeemForm>({
     resolver: zodResolver(redeemSchema),
@@ -98,23 +104,23 @@ export default function RedeemPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Failed to redeem codes");
+        throw new Error(result.error || t("redeem.errors.failed_to_redeem"));
       }
 
       const { plan, validCodes, invalidCodes } = result;
 
       if (invalidCodes.length > 0) {
         toast({
-          title: "Some codes were invalid",
-          description: `Invalid codes: ${invalidCodes.join(", ")}`,
+          title: t("redeem.toast.some_codes_invalid"),
+          description: t("redeem.toast.invalid_codes_list", { codes: invalidCodes.join(", ") }),
           variant: "destructive",
         });
       }
 
       if (validCodes.length > 0) {
         toast({
-          title: "Codes redeemed successfully!",
-          description: `You've been upgraded to ${plan} plan with ${result.totalCodes} total codes.`,
+          title: t("redeem.toast.codes_redeemed_success"),
+          description: t("redeem.toast.upgraded_to_plan", { plan, totalCodes: result.totalCodes }),
         });
         
         // Refresh status after successful redemption
@@ -133,13 +139,13 @@ export default function RedeemPage() {
         
         form.reset();
       } else {
-        throw new Error("No valid codes provided");
+        throw new Error(t("redeem.errors.no_valid_codes"));
       }
     } catch (error) {
       console.error("Redemption error:", error);
       toast({
-        title: "Redemption failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        title: t("redeem.toast.redemption_failed"),
+        description: error instanceof Error ? error.message : t("redeem.errors.unexpected_error"),
         variant: "destructive",
       });
     } finally {
@@ -150,8 +156,8 @@ export default function RedeemPage() {
   return (
     <>
       <SEO 
-        title="Redeem AppSumo Code - FinanzerPro"
-        description="Redeem your AppSumo codes to unlock Standard or Premium features in FinanzerPro."
+        title={t("redeem.seo.title")}
+        description={t("redeem.seo.description")}
       />
       
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
@@ -162,10 +168,10 @@ export default function RedeemPage() {
                 <Gift className="w-8 h-8 text-white" />
               </div>
               <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Redeem AppSumo Code
+                {t("redeem.title")}
               </CardTitle>
               <CardDescription className="text-gray-600 dark:text-gray-300">
-                Enter your AppSumo redemption codes to unlock premium features
+                {t("redeem.description")}
               </CardDescription>
             </CardHeader>
             
@@ -176,7 +182,7 @@ export default function RedeemPage() {
                   <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border">
                     <h3 className="font-semibold mb-3 flex items-center gap-2">
                       <CheckCircle className="w-4 h-4 text-green-500" />
-                      Your Redeemed Codes
+                      {t("redeem.status.your_redeemed_codes")}
                     </h3>
                     
                     {redeemStatus.totalRedeemed > 0 ? (
@@ -191,22 +197,25 @@ export default function RedeemPage() {
                         ))}
                         <div className="mt-3 p-2 bg-green-50 dark:bg-green-900 rounded border border-green-200 dark:border-green-700">
                           <p className="text-sm text-green-700 dark:text-green-300">
-                            <strong>Current Plan:</strong> {redeemStatus.plan.toUpperCase()}
+                            <strong>{t("redeem.status.current_plan")}:</strong> {redeemStatus.plan.toUpperCase()}
                           </p>
                           {redeemStatus.canRedeemMore ? (
                             <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                              You can redeem {redeemStatus.remainingSlots} more code(s) {redeemStatus.remainingSlots === 1 ? 'to unlock Premium' : ''}
+                              {t("redeem.status.can_redeem_more", { 
+                                count: redeemStatus.remainingSlots,
+                                additionalText: redeemStatus.remainingSlots === 1 ? t("redeem.status.to_unlock_premium") : ""
+                              })}
                             </p>
                           ) : (
                             <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                              Maximum codes redeemed - Premium plan activated!
+                              {t("redeem.status.maximum_codes_redeemed")}
                             </p>
                           )}
                         </div>
                       </div>
                     ) : (
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        No codes redeemed yet. Redeem 1 code for Standard plan or 2 codes for Premium plan.
+                        {t("redeem.status.no_codes_redeemed")}
                       </p>
                     )}
                   </div>
@@ -223,12 +232,12 @@ export default function RedeemPage() {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Sparkles className="w-4 h-4 text-purple-500" />
-                          Code 1 (Required)
+                          {t("redeem.form.code1_label")}
                         </FormLabel>
                         <FormControl>
                           <Input
                             {...field}
-                            placeholder="Enter your first redemption code"
+                            placeholder={t("redeem.form.code1_placeholder")}
                             className="h-12 text-center font-mono tracking-wider uppercase"
                             onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                           />
@@ -245,12 +254,12 @@ export default function RedeemPage() {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Sparkles className="w-4 h-4 text-blue-500" />
-                          Code 2 (Optional - for Premium)
+                          {t("redeem.form.code2_label")}
                         </FormLabel>
                         <FormControl>
                           <Input
                             {...field}
-                            placeholder="Enter your second redemption code"
+                            placeholder={t("redeem.form.code2_placeholder")}
                             className="h-12 text-center font-mono tracking-wider uppercase"
                             onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                           />
@@ -261,11 +270,11 @@ export default function RedeemPage() {
                   />
 
                   <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">How it works:</h4>
+                    <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">{t("redeem.info.how_it_works")}:</h4>
                     <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                      <li>• 1 Code = Standard Plan (Enhanced features)</li>
-                      <li>• 2 Codes = Premium Plan (All features unlocked)</li>
-                      <li>• Codes are single-use and cannot be transferred</li>
+                      <li>• {t("redeem.info.one_code_standard")}</li>
+                      <li>• {t("redeem.info.two_codes_premium")}</li>
+                      <li>• {t("redeem.info.codes_single_use")}</li>
                     </ul>
                   </div>
 
@@ -277,12 +286,12 @@ export default function RedeemPage() {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Redeeming codes...
+                        {t("redeem.buttons.redeeming")}
                       </>
                     ) : (
                       <>
                         <Gift className="mr-2 h-4 w-4" />
-                        Redeem Codes
+                        {t("redeem.buttons.redeem_codes")}
                       </>
                     )}
                   </Button>
