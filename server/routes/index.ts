@@ -19,6 +19,7 @@ import { registerImportRoutes } from "./importRoutes";
 import { handleContactForm } from "../contact";
 import { registerRedeemRoutes } from "./redeemRoutes";
 import { registerClerkWebhookRoutes } from "./clerkWebhooks";
+import { registerPDFRoutes } from "./pdfRoutes";
 // Contextual financial tips routes moved to aiRoutes.ts
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -46,6 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/upload-receipt', uploadReceiptHandler);
   registerAIRoutes(app);
   registerAdminRoutes(app);
+  registerPDFRoutes(app);
   // Contextual financial tips routes moved to aiRoutes.ts
 
   // Register Clerk webhooks after other routes to avoid middleware conflicts
