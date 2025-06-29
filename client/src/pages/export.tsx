@@ -553,7 +553,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                           />
                         </div>
                         <div>
-                          <label className="text-sm font-medium">End Date</label>
+                          <label className="text-sm font-medium">{t('export.end_date')}</label>
                           <input
                             type="date"
                             className="w-full px-3 py-2 border rounded-md"
@@ -567,7 +567,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
 
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium mb-3 block">Include in Export</label>
+                      <label className="text-sm font-medium mb-3 block">{t('export.include_label')}</label>
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2">
                           <Checkbox
@@ -576,7 +576,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                             onCheckedChange={(checked) => 
                               setExportOptions(prev => ({ ...prev, includeTransactions: !!checked }))}
                           />
-                          <label htmlFor="transactions" className="text-sm">Transactions</label>
+                          <label htmlFor="transactions" className="text-sm">{t('export.include_transactions')}</label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Checkbox
@@ -585,7 +585,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                             onCheckedChange={(checked) => 
                               setExportOptions(prev => ({ ...prev, includeBudgets: !!checked }))}
                           />
-                          <label htmlFor="budgets" className="text-sm">Budgets</label>
+                          <label htmlFor="budgets" className="text-sm">{t('export.include_budgets')}</label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Checkbox
@@ -594,7 +594,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                             onCheckedChange={(checked) => 
                               setExportOptions(prev => ({ ...prev, includeGoals: !!checked }))}
                           />
-                          <label htmlFor="goals" className="text-sm">Goals</label>
+                          <label htmlFor="goals" className="text-sm">{t('export.include_goals')}</label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Checkbox
@@ -603,7 +603,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                             onCheckedChange={(checked) => 
                               setExportOptions(prev => ({ ...prev, includeSummary: !!checked }))}
                           />
-                          <label htmlFor="summary" className="text-sm">Financial Summary</label>
+                          <label htmlFor="summary" className="text-sm">{t('export.include_summary')}</label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Checkbox
@@ -612,7 +612,7 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                             onCheckedChange={(checked) => 
                               setExportOptions(prev => ({ ...prev, includeCharts: !!checked }))}
                           />
-                          <label htmlFor="charts" className="text-sm">Charts & Visualizations</label>
+                          <label htmlFor="charts" className="text-sm">{t('export.include_charts')}</label>
                         </div>
                       </div>
                     </div>
@@ -621,8 +621,8 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
 
                 <div className="text-center py-8 text-muted-foreground">
                   <Download className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Export functionality coming soon</p>
-                  <p className="text-sm">Support for PDF, CSV, Excel, JSON, and more</p>
+                  <p>{t('export.coming_soon')}</p>
+                  <p className="text-sm">{t('export.coming_soon_desc')}</p>
                 </div>
               </CardContent>
             </Card>
@@ -634,10 +634,10 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Upload className="h-5 w-5" />
-                  Import Financial Data
+                  {t('export.import_title')}
                 </CardTitle>
                 <CardDescription>
-                  Import transactions, budgets, goals, and categories from CSV or JSON files
+                  {t('export.import_description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
