@@ -116,6 +116,12 @@ export const categoryTranslations = {
     'en-us': 'Other',
     'es-pe': 'Otro',
     'sk-sk': 'Iné'
+  },
+  // Handle the specific database value
+  'fondo_de_emergencia': {
+    'en-us': 'Emergency Fund',
+    'es-pe': 'Fondo de emergencia',
+    'sk-sk': 'Núdzový fond'
   }
 };
 

@@ -70,6 +70,56 @@ export default function Goals() {
     return null;
   }
 
+  // Category translation function
+  const translateCategory = (categoryName: string): string => {
+    if (!categoryName) return '';
+    
+    // Get current language from i18next
+    const currentLang = t('common.language_code'); // Use a key that returns the language code
+    
+    // Simple translation mapping for common categories
+    const translations: Record<string, Record<string, string>> = {
+      'fondo_de_emergencia': {
+        'en-us': 'Emergency Fund',
+        'es-pe': 'Fondo de emergencia',
+        'sk-sk': 'Núdzový fond'
+      },
+      'Emergency Fund': {
+        'en-us': 'Emergency Fund',
+        'es-pe': 'Fondo de emergencia', 
+        'sk-sk': 'Núdzový fond'
+      },
+      'Vacation': {
+        'en-us': 'Vacation',
+        'es-pe': 'Vacaciones',
+        'sk-sk': 'Dovolenka'
+      },
+      'House Down Payment': {
+        'en-us': 'House Down Payment',
+        'es-pe': 'Pago inicial de casa',
+        'sk-sk': 'Záloha na dom'
+      },
+      'Car Purchase': {
+        'en-us': 'Car Purchase',
+        'es-pe': 'Compra de auto',
+        'sk-sk': 'Kúpa auta'
+      },
+      'Retirement': {
+        'en-us': 'Retirement',
+        'es-pe': 'Jubilación',
+        'sk-sk': 'Dôchodok'
+      }
+    };
+    
+    const translation = translations[categoryName];
+    if (translation && translation[currentLang]) {
+      return translation[currentLang];
+    }
+    
+    // Return original name if no translation found
+    return categoryName;
+  };
+
   // Get auth headers for Clerk authentication
   const getAuthHeaders = async (): Promise<Record<string, string>> => {
     try {
@@ -594,7 +644,7 @@ export default function Goals() {
                     {goal.category && (
                       <div className="mt-2">
                         <Badge variant="secondary" className="text-xs">
-                          {goal.category}
+                          {translateCategory(goal.category)}
                         </Badge>
                       </div>
                     )}
