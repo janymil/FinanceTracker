@@ -251,8 +251,8 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
       setImportProgress(null);
       loadImportLogs(); // Refresh logs even after failed import
       toast({
-        title: "Import Failed",
-        description: error instanceof Error ? error.message : "Failed to import data",
+        title: t('export.import_failed'),
+        description: error instanceof Error ? error.message : t('export.import_failed_desc'),
         variant: "destructive",
       });
     } finally {
@@ -368,16 +368,16 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
         }
 
         toast({
-          title: "Export Successful",
-          description: `Your financial data has been exported as ${exportOptions.format.toUpperCase()}.`,
+          title: t('export.export_successful'),
+          description: t('export.export_successful_desc', { format: exportOptions.format.toUpperCase() }),
         });
       } else {
         throw new Error('Export failed');
       }
     } catch (error) {
       toast({
-        title: "Export Failed",
-        description: "There was an error exporting your data. Please try again.",
+        title: t('export.export_failed'),
+        description: t('export.export_failed_desc'),
         variant: "destructive",
       });
     }
@@ -404,8 +404,8 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
         console.log('BACKUP FRONTEND: Backup completed successfully', result);
         
         toast({
-          title: "Backup Created",
-          description: "Your financial data has been backed up to cloud storage.",
+          title: t('export.backup_created'),
+          description: t('export.backup_created_desc'),
         });
         
         // Refresh backup status
@@ -416,8 +416,8 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     } catch (error: any) {
       console.error('BACKUP FRONTEND: Backup failed', error);
       toast({
-        title: "Backup Failed",
-        description: "There was an error creating your backup. Please try again.",
+        title: t('export.backup_failed'),
+        description: t('export.backup_failed_desc'),
         variant: "destructive",
       });
     } finally {
@@ -446,8 +446,12 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
         const result = await response.json();
         
         toast({
-          title: "Restore Successful",
-          description: `Restored ${result.restoredData.transactions} transactions and ${result.restoredData.budgets} budgets from backup file: ${result.filename}`,
+          title: t('export.restore_successful'),
+          description: t('export.restore_successful_desc', { 
+            transactions: result.restoredData.transactions,
+            budgets: result.restoredData.budgets,
+            filename: result.filename
+          }),
         });
         
         // Just refresh backup status after restore
@@ -458,8 +462,8 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     } catch (error: any) {
       console.error('RESTORE FRONTEND: Restore failed', error);
       toast({
-        title: "Restore Failed",
-        description: "There was an error restoring your backup. Please try again.",
+        title: t('export.restore_failed'),
+        description: t('export.restore_failed_desc'),
         variant: "destructive",
       });
     } finally {
@@ -471,9 +475,9 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     <RequirePlan plan="premium" feature="Data Management">
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Data Management</h1>
+          <h1 className="text-3xl font-bold">{t('export.page_title')}</h1>
           <p className="text-muted-foreground">
-            Export your financial data, manage cloud backups, and import data from other platforms.
+            {t('export.page_description')}
           </p>
         </div>
 
@@ -1124,8 +1128,8 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                         handleRestore(filename);
                       } else {
                         toast({
-                          title: "No Backups Available",
-                          description: "No backups found to restore.",
+                          title: t('export.no_backups_available'),
+                          description: t('export.no_backups_found'),
                           variant: "destructive",
                         });
                       }
