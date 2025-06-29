@@ -667,22 +667,17 @@ export default function Income() {
                     </div>
                     <div>
                       <p className="font-medium">{transaction.description}</p>
-                      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        <span>{formatDate(transaction.date)}</span>
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 flex-wrap">
+                        <span className="shrink-0">{formatDate(transaction.date)}</span>
                         {transaction.categoryName && (
-                          <>
-                            <span>•</span>
-                            <span>{transaction.categoryName}</span>
-                          </>
+                          <Badge variant="outline" className="text-green-600 border-green-600 text-xs">
+                            {transaction.categoryName}
+                          </Badge>
                         )}
                         {transaction.isRecurring && (
-                          <>
-                            <span>•</span>
-                            <div className="flex items-center">
-                              <Repeat className="h-3 w-3 mr-1" />
-                              <span>{t(`common.${transaction.recurringFrequency}`)}</span>
-                            </div>
-                          </>
+                          <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs">
+                            🔄 {t(`recurring.${transaction.recurringFrequency}`)}
+                          </Badge>
                         )}
                       </div>
                       {transaction.referenceNote && (
