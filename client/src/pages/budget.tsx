@@ -30,7 +30,7 @@ import { Link } from "wouter";
 import RequirePlan from "@/components/require-plan";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
-import { getDateLocale } from "@/lib/dateUtils";
+import { formatDate } from "@/lib/dateUtils";
 
 interface Budget {
   id: number;
@@ -58,8 +58,39 @@ export default function Budget() {
   const { isReady, user } = useClerkUserReady();
   const { toast } = useToast();
   const { currency } = useCurrency();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const displayCurrency = currency || '$';
+
+  // Helper function to format dates with proper localization
+  const formatDateLocalized = (date: Date, formatType: 'month-year' | 'month-day' | 'full-date' = 'month-year'): string => {
+    const currentLang = i18n.language;
+    
+    if (formatType === 'month-year') {
+      if (currentLang.startsWith('es')) {
+        return date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+      } else if (currentLang.startsWith('sk')) {
+        return date.toLocaleDateString('sk-SK', { month: 'long', year: 'numeric' });
+      } else {
+        return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      }
+    } else if (formatType === 'month-day') {
+      if (currentLang.startsWith('es')) {
+        return date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
+      } else if (currentLang.startsWith('sk')) {
+        return date.toLocaleDateString('sk-SK', { month: 'short', day: 'numeric' });
+      } else {
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+    } else {
+      if (currentLang.startsWith('es')) {
+        return date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' });
+      } else if (currentLang.startsWith('sk')) {
+        return date.toLocaleDateString('sk-SK', { month: 'short', day: 'numeric', year: 'numeric' });
+      } else {
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+    }
+  };
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -319,9 +350,9 @@ export default function Budget() {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <Calendar className="h-5 w-5" />
-                    {format(currentDate, "MMMM yyyy")}
+                    {formatDateLocalized(currentDate, 'month-year')}
                   </CardTitle>
-                  <CardDescription>{t('budget.total_budget_for')} {format(currentDate, "MMMM yyyy")}: {displayCurrency}{totalBudget.toFixed(2)}</CardDescription>
+                  <CardDescription>{t('budget.total_budget_for')} {formatDateLocalized(currentDate, 'month-year')}: {displayCurrency}{totalBudget.toFixed(2)}</CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={() => navigateMonth("prev")}>
@@ -484,7 +515,7 @@ export default function Budget() {
         <CardHeader>
           <CardTitle>{t('budget.budget_categories')}</CardTitle>
           <CardDescription>
-            {t('budget.for_the_period')}: {format(startOfMonth(currentDate), "MMMM dd")} - {format(endOfMonth(currentDate), "MMMM dd, yyyy")}
+            {t('budget.for_the_period')}: {formatDateLocalized(startOfMonth(currentDate), 'month-day')} - {formatDateLocalized(endOfMonth(currentDate), 'full-date')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -522,7 +553,7 @@ export default function Budget() {
                           <div>
                             <h3 className="font-semibold">{budget.categoryName}</h3>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              {format(new Date(budget.startDate), "MMM dd")} - {format(new Date(budget.endDate), "MMM dd, yyyy")}
+                              {formatDateLocalized(new Date(budget.startDate), 'month-day')} - {formatDateLocalized(new Date(budget.endDate), 'full-date')}
                             </p>
                           </div>
                         </div>
