@@ -72,7 +72,23 @@ export default function Transactions() {
   const { toast } = useToast();
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  // Helper function to format dates consistently
+  const formatDateForDisplay = (dateString: string) => {
+    const dateObj = new Date(dateString);
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const year = dateObj.getFullYear();
+    
+    if (i18n.language.startsWith('es')) {
+      return `${day}/${month}/${year}`;
+    } else if (i18n.language.startsWith('sk')) {
+      return `${day}.${month}.${year}`;
+    } else {
+      return `${month}/${day}/${year}`;
+    }
+  };
 
   // Helper functions for category localization
   const isPredefinedCategory = (category: any): boolean => {
