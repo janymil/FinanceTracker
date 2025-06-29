@@ -1589,6 +1589,9 @@
     },
     "forms": {
       "add_contribution": "Add Contribution",
+      "contribute_description": "Contribute to \"{{goalName}}\" and help reach the target faster!",
+      "amount_label": "Amount ($)",
+      "note_label": "Optional Note",
       "amount_placeholder": "Amount ($)",
       "note_placeholder": "Optional note...",
       "adding": "Adding...",

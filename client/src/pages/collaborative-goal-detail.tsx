@@ -429,22 +429,22 @@ export default function CollaborativeGoalDetailPage() {
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
                 <div className="flex items-center gap-3 mb-3">
                   <DollarSign className="w-6 h-6" />
-                  <span className="font-semibold">Raised</span>
+                  <span className="font-semibold">{t('collaborative_goal_detail.hero.raised')}</span>
                 </div>
                 <div className="text-2xl font-bold">${parseFloat(goal.currentAmount).toLocaleString()}</div>
-                <div className="text-sm opacity-75">{progressPercentage.toFixed(1)}% complete</div>
+                <div className="text-sm opacity-75">{progressPercentage.toFixed(1)}% {t('collaborative_goal_detail.hero.complete')}</div>
               </div>
               
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
                 <div className="flex items-center gap-3 mb-3">
                   <Calendar className="w-6 h-6" />
-                  <span className="font-semibold">Target Date</span>
+                  <span className="font-semibold">{t('collaborative_goal_detail.hero.target_date')}</span>
                 </div>
                 <div className="text-lg font-bold">
                   {new Date(goal.targetDate).toLocaleDateString()}
                 </div>
                 <div className="text-sm opacity-75">
-                  {Math.ceil((new Date(goal.targetDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days left
+                  {Math.ceil((new Date(goal.targetDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} {t('collaborative_goal_detail.hero.days_left')}
                 </div>
               </div>
             </div>
@@ -463,14 +463,14 @@ export default function CollaborativeGoalDetailPage() {
                 <DialogTrigger asChild>
                   <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-50">
                     <Plus className="w-5 h-5 mr-2" />
-                    Add Contribution
+                    {t('collaborative_goal_detail.hero.add_contribution')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Add Contribution</DialogTitle>
+                    <DialogTitle>{t('collaborative_goal_detail.hero.add_contribution')}</DialogTitle>
                     <DialogDescription>
-                      Contribute to "{goal.name}" and help reach the target faster!
+                      {t('collaborative_goal_detail.forms.contribute_description', { goalName: goal.name })}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
