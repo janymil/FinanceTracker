@@ -597,19 +597,15 @@ export default function Goals() {
                       <div className="mt-2">
                         <Badge variant="secondary" className="text-xs">
                           {(() => {
-                            // Debug logging
-                            console.log('Goal category:', goal.category);
-                            console.log('Available categories:', categories.map(c => ({ id: c.id, name: c.name })));
-                            
-                            // Find the matching category by checking if the stored category matches the processed name
-                            const matchingCategory = categories.find(cat => 
-                              cat.name.toLowerCase().replace(/\s+/g, '_') === goal.category ||
-                              cat.name.toLowerCase() === goal.category.toLowerCase() ||
-                              cat.name === goal.category
-                            );
-                            
-                            console.log('Matching category found:', matchingCategory);
-                            return matchingCategory ? matchingCategory.name : goal.category;
+                            // Simple translation mapping for the specific case
+                            if (goal.category === 'fondo_de_emergencia') {
+                              // Check the current language and return appropriate translation
+                              const currentLang = window.location.pathname.split('/')[1]; // es, sk, en
+                              if (currentLang === 'sk') return 'Núdzový fond';
+                              if (currentLang === 'es') return 'Fondo de emergencia';
+                              return 'Emergency Fund'; // default English
+                            }
+                            return goal.category;
                           })()}
                         </Badge>
                       </div>
