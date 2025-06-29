@@ -2345,6 +2345,83 @@
       "title": "9. Changes to This Policy",
       "description": "We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the \"Last updated\" date."
     },
+    "section3": {
+      "title": "3. AI-Powered Features and Data Processing",
+      "description": "FinanzerPro uses artificial intelligence to provide personalized financial insights and recommendations. Here's how we handle your data for AI processing:",
+      "ai_provider": {
+        "title": "AI Service Provider:",
+        "description": "We use OpenAI's GPT models to analyze spending patterns and generate insights"
+      },
+      "data_anonymization": {
+        "title": "Data Anonymization:",
+        "description": "All transaction data is anonymized and stripped of personally identifiable information before AI processing"
+      },
+      "processing_purpose": {
+        "title": "Processing Purpose:",
+        "description": "AI analysis is used exclusively for generating financial recommendations, spending insights, and personalized tips"
+      },
+      "data_retention": {
+        "title": "Data Retention:",
+        "description": "Anonymized data sent to OpenAI is not stored by the AI service beyond processing requirements"
+      },
+      "user_control": {
+        "title": "User Control:",
+        "description": "You can disable AI features in your account settings to opt-out of this processing"
+      },
+      "no_personal_data": {
+        "title": "No Personal Data:",
+        "description": "Your name, email, account details, or any identifying information is never shared with AI services"
+      },
+      "important": {
+        "title": "Important:",
+        "description": "AI processing only occurs for Standard and Premium subscribers who have AI features enabled. Free plan users do not have their data processed by AI services."
+      }
+    },
+    "section4": {
+      "title": "4. Information Sharing",
+      "description": "We do not sell, trade, or otherwise transfer your personal information to third parties except:",
+      "service_providers": {
+        "title": "Service Providers:",
+        "description": "Third-party companies that help us operate our service"
+      },
+      "payment_processing": {
+        "title": "Payment Processing:",
+        "description": "Stripe for subscription payments (no financial transaction data shared)"
+      },
+      "ai_processing": {
+        "title": "AI Processing:",
+        "description": "OpenAI for anonymized financial insights (as detailed in section 3 above)"
+      },
+      "cloud_storage": {
+        "title": "Cloud Storage:",
+        "description": "Encrypted backups for Premium users"
+      },
+      "legal_requirements": {
+        "title": "Legal Requirements:",
+        "description": "When required by law or to protect rights and safety"
+      }
+    },
+    "section5": {
+      "title": "5. Data Security",
+      "description": "We implement appropriate security measures to protect your personal information:",
+      "ssl_encryption": "All data transmission is encrypted using SSL/TLS",
+      "password_hashing": "Passwords are hashed using industry-standard encryption",
+      "security_audits": "Regular security audits and updates",
+      "limited_access": "Limited access to personal data on a need-to-know basis",
+      "secure_backup": "Secure cloud backup storage with encryption"
+    },
+    "section6": {
+      "title": "6. Data Retention",
+      "description": "We retain your information for as long as your account is active or as needed to provide services. You may delete your account and data at any time through your account settings."
+    },
+    "section7": {
+      "title": "7. Your Rights",
+      "description": "You have the right to:",
+      "access_rights": "Access, update, or delete your personal information",
+      "export_rights": "Export your data in a portable format",
+      "opt_out_rights": "Opt out of certain communications",
+      "information_rights": "Request information about how your data is used"
+    },
     "section10": {
       "title": "10. Contact Us",
       "description": "If you have any questions about this Privacy Policy, please contact us at:",

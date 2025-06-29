@@ -2320,6 +2320,83 @@
       "title": "9. Cambios a Esta Política",
       "description": "Podemos actualizar esta política de privacidad de vez en cuando. Le notificaremos de cualquier cambio publicando la nueva política en esta página y actualizando la fecha de \"Última actualización\"."
     },
+    "section3": {
+      "title": "3. Características Impulsadas por IA y Procesamiento de Datos",
+      "description": "FinanzerPro utiliza inteligencia artificial para proporcionar perspectivas financieras personalizadas y recomendaciones. Así es como manejamos sus datos para el procesamiento de IA:",
+      "ai_provider": {
+        "title": "Proveedor de Servicios de IA:",
+        "description": "Utilizamos los modelos GPT de OpenAI para analizar patrones de gasto y generar perspectivas"
+      },
+      "data_anonymization": {
+        "title": "Anonimización de Datos:",
+        "description": "Todos los datos de transacciones son anonimizados y despojados de información de identificación personal antes del procesamiento de IA"
+      },
+      "processing_purpose": {
+        "title": "Propósito del Procesamiento:",
+        "description": "El análisis de IA se utiliza exclusivamente para generar recomendaciones financieras, perspectivas de gasto y consejos personalizados"
+      },
+      "data_retention": {
+        "title": "Retención de Datos:",
+        "description": "Los datos anonimizados enviados a OpenAI no son almacenados por el servicio de IA más allá de los requisitos de procesamiento"
+      },
+      "user_control": {
+        "title": "Control del Usuario:",
+        "description": "Puede desactivar las características de IA en la configuración de su cuenta para optar por no participar en este procesamiento"
+      },
+      "no_personal_data": {
+        "title": "Sin Datos Personales:",
+        "description": "Su nombre, correo electrónico, detalles de cuenta o cualquier información de identificación nunca se comparte con servicios de IA"
+      },
+      "important": {
+        "title": "Importante:",
+        "description": "El procesamiento de IA solo ocurre para suscriptores Estándar y Premium que tienen las características de IA habilitadas. Los usuarios del plan gratuito no tienen sus datos procesados por servicios de IA."
+      }
+    },
+    "section4": {
+      "title": "4. Compartir Información",
+      "description": "No vendemos, intercambiamos o transferimos de otra manera su información personal a terceros excepto:",
+      "service_providers": {
+        "title": "Proveedores de Servicios:",
+        "description": "Empresas de terceros que nos ayudan a operar nuestro servicio"
+      },
+      "payment_processing": {
+        "title": "Procesamiento de Pagos:",
+        "description": "Stripe para pagos de suscripción (no se comparten datos de transacciones financieras)"
+      },
+      "ai_processing": {
+        "title": "Procesamiento de IA:",
+        "description": "OpenAI para perspectivas financieras anonimizadas (como se detalla en la sección 3 anterior)"
+      },
+      "cloud_storage": {
+        "title": "Almacenamiento en la Nube:",
+        "description": "Respaldos cifrados para usuarios Premium"
+      },
+      "legal_requirements": {
+        "title": "Requisitos Legales:",
+        "description": "Cuando sea requerido por ley o para proteger derechos y seguridad"
+      }
+    },
+    "section5": {
+      "title": "5. Seguridad de Datos",
+      "description": "Implementamos medidas de seguridad apropiadas para proteger su información personal:",
+      "ssl_encryption": "Toda la transmisión de datos está cifrada usando SSL/TLS",
+      "password_hashing": "Las contraseñas están cifradas usando encriptación estándar de la industria",
+      "security_audits": "Auditorías de seguridad y actualizaciones regulares",
+      "limited_access": "Acceso limitado a datos personales en base a necesidad de saber",
+      "secure_backup": "Almacenamiento seguro de respaldo en la nube con cifrado"
+    },
+    "section6": {
+      "title": "6. Retención de Datos",
+      "description": "Retenemos su información mientras su cuenta esté activa o según sea necesario para proporcionar servicios. Puede eliminar su cuenta y datos en cualquier momento a través de la configuración de su cuenta."
+    },
+    "section7": {
+      "title": "7. Sus Derechos",
+      "description": "Tiene derecho a:",
+      "access_rights": "Acceder, actualizar o eliminar su información personal",
+      "export_rights": "Exportar sus datos en un formato portátil",
+      "opt_out_rights": "Optar por no recibir ciertas comunicaciones",
+      "information_rights": "Solicitar información sobre cómo se usan sus datos"
+    },
     "section10": {
       "title": "10. Contáctenos",
       "description": "Si tiene alguna pregunta sobre esta Política de Privacidad, contáctenos en:",

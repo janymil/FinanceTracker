@@ -55,68 +55,68 @@ export default function PrivacyPolicy() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("3. AI-Powered Features and Data Processing")}</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("privacy.section3.title")}</h2>
             <p className="mb-4">
-              {t("FinanzerPro uses artificial intelligence to provide personalized financial insights and recommendations. Here's how we handle your data for AI processing:")}
+              {t("privacy.section3.description")}
             </p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li><strong>{t("AI Service Provider:")}</strong> {t("We use OpenAI's GPT models to analyze spending patterns and generate insights")}</li>
-              <li><strong>{t("Data Anonymization:")}</strong> {t("All transaction data is anonymized and stripped of personally identifiable information before AI processing")}</li>
-              <li><strong>{t("Processing Purpose:")}</strong> {t("AI analysis is used exclusively for generating financial recommendations, spending insights, and personalized tips")}</li>
-              <li><strong>{t("Data Retention:")}</strong> {t("Anonymized data sent to OpenAI is not stored by the AI service beyond processing requirements")}</li>
-              <li><strong>{t("User Control:")}</strong> {t("You can disable AI features in your account settings to opt-out of this processing")}</li>
-              <li><strong>{t("No Personal Data:")}</strong> {t("Your name, email, account details, or any identifying information is never shared with AI services")}</li>
+              <li><strong>{t("privacy.section3.ai_provider.title")}</strong> {t("privacy.section3.ai_provider.description")}</li>
+              <li><strong>{t("privacy.section3.data_anonymization.title")}</strong> {t("privacy.section3.data_anonymization.description")}</li>
+              <li><strong>{t("privacy.section3.processing_purpose.title")}</strong> {t("privacy.section3.processing_purpose.description")}</li>
+              <li><strong>{t("privacy.section3.data_retention.title")}</strong> {t("privacy.section3.data_retention.description")}</li>
+              <li><strong>{t("privacy.section3.user_control.title")}</strong> {t("privacy.section3.user_control.description")}</li>
+              <li><strong>{t("privacy.section3.no_personal_data.title")}</strong> {t("privacy.section3.no_personal_data.description")}</li>
             </ul>
             <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mt-4">
               <p className="text-sm">
-                <strong>{t("Important:")}</strong> {t("AI processing only occurs for Standard and Premium subscribers who have AI features enabled. Free plan users do not have their data processed by AI services.")}
+                <strong>{t("privacy.section3.important.title")}</strong> {t("privacy.section3.important.description")}
               </p>
             </div>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("4. Information Sharing")}</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("privacy.section4.title")}</h2>
             <p className="mb-4">
-              {t("We do not sell, trade, or otherwise transfer your personal information to third parties except:")}
+              {t("privacy.section4.description")}
             </p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li><strong>{t("Service Providers:")}</strong> {t("Third-party companies that help us operate our service")}</li>
-              <li><strong>{t("Payment Processing:")}</strong> {t("Stripe for subscription payments (no financial transaction data shared)")}</li>
-              <li><strong>{t("AI Processing:")}</strong> {t("OpenAI for anonymized financial insights (as detailed in section 3 above)")}</li>
-              <li><strong>{t("Cloud Storage:")}</strong> {t("Encrypted backups for Premium users")}</li>
-              <li><strong>{t("Legal Requirements:")}</strong> {t("When required by law or to protect rights and safety")}</li>
+              <li><strong>{t("privacy.section4.service_providers.title")}</strong> {t("privacy.section4.service_providers.description")}</li>
+              <li><strong>{t("privacy.section4.payment_processing.title")}</strong> {t("privacy.section4.payment_processing.description")}</li>
+              <li><strong>{t("privacy.section4.ai_processing.title")}</strong> {t("privacy.section4.ai_processing.description")}</li>
+              <li><strong>{t("privacy.section4.cloud_storage.title")}</strong> {t("privacy.section4.cloud_storage.description")}</li>
+              <li><strong>{t("privacy.section4.legal_requirements.title")}</strong> {t("privacy.section4.legal_requirements.description")}</li>
             </ul>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("5. Data Security")}</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("privacy.section5.title")}</h2>
             <p className="mb-4">
-              {t("We implement appropriate security measures to protect your personal information:")}
+              {t("privacy.section5.description")}
             </p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li>{t("All data transmission is encrypted using SSL/TLS")}</li>
-              <li>{t("Passwords are hashed using industry-standard encryption")}</li>
-              <li>{t("Regular security audits and updates")}</li>
-              <li>{t("Limited access to personal data on a need-to-know basis")}</li>
-              <li>{t("Secure cloud backup storage with encryption")}</li>
+              <li>{t("privacy.section5.ssl_encryption")}</li>
+              <li>{t("privacy.section5.password_hashing")}</li>
+              <li>{t("privacy.section5.security_audits")}</li>
+              <li>{t("privacy.section5.limited_access")}</li>
+              <li>{t("privacy.section5.secure_backup")}</li>
             </ul>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("6. Data Retention")}</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("privacy.section6.title")}</h2>
             <p className="mb-4">
-              {t("We retain your information for as long as your account is active or as needed to provide services. You may delete your account and data at any time through your account settings.")}
+              {t("privacy.section6.description")}
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("7. Your Rights")}</h2>
-            <p className="mb-4">{t("You have the right to:")}</p>
+            <h2 className="text-2xl font-semibold mb-4">{t("privacy.section7.title")}</h2>
+            <p className="mb-4">{t("privacy.section7.description")}</p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li>{t("Access, update, or delete your personal information")}</li>
-              <li>{t("Export your data in a portable format")}</li>
-              <li>{t("Opt out of certain communications")}</li>
-              <li>{t("Request information about how your data is used")}</li>
+              <li>{t("privacy.section7.access_rights")}</li>
+              <li>{t("privacy.section7.export_rights")}</li>
+              <li>{t("privacy.section7.opt_out_rights")}</li>
+              <li>{t("privacy.section7.information_rights")}</li>
             </ul>
           </section>
 

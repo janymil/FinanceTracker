@@ -2367,6 +2367,83 @@
       "title": "9. Zmeny týchto zásad",
       "description": "Môžeme túto zásadu ochrany súkromia čas od času aktualizovať. O akýchkoľvek zmenách vás budeme informovať zverejnením novej zásady na tejto stránke a aktualizáciou dátumu \"Posledná aktualizácia\"."
     },
+    "section3": {
+      "title": "3. AI-poháňané funkcie a spracovanie údajov",
+      "description": "FinanzerPro používa umelú inteligenciu na poskytovanie personalizovaných finančných poznatkov a odporúčaní. Takto spracovávame vaše údaje pre AI spracovanie:",
+      "ai_provider": {
+        "title": "Poskytovateľ AI služieb:",
+        "description": "Používame GPT modely OpenAI na analýzu vzorcov utrácania a generovanie poznatkov"
+      },
+      "data_anonymization": {
+        "title": "Anonimizácia údajov:",
+        "description": "Všetky transakčné údaje sú anonimizované a zbavené osobných identifikačných informácií pred AI spracovaním"
+      },
+      "processing_purpose": {
+        "title": "Účel spracovávania:",
+        "description": "AI analýza sa používa výlučne na generovanie finančných odporúčaní, poznatkov o utrácaní a personalizovaných tipov"
+      },
+      "data_retention": {
+        "title": "Uchovávanie údajov:",
+        "description": "Anonimizované údaje poslané do OpenAI nie sú uchovávané AI službou nad rámec požiadaviek spracovania"
+      },
+      "user_control": {
+        "title": "Kontrola používateľa:",
+        "description": "Môžete deaktivovať AI funkcie v nastaveniach svojho účtu a vypadnúť z tohto spracovania"
+      },
+      "no_personal_data": {
+        "title": "Žiadne osobné údaje:",
+        "description": "Vaše meno, e-mail, podrobnosti účtu alebo akékoľvek identifikačné informácie sa nikdy nezdieľajú s AI službami"
+      },
+      "important": {
+        "title": "Dôležité:",
+        "description": "AI spracovanie sa vyskytuje len pre predplatiteľov Štandard a Premium, ktorí majú AI funkcie povolené. Používatelia bezplatného plánu nemajú svoje údaje spracovávané AI službami."
+      }
+    },
+    "section4": {
+      "title": "4. Zdieľanie informácií",
+      "description": "Nepredávame, nevymieňame ani inak neprenášame vaše osobné informácie tretím stranám okrem:",
+      "service_providers": {
+        "title": "Poskytovatelia služieb:",
+        "description": "Spoločnosti tretích strán, ktoré nám pomáhajú prevádzkovať našu službu"
+      },
+      "payment_processing": {
+        "title": "Spracovanie platieb:",
+        "description": "Stripe pre platby predplatného (nezdieľajú sa údaje finančných transakcií)"
+      },
+      "ai_processing": {
+        "title": "AI spracovanie:",
+        "description": "OpenAI pre anonimizované finančné poznatky (ako je podrobne uvedené v sekcii 3 vyššie)"
+      },
+      "cloud_storage": {
+        "title": "Cloudové úložisko:",
+        "description": "Šifrované zálohy pre Premium používateľov"
+      },
+      "legal_requirements": {
+        "title": "Právne požiadavky:",
+        "description": "Keď to vyžaduje zákon alebo na ochranu práv a bezpečnosti"
+      }
+    },
+    "section5": {
+      "title": "5. Bezpečnosť údajov",
+      "description": "Implementujeme primerané bezpečnostné opatrenia na ochranu vašich osobných informácií:",
+      "ssl_encryption": "Všetky prenosy údajov sú šifrované pomocou SSL/TLS",
+      "password_hashing": "Heslá sú šifrované pomocou štandardnej priemyselnej enkrypcie",
+      "security_audits": "Pravidelné bezpečnostné audity a aktualizácie",
+      "limited_access": "Obmedzený prístup k osobným údajom na báze potreby vedieť",
+      "secure_backup": "Bezpečné cloudové záložné úložisko so šifrovaním"
+    },
+    "section6": {
+      "title": "6. Uchovávanie údajov",
+      "description": "Uchovávame vaše informácie dovtedy, kým je váš účet aktívny alebo podľa potreby na poskytovanie služieb. Svoj účet a údaje môžete vymazať kedykoľvek prostredníctvom nastavení účtu."
+    },
+    "section7": {
+      "title": "7. Vaše práva",
+      "description": "Máte právo na:",
+      "access_rights": "Prístup, aktualizáciu alebo vymazanie vašich osobných informácií",
+      "export_rights": "Export vašich údajov v prenositeľnom formáte",
+      "opt_out_rights": "Odmietnutie určitých komunikácií",
+      "information_rights": "Požiadanie informácií o tom, ako sa vaše údaje používajú"
+    },
     "section10": {
       "title": "10. Kontaktujte nás",
       "description": "Ak máte akékoľvek otázky týkajúce sa týchto Zásad ochrany súkromia, kontaktujte nás na:",
