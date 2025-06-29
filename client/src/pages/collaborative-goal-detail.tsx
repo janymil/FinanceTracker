@@ -344,7 +344,7 @@ export default function CollaborativeGoalDetailPage() {
                     } catch (clipboardError) {
                       toast({
                         title: t('collaborative_goal_detail.messages.error'),
-                        description: "Unable to copy link. Please copy the URL manually.",
+                        description: t('collaborative_goal_detail.messages.copy_failed'),
                         variant: "destructive"
                       });
                     }

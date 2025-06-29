@@ -1529,7 +1529,9 @@
       "invalid_email_description": "Prosím zadajte platnú e-mailovú adresu.",
       "error": "Chyba",
       "link_copied": "Odkaz Skopírovaný",
-      "link_copied_description": "Odkaz na cieľ bol skopírovaný do schránky."
+      "link_copied_description": "Odkaz na cieľ bol skopírovaný do schránky.",
+      "share_failed": "Nie je možné zdieľať alebo skopírovať odkaz. Prosím skopírujte URL manuálne.",
+      "copy_failed": "Nie je možné skopírovať odkaz. Prosím skopírujte URL manuálne."
     },
     "hero": {
       "target": "Cieľ",

@@ -1482,7 +1482,9 @@
       "invalid_email_description": "Por favor ingresa una dirección de email válida.",
       "error": "Error",
       "link_copied": "Enlace Copiado",
-      "link_copied_description": "El enlace de la meta ha sido copiado al portapapeles."
+      "link_copied_description": "El enlace de la meta ha sido copiado al portapapeles.",
+      "share_failed": "No se pudo compartir o copiar el enlace. Por favor copia la URL manualmente.",
+      "copy_failed": "No se pudo copiar el enlace. Por favor copia la URL manualmente."
     },
     "hero": {
       "target": "Meta",

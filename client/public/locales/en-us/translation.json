@@ -1505,7 +1505,9 @@
       "invalid_email_description": "Please enter a valid email address.",
       "error": "Error",
       "link_copied": "Link Copied",
-      "link_copied_description": "Goal sharing link has been copied to clipboard."
+      "link_copied_description": "Goal sharing link has been copied to clipboard.",
+      "share_failed": "Unable to share or copy link. Please copy the URL manually.",
+      "copy_failed": "Unable to copy link. Please copy the URL manually."
     },
     "hero": {
       "target": "Target",
