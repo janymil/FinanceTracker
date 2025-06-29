@@ -270,9 +270,113 @@
   overflow-x: hidden !important;
 }
 
-/* Disabled Clerk CSS overrides to allow default terms text display */
-
 .clerk-profile-mobile * {
   max-width: 100% !important;
   box-sizing: border-box !important;
+}
+
+/* Clerk form styling fixes for terms and conditions checkbox */
+@layer components {
+  /* Fix checkbox visibility in Clerk forms */
+  .cl-checkbox {
+    opacity: 1 !important;
+    visibility: visible !important;
+    background-color: hsl(var(--background)) !important;
+    border: 2px solid hsl(var(--border)) !important;
+    border-radius: 4px !important;
+    width: 16px !important;
+    height: 16px !important;
+    display: inline-block !important;
+  }
+  
+  .cl-checkbox:checked {
+    background-color: hsl(var(--primary)) !important;
+    border-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+  }
+  
+  /* Fix checkbox container */
+  .cl-checkboxContainer {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    margin: 8px 0 !important;
+  }
+  
+  /* Fix checkbox label text visibility */
+  .cl-checkboxLabel {
+    color: hsl(var(--foreground)) !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Target specific Clerk internal classes for terms text */
+  .cl-internal-puxpf3,
+  [class*="cl-internal-"] {
+    color: #000000 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* More specific targeting for terms and conditions text */
+  .cl-termsOfServiceLabel,
+  .cl-privacyPolicyLabel,
+  .cl-checkboxLabel,
+  .cl-checkboxLabel span,
+  .cl-checkboxLabel div,
+  [class*="cl-internal"] {
+    color: #000000 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Dark mode checkbox fixes */
+  .dark .cl-checkbox {
+    background-color: hsl(var(--background)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+  
+  .dark .cl-checkboxLabel {
+    color: #ffffff !important;
+  }
+  
+  .dark .cl-internal-puxpf3,
+  .dark [class*="cl-internal-"] {
+    color: #ffffff !important;
+  }
+  
+  /* Fix terms and conditions link visibility */
+  .cl-checkboxLabel a {
+    color: hsl(var(--primary)) !important;
+    text-decoration: underline !important;
+  }
+  
+  .dark .cl-checkboxLabel a {
+    color: hsl(var(--primary)) !important;
+  }
+}
+
+/* Ultra-specific override for Clerk's internal classes */
+.cl-internal-puxpf3 {
+  color: #000000 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Global override for any Clerk internal class */
+[class*="cl-internal"] {
+  color: #000000 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Dark mode overrides */
+.dark .cl-internal-puxpf3 {
+  color: #ffffff !important;
+}
+
+.dark [class*="cl-internal"] {
+  color: #ffffff !important;
 }
