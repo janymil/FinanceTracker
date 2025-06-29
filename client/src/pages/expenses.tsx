@@ -318,6 +318,7 @@ export default function Expenses() {
   // Chart data preparation with localized month names
   const getLocalizedMonthYear = (date: Date) => {
     const currentLang = i18n.language;
+    console.log('Month localization - current language:', currentLang);
     if (currentLang.startsWith('es')) {
       const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
       return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
