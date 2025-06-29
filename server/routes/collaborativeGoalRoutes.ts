@@ -372,4 +372,37 @@ export function registerCollaborativeGoalRoutes(app: Express) {
       return res.status(500).json({ message: "Failed to fetch achievements" });
     }
   });
+
+  // Test endpoint to send invitation email
+  app.post('/api/test-goal-email', async (req, res) => {
+    try {
+      const { sendGoalInvitationEmail } = await import('../emailService');
+      
+      // Test email for existing user
+      const emailSent = await sendGoalInvitationEmail({
+        recipientEmail: 'jan.milata@gmail.com',
+        recipientName: 'Jan',
+        inviterName: 'FinanzerPro Team',
+        goalName: 'Vacation in Bali 2025',
+        goalDescription: 'Saving for an amazing tropical vacation with friends and family. Beach, culture, and unforgettable memories await!',
+        targetAmount: '3500.00',
+        targetDate: new Date('2025-08-15'),
+        goalUrl: 'https://finanzerpro.com/collaborative-goals/demo',
+        isExistingUser: true
+      });
+
+      return res.json({ 
+        success: true, 
+        emailSent,
+        message: 'Test invitation email sent to jan.milata@gmail.com' 
+      });
+    } catch (error) {
+      console.error("Error sending test email:", error);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Failed to send test email",
+        error: error.message 
+      });
+    }
+  });
 }
