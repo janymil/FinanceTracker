@@ -14,6 +14,7 @@ import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, su
 import RequirePlan from "@/components/require-plan";
 import MonthFilter from "@/components/month-filter";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useTranslation } from "react-i18next";
 
 import InteractiveChart from "@/components/interactive-chart";
 import AIInsights from "@/components/ai-insights";
@@ -26,6 +27,7 @@ export default function Reports() {
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
+  const { t } = useTranslation();
 
   if (!user) {
     return null;
@@ -36,7 +38,7 @@ export default function Reports() {
   // Calculate date ranges based on selected period and month - memoized to prevent infinite loops
   const { startDate, endDate } = useMemo(() => {
     const now = new Date();
-    
+
     // If a specific month is selected, use that month's dates
     if (selectedMonth) {
       const [year, month] = selectedMonth.split('-');
@@ -44,7 +46,7 @@ export default function Reports() {
       const monthEnd = new Date(parseInt(year), parseInt(month), 0);
       return { startDate: monthStart, endDate: monthEnd };
     }
-    
+
     // Otherwise use the selected period
     switch (selectedPeriod) {
       case "week":
@@ -101,7 +103,7 @@ export default function Reports() {
     if (!Array.isArray(transactions) || transactions.length === 0) {
       return [];
     }
-    
+
     return transactions.filter((transaction: any) => {
       const transactionDate = new Date(transaction.date);
       return transactionDate >= startDate && transactionDate <= endDate;
@@ -116,15 +118,15 @@ export default function Reports() {
 
     // Group transactions by month
     const monthlyData: { [key: string]: { income: number; expenses: number } } = {};
-    
+
     filteredTransactions.forEach((transaction: any) => {
       const date = new Date(transaction.date);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      
+
       if (!monthlyData[monthKey]) {
         monthlyData[monthKey] = { income: 0, expenses: 0 };
       }
-      
+
       const amount = parseFloat(transaction.amount);
       if (transaction.type === 'income') {
         monthlyData[monthKey].income += amount;
@@ -156,10 +158,10 @@ export default function Reports() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Advanced Reports & Analytics
+                {t("Advanced Reports & Analytics")}
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
-                AI-powered insights, interactive charts, and comprehensive financial analysis
+                {t("AI-powered insights, interactive charts, and comprehensive financial analysis")}
               </p>
             </div>
             <div className="flex items-center space-x-4">
@@ -169,11 +171,11 @@ export default function Reports() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="week">This Week</SelectItem>
-                  <SelectItem value="month">This Month</SelectItem>
-                  <SelectItem value="quarter">This Quarter</SelectItem>
-                  <SelectItem value="year">This Year</SelectItem>
-                  <SelectItem value="custom">Custom Range</SelectItem>
+                  <SelectItem value="week">{t("This Week")}</SelectItem>
+                  <SelectItem value="month">{t("This Month")}</SelectItem>
+                  <SelectItem value="quarter">{t("This Quarter")}</SelectItem>
+                  <SelectItem value="year">{t("This Year")}</SelectItem>
+                  <SelectItem value="custom">{t("Custom Range")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -192,19 +194,19 @@ export default function Reports() {
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
             <TabsTrigger value="summary" className="flex items-center gap-1 text-xs md:text-sm">
               <FileText className="h-3 w-3 md:h-4 md:w-4" />
-              <span>Summary</span>
+              <span>{t("Summary")}</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-1 text-xs md:text-sm">
               <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
-              <span>Analytics</span>
+              <span>{t("Analytics")}</span>
             </TabsTrigger>
             <TabsTrigger value="categorization" className="flex items-center gap-1 text-xs md:text-sm">
               <Zap className="h-3 w-3 md:h-4 md:w-4" />
-              <span>Auto-Tag</span>
+              <span>{t("Auto-Tag")}</span>
             </TabsTrigger>
             <TabsTrigger value="insights" className="flex items-center gap-1 text-xs md:text-sm">
               <Brain className="h-3 w-3 md:h-4 md:w-4" />
-              <span>AI Insights</span>
+              <span>{t("AI Insights")}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -215,17 +217,17 @@ export default function Reports() {
                 <InteractiveChart
                   data={dynamicChartData}
                   chartType="line"
-                  title="Income vs Expenses Trend"
-                  description="Track your cash flow over time with interactive zoom and insights"
-                  onExport={() => console.log("Exporting chart...")}
+                  title={t("Income vs Expenses Trend")}
+                  description={t("Track your cash flow over time with interactive zoom and insights")}
+                  onExport={() => console.log(t("Exporting chart..."))}
                 />
               </RequirePlan>
               <RequirePlan plan="standard">
                 <InteractiveChart
                   data={dynamicChartData}
                   chartType="bar"
-                  title="Monthly Comparison"
-                  description="Compare monthly performance with detailed tooltips"
+                  title={t("Monthly Comparison")}
+                  description={t("Compare monthly performance with detailed tooltips")}
                 />
               </RequirePlan>
             </div>
@@ -233,8 +235,8 @@ export default function Reports() {
               <InteractiveChart
                 data={dynamicChartData}
                 chartType="area"
-                title="Financial Overview"
-                description="Comprehensive view of your financial health with trend analysis"
+                title={t("Financial Overview")}
+                description={t("Comprehensive view of your financial health with trend analysis")}
               />
             </RequirePlan>
           </TabsContent>
@@ -268,16 +270,16 @@ export default function Reports() {
               <Card>
                 <CardHeader>
                   <CardTitle>
-                    {selectedPeriod === "week" ? "Weekly Overview" : 
-                     selectedPeriod === "month" ? "Monthly Overview" :
-                     selectedPeriod === "quarter" ? "Quarterly Overview" :
-                     selectedPeriod === "year" ? "Yearly Overview" : "Financial Overview"}
+                    {selectedPeriod === "week" ? t("Weekly Overview") : 
+                     selectedPeriod === "month" ? t("Monthly Overview") :
+                     selectedPeriod === "quarter" ? t("Quarterly Overview") :
+                     selectedPeriod === "year" ? t("Yearly Overview") : t("Financial Overview")}
                   </CardTitle>
                   <CardDescription>
-                    Basic financial summary for {selectedPeriod === "week" ? "this week" : 
-                                                 selectedPeriod === "month" ? "this month" :
-                                                 selectedPeriod === "quarter" ? "this quarter" :
-                                                 selectedPeriod === "year" ? "this year" : selectedPeriod}
+                    {t("Basic financial summary for")} {selectedPeriod === "week" ? t("this week") : 
+                                                 selectedPeriod === "month" ? t("this month") :
+                                                 selectedPeriod === "quarter" ? t("this quarter") :
+                                                 selectedPeriod === "year" ? t("this year") : selectedPeriod}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -288,12 +290,12 @@ export default function Reports() {
                           <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-green-900 dark:text-green-100">Total Income</p>
+                          <p className="text-sm font-medium text-green-900 dark:text-green-100">{t("Total Income")}</p>
                           <p className="text-xs text-green-600 dark:text-green-400">
-                            {selectedPeriod === "week" ? "Current week" : 
-                             selectedPeriod === "month" ? "Current month" :
-                             selectedPeriod === "quarter" ? "Current quarter" :
-                             selectedPeriod === "year" ? "Current year" : "Current period"}
+                            {selectedPeriod === "week" ? t("Current week") : 
+                             selectedPeriod === "month" ? t("Current month") :
+                             selectedPeriod === "quarter" ? t("Current quarter") :
+                             selectedPeriod === "year" ? t("Current year") : t("Current period")}
                           </p>
                         </div>
                       </div>
@@ -312,12 +314,12 @@ export default function Reports() {
                           <PieChart className="h-4 w-4 text-red-600 dark:text-red-400" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-red-900 dark:text-red-100">Total Expenses</p>
+                          <p className="text-sm font-medium text-red-900 dark:text-red-100">{t("Total Expenses")}</p>
                           <p className="text-xs text-red-600 dark:text-red-400">
-                            {selectedPeriod === "week" ? "Current week" : 
-                             selectedPeriod === "month" ? "Current month" :
-                             selectedPeriod === "quarter" ? "Current quarter" :
-                             selectedPeriod === "year" ? "Current year" : "Current period"}
+                            {selectedPeriod === "week" ? t("Current week") : 
+                             selectedPeriod === "month" ? t("Current month") :
+                             selectedPeriod === "quarter" ? t("Current quarter") :
+                             selectedPeriod === "year" ? t("Current year") : t("Current period")}
                           </p>
                         </div>
                       </div>
@@ -336,12 +338,12 @@ export default function Reports() {
                           <BarChart3 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Net Balance</p>
+                          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">{t("Net Balance")}</p>
                           <p className="text-xs text-blue-600 dark:text-blue-400">
-                            {selectedPeriod === "week" ? "Current week" : 
-                             selectedPeriod === "month" ? "Current month" :
-                             selectedPeriod === "quarter" ? "Current quarter" :
-                             selectedPeriod === "year" ? "Current year" : "Current period"}
+                            {selectedPeriod === "week" ? t("Current week") : 
+                             selectedPeriod === "month" ? t("Current month") :
+                             selectedPeriod === "quarter" ? t("Current quarter") :
+                             selectedPeriod === "year" ? t("Current year") : t("Current period")}
                           </p>
                         </div>
                       </div>
@@ -360,9 +362,9 @@ export default function Reports() {
               {/* Recent Activity */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
+                  <CardTitle>{t("Recent Activity")}</CardTitle>
                   <CardDescription>
-                    Latest transactions and account activity
+                    {t("Latest transactions and account activity")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -372,10 +374,10 @@ export default function Reports() {
                         <FileText className="h-6 w-6 text-gray-400" />
                       </div>
                       <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-                        No Recent Transactions
+                        {t("No Recent Transactions")}
                       </h3>
                       <p className="text-xs text-gray-600 dark:text-gray-300">
-                        Add transactions to see your recent activity here
+                        {t("Add transactions to see your recent activity here")}
                       </p>
                     </div>
                   ) : (
@@ -402,7 +404,7 @@ export default function Reports() {
                                   {transaction.isRecurring && (
                                     <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 dark:border-blue-800 dark:text-blue-300">
                                       <RotateCcw className="h-3 w-3 mr-1" />
-                                      Recurring
+                                      {t("Recurring")}
                                     </Badge>
                                   )}
                                 </div>
@@ -426,7 +428,7 @@ export default function Reports() {
                       {Array.isArray(transactions) && transactions.length > 5 && (
                         <div className="text-center pt-2">
                           <p className="text-xs text-gray-500">
-                            Showing 5 of {Array.isArray(transactions) ? transactions.length : 0} transactions
+                            {t("Showing 5 of")} {Array.isArray(transactions) ? transactions.length : 0} {t("transactions")}
                           </p>
                         </div>
                       )}
@@ -439,9 +441,9 @@ export default function Reports() {
             {/* Category Breakdown - Basic for Free Users */}
             <Card>
               <CardHeader>
-                <CardTitle>Category Breakdown</CardTitle>
+                <CardTitle>{t("Category Breakdown")}</CardTitle>
                 <CardDescription>
-                  Detailed analysis by category for all transaction types
+                  {t("Detailed analysis by category for all transaction types")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -451,10 +453,10 @@ export default function Reports() {
                       <PieChart className="h-8 w-8 text-gray-400" />
                     </div>
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      No Category Data
+                      {t("No Category Data")}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto mb-6">
-                      Add transactions to see detailed category breakdowns and spending patterns
+                      {t("Add transactions to see detailed category breakdowns and spending patterns")}
                     </p>
                   </div>
                 ) : (
@@ -479,7 +481,7 @@ export default function Reports() {
                                   {category.categoryName}
                                 </p>
                                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                                  {percentage.toFixed(1)}% of {isExpense ? 'expenses' : 'income'}
+                                  {percentage.toFixed(1)}% {t(isExpense ? "of expenses" : "of income")}
                                 </p>
                               </div>
                             </div>
@@ -497,11 +499,11 @@ export default function Reports() {
                           </div>
                         );
                       })}
-                    
+
                     {Array.isArray(financialSummary.transactionsByCategory) && financialSummary.transactionsByCategory.filter((cat: any) => cat.type === 'expense').length > 6 && (
                       <div className="text-center pt-2">
                         <p className="text-xs text-gray-500">
-                          Showing top 6 expense categories
+                          {t("Showing top 6 expense categories")}
                         </p>
                       </div>
                     )}
@@ -513,9 +515,9 @@ export default function Reports() {
             {/* Quick Actions */}
             <Card>
               <CardHeader>
-                <CardTitle>Financial Statistics</CardTitle>
+                <CardTitle>{t("Financial Statistics")}</CardTitle>
                 <CardDescription>
-                  Key metrics from your financial data
+                  {t("Key metrics from your financial data")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -527,9 +529,9 @@ export default function Reports() {
                     <div className="text-lg font-semibold text-gray-900 dark:text-white">
                       {financialSummary?.totalTransactionCount || 0}
                     </div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">Total Transactions</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">{t("Total Transactions")}</span>
                   </div>
-                  
+
                   <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
                     <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full w-fit mx-auto mb-2">
                       <PieChart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -539,9 +541,9 @@ export default function Reports() {
                         ? financialSummary.transactionsByCategory.length 
                         : 0}
                     </div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">Categories Used</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">{t("Categories Used")}</span>
                   </div>
-                  
+
                   <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
                     <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-full w-fit mx-auto mb-2">
                       <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -552,9 +554,9 @@ export default function Reports() {
                         1
                       )).toFixed(0)}
                     </div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">Avg Income</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">{t("Avg Income")}</span>
                   </div>
-                  
+
                   <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
                     <div className="p-2 bg-red-100 dark:bg-red-900 rounded-full w-fit mx-auto mb-2">
                       <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
@@ -565,7 +567,7 @@ export default function Reports() {
                         1
                       )).toFixed(0)}
                     </div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">Avg Expense</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">{t("Avg Expense")}</span>
                   </div>
                 </div>
               </CardContent>
@@ -581,10 +583,10 @@ export default function Reports() {
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        Unlock Advanced Reports
+                        {t("Unlock Advanced Reports")}
                       </h3>
                       <p className="text-gray-600 dark:text-gray-300">
-                        Get AI insights, interactive charts, export tools, and auto-categorization
+                        {t("Get AI insights, interactive charts, export tools, and auto-categorization")}
                       </p>
                     </div>
                   </div>
@@ -593,7 +595,7 @@ export default function Reports() {
                     className="bg-premium hover:bg-premium/90"
                   >
                     <Crown className="h-4 w-4 mr-2" />
-                    Upgrade Now
+                    {t("Upgrade Now")}
                   </Button>
                 </div>
               </div>
@@ -603,4 +605,4 @@ export default function Reports() {
       </div>
     </div>
   );
-}
+} 
