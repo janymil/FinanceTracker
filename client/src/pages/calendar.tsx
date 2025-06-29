@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, parseISO } from "date-fns";
+import { enUS, es, sk } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/context/CurrencyContext";
 
@@ -39,6 +41,7 @@ interface DayData {
 }
 
 export default function CalendarPage() {
+  const { t, i18n } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -47,6 +50,18 @@ export default function CalendarPage() {
   const { isReady, user, getAuthHeaders } = useClerkUserReady();
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
+
+  // Get date-fns locale for current language
+  const getDateFnsLocale = () => {
+    const currentLang = i18n.language;
+    if (currentLang.startsWith('es')) {
+      return es;
+    } else if (currentLang.startsWith('sk')) {
+      return sk;
+    } else {
+      return enUS;
+    }
+  };
 
   useEffect(() => {
     if (!isReady || !user?.id) {
@@ -168,15 +183,15 @@ export default function CalendarPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Calendar View</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('calendar.title')}</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              View your financial transactions in a calendar format
+              {t('calendar.description')}
             </p>
           </div>
           
           <Badge variant="outline" className="text-blue-600 border-blue-600">
             <CalendarIcon className="h-3 w-3 mr-1" />
-            Standard Feature
+            {t('calendar.standard_feature')}
           </Badge>
         </div>
 
@@ -184,7 +199,7 @@ export default function CalendarPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('calendar.monthly_income')}</CardTitle>
               <TrendingUp className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
@@ -196,7 +211,7 @@ export default function CalendarPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Monthly Expenses</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('calendar.monthly_expenses')}</CardTitle>
               <TrendingDown className="h-4 w-4 text-red-600" />
             </CardHeader>
             <CardContent>
@@ -208,7 +223,7 @@ export default function CalendarPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Net Amount</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('calendar.net_amount')}</CardTitle>
               <DollarSign className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
@@ -229,7 +244,7 @@ export default function CalendarPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl">
-                    {format(currentMonth, 'MMMM yyyy')}
+                    {format(currentMonth, 'MMMM yyyy', { locale: getDateFnsLocale() })}
                   </CardTitle>
                   <div className="flex space-x-2">
                     <Button
@@ -258,9 +273,9 @@ export default function CalendarPage() {
                   <div className="space-y-4">
                     {/* Calendar Header */}
                     <div className="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
-                      {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                      {['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'].map(day => (
                         <div key={day} className="bg-gray-100 dark:bg-gray-800 p-3 text-center text-sm font-medium text-gray-900 dark:text-white">
-                          {day}
+                          {t(`calendar.days.${day}`)}
                         </div>
                       ))}
                     </div>
