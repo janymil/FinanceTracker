@@ -212,6 +212,8 @@ export const collaborativeGoals = pgTable("collaborative_goals", {
   joinCode: varchar("join_code", { length: 20 }), // Optional join code for easy sharing
   milestoneRewards: jsonb("milestone_rewards"), // JSON array of milestone rewards
   competitionRules: jsonb("competition_rules"), // Rules for competitive challenges
+  goalDetails: jsonb("goal_details"), // Rich goal-specific details based on category
+  coverImage: varchar("cover_image", { length: 500 }), // Optional goal cover image URL
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
