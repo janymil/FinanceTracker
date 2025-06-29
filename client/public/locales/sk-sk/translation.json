@@ -1560,7 +1560,13 @@
       "contributed": "prispel",
       "creator": "Tvorca",
       "no_contributions": "Zatiaľ žiadne príspevky. Buďte prvý, kto prispeje!",
-      "no_participants": "Zatiaľ žiadni účastníci"
+      "no_participants": "Zatiaľ žiadni účastníci",
+      "unknown_user": "Neznámy Používateľ"
+    },
+    "chat": {
+      "group_chat": "Skupinový Chat",
+      "no_messages": "Zatiaľ žiadne správy. Začnite rozhovor!",
+      "type_message": "Napíšte správu..."
     },
     "goal_categories": {
       "vacation": "Dovolenka",

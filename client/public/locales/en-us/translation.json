@@ -1538,7 +1538,8 @@
       "contributed": "contributed",
       "creator": "Creator",
       "no_contributions": "No contributions yet. Be the first to contribute!",
-      "no_participants": "No participants yet"
+      "no_participants": "No participants yet",
+      "unknown_user": "Unknown User"
     },
     "chat": {
       "group_chat": "Group Chat",

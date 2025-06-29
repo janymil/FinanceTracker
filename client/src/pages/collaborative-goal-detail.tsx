@@ -330,16 +330,28 @@ export default function CollaborativeGoalDetailPage() {
   const today = new Date();
   const daysRemaining = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   
-  // Prepare chart data
-  const contributionChartData = contributions.slice(-10).map((contrib: any, index) => ({
-    name: `${contrib.firstName || 'Unknown'} ${contrib.lastName || 'User'}`,
-    amount: parseFloat(contrib.amount),
-    date: new Date(contrib.createdAt).toLocaleDateString()
-  }));
+  // Prepare chart data - group by user and sum their contributions
+  const contributionsByUser = contributions.reduce((acc: any, contrib: any) => {
+    const userName = contrib.firstName && contrib.lastName 
+      ? `${contrib.firstName} ${contrib.lastName}` 
+      : t('collaborative_goal_detail.sections.unknown_user');
+    
+    if (acc[userName]) {
+      acc[userName] += parseFloat(contrib.amount);
+    } else {
+      acc[userName] = parseFloat(contrib.amount);
+    }
+    return acc;
+  }, {});
+
+  const contributionChartData = Object.entries(contributionsByUser)
+    .map(([name, amount]) => ({ name, amount }))
+    .sort((a: any, b: any) => b.amount - a.amount)
+    .slice(0, 10);
 
   // Get top contributor
   const topContributor = contributions.length > 0 ? 
-    contributions.reduce((top: any, current: any) => 
+    contributions.reduce((top, current) => 
       parseFloat(current.amount) > parseFloat(top.amount) ? current : top
     ) : null;
 
@@ -578,34 +590,7 @@ export default function CollaborativeGoalDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Charts & Analytics */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Progress Timeline */}
-            {timelineData.length > 0 && (
-              <Card className="p-6">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5" />
-                    Contribution Timeline
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={timelineData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip formatter={(value) => [`$${value}`, 'Amount']} />
-                      <Line 
-                        type="monotone" 
-                        dataKey="amount" 
-                        stroke="#8884d8" 
-                        strokeWidth={3}
-                        dot={{ fill: '#8884d8', strokeWidth: 2, r: 6 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
+
 
             {/* Contribution Timeline */}
             {timelineData.length > 0 && (

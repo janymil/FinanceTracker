@@ -1513,7 +1513,8 @@
       "contributed": "contribuyó",
       "creator": "Creador",
       "no_contributions": "Aún no hay contribuciones. ¡Sé el primero en contribuir!",
-      "no_participants": "Aún no hay participantes"
+      "no_participants": "Aún no hay participantes",
+      "unknown_user": "Usuario Desconocido"
     },
     "chat": {
       "group_chat": "Chat Grupal",
