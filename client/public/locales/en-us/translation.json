@@ -1540,6 +1540,11 @@
       "no_contributions": "No contributions yet. Be the first to contribute!",
       "no_participants": "No participants yet"
     },
+    "chat": {
+      "group_chat": "Group Chat",
+      "no_messages": "No messages yet. Start a conversation!",
+      "type_message": "Type a message..."
+    },
     "goal_categories": {
       "vacation": "Vacation",
       "wedding": "Wedding", 

@@ -1515,6 +1515,11 @@
       "no_contributions": "Aún no hay contribuciones. ¡Sé el primero en contribuir!",
       "no_participants": "Aún no hay participantes"
     },
+    "chat": {
+      "group_chat": "Chat Grupal",
+      "no_messages": "Aún no hay mensajes. ¡Inicia una conversación!",
+      "type_message": "Escribe un mensaje..."
+    },
     "goal_categories": {
       "vacation": "Vacaciones",
       "wedding": "Boda", 
