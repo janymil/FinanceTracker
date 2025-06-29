@@ -228,3 +228,213 @@ The FinanzerPro Team
     html
   });
 }
+
+// Collaborative Goal Invitation Email Templates
+interface GoalInvitationParams {
+  recipientEmail: string;
+  recipientName: string;
+  inviterName: string;
+  goalName: string;
+  goalDescription: string;
+  targetAmount: string;
+  targetDate: Date;
+  goalUrl: string;
+  isExistingUser: boolean;
+}
+
+export async function sendGoalInvitationEmail(params: GoalInvitationParams): Promise<boolean> {
+  const { 
+    recipientEmail, 
+    recipientName, 
+    inviterName, 
+    goalName, 
+    goalDescription, 
+    targetAmount, 
+    targetDate, 
+    goalUrl, 
+    isExistingUser 
+  } = params;
+
+  const formattedAmount = `$${parseFloat(targetAmount).toLocaleString()}`;
+  const formattedDate = new Date(targetDate).toLocaleDateString();
+  
+  if (isExistingUser) {
+    // Email for existing users
+    const subject = `${inviterName} invited you to join "${goalName}" savings goal`;
+    
+    const text = `
+Hi ${recipientName},
+
+${inviterName} has invited you to join their collaborative savings goal "${goalName}"!
+
+Goal Details:
+• Target Amount: ${formattedAmount}
+• Target Date: ${formattedDate}
+• Description: ${goalDescription}
+
+Join this goal to save together and achieve your financial targets faster. Collaborative goals are proven to increase success rates by 40%!
+
+Click here to view and join the goal:
+${goalUrl}
+
+Start contributing today and be part of this exciting savings journey!
+
+Best regards,
+The FinanzerPro Team
+    `.trim();
+
+    const html = `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa;">
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
+    <h1 style="color: white; margin: 0; font-size: 24px;">🎯 You're Invited to Save Together!</h1>
+  </div>
+  
+  <div style="padding: 30px; background: white;">
+    <p style="font-size: 16px; color: #333;">Hi ${recipientName},</p>
+    
+    <p style="font-size: 16px; color: #333;">
+      <strong>${inviterName}</strong> has invited you to join their collaborative savings goal 
+      <strong style="color: #667eea;">"${goalName}"</strong>!
+    </p>
+    
+    <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin: 25px 0;">
+      <h3 style="margin: 0 0 15px 0; color: #333;">🎯 Goal Details</h3>
+      <ul style="margin: 0; padding-left: 20px; color: #555;">
+        <li><strong>Target Amount:</strong> ${formattedAmount}</li>
+        <li><strong>Target Date:</strong> ${formattedDate}</li>
+        <li><strong>Description:</strong> ${goalDescription}</li>
+      </ul>
+    </div>
+    
+    <p style="font-size: 16px; color: #333;">
+      Join this goal to save together and achieve your financial targets faster. 
+      <strong style="color: #28a745;">Collaborative goals are proven to increase success rates by 40%!</strong>
+    </p>
+    
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${goalUrl}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+        🚀 View & Join Goal
+      </a>
+    </div>
+    
+    <p style="font-size: 14px; color: #666; text-align: center;">
+      Start contributing today and be part of this exciting savings journey!
+    </p>
+  </div>
+  
+  <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+    <p>Best regards,<br>The FinanzerPro Team</p>
+  </div>
+</div>
+    `;
+
+    return sendEmail({
+      to: recipientEmail,
+      from: 'noreply@finanzerpro.com',
+      subject,
+      text,
+      html
+    });
+  } else {
+    // Email for new users
+    const subject = `${inviterName} invited you to join FinanzerPro and save together!`;
+    
+    const text = `
+Hi there,
+
+${inviterName} has invited you to join FinanzerPro and participate in their collaborative savings goal "${goalName}"!
+
+Goal Details:
+• Target Amount: ${formattedAmount}
+• Target Date: ${formattedDate}
+• Description: ${goalDescription}
+
+FinanzerPro is a smart personal finance app that helps you:
+✓ Track expenses with AI-powered categorization
+✓ Set and achieve savings goals
+✓ Collaborate with friends and family on financial goals
+✓ Get personalized financial insights
+
+Join for free and start saving together:
+${goalUrl}
+
+Why collaborative goals work:
+• 40% higher success rate than solo saving
+• Motivation through shared progress
+• Accountability from friends/family
+• Celebration of achievements together
+
+Start your financial journey today!
+
+Best regards,
+The FinanzerPro Team
+    `.trim();
+
+    const html = `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa;">
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
+    <h1 style="color: white; margin: 0; font-size: 24px;">🎉 Welcome to FinanzerPro!</h1>
+    <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">You've been invited to save together</p>
+  </div>
+  
+  <div style="padding: 30px; background: white;">
+    <p style="font-size: 16px; color: #333;">Hi there,</p>
+    
+    <p style="font-size: 16px; color: #333;">
+      <strong>${inviterName}</strong> has invited you to join <strong style="color: #667eea;">FinanzerPro</strong> 
+      and participate in their collaborative savings goal <strong>"${goalName}"</strong>!
+    </p>
+    
+    <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin: 25px 0;">
+      <h3 style="margin: 0 0 15px 0; color: #333;">🎯 Goal Details</h3>
+      <ul style="margin: 0; padding-left: 20px; color: #555;">
+        <li><strong>Target Amount:</strong> ${formattedAmount}</li>
+        <li><strong>Target Date:</strong> ${formattedDate}</li>
+        <li><strong>Description:</strong> ${goalDescription}</li>
+      </ul>
+    </div>
+    
+    <div style="background-color: #e8f4fd; border-radius: 8px; padding: 20px; margin: 25px 0;">
+      <h3 style="margin: 0 0 15px 0; color: #1976D2;">📱 What is FinanzerPro?</h3>
+      <p style="margin: 0; color: #333;">FinanzerPro is a smart personal finance app that helps you:</p>
+      <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #555;">
+        <li>✓ Track expenses with AI-powered categorization</li>
+        <li>✓ Set and achieve savings goals</li>
+        <li>✓ Collaborate with friends and family on financial goals</li>
+        <li>✓ Get personalized financial insights</li>
+      </ul>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${goalUrl}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;">
+        🚀 Join for FREE & Start Saving
+      </a>
+    </div>
+    
+    <div style="background-color: #e8f5e8; border-radius: 8px; padding: 15px; margin: 20px 0;">
+      <h4 style="margin: 0 0 10px 0; color: #2e7d32;">🤝 Why collaborative goals work:</h4>
+      <ul style="margin: 0; padding-left: 20px; color: #555; font-size: 14px;">
+        <li>40% higher success rate than solo saving</li>
+        <li>Motivation through shared progress</li>
+        <li>Accountability from friends/family</li>
+        <li>Celebration of achievements together</li>
+      </ul>
+    </div>
+  </div>
+  
+  <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+    <p>Start your financial journey today!</p>
+    <p>Best regards,<br>The FinanzerPro Team</p>
+  </div>
+</div>
+    `;
+
+    return sendEmail({
+      to: recipientEmail,
+      from: 'noreply@finanzerpro.com',
+      subject,
+      text,
+      html
+    });
+  }
+}
