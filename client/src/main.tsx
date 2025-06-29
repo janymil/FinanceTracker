@@ -147,44 +147,6 @@ root.render(
           layout: {
             logoImageUrl: '/icon.png',
             showOptionalFields: false,
-          },
-          variables: {
-            colorPrimary: '#3b82f6',
-            colorBackground: '#ffffff',
-            colorText: '#262626',
-            colorInputBackground: '#ffffff',
-            colorInputText: '#262626',
-          },
-          elements: {
-            checkbox: {
-              backgroundColor: '#ffffff',
-              borderColor: '#e2e8f0',
-              color: '#262626',
-              '&:checked': {
-                backgroundColor: '#3b82f6',
-                borderColor: '#3b82f6',
-              }
-            },
-            checkboxLabel: {
-              color: '#000000 !important',
-              opacity: '1',
-              visibility: 'visible',
-            },
-            termsOfServiceLabel: {
-              color: '#000000 !important',
-              opacity: '1',
-              visibility: 'visible',
-            },
-            privacyPolicyLabel: {
-              color: '#000000 !important',
-              opacity: '1',
-              visibility: 'visible',
-            },
-            termsPageText: {
-              color: '#000000 !important',
-              opacity: '1',
-              visibility: 'visible',
-            }
           }
         }}
       >
