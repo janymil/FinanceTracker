@@ -453,10 +453,10 @@ export default function Reports() {
                       <PieChart className="h-8 w-8 text-gray-400" />
                     </div>
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      {t("No Category Data")}
+                      {t("reports.no_category_data")}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto mb-6">
-                      {t("Add transactions to see detailed category breakdowns and spending patterns")}
+                      {t("reports.add_transactions_categories")}
                     </p>
                   </div>
                 ) : (
@@ -481,7 +481,7 @@ export default function Reports() {
                                   {category.categoryName}
                                 </p>
                                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                                  {percentage.toFixed(1)}% {t(isExpense ? "of expenses" : "of income")}
+                                  {percentage.toFixed(1)}% {t(isExpense ? "reports.of_expenses" : "reports.of_income")}
                                 </p>
                               </div>
                             </div>
@@ -503,7 +503,7 @@ export default function Reports() {
                     {Array.isArray(financialSummary.transactionsByCategory) && financialSummary.transactionsByCategory.filter((cat: any) => cat.type === 'expense').length > 6 && (
                       <div className="text-center pt-2">
                         <p className="text-xs text-gray-500">
-                          {t("Showing top 6 expense categories")}
+                          {t("reports.showing_top_6")}
                         </p>
                       </div>
                     )}
@@ -515,9 +515,9 @@ export default function Reports() {
             {/* Quick Actions */}
             <Card>
               <CardHeader>
-                <CardTitle>{t("Financial Statistics")}</CardTitle>
+                <CardTitle>{t("reports.financial_statistics")}</CardTitle>
                 <CardDescription>
-                  {t("Key metrics from your financial data")}
+                  {t("reports.key_metrics")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -529,7 +529,7 @@ export default function Reports() {
                     <div className="text-lg font-semibold text-gray-900 dark:text-white">
                       {financialSummary?.totalTransactionCount || 0}
                     </div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">{t("Total Transactions")}</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">{t("reports.total_transactions")}</span>
                   </div>
 
                   <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
@@ -541,7 +541,7 @@ export default function Reports() {
                         ? financialSummary.transactionsByCategory.length 
                         : 0}
                     </div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">{t("Categories Used")}</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">{t("reports.categories_used")}</span>
                   </div>
 
                   <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
@@ -554,7 +554,7 @@ export default function Reports() {
                         1
                       )).toFixed(0)}
                     </div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">{t("Avg Income")}</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">{t("reports.avg_income")}</span>
                   </div>
 
                   <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg text-center">
@@ -567,7 +567,7 @@ export default function Reports() {
                         1
                       )).toFixed(0)}
                     </div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">{t("Avg Expense")}</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">{t("reports.avg_expense")}</span>
                   </div>
                 </div>
               </CardContent>
@@ -583,10 +583,10 @@ export default function Reports() {
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {t("Unlock Advanced Reports")}
+                        {t("reports.unlock_advanced_reports")}
                       </h3>
                       <p className="text-gray-600 dark:text-gray-300">
-                        {t("Get AI insights, interactive charts, export tools, and auto-categorization")}
+                        {t("reports.get_ai_insights")}
                       </p>
                     </div>
                   </div>
@@ -595,7 +595,7 @@ export default function Reports() {
                     className="bg-premium hover:bg-premium/90"
                   >
                     <Crown className="h-4 w-4 mr-2" />
-                    {t("Upgrade Now")}
+                    {t("reports.upgrade_now")}
                   </Button>
                 </div>
               </div>
