@@ -1253,6 +1253,7 @@
     
     "step3_title": "Nahrať Váš Súbor",
     "drop_file_text": "Pretiahnite a pustite váš súbor sem, alebo kliknite na prehliadanie",
+    "supports_files": "Podporuje súbory",
     
     "toast_import_failed": "Import zlyhal. Skontrolujte formát súboru a skúste znovu.",
     "toast_backup_failed": "Vytvorenie zálohy zlyhalo. Skúste znovu.",
