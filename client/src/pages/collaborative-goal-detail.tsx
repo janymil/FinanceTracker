@@ -574,7 +574,7 @@ export default function CollaborativeGoalDetailPage() {
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-2">
                     <CategoryIcon className="w-5 h-5" />
-                    Goal Details
+                    {t('collaborative_goal_detail.charts.goal_details')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -582,7 +582,7 @@ export default function CollaborativeGoalDetailPage() {
                     {Object.entries(goal.goalDetails).map(([key, value]) => (
                       <div key={key} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                          {key.charAt(0).toUpperCase() + key.slice(1)}
+                          {t(`collaborative_goal_detail.goal_fields.${key}`) || key.charAt(0).toUpperCase() + key.slice(1)}
                         </div>
                         <div className="text-gray-900 dark:text-white">{value as string}</div>
                       </div>
@@ -666,7 +666,7 @@ export default function CollaborativeGoalDetailPage() {
                   ))}
                   {contributions.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
-                      No contributions yet. Be the first to contribute!
+                      {t('collaborative_goal_detail.sections.no_contributions')}
                     </div>
                   )}
                 </div>
