@@ -381,43 +381,43 @@ export default function CollaborativeGoalsPage() {
 
             <TabsContent value="goals" className="space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Active Challenges</h2>
+                <h2 className="text-xl font-semibold">{t('collaborative_goals.sections.active_challenges')}</h2>
                 <Dialog open={createGoalOpen} onOpenChange={setCreateGoalOpen}>
                   <DialogTrigger asChild>
                     <Button>
                       <Plus className="h-4 w-4 mr-2" />
-                      Create Challenge
+                      {t('collaborative_goals.buttons.create_challenge')}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
-                      <DialogTitle>Create Collaborative Goal</DialogTitle>
+                      <DialogTitle>{t('collaborative_goals.dialogs.create.title')}</DialogTitle>
                       <DialogDescription>
-                        Set up a new savings challenge to complete with friends
+                        {t('collaborative_goals.dialogs.create.description')}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="name">Goal Name</Label>
+                        <Label htmlFor="name">{t('collaborative_goals.form.goal_name')}</Label>
                         <Input
                           id="name"
                           value={newGoal.name}
                           onChange={(e) => setNewGoal({ ...newGoal, name: e.target.value })}
-                          placeholder="e.g., Summer Vacation Fund"
+                          placeholder={t('collaborative_goals.form.goal_name_placeholder')}
                         />
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="description">Description</Label>
+                        <Label htmlFor="description">{t('collaborative_goals.form.description')}</Label>
                         <Textarea
                           id="description"
                           value={newGoal.description}
                           onChange={(e) => setNewGoal({ ...newGoal, description: e.target.value })}
-                          placeholder="Describe your savings goal..."
+                          placeholder={t('collaborative_goals.form.description_placeholder')}
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
-                          <Label htmlFor="targetAmount">Target Amount ($)</Label>
+                          <Label htmlFor="targetAmount">{t('collaborative_goals.form.target_amount')}</Label>
                           <Input
                             id="targetAmount"
                             type="number"
@@ -427,7 +427,7 @@ export default function CollaborativeGoalsPage() {
                           />
                         </div>
                         <div className="grid gap-2">
-                          <Label htmlFor="targetDate">Target Date</Label>
+                          <Label htmlFor="targetDate">{t('collaborative_goals.form.target_date')}</Label>
                           <Input
                             id="targetDate"
                             type="date"
@@ -438,31 +438,31 @@ export default function CollaborativeGoalsPage() {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
-                          <Label htmlFor="category">Category</Label>
+                          <Label htmlFor="category">{t('collaborative_goals.form.category')}</Label>
                           <Select value={newGoal.category} onValueChange={(value) => setNewGoal({ ...newGoal, category: value })}>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select category" />
+                              <SelectValue placeholder={t('collaborative_goals.form.select_category')} />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="vacation">Vacation</SelectItem>
-                              <SelectItem value="emergency">Emergency Fund</SelectItem>
-                              <SelectItem value="home">Home Purchase</SelectItem>
-                              <SelectItem value="education">Education</SelectItem>
-                              <SelectItem value="investment">Investment</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
+                              <SelectItem value="vacation">{t('collaborative_goals.categories.vacation')}</SelectItem>
+                              <SelectItem value="emergency">{t('collaborative_goals.categories.emergency')}</SelectItem>
+                              <SelectItem value="home">{t('collaborative_goals.categories.home')}</SelectItem>
+                              <SelectItem value="education">{t('collaborative_goals.categories.education')}</SelectItem>
+                              <SelectItem value="investment">{t('collaborative_goals.categories.investment')}</SelectItem>
+                              <SelectItem value="other">{t('collaborative_goals.categories.other')}</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="grid gap-2">
-                          <Label htmlFor="challengeType">Challenge Type</Label>
+                          <Label htmlFor="challengeType">{t('collaborative_goals.form.challenge_type')}</Label>
                           <Select value={newGoal.challengeType} onValueChange={(value) => setNewGoal({ ...newGoal, challengeType: value })}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="collaborative">Collaborative</SelectItem>
-                              <SelectItem value="competitive">Competitive</SelectItem>
-                              <SelectItem value="milestone">Milestone-based</SelectItem>
+                              <SelectItem value="collaborative">{t('collaborative_goals.challenge_types.collaborative')}</SelectItem>
+                              <SelectItem value="competitive">{t('collaborative_goals.challenge_types.competitive')}</SelectItem>
+                              <SelectItem value="milestone">{t('collaborative_goals.challenge_types.milestone')}</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -472,7 +472,7 @@ export default function CollaborativeGoalsPage() {
                       <Button 
                         onClick={handleCreateGoal}
                       >
-                        Create Goal
+                        {t('collaborative_goals.buttons.create_goal')}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -499,14 +499,14 @@ export default function CollaborativeGoalsPage() {
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <Users className="h-12 w-12 text-gray-400 mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      No collaborative goals yet
+                      {t('collaborative_goals.empty_state.title')}
                     </h3>
                     <p className="text-gray-500 text-center mb-4">
-                      Create your first collaborative savings goal and invite friends to join
+                      {t('collaborative_goals.empty_state.description')}
                     </p>
                     <Button onClick={() => setCreateGoalOpen(true)}>
                       <Plus className="h-4 w-4 mr-2" />
-                      Create Your First Goal
+                      {t('collaborative_goals.buttons.create_first_goal')}
                     </Button>
                   </CardContent>
                 </Card>
