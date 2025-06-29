@@ -1257,6 +1257,24 @@
     
     "toast_import_failed": "Import zlyhal. Skontrolujte formát súboru a skúste znovu.",
     "toast_backup_failed": "Vytvorenie zálohy zlyhalo. Skúste znovu.",
+    
+    "backup_created": "Záloha Úspešne Vytvorená",
+    "backup_created_desc": "Vaše údaje boli bezpečne zálohované do cloudového úložiska",
+    "backup_failed": "Vytvorenie Zálohy Zlyhalo", 
+    "backup_failed_desc": "Vytvorenie zálohy zlyhalo. Skúste znovu.",
+    
+    "export_successful": "Export Úspešne Dokončený",
+    "export_successful_desc": "Vaše údaje boli exportované vo formáte {{format}}",
+    "export_failed": "Export Zlyhal",
+    "export_failed_desc": "Export údajov zlyhal. Skúste znovu.",
+    
+    "restore_successful": "Obnovenie Úspešne Dokončené", 
+    "restore_successful_desc": "Úspešne obnovených {{transactions}} transakcií a {{budgets}} rozpočtov z {{filename}}",
+    "restore_failed": "Obnovenie Zlyhalo",
+    "restore_failed_desc": "Obnovenie zálohy zlyhalo. Skontrolujte váš súbor zálohy.",
+    
+    "no_backups_available": "Žiadne Zálohy K Dispozícii",
+    "no_backups_found": "Nenašli sa žiadne súbory zálohy. Najprv vytvorte zálohu.",
     "toast_export_failed": "Export zlyhal. Skúste znovu neskôr.",
     "toast_restore_failed": "Obnovenie zlyhalo. Skontrolujte váš súbor zálohy.",
     

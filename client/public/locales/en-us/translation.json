@@ -1212,6 +1212,24 @@
     
     "toast_import_failed": "Import failed. Please check your file format and try again.",
     "toast_backup_failed": "Failed to create backup. Please try again.",
+    
+    "backup_created": "Backup Created Successfully",
+    "backup_created_desc": "Your data has been securely backed up to cloud storage",
+    "backup_failed": "Backup Creation Failed", 
+    "backup_failed_desc": "Failed to create backup. Please try again.",
+    
+    "export_successful": "Export Completed Successfully",
+    "export_successful_desc": "Your data has been exported in {{format}} format",
+    "export_failed": "Export Failed",
+    "export_failed_desc": "Failed to export data. Please try again.",
+    
+    "restore_successful": "Restore Completed Successfully", 
+    "restore_successful_desc": "Successfully restored {{transactions}} transactions and {{budgets}} budgets from {{filename}}",
+    "restore_failed": "Restore Failed",
+    "restore_failed_desc": "Failed to restore backup. Please check your backup file.",
+    
+    "no_backups_available": "No Backups Available",
+    "no_backups_found": "No backup files found. Create a backup first.",
     "toast_export_failed": "Export failed. Please try again later.",
     "toast_restore_failed": "Restore failed. Please check your backup file.",
     

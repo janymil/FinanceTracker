@@ -1201,6 +1201,24 @@
     
     "toast_import_failed": "Importación falló. Revisa el formato de tu archivo e inténtalo de nuevo.",
     "toast_backup_failed": "Error al crear respaldo. Inténtalo de nuevo.",
+    
+    "backup_created": "Respaldo Creado Exitosamente",
+    "backup_created_desc": "Tus datos han sido respaldados de forma segura en almacenamiento en la nube",
+    "backup_failed": "Error en Creación de Respaldo", 
+    "backup_failed_desc": "Error al crear respaldo. Inténtalo de nuevo.",
+    
+    "export_successful": "Exportación Completada Exitosamente",
+    "export_successful_desc": "Tus datos han sido exportados en formato {{format}}",
+    "export_failed": "Exportación Falló",
+    "export_failed_desc": "Error al exportar datos. Inténtalo de nuevo.",
+    
+    "restore_successful": "Restauración Completada Exitosamente", 
+    "restore_successful_desc": "Se restauraron exitosamente {{transactions}} transacciones y {{budgets}} presupuestos de {{filename}}",
+    "restore_failed": "Restauración Falló",
+    "restore_failed_desc": "Error al restaurar respaldo. Revisa tu archivo de respaldo.",
+    
+    "no_backups_available": "No Hay Respaldos Disponibles",
+    "no_backups_found": "No se encontraron archivos de respaldo. Crea un respaldo primero.",
     "toast_export_failed": "Exportación falló. Inténtalo más tarde.",
     "toast_restore_failed": "Restauración falló. Revisa tu archivo de respaldo.",
     
