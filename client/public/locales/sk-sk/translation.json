@@ -1039,6 +1039,8 @@
     "title": "Pokročilá analýza trendov",
     "subtitle": "Hlboké poznatky o vašich finančných vzorcoch a prognózach",
     "export": "Exportovať",
+    "generating_pdf": "Generujem PDF...",
+    "export_error": "Nepodarilo sa vygenerovať PDF správu",
     "uncategorized": "Nekategorizované",
     "other": "Iné",
     

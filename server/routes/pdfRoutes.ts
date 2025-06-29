@@ -9,7 +9,7 @@ import fetch from 'node-fetch';
 const PDF_SERVICE_URL = process.env.PDF_SERVICE_URL || 'https://finanzerpro-pdf.fly.dev';
 
 export function registerPDFRoutes(app: any) {
-  // Generate PDF report for trends data
+  // Generate PDF report for trends data - Premium plan required
   app.post('/api/generate-trends-pdf', isAuthenticated, async (req: Request, res: Response) => {
     try {
       const userId = getUserId(req);
@@ -17,19 +17,23 @@ export function registerPDFRoutes(app: any) {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
+      // Check user plan - PDF export requires premium plan
+      const user = await storage.getUser(userId);
+      if (!user || user.plan !== 'premium') {
+        console.log(`PDF export blocked - User plan: ${user?.plan}`);
+        return res.status(403).json({ 
+          error: 'PDF export requires Premium subscription',
+          plan: user?.plan || 'free'
+        });
+      }
+
       const { period, currency = '$' } = req.body;
       const language = getUserLanguage(req);
 
-      console.log('Generating PDF for user:', userId, 'Period:', period, 'Language:', language);
-
-      // Get user information
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
+      console.log('Generating PDF for premium user:', userId, 'Period:', period, 'Language:', language);
 
       const userData = {
-        name: user.name || 'User',
+        name: user.firstName || 'User',
         email: user.email || ''
       };
 

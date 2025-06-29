@@ -67,17 +67,8 @@ export default function Trends() {
     return {};
   };
 
-  // PDF Export function with premium plan requirement
+  // PDF Export function - already protected by RequirePlan wrapper
   const handlePDFExport = async () => {
-    // Check if user has premium plan access
-    const userMetadata = user?.publicMetadata as { plan?: string } | undefined;
-    const userPlan = userMetadata?.plan || 'free';
-    
-    if (userPlan === 'free') {
-      // Show upgrade prompt for free users
-      alert(t('plans.upgrade_required'));
-      return;
-    }
 
     setPdfLoading(true);
     try {

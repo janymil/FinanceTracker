@@ -983,6 +983,8 @@
     "title": "Análisis Avanzado de Tendencias",
     "subtitle": "Perspectivas profundas sobre tus patrones financieros y pronósticos",
     "export": "Exportar",
+    "generating_pdf": "Generando PDF...",
+    "export_error": "Error al generar reporte PDF",
     "uncategorized": "Sin categoría",
     "other": "Otro",
     

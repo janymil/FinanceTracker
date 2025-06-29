@@ -994,6 +994,8 @@
     "title": "Advanced Trends Analysis",
     "subtitle": "Deep insights into your financial patterns and forecasting",
     "export": "Export",
+    "generating_pdf": "Generating PDF...",
+    "export_error": "Failed to generate PDF report",
     "uncategorized": "Uncategorized",
     "other": "Other",
     
