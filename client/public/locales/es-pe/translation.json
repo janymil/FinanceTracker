@@ -1111,6 +1111,52 @@
     }
   },
 
+  "export": {
+    "page_title": "Gestión de Datos",
+    "page_description": "Exporta e importa tus datos financieros con opciones avanzadas",
+    "export_tab": "Exportar",
+    "import_tab": "Importar",
+    
+    "export_title": "Exportar Datos Financieros",
+    "export_description": "Descarga tus transacciones, presupuestos, metas y más en varios formatos",
+    
+    "format": "Formato",
+    "format_description": "Elige tu formato de exportación preferido",
+    "pdf": "PDF",
+    "csv": "CSV",
+    "excel": "Excel",
+    "json": "JSON",
+    
+    "date_range": "Rango de Fechas",
+    "date_range_description": "Selecciona el período de tiempo para tu exportación",
+    "all": "Todo el Tiempo",
+    "month": "Este Mes",
+    "quarter": "Este Trimestre",
+    "year": "Este Año",
+    "custom": "Rango Personalizado",
+    "start_date": "Fecha de Inicio",
+    "end_date": "Fecha de Fin",
+    
+    "data_selection": "Selección de Datos",
+    "data_selection_description": "Elige qué incluir en tu exportación",
+    "include_transactions": "Transacciones",
+    "include_budgets": "Presupuestos",
+    "include_goals": "Metas",
+    "include_summary": "Resumen Financiero",
+    "include_charts": "Gráficos y Visualizaciones",
+    
+    "coming_soon": "Funcionalidad de exportación próximamente",
+    "coming_soon_desc": "Soporte para PDF, CSV, Excel, JSON y más",
+    
+    "import_title": "Importar Datos Financieros",
+    "import_description": "Importa transacciones, presupuestos, metas y categorías desde archivos CSV o JSON",
+    
+    "toast_import_failed": "Importación falló. Revisa el formato de tu archivo e inténtalo de nuevo.",
+    "toast_backup_failed": "Error al crear respaldo. Inténtalo de nuevo.",
+    "toast_export_failed": "Exportación falló. Inténtalo más tarde.",
+    "toast_restore_failed": "Restauración falló. Revisa tu archivo de respaldo."
+  },
+
   "upload": {
     "drag_drop": "Arrastra y suelta una imagen aquí, o haz clic para navegar",
     "processing": "Procesando tu recibo...",

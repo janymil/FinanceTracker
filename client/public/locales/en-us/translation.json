@@ -1122,6 +1122,52 @@
     }
   },
 
+  "export": {
+    "page_title": "Data Management",
+    "page_description": "Export and import your financial data with advanced options",
+    "export_tab": "Export",
+    "import_tab": "Import",
+    
+    "export_title": "Export Financial Data",
+    "export_description": "Download your transactions, budgets, goals, and more in various formats",
+    
+    "format": "Format",
+    "format_description": "Choose your preferred export format",
+    "pdf": "PDF",
+    "csv": "CSV",
+    "excel": "Excel",
+    "json": "JSON",
+    
+    "date_range": "Date Range",
+    "date_range_description": "Select the time period for your export",
+    "all": "All Time",
+    "month": "This Month",
+    "quarter": "This Quarter",
+    "year": "This Year",
+    "custom": "Custom Range",
+    "start_date": "Start Date",
+    "end_date": "End Date",
+    
+    "data_selection": "Data Selection",
+    "data_selection_description": "Choose what to include in your export",
+    "include_transactions": "Transactions",
+    "include_budgets": "Budgets",
+    "include_goals": "Goals",
+    "include_summary": "Financial Summary",
+    "include_charts": "Charts & Visualizations",
+    
+    "coming_soon": "Export functionality coming soon",
+    "coming_soon_desc": "Support for PDF, CSV, Excel, JSON, and more",
+    
+    "import_title": "Import Financial Data",
+    "import_description": "Import transactions, budgets, goals, and categories from CSV or JSON files",
+    
+    "toast_import_failed": "Import failed. Please check your file format and try again.",
+    "toast_backup_failed": "Failed to create backup. Please try again.",
+    "toast_export_failed": "Export failed. Please try again later.",
+    "toast_restore_failed": "Restore failed. Please check your backup file."
+  },
+
   "upload": {
     "drag_drop": "Drag and drop an image here, or click to browse",
     "processing": "Processing your receipt...",

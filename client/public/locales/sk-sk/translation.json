@@ -1167,6 +1167,52 @@
     }
   },
 
+  "export": {
+    "page_title": "Správa Údajov",
+    "page_description": "Exportujte a importujte vaše finančné údaje s pokročilými možnosťami",
+    "export_tab": "Export",
+    "import_tab": "Import",
+    
+    "export_title": "Exportovať Finančné Údaje",
+    "export_description": "Stiahnite si vaše transakcie, rozpočty, ciele a viac v rôznych formátoch",
+    
+    "format": "Formát",
+    "format_description": "Vyberte váš preferovaný formát exportu",
+    "pdf": "PDF",
+    "csv": "CSV",
+    "excel": "Excel",
+    "json": "JSON",
+    
+    "date_range": "Rozsah Dátumov",
+    "date_range_description": "Vyberte časové obdobie pre váš export",
+    "all": "Celý Čas",
+    "month": "Tento Mesiac",
+    "quarter": "Tento Štvrťrok",
+    "year": "Tento Rok",
+    "custom": "Vlastný Rozsah",
+    "start_date": "Začiatočný Dátum",
+    "end_date": "Konečný Dátum",
+    
+    "data_selection": "Výber Údajov",
+    "data_selection_description": "Vyberte čo zahrnúť do vášho exportu",
+    "include_transactions": "Transakcie",
+    "include_budgets": "Rozpočty",
+    "include_goals": "Ciele",
+    "include_summary": "Finančný Súhrn",
+    "include_charts": "Grafy a Vizualizácie",
+    
+    "coming_soon": "Funkcia exportu bude čoskoro dostupná",
+    "coming_soon_desc": "Podpora pre PDF, CSV, Excel, JSON a viac",
+    
+    "import_title": "Importovať Finančné Údaje",
+    "import_description": "Importujte transakcie, rozpočty, ciele a kategórie z CSV alebo JSON súborov",
+    
+    "toast_import_failed": "Import zlyhal. Skontrolujte formát súboru a skúste znovu.",
+    "toast_backup_failed": "Vytvorenie zálohy zlyhalo. Skúste znovu.",
+    "toast_export_failed": "Export zlyhal. Skúste znovu neskôr.",
+    "toast_restore_failed": "Obnovenie zlyhalo. Skontrolujte váš súbor zálohy."
+  },
+
   "upload": {
     "drag_drop": "Pretiahnite a pustite obrázok sem, alebo kliknite na prehliadanie",
     "processing": "Spracovávam váš účet...",
