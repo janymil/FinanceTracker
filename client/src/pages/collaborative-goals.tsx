@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -90,6 +91,8 @@ interface FriendRequest {
 export default function CollaborativeGoalsPage() {
   const { toast } = useToast();
   const { user, isReady, getAuthHeaders } = useClerkUserReady();
+  const { t } = useTranslation();
+  const displayCurrency = '$';
   const [createGoalOpen, setCreateGoalOpen] = useState(false);
   const [addFriendOpen, setAddFriendOpen] = useState(false);
   const [newGoal, setNewGoal] = useState({
@@ -362,18 +365,18 @@ export default function CollaborativeGoalsPage() {
         <div className="container mx-auto px-6 py-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Collaborative Savings Goals
+              {t('collaborative_goals.title')}
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Team up with friends to achieve your savings goals together
+              {t('collaborative_goals.subtitle')}
             </p>
           </div>
 
           <Tabs defaultValue="goals" className="space-y-6">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="goals">My Goals</TabsTrigger>
-              <TabsTrigger value="friends">Friends</TabsTrigger>
-              <TabsTrigger value="achievements">Achievements</TabsTrigger>
+              <TabsTrigger value="goals">{t('collaborative_goals.tabs.my_goals')}</TabsTrigger>
+              <TabsTrigger value="friends">{t('collaborative_goals.tabs.friends')}</TabsTrigger>
+              <TabsTrigger value="achievements">{t('collaborative_goals.tabs.achievements')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="goals" className="space-y-6">
