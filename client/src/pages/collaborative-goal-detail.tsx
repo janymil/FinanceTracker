@@ -18,7 +18,36 @@ export default function CollaborativeGoalDetailPage() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  // Helper function for date localization
+  const formatLocalizedDate = (date: string | Date) => {
+    const dateObj = new Date(date);
+    const currentLang = i18n.language;
+    
+    if (currentLang.startsWith('es')) {
+      // Spanish format: DD/MM/YYYY
+      return dateObj.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } else if (currentLang.startsWith('sk')) {
+      // Slovak format: DD.MM.YYYY
+      return dateObj.toLocaleDateString('sk-SK', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } else {
+      // English format: MM/DD/YYYY
+      return dateObj.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      });
+    }
+  };
   const [contributionAmount, setContributionAmount] = useState("");
   const [contributionNote, setContributionNote] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
@@ -232,7 +261,7 @@ export default function CollaborativeGoalDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{daysRemaining > 0 ? daysRemaining : 0}</div>
-            <p className="text-xs text-muted-foreground">{t('collaborative_goal_detail.cards.until')} {goal?.targetDate ? format(new Date(goal.targetDate), 'MMM dd, yyyy') : t('collaborative_goal_detail.cards.no_date_set')}</p>
+            <p className="text-xs text-muted-foreground">{t('collaborative_goal_detail.cards.until')} {goal?.targetDate ? formatLocalizedDate(goal.targetDate) : t('collaborative_goal_detail.cards.no_date_set')}</p>
           </CardContent>
         </Card>
 
