@@ -250,6 +250,40 @@ export default function CollaborativeGoalDetailPage() {
     }
   };
 
+  // Handle sending a message
+  const sendMessage = async () => {
+    if (!newMessage.trim()) return;
+
+    try {
+      const headers = await getAuthHeaders();
+      const response = await fetch(`/api/collaborative-goals/${id}/messages`, {
+        method: 'POST',
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: newMessage,
+          messageType: 'text',
+        }),
+      });
+
+      if (response.ok) {
+        setNewMessage("");
+        fetchGoal(); // Refresh to get latest messages
+      } else {
+        throw new Error("Failed to send message");
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -720,6 +754,67 @@ export default function CollaborativeGoalDetailPage() {
                       {t('collaborative_goal_detail.sections.no_contributions')}
                     </div>
                   )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Participant Chat */}
+            <Card className="p-6">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2">
+                  <MessageCircle className="w-5 h-5" />
+                  Group Chat
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Messages */}
+                  <div className="space-y-3 max-h-64 overflow-y-auto border rounded-lg p-3">
+                    {messages.map((message: any) => (
+                      <div key={message.id} className="flex items-start space-x-3">
+                        <Avatar className="h-6 w-6">
+                          <AvatarFallback>
+                            {message.user?.firstName ? message.user.firstName[0] : 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">
+                              {message.user?.firstName} {message.user?.lastName}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {new Date(message.createdAt).toLocaleTimeString()}
+                            </span>
+                          </div>
+                          <div className="text-sm mt-1">{message.message}</div>
+                        </div>
+                      </div>
+                    ))}
+                    {messages.length === 0 && (
+                      <div className="text-center py-4 text-gray-500 text-sm">
+                        No messages yet. Start a conversation!
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Message input */}
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Type a message..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                      className="flex-1"
+                    />
+                    <Button onClick={sendMessage} disabled={!newMessage.trim()}>
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
