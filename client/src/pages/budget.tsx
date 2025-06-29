@@ -437,7 +437,7 @@ export default function Budget() {
                 <TrendingDown className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Spent</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('budget.total_spent')}</p>
                 <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                   {displayCurrency}{totalSpent.toFixed(2)}
                 </p>
@@ -454,7 +454,7 @@ export default function Budget() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  {totalRemaining >= 0 ? 'Remaining' : 'Over Budget'}
+                  {totalRemaining >= 0 ? t('budget.remaining') : t('budget.over_budget')}
                 </p>
                 <p className={`text-2xl font-bold ${totalRemaining >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                   {displayCurrency}{Math.abs(totalRemaining).toFixed(2)}
@@ -468,29 +468,29 @@ export default function Budget() {
       {/* Budget List */}
       <Card>
         <CardHeader>
-          <CardTitle>Budget Categories</CardTitle>
+          <CardTitle>{t('budget.budget_categories')}</CardTitle>
           <CardDescription>
-            For the period: {format(startOfMonth(currentDate), "MMMM dd")} - {format(endOfMonth(currentDate), "MMMM dd, yyyy")}
+            {t('budget.for_the_period')}: {format(startOfMonth(currentDate), "MMMM dd")} - {format(endOfMonth(currentDate), "MMMM dd, yyyy")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-gray-600 dark:text-gray-300 mt-2">Loading budgets...</p>
+              <p className="text-gray-600 dark:text-gray-300 mt-2">{t('budget.loading_budgets')}</p>
             </div>
           ) : budgets.length === 0 ? (
             <div className="text-center py-8">
               <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                No Budgets Created
+                {t('budget.no_budgets_created')}
               </h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                Create your first budget to start tracking your spending goals
+                {t('budget.create_first_budget')}
               </p>
               <Button onClick={() => setIsDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create Budget
+                {t('budget.create_budget')}
               </Button>
             </div>
           ) : (
@@ -532,22 +532,22 @@ export default function Budget() {
                       
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span>Spent: {displayCurrency}{(budget.spent || 0).toFixed(2)}</span>
-                          <span>Budget: {displayCurrency}{parseFloat(budget.amount.toString()).toFixed(2)}</span>
+                          <span>{t('budget.spent')}: {displayCurrency}{(budget.spent || 0).toFixed(2)}</span>
+                          <span>{t('budget.budget')}: {displayCurrency}{parseFloat(budget.amount.toString()).toFixed(2)}</span>
                         </div>
                         <Progress value={budget.percentage || 0} className="h-2" />
                         <div className="flex justify-between items-center">
                           <p className={`text-sm ${color}`}>
                             {budget.remaining !== undefined && budget.remaining >= 0 
-                              ? `${displayCurrency}${budget.remaining.toFixed(2)} remaining`
-                              : `${displayCurrency}${Math.abs(budget.remaining || 0).toFixed(2)} over budget`
+                              ? `${displayCurrency}${budget.remaining.toFixed(2)} ${t('budget.remaining')}`
+                              : `${displayCurrency}${Math.abs(budget.remaining || 0).toFixed(2)} ${t('budget.over_budget')}`
                             }
                           </p>
                           <Badge 
                             variant="outline" 
                             className={`${color} border-current`}
                           >
-                            {(budget.percentage || 0).toFixed(0)}% used
+                            {(budget.percentage || 0).toFixed(0)}% {t('budget.used')}
                           </Badge>
                         </div>
                       </div>
