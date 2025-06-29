@@ -315,19 +315,12 @@ export default function Expenses() {
   const totalExpenses = filteredExpenses.reduce((sum: number, t: Transaction) => sum + parseFloat(t.amount), 0);
   const averageExpense = filteredExpenses.length > 0 ? totalExpenses / filteredExpenses.length : 0;
 
-  // Chart data preparation with localized month names
+  // Chart data preparation with localized month names using translation keys
   const getLocalizedMonthYear = (date: Date) => {
-    const currentLang = i18n.language;
-    console.log('Month localization - current language:', currentLang);
-    if (currentLang.startsWith('es')) {
-      const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-      return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
-    } else if (currentLang.startsWith('sk')) {
-      const monthNames = ['jan', 'feb', 'mar', 'apr', 'máj', 'jún', 'júl', 'aug', 'sep', 'okt', 'nov', 'dec'];
-      return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
-    } else {
-      return format(date, "MMM yyyy");
-    }
+    const shortMonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthIndex = date.getMonth();
+    const monthName = shortMonthNames[monthIndex];
+    return `${t(monthName)} ${date.getFullYear()}`;
   };
 
   const monthlyExpenseData = expenseTransactions.reduce((acc: any, transaction: Transaction) => {
