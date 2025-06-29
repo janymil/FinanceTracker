@@ -247,10 +247,24 @@ export default function Budget() {
   };
 
   const expenseCategories = categories.filter((cat: Category) => cat.type === "expense");
+  
+  // Filter budgets to only show those active for the selected month
+  const filteredBudgets = budgets.filter((budget: Budget) => {
+    const budgetStart = new Date(budget.startDate);
+    const budgetEnd = new Date(budget.endDate);
+    const monthStart = startOfMonth(currentDate);
+    const monthEnd = endOfMonth(currentDate);
+    
+    // Budget is active if it overlaps with the selected month
+    return budgetStart <= monthEnd && budgetEnd >= monthStart;
+  });
+  
   console.log("Categories:", categories);
   console.log("Expense categories:", expenseCategories);
-  const totalBudget = budgets.reduce((sum: number, budget: Budget) => sum + parseFloat(budget.amount.toString() || '0'), 0);
-  const totalSpent = budgets.reduce((sum: number, budget: Budget) => sum + (budget.spent || 0), 0);
+  console.log("Filtered budgets for", format(currentDate, "MMMM yyyy"), ":", filteredBudgets);
+  
+  const totalBudget = filteredBudgets.reduce((sum: number, budget: Budget) => sum + parseFloat(budget.amount.toString() || '0'), 0);
+  const totalSpent = filteredBudgets.reduce((sum: number, budget: Budget) => sum + (budget.spent || 0), 0);
   const totalRemaining = totalBudget - totalSpent;
 
   const handleSubmit = () => {
@@ -479,7 +493,7 @@ export default function Budget() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
               <p className="text-gray-600 dark:text-gray-300 mt-2">{t('budget.loading_budgets')}</p>
             </div>
-          ) : budgets.length === 0 ? (
+          ) : filteredBudgets.length === 0 ? (
             <div className="text-center py-8">
               <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
@@ -495,7 +509,7 @@ export default function Budget() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {budgets.map((budget: Budget) => {
+              {filteredBudgets.map((budget: Budget) => {
                 const { status, color, bgColor } = getBudgetStatus(budget);
                 return (
                   <Card key={budget.id}>
