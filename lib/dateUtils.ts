@@ -52,19 +52,25 @@ export function formatTransactionDate(date: string | Date, language?: string): s
     currentLang = getCurrentLanguageForAPI() || 'en-us';
   }
   
-  const day = String(dateObj.getDate()).padStart(2, '0');
-  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const day = dateObj.getDate();
+  const monthIndex = dateObj.getMonth();
   const year = dateObj.getFullYear();
   
   if (currentLang.startsWith('es')) {
-    // Spanish: DD/MM/YYYY
-    return `${day}/${month}/${year}`;
+    // Spanish: "16 mayo 2025"
+    const spanishMonths = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+                          'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    return `${day} ${spanishMonths[monthIndex]} ${year}`;
   } else if (currentLang.startsWith('sk')) {
-    // Slovak: DD.MM.YYYY
-    return `${day}.${month}.${year}`;
+    // Slovak: "16 mar 2025"
+    const slovakMonths = ['jan', 'feb', 'mar', 'apr', 'máj', 'jún', 
+                         'júl', 'aug', 'sep', 'okt', 'nov', 'dec'];
+    return `${day} ${slovakMonths[monthIndex]} ${year}`;
   } else {
-    // English: MM/DD/YYYY
-    return `${month}/${day}/${year}`;
+    // English: "may 25 2025"
+    const englishMonths = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
+                          'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+    return `${englishMonths[monthIndex]} ${day} ${year}`;
   }
 }
 
