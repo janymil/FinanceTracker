@@ -394,20 +394,50 @@ export default function CollaborativeGoalDetailPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
+                onClick={async () => {
                   const text = `Join me in saving for "${goal?.name}"! Target: $${parseFloat(goal?.targetAmount || '0').toLocaleString()} - ${window.location.href}`;
+                  
+                  // Try Web Share API first, fallback to clipboard
                   if (navigator.share) {
-                    navigator.share({
-                      title: `Collaborative Goal: ${goal?.name}`,
-                      text: text,
-                      url: window.location.href
-                    });
+                    try {
+                      await navigator.share({
+                        title: `Collaborative Goal: ${goal?.name}`,
+                        text: text,
+                        url: window.location.href
+                      });
+                    } catch (error) {
+                      // Web Share API failed, fallback to clipboard
+                      try {
+                        await navigator.clipboard.writeText(text);
+                        toast({
+                          title: t('collaborative_goal_detail.messages.link_copied'),
+                          description: t('collaborative_goal_detail.messages.link_copied_description'),
+                        });
+                      } catch (clipboardError) {
+                        // Clipboard also failed, show error
+                        toast({
+                          title: t('collaborative_goal_detail.messages.error'),
+                          description: "Unable to share or copy link. Please copy the URL manually.",
+                          variant: "destructive"
+                        });
+                      }
+                    }
                   } else {
-                    navigator.clipboard.writeText(text);
-                    toast({
-                      title: t('collaborative_goal_detail.messages.link_copied'),
-                      description: t('collaborative_goal_detail.messages.link_copied_description'),
-                    });
+                    // No Web Share API, use clipboard directly
+                    try {
+                      await navigator.clipboard.writeText(text);
+                      toast({
+                        title: t('collaborative_goal_detail.messages.link_copied'),
+                        description: t('collaborative_goal_detail.messages.link_copied_description'),
+                      });
+                    } catch (clipboardError) {
+                      // Clipboard failed, show error
+                      toast({
+                        title: t('collaborative_goal_detail.messages.error'),
+                        description: "Unable to copy link. Please copy the URL manually.",
+                        variant: "destructive"
+                      });
+                    }
                   }
                 }}
                 className="flex-1"
