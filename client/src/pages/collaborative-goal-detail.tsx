@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
-import { ArrowLeft, Users, Target, Calendar, Plus, DollarSign, Activity, Trophy, Mail, Share2, Heart, MapPin, Gift, Sparkles, TrendingUp, Clock } from "lucide-react";
+import { ArrowLeft, Users, Target, Calendar, Plus, DollarSign, Activity, Trophy, Mail, Share2, Heart, MapPin, Gift, Sparkles, TrendingUp, Clock, MessageCircle, Send } from "lucide-react";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
@@ -99,6 +99,8 @@ export default function CollaborativeGoalDetailPage() {
   const [contributionNote, setContributionNote] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [isInviting, setIsInviting] = useState(false);
+  const [newMessage, setNewMessage] = useState("");
+  const [messages, setMessages] = useState([]);
 
   // Fetch goal data
   const fetchGoal = async () => {
@@ -117,6 +119,13 @@ export default function CollaborativeGoalDetailPage() {
         if (contribResponse.ok) {
           const contribData = await contribResponse.json();
           setContributions(contribData);
+        }
+
+        // Fetch messages
+        const messagesResponse = await fetch(`/api/collaborative-goals/${id}/messages`, { headers });
+        if (messagesResponse.ok) {
+          const messagesData = await messagesResponse.json();
+          setMessages(messagesData);
         }
       } else {
         toast({

@@ -1611,6 +1611,27 @@ export class DatabaseStorage implements IStorage {
     return participant;
   }
 
+  async getGoalParticipants(goalId: number): Promise<Array<CollaborativeGoalParticipant & { user: User }>> {
+    const participantsWithUsers = await db
+      .select({
+        participant: collaborativeGoalParticipants,
+        user: users,
+      })
+      .from(collaborativeGoalParticipants)
+      .innerJoin(users, eq(collaborativeGoalParticipants.userId, users.id))
+      .where(
+        and(
+          eq(collaborativeGoalParticipants.goalId, goalId),
+          eq(collaborativeGoalParticipants.status, "active")
+        )
+      );
+
+    return participantsWithUsers.map(({ participant, user }) => ({
+      ...participant,
+      user,
+    }));
+  }
+
   async getCollaborativeGoal(goalId: number, userId: string): Promise<(CollaborativeGoal & { participants: Array<CollaborativeGoalParticipant & { user: User }>, creator: User, contributions: GoalContribution[], activities: ChallengeActivity[] }) | undefined> {
     // Check if user is participant
     const [participant] = await db
