@@ -31,121 +31,121 @@ export default function CookiePolicy() {
 
         <div className="prose prose-lg dark:prose-invert max-w-none">
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("1. What Are Cookies")}</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("cookies.policy.what_are_cookies")}</h2>
             <p className="mb-4">
-              {t("Cookies are small text files that are stored on your device when you visit our website. They help us provide you with a better experience by remembering your preferences and enabling essential website functionality.")}
+              {t("cookies.policy.what_are_cookies_desc")}
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("2. How We Use Cookies")}</h2>
-            <p className="mb-4">{t("We use cookies for the following purposes:")}</p>
+            <h2 className="text-2xl font-semibold mb-4">{t("cookies.policy.how_we_use")}</h2>
+            <p className="mb-4">{t("cookies.policy.how_we_use_desc")}</p>
             
-            <h3 className="text-lg font-semibold mb-2">{t("2.1 Essential Cookies")}</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("cookies.policy.essential_cookies")}</h3>
             <p className="mb-4">
-              {t("These cookies are necessary for the website to function and cannot be switched off. They are usually only set in response to actions made by you, such as logging in or setting privacy preferences.")}
+              {t("cookies.policy.essential_desc")}
             </p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li><strong>{t("Session cookies:")}</strong> {t("Keep you logged in during your visit")}</li>
-              <li><strong>{t("Security cookies:")}</strong> {t("Protect against unauthorized access")}</li>
-              <li><strong>{t("Authentication cookies:")}</strong> {t("Remember your login status")}</li>
+              <li><strong>{t("cookies.policy.session_cookies")}</strong> {t("cookies.policy.session_desc")}</li>
+              <li><strong>{t("cookies.policy.security_cookies")}</strong> {t("cookies.policy.security_desc")}</li>
+              <li><strong>{t("cookies.policy.auth_cookies")}</strong> {t("cookies.policy.auth_desc")}</li>
             </ul>
 
-            <h3 className="text-lg font-semibold mb-2">{t("2.2 Functional Cookies")}</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("cookies.policy.functional_cookies")}</h3>
             <p className="mb-4">
-              {t("These cookies enable enhanced functionality and personalization, such as remembering your preferences and settings.")}
+              {t("cookies.policy.functional_desc")}
             </p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li><strong>{t("Theme preferences:")}</strong> {t("Remember dark/light mode selection")}</li>
-              <li><strong>{t("Language settings:")}</strong> {t("Store your preferred language")}</li>
-              <li><strong>{t("Dashboard layout:")}</strong> {t("Remember your customized view preferences")}</li>
+              <li><strong>{t("cookies.policy.theme_preferences")}</strong> {t("cookies.policy.theme_desc")}</li>
+              <li><strong>{t("cookies.policy.language_settings")}</strong> {t("cookies.policy.language_desc")}</li>
+              <li><strong>{t("cookies.policy.dashboard_layout")}</strong> {t("cookies.policy.dashboard_desc")}</li>
             </ul>
 
-            <h3 className="text-lg font-semibold mb-2">{t("2.3 Analytics Cookies")}</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("cookies.policy.analytics_cookies")}</h3>
             <p className="mb-4">
-              {t("These cookies help us understand how visitors interact with our website by collecting and reporting information anonymously.")}
+              {t("cookies.policy.analytics_desc")}
             </p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li><strong>{t("Usage analytics:")}</strong> {t("Track page views and user interactions")}</li>
-              <li><strong>{t("Performance monitoring:")}</strong> {t("Identify technical issues")}</li>
-              <li><strong>{t("Feature usage:")}</strong> {t("Understand which features are most popular")}</li>
-            </ul>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("3. Third-Party Cookies")}</h2>
-            <p className="mb-4">
-              {t("We may use third-party services that set their own cookies:")}
-            </p>
-            <ul className="list-disc list-inside mb-4 space-y-2">
-              <li><strong>{t("Stripe:")}</strong> {t("For secure payment processing (payment pages only)")}</li>
-              <li><strong>{t("Analytics services:")}</strong> {t("For website performance monitoring")}</li>
+              <li><strong>{t("cookies.policy.usage_analytics")}</strong> {t("cookies.policy.usage_desc")}</li>
+              <li><strong>{t("cookies.policy.performance_monitoring")}</strong> {t("cookies.policy.performance_desc")}</li>
+              <li><strong>{t("cookies.policy.feature_usage")}</strong> {t("cookies.policy.feature_desc")}</li>
             </ul>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("4. Cookie Duration")}</h2>
-            <p className="mb-4">{t("Cookies may be either:")}</p>
+            <h2 className="text-2xl font-semibold mb-4">{t("cookies.policy.third_party")}</h2>
+            <p className="mb-4">
+              {t("cookies.policy.third_party_desc")}
+            </p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li><strong>{t("Session cookies:")}</strong> {t("Deleted when you close your browser")}</li>
-              <li><strong>{t("Persistent cookies:")}</strong> {t("Remain on your device for a set period or until manually deleted")}</li>
+              <li><strong>{t("cookies.policy.stripe")}</strong> {t("cookies.policy.stripe_desc")}</li>
+              <li><strong>{t("cookies.policy.analytics_services")}</strong> {t("cookies.policy.analytics_services_desc")}</li>
             </ul>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("5. Managing Cookies")}</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("cookies.policy.cookie_duration")}</h2>
+            <p className="mb-4">{t("cookies.policy.duration_desc")}</p>
+            <ul className="list-disc list-inside mb-4 space-y-2">
+              <li><strong>{t("cookies.policy.session_duration")}</strong> {t("cookies.policy.session_duration_desc")}</li>
+              <li><strong>{t("cookies.policy.persistent_cookies")}</strong> {t("cookies.policy.persistent_desc")}</li>
+            </ul>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">{t("cookies.policy.managing_cookies")}</h2>
             <p className="mb-4">
-              {t("You can control and manage cookies in several ways:")}
-            </p>
-            
-            <h3 className="text-lg font-semibold mb-2">{t("5.1 Browser Settings")}</h3>
-            <p className="mb-4">
-              {t("Most browsers allow you to refuse cookies or delete existing ones. However, this may affect website functionality.")}
+              {t("cookies.policy.managing_desc")}
             </p>
             
-            <h3 className="text-lg font-semibold mb-2">{t("5.2 Cookie Banner")}</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("cookies.policy.browser_settings")}</h3>
             <p className="mb-4">
-              {t("When you first visit our website, you can choose which types of cookies to accept through our cookie consent banner.")}
+              {t("cookies.policy.browser_desc")}
             </p>
             
-            <h3 className="text-lg font-semibold mb-2">{t("5.3 Opt-Out Links")}</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("cookies.policy.cookie_banner")}</h3>
             <p className="mb-4">
-              {t("For third-party analytics cookies, you can opt out directly through the service provider's website.")}
+              {t("cookies.policy.banner_desc")}
+            </p>
+            
+            <h3 className="text-lg font-semibold mb-2">{t("cookies.policy.opt_out")}</h3>
+            <p className="mb-4">
+              {t("cookies.policy.opt_out_desc")}
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("6. Cookie List")}</h2>
-            <p className="mb-4">{t("Here are the specific cookies we use:")}</p>
+            <h2 className="text-2xl font-semibold mb-4">{t("cookies.policy.cookie_list")}</h2>
+            <p className="mb-4">{t("cookies.policy.cookie_list_desc")}</p>
             
             <div className="overflow-x-auto">
               <table className="min-w-full border border-border rounded-lg">
                 <thead className="bg-muted">
                   <tr>
-                    <th className="border border-border px-4 py-2 text-left">{t("Cookie Name")}</th>
-                    <th className="border border-border px-4 py-2 text-left">{t("Purpose")}</th>
-                    <th className="border border-border px-4 py-2 text-left">{t("Duration")}</th>
-                    <th className="border border-border px-4 py-2 text-left">{t("Type")}</th>
+                    <th className="border border-border px-4 py-2 text-left">{t("cookies.policy.cookie_name")}</th>
+                    <th className="border border-border px-4 py-2 text-left">{t("cookies.policy.purpose")}</th>
+                    <th className="border border-border px-4 py-2 text-left">{t("cookies.policy.duration")}</th>
+                    <th className="border border-border px-4 py-2 text-left">{t("cookies.policy.type")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td className="border border-border px-4 py-2">connect.sid</td>
-                    <td className="border border-border px-4 py-2">{t("Session management and authentication")}</td>
-                    <td className="border border-border px-4 py-2">{t("7 days")}</td>
-                    <td className="border border-border px-4 py-2">{t("Essential")}</td>
+                    <td className="border border-border px-4 py-2">{t("cookies.policy.session_mgmt")}</td>
+                    <td className="border border-border px-4 py-2">{t("cookies.policy.seven_days")}</td>
+                    <td className="border border-border px-4 py-2">{t("cookies.policy.essential")}</td>
                   </tr>
                   <tr>
                     <td className="border border-border px-4 py-2">theme</td>
-                    <td className="border border-border px-4 py-2">{t("Remember dark/light mode preference")}</td>
-                    <td className="border border-border px-4 py-2">{t("1 year")}</td>
-                    <td className="border border-border px-4 py-2">{t("Functional")}</td>
+                    <td className="border border-border px-4 py-2">{t("cookies.policy.theme_remember")}</td>
+                    <td className="border border-border px-4 py-2">{t("cookies.policy.one_year")}</td>
+                    <td className="border border-border px-4 py-2">{t("cookies.policy.functional")}</td>
                   </tr>
                   <tr>
                     <td className="border border-border px-4 py-2">cookie-consent</td>
-                    <td className="border border-border px-4 py-2">{t("Remember your cookie preferences")}</td>
-                    <td className="border border-border px-4 py-2">{t("1 year")}</td>
-                    <td className="border border-border px-4 py-2">{t("Essential")}</td>
+                    <td className="border border-border px-4 py-2">{t("cookies.policy.consent_remember")}</td>
+                    <td className="border border-border px-4 py-2">{t("cookies.policy.one_year")}</td>
+                    <td className="border border-border px-4 py-2">{t("cookies.policy.essential")}</td>
                   </tr>
                 </tbody>
               </table>
@@ -153,19 +153,19 @@ export default function CookiePolicy() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("7. Changes to This Policy")}</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("cookies.policy.changes_policy")}</h2>
             <p className="mb-4">
-              {t("We may update this Cookie Policy from time to time. Any changes will be posted on this page with an updated revision date.")}
+              {t("cookies.policy.changes_desc")}
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{t("8. Contact Us")}</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t("cookies.policy.contact_us")}</h2>
             <p className="mb-4">
-              {t("If you have any questions about our use of cookies, please contact us at:")}
+              {t("cookies.policy.contact_desc")}
             </p>
-            <p className="mb-2">{t("Email: info@finanzerpro.com")}</p>
-            <p>{t("Address: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120")}</p>
+            <p className="mb-2">{t("cookies.policy.email")}</p>
+            <p>{t("cookies.policy.address")}</p>
           </section>
         </div>
       </div>
