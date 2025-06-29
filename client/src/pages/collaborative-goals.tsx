@@ -270,8 +270,8 @@ export default function CollaborativeGoalsPage() {
         fetchFriends();
         fetchFriendRequests();
         toast({
-          title: "Success!",
-          description: "Friend request accepted",
+          title: t('collaborative_goals.messages.success'),
+          description: t('collaborative_goals.messages.friend_accepted'),
         });
       }
     } catch (error: any) {
@@ -295,7 +295,7 @@ export default function CollaborativeGoalsPage() {
       if (response.ok) {
         fetchFriendRequests();
         toast({
-          title: "Friend request rejected",
+          title: t('collaborative_goals.messages.friend_rejected'),
         });
       }
     } catch (error: any) {
@@ -310,8 +310,8 @@ export default function CollaborativeGoalsPage() {
   const handleCreateGoal = () => {
     if (!newGoal.name || !newGoal.targetAmount || !newGoal.targetDate) {
       toast({
-        title: "Error",
-        description: "Please fill in all required fields",
+        title: t('collaborative_goals.messages.error'),
+        description: t('collaborative_goals.messages.fill_required_fields'),
         variant: "destructive",
       });
       return;
@@ -323,8 +323,8 @@ export default function CollaborativeGoalsPage() {
   const handleSendFriendRequest = () => {
     if (!friendEmail) {
       toast({
-        title: "Error",
-        description: "Please enter an email address",
+        title: t('collaborative_goals.messages.error'),
+        description: t('collaborative_goals.messages.enter_email'),
         variant: "destructive",
       });
       return;
@@ -528,7 +528,7 @@ export default function CollaborativeGoalsPage() {
                               <CardDescription>{goal.description}</CardDescription>
                             </div>
                             <Badge variant={getChallengeTypeBadge(goal.challengeType) as any}>
-                              {goal.challengeType}
+                              {t(`collaborative_goals.challenge_types.${goal.challengeType}`)}
                             </Badge>
                           </div>
                         </CardHeader>
@@ -714,7 +714,7 @@ export default function CollaborativeGoalsPage() {
                               </p>
                               <p className="text-sm text-gray-500">{friendship.friend.email}</p>
                             </div>
-                            <Badge variant="secondary">Friends</Badge>
+                            <Badge variant="secondary">{t('collaborative_goals.status.friends')}</Badge>
                           </CardContent>
                         </Card>
                       ))}
@@ -726,15 +726,15 @@ export default function CollaborativeGoalsPage() {
 
             <TabsContent value="achievements" className="space-y-6">
               <div>
-                <h2 className="text-xl font-semibold mb-4">Your Achievements</h2>
+                <h2 className="text-xl font-semibold mb-4">{t('collaborative_goals.sections.achievements')}</h2>
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <Trophy className="h-12 w-12 text-gray-400 mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      No achievements yet
+                      {t('collaborative_goals.empty_achievements.title')}
                     </h3>
                     <p className="text-gray-500 text-center">
-                      Complete collaborative goals to earn achievements and badges
+                      {t('collaborative_goals.empty_achievements.description')}
                     </p>
                   </CardContent>
                 </Card>
