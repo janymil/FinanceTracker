@@ -93,6 +93,23 @@ const getUserLanguage = (): string => {
 const userLanguage = getUserLanguage();
 const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
 
+// Get language-aware URLs for terms and privacy policy
+const getLanguageAwareUrls = () => {
+  const urlPath = window.location.pathname;
+  const urlLang = urlPath.match(/^\/([a-z]{2})\//)?.[1];
+  const savedLanguage = localStorage.getItem('preferredLanguage');
+  const browserLanguage = detectLanguageFromBrowser();
+  
+  const currentLang = urlLang || savedLanguage || browserLanguage;
+  const lang = currentLang === 'es' || currentLang?.startsWith('es') ? 'es' :
+               currentLang === 'sk' || currentLang?.startsWith('sk') ? 'sk' : 'en';
+  
+  return {
+    termsOfServiceUrl: `/${lang}/terms-of-service`,
+    privacyPolicyUrl: `/${lang}/privacy-policy`,
+  };
+};
+
 // Get Clerk localization based on user language
 const getClerkLocalization = () => {
   // Get language from URL path first, then localStorage, then browser
