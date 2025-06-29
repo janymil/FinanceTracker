@@ -319,15 +319,46 @@ function isCrawler(userAgent: string): boolean {
   return /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|chatgpt-user|gptbot|ccbot|anthropic|claude-bot|perplexitybot|meta-externalagent|semrushbot|ahrefsbot|mj12bot|dotbot/i.test(userAgent);
 }
 
-// SSR routes for SEO - only serve to crawlers
-const seoRoutes = ['/', '/pricing', '/help', '/contact'];
+// Language detection utility
+function extractLanguageFromPath(path: string): { language: string | null; cleanPath: string } {
+  const pathSegments = path.split('/').filter(Boolean);
+  const supportedLanguages = ['en', 'es', 'sk'];
+  
+  if (pathSegments.length > 0 && supportedLanguages.includes(pathSegments[0])) {
+    const language = pathSegments[0];
+    const cleanPath = '/' + pathSegments.slice(1).join('/');
+    return { language, cleanPath: cleanPath === '/' ? '/' : cleanPath };
+  }
+  
+  return { language: null, cleanPath: path };
+}
 
+// SSR routes for SEO - only serve to crawlers (both root and language-prefixed)
+const seoRoutes = ['/', '/pricing', '/help', '/contact', '/auth', '/privacy-policy', '/terms-of-service', '/cookie-policy'];
+
+// Handle root routes (e.g., /pricing)
 seoRoutes.forEach(route => {
   app.get(route, (req, res, next) => {
     const userAgent = req.get('User-Agent') || '';
     
     if (isCrawler(userAgent)) {
-      const html = renderPageForCrawler(route);
+      const html = renderPageForCrawler(route, 'en'); // Default to English for root routes
+      res.setHeader('Content-Type', 'text/html');
+      return res.send(html);
+    }
+    
+    next(); // Continue to React app for human users
+  });
+});
+
+// Handle language-prefixed routes (e.g., /es/pricing, /sk/contact)
+seoRoutes.forEach(route => {
+  app.get(`/:lang(en|es|sk)${route === '/' ? '' : route}`, (req, res, next) => {
+    const userAgent = req.get('User-Agent') || '';
+    
+    if (isCrawler(userAgent)) {
+      const language = req.params.lang;
+      const html = renderPageForCrawler(route, language);
       res.setHeader('Content-Type', 'text/html');
       return res.send(html);
     }

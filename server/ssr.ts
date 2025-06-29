@@ -2,7 +2,7 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 
 // Simple SSR for crawlers - generates static HTML with proper meta tags
-export function renderPageForCrawler(route: string): string {
+export function renderPageForCrawler(route: string, language: string = 'en'): string {
   const getPageData = (path: string) => {
     switch (path) {
       case '/':
