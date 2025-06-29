@@ -123,26 +123,10 @@ const getClerkLocalization = () => {
   
   console.log('Clerk localization detection:', { urlLang, savedLanguage, browserLanguage, currentLang });
   
-  if (currentLang === 'es' || currentLang?.startsWith('es')) {
-    console.log('Using Spanish localization for Clerk');
-    return esES;
-  } else if (currentLang === 'sk' || currentLang?.startsWith('sk')) {
-    console.log('Using Slovak localization for Clerk');
-    // Use custom Slovak config that preserves form functionality
-    return {
-      ...skSK,
-      signUp: {
-        ...skSK.signUp,
-        start: {
-          ...skSK.signUp?.start,
-          actionText: "Nemáte účet?",
-          actionLink: "Zaregistrujte sa",
-        }
-      }
-    };
-  }
-  console.log('Using English (default) localization for Clerk');
-  return undefined; // English is default
+  // Disable all Clerk localizations to prevent form display issues
+  // Keep application's i18n system working for the interface
+  console.log('Using English (default) localization for Clerk to ensure form functionality');
+  return undefined; // Always use English for Clerk forms
 };
 
 const languageAwareUrls = getLanguageAwareUrls();
