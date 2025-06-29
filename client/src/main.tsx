@@ -149,17 +149,22 @@ root.render(
               }
             },
             checkboxLabel: {
-              color: '#262626',
+              color: '#000000 !important',
               opacity: '1',
               visibility: 'visible',
             },
             termsOfServiceLabel: {
-              color: '#262626',
+              color: '#000000 !important',
               opacity: '1',
               visibility: 'visible',
             },
             privacyPolicyLabel: {
-              color: '#262626',
+              color: '#000000 !important',
+              opacity: '1',
+              visibility: 'visible',
+            },
+            termsPageText: {
+              color: '#000000 !important',
               opacity: '1',
               visibility: 'visible',
             }

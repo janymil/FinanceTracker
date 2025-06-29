@@ -312,6 +312,26 @@
     visibility: visible !important;
   }
   
+  /* Target specific Clerk internal classes for terms text */
+  .cl-internal-puxpf3,
+  [class*="cl-internal-"] {
+    color: #000000 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* More specific targeting for terms and conditions text */
+  .cl-termsOfServiceLabel,
+  .cl-privacyPolicyLabel,
+  .cl-checkboxLabel,
+  .cl-checkboxLabel span,
+  .cl-checkboxLabel div,
+  [class*="cl-internal"] {
+    color: #000000 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
   /* Dark mode checkbox fixes */
   .dark .cl-checkbox {
     background-color: hsl(var(--background)) !important;
@@ -319,7 +339,12 @@
   }
   
   .dark .cl-checkboxLabel {
-    color: hsl(var(--foreground)) !important;
+    color: #ffffff !important;
+  }
+  
+  .dark .cl-internal-puxpf3,
+  .dark [class*="cl-internal-"] {
+    color: #ffffff !important;
   }
   
   /* Fix terms and conditions link visibility */
@@ -331,4 +356,27 @@
   .dark .cl-checkboxLabel a {
     color: hsl(var(--primary)) !important;
   }
+}
+
+/* Ultra-specific override for Clerk's internal classes */
+.cl-internal-puxpf3 {
+  color: #000000 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Global override for any Clerk internal class */
+[class*="cl-internal"] {
+  color: #000000 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Dark mode overrides */
+.dark .cl-internal-puxpf3 {
+  color: #ffffff !important;
+}
+
+.dark [class*="cl-internal"] {
+  color: #ffffff !important;
 }
