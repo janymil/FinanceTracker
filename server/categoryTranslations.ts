@@ -79,6 +79,43 @@ export const categoryTranslations = {
     'en-us': 'Other Income',
     'es-pe': 'Otros ingresos',
     'sk-sk': 'Iné príjmy'
+  },
+  
+  // Goal categories
+  'Emergency fund': {
+    'en-us': 'Emergency fund',
+    'es-pe': 'Fondo de emergencia',
+    'sk-sk': 'Núdzový fond'
+  },
+  'Vacation': {
+    'en-us': 'Vacation',
+    'es-pe': 'Vacaciones',
+    'sk-sk': 'Dovolenka'
+  },
+  'House Down Payment': {
+    'en-us': 'House Down Payment',
+    'es-pe': 'Pago inicial de casa',
+    'sk-sk': 'Záloha na dom'
+  },
+  'Car Purchase': {
+    'en-us': 'Car Purchase',
+    'es-pe': 'Compra de auto',
+    'sk-sk': 'Kúpa auta'
+  },
+  'Debt Payoff': {
+    'en-us': 'Debt Payoff',
+    'es-pe': 'Pago de deudas',
+    'sk-sk': 'Splácanie dlhov'
+  },
+  'Retirement': {
+    'en-us': 'Retirement',
+    'es-pe': 'Jubilación',
+    'sk-sk': 'Dôchodok'
+  },
+  'Other': {
+    'en-us': 'Other',
+    'es-pe': 'Otro',
+    'sk-sk': 'Iné'
   }
 };
 
