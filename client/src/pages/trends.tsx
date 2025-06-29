@@ -612,8 +612,8 @@ export default function Trends() {
               {/* Day of Week Patterns */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Day of Week Patterns</CardTitle>
-                  <CardDescription>Your spending behavior across different days</CardDescription>
+                  <CardTitle>{t('trends.patterns.day_of_week_title')}</CardTitle>
+                  <CardDescription>{t('trends.patterns.day_of_week_description')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="h-64">
@@ -622,7 +622,7 @@ export default function Trends() {
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="day" />
                         <YAxis />
-                        <Tooltip formatter={(value) => [formatCurrency(Number(value)), 'Amount']} />
+                        <Tooltip formatter={(value) => [formatCurrency(Number(value)), t('trends.chart.amount')]} />
                         <Bar dataKey="amount" fill="#8884d8" />
                       </BarChart>
                     </ResponsiveContainer>
@@ -638,8 +638,8 @@ export default function Trends() {
               {/* Monthly Day Patterns */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Monthly Spending Cycles</CardTitle>
-                  <CardDescription>How your spending varies throughout the month</CardDescription>
+                  <CardTitle>{t('trends.patterns.monthly_cycles_title')}</CardTitle>
+                  <CardDescription>{t('trends.patterns.monthly_cycles_description')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="h-64">
@@ -648,7 +648,7 @@ export default function Trends() {
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="day" />
                         <YAxis />
-                        <Tooltip formatter={(value) => [formatCurrency(Number(value)), 'Amount']} />
+                        <Tooltip formatter={(value) => [formatCurrency(Number(value)), t('trends.chart.amount')]} />
                         <Line type="monotone" dataKey="amount" stroke="#82ca9d" strokeWidth={2} />
                       </LineChart>
                     </ResponsiveContainer>
@@ -665,8 +665,8 @@ export default function Trends() {
             {/* Category Frequency Analysis */}
             <Card>
               <CardHeader>
-                <CardTitle>Category Spending Frequency</CardTitle>
-                <CardDescription>How often you spend in each category</CardDescription>
+                <CardTitle>{t('trends.patterns.category_frequency_title')}</CardTitle>
+                <CardDescription>{t('trends.patterns.category_frequency_description')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -674,15 +674,15 @@ export default function Trends() {
                     <div key={category.name} className="p-4 border rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="font-medium">{category.name}</h4>
-                        <Badge variant="outline">{category.frequency} times</Badge>
+                        <Badge variant="outline">{t('trends.patterns.times_count', { count: category.frequency })}</Badge>
                       </div>
                       <div className="space-y-1">
                         <div className="flex justify-between text-sm">
-                          <span>Total:</span>
+                          <span>{t('trends.patterns.total')}:</span>
                           <span className="font-medium">{formatCurrency(category.total)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span>Average:</span>
+                          <span>{t('trends.patterns.average')}:</span>
                           <span className="font-medium">{formatCurrency(category.average)}</span>
                         </div>
                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -714,9 +714,9 @@ export default function Trends() {
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>AI Financial Forecasts</CardTitle>
+                    <CardTitle>{t('trends.forecasts.ai_forecasts_title')}</CardTitle>
                     <CardDescription>
-                      AI-powered predictions based on your historical data patterns
+                      {t('trends.forecasts.ai_forecasts_description')}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>

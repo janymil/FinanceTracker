@@ -990,6 +990,85 @@
     "premium": "Premium"
   },
 
+  "trends": {
+    "title": "Advanced Trends Analysis",
+    "subtitle": "Deep insights into your financial patterns and forecasting",
+    "export": "Export",
+    "uncategorized": "Uncategorized",
+    "other": "Other",
+    
+    "periods": {
+      "last_30_days": "Last 30 Days",
+      "last_12_weeks": "Last 12 Weeks", 
+      "last_6_months": "Last 6 Months",
+      "last_2_years": "Last 2 Years"
+    },
+
+    "tabs": {
+      "overview": "Overview",
+      "by_category": "By Category",
+      "patterns": "Patterns",
+      "forecasts": "Forecasts"
+    },
+
+    "overview": {
+      "trend_direction": "Trend Direction",
+      "positive": "Positive",
+      "net_balance_upward": "Net balance trending upward",
+      "best_period": "Best Period",
+      "not_available": "N/A",
+      "highest_net_balance": "Highest net balance",
+      "volatility": "Volatility",
+      "low": "Low",
+      "stable_patterns": "Stable spending patterns",
+      "financial_trends_title": "Financial Trends Overview",
+      "financial_trends_description": "Income, expenses, and net balance over {{period}}"
+    },
+
+    "chart": {
+      "income": "Income",
+      "expenses": "Expenses", 
+      "net_balance": "Net Balance",
+      "amount": "Amount"
+    },
+
+    "days": {
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday", 
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday"
+    },
+
+    "insights": {
+      "no_data": "No spending data available.",
+      "weekend_higher": "You spend more on weekends ({{weekendAmount}}) than weekdays. {{maxDay}} is your highest spending day.",
+      "weekday_higher": "You spend more on weekdays ({{weekdayAmount}}) than weekends. {{maxDay}} is your highest spending day.",
+      "month_start_higher": "You tend to spend more at the beginning of the month ({{firstWeekAvg}} avg) than at the end ({{lastWeekAvg}} avg).",
+      "month_end_higher": "You tend to spend more at the end of the month ({{lastWeekAvg}} avg) than at the beginning ({{firstWeekAvg}} avg).",
+      "consistent_spending": "Your spending is relatively consistent throughout the month."
+    },
+
+    "patterns": {
+      "day_of_week_title": "Day of Week Patterns",
+      "day_of_week_description": "Your spending behavior across different days",
+      "monthly_cycles_title": "Monthly Spending Cycles",
+      "monthly_cycles_description": "How your spending varies throughout the month",
+      "category_frequency_title": "Category Spending Frequency",
+      "category_frequency_description": "How often you spend in each category",
+      "times_count": "{{count}} times",
+      "total": "Total",
+      "average": "Average"
+    },
+
+    "forecasts": {
+      "ai_forecasts_title": "AI Financial Forecasts",
+      "ai_forecasts_description": "AI-powered predictions based on your historical data patterns"
+    }
+  },
+
   "upload": {
     "drag_drop": "Drag and drop an image here, or click to browse",
     "processing": "Processing your receipt...",
