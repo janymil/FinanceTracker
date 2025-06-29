@@ -88,7 +88,7 @@ export function registerGoalRoutes(app: Express) {
       if (description !== undefined) updateData.description = description ? String(description) : null;
       if (currentAmount !== undefined) updateData.currentAmount = String(currentAmount);
 
-      const goal = await storage.updateGoal(id, updateData);
+      const goal = await storage.updateGoal(id, userId, updateData);
       return res.json(goal);
     } catch (error) {
       console.error("Error updating goal:", error);

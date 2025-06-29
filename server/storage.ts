@@ -100,7 +100,7 @@ export interface IStorage {
   createGoal(goal: InsertGoal): Promise<Goal>;
   getUserGoals(userId: string): Promise<Goal[]>;
   getGoal(id: number, userId: string): Promise<Goal | undefined>;
-  updateGoal(id: number, goal: Partial<InsertGoal>): Promise<Goal>;
+  updateGoal(id: number, userId: string, goal: Partial<InsertGoal>): Promise<Goal>;
   deleteGoal(id: number, userId: string): Promise<void>;
 
   // Category operations
@@ -592,7 +592,7 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async updateGoal(id: number, goal: Partial<InsertGoal>): Promise<Goal> {
+  async updateGoal(id: number, userId: string, goal: Partial<InsertGoal>): Promise<Goal> {
     // SECURITY FIX: Verify ownership before allowing update
     const existingGoal = await db
       .select()
@@ -600,14 +600,14 @@ export class DatabaseStorage implements IStorage {
       .where(eq(goals.id, id))
       .limit(1);
 
-    if (!existingGoal.length || existingGoal[0].userId !== goal.userId) {
+    if (!existingGoal.length || existingGoal[0].userId !== userId) {
       throw new Error("Goal not found or unauthorized access");
     }
 
     const [updatedGoal] = await db
       .update(goals)
       .set(goal)
-      .where(and(eq(goals.id, id), eq(goals.userId, goal.userId!)))
+      .where(and(eq(goals.id, id), eq(goals.userId, userId)))
       .returning();
     return updatedGoal;
   }
