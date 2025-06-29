@@ -1527,7 +1527,9 @@
       "invalid_amount_description": "Prosím zadajte platnú sumu príspevku.",
       "invalid_email": "Neplatný Email",
       "invalid_email_description": "Prosím zadajte platnú e-mailovú adresu.",
-      "error": "Chyba"
+      "error": "Chyba",
+      "link_copied": "Odkaz Skopírovaný",
+      "link_copied_description": "Odkaz na cieľ bol skopírovaný do schránky."
     },
     "errors": {
       "goal_not_found": "Cieľ sa Nenašiel",

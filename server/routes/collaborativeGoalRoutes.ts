@@ -280,44 +280,19 @@ export function registerCollaborativeGoalRoutes(app: Express) {
           const participant = await storage.joinCollaborativeGoal(goalId, existingUser.id);
           
           // Send notification email to existing user
-          const { sendEmail } = await import('../emailService');
-          const formattedAmount = `$${parseFloat(goal.targetAmount).toLocaleString()}`;
-          const formattedDate = new Date(goal.targetDate).toLocaleDateString();
+          const { sendGoalInvitationEmail } = await import('../emailService');
+          const goalUrl = `${req.get('origin') || 'https://finanzerpro.com'}/collaborative-goals/${goalId}`;
           
-          const emailSent = await sendEmail({
-            to: email,
-            from: 'noreply@finanzerpro.com',
-            subject: `${inviter.firstName} ${inviter.lastName} invited you to join "${goal.name}" savings goal`,
-            text: `Hi ${existingUser.firstName},
-
-${inviter.firstName} ${inviter.lastName} has invited you to join their collaborative savings goal "${goal.name}"!
-
-Goal Details:
-• Target Amount: ${formattedAmount}
-• Target Date: ${formattedDate}
-• Description: ${goal.description || 'No description'}
-
-You've been automatically added to this goal. Log in to view your progress and start contributing!
-
-Best regards,
-The FinanzerPro Team`,
-            html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-  <h2>You've been added to a savings goal!</h2>
-  <p>Hi ${existingUser.firstName},</p>
-  <p><strong>${inviter.firstName} ${inviter.lastName}</strong> has invited you to join their collaborative savings goal "<strong>${goal.name}</strong>"!</p>
-  
-  <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin: 25px 0;">
-    <h3>Goal Details</h3>
-    <ul>
-      <li><strong>Target Amount:</strong> ${formattedAmount}</li>
-      <li><strong>Target Date:</strong> ${formattedDate}</li>
-      <li><strong>Description:</strong> ${goal.description || 'No description'}</li>
-    </ul>
-  </div>
-  
-  <p>You've been automatically added to this goal. Log in to view your progress and start contributing!</p>
-  <p>Best regards,<br>The FinanzerPro Team</p>
-</div>`
+          const emailSent = await sendGoalInvitationEmail({
+            recipientEmail: email,
+            recipientName: `${existingUser.firstName} ${existingUser.lastName}`,
+            inviterName: `${inviter.firstName} ${inviter.lastName}`,
+            goalName: goal.name,
+            goalDescription: goal.description || '',
+            targetAmount: goal.targetAmount,
+            targetDate: goal.targetDate,
+            goalUrl,
+            isExistingUser: true
           });
           
           return res.json({ 
@@ -331,44 +306,19 @@ The FinanzerPro Team`,
         }
       } else {
         // User doesn't exist - send invitation email
-        const { sendEmail } = await import('../emailService');
-        const formattedAmount = `$${parseFloat(goal.targetAmount).toLocaleString()}`;
-        const formattedDate = new Date(goal.targetDate).toLocaleDateString();
+        const { sendGoalInvitationEmail } = await import('../emailService');
+        const goalUrl = `${req.get('origin') || 'https://finanzerpro.com'}/collaborative-goals/${goalId}`;
         
-        const emailSent = await sendEmail({
-          to: email,
-          from: 'noreply@finanzerpro.com',
-          subject: `${inviter.firstName} ${inviter.lastName} invited you to join "${goal.name}" savings goal`,
-          text: `Hi there,
-
-${inviter.firstName} ${inviter.lastName} has invited you to join FinanzerPro and participate in their collaborative savings goal "${goal.name}"!
-
-Goal Details:
-• Target Amount: ${formattedAmount}
-• Target Date: ${formattedDate}
-• Description: ${goal.description || 'No description'}
-
-Join for free and start saving together!
-
-Best regards,
-The FinanzerPro Team`,
-          html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-  <h2>You're invited to save together!</h2>
-  <p>Hi there,</p>
-  <p><strong>${inviter.firstName} ${inviter.lastName}</strong> has invited you to join <strong>FinanzerPro</strong> and participate in their collaborative savings goal "<strong>${goal.name}</strong>"!</p>
-  
-  <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin: 25px 0;">
-    <h3>Goal Details</h3>
-    <ul>
-      <li><strong>Target Amount:</strong> ${formattedAmount}</li>
-      <li><strong>Target Date:</strong> ${formattedDate}</li>
-      <li><strong>Description:</strong> ${goal.description || 'No description'}</li>
-    </ul>
-  </div>
-  
-  <p>Join for free and start saving together!</p>
-  <p>Best regards,<br>The FinanzerPro Team</p>
-</div>`
+        const emailSent = await sendGoalInvitationEmail({
+          recipientEmail: email,
+          recipientName: 'there', // Generic greeting for new users
+          inviterName: `${inviter.firstName} ${inviter.lastName}`,
+          goalName: goal.name,
+          goalDescription: goal.description || '',
+          targetAmount: goal.targetAmount,
+          targetDate: goal.targetDate,
+          goalUrl,
+          isExistingUser: false
         });
         
         return res.json({ 
