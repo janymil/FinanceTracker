@@ -149,7 +149,7 @@ export interface IStorage {
   // Collaborative goal management
   createCollaborativeGoal(goal: InsertCollaborativeGoal): Promise<CollaborativeGoal>;
   getUserCollaborativeGoals(userId: string): Promise<Array<CollaborativeGoal & { participants: CollaborativeGoalParticipant[], creator: User }>>;
-  getCollaborativeGoal(goalId: number, userId: string): Promise<(CollaborativeGoal & { participants: Array<CollaborativeGoalParticipant & { user: User }>, creator: User, contributions: GoalContribution[], activities: ChallengeActivity[] }) | undefined>;
+  getCollaborativeGoal(goalId: number, userId: string): Promise<(CollaborativeGoal & { participants: Array<CollaborativeGoalParticipant & { user: User }>, creator: User, contributions: Array<GoalContribution & { user: User }>, activities: ChallengeActivity[] }) | undefined>;
   getGoalParticipant(goalId: number, userId: string): Promise<CollaborativeGoalParticipant | undefined>;
   joinCollaborativeGoal(goalId: number, userId: string, personalTarget?: number): Promise<CollaborativeGoalParticipant>;
   leaveCollaborativeGoal(goalId: number, userId: string): Promise<void>;
@@ -1677,12 +1677,8 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    // Get contributions
-    const contributions = await db
-      .select()
-      .from(goalContributions)
-      .where(eq(goalContributions.goalId, goalId))
-      .orderBy(desc(goalContributions.createdAt));
+    // Get contributions with user data
+    const contributions = await this.getGoalContributions(goalId);
 
     // Get activities
     const activities = await db

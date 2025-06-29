@@ -82,7 +82,7 @@ interface Goal {
     amount: string;
     description?: string;
     createdAt: string;
-    user?: {
+    user: {
       id: string;
       firstName: string;
       lastName: string;
@@ -370,8 +370,8 @@ export default function CollaborativeGoalDetailPage() {
     .slice(0, 10);
 
   // Get top contributor
-  const topContributor = contributions.length > 0 ? 
-    contributions.reduce((top: any, current: any) => 
+  const topContributor = contributions && contributions.length > 0 ? 
+    contributions.reduce((top, current) => 
       parseFloat(current.amount) > parseFloat(top.amount) ? current : top
     ) : null;
 
