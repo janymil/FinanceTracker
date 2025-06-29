@@ -27,7 +27,7 @@ export async function generateChart(chartData: ChartData): Promise<string> {
   const chartJSNodeCanvas = new ChartJSNodeCanvas({ 
     width, 
     height,
-    backgroundColor: 'white'
+    backgroundColour: 'white'
   });
 
   const configuration: ChartConfiguration = {
