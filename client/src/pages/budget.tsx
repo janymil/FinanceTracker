@@ -29,6 +29,8 @@ import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns
 import { Link } from "wouter";
 import RequirePlan from "@/components/require-plan";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useTranslation } from "react-i18next";
+import { getDateLocale } from "@/lib/dateUtils";
 
 interface Budget {
   id: number;
@@ -56,6 +58,7 @@ export default function Budget() {
   const { isReady, user } = useClerkUserReady();
   const { toast } = useToast();
   const { currency } = useCurrency();
+  const { t } = useTranslation();
   const displayCurrency = currency || '$';
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
@@ -168,8 +171,8 @@ export default function Budget() {
         endDate: format(endOfMonth(currentDate), "yyyy-MM-dd"),
       });
       toast({
-        title: "Budget Created",
-        description: "Budget has been created successfully",
+        title: t('budget.budget_created'),
+        description: t('budget.budget_created_successfully'),
       });
     } catch (error: any) {
       toast({
