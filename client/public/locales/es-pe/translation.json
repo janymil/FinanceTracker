@@ -1555,6 +1555,14 @@
       "paused": "Pausada",
       "unknown": "Desconocido"
     },
+    "actions": {
+      "share_goal": "Compartir Meta",
+      "invite_friends": "Invitar Amigos", 
+      "invite_description": "Envía una invitación a amigos para unirse a esta meta colaborativa.",
+      "email_placeholder": "Ingresa el email de tu amigo",
+      "send_invitation": "Enviar Invitación",
+      "sending": "Enviando..."
+    },
     "cards": {
       "progress": "Progreso",
       "of": "de",

@@ -1578,6 +1578,14 @@
       "paused": "Paused",
       "unknown": "Unknown"
     },
+    "actions": {
+      "share_goal": "Share Goal",
+      "invite_friends": "Invite Friends", 
+      "invite_description": "Send an invitation to friends to join this collaborative goal.",
+      "email_placeholder": "Enter friend's email address",
+      "send_invitation": "Send Invitation",
+      "sending": "Sending..."
+    },
     "cards": {
       "progress": "Progress",
       "of": "of",

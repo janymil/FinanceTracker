@@ -1602,6 +1602,14 @@
       "paused": "Pozastavený",
       "unknown": "Neznámy"
     },
+    "actions": {
+      "share_goal": "Zdieľať Cieľ",
+      "invite_friends": "Pozvať Priateľov", 
+      "invite_description": "Pošlite pozvánku priateľom, aby sa pripojili k tomuto spoločnému cieľu.",
+      "email_placeholder": "Zadajte email priateľa",
+      "send_invitation": "Poslať Pozvánku",
+      "sending": "Odosiela sa..."
+    },
     "cards": {
       "progress": "Pokrok",
       "of": "z",

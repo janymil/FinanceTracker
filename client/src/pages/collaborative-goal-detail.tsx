@@ -329,7 +329,7 @@ export default function CollaborativeGoalDetailPage() {
                       } catch (clipboardError) {
                         toast({
                           title: t('collaborative_goal_detail.messages.error'),
-                          description: "Unable to share or copy link. Please copy the URL manually.",
+                          description: t('collaborative_goal_detail.messages.share_failed'),
                           variant: "destructive"
                         });
                       }
@@ -386,7 +386,7 @@ export default function CollaborativeGoalDetailPage() {
                           {isInviting ? t('collaborative_goal_detail.actions.sending') : t('collaborative_goal_detail.actions.send_invitation')}
                         </Button>
                         <Button variant="outline" onClick={() => setShowInviteFriends(false)}>
-                          Cancel
+                          {t('collaborative_goal_detail.buttons.cancel')}
                         </Button>
                       </div>
                     </div>
@@ -506,7 +506,7 @@ export default function CollaborativeGoalDetailPage() {
               
               <Button variant="outline" size="lg" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
                 <Users className="w-5 h-5 mr-2" />
-                {goal.participants?.length || 0} Participants
+                {goal.participants?.length || 0} {t('collaborative_goal_detail.hero.participants_count')}
               </Button>
             </div>
           </div>
