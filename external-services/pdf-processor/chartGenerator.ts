@@ -133,3 +133,51 @@ export async function generateCategoryChart(data: Array<{name: string, amount: n
     title: 'Spending by Category'
   });
 }
+import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
+import { Chart, ChartConfiguration } from 'chart.js';
+
+const width = 800;
+const height = 400;
+
+const chartJSNodeCanvas = new ChartJSNodeCanvas({ 
+  width, 
+  height,
+  backgroundColour: 'white'
+});
+
+export interface ChartConfig {
+  type: 'line' | 'doughnut' | 'bar';
+  data: any;
+  title: string;
+}
+
+export async function generateChart(config: ChartConfig): Promise<string> {
+  const chartConfiguration: ChartConfiguration = {
+    type: config.type as any,
+    data: config.data,
+    options: {
+      responsive: false,
+      plugins: {
+        title: {
+          display: true,
+          text: config.title,
+          font: {
+            size: 16
+          }
+        },
+        legend: {
+          display: true,
+          position: 'bottom'
+        }
+      },
+      scales: config.type !== 'doughnut' ? {
+        y: {
+          beginAtZero: true
+        }
+      } : undefined
+    }
+  };
+
+  const imageBuffer = await chartJSNodeCanvas.renderToBuffer(chartConfiguration);
+  return `data:image/png;base64,${imageBuffer.toString('base64')}`;
+}

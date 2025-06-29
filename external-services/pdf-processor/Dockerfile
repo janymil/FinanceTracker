@@ -1,3 +1,4 @@
+
 FROM node:18-slim
 
 # Install system dependencies required for Puppeteer and Canvas
@@ -18,14 +19,20 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 WORKDIR /app
 
 # Copy package files and install dependencies
-COPY package.json package-lock.json ./
+COPY package*.json ./
 RUN npm ci --only=production
+
+# Copy TypeScript config
+COPY tsconfig.json ./
 
 # Copy source code
 COPY *.ts ./
+
+# Build TypeScript
+RUN npx tsc
 
 # Expose port
 EXPOSE 3000
 
 # Start the application
-CMD ["npx", "tsx", "index.ts"]
+CMD ["node", "dist/index.js"]

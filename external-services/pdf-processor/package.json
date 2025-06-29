@@ -1,27 +1,31 @@
+
 {
   "name": "pdf-processor",
   "version": "1.0.0",
   "description": "PDF generation service for FinanzerPro",
-  "main": "index.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "npx tsx index.ts",
-    "dev": "npx tsx index.ts"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx index.ts"
   },
   "dependencies": {
-    "express": "*",
-    "cors": "*", 
-    "dotenv": "*",
-    "tsx": "*",
-    "typescript": "*",
-    "puppeteer": "*",
-    "chartjs-node-canvas": "*",
-    "qrcode": "*",
-    "@types/express": "*",
-    "@types/cors": "*",
-    "@types/qrcode": "*",
-    "@types/node": "*",
-    "canvas": "*",
-    "chart.js": "*"
+    "express": "^4.18.2",
+    "cors": "^2.8.5", 
+    "dotenv": "^16.3.1",
+    "puppeteer": "^21.5.2",
+    "chartjs-node-canvas": "^4.1.6",
+    "qrcode": "^1.5.3",
+    "canvas": "^2.11.2",
+    "chart.js": "^4.4.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.6.2",
+    "typescript": "^5.3.2",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/qrcode": "^1.5.5",
+    "@types/node": "^20.10.0"
   },
   "engines": {
     "node": ">=18"
