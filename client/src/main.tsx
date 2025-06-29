@@ -126,10 +126,12 @@ const getClerkLocalization = () => {
   if (currentLang === 'es' || currentLang?.startsWith('es')) {
     console.log('Using Spanish localization for Clerk');
     return esES;
-  } else if (currentLang === 'sk' || currentLang?.startsWith('sk')) {
-    console.log('Using Slovak localization for Clerk');
-    return skSK;
-  }
+  } 
+  // Temporarily disable Slovak localization to test form display
+  // else if (currentLang === 'sk' || currentLang?.startsWith('sk')) {
+  //   console.log('Using Slovak localization for Clerk');
+  //   return skSK;
+  // }
   console.log('Using English (default) localization for Clerk');
   return undefined; // English is default
 };
