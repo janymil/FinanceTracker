@@ -92,9 +92,33 @@ const getUserLanguage = (): string => {
 const userLanguage = getUserLanguage();
 const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
 
+// Custom Slovak localization with missing terms
+const customSlovak = {
+  ...skSK,
+  signUp: {
+    ...(skSK.signUp || {}),
+    form: {
+      ...(skSK.signUp?.form || {}),
+      termsAndConditions: 'Súhlasím s {{terms}} a {{privacy}}'
+    },
+    legalConsent: {
+      ...(skSK.signUp?.legalConsent || {}),
+      checkbox: {
+        label__onlyPrivacyPolicy: 'Súhlasím so <privacyPolicyLink>zásadami ochrany osobných údajov</privacyPolicyLink>',
+        label__onlyTermsOfService: 'Súhlasím s <termsOfServiceLink>obchodnými podmienkami</termsOfServiceLink>',
+        label__termsOfServiceAndPrivacyPolicy: 'Súhlasím s <termsOfServiceLink>obchodnými podmienkami</termsOfServiceLink> a <privacyPolicyLink>zásadami ochrany osobných údajov</privacyPolicyLink>'
+      },
+      continue: {
+        subtitle: 'Pokračovaním súhlasíte s našimi zásadami.',
+        title: 'Zákonné súhlasy'
+      }
+    }
+  }
+};
+
 // Simple Clerk localization without hooks
 const userLang = navigator.language;
-const localization = userLang.startsWith('es') ? esES : userLang.startsWith('sk') ? skSK : undefined;
+const localization = userLang.startsWith('es') ? esES : userLang.startsWith('sk') ? customSlovak : undefined;
 
 const root = createRoot(container);
 root.render(
