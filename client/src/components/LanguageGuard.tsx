@@ -31,28 +31,40 @@ function getLanguagePrefixedPath(currentPath: string): string | null {
   }
   
   // Detect preferred language (use simplified codes)
-  let preferredLang = localStorage.getItem('preferredLanguage');
+  // First, always check current browser language
+  const browserLang = navigator.language || 'en-US';
+  const mainLangCode = browserLang.split('-')[0].toLowerCase();
   
-  if (!preferredLang || !['en', 'es', 'sk'].includes(preferredLang)) {
-    // Try browser language with dynamic mapping
-    const browserLang = navigator.language || 'en-US';
-    
-    // Extract the main language code (e.g., 'en' from 'en-GB', 'es' from 'es-MX')
-    const mainLangCode = browserLang.split('-')[0].toLowerCase();
-    
-    // Map to our supported simplified codes
-    if (mainLangCode === 'en') {
-      preferredLang = 'en';
-    } else if (mainLangCode === 'es') {
-      preferredLang = 'es';
-    } else if (mainLangCode === 'sk') {
-      preferredLang = 'sk';
-    } else {
-      preferredLang = 'en'; // Default fallback
-    }
-    
-    localStorage.setItem('preferredLanguage', preferredLang);
+  let browserDetectedLang = 'en'; // Default fallback
+  if (mainLangCode === 'en') {
+    browserDetectedLang = 'en';
+  } else if (mainLangCode === 'es') {
+    browserDetectedLang = 'es';
+  } else if (mainLangCode === 'sk') {
+    browserDetectedLang = 'sk';
   }
+  
+  // Check if user has a saved language preference
+  const savedLang = localStorage.getItem('preferredLanguage');
+  const lastDetectedBrowserLang = localStorage.getItem('lastDetectedBrowserLang');
+  
+  console.log('Browser language detection:', browserLang, '→', browserDetectedLang);
+  console.log('Saved language:', savedLang, 'Last detected:', lastDetectedBrowserLang);
+  
+  // If browser language has changed since last detection, prioritize new browser language
+  if (lastDetectedBrowserLang !== browserDetectedLang) {
+    console.log('Browser language changed! Updating from', lastDetectedBrowserLang, 'to', browserDetectedLang);
+    localStorage.setItem('lastDetectedBrowserLang', browserDetectedLang);
+    localStorage.setItem('preferredLanguage', browserDetectedLang);
+    return `/${browserDetectedLang}${currentPath}`;
+  }
+  
+  // Use saved preference if available, otherwise use browser detected language
+  const preferredLang = (savedLang && ['en', 'es', 'sk'].includes(savedLang)) ? savedLang : browserDetectedLang;
+  
+  // Update localStorage
+  localStorage.setItem('preferredLanguage', preferredLang);
+  localStorage.setItem('lastDetectedBrowserLang', browserDetectedLang);
   
   // Return the language-prefixed URL
   return `/${preferredLang}${currentPath}`;
