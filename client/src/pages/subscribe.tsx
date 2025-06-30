@@ -426,10 +426,10 @@ export default function Subscribe() {
           {/* Security & Terms */}
           <div className="text-center mt-8 space-y-2">
             <p className="text-sm text-gray-500">
-              Secure payment processing by Stripe
+              {t('subscribe.secure_payment')}
             </p>
             <p className="text-xs text-gray-400">
-              By subscribing, you agree to our Terms of Service and Privacy Policy
+              {t('subscribe.terms_agreement')}
             </p>
           </div>
         </div>

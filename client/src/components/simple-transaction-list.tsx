@@ -89,13 +89,13 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
       await queryClient.invalidateQueries({ queryKey: ["/api/budgets", user?.id] });
       await queryClient.invalidateQueries({ queryKey: ["/api/financial-health", user?.id] });
       toast({
-        title: "Transaction Deleted",
-        description: "Transaction has been successfully deleted",
+        title: t("Transaction Deleted"),
+        description: t("Transaction has been successfully deleted"),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete transaction",
+        title: t("Error"),
+        description: error.message || t("Failed to delete transaction"),
         variant: "destructive",
       });
     } finally {
@@ -141,7 +141,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
     return (
       <Card className="bg-white dark:bg-gray-800">
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
+          <CardTitle>{t('Recent Transactions')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">

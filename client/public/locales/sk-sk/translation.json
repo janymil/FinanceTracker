@@ -2593,6 +2593,8 @@
     "subscribe_for_year": "Predplatiť za ${{price}}/rok",
     "already_have_account": "Už máte účet?",
     "sign_in_here": "Prihláste sa tu",
+    "secure_payment": "Bezpečné spracovanie platieb cez Stripe",
+    "terms_agreement": "Predplatením súhlasíte s našimi Podmienkami služby a Zásadami ochrany súkromia",
     "billing": {
       "monthly": "Mesačne",
       "yearly": "Ročne",

@@ -2546,6 +2546,8 @@
     "subscribe_for_year": "Suscribirse por ${{price}}/año",
     "already_have_account": "¿Ya tienes una cuenta?",
     "sign_in_here": "Inicia sesión aquí",
+    "secure_payment": "Procesamiento seguro de pagos por Stripe",
+    "terms_agreement": "Al suscribirse, aceptas nuestros Términos de Servicio y Política de Privacidad",
     "billing": {
       "monthly": "Mensual",
       "yearly": "Anual",
