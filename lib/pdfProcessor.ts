@@ -1,10 +1,13 @@
 /**
  * PDF Processing Pipeline for Bank Statement Import
  * Hybrid approach: PDF text extraction → OCR fallback → AI parsing
+ * SECURITY: Enhanced protection for sensitive financial data
  */
 
 import { performOCR } from '../server/uploadReceipt';
 import { getCurrentLanguageForAPI } from './languageUtils';
+import { DataEncryption } from '../server/encryption';
+import crypto from 'crypto';
 
 export interface ExtractedTransaction {
   date: string; // YYYY-MM-DD format
@@ -23,10 +26,133 @@ export interface PDFProcessingResult {
   processingMethod: 'text' | 'ocr' | 'hybrid';
   errors: string[];
   confidence: number; // overall confidence score
+  securityLog: SecurityEvent[]; // Security audit trail
+}
+
+interface SecurityEvent {
+  timestamp: Date;
+  event: string;
+  status: 'success' | 'warning' | 'error';
+  details?: string;
 }
 
 /**
- * Main PDF processing pipeline
+ * Security utility functions for PDF processing
+ */
+class PDFSecurityManager {
+  static logSecurityEvent(log: SecurityEvent[], event: string, status: 'success' | 'warning' | 'error', details?: string) {
+    log.push({
+      timestamp: new Date(),
+      event,
+      status,
+      details
+    });
+  }
+
+  static sanitizeExtractedText(text: string, securityLog: SecurityEvent[]): string {
+    this.logSecurityEvent(securityLog, 'text_sanitization_start', 'success');
+    
+    // Remove potential sensitive patterns that shouldn't be in transactions
+    let sanitized = text;
+    
+    // Remove social security numbers (xxx-xx-xxxx)
+    sanitized = sanitized.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[SSN_REDACTED]');
+    
+    // Remove full credit card numbers (keep last 4 for reference)
+    sanitized = sanitized.replace(/\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g, (match) => {
+      const last4 = match.slice(-4);
+      return `****-****-****-${last4}`;
+    });
+    
+    // Remove routing numbers in isolation (9 digits starting with 0,1,2,3)
+    sanitized = sanitized.replace(/\b[0-3]\d{8}\b/g, '[ROUTING_REDACTED]');
+    
+    this.logSecurityEvent(securityLog, 'text_sanitization_complete', 'success', `Processed ${text.length} chars`);
+    return sanitized;
+  }
+
+  static encryptSensitiveData(transaction: ExtractedTransaction, securityLog: SecurityEvent[]): ExtractedTransaction {
+    this.logSecurityEvent(securityLog, 'transaction_encryption_start', 'success');
+    
+    try {
+      // Encrypt sensitive fields using AES-256 encryption
+      const encrypted = {
+        ...transaction,
+        description: DataEncryption.encrypt(transaction.description),
+        rawText: transaction.rawText ? DataEncryption.encrypt(transaction.rawText) : transaction.rawText
+      };
+      
+      this.logSecurityEvent(securityLog, 'transaction_encryption_success', 'success');
+      return encrypted;
+    } catch (error) {
+      this.logSecurityEvent(securityLog, 'transaction_encryption_failed', 'error', error instanceof Error ? error.message : 'Unknown error');
+      return transaction; // Return original if encryption fails
+    }
+  }
+
+  static secureMemoryCleanup(buffers: Buffer[], securityLog: SecurityEvent[]) {
+    this.logSecurityEvent(securityLog, 'memory_cleanup_start', 'success');
+    
+    try {
+      // Overwrite buffer memory with zeros for security
+      buffers.forEach((buffer, index) => {
+        if (buffer && buffer.length > 0) {
+          buffer.fill(0);
+          this.logSecurityEvent(securityLog, `buffer_${index}_cleared`, 'success', `${buffer.length} bytes`);
+        }
+      });
+      
+      // Force garbage collection if available
+      if (global.gc) {
+        global.gc();
+        this.logSecurityEvent(securityLog, 'garbage_collection_forced', 'success');
+      }
+      
+      this.logSecurityEvent(securityLog, 'memory_cleanup_complete', 'success');
+    } catch (error) {
+      this.logSecurityEvent(securityLog, 'memory_cleanup_error', 'error', error instanceof Error ? error.message : 'Unknown error');
+    }
+  }
+
+  static validatePDFSecurity(pdfBuffer: Buffer, securityLog: SecurityEvent[]): boolean {
+    this.logSecurityEvent(securityLog, 'pdf_security_validation_start', 'success');
+    
+    try {
+      // Check PDF file size (limit to 50MB for security)
+      const maxSize = 50 * 1024 * 1024; // 50MB
+      if (pdfBuffer.length > maxSize) {
+        this.logSecurityEvent(securityLog, 'pdf_size_exceeded', 'error', `File size: ${pdfBuffer.length} bytes`);
+        return false;
+      }
+      
+      // Verify PDF magic number
+      const magicNumber = pdfBuffer.subarray(0, 4).toString();
+      if (!magicNumber.startsWith('%PDF')) {
+        this.logSecurityEvent(securityLog, 'invalid_pdf_format', 'error', `Magic number: ${magicNumber}`);
+        return false;
+      }
+      
+      // Check for potential malicious patterns
+      const pdfString = pdfBuffer.toString('binary');
+      const suspiciousPatterns = ['/JavaScript', '/JS', '/Launch', '/SubmitForm', '/GoToR'];
+      
+      for (const pattern of suspiciousPatterns) {
+        if (pdfString.includes(pattern)) {
+          this.logSecurityEvent(securityLog, 'suspicious_pdf_content', 'warning', `Found: ${pattern}`);
+        }
+      }
+      
+      this.logSecurityEvent(securityLog, 'pdf_security_validation_passed', 'success', `Size: ${pdfBuffer.length} bytes`);
+      return true;
+    } catch (error) {
+      this.logSecurityEvent(securityLog, 'pdf_security_validation_error', 'error', error instanceof Error ? error.message : 'Unknown error');
+      return false;
+    }
+  }
+}
+
+/**
+ * Main PDF processing pipeline with enhanced security
  */
 export async function processBankStatementPDF(
   pdfBuffer: Buffer,
@@ -37,10 +163,20 @@ export async function processBankStatementPDF(
     totalPages: 0,
     processingMethod: 'text',
     errors: [],
-    confidence: 0
+    confidence: 0,
+    securityLog: []
   };
 
+  // Array to track buffers for secure cleanup
+  const buffers: Buffer[] = [pdfBuffer];
+
   try {
+    // Step 0: Security validation
+    if (!PDFSecurityManager.validatePDFSecurity(pdfBuffer, result.securityLog)) {
+      result.errors.push('PDF failed security validation');
+      return result;
+    }
+
     // Step 1: Try PDF text extraction first (dynamic import to avoid startup issues)
     const { default: pdf } = await import('pdf-parse');
     const pdfData = await pdf(pdfBuffer);
@@ -50,6 +186,9 @@ export async function processBankStatementPDF(
     let textQuality = assessTextQuality(extractedText);
 
     console.log(`PDF text extraction: ${extractedText.length} characters, quality: ${textQuality}`);
+
+    // Step 1.5: Sanitize extracted text for security
+    extractedText = PDFSecurityManager.sanitizeExtractedText(extractedText, result.securityLog);
 
     // Step 2: If text quality is poor, use OCR fallback
     if (textQuality < 0.5) {
@@ -73,7 +212,12 @@ export async function processBankStatementPDF(
     // Step 3: AI parsing with bank-specific prompts
     if (extractedText.trim().length > 0) {
       const transactions = await parseTransactionsWithAI(extractedText, language);
-      result.transactions = transactions;
+      
+      // Step 4: Encrypt sensitive transaction data
+      result.transactions = transactions.map(transaction => 
+        PDFSecurityManager.encryptSensitiveData(transaction, result.securityLog)
+      );
+      
       result.confidence = calculateOverallConfidence(transactions);
     } else {
       result.errors.push('No readable text found in PDF');
@@ -84,6 +228,10 @@ export async function processBankStatementPDF(
     console.error('PDF processing error:', error);
     result.errors.push(`PDF processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     result.confidence = 0;
+    PDFSecurityManager.logSecurityEvent(result.securityLog, 'processing_error', 'error', error instanceof Error ? error.message : 'Unknown error');
+  } finally {
+    // Step 5: Secure memory cleanup
+    PDFSecurityManager.secureMemoryCleanup(buffers, result.securityLog);
   }
 
   return result;
