@@ -10,8 +10,10 @@ import { Badge } from "../components/ui/badge";
 import { useToast } from "../hooks/use-toast";
 import { User, Bell, Palette, CreditCard, ExternalLink, Settings, Trash2 } from "lucide-react";
 import { SubscriptionSchedule } from "../components/subscription-schedule";
+import { useTranslation } from "react-i18next";
 
 export default function ProfilePage() {
+  const { t } = useTranslation();
   const { user } = useUser();
   const { user: authUser } = useAuth();
   const { getAuthHeaders } = useClerkUserReady();
@@ -19,7 +21,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
 
   if (!user || !authUser) {
-    return <div>Loading...</div>;
+    return <div>{t('Loading...')}</div>;
   }
 
   const handleManageSubscription = async () => {
@@ -35,25 +37,24 @@ export default function ProfilePage() {
       if (!response.ok) {
         const errorData = await response.json();
         if (response.status === 400 && errorData.message?.includes('No active subscription')) {
-          // User doesn't have Stripe subscription - redirect to pricing page
           toast({
-            title: "No Stripe Subscription",
-            description: "You currently have premium access but no Stripe subscription. Contact support or visit the pricing page to set up billing.",
+            title: t('No Stripe Subscription'),
+            description: t('You currently have premium access but no Stripe subscription. Contact support or visit the pricing page to set up billing.'),
             variant: "destructive",
           });
           return;
         }
-        throw new Error(errorData.message || 'Failed to create customer portal session');
+        throw new Error(errorData.message || t('Failed to create customer portal session'));
       }
 
       const { url } = await response.json();
       window.location.href = url;
     } catch (error: any) {
       console.error('Error creating customer portal session:', error);
-      const errorMessage = error?.message || 'Unknown error occurred';
+      const errorMessage = error?.message || t('Unknown error occurred');
       toast({
-        title: "Error",
-        description: `Failed to open subscription management: ${errorMessage}`,
+        title: t('Error'),
+        description: t('Failed to open subscription management: {{errorMessage}}', { errorMessage }),
         variant: "destructive",
       });
     } finally {
@@ -64,26 +65,26 @@ export default function ProfilePage() {
   return (
     <div className="container mx-auto py-6 px-4 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Profile Settings</h1>
+        <h1 className="text-3xl font-bold mb-2">{t('Profile Settings')}</h1>
         <p className="text-muted-foreground">
-          Manage your account settings and preferences
+          {t('Manage your account settings and preferences')}
         </p>
       </div>
 
       {/* User Profile Header */}
       <div className="flex items-center space-x-4 mb-8 p-6 border rounded-lg bg-card">
         <Avatar className="h-20 w-20">
-          <AvatarImage src={user.imageUrl} alt={user.fullName || "User"} />
+          <AvatarImage src={user.imageUrl} alt={user.fullName || t('User')} />
           <AvatarFallback>
             {user.fullName ? user.fullName.charAt(0).toUpperCase() : user.primaryEmailAddress?.emailAddress.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         <div className="flex-1">
-          <h2 className="text-2xl font-semibold">{user.fullName || "User"}</h2>
+          <h2 className="text-2xl font-semibold">{user.fullName || t('User')}</h2>
           <p className="text-muted-foreground">{user.primaryEmailAddress?.emailAddress}</p>
           <div className="flex items-center gap-2 mt-2">
             <Badge variant="secondary" className="bg-premium text-premium-foreground">
-              {authUser.plan || 'Free'} Plan
+              {t('{{plan}} Plan', { plan: authUser.plan || 'Free' })}
             </Badge>
           </div>
         </div>
@@ -93,19 +94,19 @@ export default function ProfilePage() {
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
           <TabsTrigger value="profile" className="flex items-center gap-1 text-xs md:text-sm">
             <User className="h-3 w-3 md:h-4 md:w-4" />
-            <span>Profile</span>
+            <span>{t('Profile')}</span>
           </TabsTrigger>
           <TabsTrigger value="notifications" className="flex items-center gap-1 text-xs md:text-sm">
             <Bell className="h-3 w-3 md:h-4 md:w-4" />
-            <span>Notifications</span>
+            <span>{t('Notifications')}</span>
           </TabsTrigger>
           <TabsTrigger value="preferences" className="flex items-center gap-1 text-xs md:text-sm">
             <Palette className="h-3 w-3 md:h-4 md:w-4" />
-            <span>Preferences</span>
+            <span>{t('Preferences')}</span>
           </TabsTrigger>
           <TabsTrigger value="subscription" className="flex items-center gap-1 text-xs md:text-sm">
             <CreditCard className="h-3 w-3 md:h-4 md:w-4" />
-            <span>Subscription</span>
+            <span>{t('Subscription')}</span>
           </TabsTrigger>
         </TabsList>
 
@@ -113,19 +114,19 @@ export default function ProfilePage() {
         <TabsContent value="profile">
           <Card>
             <CardHeader>
-              <CardTitle>Account Management</CardTitle>
+              <CardTitle>{t('Account Management')}</CardTitle>
               <CardDescription>
-                Manage your profile details, security settings, password, and connected accounts through Clerk's secure interface
+                {t("Manage your profile details, security settings, password, and connected accounts through Clerk's secure interface")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {/* Mobile Navigation Hint */}
               <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg md:hidden">
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  💡 <strong>Tip:</strong> Use the menu button (☰) in the top-left corner below to access Account Settings and Security options.
+                  💡 <strong>{t('Tip')}:</strong> {t('Use the menu button (☰) in the top-left corner below to access Account Settings and Security options.')}
                 </p>
               </div>
-              
+
               {/* Clerk UserProfile with improved mobile styling */}
               <div className="clerk-profile-mobile w-full overflow-x-auto">
                 <div className="min-w-[600px] md:min-w-0">
@@ -140,13 +141,13 @@ export default function ProfilePage() {
         <TabsContent value="notifications">
           <Card>
             <CardHeader>
-              <CardTitle>Notification Settings</CardTitle>
+              <CardTitle>{t('Notification Settings')}</CardTitle>
               <CardDescription>
-                Manage your notification preferences
+                {t('Manage your notification preferences')}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p>Notification settings will be managed here.</p>
+              <p>{t('Notification settings will be managed here.')}</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -155,13 +156,13 @@ export default function ProfilePage() {
         <TabsContent value="preferences">
           <Card>
             <CardHeader>
-              <CardTitle>Preferences</CardTitle>
+              <CardTitle>{t('Preferences')}</CardTitle>
               <CardDescription>
-                Customize your app preferences
+                {t('Customize your app preferences')}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p>App preferences will be managed here.</p>
+              <p>{t('App preferences will be managed here.')}</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -170,9 +171,9 @@ export default function ProfilePage() {
         <TabsContent value="subscription">
           <Card>
             <CardHeader>
-              <CardTitle>Subscription Management</CardTitle>
+              <CardTitle>{t('Subscription Management')}</CardTitle>
               <CardDescription>
-                Manage your subscription plan, billing, and payment methods
+                {t('Manage your subscription plan, billing, and payment methods')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -182,51 +183,51 @@ export default function ProfilePage() {
               {/* Current Plan Status */}
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
-                  <h3 className="font-semibold text-lg">Current Plan</h3>
+                  <h3 className="font-semibold text-lg">{t('Current Plan')}</h3>
                   <p className="text-muted-foreground">
-                    You are currently on the {authUser.plan || 'Free'} plan
+                    {t('You are currently on the {{plan}} plan', { plan: authUser.plan || 'Free' })}
                   </p>
                 </div>
                 <Badge variant="secondary" className="bg-premium text-premium-foreground">
-                  {authUser.plan || 'Free'}
+                  {t(authUser.plan || 'Free')}
                 </Badge>
               </div>
 
               {/* Plan Features */}
               <div className="grid gap-4">
-                <h4 className="font-medium">Plan Features</h4>
+                <h4 className="font-medium">{t('Plan Features')}</h4>
                 {authUser.plan === 'free' && (
                   <div className="text-sm text-muted-foreground space-y-1">
-                    <p>• Basic expense and income tracking</p>
-                    <p>• Manual categorization</p>
-                    <p>• Up to 100 transaction entries</p>
-                    <p>• Simple financial overview</p>
-                    <p>• Personalized financial tips</p>
+                    <p>{t('• Basic expense and income tracking')}</p>
+                    <p>{t('• Manual categorization')}</p>
+                    <p>{t('• Up to 100 transaction entries')}</p>
+                    <p>{t('• Simple financial overview')}</p>
+                    <p>{t('• Personalized financial tips')}</p>
                   </div>
                 )}
                 {authUser.plan === 'standard' && (
                   <div className="text-sm text-muted-foreground space-y-1">
-                    <p>• Everything in Free plan</p>
-                    <p>• Goals and budget management</p>
-                    <p>• Interactive charts and reports</p>
-                    <p>• AI expense categorization</p>
-                    <p>• Receipt OCR scanning</p>
-                    <p>• Mobile QR code upload</p>
-                    <p>• Calendar view and reminders</p>
-                    <p>• Unlimited transaction history</p>
+                    <p>{t('• Everything in Free plan')}</p>
+                    <p>{t('• Goals and budget management')}</p>
+                    <p>{t('• Interactive charts and reports')}</p>
+                    <p>{t('• AI expense categorization')}</p>
+                    <p>{t('• Receipt OCR scanning')}</p>
+                    <p>{t('• Mobile QR code upload')}</p>
+                    <p>{t('• Calendar view and reminders')}</p>
+                    <p>{t('• Unlimited transaction history')}</p>
                   </div>
                 )}
                 {authUser.plan === 'premium' && (
                   <div className="text-sm text-muted-foreground space-y-1">
-                    <p>• Everything in Standard plan</p>
-                    <p>• AI financial tips and insights</p>
-                    <p>• Advanced trends analysis</p>
-                    <p>• Expense prediction</p>
-                    <p>• Daily personalized recommendations</p>
-                    <p>• Cloud receipt storage</p>
-                    <p>• Cloud data backup</p>
-                    <p>• Data management (CSV, PDF)</p>
-                    <p>• Priority email support</p>
+                    <p>{t('• Everything in Standard plan')}</p>
+                    <p>{t('• AI financial tips and insights')}</p>
+                    <p>{t('• Advanced trends analysis')}</p>
+                    <p>{t('• Expense prediction')}</p>
+                    <p>{t('• Daily personalized recommendations')}</p>
+                    <p>{t('• Cloud receipt storage')}</p>
+                    <p>{t('• Cloud data backup')}</p>
+                    <p>{t('• Data management (CSV, PDF)')}</p>
+                    <p>{t('• Priority email support')}</p>
                   </div>
                 )}
               </div>
@@ -234,7 +235,7 @@ export default function ProfilePage() {
               {/* Subscription Management Actions */}
               {authUser.plan !== 'free' && (
                 <div className="space-y-4">
-                  <h4 className="font-medium">Subscription Management</h4>
+                  <h4 className="font-medium">{t('Subscription Management')}</h4>
                   <div className="grid gap-3">
                     <Button
                       onClick={handleManageSubscription}
@@ -242,24 +243,23 @@ export default function ProfilePage() {
                       className="flex items-center gap-2"
                     >
                       <Settings className="h-4 w-4" />
-                      {isLoading ? 'Opening...' : 'Manage Subscription'}
+                      {isLoading ? t('Opening...') : t('Manage Subscription')}
                       <ExternalLink className="h-3 w-3" />
                     </Button>
                     <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg">
                       <p className="text-sm text-blue-700 dark:text-blue-300">
-                        <strong>Note:</strong> If you received premium access through admin upgrade or special promotion, 
-                        you may not have a Stripe subscription to manage. Contact support if you need billing assistance.
+                        <strong>{t('Note')}:</strong> {t('If you received premium access through admin upgrade or special promotion, you may not have a Stripe subscription to manage. Contact support if you need billing assistance.')}
                       </p>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      This will open Stripe's secure customer portal where you can:
+                      {t("This will open Stripe's secure customer portal where you can:")}
                     </p>
                     <ul className="text-xs text-muted-foreground space-y-1 ml-4">
-                      <li>• Update payment methods</li>
-                      <li>• Change subscription plan</li>
-                      <li>• View billing history</li>
-                      <li>• Download invoices</li>
-                      <li>• Cancel subscription</li>
+                      <li>{t('• Update payment methods')}</li>
+                      <li>{t('• Change subscription plan')}</li>
+                      <li>{t('• View billing history')}</li>
+                      <li>{t('• Download invoices')}</li>
+                      <li>{t('• Cancel subscription')}</li>
                     </ul>
                   </div>
                 </div>
@@ -268,18 +268,18 @@ export default function ProfilePage() {
               {/* Upgrade Options for Free Users */}
               {authUser.plan === 'free' && (
                 <div className="space-y-4">
-                  <h4 className="font-medium">Upgrade Your Plan</h4>
+                  <h4 className="font-medium">{t('Upgrade Your Plan')}</h4>
                   <div className="grid gap-3">
                     <Button
                       onClick={() => window.location.href = '/subscribe'}
                       className="flex items-center gap-2"
                     >
                       <CreditCard className="h-4 w-4" />
-                      View Pricing Plans
+                      {t('View Pricing Plans')}
                       <ExternalLink className="h-3 w-3" />
                     </Button>
                     <p className="text-xs text-muted-foreground">
-                      Upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features
+                      {t('Upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features')}
                     </p>
                   </div>
                 </div>
