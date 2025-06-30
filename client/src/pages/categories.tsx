@@ -38,15 +38,15 @@ const getLocalizedCategoryName = (category: Category, t: (key: string) => string
   return category.name; // Return original name for custom categories
 }
 
-const categoryColors = [
-  { name: "Blue", value: "#3B82F6" },
-  { name: "Green", value: "#10B981" },
-  { name: "Purple", value: "#8B5CF6" },
-  { name: "Red", value: "#EF4444" },
-  { name: "Orange", value: "#F97316" },
-  { name: "Pink", value: "#EC4899" },
-  { name: "Indigo", value: "#6366F1" },
-  { name: "Teal", value: "#14B8A6" },
+const getCategoryColors = (t: any) => [
+  { name: t("colors.blue"), value: "#3B82F6" },
+  { name: t("colors.green"), value: "#10B981" },
+  { name: t("colors.purple"), value: "#8B5CF6" },
+  { name: t("colors.red"), value: "#EF4444" },
+  { name: t("colors.orange"), value: "#F97316" },
+  { name: t("colors.pink"), value: "#EC4899" },
+  { name: t("colors.indigo"), value: "#6366F1" },
+  { name: t("colors.teal"), value: "#14B8A6" },
 ];
 
 export default function Categories() {

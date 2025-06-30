@@ -1388,6 +1388,12 @@
     "wont_receive_notifications": "You won't receive browser notifications"
   },
 
+  "transaction_reminders": {
+    "failed_to_create": "Failed to create reminder",
+    "failed_to_complete": "Failed to complete reminder",
+    "failed_to_delete": "Failed to delete reminder"
+  },
+
   "types": {
     "expense": "expense",
     "income": "income",

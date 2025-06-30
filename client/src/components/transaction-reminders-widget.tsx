@@ -233,8 +233,8 @@ export default function TransactionRemindersWidget() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to complete reminder",
+        title: t("common.error"),
+        description: error.message || t("transaction_reminders.failed_to_complete"),
         variant: "destructive",
       });
     },
@@ -256,8 +256,8 @@ export default function TransactionRemindersWidget() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete reminder",
+        title: t("common.error"),
+        description: error.message || t("transaction_reminders.failed_to_delete"),
         variant: "destructive",
       });
     },

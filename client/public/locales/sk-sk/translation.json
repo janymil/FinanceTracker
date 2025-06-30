@@ -1521,6 +1521,12 @@
     "wont_receive_notifications": "Nebudete dostávať notifikácie z prehliadača"
   },
 
+  "transaction_reminders": {
+    "failed_to_create": "Nepodarilo sa vytvoriť pripomienku",
+    "failed_to_complete": "Nepodarilo sa dokončiť pripomienku",
+    "failed_to_delete": "Nepodarilo sa odstrániť pripomienku"
+  },
+
   "types": {
     "expense": "výdavok",
     "income": "príjem",

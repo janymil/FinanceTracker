@@ -1465,6 +1465,12 @@
     "wont_receive_notifications": "No recibirás notificaciones del navegador"
   },
 
+  "transaction_reminders": {
+    "failed_to_create": "Error al crear recordatorio",
+    "failed_to_complete": "Error al completar recordatorio",
+    "failed_to_delete": "Error al eliminar recordatorio"
+  },
+
   "types": {
     "expense": "gasto",
     "income": "ingreso",
