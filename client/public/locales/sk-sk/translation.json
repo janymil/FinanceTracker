@@ -892,6 +892,22 @@
   "Draggable positioning, mood changes based on spending, unique traits per user, hide/restore options": "Presúvateľné umiestnenie, zmeny nálady na základe utrácania, jedinečné vlastnosti pre každého používateľa, možnosti skrytia/obnovenia",
 
   "Transaction Management": "Správa Transakcií",
+  "Location": "Umiestnenie",
+  "Function": "Funkcia",
+  "Features": "Vlastnosti",
+  "Top left of dashboard": "Vľavo hore na nástenke",
+  "Center top of dashboard": "V centre hore na nástenke",
+  "Right side of dashboard": "Pravá strana nástenky",
+  "Bottom section of dashboard": "Spodná časť nástenky",
+  "Left column of dashboard": "Ľavý stĺpec nástenky",
+  "Right column of dashboard": "Pravý stĺpec nástenky", 
+  "Top of dashboard": "Vrch nástenky",
+  "Your financial command center with widgets and insights": "Vaše finančné veliteľské centrum s widgetmi a poznatkami",
+  "Record and manage your income and expenses": "Zaznamenajte a spravujte svoje príjmy a výdavky",
+  "Receipt OCR Processing (Standard+)": "OCR Spracovanie Účteniek (Standard+)",
+  "Upload Image buttons on transaction pages": "Tlačidlá Nahrať Obrázok na stránkach transakcií",
+  "Extract transaction data from receipt photos": "Extrahuje údaje transakcií z fotografií účteniek",
+  "Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload": "Google Cloud Vision OCR, AI kategorizácia, podpora mobilnej kamery, QR kód nahrávanie medzi zariadeniami",
 
   "require_plan": {
     "compact": {
