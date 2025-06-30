@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, DollarSign, CreditCard, Wallet, PiggyBank } from "lucide-react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
+import { getDateRangeForFilter, isDateInRange } from "@/lib/dateRangeUtils";
 
 interface QuickSnapshotProps {
   summary?: {
@@ -84,16 +85,14 @@ export default function QuickFinancialSnapshot({ summary, transactions }: QuickS
   // More sophisticated trend calculation if we have transaction data
   let spendingTrend = 'stable';
   if (hasTransactionData) {
-    const now = new Date();
-    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-    const lastMonthExpenses = transactions
+    const lastMonthRange = getDateRangeForFilter('last-month');
+    
+    const lastMonthExpenses = lastMonthRange ? transactions
       .filter(t => {
         const tDate = new Date(t.date);
-        return t.type === 'expense' && tDate >= lastMonth && tDate < currentMonth;
+        return t.type === 'expense' && isDateInRange(tDate, lastMonthRange);
       })
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0) : 0;
 
     if (currentMonthExpenses > lastMonthExpenses * 1.1) {
       spendingTrend = 'increasing';

@@ -11,6 +11,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { CurrencySetupModal } from "@/components/CurrencySetupModal";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
+import { getMonthDateRange } from "@/lib/dateRangeUtils";
 
 
 // Core components for immediate display
@@ -174,11 +175,8 @@ export default function Dashboard() {
 
 
 
-  // Get start and end dates for the selected month
-  const startDate = new Date(`${selectedMonth}-01`);
-  const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
-  // Set end date to end of day to include all transactions from the last day
-  endDate.setHours(23, 59, 59, 999);
+  // Get start and end dates for the selected month using centralized utilities
+  const { startDate, endDate } = getMonthDateRange(selectedMonth);
 
   // Hooks
   const queryClient = useQueryClient();
