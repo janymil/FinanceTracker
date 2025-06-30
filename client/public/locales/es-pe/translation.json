@@ -883,6 +883,30 @@
   "Draggable positioning, mood changes based on spending, unique traits per user, hide/restore options": "Posicionamiento arrastrable, cambios de humor basados en el gasto, rasgos únicos por usuario, opciones de ocultar/restaurar",
 
   "Transaction Management": "Gestión de Transacciones",
+  "Location": "Ubicación",
+  "Function": "Función",
+  "Features": "Características",
+  
+  "Top left of dashboard": "Parte superior izquierda del tablero",
+  "Center top of dashboard": "Centro superior del tablero", 
+  "Right side of dashboard": "Lado derecho del tablero",
+  "Bottom section of dashboard": "Sección inferior del tablero",
+  "Left column of dashboard": "Columna izquierda del tablero",
+  "Right column of dashboard": "Columna derecha del tablero",
+  
+  "Dashboard Overview": "Vista General del Tablero",
+  "Your financial command center with widgets and insights": "Tu centro de comando financiero con widgets e insights",
+  "Record and manage your income and expenses": "Registra y gestiona tus ingresos y gastos",
+  
+  "Receipt OCR Processing (Standard+)": "Procesamiento OCR de Recibos (Standard+)",
+  "Upload Image buttons on transaction pages": "Botones de Subir Imagen en páginas de transacciones",
+  "Extract transaction data from receipt photos": "Extrae datos de transacción de fotos de recibos",
+  "Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload": "OCR de Google Cloud Vision, categorización IA, soporte de cámara móvil, carga QR entre dispositivos",
+  
+  "AI-powered analysis with recommendations": "Análisis impulsado por IA con recomendaciones",
+  "Progress bars, overspending alerts": "Barras de progreso, alertas de sobregasto", 
+  "One-click editing, category icons, amount formatting": "Edición con un clic, iconos de categoría, formato de montos",
+  "Draggable positioning, mood changes, unique traits": "Posicionamiento arrastrable, cambios de humor, rasgos únicos",
 
   "require_plan": {
     "compact": {

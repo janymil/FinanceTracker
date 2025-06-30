@@ -757,7 +757,7 @@ export default function Help() {
                         </AccordionTrigger>
                         <AccordionContent className="pt-4">
                           <div className="grid gap-6 md:grid-cols-2">
-                        <div className="space-y-4">
+                            <div className="space-y-4">
                           <div>
                             <h5 className="font-medium text-sm mb-2">Transaction Entry Forms</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
@@ -998,37 +998,20 @@ export default function Help() {
                         </div>
                       </div>
 
-                      {/* Mobile Features */}
-                      <div className="border-l-4 border-pink-500 pl-4">
-                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
-                          <Camera className="h-5 w-5" />
-                          Mobile Features
-                        </h4>
-                        <div className="space-y-4">
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">Responsive Design</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Function:</strong> Full mobile optimization for all features<br/>
-                              <strong>Features:</strong> Touch-friendly interfaces, mobile navigation, responsive layouts, optimized forms
-                            </p>
+                            <div className="space-y-4">
+                              {/* Mobile Features */}
+                              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <h5 className="font-medium text-sm mb-2 flex items-center gap-2">
+                                  <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
+                                  Mobile Features
+                                </h5>
+                                <div className="text-xs text-gray-500 space-y-1">
+                                  <div><strong>Function:</strong> Full mobile optimization for all features</div>
+                                  <div><strong>Features:</strong> Touch-friendly interfaces, mobile navigation, responsive layouts, camera integration</div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">Mobile Camera Integration</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Function:</strong> Direct camera access for receipt scanning<br/>
-                              <strong>Features:</strong> Camera capture, gallery selection, image preview, auto-focus optimization
-                            </p>
-                          </div>
-
-                          <div>
-                            <h5 className="font-medium text-sm mb-2">QR Code Cross-Device Upload</h5>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Function:</strong> Scan receipts on mobile, process on desktop<br/>
-                              <strong>Features:</strong> QR code generation, anonymous mobile access, real-time polling, automatic form population
-                            </p>
-                          </div>
-                        </div>
                         </AccordionContent>
                       </AccordionItem>
                     </Accordion>

@@ -806,6 +806,30 @@
   "Draggable positioning, mood changes based on spending, unique traits per user, hide/restore options": "Draggable positioning, mood changes based on spending, unique traits per user, hide/restore options",
 
   "Transaction Management": "Transaction Management",
+  "Location": "Location",
+  "Function": "Function",
+  "Features": "Features",
+  
+  "Top left of dashboard": "Top left of dashboard",
+  "Center top of dashboard": "Center top of dashboard", 
+  "Right side of dashboard": "Right side of dashboard",
+  "Bottom section of dashboard": "Bottom section of dashboard",
+  "Left column of dashboard": "Left column of dashboard",
+  "Right column of dashboard": "Right column of dashboard",
+  
+  "Dashboard Overview": "Dashboard Overview",
+  "Your financial command center with widgets and insights": "Your financial command center with widgets and insights",
+  "Record and manage your income and expenses": "Record and manage your income and expenses",
+  
+  "Receipt OCR Processing (Standard+)": "Receipt OCR Processing (Standard+)",
+  "Upload Image buttons on transaction pages": "Upload Image buttons on transaction pages",
+  "Extract transaction data from receipt photos": "Extract transaction data from receipt photos",
+  "Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload": "Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload",
+  
+  "AI-powered analysis with recommendations": "AI-powered analysis with recommendations",
+  "Progress bars, overspending alerts": "Progress bars, overspending alerts", 
+  "One-click editing, category icons, amount formatting": "One-click editing, category icons, amount formatting",
+  "Draggable positioning, mood changes, unique traits": "Draggable positioning, mood changes, unique traits",
 
   "require_plan": {
     "compact": {
