@@ -770,6 +770,94 @@
     }
   },
 
+  "Frequently Asked Questions": "Preguntas Frecuentes",
+  "AI Assistant": "Asistente IA",
+  "Ask me anything about FinanzerPro": "Pregúntame cualquier cosa sobre FinanzerPro",
+
+  "How do I get started with FinanzerPro?": "¿Cómo empiezo con FinanzerPro?",
+  "Simply create an account and start by adding your first transaction. You can manually enter expenses and income, or use our AI categorization feature (Standard+ plans) to automatically classify your transactions.": "Simplemente crea una cuenta y comienza agregando tu primera transacción. Puedes ingresar gastos e ingresos manualmente, o usar nuestra función de categorización IA (planes Standard+) para clasificar automáticamente tus transacciones.",
+
+  "What are the differences between subscription plans?": "¿Cuáles son las diferencias entre los planes de suscripción?",
+  "Free plan allows 100 transactions, Standard plan ($4.99/month) includes up to 100 transactions with AI features, budgeting, and goals. Premium plan ($9.99/month) offers unlimited transactions, advanced analytics, cloud backup, and data import/export.": "El plan gratuito permite 100 transacciones, el plan Standard ($4.99/mes) incluye hasta 100 transacciones con funciones IA, presupuestos y metas. El plan Premium ($9.99/mes) ofrece transacciones ilimitadas, análisis avanzados, respaldo en la nube e importación/exportación de datos.",
+
+  "Is my financial data secure?": "¿Están seguros mis datos financieros?",
+  "Yes, we use industry-standard encryption and security measures. Your data is stored securely with PostgreSQL, and we offer cloud backup for Premium users. We never share your personal financial information.": "Sí, utilizamos encriptación y medidas de seguridad estándar de la industria. Tus datos se almacenan de forma segura con PostgreSQL, y ofrecemos respaldo en la nube para usuarios Premium. Nunca compartimos tu información financiera personal.",
+
+  "How does AI categorization work?": "¿Cómo funciona la categorización IA?",
+  "Our AI analyzes your transaction descriptions and amounts to automatically suggest the most appropriate category. It learns from your patterns and becomes more accurate over time. Available for Standard and Premium plans.": "Nuestra IA analiza las descripciones y montos de tus transacciones para sugerir automáticamente la categoría más apropiada. Aprende de tus patrones y se vuelve más precisa con el tiempo. Disponible para planes Standard y Premium.",
+
+  "How does receipt scanning work?": "¿Cómo funciona el escaneo de recibos?",
+  "Upload photos of receipts using the 'Upload Image' button on any transaction page. Our OCR technology automatically extracts merchant name, amount, and date. Standard+ users get AI-powered category suggestions. Works with mobile camera or gallery photos.": "Sube fotos de recibos usando el botón 'Subir Imagen' en cualquier página de transacciones. Nuestra tecnología OCR extrae automáticamente el nombre del comerciante, monto y fecha. Los usuarios Standard+ obtienen sugerencias de categorías impulsadas por IA. Funciona con cámara móvil o fotos de galería.",
+
+  "How does mobile QR code upload work?": "¿Cómo funciona la subida de códigos QR móvil?",
+  "Click 'Upload Image' on your computer and select 'Scan with Phone'. A QR code appears on your screen. Scan it with your phone's camera to open the mobile upload page. Take a photo of your receipt on your phone, and the extracted data automatically appears in your computer's transaction form. Perfect for seamless cross-device receipt scanning.": "Haz clic en 'Subir Imagen' en tu computadora y selecciona 'Escanear con Teléfono'. Aparece un código QR en tu pantalla. Escanéalo con la cámara de tu teléfono para abrir la página de subida móvil. Toma una foto de tu recibo en tu teléfono, y los datos extraídos aparecen automáticamente en el formulario de transacción de tu computadora. Perfecto para escaneo de recibos sin interrupciones entre dispositivos.",
+
+  "What if OCR doesn't read my receipt correctly?": "¿Qué pasa si el OCR no lee mi recibo correctamente?",
+  "You can edit any extracted information before saving. The system shows extracted data in editable fields, allowing you to correct merchant names, amounts, or dates. Clear, well-lit photos produce the best results.": "Puedes editar cualquier información extraída antes de guardar. El sistema muestra los datos extraídos en campos editables, permitiéndote corregir nombres de comerciantes, montos o fechas. Las fotos claras y bien iluminadas producen los mejores resultados.",
+
+  "What types of receipts are supported?": "¿Qué tipos de recibos son compatibles?",
+  "All standard receipts including restaurant bills, grocery stores, gas stations, retail purchases, and service receipts. The system works best with printed receipts that have clear text and are photographed in good lighting conditions.": "Todos los recibos estándar incluyendo facturas de restaurantes, supermercados, gasolineras, compras al por menor y recibos de servicios. El sistema funciona mejor con recibos impresos que tienen texto claro y son fotografiados en buenas condiciones de iluminación.",
+
+  "How do I set up budgets and goals?": "¿Cómo configuro presupuestos y metas?",
+  "Navigate to the Budgets or Goals section from the sidebar. Set monthly spending limits by category for budgets, or create savings targets with deadlines for goals. The app will track your progress automatically.": "Navega a la sección de Presupuestos o Metas desde la barra lateral. Establece límites de gasto mensual por categoría para presupuestos, o crea objetivos de ahorro con fechas límite para metas. La aplicación rastreará tu progreso automáticamente.",
+
+  "Can I export my data?": "¿Puedo exportar mis datos?",
+  "Yes, Premium users can export data in CSV, Excel, or JSON formats. You can also set up automatic cloud backups and import data from other financial apps like Mint, QuickBooks, and YNAB.": "Sí, los usuarios Premium pueden exportar datos en formatos CSV, Excel o JSON. También puedes configurar respaldos automáticos en la nube e importar datos de otras aplicaciones financieras como Mint, QuickBooks y YNAB.",
+
+  "Is FinanzerPro available on mobile?": "¿Está FinanzerPro disponible en móvil?",
+  "FinanzerPro is a responsive web application that works perfectly on mobile browsers. Simply bookmark the site on your phone for easy access anywhere.": "FinanzerPro es una aplicación web receptiva que funciona perfectamente en navegadores móviles. Simplemente marca el sitio en tu teléfono para acceso fácil desde cualquier lugar.",
+
+  "What widgets are available on the dashboard?": "¿Qué widgets están disponibles en el tablero?",
+  "Dashboard includes Financial Summary Cards (income/expenses/balance), Recent Transactions widget, Budget Overview (Standard+), Financial Health Score, AI Financial Tips (Premium), Financial Mascot (Premium), and Transaction Reminders (Standard+). All widgets update automatically.": "El tablero incluye Tarjetas de Resumen Financiero (ingresos/gastos/balance), widget de Transacciones Recientes, Vista General del Presupuesto (Standard+), Puntuación de Salud Financiera, Consejos Financieros IA (Premium), Mascota Financiera (Premium) y Recordatorios de Transacciones (Standard+). Todos los widgets se actualizan automáticamente.",
+
+  "How do I edit or delete transactions?": "¿Cómo edito o elimino transacciones?",
+  "Click on any transaction in lists or dashboard widgets to edit. Modify amount, description, date, category, or notes. Use the delete button to remove transactions. Changes update immediately without page reloads.": "Haz clic en cualquier transacción en listas o widgets del tablero para editar. Modifica monto, descripción, fecha, categoría o notas. Usa el botón de eliminar para quitar transacciones. Los cambios se actualizan inmediatamente sin recargar la página.",
+
+  "How do recurring transactions work?": "¿Cómo funcionan las transacciones recurrentes?",
+  "Standard+ users can mark transactions as recurring (weekly, monthly, yearly). The system shows upcoming reminders in the dashboard widget and detects patterns automatically. Set end dates or leave open-ended for ongoing bills.": "Los usuarios Standard+ pueden marcar transacciones como recurrentes (semanal, mensual, anual). El sistema muestra recordatorios próximos en el widget del tablero y detecta patrones automáticamente. Establece fechas de finalización o déjalas abiertas para facturas continuas.",
+
+  "Can I create custom categories?": "¿Puedo crear categorías personalizadas?",
+  "Yes, create unlimited custom categories with personalized names, colors, and icons. Choose from income, expense, or goal types. Custom categories appear alongside 15+ predefined categories in all dropdown menus.": "Sí, crea categorías personalizadas ilimitadas con nombres, colores e iconos personalizados. Elige entre tipos de ingresos, gastos o metas. Las categorías personalizadas aparecen junto a más de 15 categorías predefinidas en todos los menús desplegables.",
+
+  "How is the Financial Health Score calculated?": "¿Cómo se calcula la Puntuación de Salud Financiera?",
+  "Free users see a simple calculation based on income/expense ratio. Standard+ users get AI-powered analysis evaluating spending habits, budget adherence, savings rate, and goal progress with detailed improvement recommendations.": "Los usuarios gratuitos ven un cálculo simple basado en la proporción ingresos/gastos. Los usuarios Standard+ obtienen análisis impulsado por IA que evalúa hábitos de gasto, cumplimiento del presupuesto, tasa de ahorro y progreso de metas con recomendaciones detalladas de mejora.",
+
+  "How does budget tracking work?": "¿Cómo funciona el seguimiento del presupuesto?",
+  "Standard+ users create budgets for categories with weekly/monthly/yearly limits. Progress bars show spending with color-coded status: green (under budget), yellow (approaching limit), red (over budget). Receive overspending alerts automatically.": "Los usuarios Standard+ crean presupuestos para categorías con límites semanales/mensuales/anuales. Las barras de progreso muestran el gasto con estado codificado por colores: verde (dentro del presupuesto), amarillo (acercándose al límite), rojo (sobre el presupuesto). Recibe alertas de sobregasto automáticamente.",
+
+  "Can I share goals with family members?": "¿Puedo compartir metas con miembros de la familia?",
+  "Yes, Standard+ users can create collaborative goals and invite family members or partners. Track shared contributions, view progress together, and celebrate achievements as a team for joint savings efforts.": "Sí, los usuarios Standard+ pueden crear metas colaborativas e invitar a miembros de la familia o parejas. Rastrea contribuciones compartidas, ve el progreso juntos y celebra logros como equipo para esfuerzos de ahorro conjunto.",
+
+  "What is the calendar view feature?": "¿Qué es la función de vista de calendario?",
+  "Standard+ users can view transactions in a monthly calendar grid showing daily spending totals and transaction previews. Navigate between months to see spending patterns over time with mobile-responsive design.": "Los usuarios Standard+ pueden ver transacciones en una cuadrícula de calendario mensual que muestra totales de gasto diario y vistas previas de transacciones. Navega entre meses para ver patrones de gasto a lo largo del tiempo con diseño responsivo móvil.",
+
+  "What are AI trend predictions?": "¿Qué son las predicciones de tendencias IA?",
+  "Premium users get AI-powered financial forecasting showing spending predictions, income projections, budget recommendations, and goal timeline estimates. Uses machine learning to analyze patterns and predict future financial trends.": "Los usuarios Premium obtienen pronósticos financieros impulsados por IA que muestran predicciones de gasto, proyecciones de ingresos, recomendaciones de presupuesto y estimaciones de cronograma de metas. Usa aprendizaje automático para analizar patrones y predecir tendencias financieras futuras.",
+
+  "What is the Financial Mascot feature?": "¿Qué es la función de Mascota Financiera?",
+  "Premium users get a personalized AI companion that reflects financial health through mood changes and visual indicators. The mascot is draggable around the screen, has unique traits based on your profile, and can be hidden/restored.": "Los usuarios Premium obtienen un compañero IA personalizado que refleja la salud financiera a través de cambios de humor e indicadores visuales. La mascota se puede arrastrar por la pantalla, tiene rasgos únicos basados en tu perfil y puede ocultarse/restaurarse.",
+
+  "How does cloud backup work?": "¿Cómo funciona el respaldo en la nube?",
+  "Premium users get automatic daily backups at 2:00 AM storing all transactions, budgets, goals, categories, and receipt images securely. Manual backup options available with complete restore functionality to recover all data.": "Los usuarios Premium obtienen respaldos automáticos diarios a las 2:00 AM almacenando todas las transacciones, presupuestos, metas, categorías e imágenes de recibos de forma segura. Opciones de respaldo manual disponibles con funcionalidad de restauración completa para recuperar todos los datos.",
+
+  "Can I import data from other financial apps?": "¿Puedo importar datos de otras aplicaciones financieras?",
+  "Premium users can import from Mint, QuickBooks, YNAB, Personal Capital, and bank exports. Features include column mapping, data validation, preview before import, and batch processing with error handling.": "Los usuarios Premium pueden importar desde Mint, QuickBooks, YNAB, Personal Capital y exportaciones bancarias. Las características incluyen mapeo de columnas, validación de datos, vista previa antes de importar y procesamiento por lotes con manejo de errores.",
+
+  "Can I use my phone's camera for receipts?": "¿Puedo usar la cámara de mi teléfono para recibos?",
+  "Yes, mobile browsers support direct camera access. Choose 'Take Photo' to use your camera or 'Choose from Gallery' to select existing photos. QR code scanning allows cross-device upload from phone to computer.": "Sí, los navegadores móviles soportan acceso directo a la cámara. Elige 'Tomar Foto' para usar tu cámara o 'Elegir de Galería' para seleccionar fotos existentes. El escaneo de códigos QR permite subida entre dispositivos desde teléfono a computadora.",
+
+  "How do I filter and view reports?": "¿Cómo filtro y veo reportes?",
+  "Use month dropdowns and period filters (week/month/quarter/year) on the Reports page. View financial overviews, category breakdowns, and analytics. Premium users get advanced trend analysis and comparative reports.": "Usa menús desplegables de mes y filtros de período (semana/mes/trimestre/año) en la página de Reportes. Ve resúmenes financieros, desgloses por categoría y análisis. Los usuarios Premium obtienen análisis de tendencias avanzado y reportes comparativos.",
+
+  "How do plan upgrades and downgrades work?": "¿Cómo funcionan las actualizaciones y reducciones de plan?",
+  "Upgrades apply immediately with prorated billing. Downgrades are scheduled for the end of your current billing period. Access subscription management through Profile page with full billing transparency and Stripe customer portal integration.": "Las actualizaciones se aplican inmediatamente con facturación prorrateada. Las reducciones se programan para el final de tu período de facturación actual. Accede a la gestión de suscripción a través de la página de Perfil con transparencia total de facturación e integración del portal de clientes de Stripe.",
+
+  "Is the app fully mobile-friendly?": "¿Es la aplicación completamente compatible con móviles?",
+  "Yes, complete responsive design with touch-friendly interfaces, mobile navigation, collapsible filters, optimized forms, and camera integration. All desktop functionality is accessible on mobile browsers without requiring app downloads.": "Sí, diseño completamente responsivo con interfaces táctiles, navegación móvil, filtros colapsables, formularios optimizados e integración de cámara. Toda la funcionalidad de escritorio es accesible en navegadores móviles sin requerir descargas de aplicaciones.",
+
+  "How can I get help or support?": "¿Cómo puedo obtener ayuda o soporte?",
+  "Use this AI chat assistant for immediate help, check our comprehensive documentation below, or contact our support team through the contact page for personalized assistance.": "Usa este asistente de chat IA para ayuda inmediata, revisa nuestra documentación completa a continuación, o contacta a nuestro equipo de soporte a través de la página de contacto para asistencia personalizada.",
+
   "require_plan": {
     "compact": {
       "feature_title": "Función {{plan}}",

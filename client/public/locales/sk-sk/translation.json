@@ -779,6 +779,52 @@
     }
   },
 
+  "Frequently Asked Questions": "Často Kladené Otázky",
+  "AI Assistant": "AI Asistent",
+  "Ask me anything about FinanzerPro": "Opýtajte sa ma čokoľvek o FinanzerPro",
+
+  "How do I get started with FinanzerPro?": "Ako začnem s FinanzerPro?",
+  "Simply create an account and start by adding your first transaction. You can manually enter expenses and income, or use our AI categorization feature (Standard+ plans) to automatically classify your transactions.": "Jednoducho si vytvorte účet a začnite pridaním svojej prvej transakcie. Môžete manuálne zadať výdavky a príjmy, alebo použiť našu funkciu AI kategorizácie (Standard+ plány) na automatickú klasifikáciu vašich transakcií.",
+
+  "What are the differences between subscription plans?": "Aké sú rozdiely medzi predplatnými plánmi?",
+  "Free plan allows 100 transactions, Standard plan ($4.99/month) includes up to 100 transactions with AI features, budgeting, and goals. Premium plan ($9.99/month) offers unlimited transactions, advanced analytics, cloud backup, and data import/export.": "Bezplatný plán umožňuje 100 transakcií, Standard plán ($4.99/mesiac) zahŕňa až 100 transakcií s AI funkciami, rozpočtovaním a cieľmi. Premium plán ($9.99/mesiac) ponúka neobmedzené transakcie, pokročilé analýzy, cloudové zálohovanie a import/export údajov.",
+
+  "Is my financial data secure?": "Sú moje finančné údaje bezpečné?",
+  "Yes, we use industry-standard encryption and security measures. Your data is stored securely with PostgreSQL, and we offer cloud backup for Premium users. We never share your personal financial information.": "Áno, používame štandardné priemyselné šifrovanie a bezpečnostné opatrenia. Vaše údaje sú bezpečne uložené s PostgreSQL a ponúkame cloudové zálohovanie pre Premium používateľov. Nikdy nezdieľame vaše osobné finančné informácie.",
+
+  "How does AI categorization work?": "Ako funguje AI kategorizácia?",
+  "Our AI analyzes your transaction descriptions and amounts to automatically suggest the most appropriate category. It learns from your patterns and becomes more accurate over time. Available for Standard and Premium plans.": "Naša AI analyzuje popisy a sumy vašich transakcií na automatické navrhovanie najvhodnejšej kategórie. Učí sa z vašich vzorov a časom sa stáva presnejšou. Dostupné pre Standard a Premium plány.",
+
+  "How does receipt scanning work?": "Ako funguje skenovanie účteniek?",
+  "Upload photos of receipts using the 'Upload Image' button on any transaction page. Our OCR technology automatically extracts merchant name, amount, and date. Standard+ users get AI-powered category suggestions. Works with mobile camera or gallery photos.": "Nahrajte fotografie účteniek pomocou tlačidla 'Nahrať Obrázok' na ktorejkoľvek stránke transakcií. Naša OCR technológia automaticky extrahuje názov obchodníka, sumu a dátum. Standard+ používatelia dostávajú AI návrhy kategórií. Funguje s mobilnou kamerou alebo fotkami z galérie.",
+
+  "How does mobile QR code upload work?": "Ako funguje mobilné nahrávanie QR kódu?",
+  "Click 'Upload Image' on your computer and select 'Scan with Phone'. A QR code appears on your screen. Scan it with your phone's camera to open the mobile upload page. Take a photo of your receipt on your phone, and the extracted data automatically appears in your computer's transaction form. Perfect for seamless cross-device receipt scanning.": "Kliknite na 'Nahrať Obrázok' na vašom počítači a vyberte 'Skenovať s Telefónom'. Na obrazovke sa zobrazí QR kód. Naskenujte ho kamerou telefónu na otvorenie mobilnej stránky nahrávania. Odfotografujte účtenku na telefóne a extrahované údaje sa automaticky zobrazia vo formulári transakcie na počítači. Perfektné pre bezproblémové skenovanie účteniek medzi zariadeniami.",
+
+  "What if OCR doesn't read my receipt correctly?": "Čo keď OCR neprečíta moju účtenku správne?",
+  "You can edit any extracted information before saving. The system shows extracted data in editable fields, allowing you to correct merchant names, amounts, or dates. Clear, well-lit photos produce the best results.": "Môžete upraviť akékoľvek extrahované informácie pred uložením. Systém zobrazuje extrahované údaje v upraviteľných poliach, umožňujúc vám opraviť názvy obchodníkov, sumy alebo dátumy. Jasné, dobre osvetlené fotky poskytujú najlepšie výsledky.",
+
+  "What types of receipts are supported?": "Aké typy účteniek sú podporované?",
+  "All standard receipts including restaurant bills, grocery stores, gas stations, retail purchases, and service receipts. The system works best with printed receipts that have clear text and are photographed in good lighting conditions.": "Všetky štandardné účtenky vrátane reštauračných účtov, obchodov s potravinami, čerpacích staníc, maloobchodných nákupov a servisných účteniek. Systém funguje najlepšie s tlačenými účtenkami, ktoré majú jasný text a sú odfotografované v dobrých svetelných podmienkach.",
+
+  "How do I set up budgets and goals?": "Ako nastavím rozpočty a ciele?",
+  "Navigate to the Budgets or Goals section from the sidebar. Set monthly spending limits by category for budgets, or create savings targets with deadlines for goals. The app will track your progress automatically.": "Prejdite do sekcie Rozpočty alebo Ciele z bočného panela. Nastavte mesačné limity výdavkov podľa kategórie pre rozpočty, alebo vytvorte úsporné ciele s termínmi. Aplikácia bude automaticky sledovať váš pokrok.",
+
+  "Can I export my data?": "Môžem exportovať svoje údaje?",
+  "Yes, Premium users can export data in CSV, Excel, or JSON formats. You can also set up automatic cloud backups and import data from other financial apps like Mint, QuickBooks, and YNAB.": "Áno, Premium používatelia môžu exportovať údaje vo formátoch CSV, Excel alebo JSON. Môžete tiež nastaviť automatické cloudové zálohovanie a importovať údaje z iných finančných aplikácií ako Mint, QuickBooks a YNAB.",
+
+  "Is FinanzerPro available on mobile?": "Je FinanzerPro dostupné na mobile?",
+  "FinanzerPro is a responsive web application that works perfectly on mobile browsers. Simply bookmark the site on your phone for easy access anywhere.": "FinanzerPro je responzívna webová aplikácia, ktorá funguje perfektne v mobilných prehliadačoch. Jednoducho si označte stránku v telefóne pre ľahký prístup kdekoľvek.",
+
+  "What widgets are available on the dashboard?": "Aké widgety sú dostupné na nástenke?",
+  "Dashboard includes Financial Summary Cards (income/expenses/balance), Recent Transactions widget, Budget Overview (Standard+), Financial Health Score, AI Financial Tips (Premium), Financial Mascot (Premium), and Transaction Reminders (Standard+). All widgets update automatically.": "Nástenka zahŕňa Karty Finančného Súhrnu (príjmy/výdavky/bilancia), widget Nedávnych Transakcií, Prehľad Rozpočtu (Standard+), Skóre Finančného Zdravia, AI Finančné Tipy (Premium), Finančnú Maskota (Premium) a Pripomienky Transakcií (Standard+). Všetky widgety sa aktualizujú automaticky.",
+
+  "How do I edit or delete transactions?": "Ako upravím alebo zmažem transakcie?",
+  "Click on any transaction in lists or dashboard widgets to edit. Modify amount, description, date, category, or notes. Use the delete button to remove transactions. Changes update immediately without page reloads.": "Kliknite na akúkoľvek transakciu v zoznamoch alebo widgetoch nástenky na úpravu. Upravte sumu, popis, dátum, kategóriu alebo poznámky. Použite tlačidlo vymazania na odstránenie transakcií. Zmeny sa aktualizujú okamžite bez obnovenia stránky.",
+
+  "How do recurring transactions work?": "Ako fungujú opakujúce sa transakcie?",
+  "Standard+ users can mark transactions as recurring (weekly, monthly, yearly). The system shows upcoming reminders in the dashboard widget and detects patterns automatically. Set end dates or leave open-ended for ongoing bills.": "Standard+ používatelia môžu označiť transakcie ako opakujúce sa (týždenne, mesačne, ročne). Systém zobrazuje nadchádzajúce pripomienky vo widgete nástenky a automaticky detekuje vzory. Nastavte koncové dátumy alebo ich nechajte otvorené pre pokračujúce účty.",
+
   "require_plan": {
     "compact": {
       "feature_title": "{{plan}} Funkcia",
