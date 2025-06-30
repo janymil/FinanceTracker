@@ -82,8 +82,8 @@ export default function Categories() {
       setIsDialogOpen(false);
       setNewCategory({ name: "", icon: "dollar-sign", color: "#3B82F6", type: "expense" });
       toast({
-        title: "Category Created",
-        description: "New category has been added successfully",
+        title: t("categories.category_created"),
+        description: t("categories.category_added_successfully"),
       });
     },
     onError: (error: any) => {
@@ -362,7 +362,7 @@ export default function Categories() {
                   <div>
                     <Label>{t("Color")}</Label>
                     <div className="grid grid-cols-4 gap-2 mt-2">
-                      {categoryColors.map((color) => (
+                      {getCategoryColors(t).map((color) => (
                         <Button
                           key={color.value}
                           variant={newCategory.color === color.value ? "default" : "outline"}
