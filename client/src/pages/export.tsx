@@ -948,13 +948,29 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                           onChange={importOptions.source === 'pdf-statement' ? handlePDFUpload : handleFileSelect}
                           className="hidden"
                         />
-                        <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                        {isProcessingPDF ? (
+                          <Loader2 className="h-8 w-8 text-blue-500 mx-auto mb-2 animate-spin" />
+                        ) : (
+                          <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                        )}
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {selectedFile ? (
+                          {isProcessingPDF ? (
+                            <>
+                              <span className="font-medium text-blue-600">Processing PDF...</span>
+                              <br />
+                              <span className="text-xs">Extracting transactions with AI</span>
+                            </>
+                          ) : selectedFile ? (
                             <>
                               <span className="font-medium text-green-600">{selectedFile.name}</span>
                               <br />
                               <span className="text-xs">{t('export.click_to_change_file')}</span>
+                            </>
+                          ) : importOptions.source === 'pdf-statement' ? (
+                            <>
+                              Drop your bank statement PDF here or click to browse
+                              <br />
+                              <span className="text-xs">Supports PDF files with transaction data</span>
                             </>
                           ) : (
                             <>
@@ -969,8 +985,8 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                   </div>
                 </div>
 
-                {/* Step 4: Import Options */}
-                {selectedFile && (
+                {/* Step 4: Import Options (skip for PDF since they show preview modal) */}
+                {selectedFile && importOptions.source !== 'pdf-statement' && (
                   <div className="border rounded-lg p-4">
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0 w-6 h-6 bg-gray-500 text-white rounded-full flex items-center justify-center text-sm font-medium">
@@ -1418,6 +1434,138 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
               >
                 <Download className="mr-2 h-4 w-4" />
                 Restore
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* PDF Transaction Preview Modal */}
+        <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+            <DialogHeader>
+              <DialogTitle>Review Extracted Transactions</DialogTitle>
+              <DialogDescription>
+                {pdfProcessingResult && (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium">Method:</span> {pdfProcessingResult.processingMethod}
+                      </div>
+                      <div>
+                        <span className="font-medium">Pages:</span> {pdfProcessingResult.totalPages}
+                      </div>
+                      <div>
+                        <span className="font-medium">Extracted:</span> {pdfProcessingResult.extractedTransactions}
+                      </div>
+                      <div>
+                        <span className="font-medium">Confidence:</span> {(pdfProcessingResult.overallConfidence * 100).toFixed(0)}%
+                      </div>
+                    </div>
+                    {pdfProcessingResult.errors.length > 0 && (
+                      <div className="text-amber-600 text-xs">
+                        <span className="font-medium">Warnings:</span> {pdfProcessingResult.errors.join(', ')}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="flex-1 overflow-hidden">
+              <div className="space-y-4">
+                {/* Selection Controls */}
+                <div className="flex items-center justify-between border-b pb-3">
+                  <div className="flex items-center space-x-2">
+                    <Button variant="outline" size="sm" onClick={selectAllTransactions}>
+                      Select All ({previewTransactions.length})
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={deselectAllTransactions}>
+                      Deselect All
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                      {selectedTransactions.size} of {previewTransactions.length} selected
+                    </span>
+                  </div>
+                </div>
+
+                {/* Transactions List */}
+                <div className="overflow-y-auto max-h-96 space-y-2">
+                  {previewTransactions.map((transaction, index) => (
+                    <div
+                      key={index}
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                        selectedTransactions.has(index)
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => toggleTransactionSelection(index)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              checked={selectedTransactions.has(index)}
+                              onChange={() => toggleTransactionSelection(index)}
+                            />
+                            <span className="font-medium">{transaction.description}</span>
+                            <Badge
+                              variant={transaction.type === 'income' ? 'default' : 'secondary'}
+                              className={
+                                transaction.type === 'income'
+                                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                  : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                              }
+                            >
+                              {transaction.type}
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            Date: {transaction.date} | Amount: ${Math.abs(transaction.amount).toFixed(2)}
+                          </div>
+                          {transaction.category && (
+                            <div className="text-xs text-blue-600">
+                              Suggested Category: {transaction.category}
+                            </div>
+                          )}
+                          {transaction.rawText && (
+                            <div className="text-xs text-gray-500 bg-gray-50 dark:bg-gray-800 p-2 rounded">
+                              Raw Text: {transaction.rawText.substring(0, 100)}...
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-semibold">
+                            {transaction.type === 'income' ? '+' : '-'}${Math.abs(transaction.amount).toFixed(2)}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {(transaction.confidence * 100).toFixed(0)}% confidence
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPreviewModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleImportSelectedTransactions}
+                disabled={selectedTransactions.size === 0 || isImportingFromPreview}
+              >
+                {isImportingFromPreview ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Importing...
+                  </>
+                ) : (
+                  <>
+                    Import {selectedTransactions.size} Transaction{selectedTransactions.size !== 1 ? 's' : ''}
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
