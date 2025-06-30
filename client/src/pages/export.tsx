@@ -933,7 +933,12 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                               ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20' 
                               : 'border-gray-200 hover:border-gray-300'
                           }`}
-                          onClick={() => setImportOptions(prev => ({ ...prev, source: 'pdf-statement' }))}
+                          onClick={() => {
+                            setImportOptions(prev => ({ ...prev, source: 'pdf-statement' }));
+                            if (!hasConsentedToSecurity) {
+                              setShowSecurityDisclosure(true);
+                            }
+                          }}
                         >
                           <div className="flex items-center gap-2">
                             <FileText className="h-5 w-5 text-blue-600" />
