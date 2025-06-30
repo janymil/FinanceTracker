@@ -332,18 +332,16 @@ export default function Help() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p>
-                    FinanzerPro is a modern, intelligent personal finance application designed to help you 
-                    take control of your financial future. With AI-powered insights, comprehensive tracking, 
-                    and flexible subscription plans, managing your money has never been easier.
+                    {t("FinanzerPro is a modern, intelligent personal finance application designed to help you take control of your financial future. With AI-powered insights, comprehensive tracking, and flexible subscription plans, managing your money has never been easier.")}
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                     <div className="flex items-start gap-3 p-4 border rounded-lg">
                       <BarChart3 className="h-8 w-8 text-blue-500 mt-1" />
                       <div>
-                        <h3 className="font-semibold">Smart Analytics</h3>
+                        <h3 className="font-semibold">{t('Smart Analytics')}</h3>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                          AI-powered insights and trend predictions for better financial decisions
+                          {t('AI-powered insights and trend predictions for better financial decisions')}
                         </p>
                       </div>
                     </div>
@@ -351,9 +349,9 @@ export default function Help() {
                     <div className="flex items-start gap-3 p-4 border rounded-lg">
                       <Shield className="h-8 w-8 text-green-500 mt-1" />
                       <div>
-                        <h3 className="font-semibold">Secure Data Protection</h3>
+                        <h3 className="font-semibold">{t('Secure Data Protection')}</h3>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                          Your financial data is protected with industry-standard encryption
+                          {t('Your financial data is protected with industry-standard encryption')}
                         </p>
                       </div>
                     </div>
@@ -361,9 +359,9 @@ export default function Help() {
                     <div className="flex items-start gap-3 p-4 border rounded-lg">
                       <Cloud className="h-8 w-8 text-purple-500 mt-1" />
                       <div>
-                        <h3 className="font-semibold">Cloud Backup</h3>
+                        <h3 className="font-semibold">{t('Cloud Backup')}</h3>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                          Never lose your data with automatic cloud synchronization
+                          {t('Never lose your data with automatic cloud synchronization')}
                         </p>
                       </div>
                     </div>
@@ -371,9 +369,9 @@ export default function Help() {
                     <div className="flex items-start gap-3 p-4 border rounded-lg">
                       <Zap className="h-8 w-8 text-yellow-500 mt-1" />
                       <div>
-                        <h3 className="font-semibold">AI Categorization</h3>
+                        <h3 className="font-semibold">{t('AI Categorization')}</h3>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                          Automatically categorize transactions with machine learning
+                          {t('Automatically categorize transactions with machine learning')}
                         </p>
                       </div>
                     </div>
