@@ -51,10 +51,10 @@ export default function ProfilePage() {
       window.location.href = url;
     } catch (error: any) {
       console.error('Error creating customer portal session:', error);
-      const errorMessage = error?.message || t('Unknown error occurred');
+      const errorMessage = error?.message || t('profile.Unknown error occurred');
       toast({
-        title: t('Error'),
-        description: t('Failed to open subscription management: {{errorMessage}}', { errorMessage }),
+        title: t('profile.Error'),
+        description: t('profile.Failed to open subscription management: {{errorMessage}}', { errorMessage }),
         variant: "destructive",
       });
     } finally {
@@ -141,13 +141,13 @@ export default function ProfilePage() {
         <TabsContent value="notifications">
           <Card>
             <CardHeader>
-              <CardTitle>{t('Notification Settings')}</CardTitle>
+              <CardTitle>{t('profile.Notification Settings')}</CardTitle>
               <CardDescription>
-                {t('Manage your notification preferences')}
+                {t('profile.Manage your notification preferences')}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p>{t('Notification settings will be managed here.')}</p>
+              <p>{t('profile.Notification settings will be managed here.')}</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -158,11 +158,11 @@ export default function ProfilePage() {
             <CardHeader>
               <CardTitle>{t('profile.Preferences')}</CardTitle>
               <CardDescription>
-                {t('Customize your app preferences')}
+                {t('profile.Customize your app preferences')}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p>{t('App preferences will be managed here.')}</p>
+              <p>{t('profile.App preferences will be managed here.')}</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -171,9 +171,9 @@ export default function ProfilePage() {
         <TabsContent value="subscription">
           <Card>
             <CardHeader>
-              <CardTitle>{t('Subscription Management')}</CardTitle>
+              <CardTitle>{t('profile.Subscription Management')}</CardTitle>
               <CardDescription>
-                {t('Manage your subscription plan, billing, and payment methods')}
+                {t('profile.Manage your subscription plan, billing, and payment methods')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -183,51 +183,51 @@ export default function ProfilePage() {
               {/* Current Plan Status */}
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
-                  <h3 className="font-semibold text-lg">{t('Current Plan')}</h3>
+                  <h3 className="font-semibold text-lg">{t('profile.Current Plan')}</h3>
                   <p className="text-muted-foreground">
                     {t('You are currently on the {{plan}} plan', { plan: authUser.plan || 'Free' })}
                   </p>
                 </div>
                 <Badge variant="secondary" className="bg-premium text-premium-foreground">
-                  {t(authUser.plan || 'Free')}
+                  {t('profile.' + (authUser.plan || 'Free'))}
                 </Badge>
               </div>
 
               {/* Plan Features */}
               <div className="grid gap-4">
-                <h4 className="font-medium">{t('Plan Features')}</h4>
+                <h4 className="font-medium">{t('profile.Plan Features')}</h4>
                 {authUser.plan === 'free' && (
                   <div className="text-sm text-muted-foreground space-y-1">
-                    <p>{t('• Basic expense and income tracking')}</p>
-                    <p>{t('• Manual categorization')}</p>
-                    <p>{t('• Up to 100 transaction entries')}</p>
-                    <p>{t('• Simple financial overview')}</p>
-                    <p>{t('• Personalized financial tips')}</p>
+                    <p>{t('profile.• Basic expense and income tracking')}</p>
+                    <p>{t('profile.• Manual categorization')}</p>
+                    <p>{t('profile.• Up to 100 transaction entries')}</p>
+                    <p>{t('profile.• Simple financial overview')}</p>
+                    <p>{t('profile.• Personalized financial tips')}</p>
                   </div>
                 )}
                 {authUser.plan === 'standard' && (
                   <div className="text-sm text-muted-foreground space-y-1">
-                    <p>{t('• Everything in Free plan')}</p>
-                    <p>{t('• Goals and budget management')}</p>
-                    <p>{t('• Interactive charts and reports')}</p>
-                    <p>{t('• AI expense categorization')}</p>
-                    <p>{t('• Receipt OCR scanning')}</p>
-                    <p>{t('• Mobile QR code upload')}</p>
-                    <p>{t('• Calendar view and reminders')}</p>
-                    <p>{t('• Unlimited transaction history')}</p>
+                    <p>{t('profile.• Everything in Free plan')}</p>
+                    <p>{t('profile.• Goals and budget management')}</p>
+                    <p>{t('profile.• Interactive charts and reports')}</p>
+                    <p>{t('profile.• AI expense categorization')}</p>
+                    <p>{t('profile.• Receipt OCR scanning')}</p>
+                    <p>{t('profile.• Mobile QR code upload')}</p>
+                    <p>{t('profile.• Calendar view and reminders')}</p>
+                    <p>{t('profile.• Unlimited transaction history')}</p>
                   </div>
                 )}
                 {authUser.plan === 'premium' && (
                   <div className="text-sm text-muted-foreground space-y-1">
-                    <p>{t('• Everything in Standard plan')}</p>
-                    <p>{t('• AI financial tips and insights')}</p>
-                    <p>{t('• Advanced trends analysis')}</p>
-                    <p>{t('• Expense prediction')}</p>
-                    <p>{t('• Daily personalized recommendations')}</p>
-                    <p>{t('• Cloud receipt storage')}</p>
-                    <p>{t('• Cloud data backup')}</p>
-                    <p>{t('• Data management (CSV, PDF)')}</p>
-                    <p>{t('• Priority email support')}</p>
+                    <p>{t('profile.• Everything in Standard plan')}</p>
+                    <p>{t('profile.• AI financial tips and insights')}</p>
+                    <p>{t('profile.• Advanced trends analysis')}</p>
+                    <p>{t('profile.• Expense prediction')}</p>
+                    <p>{t('profile.• Daily personalized recommendations')}</p>
+                    <p>{t('profile.• Cloud receipt storage')}</p>
+                    <p>{t('profile.• Cloud data backup')}</p>
+                    <p>{t('profile.• Data management (CSV, PDF)')}</p>
+                    <p>{t('profile.• Priority email support')}</p>
                   </div>
                 )}
               </div>
@@ -235,7 +235,7 @@ export default function ProfilePage() {
               {/* Subscription Management Actions */}
               {authUser.plan !== 'free' && (
                 <div className="space-y-4">
-                  <h4 className="font-medium">{t('Subscription Management')}</h4>
+                  <h4 className="font-medium">{t('profile.Subscription Management')}</h4>
                   <div className="grid gap-3">
                     <Button
                       onClick={handleManageSubscription}
@@ -243,12 +243,12 @@ export default function ProfilePage() {
                       className="flex items-center gap-2"
                     >
                       <Settings className="h-4 w-4" />
-                      {isLoading ? t('Opening...') : t('Manage Subscription')}
+                      {isLoading ? t('profile.Opening...') : t('profile.Manage Subscription')}
                       <ExternalLink className="h-3 w-3" />
                     </Button>
                     <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg">
                       <p className="text-sm text-blue-700 dark:text-blue-300">
-                        <strong>{t('Note')}:</strong> {t('If you received premium access through admin upgrade or special promotion, you may not have a Stripe subscription to manage. Contact support if you need billing assistance.')}
+                        <strong>{t('profile.Note')}:</strong> {t('If you received premium access through admin upgrade or special promotion, you may not have a Stripe subscription to manage. Contact support if you need billing assistance.')}
                       </p>
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -268,14 +268,14 @@ export default function ProfilePage() {
               {/* Upgrade Options for Free Users */}
               {authUser.plan === 'free' && (
                 <div className="space-y-4">
-                  <h4 className="font-medium">{t('Upgrade Your Plan')}</h4>
+                  <h4 className="font-medium">{t('profile.Upgrade Your Plan')}</h4>
                   <div className="grid gap-3">
                     <Button
                       onClick={() => window.location.href = '/subscribe'}
                       className="flex items-center gap-2"
                     >
                       <CreditCard className="h-4 w-4" />
-                      {t('View Pricing Plans')}
+                      {t('profile.View Pricing Plans')}
                       <ExternalLink className="h-3 w-3" />
                     </Button>
                     <p className="text-xs text-muted-foreground">
