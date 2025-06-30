@@ -21,13 +21,14 @@ export default function Navigation() {
 
   const handleLogout = async () => {
     try {
-      // Clear user session data while preserving AI tips and theme
-      clearUserSession();
-      // Use default Clerk signOut with proper redirect
+      // Use Clerk signOut first
       await signOut({ redirectUrl: '/' });
+      // Clear session after successful signout
+      clearUserSession();
     } catch (error) {
       console.error('Logout error:', error);
-      // If signOut fails, still redirect to home
+      // If signOut fails, clear session and redirect
+      clearUserSession();
       window.location.href = '/';
     }
   };

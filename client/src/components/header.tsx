@@ -94,13 +94,14 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   
   const handleLogout = async () => {
     try {
-      // Clear user session data while preserving global preferences
-      clearUserSession();
-      // Use default Clerk signOut with proper redirect
+      // Use Clerk signOut first
       await signOut({ redirectUrl: '/' });
+      // Clear session after successful signout
+      clearUserSession();
     } catch (error) {
       console.error('Logout error:', error);
-      // If signOut fails, still redirect to home
+      // If signOut fails, clear session and redirect
+      clearUserSession();
       window.location.href = '/';
     }
   };

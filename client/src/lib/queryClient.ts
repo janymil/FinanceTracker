@@ -174,16 +174,7 @@ export function clearUserSession() {
     });
   }
   
-  // Clear query cache without forcing reload on auth, help, contact, and other public pages
-  const publicPages = ['/auth', '/help', '/contact', '/privacy-policy', '/terms-of-service', '/cookie-policy', '/pricing', '/'];
-  const isPublicPage = publicPages.some(page => 
-    window.location.pathname === page || 
-    window.location.pathname.startsWith('/auth')
-  );
-  
-  if (!isPublicPage) {
-    window.location.reload();
-  }
+  // Do not force reload after logout - let Clerk handle the redirect
 }
 
 // Security function to clear cache when user changes
