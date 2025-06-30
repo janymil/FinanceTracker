@@ -1979,16 +1979,9 @@ Provide an AI-powered financial health score that adapts to this user's specific
  */
 export async function parseBankStatement(text: string, language: string = 'en-us'): Promise<{ transactions: any[] }> {
   const languageLabel = getLanguageLabel(language);
-  const cacheKey = `bank_statement_parsing_${language}`;
 
   try {
-    // Check cache first
-    const cache = new UnifiedAICache('parseBankStatement', 'system');
-    const cached = await cache.get(cacheKey);
-    if (cached) {
-      console.log('Using cached bank statement parsing result');
-      return cached;
-    }
+    // SECURITY: Never cache bank statement data - process fresh every time
 
     const bankStatementPrompt = `You are an expert financial data extraction system specialized in bank statement analysis. 
 
@@ -2059,9 +2052,7 @@ Respond ONLY with valid JSON. No explanations or additional text.`;
         }))
       };
 
-      // Cache the result for 1 hour
-      await cache.set(cacheKey, formattedResult, false, 72);
-
+      // SECURITY: Never cache bank statement results - return immediately
       return formattedResult;
     }
 
