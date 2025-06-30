@@ -1128,12 +1128,12 @@ export default function Help() {
                       </div>
 
                       <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                        <h4 className="font-medium mb-2 text-yellow-800 dark:text-yellow-200">Troubleshooting</h4>
+                        <h4 className="font-medium mb-2 text-yellow-800 dark:text-yellow-200">{t('Troubleshooting')}</h4>
                         <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
-                          <li>• If OCR fails, manually enter transaction details</li>
-                          <li>• Poor image quality may affect extraction accuracy</li>
-                          <li>• Handwritten receipts work better when text is clear</li>
-                          <li>• Multiple items on one receipt create one transaction for the total</li>
+                          <li>• {t('If OCR fails, manually enter transaction details')}</li>
+                          <li>• {t('Poor image quality may affect extraction accuracy')}</li>
+                          <li>• {t('Handwritten receipts work better when text is clear')}</li>
+                          <li>• {t('Multiple items on one receipt create one transaction for the total')}</li>
                         </ul>
                       </div>
                     </div>
