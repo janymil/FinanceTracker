@@ -974,6 +974,33 @@
   "Mint, QuickBooks, YNAB, Personal Capital, bank exports": "Mint, QuickBooks, YNAB, Personal Capital, exportaciones bancarias",
   "Column mapping, data validation, preview before import, batch processing": "Mapeo de columnas, validación de datos, vista previa antes de importar, procesamiento por lotes",
 
+  "Profile and Settings": "Perfil y Configuración",
+  "Account Management": "Gestión de Cuenta",
+  "Profile page - Account tab": "Página de Perfil - Pestaña Cuenta",
+  "Manage personal information and security settings": "Gestionar información personal y configuraciones de seguridad",
+  "Clerk authentication, email updates, password changes, profile photos": "Autenticación Clerk, actualizaciones de email, cambios de contraseña, fotos de perfil",
+  "Subscription Management": "Gestión de Suscripción",
+  "Profile page - Subscription tab": "Página de Perfil - Pestaña Suscripción",
+  "View and modify subscription plans": "Ver y modificar planes de suscripción",
+  "Plan comparisons, upgrade/downgrade options, billing history, Stripe customer portal": "Comparaciones de planes, opciones de upgrade/downgrade, historial de facturación, portal de cliente Stripe",
+  "Notification Preferences": "Preferencias de Notificaciones",
+  "Profile page - Notifications tab": "Página de Perfil - Pestaña Notificaciones",
+  "Control alert and reminder settings": "Controlar configuraciones de alertas y recordatorios",
+  "Budget alerts, goal reminders, transaction notifications, email preferences": "Alertas de presupuesto, recordatorios de metas, notificaciones de transacciones, preferencias de email",
+  "Mobile Features": "Características Móviles",
+  "Responsive Design": "Diseño Responsivo",
+  "Full mobile optimization for all features": "Optimización móvil completa para todas las características",
+  "Touch-friendly interfaces, mobile navigation, responsive layouts, optimized forms": "Interfaces táctiles, navegación móvil, diseños responsivos, formularios optimizados",
+  "Mobile Camera Integration": "Integración de Cámara Móvil",
+  "Direct camera access for receipt scanning": "Acceso directo a cámara para escaneo de recibos",
+  "Camera capture, gallery selection, image preview, auto-focus optimization": "Captura de cámara, selección de galería, vista previa de imagen, optimización de auto-enfoque",
+  "QR Code Cross-Device Upload": "Subida QR de Dispositivo Cruzado",
+  "Scan receipts on mobile, process on desktop": "Escanear recibos en móvil, procesar en escritorio",
+  "QR code generation, anonymous mobile access, real-time polling, automatic form population": "Generación de código QR, acceso móvil anónimo, sondeo en tiempo real, población automática de formularios",
+
+  "Fields": "Campos",
+  "Validation": "Validación",
+
   "require_plan": {
     "compact": {
       "feature_title": "Función {{plan}}",

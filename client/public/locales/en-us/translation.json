@@ -897,6 +897,33 @@
   "Mint, QuickBooks, YNAB, Personal Capital, bank exports": "Mint, QuickBooks, YNAB, Personal Capital, bank exports",
   "Column mapping, data validation, preview before import, batch processing": "Column mapping, data validation, preview before import, batch processing",
 
+  "Profile and Settings": "Profile and Settings",
+  "Account Management": "Account Management",
+  "Profile page - Account tab": "Profile page - Account tab",
+  "Manage personal information and security settings": "Manage personal information and security settings",
+  "Clerk authentication, email updates, password changes, profile photos": "Clerk authentication, email updates, password changes, profile photos",
+  "Subscription Management": "Subscription Management",
+  "Profile page - Subscription tab": "Profile page - Subscription tab",
+  "View and modify subscription plans": "View and modify subscription plans",
+  "Plan comparisons, upgrade/downgrade options, billing history, Stripe customer portal": "Plan comparisons, upgrade/downgrade options, billing history, Stripe customer portal",
+  "Notification Preferences": "Notification Preferences",
+  "Profile page - Notifications tab": "Profile page - Notifications tab",
+  "Control alert and reminder settings": "Control alert and reminder settings",
+  "Budget alerts, goal reminders, transaction notifications, email preferences": "Budget alerts, goal reminders, transaction notifications, email preferences",
+  "Mobile Features": "Mobile Features",
+  "Responsive Design": "Responsive Design",
+  "Full mobile optimization for all features": "Full mobile optimization for all features",
+  "Touch-friendly interfaces, mobile navigation, responsive layouts, optimized forms": "Touch-friendly interfaces, mobile navigation, responsive layouts, optimized forms",
+  "Mobile Camera Integration": "Mobile Camera Integration",
+  "Direct camera access for receipt scanning": "Direct camera access for receipt scanning",
+  "Camera capture, gallery selection, image preview, auto-focus optimization": "Camera capture, gallery selection, image preview, auto-focus optimization",
+  "QR Code Cross-Device Upload": "QR Code Cross-Device Upload",
+  "Scan receipts on mobile, process on desktop": "Scan receipts on mobile, process on desktop",
+  "QR code generation, anonymous mobile access, real-time polling, automatic form population": "QR code generation, anonymous mobile access, real-time polling, automatic form population",
+
+  "Fields": "Fields",
+  "Validation": "Validation",
+
   "require_plan": {
     "compact": {
       "feature_title": "{{plan}} Feature",

@@ -983,6 +983,33 @@
   "Mint, QuickBooks, YNAB, Personal Capital, bank exports": "Mint, QuickBooks, YNAB, Personal Capital, bankové exporty",
   "Column mapping, data validation, preview before import, batch processing": "Mapovanie stĺpcov, validácia údajov, náhľad pred importom, dávkové spracovanie",
 
+  "Profile and Settings": "Profil a Nastavenia",
+  "Account Management": "Správa Účtu",
+  "Profile page - Account tab": "Stránka Profilu - Záložka Účet",
+  "Manage personal information and security settings": "Spravovať osobné informácie a bezpečnostné nastavenia",
+  "Clerk authentication, email updates, password changes, profile photos": "Clerk autentifikácia, aktualizácie emailu, zmeny hesla, profilové fotky",
+  "Subscription Management": "Správa Predplatného",
+  "Profile page - Subscription tab": "Stránka Profilu - Záložka Predplatné",
+  "View and modify subscription plans": "Zobrazovať a upravovať plány predplatného",
+  "Plan comparisons, upgrade/downgrade options, billing history, Stripe customer portal": "Porovnania plánov, možnosti upgrade/downgrade, história účtovania, Stripe zákaznícky portál",
+  "Notification Preferences": "Preferencie Notifikácií",
+  "Profile page - Notifications tab": "Stránka Profilu - Záložka Notifikácie",
+  "Control alert and reminder settings": "Ovládať nastavenia upozornení a pripomienok",
+  "Budget alerts, goal reminders, transaction notifications, email preferences": "Rozpočtové upozornenia, pripomienky cieľov, notifikácie transakcií, emailové preferencie",
+  "Mobile Features": "Mobilné Funkcie",
+  "Responsive Design": "Responzívny Dizajn",
+  "Full mobile optimization for all features": "Kompletná mobilná optimalizácia pre všetky funkcie",
+  "Touch-friendly interfaces, mobile navigation, responsive layouts, optimized forms": "Dotykovo prívetivé rozhrania, mobilná navigácia, responzívne rozloženia, optimalizované formuláre",
+  "Mobile Camera Integration": "Integrácia Mobilnej Kamery",
+  "Direct camera access for receipt scanning": "Priamy prístup ku kamere pre skenovanie účteniek",
+  "Camera capture, gallery selection, image preview, auto-focus optimization": "Zachytávanie kamerou, výber z galérie, náhľad obrázka, optimalizácia auto-fokusu",
+  "QR Code Cross-Device Upload": "QR Kód Nahrávanie Medzi Zariadeniami",
+  "Scan receipts on mobile, process on desktop": "Skenovať účtenky na mobile, spracovať na desktope",
+  "QR code generation, anonymous mobile access, real-time polling, automatic form population": "Generovanie QR kódu, anonymný mobilný prístup, real-time polling, automatické vyplňovanie formulárov",
+
+  "Fields": "Polia",
+  "Validation": "Validácia",
+
   "require_plan": {
     "compact": {
       "feature_title": "{{plan}} Funkcia",

@@ -947,33 +947,33 @@ export default function Help() {
                       <div className="border-l-4 border-teal-500 pl-4">
                         <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
                           <Users className="h-5 w-5" />
-                          Profile and Settings
+                          {t('Profile and Settings')}
                         </h4>
                         <div className="space-y-4">
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Account Management</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Account Management')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Profile page - Account tab<br/>
-                              <strong>Function:</strong> Manage personal information and security settings<br/>
-                              <strong>Features:</strong> Clerk authentication, email updates, password changes, profile photos
+                              <strong>{t('Location')}:</strong> {t('Profile page - Account tab')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Manage personal information and security settings')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Clerk authentication, email updates, password changes, profile photos')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Subscription Management</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Subscription Management')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Profile page - Subscription tab<br/>
-                              <strong>Function:</strong> View and modify subscription plans<br/>
-                              <strong>Features:</strong> Plan comparisons, upgrade/downgrade options, billing history, Stripe customer portal
+                              <strong>{t('Location')}:</strong> {t('Profile page - Subscription tab')}<br/>
+                              <strong>{t('Function')}:</strong> {t('View and modify subscription plans')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Plan comparisons, upgrade/downgrade options, billing history, Stripe customer portal')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Notification Preferences</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Notification Preferences')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Profile page - Notifications tab<br/>
-                              <strong>Function:</strong> Control alert and reminder settings<br/>
-                              <strong>Features:</strong> Budget alerts, goal reminders, transaction notifications, email preferences
+                              <strong>{t('Location')}:</strong> {t('Profile page - Notifications tab')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Control alert and reminder settings')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Budget alerts, goal reminders, transaction notifications, email preferences')}
                             </p>
                           </div>
                         </div>
@@ -983,30 +983,30 @@ export default function Help() {
                       <div className="border-l-4 border-pink-500 pl-4">
                         <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
                           <Camera className="h-5 w-5" />
-                          Mobile Features
+                          {t('Mobile Features')}
                         </h4>
                         <div className="space-y-4">
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Responsive Design</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Responsive Design')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Function:</strong> Full mobile optimization for all features<br/>
-                              <strong>Features:</strong> Touch-friendly interfaces, mobile navigation, responsive layouts, optimized forms
+                              <strong>{t('Function')}:</strong> {t('Full mobile optimization for all features')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Touch-friendly interfaces, mobile navigation, responsive layouts, optimized forms')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Mobile Camera Integration</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Mobile Camera Integration')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Function:</strong> Direct camera access for receipt scanning<br/>
-                              <strong>Features:</strong> Camera capture, gallery selection, image preview, auto-focus optimization
+                              <strong>{t('Function')}:</strong> {t('Direct camera access for receipt scanning')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Camera capture, gallery selection, image preview, auto-focus optimization')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">QR Code Cross-Device Upload</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('QR Code Cross-Device Upload')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Function:</strong> Scan receipts on mobile, process on desktop<br/>
-                              <strong>Features:</strong> QR code generation, anonymous mobile access, real-time polling, automatic form population
+                              <strong>{t('Function')}:</strong> {t('Scan receipts on mobile, process on desktop')}<br/>
+                              <strong>{t('Features')}:</strong> {t('QR code generation, anonymous mobile access, real-time polling, automatic form population')}
                             </p>
                           </div>
                         </div>
@@ -1019,114 +1019,111 @@ export default function Help() {
                   <div>
                     <h3 className="font-semibold mb-4 flex items-center gap-2">
                       <Camera className="h-5 w-5" />
-                      Receipt OCR Scanning (Standard+)
+                      {t('Receipt OCR Scanning (Standard+)')}
                     </h3>
                     <div className="space-y-4">
                       <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
                         <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                          Available for Standard and Premium subscribers
+                          {t('Available for Standard and Premium subscribers')}
                         </p>
                       </div>
 
                       <div>
-                        <h4 className="font-medium mb-2">How to Scan Receipts</h4>
+                        <h4 className="font-medium mb-2">{t('How to Scan Receipts')}</h4>
                         
                         <div className="mb-4">
-                          <h5 className="font-medium text-sm mb-2 text-blue-600 dark:text-blue-400">Desktop/Web Upload:</h5>
+                          <h5 className="font-medium text-sm mb-2 text-blue-600 dark:text-blue-400">{t('Desktop/Web Upload')}:</h5>
                           <ol className="text-sm text-gray-600 dark:text-gray-300 space-y-2 ml-4">
                             <li className="flex gap-2">
                               <span className="font-medium text-primary">1.</span>
-                              Navigate to Expenses, Income, or Transactions page
+                              {t('Navigate to Expenses, Income, or Transactions page')}
                             </li>
                             <li className="flex gap-2">
                               <span className="font-medium text-primary">2.</span>
-                              Click the "Upload Image" button next to "Add Transaction"
+                              {t('Click the "Upload Image" button next to "Add Transaction"')}
                             </li>
                             <li className="flex gap-2">
                               <span className="font-medium text-primary">3.</span>
-                              Choose "Take Photo" (mobile camera) or "Choose from Gallery"
+                              {t('Choose "Take Photo" (mobile camera) or "Choose from Gallery"')}
                             </li>
                             <li className="flex gap-2">
                               <span className="font-medium text-primary">4.</span>
-                              Select or capture a clear image of your receipt
+                              {t('Select or capture a clear image of your receipt')}
                             </li>
                             <li className="flex gap-2">
                               <span className="font-medium text-primary">5.</span>
-                              Wait for OCR processing - extracted data will appear automatically
+                              {t('Wait for OCR processing - extracted data will appear automatically')}
                             </li>
                           </ol>
                         </div>
 
                         <div>
-                          <h5 className="font-medium text-sm mb-2 text-green-600 dark:text-green-400">Mobile QR Code Upload:</h5>
+                          <h5 className="font-medium text-sm mb-2 text-green-600 dark:text-green-400">{t('Mobile QR Code Upload')}:</h5>
                           <ol className="text-sm text-gray-600 dark:text-gray-300 space-y-2 ml-4">
                             <li className="flex gap-2">
                               <span className="font-medium text-primary">1.</span>
-                              From your computer, click "Upload Image" and select "Scan with Phone"
+                              {t('From your computer, click "Upload Image" and select "Scan with Phone"')}
                             </li>
                             <li className="flex gap-2">
                               <span className="font-medium text-primary">2.</span>
-                              A QR code will appear on your screen
+                              {t('A QR code will appear on your screen')}
                             </li>
                             <li className="flex gap-2">
                               <span className="font-medium text-primary">3.</span>
-                              Use your phone's camera to scan the QR code
+                              {t('Use your phone\'s camera to scan the QR code')}
                             </li>
                             <li className="flex gap-2">
                               <span className="font-medium text-primary">4.</span>
-                              Take a photo of your receipt using your phone
+                              {t('Take a photo of your receipt using your phone')}
                             </li>
                             <li className="flex gap-2">
                               <span className="font-medium text-primary">5.</span>
-                              Data automatically appears in your computer's transaction form
+                              {t('Data automatically appears in your computer\'s transaction form')}
                             </li>
                           </ol>
                         </div>
                       </div>
 
                       <div>
-                        <h4 className="font-medium mb-2">What Gets Extracted</h4>
+                        <h4 className="font-medium mb-2">{t('What Gets Extracted')}</h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <div className="p-3 border rounded-lg">
-                            <h5 className="font-medium text-sm">Merchant Name</h5>
-                            <p className="text-xs text-gray-600 dark:text-gray-300">Store or restaurant name</p>
+                            <h5 className="font-medium text-sm">{t('Merchant Name')}</h5>
+                            <p className="text-xs text-gray-600 dark:text-gray-300">{t('Store or restaurant name')}</p>
                           </div>
                           <div className="p-3 border rounded-lg">
-                            <h5 className="font-medium text-sm">Total Amount</h5>
-                            <p className="text-xs text-gray-600 dark:text-gray-300">Final transaction amount</p>
+                            <h5 className="font-medium text-sm">{t('Total Amount')}</h5>
+                            <p className="text-xs text-gray-600 dark:text-gray-300">{t('Final transaction amount')}</p>
                           </div>
                           <div className="p-3 border rounded-lg">
-                            <h5 className="font-medium text-sm">Date</h5>
-                            <p className="text-xs text-gray-600 dark:text-gray-300">Transaction date</p>
+                            <h5 className="font-medium text-sm">{t('Date')}</h5>
+                            <p className="text-xs text-gray-600 dark:text-gray-300">{t('Transaction date')}</p>
                           </div>
                         </div>
                       </div>
 
                       <div>
-                        <h4 className="font-medium mb-2">AI Category Suggestions</h4>
+                        <h4 className="font-medium mb-2">{t('AI Category Suggestions')}</h4>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                          For Standard+ users, our AI analyzes the merchant name and suggests the most 
-                          appropriate expense category. You can accept the suggestion or choose a different category.
+                          {t('For Standard+ users, our AI analyzes the merchant name and suggests the most appropriate expense category. You can accept the suggestion or choose a different category.')}
                         </p>
                       </div>
 
                       <div>
-                        <h4 className="font-medium mb-2">Best Practices for Scanning</h4>
+                        <h4 className="font-medium mb-2">{t('Best Practices for Scanning')}</h4>
                         <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 ml-4">
-                          <li>• Ensure good lighting when taking photos</li>
-                          <li>• Keep the receipt flat and avoid shadows</li>
-                          <li>• Capture the entire receipt including headers and totals</li>
-                          <li>• Use clear, uncrumpled receipts for best results</li>
-                          <li>• Check extracted data before saving the transaction</li>
+                          <li>• {t('Ensure good lighting when taking photos')}</li>
+                          <li>• {t('Keep the receipt flat and avoid shadows')}</li>
+                          <li>• {t('Capture the entire receipt including headers and totals')}</li>
+                          <li>• {t('Use clear, uncrumpled receipts for best results')}</li>
+                          <li>• {t('Check extracted data before saving the transaction')}</li>
                         </ul>
                       </div>
 
                       <div>
-                        <h4 className="font-medium mb-2">Editing Extracted Data</h4>
+                        <h4 className="font-medium mb-2">{t('Editing Extracted Data')}</h4>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                          All extracted information appears in editable form fields. You can modify any 
-                          details before saving the transaction. The original receipt image is stored and 
-                          can be viewed later by clicking on receipt thumbnails in transaction lists.
+                          {t('All extracted information appears in editable form fields. You can modify any details before saving the transaction. The original receipt image is stored and can be viewed later by clicking on receipt thumbnails in transaction lists.')}
                         </p>
                       </div>
 
