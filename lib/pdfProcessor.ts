@@ -29,6 +29,29 @@ export interface PDFProcessingResult {
   confidence: number; // overall confidence score
   securityLog: SecurityEvent[]; // Security audit trail
   duplicates?: DuplicateDetection[]; // Potential duplicate transactions
+  anonymizationPreview?: AnonymizationPreviewData; // Preview data for user confirmation
+}
+
+export interface AnonymizationPreviewData {
+  originalText: string;
+  anonymizedText: string;
+  securityLog: SecurityEvent[];
+  detectedSensitiveData: SensitiveDataDetection[];
+  processingStats: ProcessingStats;
+}
+
+export interface SensitiveDataDetection {
+  type: 'name' | 'account' | 'ssn' | 'email' | 'phone' | 'address' | 'balance';
+  count: number;
+  examples: string[];
+  redactionPattern: string;
+}
+
+export interface ProcessingStats {
+  originalLength: number;
+  anonymizedLength: number;
+  redactionCount: number;
+  safetyScore: number; // 0-100
 }
 
 export interface DuplicateDetection {
@@ -66,45 +89,104 @@ class PDFSecurityManager {
     });
   }
 
-  static sanitizeExtractedText(text: string, securityLog: SecurityEvent[]): string {
+  static sanitizeExtractedText(
+    text: string, 
+    securityLog: SecurityEvent[]
+  ): { sanitized: string; detectedData: SensitiveDataDetection[] } {
     PDFSecurityManager.logSecurityEvent(securityLog, 'text_sanitization_start', 'success');
     
-    // COMPREHENSIVE anonymization for AI processing
     let sanitized = text;
+    const detectedData: SensitiveDataDetection[] = [];
     
-    // Remove personal names (common patterns)
-    sanitized = sanitized.replace(/\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/g, '[NAME_REDACTED]');
+    // Track personal names
+    const nameMatches = text.match(/\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/g) || [];
+    if (nameMatches.length > 0) {
+      detectedData.push({
+        type: 'name',
+        count: nameMatches.length,
+        examples: nameMatches.slice(0, 3),
+        redactionPattern: '[NAME_REDACTED]'
+      });
+      sanitized = sanitized.replace(/\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/g, '[NAME_REDACTED]');
+    }
     
-    // Remove social security numbers (xxx-xx-xxxx)
-    sanitized = sanitized.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[SSN_REDACTED]');
+    // Track SSN numbers
+    const ssnMatches = text.match(/\b\d{3}-\d{2}-\d{4}\b/g) || [];
+    if (ssnMatches.length > 0) {
+      detectedData.push({
+        type: 'ssn',
+        count: ssnMatches.length,
+        examples: ssnMatches.slice(0, 2),
+        redactionPattern: '[SSN_REDACTED]'
+      });
+      sanitized = sanitized.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[SSN_REDACTED]');
+    }
     
-    // Remove full credit card numbers (keep last 4 for reference)
-    sanitized = sanitized.replace(/\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g, (match) => {
-      const last4 = match.slice(-4);
-      return `****-****-****-${last4}`;
-    });
+    // Track account numbers
+    const accountMatches = text.match(/\b\d{8,20}\b/g) || [];
+    if (accountMatches.length > 0) {
+      detectedData.push({
+        type: 'account',
+        count: accountMatches.length,
+        examples: accountMatches.slice(0, 3).map(acc => `****${acc.slice(-4)}`),
+        redactionPattern: '[ACCOUNT_REDACTED]'
+      });
+      sanitized = sanitized.replace(/\b\d{8,20}\b/g, '[ACCOUNT_REDACTED]');
+    }
     
-    // Remove account numbers (8+ consecutive digits)
-    sanitized = sanitized.replace(/\b\d{8,20}\b/g, '[ACCOUNT_REDACTED]');
+    // Track email addresses
+    const emailMatches = text.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g) || [];
+    if (emailMatches.length > 0) {
+      detectedData.push({
+        type: 'email',
+        count: emailMatches.length,
+        examples: emailMatches.slice(0, 2),
+        redactionPattern: '[EMAIL_REDACTED]'
+      });
+      sanitized = sanitized.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL_REDACTED]');
+    }
     
-    // Remove routing numbers in isolation (9 digits starting with 0,1,2,3)
-    sanitized = sanitized.replace(/\b[0-3]\d{8}\b/g, '[ROUTING_REDACTED]');
+    // Track phone numbers
+    const phoneMatches = text.match(/\b(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}\b/g) || [];
+    if (phoneMatches.length > 0) {
+      detectedData.push({
+        type: 'phone',
+        count: phoneMatches.length,
+        examples: phoneMatches.slice(0, 2),
+        redactionPattern: '[PHONE_REDACTED]'
+      });
+      sanitized = sanitized.replace(/\b(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}\b/g, '[PHONE_REDACTED]');
+    }
     
-    // Remove email addresses
-    sanitized = sanitized.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL_REDACTED]');
+    // Track addresses
+    const addressMatches = text.match(/\b\d+\s+[A-Z][a-z]+(\s+[A-Z][a-z]+)*\s+(St|Street|Ave|Avenue|Rd|Road|Dr|Drive|Blvd|Boulevard|Ln|Lane|Way|Ct|Court)\b/gi) || [];
+    if (addressMatches.length > 0) {
+      detectedData.push({
+        type: 'address',
+        count: addressMatches.length,
+        examples: addressMatches.slice(0, 2),
+        redactionPattern: '[ADDRESS_REDACTED]'
+      });
+      sanitized = sanitized.replace(/\b\d+\s+[A-Z][a-z]+(\s+[A-Z][a-z]+)*\s+(St|Street|Ave|Avenue|Rd|Road|Dr|Drive|Blvd|Boulevard|Ln|Lane|Way|Ct|Court)\b/gi, '[ADDRESS_REDACTED]');
+    }
     
-    // Remove phone numbers
-    sanitized = sanitized.replace(/\b(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}\b/g, '[PHONE_REDACTED]');
+    // Track balance/total lines
+    const balanceMatches = [...(text.match(/^.*balance.*$/gmi) || []), ...(text.match(/^.*total.*$/gmi) || [])];
+    if (balanceMatches.length > 0) {
+      detectedData.push({
+        type: 'balance',
+        count: balanceMatches.length,
+        examples: balanceMatches.slice(0, 2),
+        redactionPattern: '[BALANCE_REDACTED]'
+      });
+      sanitized = sanitized.replace(/^.*balance.*$/gmi, '[BALANCE_REDACTED]');
+      sanitized = sanitized.replace(/^.*total.*$/gmi, '[TOTAL_REDACTED]');
+    }
     
-    // Remove addresses (street numbers + street names)
-    sanitized = sanitized.replace(/\b\d+\s+[A-Z][a-z]+(\s+[A-Z][a-z]+)*\s+(St|Street|Ave|Avenue|Rd|Road|Dr|Drive|Blvd|Boulevard|Ln|Lane|Way|Ct|Court)\b/gi, '[ADDRESS_REDACTED]');
+    PDFSecurityManager.logSecurityEvent(securityLog, 'text_sanitization_complete', 'success', 
+      `Anonymized ${text.length} chars, found ${detectedData.reduce((sum, d) => sum + d.count, 0)} sensitive items`);
     
-    // Remove balance information lines (preserves transaction data)
-    sanitized = sanitized.replace(/^.*balance.*$/gmi, '[BALANCE_REDACTED]');
-    sanitized = sanitized.replace(/^.*total.*$/gmi, '[TOTAL_REDACTED]');
-    
-    PDFSecurityManager.logSecurityEvent(securityLog, 'text_sanitization_complete', 'success', `Anonymized ${text.length} chars`);
-    return sanitized;
+    return { sanitized, detectedData };
   }
 
   static encryptSensitiveData(transaction: ExtractedTransaction, securityLog: SecurityEvent[]): ExtractedTransaction {
@@ -225,8 +307,27 @@ export async function processBankStatementPDF(
 
     console.log(`PDF text extraction: ${extractedText.length} characters, quality: ${textQuality}`);
 
-    // Step 1.5: Sanitize extracted text for security
-    extractedText = PDFSecurityManager.sanitizeExtractedText(extractedText, result.securityLog);
+    // Step 1.5: Sanitize extracted text for security and create preview data
+    const originalText = extractedText; // Store original for preview
+    const sanitizationResult = PDFSecurityManager.sanitizeExtractedText(extractedText, result.securityLog);
+    extractedText = sanitizationResult.sanitized;
+
+    // Create anonymization preview data
+    const totalRedactions = sanitizationResult.detectedData.reduce((sum, d) => sum + d.count, 0);
+    const safetyScore = calculateSafetyScore(sanitizationResult.detectedData, originalText.length);
+    
+    result.anonymizationPreview = {
+      originalText,
+      anonymizedText: extractedText,
+      securityLog: [...result.securityLog],
+      detectedSensitiveData: sanitizationResult.detectedData,
+      processingStats: {
+        originalLength: originalText.length,
+        anonymizedLength: extractedText.length,
+        redactionCount: totalRedactions,
+        safetyScore
+      }
+    };
 
     // Step 2: If text quality is poor, use OCR fallback
     if (textQuality < 0.5) {
@@ -279,6 +380,94 @@ export async function processBankStatementPDF(
   }
 
   return result;
+}
+
+/**
+ * Generate anonymization preview without AI processing
+ * Shows users exactly what data would be sent to AI
+ */
+export async function generateAnonymizationPreview(
+  pdfBuffer: Buffer,
+  language: string = 'en-us'
+): Promise<AnonymizationPreviewData | null> {
+  const securityLog: SecurityEvent[] = [];
+  
+  try {
+    // Step 0: Security validation
+    if (!PDFSecurityManager.validatePDFSecurity(pdfBuffer, securityLog)) {
+      throw new Error('PDF failed security validation');
+    }
+
+    // Step 1: Extract text from PDF
+    const { default: pdf } = await import('pdf-parse');
+    const pdfData = await pdf(pdfBuffer);
+    const originalText = pdfData.text;
+
+    if (!originalText || originalText.trim().length === 0) {
+      throw new Error('No readable text found in PDF');
+    }
+
+    // Step 2: Generate anonymization preview
+    const sanitizationResult = PDFSecurityManager.sanitizeExtractedText(originalText, securityLog);
+    const totalRedactions = sanitizationResult.detectedData.reduce((sum, d) => sum + d.count, 0);
+    const safetyScore = calculateSafetyScore(sanitizationResult.detectedData, originalText.length);
+
+    return {
+      originalText,
+      anonymizedText: sanitizationResult.sanitized,
+      securityLog,
+      detectedSensitiveData: sanitizationResult.detectedData,
+      processingStats: {
+        originalLength: originalText.length,
+        anonymizedLength: sanitizationResult.sanitized.length,
+        redactionCount: totalRedactions,
+        safetyScore
+      }
+    };
+
+  } catch (error) {
+    console.error('Preview generation error:', error);
+    return null;
+  }
+}
+
+/**
+ * Calculate safety score based on detected sensitive data
+ */
+function calculateSafetyScore(detectedData: SensitiveDataDetection[], originalLength: number): number {
+  const totalSensitiveItems = detectedData.reduce((sum, d) => sum + d.count, 0);
+  
+  // Base score starts at 100%
+  let score = 100;
+  
+  // Penalize based on sensitive data density
+  const sensitivityRatio = totalSensitiveItems / (originalLength / 100); // items per 100 chars
+  
+  // Heavy penalties for high-risk data
+  const riskPenalties = {
+    'ssn': 20,      // SSN is highest risk
+    'account': 15,  // Account numbers are high risk
+    'name': 10,     // Names are medium risk
+    'email': 8,     // Email addresses are medium risk
+    'phone': 8,     // Phone numbers are medium risk
+    'address': 12,  // Addresses are medium-high risk
+    'balance': 5    // Balance info is low-medium risk
+  };
+  
+  detectedData.forEach(detection => {
+    const penalty = (riskPenalties[detection.type] || 5) * detection.count;
+    score -= penalty;
+  });
+  
+  // Additional penalty for high density of sensitive data
+  if (sensitivityRatio > 5) {
+    score -= 20; // High density penalty
+  } else if (sensitivityRatio > 2) {
+    score -= 10; // Medium density penalty
+  }
+  
+  // Ensure score stays within 0-100 range
+  return Math.max(0, Math.min(100, score));
 }
 
 /**
