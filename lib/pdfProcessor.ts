@@ -10,6 +10,23 @@ import { DataEncryption } from '../server/encryption';
 import { runAI } from './aiProcessor';
 import crypto from 'crypto';
 
+// Import pdf-parse at top level to avoid module resolution issues
+let pdfParse: any = null;
+
+// PDF Parser function
+async function getPdfParser() {
+  if (!pdfParse) {
+    try {
+      const module = await import('pdf-parse');
+      pdfParse = module.default || module;
+    } catch (error) {
+      console.error('Failed to import pdf-parse:', error);
+      throw new Error('PDF parsing library not available');
+    }
+  }
+  return pdfParse;
+}
+
 export interface ExtractedTransaction {
   date: string; // YYYY-MM-DD format
   description: string;
@@ -298,8 +315,8 @@ export async function processBankStatementPDF(
     }
 
     // Step 1: Try PDF text extraction first
-    const pdfParse = (await import('pdf-parse')).default;
-    const pdfData = await pdfParse(pdfBuffer);
+    const pdf = await getPdfParser();
+    const pdfData = await pdf(pdfBuffer);
     result.totalPages = pdfData.numpages;
 
     let extractedText = pdfData.text;
