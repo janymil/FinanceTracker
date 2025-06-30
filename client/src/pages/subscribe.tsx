@@ -6,11 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, Crown, Check, ArrowLeft, CreditCard } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 export default function Subscribe() {
   const [, setLocation] = useLocation();
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   // Get user's current plan and billing interval
   const userPlan = user && 'plan' in user && user.plan ? user.plan : 'free';
@@ -26,9 +28,9 @@ export default function Subscribe() {
 
   const getButtonText = (plan: string, interval: 'monthly' | 'yearly') => {
     if (isCurrentPlan(plan, interval)) {
-      return 'This is your plan';
+      return t('subscribe.current_plan');
     }
-    return 'Subscribe Now';
+    return t('subscribe.subscribe_now');
   };
 
   const handleSubscribe = async (plan: string, interval: 'month' | 'year' = 'month') => {
@@ -88,31 +90,31 @@ export default function Subscribe() {
 
   const plans = {
     standard: {
-      name: 'Standard',
+      name: t('plans.standard'),
       monthly: 4.99,
       yearly: 49.90,
       features: [
-        'Everything in Free plan',
-        'Goals and budget management',
-        'Interactive charts and reports',
-        'AI expense categorization',
-        'Calendar view and reminders',
-        'Unlimited transaction history'
+        t('subscribe.plans.standard.features.0'),
+        t('subscribe.plans.standard.features.1'),
+        t('subscribe.plans.standard.features.2'),
+        t('subscribe.plans.standard.features.3'),
+        t('subscribe.plans.standard.features.4'),
+        t('subscribe.plans.standard.features.5')
       ]
     },
     premium: {
-      name: 'Premium',
+      name: t('plans.premium'),
       monthly: 9.99,
       yearly: 99.90,
       features: [
-        'Everything in Standard plan',
-        'AI financial tips and insights',
-        'Advanced trends analysis',
-        'Expense prediction',
-        'Daily personalized recommendations',
-        'Cloud data backup',
-        'Data management (CSV, PDF)',
-        'Priority email support'
+        t('subscribe.plans.premium.features.0'),
+        t('subscribe.plans.premium.features.1'),
+        t('subscribe.plans.premium.features.2'),
+        t('subscribe.plans.premium.features.3'),
+        t('subscribe.plans.premium.features.4'),
+        t('subscribe.plans.premium.features.5'),
+        t('subscribe.plans.premium.features.6'),
+        t('subscribe.plans.premium.features.7')
       ]
     }
   };
@@ -129,22 +131,22 @@ export default function Subscribe() {
               className="mb-4"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
+              {t('subscribe.back_to_home')}
             </Button>
-            <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
+            <h1 className="text-4xl font-bold mb-4">{t('subscribe.title')}</h1>
             <p className="text-gray-600 dark:text-gray-300">
-              Unlock powerful financial management features with your subscription
+              {t('subscribe.subtitle')}
             </p>
           </div>
 
           {/* Billing Toggle */}
           <Tabs defaultValue="monthly" className="w-full">
             <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
-              <TabsTrigger value="monthly">Monthly</TabsTrigger>
+              <TabsTrigger value="monthly">{t('subscribe.billing.monthly')}</TabsTrigger>
               <TabsTrigger value="yearly">
-                Yearly 
+                {t('subscribe.billing.yearly')}
                 <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800">
-                  Save 17%
+                  {t('subscribe.billing.save_percentage')}
                 </Badge>
               </TabsTrigger>
             </TabsList>
@@ -197,7 +199,7 @@ export default function Subscribe() {
                       ) : (
                         <>
                           <CreditCard className="h-5 w-5 mr-2" />
-                          {loading ? 'Processing...' : `Subscribe for $${plans.standard.monthly}/month`}
+                          {loading ? t('subscribe.processing') : t('subscribe.subscribe_for_month', { price: plans.standard.monthly })}
                         </>
                       )}
                     </Button>
