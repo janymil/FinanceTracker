@@ -28,7 +28,7 @@ Once uploaded, the system initiates a multi-stage processing pipeline:
 
 1. **Document Validation**: The system verifies PDF integrity and confirms the file contains financial data
 2. **Text Extraction**: Advanced PDF parsing technology extracts all textual content from the document
-3. **OCR Fallback**: For image-based or scanned statements, Optical Character Recognition (OCR) technology powered by Google Cloud Vision ensures complete data capture
+3. **Privacy-First OCR Fallback**: For image-based or scanned statements, advanced local Optical Character Recognition (OCR) technology powered by Tesseract.js ensures complete data capture while maintaining absolute privacy—all processing occurs locally without external data transmission
 4. **Transaction Recognition**: Natural Language Processing algorithms identify individual transactions, amounts, dates, and merchant information
 5. **Smart Categorization**: AI-powered categorization automatically assigns transactions to appropriate expense categories based on merchant names and transaction patterns
 6. **Duplicate Detection**: The system compares extracted transactions against existing records to prevent duplicate entries
@@ -47,7 +47,7 @@ FinanzerPro's PDF import feature is built on a robust, scalable architecture des
 The system employs multiple specialized technologies working in concert:
 
 - **PDF Processing Engine**: Advanced PDF parsing libraries handle various document formats and structures
-- **Google Cloud Vision API**: Industry-leading OCR technology for image-based content extraction
+- **Local OCR Processing Engine**: Privacy-first Tesseract.js technology for secure image-based content extraction without external data transmission
 - **OpenAI GPT-4o Integration**: Sophisticated AI models for transaction categorization and financial data interpretation
 - **PostgreSQL Database**: Enterprise-grade data storage with encryption and backup capabilities
 - **Node.js/Express Backend**: High-performance server infrastructure with TypeScript for type safety
@@ -104,7 +104,9 @@ FinanzerPro's PDF import feature adheres to stringent regulatory requirements an
 ### **Privacy Protections**
 - **Data Minimization**: Only necessary financial data is extracted and stored
 - **User Consent**: Explicit consent mechanisms for data processing and AI analysis
-- **Anonymization**: AI processing uses anonymized data to protect user identity
+- **Local Processing First**: Bank statements are processed locally using Tesseract.js OCR without external data transmission
+- **Comprehensive Anonymization**: AI processing uses fully anonymized data with all personal identifiers removed (names, account numbers, addresses, phone numbers)
+- **Privacy-First Architecture**: Original sensitive data never leaves the user's device during OCR processing
 - **Retention Policies**: Clear data retention schedules with automatic deletion of expired information
 
 ### **Transparency Measures**
