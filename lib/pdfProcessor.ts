@@ -932,39 +932,29 @@ async function performOCROnPDF(pdfBuffer: Buffer): Promise<string> {
  */
 async function addAICategorization(
   transactions: ExtractedTransaction[],
-  language: string
+  language: string,
+  userId: string
 ): Promise<ExtractedTransaction[]> {
   try {
-    // Use centralized AI system for categorization
+    // For now, use the enhanced basic categorization
+    // TODO: Implement user-specific categorization logic
     const categorizedTransactions = await Promise.all(
       transactions.map(async (transaction) => {
         try {
           if (transaction.description && transaction.amount !== 0) {
-            const result = await runAI('categorizeExpense', 'system', {
-              description: transaction.description,
-              amount: Math.abs(transaction.amount),
-              language: language
-            });
-            
-            transaction.category = result.category || 'Other';
-            console.log(`AI Categorized "${transaction.description}" as "${result.category || 'Other'}"`);
-          }
-        } catch (error) {
-          console.error(`Failed to categorize transaction: ${transaction.description}`, error);
-          // Fallback to local categorization
-          try {
             const { categorizeExpense } = await import('../server/openai');
             const categorization = await categorizeExpense(
               transaction.description,
               Math.abs(transaction.amount),
               language
             );
+            
             transaction.category = categorization.category;
-            console.log(`Local Categorized "${transaction.description}" as "${categorization.category}"`);
-          } catch (fallbackError) {
-            console.error(`Local categorization also failed for: ${transaction.description}`, fallbackError);
-            transaction.category = 'Other';
+            console.log(`AI Categorized "${transaction.description}" as "${categorization.category}"`);
           }
+        } catch (error) {
+          console.error(`Failed to categorize transaction: ${transaction.description}`, error);
+          transaction.category = 'Other';
         }
         
         return transaction;
@@ -1006,7 +996,7 @@ async function parseTransactionsWithAI(
       }));
 
       // Add AI categorization for each transaction
-      return await addAICategorization(parsedTransactions, language);
+      return await addAICategorization(parsedTransactions, language, 'system'); // TODO: Pass actual user ID
     }
 
     return [];
