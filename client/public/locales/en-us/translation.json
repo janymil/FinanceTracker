@@ -1394,6 +1394,22 @@
     "failed_to_delete": "Failed to delete reminder"
   },
 
+  "categories": {
+    "category_created": "Category Created",
+    "category_added_successfully": "New category has been added successfully"
+  },
+
+  "colors": {
+    "blue": "Blue",
+    "green": "Green",
+    "purple": "Purple",
+    "red": "Red",
+    "orange": "Orange",
+    "pink": "Pink", 
+    "indigo": "Indigo",
+    "teal": "Teal"
+  },
+
   "types": {
     "expense": "expense",
     "income": "income",

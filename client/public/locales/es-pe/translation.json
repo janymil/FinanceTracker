@@ -1471,6 +1471,22 @@
     "failed_to_delete": "Error al eliminar recordatorio"
   },
 
+  "categories": {
+    "category_created": "Categoría Creada",
+    "category_added_successfully": "Nueva categoría agregada exitosamente"
+  },
+
+  "colors": {
+    "blue": "Azul",
+    "green": "Verde",
+    "purple": "Morado",
+    "red": "Rojo",
+    "orange": "Naranja",
+    "pink": "Rosa",
+    "indigo": "Índigo",
+    "teal": "Verde Azulado"
+  },
+
   "types": {
     "expense": "gasto",
     "income": "ingreso",

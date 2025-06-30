@@ -152,8 +152,8 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
     } catch (error) {
       console.error('Failed to generate QR code:', error);
       toast({
-        title: "QR Code Error",
-        description: "Failed to generate QR code",
+        title: t("upload.qr_code_error"),
+        description: t("upload.failed_to_generate_qr"),
         variant: "destructive"
       });
     }
@@ -186,8 +186,8 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
             clearInterval(pollInterval);
             setQrUploadState(prev => ({ ...prev, isPolling: false, status: 'error' }));
             toast({
-              title: "Upload Error",
-              description: result.error || "Failed to process mobile upload",
+              title: t("upload.upload_error"),
+              description: result.error || t("upload.failed_to_process_mobile"),
               variant: "destructive"
             });
           }

@@ -1527,6 +1527,22 @@
     "failed_to_delete": "Nepodarilo sa odstrániť pripomienku"
   },
 
+  "categories": {
+    "category_created": "Kategória Vytvorená",
+    "category_added_successfully": "Nová kategória bola úspešne pridaná"
+  },
+
+  "colors": {
+    "blue": "Modrá",
+    "green": "Zelená",
+    "purple": "Fialová",
+    "red": "Červená",
+    "orange": "Oranžová",
+    "pink": "Ružová",
+    "indigo": "Indigo",
+    "teal": "Tyrkysová"
+  },
+
   "types": {
     "expense": "výdavok",
     "income": "príjem",

@@ -88,7 +88,7 @@ export default function Categories() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -111,7 +111,7 @@ export default function Categories() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -132,7 +132,7 @@ export default function Categories() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
