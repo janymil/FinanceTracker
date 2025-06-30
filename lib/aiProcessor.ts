@@ -26,6 +26,11 @@ export async function runAI(task: string, userId: string, payload: Record<string
 
   try {
     console.log(`[AI ${task}] Calling Fly.io processor...`);
+    
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for bank statement processing
+    
     const response = await fetch("https://finanzerpro.fly.dev/execute-gpt-task", {
       method: "POST",
       headers: {
@@ -35,8 +40,11 @@ export async function runAI(task: string, userId: string, payload: Record<string
         task,
         userId,
         payload
-      })
+      }),
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       console.error(`[AI ${task}] Fly.io error:`, response.status, response.statusText);
