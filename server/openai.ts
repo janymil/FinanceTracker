@@ -9,10 +9,6 @@ export interface ExpenseCategorizationResult {
   category: string;
   confidence: number;
   reasoning: string;
-  merchantResearch?: string;
-  isNewCategory?: boolean;
-  alternativeCategories?: string[];
-  userPatternMatch?: string;
 }
 
 export interface FinancialTip {
@@ -339,59 +335,44 @@ export async function categorizeExpense(
           role: "system",
           content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (category, reasoning) must be in ${getLanguageLabel(normalizedLanguage)}.
 
-You are a PREMIUM AI Financial Categorization Expert for paying customers. Your job is to provide HIGHLY INTELLIGENT, RESEARCH-BASED categorization that goes far beyond simple pattern matching.
+You are an intelligent financial categorization system. Follow this simple, logical process:
 
-ADVANCED ANALYSIS PROTOCOL (MANDATORY):
+STEP 1: CHECK USER'S HISTORY
+- Look through the user's previous transactions
+- If you find this exact merchant before, use the SAME category they used
+- Be consistent with the user's past choices
 
-PHASE 1: USER DATA ANALYSIS
-- Examine if this exact merchant appears in user's transaction history
-- If found: What category did the user assign? How many times? Is there consistency?
-- Analyze user's spending patterns to understand their categorization preferences
-- Identify if user has categories that could logically fit this merchant type
+STEP 2: RESEARCH THE MERCHANT (only if not found in history)
+- What type of business is this merchant?
+- What do they sell or provide?
+- Examples: Migros = Swiss supermarket, Replit = coding platform, ALDI = grocery store
 
-PHASE 2: MERCHANT INTELLIGENCE RESEARCH
-- Use your knowledge base to research: What is this merchant/business?
-- What industry do they operate in? What products/services do they provide?
-- What is their primary business model? (B2B, B2C, subscription, retail, etc.)
-- Are there multiple possible interpretations of this merchant name?
-
-PHASE 3: SMART CATEGORY MATCHING
-- Does the merchant's actual business type align with any of user's existing categories?
-- Consider semantic similarity (e.g., "Groceries" vs "Food", "Tech" vs "Software")
-- Don't force inappropriate matches - quality over convenience
-- If no good match exists, suggest creating a new appropriate category
-
-PHASE 4: CONFIDENCE ASSESSMENT
-- High confidence (0.9+): Exact merchant match in user data OR very clear business type
-- Medium confidence (0.6-0.8): Clear business type but some ambiguity
-- Low confidence (0.3-0.5): Unclear merchant name or multiple interpretations
-- Very low confidence (0.1-0.2): Unresearchable merchant or complete ambiguity
+STEP 3: MATCH TO CATEGORY
+- Match the merchant's business type to user's existing categories
+- If no exact match, pick the closest logical category
+- Only suggest "Other" if the merchant is truly unclear
 
 ${userCategoriesList.length > 0 ? `
-USER'S EXISTING CATEGORIES:
-${userCategoriesList.join(', ')}
+USER'S EXISTING CATEGORIES: ${userCategoriesList.join(', ')}
 
-USER'S MERCHANT TRANSACTION PATTERNS:
+USER'S MERCHANT PATTERNS:
 ${merchantExamples}
-` : 'USER HAS NO EXISTING CATEGORIES - Focus on researching merchant and suggesting appropriate new categories.'}
+` : ''}
 
-INTELLIGENT CATEGORIZATION RULES:
-1. NEVER guess or assume - research the merchant first
-2. NEVER force transactions into inappropriate categories just because they exist
-3. If uncertain about merchant type, research alternatives and explain the ambiguity
-4. Prioritize accuracy over speed - taking time to analyze properly is expected
-5. Consider regional variations (e.g., "Migros" in Switzerland vs other countries)
-6. For unclear merchants, provide multiple possibilities with reasoning
+CATEGORIZATION EXAMPLES:
+- Grocery stores (Migros, ALDI, Coop) → Food/Groceries category
+- Tech services (Replit, GitHub) → Business/Technology category
+- Gas stations → Transportation category
+- Restaurants → Food/Dining category
+- Phone/Internet bills → Bills/Utilities category
 
-RESPONSE FORMAT - You MUST include ALL fields:
+Be practical and logical. Don't overthink it.
+
+Respond with JSON:
 {
-  "category": "exact_category_name_or_new_suggestion",
-  "confidence": 0.95,
-  "reasoning": "Detailed analysis: What is this merchant? What do they sell/provide? Why this category fits or why new category needed?",
-  "merchantResearch": "Your research findings about what this business actually is",
-  "isNewCategory": true/false,
-  "alternativeCategories": ["other_possible_category1", "other_possible_category2"],
-  "userPatternMatch": "Found this merchant X times in user data with category Y" or "No previous transactions found"
+  "category": "category_name",
+  "confidence": 0.85,
+  "reasoning": "Brief explanation of why this category fits"
 }`
         },
         {
@@ -431,22 +412,11 @@ Use your intelligence to categorize correctly.`
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
-    
-    // Log the enhanced AI analysis for debugging
-    console.log(`[Enhanced AI Categorization] Merchant: "${description}"`);
-    console.log(`[Enhanced AI] User Pattern: ${result.userPatternMatch || 'No pattern data'}`);
-    console.log(`[Enhanced AI] Research: ${result.merchantResearch || 'No research data'}`);
-    console.log(`[Enhanced AI] Category: ${result.category} (Confidence: ${result.confidence})`);
-    console.log(`[Enhanced AI] New Category: ${result.isNewCategory ? 'YES' : 'NO'}`);
 
     return {
       category: result.category || 'Other',
       confidence: Math.max(0, Math.min(1, result.confidence || 0.5)),
-      reasoning: result.reasoning || 'Unable to determine category',
-      merchantResearch: result.merchantResearch || 'No research available',
-      isNewCategory: result.isNewCategory || false,
-      alternativeCategories: result.alternativeCategories || [],
-      userPatternMatch: result.userPatternMatch || 'No previous transactions found'
+      reasoning: result.reasoning || 'Unable to determine category'
     };
   } catch (error) {
     console.error('Error categorizing expense (fallback):', error);
