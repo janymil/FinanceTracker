@@ -587,7 +587,7 @@ export default function Help() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <BookOpen className="h-6 w-6" />
-                    Quick Start Guide
+                    {t('Quick Start Guide')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -597,9 +597,9 @@ export default function Help() {
                         1
                       </div>
                       <div>
-                        <h3 className="font-semibold">Create Your Account</h3>
+                        <h3 className="font-semibold">{t('Create Your Account')}</h3>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                          Sign up for a free account to get started. You can upgrade to Standard or Premium anytime.
+                          {t('Sign up for a free account to get started. You can upgrade to Standard or Premium anytime.')}
                         </p>
                       </div>
                     </div>
@@ -609,9 +609,9 @@ export default function Help() {
                         2
                       </div>
                       <div>
-                        <h3 className="font-semibold">Add Your First Transaction</h3>
+                        <h3 className="font-semibold">{t('Add Your First Transaction')}</h3>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                          Navigate to the dashboard and click "Add Transaction" to record your first income or expense.
+                          {t('Navigate to the dashboard and click "Add Transaction" to record your first income or expense.')}
                         </p>
                       </div>
                     </div>
@@ -621,9 +621,9 @@ export default function Help() {
                         3
                       </div>
                       <div>
-                        <h3 className="font-semibold">Set Up Categories</h3>
+                        <h3 className="font-semibold">{t('Set Up Categories')}</h3>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                          Choose from predefined categories or let AI automatically categorize your transactions.
+                          {t('Choose from predefined categories or let AI automatically categorize your transactions.')}
                         </p>
                       </div>
                     </div>
@@ -633,9 +633,9 @@ export default function Help() {
                         4
                       </div>
                       <div>
-                        <h3 className="font-semibold">Create Budgets (Standard+)</h3>
+                        <h3 className="font-semibold">{t('Create Budgets (Standard+)')}</h3>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                          Set monthly spending limits by category to stay on track with your financial goals.
+                          {t('Set monthly spending limits by category to stay on track with your financial goals.')}
                         </p>
                       </div>
                     </div>
@@ -645,9 +645,9 @@ export default function Help() {
                         5
                       </div>
                       <div>
-                        <h3 className="font-semibold">Monitor Your Progress</h3>
+                        <h3 className="font-semibold">{t('Monitor Your Progress')}</h3>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                          Use the dashboard and reports to track your spending patterns and achieve your financial goals.
+                          {t('Use the dashboard and reports to track your spending patterns and achieve your financial goals.')}
                         </p>
                       </div>
                     </div>
@@ -656,14 +656,14 @@ export default function Help() {
                   <Separator />
 
                   <div>
-                    <h3 className="font-semibold mb-4">Comprehensive Feature Documentation</h3>
+                    <h3 className="font-semibold mb-4">{t('Comprehensive Feature Documentation')}</h3>
                     <div className="space-y-8">
                       
                       {/* Dashboard Functions */}
                       <div className="border-l-4 border-blue-500 pl-4">
                         <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
                           <BarChart3 className="h-5 w-5" />
-                          Dashboard Functions
+                          {t('Dashboard Functions')}
                         </h4>
                         <div className="space-y-4">
                           <div>
