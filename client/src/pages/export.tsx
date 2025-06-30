@@ -158,6 +158,10 @@ export default function ExportPage() {
   const [showSecurityDisclosure, setShowSecurityDisclosure] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [hasConsentedToSecurity, setHasConsentedToSecurity] = useState(false);
+  
+  // Duplicate warning state
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+  const [duplicateDetections, setDuplicateDetections] = useState<DuplicateDetection[]>([]);
 
   // Import functionality
   const handleDownloadExample = () => {
@@ -382,16 +386,27 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
       setPdfProcessingResult(result);
       setPreviewTransactions(result.transactions);
       
-      // Select all transactions by default
-      const allIndices = new Set(result.transactions.map((_, index) => index));
-      setSelectedTransactions(allIndices);
-      
-      setShowPreviewModal(true);
-
-      toast({
-        title: 'PDF Processing Complete',
-        description: `Extracted ${result.extractedTransactions} transactions with ${(result.overallConfidence * 100).toFixed(0)}% confidence.`,
-      });
+      // Check for duplicates
+      if (result.duplicates && result.duplicates.length > 0) {
+        setDuplicateDetections(result.duplicates);
+        setShowDuplicateWarning(true);
+        
+        toast({
+          title: t('export.duplicate_warning.found_title', 'Duplicate Transactions Found'),
+          description: t('export.duplicate_warning.found_description', 'Found {{count}} potential duplicate(s). Please review before importing.', { count: result.duplicates.length }),
+          variant: "default",
+        });
+      } else {
+        // No duplicates, show preview modal directly
+        const allIndices = new Set(result.transactions.map((_, index) => index));
+        setSelectedTransactions(allIndices);
+        setShowPreviewModal(true);
+        
+        toast({
+          title: 'PDF Processing Complete',
+          description: `Extracted ${result.extractedTransactions} transactions with ${(result.overallConfidence * 100).toFixed(0)}% confidence.`,
+        });
+      }
 
     } catch (error) {
       console.error('PDF processing error:', error);
@@ -403,6 +418,30 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     } finally {
       setIsProcessingPDF(false);
     }
+  };
+
+  // Duplicate warning handlers
+  const handleDuplicateWarningProceed = (selectedTransactions: any[]) => {
+    setShowDuplicateWarning(false);
+    setPreviewTransactions(selectedTransactions);
+    
+    // Select all remaining transactions
+    const allIndices = new Set(selectedTransactions.map((_, index) => index));
+    setSelectedTransactions(allIndices);
+    
+    setShowPreviewModal(true);
+    
+    toast({
+      title: t('export.duplicate_warning.proceeding_title', 'Proceeding with Import'),
+      description: t('export.duplicate_warning.proceeding_description', 'Importing {{count}} selected transactions', { count: selectedTransactions.length }),
+    });
+  };
+
+  const handleDuplicateWarningClose = () => {
+    setShowDuplicateWarning(false);
+    setDuplicateDetections([]);
+    setPdfProcessingResult(null);
+    setPreviewTransactions([]);
   };
 
   const handleImportSelectedTransactions = async () => {
@@ -1626,6 +1665,15 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
           isOpen={showSecurityDisclosure}
           onClose={() => setShowSecurityDisclosure(false)}
           onConsent={handleSecurityConsent}
+        />
+
+        {/* Duplicate Warning Modal */}
+        <DuplicateWarningModal
+          isOpen={showDuplicateWarning}
+          onClose={handleDuplicateWarningClose}
+          onProceed={handleDuplicateWarningProceed}
+          duplicates={duplicateDetections}
+          allTransactions={previewTransactions}
         />
       </div>
     </RequirePlan>
