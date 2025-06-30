@@ -1494,6 +1494,22 @@
     }
   },
 
+  "expense_reminders": {
+    "reminder_created": "Pripomienka Vytvorená",
+    "created_successfully": "Pripomienka výdavku bola úspešne nastavená",
+    "reminder_completed": "Pripomienka Dokončená",
+    "completed_successfully": "Pripomienka výdavku označená ako dokončená",
+    "reminder_deleted": "Pripomienka Odstránená",
+    "deleted_successfully": "Pripomienka výdavku bola odstránená",
+    "edit_reminder": "Upraviť Pripomienku",
+    "create_reminder": "Vytvoriť Finančnú Pripomienku",
+    "placeholder_notes": "Dodatočné poznámky k tomuto výdavku",
+    "select_category": "Vybrať kategóriu",
+    "update_reminder": "Aktualizovať Pripomienku",
+    "create_reminder_button": "Vytvoriť Pripomienku",
+    "copied_to_clipboard": "Referenčná poznámka skopírovaná do schránky"
+  },
+
   "types": {
     "expense": "výdavok",
     "income": "príjem",

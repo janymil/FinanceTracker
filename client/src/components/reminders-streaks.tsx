@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -55,6 +56,7 @@ interface Streak {
 }
 
 export default function RemindersStreaks({}: RemindersStreaksProps) {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { isReady, user } = useClerkUserReady();
@@ -167,8 +169,8 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
   const requestNotificationPermission = async () => {
     if (!('Notification' in window)) {
       toast({
-        title: "Notifications not supported",
-        description: "Your browser doesn't support notifications",
+        title: t("reminders.notifications_not_supported"),
+        description: t("reminders.browser_not_support"),
         variant: "destructive"
       });
       return false;
@@ -180,8 +182,8 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
 
     if (Notification.permission === 'denied') {
       toast({
-        title: "Notifications blocked",
-        description: "Please enable notifications in your browser settings",
+        title: t("reminders.notifications_blocked"),
+        description: t("reminders.enable_in_settings"),
         variant: "destructive"
       });
       return false;
@@ -192,14 +194,14 @@ export default function RemindersStreaks({}: RemindersStreaksProps) {
     
     if (permission === 'granted') {
       toast({
-        title: "Notifications enabled",
-        description: "You'll now receive reminder notifications"
+        title: t("reminders.notifications_enabled"),
+        description: t("reminders.will_receive_notifications")
       });
       return true;
     } else {
       toast({
-        title: "Notifications denied",
-        description: "You won't receive browser notifications",
+        title: t("reminders.notifications_denied"),
+        description: t("reminders.wont_receive_notifications"),
         variant: "destructive"
       });
       return false;
