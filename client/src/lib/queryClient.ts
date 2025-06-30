@@ -191,9 +191,42 @@ export function clearCacheOnUserChange(newUserId: string) {
   const currentUserId = localStorage.getItem('currentUserId');
   
   if (currentUserId && currentUserId !== newUserId) {
-    // Different user detected - clear everything
+    console.log('Different user detected, clearing user-specific data while preserving preferences');
+    
+    // Clear all React Query cache
     queryClient.clear();
-    localStorage.clear();
+    
+    // Clear localStorage but preserve global preferences that should persist across users
+    if (typeof window !== 'undefined') {
+      // Backup global preferences that should persist across all users
+      const globalPreferences: { [key: string]: string } = {};
+      
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (
+          // Global app preferences (not user-specific)
+          key === 'theme' ||
+          key === 'cookie-consent' ||
+          key.startsWith('app-preference-') ||
+          key.includes('global-settings') ||
+          key === 'language-preference' // Keep global language choice
+        )) {
+          const value = localStorage.getItem(key);
+          if (value) {
+            globalPreferences[key] = value;
+          }
+        }
+      }
+      
+      // Clear all localStorage and sessionStorage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Restore only global preferences (not user-specific data)
+      Object.entries(globalPreferences).forEach(([key, value]) => {
+        localStorage.setItem(key, value);
+      });
+    }
   }
   
   // Store new user ID

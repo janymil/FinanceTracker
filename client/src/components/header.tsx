@@ -53,7 +53,7 @@ import { CurrencySelector } from "@/components/CurrencySelector";
 import { useCurrency } from "@/context/CurrencyContext";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient, apiRequest, clearUserSession } from "@/lib/queryClient";
 import { useTheme } from "@/context/ThemeContext";
 
 interface Category {
@@ -91,6 +91,13 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { canChangeCurrency } = useCurrency();
   const { toast } = useToast();
   const { signOut } = useClerk();
+  
+  const handleLogout = async () => {
+    // Clear user session data while preserving global preferences
+    clearUserSession();
+    // Use default Clerk signOut - let Clerk handle the redirect
+    await signOut({ redirectUrl: '/' });
+  };
   const { theme, toggleTheme } = useTheme();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newTransaction, setNewTransaction] = useState({
@@ -522,7 +529,7 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={async () => await signOut({ redirectUrl: '/' })}>
+              <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
 {t("Sign Out")}
               </DropdownMenuItem>
