@@ -7,6 +7,7 @@
 import { performOCR } from '../server/uploadReceipt';
 import { getCurrentLanguageForAPI } from './languageUtils';
 import { DataEncryption } from '../server/encryption';
+import { runAI } from './aiProcessor';
 import crypto from 'crypto';
 
 export interface ExtractedTransaction {
@@ -606,37 +607,12 @@ async function parseTransactionsWithAI(
   language: string
 ): Promise<ExtractedTransaction[]> {
   
-  const bankStatementPrompt = createBankStatementPrompt(language);
-  
   try {
-    // Import OpenAI here to avoid circular dependencies
-    const { default: OpenAI } = await import('openai');
-    
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OpenAI API key not configured');
-    }
-
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+    // Use centralized AI system for bank statement processing
+    const result = await runAI('parseBankStatement', 'system', {
+      text: text,
+      language: language
     });
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: bankStatementPrompt
-        },
-        {
-          role: "user",
-          content: `Please analyze this bank statement text and extract all transactions:\n\n${text}`
-        }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.1
-    });
-
-    const result = JSON.parse(response.choices[0].message.content || '{}');
     
     if (result.transactions && Array.isArray(result.transactions)) {
       const parsedTransactions = result.transactions.map((tx: any) => ({
