@@ -1543,6 +1543,22 @@
     "teal": "Tyrkysová"
   },
 
+  "categories": {
+    "voľná_práca": "Voľná práca",
+    "plat": "Plat",
+    "investície": "Investície",
+    "doprava": "Doprava",
+    "jedlo_&_reštaurácie": "Jedlo & Reštaurácie",
+    "nakupovanie": "Nakupovanie",
+    "účty_&_služby": "Účty & Služby",
+    "zdravotníctvo": "Zdravotníctvo",
+    "zábava": "Zábava",
+    "freelancing": "Freelancing",
+    "salary": "Plat",
+    "freelance": "Voľná práca",
+    "investments": "Investície"
+  },
+
   "types": {
     "expense": "výdavok",
     "income": "príjem",

@@ -1410,6 +1410,22 @@
     "teal": "Teal"
   },
 
+  "categories": {
+    "voľná_práca": "Freelance",
+    "plat": "Salary",
+    "investície": "Investments",
+    "doprava": "Transportation",
+    "jedlo_&_reštaurácie": "Food & Dining",
+    "nakupovanie": "Shopping",
+    "účty_&_služby": "Bills & Utilities",
+    "zdravotníctvo": "Healthcare",
+    "zábava": "Entertainment",
+    "freelancing": "Freelancing",
+    "salary": "Salary",
+    "freelance": "Freelance",
+    "investments": "Investments"
+  },
+
   "types": {
     "expense": "expense",
     "income": "income",

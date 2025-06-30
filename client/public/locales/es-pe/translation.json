@@ -1487,6 +1487,22 @@
     "teal": "Verde Azulado"
   },
 
+  "categories": {
+    "voľná_práca": "Freelance",
+    "plat": "Salario",
+    "investície": "Inversiones",
+    "doprava": "Transporte",
+    "jedlo_&_reštaurácie": "Comida y Restaurantes",
+    "nakupovanie": "Compras",
+    "účty_&_služby": "Facturas y Servicios",
+    "zdravotníctvo": "Salud",
+    "zábava": "Entretenimiento",
+    "freelancing": "Freelance",
+    "salary": "Salario",
+    "freelance": "Freelance",
+    "investments": "Inversiones"
+  },
+
   "types": {
     "expense": "gasto",
     "income": "ingreso",
