@@ -125,13 +125,13 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
 
       setEditingTransaction(null);
       toast({
-        title: "Transaction Updated",
-        description: "Transaction has been successfully updated",
+        title: t("Transaction Updated"),
+        description: t("Transaction has been successfully updated"),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update transaction",
+        title: t("Error"),
+        description: error.message || t("Failed to update transaction"),
         variant: "destructive",
       });
     }
@@ -313,12 +313,12 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
 
         <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
           <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-2">
-            Free plan: {transactions?.length || 0}/100 transaction entries used
+            {t('Free plan')}: {transactions?.length || 0}/100 {t('transaction entries used')}
           </div>
           <Link href="/subscribe">
             <Button variant="ghost" className="w-full text-premium hover:text-premium/80">
               <Crown className="h-4 w-4 mr-2" />
-              Upgrade for unlimited transaction storage
+              {t('Upgrade for unlimited transaction storage')}
             </Button>
           </Link>
         </div>
@@ -448,7 +448,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
       </CardContent>
       <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
         <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-2">
-          Free plan: {transactions?.length || 0}/100 transaction entries used
+          {t('Free plan')}: {transactions?.length || 0}/100 {t('transaction entries used')}
         </div>
         <Link href="/transactions" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium">
           {t("View All Transactions")}
