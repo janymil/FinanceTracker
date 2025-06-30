@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
+import { useClerk } from '@clerk/clerk-react';
+import { esES, skSK } from '@clerk/localizations';
 import { detectLanguageAndRedirect } from '../i18n/languageDetector.ts';
 
 interface LanguageGuardProps {
@@ -74,6 +76,7 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
   const [location, setLocation] = useLocation();
   const { i18n } = useTranslation();
   const [ready, setReady] = useState(false);
+  const clerk = useClerk();
 
   useEffect(() => {
     const pathParts = location.split('/').filter(Boolean);
@@ -103,11 +106,55 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
     
     const i18nLang = langMap[lang] || 'en-us';
 
+    // Update Clerk localization based on current language
+    const updateClerkLocalization = (langCode: string) => {
+      try {
+        let clerkLocalization;
+        if (langCode === 'es') {
+          clerkLocalization = esES;
+        } else if (langCode === 'sk') {
+          // Use custom Slovak from main.tsx
+          clerkLocalization = {
+            ...skSK,
+            signUp: {
+              ...(skSK.signUp || {}),
+              legalConsent: {
+                ...(skSK.signUp?.legalConsent || {}),
+                checkbox: {
+                  label__onlyPrivacyPolicy: 'Súhlasím so {{ privacyPolicyLink || link("zásadami ochrany osobných údajov") }}',
+                  label__onlyTermsOfService: 'Súhlasím s {{ termsOfServiceLink || link("obchodnými podmienkami") }}',
+                  label__termsOfServiceAndPrivacyPolicy: 'Súhlasím s {{ termsOfServiceLink || link("obchodnými podmienkami") }} a {{ privacyPolicyLink || link("zásadami ochrany osobných údajov") }}'
+                },
+                continue: {
+                  subtitle: 'Pokračovaním súhlasíte s našimi zásadami.',
+                  title: 'Zákonné súhlasy'
+                }
+              }
+            }
+          };
+        } else {
+          clerkLocalization = undefined; // English default
+        }
+        
+        // Update Clerk localization
+        if (clerk && clerk.__unstable__environment) {
+          console.log('LanguageGuard: Updating Clerk localization for', langCode);
+          clerk.__unstable__environment.setLocalization(clerkLocalization);
+        }
+      } catch (error) {
+        console.error('LanguageGuard: Error updating Clerk localization:', error);
+      }
+    };
+
     // Change language if needed and mark ready
     if (i18n.language !== i18nLang) {
       console.log('LanguageGuard: Changing language from', i18n.language, 'to', i18nLang);
       // Save user's manual language choice
       localStorage.setItem('preferredLanguage', lang);
+      
+      // Update Clerk localization immediately
+      updateClerkLocalization(lang);
+      
       i18n.changeLanguage(i18nLang).then(() => {
         console.log('LanguageGuard: Language changed successfully to', i18nLang);
         console.log('LanguageGuard: i18n language is now:', i18n.language);
@@ -133,6 +180,9 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
     } else {
       console.log('LanguageGuard: Language already set to', i18nLang);
       console.log('LanguageGuard: Has resources for', i18nLang, ':', i18n.hasResourceBundle(i18nLang, 'translation'));
+      
+      // Still update Clerk localization in case it wasn't set properly
+      updateClerkLocalization(lang);
       setReady(true);
     }
   }, [location, i18n]);
