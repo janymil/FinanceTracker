@@ -114,6 +114,7 @@ interface TransactionPreviewCardProps {
   isSelected: boolean;
   onToggleSelect: () => void;
   onCategoryChange: (newCategory: string) => void;
+  onTransactionChange: (updatedTransaction: Partial<PreviewTransaction>) => void;
 }
 
 function TransactionPreviewCard({ 
@@ -121,29 +122,40 @@ function TransactionPreviewCard({
   index, 
   isSelected, 
   onToggleSelect, 
-  onCategoryChange 
+  onCategoryChange,
+  onTransactionChange 
 }: TransactionPreviewCardProps) {
   const { getToken } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [editedCategory, setEditedCategory] = useState(transaction.category || '');
+  const [editedTransaction, setEditedTransaction] = useState({
+    description: transaction.description,
+    amount: transaction.amount,
+    category: transaction.category || '',
+    date: transaction.date,
+    type: transaction.type
+  });
   const [showCreateNewCategory, setShowCreateNewCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
 
-  // Fetch user's existing categories
+  // Fetch user's existing categories with proper typing
   const { data: categories = [] } = useQuery({
     queryKey: ['/api/categories'],
     enabled: !!getToken
   });
+  
+  console.log('Categories loaded for dropdown:', categories);
 
-  const handleSaveCategory = () => {
-    onCategoryChange(editedCategory);
+  const handleSaveTransaction = () => {
+    // Update transaction with all edits
+    onTransactionChange(editedTransaction);
     setIsEditing(false);
   };
 
   const handleCreateNewCategory = () => {
     if (newCategoryName.trim()) {
-      onCategoryChange(newCategoryName.trim());
-      setEditedCategory(newCategoryName.trim());
+      const updatedTransaction = { ...editedTransaction, category: newCategoryName.trim() };
+      setEditedTransaction(updatedTransaction);
+      onTransactionChange(updatedTransaction);
       setNewCategoryName('');
       setShowCreateNewCategory(false);
       setIsEditing(false);
@@ -151,10 +163,20 @@ function TransactionPreviewCard({
   };
 
   const handleCancelEdit = () => {
-    setEditedCategory(transaction.category || '');
+    setEditedTransaction({
+      description: transaction.description,
+      amount: transaction.amount,
+      category: transaction.category || '',
+      date: transaction.date,
+      type: transaction.type
+    });
     setIsEditing(false);
     setShowCreateNewCategory(false);
     setNewCategoryName('');
+  };
+
+  const handleFieldChange = (field: string, value: any) => {
+    setEditedTransaction(prev => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -202,11 +224,11 @@ function TransactionPreviewCard({
             </div>
           </div>
 
-          {/* Category Management Section */}
+          {/* Transaction Editing Section */}
           <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-md border">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Category Assignment
+                Transaction Details
               </span>
               {!isEditing && (
                 <Button
@@ -216,27 +238,87 @@ function TransactionPreviewCard({
                   className="text-blue-600 hover:text-blue-700"
                 >
                   <Edit2 className="h-3 w-3 mr-1" />
-                  Edit
+                  Edit Transaction
                 </Button>
               )}
             </div>
 
             {isEditing ? (
               <div className="space-y-3">
+                {/* Transaction Description */}
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                    Description:
+                  </label>
+                  <Input
+                    value={editedTransaction.description}
+                    onChange={(e) => handleFieldChange('description', e.target.value)}
+                    placeholder="Transaction description..."
+                    className="h-8"
+                  />
+                </div>
+
+                {/* Amount and Type */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                      Amount:
+                    </label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={editedTransaction.amount}
+                      onChange={(e) => handleFieldChange('amount', parseFloat(e.target.value) || 0)}
+                      placeholder="0.00"
+                      className="h-8"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                      Type:
+                    </label>
+                    <Select
+                      value={editedTransaction.type}
+                      onValueChange={(value) => handleFieldChange('type', value)}
+                    >
+                      <SelectTrigger className="h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="expense">Expense</SelectItem>
+                        <SelectItem value="income">Income</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Date */}
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                    Date:
+                  </label>
+                  <Input
+                    type="date"
+                    value={editedTransaction.date}
+                    onChange={(e) => handleFieldChange('date', e.target.value)}
+                    className="h-8"
+                  />
+                </div>
+
                 {/* Category Selection */}
                 <div className="space-y-2">
                   <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                    Select from existing categories:
+                    Category:
                   </label>
                   <Select
-                    value={editedCategory}
-                    onValueChange={setEditedCategory}
+                    value={editedTransaction.category}
+                    onValueChange={(value) => handleFieldChange('category', value)}
                   >
                     <SelectTrigger className="h-8">
                       <SelectValue placeholder="Choose category..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((category: any) => (
+                      {Array.isArray(categories) && categories.map((category: any) => (
                         <SelectItem key={category.id} value={category.name}>
                           {category.name} ({category.type})
                         </SelectItem>
@@ -291,25 +373,33 @@ function TransactionPreviewCard({
                     size="sm"
                     onClick={showCreateNewCategory && newCategoryName.trim() ? 
                       handleCreateNewCategory : 
-                      handleSaveCategory
+                      handleSaveTransaction
                     }
-                    disabled={!editedCategory && !newCategoryName.trim()}
+                    disabled={!editedTransaction.description.trim()}
                   >
                     <Save className="h-3 w-3 mr-1" />
-                    Save
+                    Save Changes
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-                  {transaction.category || 'No category assigned'}
-                </span>
-                {transaction.category && (
-                  <Badge variant="outline" className="text-xs">
-                    AI Suggested
-                  </Badge>
-                )}
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Category:</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">
+                    {transaction.category || 'No category assigned'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Amount:</span>
+                  <span className="font-medium">
+                    ${Math.abs(transaction.amount).toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Date:</span>
+                  <span>{transaction.date}</span>
+                </div>
               </div>
             )}
           </div>
@@ -1855,6 +1945,11 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                     onCategoryChange={(newCategory) => {
                       const updatedTransactions = [...previewTransactions];
                       updatedTransactions[index] = { ...transaction, category: newCategory };
+                      setPreviewTransactions(updatedTransactions);
+                    }}
+                    onTransactionChange={(updatedFields) => {
+                      const updatedTransactions = [...previewTransactions];
+                      updatedTransactions[index] = { ...transaction, ...updatedFields };
                       setPreviewTransactions(updatedTransactions);
                     }}
                   />
