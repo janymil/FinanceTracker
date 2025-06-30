@@ -50,7 +50,7 @@ class PDFSecurityManager {
   }
 
   static sanitizeExtractedText(text: string, securityLog: SecurityEvent[]): string {
-    this.logSecurityEvent(securityLog, 'text_sanitization_start', 'success');
+    PDFSecurityManager.logSecurityEvent(securityLog, 'text_sanitization_start', 'success');
     
     // Remove potential sensitive patterns that shouldn't be in transactions
     let sanitized = text;
@@ -67,12 +67,12 @@ class PDFSecurityManager {
     // Remove routing numbers in isolation (9 digits starting with 0,1,2,3)
     sanitized = sanitized.replace(/\b[0-3]\d{8}\b/g, '[ROUTING_REDACTED]');
     
-    this.logSecurityEvent(securityLog, 'text_sanitization_complete', 'success', `Processed ${text.length} chars`);
+    PDFSecurityManager.logSecurityEvent(securityLog, 'text_sanitization_complete', 'success', `Processed ${text.length} chars`);
     return sanitized;
   }
 
   static encryptSensitiveData(transaction: ExtractedTransaction, securityLog: SecurityEvent[]): ExtractedTransaction {
-    this.logSecurityEvent(securityLog, 'transaction_encryption_start', 'success');
+    PDFSecurityManager.logSecurityEvent(securityLog, 'transaction_encryption_start', 'success');
     
     try {
       // Encrypt sensitive fields using AES-256 encryption
@@ -82,53 +82,53 @@ class PDFSecurityManager {
         rawText: transaction.rawText ? DataEncryption.encrypt(transaction.rawText) : transaction.rawText
       };
       
-      this.logSecurityEvent(securityLog, 'transaction_encryption_success', 'success');
+      PDFSecurityManager.logSecurityEvent(securityLog, 'transaction_encryption_success', 'success');
       return encrypted;
     } catch (error) {
-      this.logSecurityEvent(securityLog, 'transaction_encryption_failed', 'error', error instanceof Error ? error.message : 'Unknown error');
+      PDFSecurityManager.logSecurityEvent(securityLog, 'transaction_encryption_failed', 'error', error instanceof Error ? error.message : 'Unknown error');
       return transaction; // Return original if encryption fails
     }
   }
 
   static secureMemoryCleanup(buffers: Buffer[], securityLog: SecurityEvent[]) {
-    this.logSecurityEvent(securityLog, 'memory_cleanup_start', 'success');
+    PDFSecurityManager.logSecurityEvent(securityLog, 'memory_cleanup_start', 'success');
     
     try {
       // Overwrite buffer memory with zeros for security
       buffers.forEach((buffer, index) => {
         if (buffer && buffer.length > 0) {
           buffer.fill(0);
-          this.logSecurityEvent(securityLog, `buffer_${index}_cleared`, 'success', `${buffer.length} bytes`);
+          PDFSecurityManager.logSecurityEvent(securityLog, `buffer_${index}_cleared`, 'success', `${buffer.length} bytes`);
         }
       });
       
       // Force garbage collection if available
       if (global.gc) {
         global.gc();
-        this.logSecurityEvent(securityLog, 'garbage_collection_forced', 'success');
+        PDFSecurityManager.logSecurityEvent(securityLog, 'garbage_collection_forced', 'success');
       }
       
-      this.logSecurityEvent(securityLog, 'memory_cleanup_complete', 'success');
+      PDFSecurityManager.logSecurityEvent(securityLog, 'memory_cleanup_complete', 'success');
     } catch (error) {
-      this.logSecurityEvent(securityLog, 'memory_cleanup_error', 'error', error instanceof Error ? error.message : 'Unknown error');
+      PDFSecurityManager.logSecurityEvent(securityLog, 'memory_cleanup_error', 'error', error instanceof Error ? error.message : 'Unknown error');
     }
   }
 
   static validatePDFSecurity(pdfBuffer: Buffer, securityLog: SecurityEvent[]): boolean {
-    this.logSecurityEvent(securityLog, 'pdf_security_validation_start', 'success');
+    PDFSecurityManager.logSecurityEvent(securityLog, 'pdf_security_validation_start', 'success');
     
     try {
       // Check PDF file size (limit to 50MB for security)
       const maxSize = 50 * 1024 * 1024; // 50MB
       if (pdfBuffer.length > maxSize) {
-        this.logSecurityEvent(securityLog, 'pdf_size_exceeded', 'error', `File size: ${pdfBuffer.length} bytes`);
+        PDFSecurityManager.logSecurityEvent(securityLog, 'pdf_size_exceeded', 'error', `File size: ${pdfBuffer.length} bytes`);
         return false;
       }
       
       // Verify PDF magic number
       const magicNumber = pdfBuffer.subarray(0, 4).toString();
       if (!magicNumber.startsWith('%PDF')) {
-        this.logSecurityEvent(securityLog, 'invalid_pdf_format', 'error', `Magic number: ${magicNumber}`);
+        PDFSecurityManager.logSecurityEvent(securityLog, 'invalid_pdf_format', 'error', `Magic number: ${magicNumber}`);
         return false;
       }
       
@@ -138,14 +138,14 @@ class PDFSecurityManager {
       
       for (const pattern of suspiciousPatterns) {
         if (pdfString.includes(pattern)) {
-          this.logSecurityEvent(securityLog, 'suspicious_pdf_content', 'warning', `Found: ${pattern}`);
+          PDFSecurityManager.logSecurityEvent(securityLog, 'suspicious_pdf_content', 'warning', `Found: ${pattern}`);
         }
       }
       
-      this.logSecurityEvent(securityLog, 'pdf_security_validation_passed', 'success', `Size: ${pdfBuffer.length} bytes`);
+      PDFSecurityManager.logSecurityEvent(securityLog, 'pdf_security_validation_passed', 'success', `Size: ${pdfBuffer.length} bytes`);
       return true;
     } catch (error) {
-      this.logSecurityEvent(securityLog, 'pdf_security_validation_error', 'error', error instanceof Error ? error.message : 'Unknown error');
+      PDFSecurityManager.logSecurityEvent(securityLog, 'pdf_security_validation_error', 'error', error instanceof Error ? error.message : 'Unknown error');
       return false;
     }
   }
