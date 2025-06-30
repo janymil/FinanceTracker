@@ -52,9 +52,9 @@ export default function UpgradePrompt({
           {feature}
         </h1>
         
-        <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+        <div className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
           {description}
-        </p>
+        </div>
       </div>
 
       <Card className="mb-8">
