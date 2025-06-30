@@ -62,6 +62,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
     return result;
 
   } catch (error: any) {
+    console.error(`[AI ${task}] Fly.io service failed:`, error.message || error);
     
     try {
       let fallbackResult;
