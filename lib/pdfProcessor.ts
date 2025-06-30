@@ -298,7 +298,7 @@ export async function processBankStatementPDF(
     }
 
     // Step 1: Try PDF text extraction first
-    const pdf = require('pdf-parse');
+    const pdf = await getPdfParser();
     const pdfData = await pdf(pdfBuffer);
     result.totalPages = pdfData.numpages;
 
