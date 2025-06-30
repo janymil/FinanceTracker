@@ -28,9 +28,17 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle,
-  Code
+  Code,
+  Edit2,
+  Plus,
+  Save,
+  X,
+  TrendingUp,
+  TrendingDown
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
 
 interface ExportOptions {
   format: "pdf" | "csv" | "excel" | "json";
@@ -97,6 +105,244 @@ interface PreviewTransaction {
   category?: string;
   rawText?: string;
   detectedFormat?: string;
+}
+
+// Enhanced Transaction Preview Card Component with User Controls
+interface TransactionPreviewCardProps {
+  transaction: PreviewTransaction;
+  index: number;
+  isSelected: boolean;
+  onToggleSelect: () => void;
+  onCategoryChange: (newCategory: string) => void;
+}
+
+function TransactionPreviewCard({ 
+  transaction, 
+  index, 
+  isSelected, 
+  onToggleSelect, 
+  onCategoryChange 
+}: TransactionPreviewCardProps) {
+  const { getToken } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedCategory, setEditedCategory] = useState(transaction.category || '');
+  const [showCreateNewCategory, setShowCreateNewCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+
+  // Fetch user's existing categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ['/api/categories'],
+    enabled: !!getToken
+  });
+
+  const handleSaveCategory = () => {
+    onCategoryChange(editedCategory);
+    setIsEditing(false);
+  };
+
+  const handleCreateNewCategory = () => {
+    if (newCategoryName.trim()) {
+      onCategoryChange(newCategoryName.trim());
+      setEditedCategory(newCategoryName.trim());
+      setNewCategoryName('');
+      setShowCreateNewCategory(false);
+      setIsEditing(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditedCategory(transaction.category || '');
+    setIsEditing(false);
+    setShowCreateNewCategory(false);
+    setNewCategoryName('');
+  };
+
+  return (
+    <div
+      className={`p-4 border rounded-lg transition-colors ${
+        isSelected
+          ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20'
+          : 'border-gray-200 hover:border-gray-300'
+      }`}
+    >
+      <div className="flex items-start justify-between gap-4">
+        {/* Transaction Details */}
+        <div className="flex-1 space-y-3">
+          {/* Header with checkbox and basic info */}
+          <div className="flex items-center space-x-3">
+            <Checkbox
+              checked={isSelected}
+              onChange={onToggleSelect}
+              className="mt-1"
+            />
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-medium text-gray-900 dark:text-gray-100">
+                  {transaction.description}
+                </span>
+                <Badge
+                  variant={transaction.type === 'income' ? 'default' : 'secondary'}
+                  className={
+                    transaction.type === 'income'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                  }
+                >
+                  {transaction.type === 'income' ? (
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3 mr-1" />
+                  )}
+                  {transaction.type}
+                </Badge>
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                {transaction.date} • {(transaction.confidence * 100).toFixed(0)}% confidence
+              </div>
+            </div>
+          </div>
+
+          {/* Category Management Section */}
+          <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-md border">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Category Assignment
+              </span>
+              {!isEditing && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsEditing(true)}
+                  className="text-blue-600 hover:text-blue-700"
+                >
+                  <Edit2 className="h-3 w-3 mr-1" />
+                  Edit
+                </Button>
+              )}
+            </div>
+
+            {isEditing ? (
+              <div className="space-y-3">
+                {/* Category Selection */}
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                    Select from existing categories:
+                  </label>
+                  <Select
+                    value={editedCategory}
+                    onValueChange={setEditedCategory}
+                  >
+                    <SelectTrigger className="h-8">
+                      <SelectValue placeholder="Choose category..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category: any) => (
+                        <SelectItem key={category.id} value={category.name}>
+                          {category.name} ({category.type})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Or Create New Category */}
+                <div className="border-t pt-2">
+                  {!showCreateNewCategory ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowCreateNewCategory(true)}
+                      className="w-full"
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Create New Category
+                    </Button>
+                  ) : (
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                        Create new category:
+                      </label>
+                      <Input
+                        value={newCategoryName}
+                        onChange={(e) => setNewCategoryName(e.target.value)}
+                        placeholder="Enter category name..."
+                        className="h-8"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleCreateNewCategory();
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-2 pt-2 border-t">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCancelEdit}
+                  >
+                    <X className="h-3 w-3 mr-1" />
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={showCreateNewCategory && newCategoryName.trim() ? 
+                      handleCreateNewCategory : 
+                      handleSaveCategory
+                    }
+                    disabled={!editedCategory && !newCategoryName.trim()}
+                  >
+                    <Save className="h-3 w-3 mr-1" />
+                    Save
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                  {transaction.category || 'No category assigned'}
+                </span>
+                {transaction.category && (
+                  <Badge variant="outline" className="text-xs">
+                    AI Suggested
+                  </Badge>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Raw Text Preview (if available) */}
+          {transaction.rawText && (
+            <div className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-700 p-2 rounded text-mono">
+              <span className="font-medium">Raw Text:</span> {transaction.rawText.substring(0, 150)}
+              {transaction.rawText.length > 150 && '...'}
+            </div>
+          )}
+        </div>
+
+        {/* Amount Display */}
+        <div className="text-right min-w-0">
+          <div className={`text-xl font-bold ${
+            transaction.type === 'income' 
+              ? 'text-green-600 dark:text-green-400' 
+              : 'text-red-600 dark:text-red-400'
+          }`}>
+            {transaction.type === 'income' ? '+' : '-'}${Math.abs(transaction.amount).toFixed(2)}
+          </div>
+          <div className="text-xs text-gray-500 mt-1">
+            {transaction.detectedFormat && (
+              <span className="inline-block bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">
+                {transaction.detectedFormat}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function ExportPage() {
@@ -1546,11 +1792,11 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
           </DialogContent>
         </Dialog>
 
-        {/* PDF Transaction Preview Modal */}
+        {/* Enhanced PDF Transaction Preview Modal */}
         <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
-            <DialogHeader>
-              <DialogTitle>Review Extracted Transactions</DialogTitle>
+          <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
+            <DialogHeader className="flex-shrink-0">
+              <DialogTitle>Review and Edit Extracted Transactions</DialogTitle>
               <DialogDescription>
                 {pdfProcessingResult && (
                   <div className="space-y-2">
@@ -1578,84 +1824,45 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
               </DialogDescription>
             </DialogHeader>
             
-            <div className="flex-1 overflow-hidden">
-              <div className="space-y-4">
-                {/* Selection Controls */}
-                <div className="flex items-center justify-between border-b pb-3">
-                  <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm" onClick={selectAllTransactions}>
-                      Select All ({previewTransactions.length})
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={deselectAllTransactions}>
-                      Deselect All
-                    </Button>
-                    <span className="text-sm text-muted-foreground">
-                      {selectedTransactions.size} of {previewTransactions.length} selected
-                    </span>
-                  </div>
+            <div className="flex-1 flex flex-col min-h-0">
+              {/* Selection Controls */}
+              <div className="flex items-center justify-between border-b pb-3 mb-4 flex-shrink-0">
+                <div className="flex items-center space-x-2">
+                  <Button variant="outline" size="sm" onClick={selectAllTransactions}>
+                    Select All ({previewTransactions.length})
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={deselectAllTransactions}>
+                    Deselect All
+                  </Button>
+                  <span className="text-sm text-muted-foreground">
+                    {selectedTransactions.size} of {previewTransactions.length} selected
+                  </span>
                 </div>
+                <div className="text-xs text-muted-foreground">
+                  💡 Click any transaction to edit its category
+                </div>
+              </div>
 
-                {/* Transactions List */}
-                <div className="overflow-y-auto max-h-96 space-y-2">
-                  {previewTransactions.map((transaction, index) => (
-                    <div
-                      key={index}
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                        selectedTransactions.has(index)
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                      onClick={() => toggleTransactionSelection(index)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 space-y-1">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              checked={selectedTransactions.has(index)}
-                              onChange={() => toggleTransactionSelection(index)}
-                            />
-                            <span className="font-medium">{transaction.description}</span>
-                            <Badge
-                              variant={transaction.type === 'income' ? 'default' : 'secondary'}
-                              className={
-                                transaction.type === 'income'
-                                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                  : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                              }
-                            >
-                              {transaction.type}
-                            </Badge>
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            Date: {transaction.date} | Amount: ${Math.abs(transaction.amount).toFixed(2)}
-                          </div>
-                          {transaction.category && (
-                            <div className="text-xs text-blue-600">
-                              Suggested Category: {transaction.category}
-                            </div>
-                          )}
-                          {transaction.rawText && (
-                            <div className="text-xs text-gray-500 bg-gray-50 dark:bg-gray-800 p-2 rounded">
-                              Raw Text: {transaction.rawText.substring(0, 100)}...
-                            </div>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <div className="text-lg font-semibold">
-                            {transaction.type === 'income' ? '+' : '-'}${Math.abs(transaction.amount).toFixed(2)}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {(transaction.confidence * 100).toFixed(0)}% confidence
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              {/* Scrollable Transactions List */}
+              <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+                {previewTransactions.map((transaction, index) => (
+                  <TransactionPreviewCard
+                    key={index}
+                    transaction={transaction}
+                    index={index}
+                    isSelected={selectedTransactions.has(index)}
+                    onToggleSelect={() => toggleTransactionSelection(index)}
+                    onCategoryChange={(newCategory) => {
+                      const updatedTransactions = [...previewTransactions];
+                      updatedTransactions[index] = { ...transaction, category: newCategory };
+                      setPreviewTransactions(updatedTransactions);
+                    }}
+                  />
+                ))}
               </div>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="flex-shrink-0 mt-4">
               <Button variant="outline" onClick={() => setShowPreviewModal(false)}>
                 Cancel
               </Button>
