@@ -550,13 +550,32 @@ export function registerImportRoutes(app: Express) {
 
       console.log(`Processing PDF bank statement for user ${userId}, file size: ${req.file.size} bytes`);
 
-      // Process the PDF using our hybrid approach
-      const processingResult = await processBankStatementPDF(req.file.buffer, language);
+      // Get existing transactions for duplicate detection (last 6 months)
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      const existingTransactions = await storage.getUserTransactions(userId);
+      
+      // Filter to last 6 months and format for duplicate detection
+      const formattedExisting = existingTransactions
+        .filter(tx => tx.date >= sixMonthsAgo)
+        .map(tx => ({
+          id: tx.id,
+          date: tx.date.toISOString().split('T')[0],
+          description: tx.description,
+          amount: parseFloat(tx.amount),
+          type: tx.type as 'income' | 'expense'
+        }));
+
+      console.log(`Found ${formattedExisting.length} existing transactions for duplicate detection`);
+
+      // Process the PDF using our hybrid approach with duplicate detection
+      const processingResult = await processBankStatementPDF(req.file.buffer, language, formattedExisting);
 
       // Validate extracted transactions
       const validationResult = validateTransactions(processingResult.transactions);
 
-      // Prepare response with processing details
+      // Prepare response with processing details including duplicates
       const response = {
         success: true,
         processingMethod: processingResult.processingMethod,
@@ -567,6 +586,7 @@ export function registerImportRoutes(app: Express) {
         errors: processingResult.errors,
         transactions: validationResult.valid,
         invalidData: validationResult.invalid,
+        duplicates: processingResult.duplicates || [],
         preview: true // Indicates this is for preview, not final import
       };
 

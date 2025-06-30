@@ -13,6 +13,7 @@ import RequirePlan from '@/components/require-plan';
 import { useClerkUserReady } from '@/hooks/useClerkUserReady';
 import { useAuth } from '@clerk/clerk-react';
 import { PDFSecurityModal } from '@/components/PDFSecurityModal';
+import { DuplicateWarningModal } from '@/components/DuplicateWarningModal';
 import { 
   Download, 
   Upload, 
@@ -63,7 +64,27 @@ interface PDFProcessingResult {
   errors: string[];
   transactions: any[];
   invalidData: any[];
+  duplicates?: DuplicateDetection[];
   preview: boolean;
+}
+
+interface DuplicateDetection {
+  extractedTransaction: {
+    date: string;
+    description: string;
+    amount: number;
+    type: 'income' | 'expense';
+    confidence: number;
+  };
+  existingTransactions: {
+    id: number;
+    date: string;
+    description: string;
+    amount: number;
+    type: 'income' | 'expense';
+  }[];
+  similarityScore: number;
+  matchReasons: string[];
 }
 
 interface PreviewTransaction {
