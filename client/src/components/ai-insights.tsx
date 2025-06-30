@@ -52,8 +52,8 @@ export default function AIInsights({ data }: AIInsightsProps) {
       // High spending alerts -> go to expenses page
       setLocation('/expenses');
     } else if (insight.recommendation?.toLowerCase().includes('budget')) {
-      // Budget-related recommendations -> go to budgets page
-      setLocation('/budgets');
+      // Budget-related recommendations -> go to budget page
+      setLocation('/budget');
     } else if (insight.category) {
       // Category-specific insights -> go to transactions filtered by category
       setLocation('/transactions');
@@ -95,11 +95,11 @@ export default function AIInsights({ data }: AIInsightsProps) {
       insights.push({
         id: "high-spending",
         type: "warning",
-        title: "High Spending Alert",
-        description: `You've spent ${((totalExpenses / totalIncome) * 100).toFixed(0)}% of your income this month`,
+        title: t("ai_insights.high_spending_alert"),
+        description: t("ai_insights.high_spending_description", { percentage: ((totalExpenses / totalIncome) * 100).toFixed(0) }),
         impact: "high",
         amount: totalExpenses,
-        recommendation: "Consider reviewing your largest expense categories",
+        recommendation: t("ai_insights.review_expense_categories"),
         actionable: true
       });
     }
@@ -120,12 +120,15 @@ export default function AIInsights({ data }: AIInsightsProps) {
       insights.push({
         id: "category-dominance",
         type: "suggestion",
-        title: "Category Focus Opportunity",
-        description: `${topCategory[0]} represents ${((topCategory[1] as number / totalExpenses) * 100).toFixed(0)}% of your spending`,
+        title: t("ai_insights.category_focus_opportunity"),
+        description: t("ai_insights.category_spending_percentage", { 
+          category: topCategory[0], 
+          percentage: ((topCategory[1] as number / totalExpenses) * 100).toFixed(0) 
+        }),
         impact: "medium",
         category: topCategory[0] as string,
         amount: topCategory[1] as number,
-        recommendation: `Consider setting a budget limit for ${topCategory[0]}`,
+        recommendation: t("ai_insights.consider_budget_limit", { category: topCategory[0] }),
         actionable: true
       });
     }
@@ -136,11 +139,11 @@ export default function AIInsights({ data }: AIInsightsProps) {
       insights.push({
         id: "positive-cashflow",
         type: "achievement",
-        title: "Positive Cash Flow",
-        description: `You're saving ${savingsRate.toFixed(1)}% of your income this month`,
+        title: t("ai_insights.positive_cash_flow"),
+        description: t("ai_insights.savings_rate", { rate: savingsRate.toFixed(1) }),
         impact: "medium",
         amount: totalIncome - totalExpenses,
-        recommendation: savingsRate < 20 ? "Consider increasing your savings rate to 20%" : "Excellent savings rate!",
+        recommendation: savingsRate < 20 ? t("ai_insights.increase_savings_rate") : t("ai_insights.excellent_savings"),
         actionable: savingsRate < 20
       });
     }
