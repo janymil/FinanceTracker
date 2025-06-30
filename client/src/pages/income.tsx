@@ -465,43 +465,45 @@ export default function Income() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="recurring"
-                      checked={newIncome.isRecurring}
-                      onCheckedChange={(checked) => setNewIncome({...newIncome, isRecurring: checked as boolean})}
-                    />
-                    <Label htmlFor="recurring">{t("common.recurring")} {t("types.income")}</Label>
-                  </div>
-                  {newIncome.isRecurring && (
-                    <>
-                      <div className="grid w-full items-center gap-1.5">
-                        <Label htmlFor="frequency">{t("common.frequency")}</Label>
-                        <Select 
-                          value={newIncome.recurringFrequency} 
-                          onValueChange={(value) => setNewIncome({...newIncome, recurringFrequency: value as any})}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="weekly">{t("frequencies.weekly")}</SelectItem>
-                            <SelectItem value="monthly">{t("frequencies.monthly")}</SelectItem>
-                            <SelectItem value="yearly">{t("frequencies.yearly")}</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid w-full items-center gap-1.5">
-                        <Label htmlFor="endDate">{t("common.end_date")} ({t("common.optional")})</Label>
-                        <Input
-                          id="endDate"
-                          type="date"
-                          value={newIncome.recurringEndDate}
-                          onChange={(e) => setNewIncome({...newIncome, recurringEndDate: e.target.value})}
-                        />
-                      </div>
-                    </>
-                  )}
+                  <RequirePlan requiredPlan="standard" feature={t("common.recurring_transactions")}>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="recurring"
+                        checked={newIncome.isRecurring}
+                        onCheckedChange={(checked) => setNewIncome({...newIncome, isRecurring: checked as boolean})}
+                      />
+                      <Label htmlFor="recurring">{t("common.recurring")} {t("types.income")}</Label>
+                    </div>
+                    {newIncome.isRecurring && (
+                      <>
+                        <div className="grid w-full items-center gap-1.5">
+                          <Label htmlFor="frequency">{t("common.frequency")}</Label>
+                          <Select 
+                            value={newIncome.recurringFrequency} 
+                            onValueChange={(value) => setNewIncome({...newIncome, recurringFrequency: value as any})}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="weekly">{t("frequencies.weekly")}</SelectItem>
+                              <SelectItem value="monthly">{t("frequencies.monthly")}</SelectItem>
+                              <SelectItem value="yearly">{t("frequencies.yearly")}</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid w-full items-center gap-1.5">
+                          <Label htmlFor="endDate">{t("common.end_date")} ({t("common.optional")})</Label>
+                          <Input
+                            id="endDate"
+                            type="date"
+                            value={newIncome.recurringEndDate}
+                            onChange={(e) => setNewIncome({...newIncome, recurringEndDate: e.target.value})}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </RequirePlan>
                   <div className="grid w-full items-center gap-1.5">
                     <Label htmlFor="referenceNote">{t("common.reference_note")}</Label>
                     <Input
