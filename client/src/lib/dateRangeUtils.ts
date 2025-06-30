@@ -102,3 +102,118 @@ export function debugDateRange(range: DateRange, label: string): void {
     timezoneOffset: getUserTimezoneOffset()
   });
 }
+
+/**
+ * Get date range for specific month in current year
+ * @param monthAbbr - Month abbreviation (jan, feb, mar, etc.)
+ * @returns DateRange object for the specified month
+ */
+export function getSpecificMonthDateRange(monthAbbr: string): DateRange {
+  const monthMap: { [key: string]: number } = {
+    'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
+    'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11
+  };
+  
+  const currentYear = new Date().getFullYear();
+  const monthIndex = monthMap[monthAbbr.toLowerCase()];
+  
+  if (monthIndex === undefined) {
+    throw new Error(`Invalid month abbreviation: ${monthAbbr}`);
+  }
+  
+  const startDate = new Date(currentYear, monthIndex, 1);
+  const endDate = new Date(currentYear, monthIndex + 1, 0, 23, 59, 59, 999);
+  
+  return {
+    startDate,
+    endDate,
+    startISO: startDate.toISOString(),
+    endISO: endDate.toISOString()
+  };
+}
+
+/**
+ * Get date range for current month
+ */
+export function getCurrentMonthOnlyDateRange(): DateRange {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+  
+  const startDate = new Date(currentYear, currentMonth, 1);
+  const endDate = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
+  
+  return {
+    startDate,
+    endDate,
+    startISO: startDate.toISOString(),
+    endISO: endDate.toISOString()
+  };
+}
+
+/**
+ * Check if a date falls within a date range
+ * @param date - Date to check
+ * @param dateRange - Date range to check against
+ */
+export function isDateInRange(date: Date, dateRange: DateRange): boolean {
+  return date >= dateRange.startDate && date <= dateRange.endDate;
+}
+
+/**
+ * Get date range based on filter type
+ * @param filterType - Date filter type
+ */
+export function getDateRangeForFilter(filterType: string): DateRange | null {
+  const today = new Date();
+  
+  switch (filterType) {
+    case "today":
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
+      return {
+        startDate: startOfDay,
+        endDate: endOfDay,
+        startISO: startOfDay.toISOString(),
+        endISO: endOfDay.toISOString()
+      };
+      
+    case "week":
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      return {
+        startDate: weekAgo,
+        endDate: today,
+        startISO: weekAgo.toISOString(),
+        endISO: today.toISOString()
+      };
+      
+    case "month":
+      const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+      return {
+        startDate: monthAgo,
+        endDate: today,
+        startISO: monthAgo.toISOString(),
+        endISO: today.toISOString()
+      };
+      
+    case "current-month":
+      return getCurrentMonthOnlyDateRange();
+      
+    case "jan":
+    case "feb":
+    case "mar":
+    case "apr":
+    case "may":
+    case "jun":
+    case "jul":
+    case "aug":
+    case "sep":
+    case "oct":
+    case "nov":
+    case "dec":
+      return getSpecificMonthDateRange(filterType);
+      
+    default:
+      return null;
+  }
+}

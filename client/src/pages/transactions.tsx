@@ -37,6 +37,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
 import TransactionFilters from "@/components/TransactionFilters";
 import { useDateFormat } from "@/hooks/useDateFormat";
+import { getMonthDateRange } from "@/lib/dateRangeUtils";
 
 interface Transaction {
   id: number;
@@ -266,9 +267,8 @@ export default function Transactions() {
     let matchesMonth = true;
     if (selectedMonth) {
       const transactionDate = new Date(transaction.date);
-      const [year, month] = selectedMonth.split('-');
-      matchesMonth = transactionDate.getFullYear() === parseInt(year) && 
-                     transactionDate.getMonth() === parseInt(month) - 1;
+      const { startDate, endDate } = getMonthDateRange(selectedMonth);
+      matchesMonth = transactionDate >= startDate && transactionDate <= endDate;
     }
 
     let matchesDate = true;
