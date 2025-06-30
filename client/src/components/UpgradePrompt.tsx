@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown, TrendingUp, Check, X } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 interface UpgradePromptProps {
   currentPlan: string;
@@ -12,6 +13,7 @@ interface UpgradePromptProps {
 export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Check if user selected a paid plan during signup
@@ -56,31 +58,31 @@ export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
 
   const planDetails = {
     standard: {
-      name: 'Standard',
-      price: '$4.99/month',
+      name: t('upgrade.standard_name'),
+      price: t('upgrade.standard_price'),
       color: 'blue',
       icon: TrendingUp,
       features: [
-        'Goals and budget management',
-        'Interactive charts and reports', 
-        'AI expense categorization',
-        'Calendar view and reminders',
-        'Unlimited transaction history'
+        t('upgrade.standard_features.goals'),
+        t('upgrade.standard_features.charts'),
+        t('upgrade.standard_features.ai_categorization'),
+        t('upgrade.standard_features.calendar'),
+        t('upgrade.standard_features.unlimited_history')
       ]
     },
     premium: {
-      name: 'Premium',
-      price: '$9.99/month',
+      name: t('upgrade.premium_name'),
+      price: t('upgrade.premium_price'),
       color: 'purple',
       icon: Crown,
       features: [
-        'Everything in Standard plan',
-        'AI financial tips and insights',
-        'Advanced trends analysis',
-        'Expense prediction',
-        'Daily personalized recommendations',
-        'Cloud data backup',
-        'Data management (CSV, PDF)'
+        t('upgrade.premium_features.everything'),
+        t('upgrade.premium_features.ai_tips'),
+        t('upgrade.premium_features.trends'),
+        t('upgrade.premium_features.prediction'),
+        t('upgrade.premium_features.recommendations'),
+        t('upgrade.premium_features.backup'),
+        t('upgrade.premium_features.data_management')
       ]
     }
   };
@@ -106,13 +108,13 @@ export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
           </div>
           <div>
             <CardTitle className="flex items-center gap-2">
-              Complete Your {plan.name} Upgrade
+              {t('upgrade.complete_upgrade', { plan: plan.name })}
               <Badge variant="secondary" className="bg-green-100 text-green-800">
-                Ready to activate
+                {t('upgrade.ready_to_activate')}
               </Badge>
             </CardTitle>
             <CardDescription>
-              You selected the {plan.name} plan. Complete your upgrade to unlock all features.
+              {t('upgrade.selected_plan_description', { plan: plan.name })}
             </CardDescription>
           </div>
         </div>
@@ -121,7 +123,7 @@ export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <h4 className="font-semibold text-sm">What you'll get:</h4>
+            <h4 className="font-semibold text-sm">{t('upgrade.what_you_get')}</h4>
             <div className="space-y-1">
               {plan.features.slice(0, 4).map((feature, index) => (
                 <div key={index} className="flex items-center text-sm">
@@ -131,7 +133,7 @@ export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
               ))}
               {plan.features.length > 4 && (
                 <div className="text-sm text-gray-500">
-                  +{plan.features.length - 4} more features
+                  {t('upgrade.more_features', { count: plan.features.length - 4 })}
                 </div>
               )}
             </div>
@@ -143,7 +145,7 @@ export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
                 {plan.price}
               </div>
               <div className="text-sm text-gray-500">
-                Cancel anytime
+                {t('upgrade.cancel_anytime')}
               </div>
             </div>
             

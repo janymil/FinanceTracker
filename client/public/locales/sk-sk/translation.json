@@ -1586,6 +1586,16 @@
     "premium": "Premium"
   },
 
+  "currency": {
+    "welcome_title": "Vitajte v FinanzerPro! 🌎",
+    "welcome_description": "Prosím vyberte svoju preferovanú menu na začiatok. Môžete ju zmeniť neskôr, kým nepridáte vašu prvú transakciu.",
+    "choose_description": "🌎 Vyberte si z 15 mien vrátane latinskoamerických opcií:",
+    "success_title": "Mena Úspešne Nastavená",
+    "success_description": "Vaša mena bola nastavená na {{symbol}}. Použite ikonu ozubeného kolieska v hlavičke na zmenu pred pridaním transakcií.",
+    "error_title": "Chyba",
+    "error_description": "Nepodarilo sa nastaviť menu. Prosím skúste to znovu."
+  },
+
   "trends": {
     "title": "Pokročilá analýza trendov",
     "subtitle": "Hlboké poznatky o vašich finančných vzorcoch a prognózach",

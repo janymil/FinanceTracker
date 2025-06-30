@@ -1530,6 +1530,16 @@
     "premium": "Premium"
   },
 
+  "currency": {
+    "welcome_title": "¡Bienvenido a FinanzerPro! 🌎",
+    "welcome_description": "Por favor elige tu moneda preferida para comenzar. Puedes cambiarla más tarde hasta que agregues tu primera transacción.",
+    "choose_description": "🌎 Elige entre 15 monedas incluyendo opciones latinoamericanas:",
+    "success_title": "Moneda Configurada Exitosamente",
+    "success_description": "Tu moneda ha sido configurada a {{symbol}}. Usa el ícono de engranaje en el encabezado para cambiarla antes de agregar transacciones.",
+    "error_title": "Error",
+    "error_description": "Error al configurar la moneda. Por favor inténtalo de nuevo."
+  },
+
   "trends": {
     "title": "Análisis Avanzado de Tendencias",
     "subtitle": "Perspectivas profundas sobre tus patrones financieros y pronósticos",
