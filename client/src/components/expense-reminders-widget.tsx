@@ -54,6 +54,7 @@ interface Category {
 }
 
 export default function FinancialRemindersWidget() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReminder, setEditingReminder] = useState<ExpenseReminder | null>(null);
@@ -94,12 +95,12 @@ export default function FinancialRemindersWidget() {
       setIsDialogOpen(false);
       resetForm();
       toast({
-        title: "Reminder Created",
-        description: "Expense reminder has been set successfully",
+        title: t("expense_reminders.reminder_created"),
+        description: t("expense_reminders.created_successfully"),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -112,12 +113,12 @@ export default function FinancialRemindersWidget() {
       await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
       toast({
-        title: "Reminder Completed",
-        description: "Expense reminder marked as completed",
+        title: t("expense_reminders.reminder_completed"),
+        description: t("expense_reminders.completed_successfully"),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -130,12 +131,12 @@ export default function FinancialRemindersWidget() {
       await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/expense-reminders/upcoming"] });
       toast({
-        title: "Reminder Deleted",
-        description: "Expense reminder has been deleted",
+        title: t("expense_reminders.reminder_deleted"),
+        description: t("expense_reminders.deleted_successfully"),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
