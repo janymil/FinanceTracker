@@ -1400,7 +1400,13 @@
     "edit_income": "Upraviť príjem",
     "edit_description": "Aktualizovať podrobnosti transakcie príjmu",
     "recurring_income": "Opakujúci sa príjem",
-    "update_income": "Aktualizovať príjem"
+    "update_income": "Aktualizovať príjem",
+    "added_title": "Príjem Pridaný",
+    "added_description": "Transakcia príjmu bola úspešne vytvorená",
+    "updated_title": "Príjem Aktualizovaný",
+    "updated_description": "Transakcia príjmu bola úspešne aktualizovaná",
+    "confirm_delete": "Ste si istí, že chcete vymazať tento príjem?",
+    "adding": "Pridávam..."
   },
 
   "expenses": {
