@@ -315,10 +315,10 @@ export class DatabaseStorage implements IStorage {
 
   // Transaction operations
   async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
-    // Encrypt sensitive fields
+    // Encrypt sensitive fields (but keep amount as numeric for database compatibility)
     const encryptedTransaction = {
       ...transaction,
-      amount: DataEncryption.encryptAmount(transaction.amount),
+      // amount stays as string/numeric - NOT encrypted to maintain database compatibility
       description: DataEncryption.encryptDescription(transaction.description),
       referenceNote: transaction.referenceNote ? DataEncryption.encrypt(transaction.referenceNote) : null
     };
@@ -345,10 +345,10 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    // Decrypt for return
+    // Decrypt for return (amount is not encrypted, so no decryption needed)
     return {
       ...newTransaction,
-      amount: DataEncryption.decryptAmount(newTransaction.amount),
+      // amount stays as-is since it's not encrypted
       description: DataEncryption.decryptDescription(newTransaction.description),
       referenceNote: newTransaction.referenceNote ? DataEncryption.decrypt(newTransaction.referenceNote) : null
     };
@@ -386,10 +386,10 @@ export class DatabaseStorage implements IStorage {
 
     const userTransactions = await query;
 
-    // Decrypt sensitive fields
+    // Decrypt sensitive fields (amount is not encrypted)
     return userTransactions.map(transaction => ({
       ...transaction,
-      amount: DataEncryption.decryptAmount(transaction.amount),
+      // amount stays as-is since it's not encrypted
       description: DataEncryption.decryptDescription(transaction.description),
       referenceNote: transaction.referenceNote ? DataEncryption.decrypt(transaction.referenceNote) : null
     }));
