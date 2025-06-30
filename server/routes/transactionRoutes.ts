@@ -258,6 +258,10 @@ export function registerTransactionRoutes(app: Express) {
         new Date(endDate as string)
       );
 
+      console.log(`🔍 Financial Summary Debug for user ${userId}:`);
+      console.log(`📅 Date range: ${startDate} to ${endDate}`);
+      console.log(`💰 Raw summary:`, JSON.stringify(summary, null, 2));
+
       // Get user language and translate predefined category names
       const userLanguage = getUserLanguage(req);
       const translatedSummary = {
@@ -268,6 +272,7 @@ export function registerTransactionRoutes(app: Express) {
         }))
       };
 
+      console.log(`🌍 Translated summary:`, JSON.stringify(translatedSummary, null, 2));
       res.json(translatedSummary);
     } catch (error) {
       console.error("Error fetching financial summary:", error);
