@@ -827,34 +827,34 @@ export default function Help() {
                       <div className="border-l-4 border-orange-500 pl-4">
                         <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
                           <Target className="h-5 w-5" />
-                          Budget and Goals (Standard+)
+                          {t('Budget and Goals (Standard+)')}
                         </h4>
                         <div className="space-y-4">
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Budget Creation and Management</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Budget Creation and Management')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Budgets page<br/>
-                              <strong>Function:</strong> Set spending limits for categories with time periods<br/>
-                              <strong>Options:</strong> Weekly, monthly, quarterly, yearly timeframes<br/>
-                              <strong>Features:</strong> Progress tracking, overspending alerts, visual indicators, budget history
+                              <strong>{t('Location')}:</strong> {t('Budgets page')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Set spending limits for categories with time periods')}<br/>
+                              <strong>{t('Options')}:</strong> {t('Weekly, monthly, quarterly, yearly timeframes')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Progress tracking, overspending alerts, visual indicators, budget history')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Financial Goals</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Financial Goals')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Goals page<br/>
-                              <strong>Function:</strong> Set savings targets with deadlines<br/>
-                              <strong>Types:</strong> Emergency Fund, Vacation, House Down Payment, Car Purchase, Debt Payoff, Retirement<br/>
-                              <strong>Features:</strong> Progress tracking, milestone celebrations, contribution history, deadline reminders
+                              <strong>{t('Location')}:</strong> {t('Goals page')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Set savings targets with deadlines')}<br/>
+                              <strong>{t('Types')}:</strong> {t('Emergency Fund, Vacation, House Down Payment, Car Purchase, Debt Payoff, Retirement')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Progress tracking, milestone celebrations, contribution history, deadline reminders')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Collaborative Goals</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Collaborative Goals')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Function:</strong> Share goals with family members or partners<br/>
-                              <strong>Features:</strong> Friend invitations, shared contributions, progress visibility, achievement tracking
+                              <strong>{t('Function')}:</strong> {t('Share goals with family members or partners')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Friend invitations, shared contributions, progress visibility, achievement tracking')}
                             </p>
                           </div>
                         </div>

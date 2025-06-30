@@ -844,6 +844,23 @@
   "Automatically suggest categories based on transaction descriptions": "Automatically suggest categories based on transaction descriptions",
   "Machine learning analysis, merchant recognition, user preference learning, manual override options": "Machine learning analysis, merchant recognition, user preference learning, manual override options",
 
+  "Budget and Goals (Standard+)": "Budget and Goals (Standard+)",
+  "Budget Creation and Management": "Budget Creation and Management",
+  "Budgets page": "Budgets page",
+  "Set spending limits for categories with time periods": "Set spending limits for categories with time periods",
+  "Options": "Options",
+  "Weekly, monthly, quarterly, yearly timeframes": "Weekly, monthly, quarterly, yearly timeframes",
+  "Progress tracking, overspending alerts, visual indicators, budget history": "Progress tracking, overspending alerts, visual indicators, budget history",
+  "Financial Goals": "Financial Goals",
+  "Goals page": "Goals page",
+  "Set savings targets with deadlines": "Set savings targets with deadlines",
+  "Types": "Types",
+  "Emergency Fund, Vacation, House Down Payment, Car Purchase, Debt Payoff, Retirement": "Emergency Fund, Vacation, House Down Payment, Car Purchase, Debt Payoff, Retirement",
+  "Progress tracking, milestone celebrations, contribution history, deadline reminders": "Progress tracking, milestone celebrations, contribution history, deadline reminders",
+  "Collaborative Goals": "Collaborative Goals",
+  "Share goals with family members or partners": "Share goals with family members or partners",
+  "Friend invitations, shared contributions, progress visibility, achievement tracking": "Friend invitations, shared contributions, progress visibility, achievement tracking",
+
   "require_plan": {
     "compact": {
       "feature_title": "{{plan}} Feature",
