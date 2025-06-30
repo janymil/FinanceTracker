@@ -295,9 +295,39 @@ Analyze this transaction and provide consistent categorization:`
   }
 }
 
-export async function categorizeExpense(description: string, amount: number, language: string = 'en-us'): Promise<ExpenseCategorizationResult> {
+export async function categorizeExpense(
+  description: string, 
+  amount: number, 
+  language: string = 'en-us',
+  userTransactions: any[] = [],
+  userCategories: any[] = []
+): Promise<ExpenseCategorizationResult> {
   const normalizedLanguage = normalizeLanguageCode(language);
   try {
+    // Analyze user's existing transaction patterns for personalization
+    const userCategoriesSet = new Set();
+    const merchantPatterns = new Map();
+    
+    // Extract user's categories and merchant patterns
+    userTransactions.forEach(transaction => {
+      if (transaction.category && transaction.category !== 'Uncategorized') {
+        userCategoriesSet.add(transaction.category);
+        
+        // Build merchant pattern recognition
+        const merchant = transaction.description.toLowerCase();
+        if (!merchantPatterns.has(merchant)) {
+          merchantPatterns.set(merchant, transaction.category);
+        }
+      }
+    });
+
+    // Build personalized context
+    const userCategoriesList = Array.from(userCategoriesSet);
+    const merchantExamples = Array.from(merchantPatterns.entries())
+      .slice(0, 10) // Limit to avoid token overflow
+      .map(([merchant, category]) => `"${merchant}" → ${category}`)
+      .join('\n');
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -311,9 +341,18 @@ ANALYSIS APPROACH:
 1. Identify the merchant/business type from the description
 2. Understand what industry/service they provide
 3. Match to the most logical category based on business nature
-4. Use intelligent business analysis, not keyword matching
+4. Use the user's existing categories when they fit
+5. Be consistent with similar merchants the user has used before
 
-BUSINESS TYPE ANALYSIS (use intelligence, not rules):
+${userCategoriesList.length > 0 ? `
+USER'S EXISTING CATEGORIES:
+${userCategoriesList.join(', ')}
+
+USER'S MERCHANT PATTERNS (learn from these):
+${merchantExamples}
+` : ''}
+
+BUSINESS TYPE HINTS (not rules, use intelligence):
 - Grocery stores, supermarkets, restaurants → Food & Dining related
 - Gas stations, public transport, car services → Transportation related  
 - Tech services, software, hosting → Business/Technology related
@@ -321,10 +360,6 @@ BUSINESS TYPE ANALYSIS (use intelligence, not rules):
 - Utilities, phone bills, internet → Bills & Utilities related
 - Medical, pharmacy, health services → Healthcare related
 - Hotels, airlines, travel → Travel related
-- Clothing, electronics, general retail → Shopping related
-- Rent, mortgage, home improvement → Home & Garden related
-- Salon, spa, cosmetics → Personal Care related
-- Courses, books, tuition → Education related
 
 IMPORTANT: Analyze the business name intelligently. Don't just match keywords - understand what the business actually does.
 
@@ -344,6 +379,7 @@ Analyze this merchant intelligently:
 1. What type of business is this?
 2. What industry/service do they provide?
 3. Which category best matches their business nature?
+4. Have I used similar merchants before? (check patterns above)
 
 Use your intelligence to categorize correctly.`
         }

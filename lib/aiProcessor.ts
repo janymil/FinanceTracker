@@ -90,7 +90,13 @@ export async function runAI(task: string, userId: string, payload: Record<string
           break;
         case 'categorizeExpense':
           const { categorizeExpense } = await import('../server/openai');
-          fallbackResult = await categorizeExpense(payload.description, payload.amount, payload.language);
+          fallbackResult = await categorizeExpense(
+            payload.description, 
+            payload.amount, 
+            payload.language || 'en-us',
+            payload.userTransactions || [],
+            payload.userCategories || []
+          );
           break;
         case 'parseBankStatement':
           fallbackResult = await parseBankStatement(payload.text, payload.language || 'en-us');
