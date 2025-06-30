@@ -957,7 +957,7 @@ async function addAICategorization(
               language: language,
               userTransactions: userTransactions.map(tx => ({
                 description: tx.description,
-                category: tx.categoryName,
+                category: tx.categoryName || tx.category,
                 amount: tx.amount,
                 type: tx.type,
                 date: tx.date

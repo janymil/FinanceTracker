@@ -1962,6 +1962,16 @@ app.post("/execute-gpt-task", async (req, res) => {
         result = await parseBankStatement(payload.text, payload.language || 'en-us');
         break;
 
+      case "categorizeExpense":
+        result = await categorizeExpense(
+          payload.description,
+          payload.amount,
+          payload.language || 'en-us',
+          payload.userTransactions || [],
+          payload.userCategories || []
+        );
+        break;
+
       default:
         return res.status(400).json({ error: `Unknown task: ${task}` });
     }
