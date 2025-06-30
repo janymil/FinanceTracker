@@ -97,10 +97,6 @@ const customSlovak = {
   ...skSK,
   signUp: {
     ...(skSK.signUp || {}),
-    form: {
-      ...(skSK.signUp?.form || {}),
-      termsAndConditions: 'Súhlasím s {{terms}} a {{privacy}}'
-    },
     legalConsent: {
       ...(skSK.signUp?.legalConsent || {}),
       checkbox: {
