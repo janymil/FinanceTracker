@@ -53,6 +53,8 @@ export default function TrendsChart() {
       // Calculate start and end of month
       const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
+      // Ensure end of day to include all transactions
+      monthEnd.setHours(23, 59, 59, 999);
       
       // Filter transactions for this month
       const monthTransactions = transactions.filter((t: any) => {

@@ -149,7 +149,10 @@ export default function Trends() {
         // Fetch financial summary with date range
         const now = new Date();
         const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
-        const summaryUrl = `/api/financial-summary?startDate=${sixMonthsAgo.toISOString().split('T')[0]}&endDate=${now.toISOString().split('T')[0]}`;
+        // Fix: Use end of current month instead of current datetime to avoid timezone issues
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        endOfMonth.setHours(23, 59, 59, 999);
+        const summaryUrl = `/api/financial-summary?startDate=${sixMonthsAgo.toISOString().split('T')[0]}&endDate=${endOfMonth.toISOString()}`;
         const summaryRes = await fetch(summaryUrl, { headers });
         if (summaryRes.ok) {
           const summaryData = await summaryRes.json();

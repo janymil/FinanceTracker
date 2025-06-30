@@ -259,6 +259,7 @@ export function registerTransactionRoutes(app: Express) {
       );
 
       console.log(`🔍 Financial Summary Debug for user ${userId}:`);
+      console.log(`📅 Query params received: startDate=${startDate}, endDate=${endDate}`);
       console.log(`📅 Date range: ${startDate} to ${endDate}`);
       console.log(`💰 Raw summary:`, JSON.stringify(summary, null, 2));
 
