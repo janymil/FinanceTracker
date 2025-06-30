@@ -238,12 +238,12 @@ export default function Budget() {
       setEditingBudget(null);
       setIsDialogOpen(false);
       toast({
-        title: "Budget Updated",
-        description: "Budget has been updated successfully",
+        title: t("budget.budget_updated"),
+        description: t("budget.budget_updated_successfully"),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -265,12 +265,12 @@ export default function Budget() {
       
       await fetchBudgets(); // Refresh budgets
       toast({
-        title: "Budget Deleted",
-        description: "Budget has been removed successfully",
+        title: t("budget.budget_deleted"),
+        description: t("budget.budget_deleted_successfully"),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });

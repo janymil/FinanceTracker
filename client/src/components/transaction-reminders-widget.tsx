@@ -210,8 +210,8 @@ export default function TransactionRemindersWidget() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create reminder",
+        title: t("common.error"),
+        description: error.message || t("transaction_reminders.failed_to_create"),
         variant: "destructive",
       });
     },
