@@ -1,7 +1,5 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ClerkProvider } from '@clerk/clerk-react';
-import { esES, skSK } from '@clerk/localizations';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Router } from 'wouter';
 import { HelmetProvider } from 'react-helmet-async';
@@ -10,6 +8,7 @@ import App from './App.tsx';
 import './index.css';
 import { clearStaleSession } from './utils/sessionCleanup';
 import i18n from './i18n/i18n';
+import DynamicClerkProvider from './components/DynamicClerkProvider.tsx';
 // Clear any stale authentication data on app startup
 clearStaleSession();
 
@@ -92,29 +91,7 @@ const getUserLanguage = (): string => {
 const userLanguage = getUserLanguage();
 const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
 
-// Custom Slovak localization with missing terms
-const customSlovak = {
-  ...skSK,
-  signUp: {
-    ...(skSK.signUp || {}),
-    legalConsent: {
-      ...(skSK.signUp?.legalConsent || {}),
-      checkbox: {
-        label__onlyPrivacyPolicy: 'Súhlasím so {{ privacyPolicyLink || link("zásadami ochrany osobných údajov") }}',
-        label__onlyTermsOfService: 'Súhlasím s {{ termsOfServiceLink || link("obchodnými podmienkami") }}',
-        label__termsOfServiceAndPrivacyPolicy: 'Súhlasím s {{ termsOfServiceLink || link("obchodnými podmienkami") }} a {{ privacyPolicyLink || link("zásadami ochrany osobných údajov") }}'
-      },
-      continue: {
-        subtitle: 'Pokračovaním súhlasíte s našimi zásadami.',
-        title: 'Zákonné súhlasy'
-      }
-    }
-  }
-};
 
-// Simple Clerk localization without hooks
-const userLang = navigator.language;
-const localization = userLang.startsWith('es') ? esES : userLang.startsWith('sk') ? customSlovak : undefined;
 
 const root = createRoot(container);
 root.render(
@@ -124,7 +101,7 @@ root.render(
         publishableKey={clerkPubKey}
         afterSignInUrl={dashboardRedirectUrl}
         afterSignUpUrl={dashboardRedirectUrl}
-        localization={localization}
+        localization={getClerkLocalization()}
       >
         <QueryClientProvider client={queryClient}>
           <Router>
