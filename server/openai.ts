@@ -90,21 +90,32 @@ export async function categorizeExpense(description: string, amount: number, lan
           role: "system",
           content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (category, confidence, reasoning) must be in ${getLanguageLabel(normalizedLanguage)}.
 
-You are an expert financial categorization assistant. Analyze the expense description and amount to determine the most appropriate category.
+You are an expert financial categorization assistant with extensive knowledge of global merchants, payment processors, and business types. Analyze the expense description and amount to determine the most appropriate category.
 
-Available categories:
-- Food & Dining (restaurants, groceries, takeout)
-- Transportation (gas, public transport, parking, car maintenance)
-- Shopping (clothes, electronics, general retail)
-- Entertainment (movies, concerts, games, subscriptions)
-- Bills & Utilities (electricity, water, internet, phone)
-- Healthcare (medical, pharmacy, insurance)
+Available categories with specific examples:
+- Food & Dining (Migros, Coop, ALDI, Lidl, Tottus, restaurants, groceries, takeout)
+- Transportation (gas, public transport, parking, car maintenance, ride-sharing)
+- Shopping (clothes, electronics, general retail, Casa Ideas, Plaza Norte)
+- Entertainment (movies, concerts, games, streaming services, SoundCloud, Suno)
+- Bills & Utilities (electricity, water, internet, phone bills, yallo.ch mobile services)
+- Healthcare (medical, pharmacy, insurance, Amavita)
 - Travel (hotels, flights, vacation expenses)
 - Education (courses, books, tuition)
 - Home & Garden (rent, mortgage, home improvement, furniture)
 - Personal Care (salon, spa, cosmetics)
-- Business (office supplies, professional services)
-- Other (miscellaneous expenses)
+- Business (Replit development tools, OpenAI services, Hostinger hosting, Bunny.net CDN, office supplies, professional services, Anytime Mailbox)
+- Other (miscellaneous expenses only when no other category fits)
+
+IMPORTANT MERCHANT RECOGNITION:
+- yallo.ch = Swiss mobile operator → Bills & Utilities
+- Replit = Development platform → Business
+- OpenAI = AI services → Business
+- Hostinger = Web hosting → Business
+- Bunny.net = CDN services → Business
+- SoundCloud = Music streaming → Entertainment
+- Migros, Coop, ALDI, Lidl = Grocery stores → Food & Dining
+- Amavita = Swiss pharmacy → Healthcare
+- Cash withdrawals = Other (unless specific purpose is clear)
 
 Respond with JSON in this exact format:
 {
@@ -118,7 +129,14 @@ Respond with JSON in this exact format:
           content: `Description: "${description}"
 Amount: $${amount}
 
-Please categorize this expense.`
+Please analyze this merchant/description carefully and categorize appropriately. Pay special attention to:
+- Technology/development services (Replit, OpenAI, hosting services) → Business
+- Mobile/telecom services (yallo.ch, phone carriers) → Bills & Utilities  
+- Streaming/entertainment platforms → Entertainment
+- Grocery stores and supermarkets → Food & Dining
+- Known brand names and their business types
+
+Categorize this expense with high confidence when you recognize the merchant.`
         }
       ],
       response_format: { type: "json_object" },

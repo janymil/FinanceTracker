@@ -935,25 +935,36 @@ async function addAICategorization(
   language: string
 ): Promise<ExtractedTransaction[]> {
   try {
-    // Import categorization function
-    const { categorizeExpense } = await import('../server/openai');
-    
+    // Use centralized AI system for categorization
     const categorizedTransactions = await Promise.all(
       transactions.map(async (transaction) => {
         try {
           if (transaction.description && transaction.amount !== 0) {
+            const result = await runAI('categorizeExpense', 'system', {
+              description: transaction.description,
+              amount: Math.abs(transaction.amount),
+              language: language
+            });
+            
+            transaction.category = result.category || 'Other';
+            console.log(`AI Categorized "${transaction.description}" as "${result.category || 'Other'}"`);
+          }
+        } catch (error) {
+          console.error(`Failed to categorize transaction: ${transaction.description}`, error);
+          // Fallback to local categorization
+          try {
+            const { categorizeExpense } = await import('../server/openai');
             const categorization = await categorizeExpense(
               transaction.description,
               Math.abs(transaction.amount),
               language
             );
-            
             transaction.category = categorization.category;
-            console.log(`Categorized "${transaction.description}" as "${categorization.category}"`);
+            console.log(`Local Categorized "${transaction.description}" as "${categorization.category}"`);
+          } catch (fallbackError) {
+            console.error(`Local categorization also failed for: ${transaction.description}`, fallbackError);
+            transaction.category = 'Other';
           }
-        } catch (error) {
-          console.error(`Failed to categorize transaction: ${transaction.description}`, error);
-          // Keep transaction without category rather than failing the whole batch
         }
         
         return transaction;
