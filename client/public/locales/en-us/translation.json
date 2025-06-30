@@ -1556,7 +1556,12 @@
     "save_failed": "Save failed",
     "save_failed_description": "Failed to save transaction. Please try again.",
     "transaction_description_placeholder": "Transaction description",
-    "select_category_placeholder": "Select category"
+    "select_category_placeholder": "Select category",
+    "qr_code_error": "QR Code Error",
+    "failed_to_generate_qr": "Failed to generate QR code",
+    "upload_error": "Upload Error",
+    "failed_to_process_mobile": "Failed to process mobile upload",
+    "timeout": "Timeout"
   },
 
   "trends": {

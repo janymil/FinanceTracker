@@ -206,7 +206,7 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
       if (qrUploadState.isPolling) {
         setQrUploadState(prev => ({ ...prev, isPolling: false, status: 'error' }));
         toast({
-          title: "Timeout",
+          title: t("upload.timeout"),
           description: "QR scan session expired. Please try again.",
           variant: "destructive"
         });
@@ -299,8 +299,8 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
   const handleFileSelect = async (file: File) => {
     if (!file.type.startsWith('image/')) {
       toast({
-        title: "Invalid file type",
-        description: "Please select an image",
+        title: t("upload.invalid_file_type"),
+        description: t("upload.please_select_image"),
         variant: "destructive"
       });
       return;
@@ -409,8 +409,8 @@ export default function UploadReceiptModal({ onReceiptProcessed, buttonText }: U
         message: 'Failed to process receipt'
       });
       toast({
-        title: "Upload failed",
-        description: "Please try again",
+        title: t("upload.upload_failed"),
+        description: t("upload.please_try_again"),
         variant: "destructive"
       });
     }

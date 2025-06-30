@@ -1633,7 +1633,12 @@
     "save_failed": "Error al guardar",
     "save_failed_description": "Error al guardar la transacción. Por favor inténtalo de nuevo.",
     "transaction_description_placeholder": "Descripción de la transacción",
-    "select_category_placeholder": "Seleccionar categoría"
+    "select_category_placeholder": "Seleccionar categoría",
+    "qr_code_error": "Error de Código QR",
+    "failed_to_generate_qr": "Error al generar código QR",
+    "upload_error": "Error de Carga",
+    "failed_to_process_mobile": "Error al procesar carga móvil",
+    "timeout": "Tiempo Agotado"
   },
 
   "trends": {

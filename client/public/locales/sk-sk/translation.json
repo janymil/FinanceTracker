@@ -1689,7 +1689,12 @@
     "save_failed": "Ukladanie zlyhalo",
     "save_failed_description": "Nepodarilo sa uložiť transakciu. Prosím skúste to znovu.",
     "transaction_description_placeholder": "Popis transakcie",
-    "select_category_placeholder": "Vybrať kategóriu"
+    "select_category_placeholder": "Vybrať kategóriu",
+    "qr_code_error": "Chyba QR Kódu",
+    "failed_to_generate_qr": "Nepodarilo sa vygenerovať QR kód",
+    "upload_error": "Chyba Nahrávania",
+    "failed_to_process_mobile": "Nepodarilo sa spracovať mobilné nahrávanie",
+    "timeout": "Časový Limit Prekročený"
   },
 
   "trends": {
