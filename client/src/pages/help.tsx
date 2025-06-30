@@ -114,143 +114,143 @@ export default function Help() {
   const faqItems = [
     {
       id: "getting-started",
-      question: "How do I get started with FinanzerPro?",
-      answer: "Simply create an account and start by adding your first transaction. You can manually enter expenses and income, or use our AI categorization feature (Standard+ plans) to automatically classify your transactions."
+      question: t("How do I get started with FinanzerPro?"),
+      answer: t("Simply create an account and start by adding your first transaction. You can manually enter expenses and income, or use our AI categorization feature (Standard+ plans) to automatically classify your transactions.")
     },
     {
       id: "subscription-plans",
-      question: "What are the differences between subscription plans?",
-      answer: "Free plan allows 100 transactions, Standard plan ($4.99/month) includes up to 100 transactions with AI features, budgeting, and goals. Premium plan ($9.99/month) offers unlimited transactions, advanced analytics, cloud backup, and data import/export."
+      question: t("What are the differences between subscription plans?"),
+      answer: t("Free plan allows 100 transactions, Standard plan ($4.99/month) includes up to 100 transactions with AI features, budgeting, and goals. Premium plan ($9.99/month) offers unlimited transactions, advanced analytics, cloud backup, and data import/export.")
     },
     {
       id: "data-security",
-      question: "Is my financial data secure?",
-      answer: "Yes, we use industry-standard encryption and security measures. Your data is stored securely with PostgreSQL, and we offer cloud backup for Premium users. We never share your personal financial information."
+      question: t("Is my financial data secure?"),
+      answer: t("Yes, we use industry-standard encryption and security measures. Your data is stored securely with PostgreSQL, and we offer cloud backup for Premium users. We never share your personal financial information.")
     },
     {
       id: "ai-categorization",
-      question: "How does AI categorization work?",
-      answer: "Our AI analyzes your transaction descriptions and amounts to automatically suggest the most appropriate category. It learns from your patterns and becomes more accurate over time. Available for Standard and Premium plans."
+      question: t("How does AI categorization work?"),
+      answer: t("Our AI analyzes your transaction descriptions and amounts to automatically suggest the most appropriate category. It learns from your patterns and becomes more accurate over time. Available for Standard and Premium plans.")
     },
     {
       id: "receipt-ocr",
-      question: "How does receipt scanning work?",
-      answer: "Upload photos of receipts using the 'Upload Image' button on any transaction page. Our OCR technology automatically extracts merchant name, amount, and date. Standard+ users get AI-powered category suggestions. Works with mobile camera or gallery photos."
+      question: t("How does receipt scanning work?"),
+      answer: t("Upload photos of receipts using the 'Upload Image' button on any transaction page. Our OCR technology automatically extracts merchant name, amount, and date. Standard+ users get AI-powered category suggestions. Works with mobile camera or gallery photos.")
     },
     {
       id: "mobile-qr-upload",
-      question: "How does mobile QR code upload work?",
-      answer: "Click 'Upload Image' on your computer and select 'Scan with Phone'. A QR code appears on your screen. Scan it with your phone's camera to open the mobile upload page. Take a photo of your receipt on your phone, and the extracted data automatically appears in your computer's transaction form. Perfect for seamless cross-device receipt scanning."
+      question: t("How does mobile QR code upload work?"),
+      answer: t("Click 'Upload Image' on your computer and select 'Scan with Phone'. A QR code appears on your screen. Scan it with your phone's camera to open the mobile upload page. Take a photo of your receipt on your phone, and the extracted data automatically appears in your computer's transaction form. Perfect for seamless cross-device receipt scanning.")
     },
     {
       id: "ocr-accuracy",
-      question: "What if OCR doesn't read my receipt correctly?",
-      answer: "You can edit any extracted information before saving. The system shows extracted data in editable fields, allowing you to correct merchant names, amounts, or dates. Clear, well-lit photos produce the best results."
+      question: t("What if OCR doesn't read my receipt correctly?"),
+      answer: t("You can edit any extracted information before saving. The system shows extracted data in editable fields, allowing you to correct merchant names, amounts, or dates. Clear, well-lit photos produce the best results.")
     },
     {
       id: "supported-receipts",
-      question: "What types of receipts are supported?",
-      answer: "All standard receipts including restaurant bills, grocery stores, gas stations, retail purchases, and service receipts. The system works best with printed receipts that have clear text and are photographed in good lighting conditions."
+      question: t("What types of receipts are supported?"),
+      answer: t("All standard receipts including restaurant bills, grocery stores, gas stations, retail purchases, and service receipts. The system works best with printed receipts that have clear text and are photographed in good lighting conditions.")
     },
     {
       id: "budgets-goals",
-      question: "How do I set up budgets and goals?",
-      answer: "Navigate to the Budgets or Goals section from the sidebar. Set monthly spending limits by category for budgets, or create savings targets with deadlines for goals. The app will track your progress automatically."
+      question: t("How do I set up budgets and goals?"),
+      answer: t("Navigate to the Budgets or Goals section from the sidebar. Set monthly spending limits by category for budgets, or create savings targets with deadlines for goals. The app will track your progress automatically.")
     },
     {
       id: "data-export",
-      question: "Can I export my data?",
-      answer: "Yes, Premium users can export data in CSV, Excel, or JSON formats. You can also set up automatic cloud backups and import data from other financial apps like Mint, QuickBooks, and YNAB."
+      question: t("Can I export my data?"),
+      answer: t("Yes, Premium users can export data in CSV, Excel, or JSON formats. You can also set up automatic cloud backups and import data from other financial apps like Mint, QuickBooks, and YNAB.")
     },
     {
       id: "mobile-access",
-      question: "Is FinanzerPro available on mobile?",
-      answer: "FinanzerPro is a responsive web application that works perfectly on mobile browsers. Simply bookmark the site on your phone for easy access anywhere."
+      question: t("Is FinanzerPro available on mobile?"),
+      answer: t("FinanzerPro is a responsive web application that works perfectly on mobile browsers. Simply bookmark the site on your phone for easy access anywhere.")
     },
     {
       id: "dashboard-widgets",
-      question: "What widgets are available on the dashboard?",
-      answer: "Dashboard includes Financial Summary Cards (income/expenses/balance), Recent Transactions widget, Budget Overview (Standard+), Financial Health Score, AI Financial Tips (Premium), Financial Mascot (Premium), and Transaction Reminders (Standard+). All widgets update automatically."
+      question: t("What widgets are available on the dashboard?"),
+      answer: t("Dashboard includes Financial Summary Cards (income/expenses/balance), Recent Transactions widget, Budget Overview (Standard+), Financial Health Score, AI Financial Tips (Premium), Financial Mascot (Premium), and Transaction Reminders (Standard+). All widgets update automatically.")
     },
     {
       id: "transaction-editing",
-      question: "How do I edit or delete transactions?",
-      answer: "Click on any transaction in lists or dashboard widgets to edit. Modify amount, description, date, category, or notes. Use the delete button to remove transactions. Changes update immediately without page reloads."
+      question: t("How do I edit or delete transactions?"),
+      answer: t("Click on any transaction in lists or dashboard widgets to edit. Modify amount, description, date, category, or notes. Use the delete button to remove transactions. Changes update immediately without page reloads.")
     },
     {
       id: "recurring-transactions",
-      question: "How do recurring transactions work?",
-      answer: "Standard+ users can mark transactions as recurring (weekly, monthly, yearly). The system shows upcoming reminders in the dashboard widget and detects patterns automatically. Set end dates or leave open-ended for ongoing bills."
+      question: t("How do recurring transactions work?"),
+      answer: t("Standard+ users can mark transactions as recurring (weekly, monthly, yearly). The system shows upcoming reminders in the dashboard widget and detects patterns automatically. Set end dates or leave open-ended for ongoing bills.")
     },
     {
       id: "categories-custom",
-      question: "Can I create custom categories?",
-      answer: "Yes, create unlimited custom categories with personalized names, colors, and icons. Choose from income, expense, or goal types. Custom categories appear alongside 15+ predefined categories in all dropdown menus."
+      question: t("Can I create custom categories?"),
+      answer: t("Yes, create unlimited custom categories with personalized names, colors, and icons. Choose from income, expense, or goal types. Custom categories appear alongside 15+ predefined categories in all dropdown menus.")
     },
     {
       id: "financial-health-score",
-      question: "How is the Financial Health Score calculated?",
-      answer: "Free users see a simple calculation based on income/expense ratio. Standard+ users get AI-powered analysis evaluating spending habits, budget adherence, savings rate, and goal progress with detailed improvement recommendations."
+      question: t("How is the Financial Health Score calculated?"),
+      answer: t("Free users see a simple calculation based on income/expense ratio. Standard+ users get AI-powered analysis evaluating spending habits, budget adherence, savings rate, and goal progress with detailed improvement recommendations.")
     },
     {
       id: "budget-tracking",
-      question: "How does budget tracking work?",
-      answer: "Standard+ users create budgets for categories with weekly/monthly/yearly limits. Progress bars show spending with color-coded status: green (under budget), yellow (approaching limit), red (over budget). Receive overspending alerts automatically."
+      question: t("How does budget tracking work?"),
+      answer: t("Standard+ users create budgets for categories with weekly/monthly/yearly limits. Progress bars show spending with color-coded status: green (under budget), yellow (approaching limit), red (over budget). Receive overspending alerts automatically.")
     },
     {
       id: "goals-collaboration",
-      question: "Can I share goals with family members?",
-      answer: "Yes, Standard+ users can create collaborative goals and invite family members or partners. Track shared contributions, view progress together, and celebrate achievements as a team for joint savings efforts."
+      question: t("Can I share goals with family members?"),
+      answer: t("Yes, Standard+ users can create collaborative goals and invite family members or partners. Track shared contributions, view progress together, and celebrate achievements as a team for joint savings efforts.")
     },
     {
       id: "calendar-view",
-      question: "What is the calendar view feature?",
-      answer: "Standard+ users can view transactions in a monthly calendar grid showing daily spending totals and transaction previews. Navigate between months to see spending patterns over time with mobile-responsive design."
+      question: t("What is the calendar view feature?"),
+      answer: t("Standard+ users can view transactions in a monthly calendar grid showing daily spending totals and transaction previews. Navigate between months to see spending patterns over time with mobile-responsive design.")
     },
     {
       id: "trends-predictions",
-      question: "What are AI trend predictions?",
-      answer: "Premium users get AI-powered financial forecasting showing spending predictions, income projections, budget recommendations, and goal timeline estimates. Uses machine learning to analyze patterns and predict future financial trends."
+      question: t("What are AI trend predictions?"),
+      answer: t("Premium users get AI-powered financial forecasting showing spending predictions, income projections, budget recommendations, and goal timeline estimates. Uses machine learning to analyze patterns and predict future financial trends.")
     },
     {
       id: "financial-mascot",
-      question: "What is the Financial Mascot feature?",
-      answer: "Premium users get a personalized AI companion that reflects financial health through mood changes and visual indicators. The mascot is draggable around the screen, has unique traits based on your profile, and can be hidden/restored."
+      question: t("What is the Financial Mascot feature?"),
+      answer: t("Premium users get a personalized AI companion that reflects financial health through mood changes and visual indicators. The mascot is draggable around the screen, has unique traits based on your profile, and can be hidden/restored.")
     },
     {
       id: "cloud-backup-restore",
-      question: "How does cloud backup work?",
-      answer: "Premium users get automatic daily backups at 2:00 AM storing all transactions, budgets, goals, categories, and receipt images securely. Manual backup options available with complete restore functionality to recover all data."
+      question: t("How does cloud backup work?"),
+      answer: t("Premium users get automatic daily backups at 2:00 AM storing all transactions, budgets, goals, categories, and receipt images securely. Manual backup options available with complete restore functionality to recover all data.")
     },
     {
       id: "data-import",
-      question: "Can I import data from other financial apps?",
-      answer: "Premium users can import from Mint, QuickBooks, YNAB, Personal Capital, and bank exports. Features include column mapping, data validation, preview before import, and batch processing with error handling."
+      question: t("Can I import data from other financial apps?"),
+      answer: t("Premium users can import from Mint, QuickBooks, YNAB, Personal Capital, and bank exports. Features include column mapping, data validation, preview before import, and batch processing with error handling.")
     },
     {
       id: "mobile-camera",
-      question: "Can I use my phone's camera for receipts?",
-      answer: "Yes, mobile browsers support direct camera access. Choose 'Take Photo' to use your camera or 'Choose from Gallery' to select existing photos. QR code scanning allows cross-device upload from phone to computer."
+      question: t("Can I use my phone's camera for receipts?"),
+      answer: t("Yes, mobile browsers support direct camera access. Choose 'Take Photo' to use your camera or 'Choose from Gallery' to select existing photos. QR code scanning allows cross-device upload from phone to computer.")
     },
     {
       id: "reports-filtering",
-      question: "How do I filter and view reports?",
-      answer: "Use month dropdowns and period filters (week/month/quarter/year) on the Reports page. View financial overviews, category breakdowns, and analytics. Premium users get advanced trend analysis and comparative reports."
+      question: t("How do I filter and view reports?"),
+      answer: t("Use month dropdowns and period filters (week/month/quarter/year) on the Reports page. View financial overviews, category breakdowns, and analytics. Premium users get advanced trend analysis and comparative reports.")
     },
     {
       id: "subscription-changes",
-      question: "How do plan upgrades and downgrades work?",
-      answer: "Upgrades apply immediately with prorated billing. Downgrades are scheduled for the end of your current billing period. Access subscription management through Profile page with full billing transparency and Stripe customer portal integration."
+      question: t("How do plan upgrades and downgrades work?"),
+      answer: t("Upgrades apply immediately with prorated billing. Downgrades are scheduled for the end of your current billing period. Access subscription management through Profile page with full billing transparency and Stripe customer portal integration.")
     },
     {
       id: "mobile-responsive",
-      question: "Is the app fully mobile-friendly?",
-      answer: "Yes, complete responsive design with touch-friendly interfaces, mobile navigation, collapsible filters, optimized forms, and camera integration. All desktop functionality is accessible on mobile browsers without requiring app downloads."
+      question: t("Is the app fully mobile-friendly?"),
+      answer: t("Yes, complete responsive design with touch-friendly interfaces, mobile navigation, collapsible filters, optimized forms, and camera integration. All desktop functionality is accessible on mobile browsers without requiring app downloads.")
     },
     {
       id: "customer-support",
-      question: "How can I get help or support?",
-      answer: "Use this AI chat assistant for immediate help, check our comprehensive documentation below, or contact our support team through the contact page for personalized assistance."
+      question: t("How can I get help or support?"),
+      answer: t("Use this AI chat assistant for immediate help, check our comprehensive documentation below, or contact our support team through the contact page for personalized assistance.")
     }
   ];
 
@@ -713,11 +713,11 @@ export default function Help() {
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">AI Financial Tips (Premium)</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('AI Financial Tips (Premium)')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Left column of dashboard<br/>
-                              <strong>Function:</strong> Personalized financial advice based on spending patterns<br/>
-                              <strong>Features:</strong> AI-generated tips, trend analysis, actionable recommendations, persistent across sessions
+                              <strong>{t('Location')}:</strong> {t('Left column of dashboard')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Personalized financial advice based on spending patterns')}<br/>
+                              <strong>{t('Features')}:</strong> {t('AI-generated tips, trend analysis, actionable recommendations, persistent across sessions')}
                             </p>
                           </div>
 
@@ -1150,7 +1150,7 @@ export default function Help() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <HelpCircle className="h-6 w-6" />
-                    Frequently Asked Questions
+                    {t('Frequently Asked Questions')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -1188,10 +1188,10 @@ export default function Help() {
             <CardHeader className="flex-shrink-0">
               <CardTitle className="flex items-center gap-2">
                 <Bot className="h-5 w-5 text-primary" />
-                AI Assistant
+                {t('AI Assistant')}
               </CardTitle>
               <CardDescription>
-                Ask me anything about FinanzerPro
+                {t('Ask me anything about FinanzerPro')}
               </CardDescription>
             </CardHeader>
 
