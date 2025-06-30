@@ -306,17 +306,17 @@ export default function Help() {
               {t('FinanzerPro Documentation')}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              {t('Complete guide to managing your finances with FinanzerPro\'s powerful features')}
+              {t("Complete guide to managing your finances with FinanzerPro's powerful features")}
             </p>
           </div>
 
           <Tabs defaultValue="overview" className="w-full">
             <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="features">Features</TabsTrigger>
-              <TabsTrigger value="plans">Plans</TabsTrigger>
-              <TabsTrigger value="guide">User Guide</TabsTrigger>
-              <TabsTrigger value="faq">FAQ</TabsTrigger>
+              <TabsTrigger value="overview">{t('Overview')}</TabsTrigger>
+              <TabsTrigger value="features">{t('Features')}</TabsTrigger>
+              <TabsTrigger value="plans">{t('Plans')}</TabsTrigger>
+              <TabsTrigger value="guide">{t('User Guide')}</TabsTrigger>
+              <TabsTrigger value="faq">{t('FAQ')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -324,10 +324,10 @@ export default function Help() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="h-6 w-6 text-primary" />
-                    Welcome to FinanzerPro
+                    {t('Welcome to FinanzerPro')}
                   </CardTitle>
                   <CardDescription>
-                    Your comprehensive personal finance management solution
+                    {t('Your comprehensive personal finance management solution')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
