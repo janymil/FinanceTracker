@@ -382,10 +382,8 @@ export async function processBankStatementPDF(
     if (extractedText.trim().length > 0) {
       const transactions = await parseTransactionsWithAI(extractedText, language);
       
-      // Step 4: Encrypt sensitive transaction data
-      result.transactions = transactions.map(transaction => 
-        PDFSecurityManager.encryptSensitiveData(transaction, result.securityLog)
-      );
+      // Keep transactions unencrypted for preview - encryption happens during database save
+      result.transactions = transactions;
       
       result.confidence = calculateOverallConfidence(transactions);
     } else {
