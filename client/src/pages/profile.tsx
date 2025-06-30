@@ -84,7 +84,7 @@ export default function ProfilePage() {
           <p className="text-muted-foreground">{user.primaryEmailAddress?.emailAddress}</p>
           <div className="flex items-center gap-2 mt-2">
             <Badge variant="secondary" className="bg-premium text-premium-foreground">
-              {t('{{plan}} Plan', { plan: authUser.plan || 'Free' })}
+              {t('profile.{{plan}} Plan', { plan: authUser.plan || 'Free' })}
             </Badge>
           </div>
         </div>

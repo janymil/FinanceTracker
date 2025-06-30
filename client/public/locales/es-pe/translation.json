@@ -3416,6 +3416,11 @@
     "• Change subscription plan": "• Cambiar plan de suscripción", 
     "• View billing history": "• Ver historial de facturación",
     "• Download invoices": "• Descargar facturas",
-    "• Cancel subscription": "• Cancelar suscripción"
+    "• Cancel subscription": "• Cancelar suscripción",
+    "Loading...": "Cargando...",
+    "No Stripe Subscription": "Sin Suscripción de Stripe",
+    "You currently have premium access but no Stripe subscription. Contact support or visit the pricing page to set up billing.": "Actualmente tienes acceso premium pero no tienes suscripción de Stripe. Contacta soporte o visita la página de precios para configurar la facturación.",
+    "Standard": "Estándar",
+    "Premium": "Premium"
   }
 }

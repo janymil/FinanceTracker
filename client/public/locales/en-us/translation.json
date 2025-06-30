@@ -3353,6 +3353,11 @@
     "• Change subscription plan": "• Change subscription plan", 
     "• View billing history": "• View billing history",
     "• Download invoices": "• Download invoices",
-    "• Cancel subscription": "• Cancel subscription"
+    "• Cancel subscription": "• Cancel subscription",
+    "Loading...": "Loading...",
+    "No Stripe Subscription": "No Stripe Subscription",
+    "You currently have premium access but no Stripe subscription. Contact support or visit the pricing page to set up billing.": "You currently have premium access but no Stripe subscription. Contact support or visit the pricing page to set up billing.",
+    "Standard": "Standard",
+    "Premium": "Premium"
   }
 }
