@@ -116,7 +116,7 @@ export default function ProfilePage() {
             <CardHeader>
               <CardTitle>{t('profile.Account Management')}</CardTitle>
               <CardDescription>
-                {t('profile.Manage your profile details, security settings, password, and connected accounts through Clerks secure interface')}
+                {t('profile.Manage your profile details, security settings, password, and connected accounts through Clerk\'s secure interface')}
               </CardDescription>
             </CardHeader>
             <CardContent>
