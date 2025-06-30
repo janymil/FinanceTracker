@@ -9,6 +9,10 @@ export interface ExpenseCategorizationResult {
   category: string;
   confidence: number;
   reasoning: string;
+  merchantResearch?: string;
+  isNewCategory?: boolean;
+  alternativeCategories?: string[];
+  userPatternMatch?: string;
 }
 
 export interface FinancialTip {
