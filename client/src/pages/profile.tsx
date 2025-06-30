@@ -248,18 +248,18 @@ export default function ProfilePage() {
                     </Button>
                     <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg">
                       <p className="text-sm text-blue-700 dark:text-blue-300">
-                        <strong>{t('profile.Note')}:</strong> {t('If you received premium access through admin upgrade or special promotion, you may not have a Stripe subscription to manage. Contact support if you need billing assistance.')}
+                        <strong>{t('profile.Note')}:</strong> {t('profile.If you received premium access through admin upgrade or special promotion, you may not have a Stripe subscription to manage. Contact support if you need billing assistance.')}
                       </p>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {t("This will open Stripe's secure customer portal where you can:")}
+                      {t('profile.This will open Stripe\'s secure customer portal where you can:')}
                     </p>
                     <ul className="text-xs text-muted-foreground space-y-1 ml-4">
-                      <li>{t('• Update payment methods')}</li>
-                      <li>{t('• Change subscription plan')}</li>
-                      <li>{t('• View billing history')}</li>
-                      <li>{t('• Download invoices')}</li>
-                      <li>{t('• Cancel subscription')}</li>
+                      <li>{t('profile.• Update payment methods')}</li>
+                      <li>{t('profile.• Change subscription plan')}</li>
+                      <li>{t('profile.• View billing history')}</li>
+                      <li>{t('profile.• Download invoices')}</li>
+                      <li>{t('profile.• Cancel subscription')}</li>
                     </ul>
                   </div>
                 </div>
@@ -279,7 +279,7 @@ export default function ProfilePage() {
                       <ExternalLink className="h-3 w-3" />
                     </Button>
                     <p className="text-xs text-muted-foreground">
-                      {t('Upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features')}
+                      {t('profile.Upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features')}
                     </p>
                   </div>
                 </div>
