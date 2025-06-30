@@ -864,42 +864,42 @@ export default function Help() {
                       <div className="border-l-4 border-red-500 pl-4">
                         <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
                           <BarChart3 className="h-5 w-5" />
-                          Reports and Analytics
+                          {t('Reports and Analytics')}
                         </h4>
                         <div className="space-y-4">
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Financial Overview Reports</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Financial Overview Reports')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Reports page - Overview tab<br/>
-                              <strong>Function:</strong> Comprehensive financial summary with charts and metrics<br/>
-                              <strong>Features:</strong> Income vs. expenses, category breakdowns, time period filtering, trend indicators
+                              <strong>{t('Location')}:</strong> {t('Reports page - Overview tab')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Comprehensive financial summary with charts and metrics')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Income vs. expenses, category breakdowns, time period filtering, trend indicators')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Advanced Analytics (Premium)</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Advanced Analytics (Premium)')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Reports page - Analytics tab<br/>
-                              <strong>Function:</strong> Detailed financial pattern analysis<br/>
-                              <strong>Features:</strong> Spending trends, seasonal patterns, category comparisons, growth metrics
+                              <strong>{t('Location')}:</strong> {t('Reports page - Analytics tab')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Detailed financial pattern analysis')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Spending trends, seasonal patterns, category comparisons, growth metrics')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">AI Trend Predictions (Premium)</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('AI Trend Predictions (Premium)')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Trends page - Forecasts tab<br/>
-                              <strong>Function:</strong> AI-powered financial forecasting<br/>
-                              <strong>Features:</strong> Spending predictions, income projections, budget recommendations, goal timeline estimates
+                              <strong>{t('Location')}:</strong> {t('Trends page - Forecasts tab')}<br/>
+                              <strong>{t('Function')}:</strong> {t('AI-powered financial forecasting')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Spending predictions, income projections, budget recommendations, goal timeline estimates')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Calendar View (Standard+)</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Calendar View (Standard+)')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Calendar page<br/>
-                              <strong>Function:</strong> Monthly grid view of all transactions<br/>
-                              <strong>Features:</strong> Daily spending totals, transaction previews, monthly navigation, mobile responsive grid
+                              <strong>{t('Location')}:</strong> {t('Calendar page')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Monthly grid view of all transactions')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Daily spending totals, transaction previews, monthly navigation, mobile responsive grid')}
                             </p>
                           </div>
                         </div>
@@ -909,35 +909,35 @@ export default function Help() {
                       <div className="border-l-4 border-indigo-500 pl-4">
                         <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
                           <Cloud className="h-5 w-5" />
-                          Data Management (Premium)
+                          {t('Data Management (Premium)')}
                         </h4>
                         <div className="space-y-4">
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Cloud Backup System</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Cloud Backup System')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Data Management page - Backup tab<br/>
-                              <strong>Function:</strong> Secure cloud storage of all financial data<br/>
-                              <strong>Features:</strong> Automatic daily backups at 2:00 AM, manual backup options, backup history, restore functionality
+                              <strong>{t('Location')}:</strong> {t('Data Management page - Backup tab')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Secure cloud storage of all financial data')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Automatic daily backups at 2:00 AM, manual backup options, backup history, restore functionality')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Data Export</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Data Export')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Data Management page - Export tab<br/>
-                              <strong>Function:</strong> Download financial data in multiple formats<br/>
-                              <strong>Formats:</strong> PDF reports, Excel spreadsheets, CSV files, JSON data<br/>
-                              <strong>Features:</strong> Custom date ranges, selective data export, formatted reports
+                              <strong>{t('Location')}:</strong> {t('Data Management page - Export tab')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Download financial data in multiple formats')}<br/>
+                              <strong>{t('Formats')}:</strong> {t('PDF reports, Excel spreadsheets, CSV files, JSON data')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Custom date ranges, selective data export, formatted reports')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Data Import</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Data Import')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Data Management page - Import tab<br/>
-                              <strong>Function:</strong> Import transactions from other financial apps<br/>
-                              <strong>Supported:</strong> Mint, QuickBooks, YNAB, Personal Capital, bank exports<br/>
-                              <strong>Features:</strong> Column mapping, data validation, preview before import, batch processing
+                              <strong>{t('Location')}:</strong> {t('Data Management page - Import tab')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Import transactions from other financial apps')}<br/>
+                              <strong>{t('Supported')}:</strong> {t('Mint, QuickBooks, YNAB, Personal Capital, bank exports')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Column mapping, data validation, preview before import, batch processing')}
                             </p>
                           </div>
                         </div>
