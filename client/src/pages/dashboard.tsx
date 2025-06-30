@@ -177,6 +177,8 @@ export default function Dashboard() {
   // Get start and end dates for the selected month
   const startDate = new Date(`${selectedMonth}-01`);
   const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+  // Set end date to end of day to include all transactions from the last day
+  endDate.setHours(23, 59, 59, 999);
 
   // Hooks
   const queryClient = useQueryClient();
