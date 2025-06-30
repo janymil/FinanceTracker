@@ -386,21 +386,21 @@ export default function Help() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CreditCard className="h-5 w-5" />
-                      Transaction Management
+                      {t('Transaction Management')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2 text-sm">
-                      <li>• Add income and expense transactions</li>
-                      <li>• Receipt OCR scanning (Standard+)</li>
-                      <li>• Mobile QR code upload</li>
-                      <li>• AI-powered automatic categorization</li>
-                      <li>• Smart search and filtering</li>
-                      <li>• Monthly view with dynamic navigation</li>
-                      <li>• Recurring transaction detection</li>
-                      <li>• Transaction editing and deletion</li>
-                      <li>• Bulk operations and imports</li>
-                      <li>• Custom category creation</li>
+                      <li>• {t('Add income and expense transactions')}</li>
+                      <li>• {t('Receipt OCR scanning (Standard+)')}</li>
+                      <li>• {t('Mobile QR code upload')}</li>
+                      <li>• {t('AI-powered automatic categorization')}</li>
+                      <li>• {t('Smart search and filtering')}</li>
+                      <li>• {t('Monthly view with dynamic navigation')}</li>
+                      <li>• {t('Recurring transaction detection')}</li>
+                      <li>• {t('Transaction editing and deletion')}</li>
+                      <li>• {t('Bulk operations and imports')}</li>
+                      <li>• {t('Custom category creation')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -409,19 +409,19 @@ export default function Help() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Target className="h-5 w-5" />
-                      Budgets & Goals
+                      {t('Budgets & Goals')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2 text-sm">
-                      <li>• Set monthly spending limits by category</li>
-                      <li>• Track progress with visual indicators</li>
-                      <li>• Create savings goals with deadlines</li>
-                      <li>• Automatic budget vs. actual comparisons</li>
-                      <li>• Smart notifications and reminders</li>
-                      <li>• Collaborative savings goals with friends</li>
-                      <li>• Goal achievement tracking</li>
-                      <li>• Budget overflow warnings</li>
+                      <li>• {t('Set monthly spending limits by category')}</li>
+                      <li>• {t('Track progress with visual indicators')}</li>
+                      <li>• {t('Create savings goals with deadlines')}</li>
+                      <li>• {t('Automatic budget vs. actual comparisons')}</li>
+                      <li>• {t('Smart notifications and reminders')}</li>
+                      <li>• {t('Collaborative savings goals with friends')}</li>
+                      <li>• {t('Goal achievement tracking')}</li>
+                      <li>• {t('Budget overflow warnings')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -430,20 +430,20 @@ export default function Help() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <PieChart className="h-5 w-5" />
-                      Analytics & Reports
+                      {t('Analytics & Reports')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2 text-sm">
-                      <li>• Comprehensive financial dashboard</li>
-                      <li>• Category-wise spending breakdown</li>
-                      <li>• Trend analysis and predictions</li>
-                      <li>• Income vs. expense comparisons</li>
-                      <li>• Export data in multiple formats</li>
-                      <li>• Period filtering (week/month/quarter/year)</li>
-                      <li>• Visual charts and graphs</li>
-                      <li>• Custom date range analysis</li>
-                      <li>• Financial health scoring</li>
+                      <li>• {t('Comprehensive financial dashboard')}</li>
+                      <li>• {t('Category-wise spending breakdown')}</li>
+                      <li>• {t('Trend analysis and predictions')}</li>
+                      <li>• {t('Income vs. expense comparisons')}</li>
+                      <li>• {t('Export data in multiple formats')}</li>
+                      <li>• {t('Period filtering (week/month/quarter/year)')}</li>
+                      <li>• {t('Visual charts and graphs')}</li>
+                      <li>• {t('Custom date range analysis')}</li>
+                      <li>• {t('Financial health scoring')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -452,21 +452,21 @@ export default function Help() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Calendar className="h-5 w-5" />
-                      Smart Features
+                      {t('Smart Features')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2 text-sm">
-                      <li>• AI financial health scoring</li>
-                      <li>• Personalized recommendations</li>
-                      <li>• Calendar view of transactions</li>
-                      <li>• Automatic backup scheduling</li>
-                      <li>• Data import from other apps</li>
-                      <li>• Financial mascot companion</li>
-                      <li>• Expense prediction and forecasting</li>
-                      <li>• Daily AI-powered financial tips</li>
-                      <li>• Transaction reminders and alerts</li>
-                      <li>• Multi-device receipt scanning</li>
+                      <li>• {t('AI financial health scoring')}</li>
+                      <li>• {t('Personalized recommendations')}</li>
+                      <li>• {t('Calendar view of transactions')}</li>
+                      <li>• {t('Automatic backup scheduling')}</li>
+                      <li>• {t('Data import from other apps')}</li>
+                      <li>• {t('Financial mascot companion')}</li>
+                      <li>• {t('Expense prediction and forecasting')}</li>
+                      <li>• {t('Daily AI-powered financial tips')}</li>
+                      <li>• {t('Transaction reminders and alerts')}</li>
+                      <li>• {t('Multi-device receipt scanning')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -475,19 +475,19 @@ export default function Help() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Download className="h-5 w-5" />
-                      Data Management
+                      {t('Data Management')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2 text-sm">
-                      <li>• Cloud storage and backup (Premium)</li>
-                      <li>• Import from CSV, Excel, JSON formats</li>
-                      <li>• Export to multiple file formats</li>
-                      <li>• Automatic daily backup scheduling</li>
-                      <li>• Data restore and recovery</li>
-                      <li>• Receipt image storage</li>
-                      <li>• Secure data encryption</li>
-                      <li>• Cross-platform synchronization</li>
+                      <li>• {t('Cloud storage and backup (Premium)')}</li>
+                      <li>• {t('Import from CSV, Excel, JSON formats')}</li>
+                      <li>• {t('Export to multiple file formats')}</li>
+                      <li>• {t('Automatic daily backup scheduling')}</li>
+                      <li>• {t('Data restore and recovery')}</li>
+                      <li>• {t('Receipt image storage')}</li>
+                      <li>• {t('Secure data encryption')}</li>
+                      <li>• {t('Cross-platform synchronization')}</li>
                     </ul>
                   </CardContent>
                 </Card>
