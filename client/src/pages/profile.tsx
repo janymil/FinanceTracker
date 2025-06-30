@@ -21,7 +21,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
 
   if (!user || !authUser) {
-    return <div>{t('Loading...')}</div>;
+    return <div>{t('profile.Loading...')}</div>;
   }
 
   const handleManageSubscription = async () => {
@@ -38,7 +38,7 @@ export default function ProfilePage() {
         const errorData = await response.json();
         if (response.status === 400 && errorData.message?.includes('No active subscription')) {
           toast({
-            title: t('No Stripe Subscription'),
+            title: t('profile.No Stripe Subscription'),
             description: t('You currently have premium access but no Stripe subscription. Contact support or visit the pricing page to set up billing.'),
             variant: "destructive",
           });
