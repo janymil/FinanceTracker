@@ -317,7 +317,8 @@ export async function processBankStatementPDF(
     // Step 1: Try PDF text extraction first
     let pdf: any;
     try {
-      const module = await import('pdf-parse');
+      // Use wrapper to prevent debug mode execution
+      const module = await import('./pdf-parser-wrapper.js');
       pdf = module.default || module;
     } catch (error) {
       console.error('Failed to import pdf-parse:', error);
