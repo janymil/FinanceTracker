@@ -813,6 +813,11 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
         recurringFrequency: ''
       }));
 
+      // Create CSV content with headers
+      const headers = 'dataType,transactionType,amount,description,date,category,isRecurring,recurringFrequency';
+      const csvRows = importData.map(row => Object.values(row).join(','));
+      const csvContent = [headers, ...csvRows].join('\n');
+
       const response = await fetch('/api/import-data', {
         method: 'POST',
         headers: {
@@ -820,13 +825,11 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          content: importData.map(row => 
-            Object.values(row).join(',')
-          ).join('\n'),
+          content: csvContent,
           format: 'csv',
           options: {
             ...importOptions,
-            skipFirstRow: false
+            skipFirstRow: true // Now we have headers, so skip first row
           }
         })
       });
