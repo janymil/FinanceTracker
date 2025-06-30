@@ -327,8 +327,8 @@ export default function Income() {
     e.preventDefault();
     if (!newIncome.amount || !newIncome.description) {
       toast({
-        title: "Error",
-        description: "Please fill in all required fields",
+        title: t("common.error"),
+        description: t("common.required_fields_error"),
         variant: "destructive",
       });
       return;
@@ -359,7 +359,7 @@ export default function Income() {
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm("Are you sure you want to delete this income?")) {
+    if (confirm(t("income.confirm_delete"))) {
       deleteIncomeMutation.mutate(id);
     }
   };

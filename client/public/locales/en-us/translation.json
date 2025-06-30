@@ -1232,6 +1232,7 @@
     "reference_note_placeholder": "Add a reference or note (optional)",
     "recurring": "Recurring",
     "recurring_transactions": "Recurring Transactions",
+    "required_fields_error": "Please fill in all required fields",
     "note": "Note",
     "of": "of",
     "transactions": "transactions"
@@ -1266,7 +1267,13 @@
     "edit_income": "Edit Income",
     "edit_description": "Update the income transaction details",
     "recurring_income": "Recurring income",
-    "update_income": "Update Income"
+    "update_income": "Update Income",
+    "added_title": "Income Added",
+    "added_description": "Income transaction has been created successfully",
+    "updated_title": "Income Updated", 
+    "updated_description": "Income transaction has been updated successfully",
+    "confirm_delete": "Are you sure you want to delete this income?",
+    "adding": "Adding..."
   },
 
   "expenses": {

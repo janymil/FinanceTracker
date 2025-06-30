@@ -1173,6 +1173,7 @@
     "add_transactions_activity": "Agrega transacciones para ver tu actividad reciente aquí",
     "recurring": "Recurrente",
     "recurring_transactions": "Transacciones Recurrentes",
+    "required_fields_error": "Por favor completa todos los campos requeridos",
     "showing_5_of": "Mostrando 5 de",
     "transactions": "transacciones",
     "category_breakdown": "Desglose por Categoría",
@@ -1343,7 +1344,13 @@
     "edit_income": "Editar Ingreso",
     "edit_description": "Actualizar los detalles de la transacción de ingreso",
     "recurring_income": "Ingreso recurrente",
-    "update_income": "Actualizar Ingreso"
+    "update_income": "Actualizar Ingreso",
+    "added_title": "Ingreso Agregado",
+    "added_description": "La transacción de ingreso ha sido creada exitosamente",
+    "updated_title": "Ingreso Actualizado",
+    "updated_description": "La transacción de ingreso ha sido actualizada exitosamente",
+    "confirm_delete": "¿Estás seguro de que quieres eliminar este ingreso?",
+    "adding": "Agregando..."
   },
 
   "expenses": {
