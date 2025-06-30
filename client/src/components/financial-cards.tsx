@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
+import { getMonthDateRange } from "@/lib/dateRangeUtils";
 
 interface FinancialSummary {
   totalIncome: number;
@@ -102,14 +103,9 @@ export default function FinancialCards({ summary, isLoading, budgetsData, select
     const currentMonthBudgets = budgetsData.filter((budget: any) => {
       if (!selectedMonth) return true; // If no month selected, show all budgets
       
-      const [year, month] = selectedMonth.split('-');
-      const selectedDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const { startDate: monthStart, endDate: monthEnd } = getMonthDateRange(selectedMonth);
       const budgetStart = new Date(budget.startDate);
       const budgetEnd = new Date(budget.endDate);
-      
-      // Check if the selected month falls within the budget period
-      const monthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-      const monthEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
       
 
       

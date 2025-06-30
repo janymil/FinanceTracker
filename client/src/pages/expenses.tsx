@@ -33,6 +33,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
 import { useDateFormat } from "@/hooks/useDateFormat";
+import { getMonthDateRange } from "@/lib/dateRangeUtils";
 
 import TransactionFilters from "@/components/TransactionFilters";
 
@@ -242,9 +243,8 @@ export default function Expenses() {
     // Month filter takes precedence over date range
     if (selectedMonth) {
       const transactionDate = new Date(transaction.date);
-      const [year, month] = selectedMonth.split('-');
-      const monthMatches = transactionDate.getFullYear() === parseInt(year) && 
-                          transactionDate.getMonth() === parseInt(month) - 1;
+      const { startDate, endDate } = getMonthDateRange(selectedMonth);
+      const monthMatches = transactionDate >= startDate && transactionDate <= endDate;
       return matchesSearch && matchesCategory && matchesRecurring && monthMatches;
     }
     
