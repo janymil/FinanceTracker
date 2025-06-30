@@ -37,6 +37,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { useUser } from "@clerk/clerk-react";
 import { AnonymousHeader } from "@/components/anonymous-header";
+import { useTranslation } from "react-i18next";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -45,12 +46,13 @@ interface ChatMessage {
 }
 
 export default function Help() {
+  const { t } = useTranslation();
   const { user } = useUser();
   const [, setLocation] = useLocation();
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "Hi! I'm your FinanzerPro assistant. I can help you with questions about using the app, subscription plans, features, and more. What would you like to know?",
+      content: t('help.chat.initial_message'),
       timestamp: new Date()
     }
   ]);

@@ -2045,6 +2045,119 @@
     }
   },
 
+  "help": {
+    "seo": {
+      "title": "Help & Documentation - FinanzerPro User Guide | Features & Support",
+      "description": "Complete FinanzerPro documentation covering expense tracking, receipt OCR scanning, AI categorization, budgeting, goals, and all features. Get help with setup, troubleshooting, and maximizing your financial management.",
+      "keywords": "finanzerpro help, expense tracker guide, receipt scanning tutorial, AI categorization help, budget app documentation, personal finance support, financial management tutorial"
+    },
+    "page": {
+      "title": "FinanzerPro Documentation",
+      "subtitle": "Complete guide to managing your finances with FinanzerPro's powerful features"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "features": "Features", 
+      "plans": "Plans",
+      "guide": "User Guide",
+      "faq": "FAQ"
+    },
+    "overview": {
+      "getting_started": {
+        "title": "Getting Started",
+        "description": "Welcome to FinanzerPro! This comprehensive guide will help you master personal finance management with our intelligent platform.",
+        "create_account": "Create your free account to get started",
+        "add_transactions": "Add your first transaction manually or using receipt scanning",
+        "set_budgets": "Set up budgets and financial goals (Standard+ plans)",
+        "explore_ai": "Explore AI-powered insights and recommendations (Premium)",
+        "mobile_friendly": "Use on any device - fully responsive design"
+      },
+      "key_features": {
+        "title": "Key Features",
+        "expense_tracking": "📊 Smart Expense Tracking",
+        "expense_desc": "Automatic categorization with AI-powered insights",
+        "receipt_ocr": "📷 Receipt OCR Scanning",
+        "receipt_desc": "Extract transaction data from photos instantly",
+        "budget_management": "💰 Budget Management",
+        "budget_desc": "Set limits and track spending by category",
+        "goal_setting": "🎯 Financial Goals",
+        "goal_desc": "Create and monitor savings targets with deadlines",
+        "ai_insights": "🤖 AI Financial Analysis",
+        "ai_desc": "Get personalized recommendations and predictions",
+        "cloud_sync": "☁️ Cloud Backup & Sync",
+        "cloud_desc": "Secure data backup and cross-device synchronization"
+      },
+      "quick_links": {
+        "title": "Quick Start Guide",
+        "add_first": "Adding your first transaction",
+        "upload_receipt": "Uploading receipt photos for OCR scanning",
+        "mobile_qr": "Mobile QR upload: Click 'Upload Image' → 'Scan with Phone' for cross-device receipt scanning",
+        "edit_transactions": "Editing transactions: Click any transaction in lists or dashboard widgets to modify",
+        "set_budgets": "Setting budgets: Go to Budgets page and create category-based spending limits (Standard+)",
+        "create_goals": "Creating goals: Use Goals page to set savings targets with deadlines (Standard+)",
+        "view_calendar": "Viewing calendar: Check Calendar page for monthly transaction grid view (Standard+)",
+        "manage_categories": "Managing categories: Use Categories page to create custom expense/income categories",
+        "check_reports": "Checking reports: Reports page shows spending breakdowns and financial analysis",
+        "ai_predictions": "AI predictions: Trends page provides forecasting and pattern analysis (Premium)",
+        "cloud_backup": "Cloud backup: Data Management page for automatic backup and restore (Premium)",
+        "subscription": "Subscription: Profile page for plan upgrades and billing management"
+      },
+      "support": {
+        "title": "Getting Help",
+        "chat_ai": "Use this AI chat for immediate help with app features",
+        "faq_check": "Check the FAQ section below for common questions",
+        "email_support": "Contact support at info@finanzerpro.com for technical issues",
+        "help_center": "Visit the Help Center for detailed guides and tutorials"
+      }
+    },
+    "chat": {
+      "placeholder": "Ask me anything about FinanzerPro...",
+      "send": "Send",
+      "initial_message": "Hi! I'm your FinanzerPro assistant. I can help you with questions about using the app, subscription plans, features, and more. What would you like to know?",
+      "error_response": "Sorry, I'm having trouble right now. Please try again later.",
+      "thinking": "Thinking..."
+    },
+    "plans": {
+      "title": "Subscription Plans",
+      "description": "Choose the plan that best fits your financial management needs",
+      "free": "Free",
+      "standard": "Standard", 
+      "premium": "Premium",
+      "price_free": "$0",
+      "price_standard": "$4.99",
+      "price_premium": "$9.99",
+      "per_month": "/month",
+      "features": {
+        "free": [
+          "Up to 100 transactions",
+          "Basic transaction tracking", 
+          "Simple dashboard",
+          "Mobile responsive design"
+        ],
+        "standard": [
+          "Up to 100 transactions",
+          "Receipt OCR scanning",
+          "AI expense categorization", 
+          "Budget management",
+          "Financial goals",
+          "Transaction reminders",
+          "Calendar view",
+          "Basic reporting"
+        ],
+        "premium": [
+          "Unlimited transactions",
+          "Advanced AI insights",
+          "Trend predictions",
+          "Cloud backup & sync",
+          "Data import/export", 
+          "Advanced analytics",
+          "Priority support",
+          "Multiple data formats"
+        ]
+      }
+    }
+  },
+
   "cookies": {
     "seo": {
       "title": "Cookie Policy - FinanzerPro",

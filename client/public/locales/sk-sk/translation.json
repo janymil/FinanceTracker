@@ -2067,6 +2067,119 @@
     }
   },
 
+  "help": {
+    "seo": {
+      "title": "Pomoc a Dokumentácia - Používateľská Príručka FinanzerPro | Funkcie a Podpora",
+      "description": "Kompletná dokumentácia FinanzerPro pokrývajúca sledovanie výdavkov, OCR skenovanie účteniek, AI kategorizáciu, rozpočty, ciele a všetky funkcie. Získajte pomoc s nastavením, riešením problémov a maximalizáciou vašej finančnej správy.",
+      "keywords": "pomoc finanzerpro, sprievodca sledovanie výdavkov, návod skenovanie účteniek, pomoc AI kategorizácia, dokumentácia rozpočet app, podpora osobné financie, návod finančná správa"
+    },
+    "page": {
+      "title": "Dokumentácia FinanzerPro",
+      "subtitle": "Kompletná príručka na správu vašich financií s mocnými funkciami FinanzerPro"
+    },
+    "tabs": {
+      "overview": "Prehľad",
+      "features": "Funkcie", 
+      "plans": "Plány",
+      "guide": "Používateľská Príručka",
+      "faq": "Často Kladené Otázky"
+    },
+    "overview": {
+      "getting_started": {
+        "title": "Začíname",
+        "description": "Vitajte v FinanzerPro! Táto komplexná príručka vám pomôže zvládnuť správu osobných financií s našou inteligentnou platformou.",
+        "create_account": "Vytvorte si bezplatný účet pre začiatok",
+        "add_transactions": "Pridajte svoju prvú transakciu manuálne alebo pomocou skenovania účteniek",
+        "set_budgets": "Nastavte rozpočty a finančné ciele (plány Standard+)",
+        "explore_ai": "Preskúmajte poznatky a odporúčania poháňané AI (Premium)",
+        "mobile_friendly": "Používajte na akomkoľvek zariadení - plne responzívny dizajn"
+      },
+      "key_features": {
+        "title": "Kľúčové Funkcie",
+        "expense_tracking": "📊 Inteligentné Sledovanie Výdavkov",
+        "expense_desc": "Automatická kategorizácia s poznatkami poháňanými AI",
+        "receipt_ocr": "📷 OCR Skenovanie Účteniek",
+        "receipt_desc": "Extrahujte údaje transakcií z fotografií okamžite",
+        "budget_management": "💰 Správa Rozpočtov",
+        "budget_desc": "Nastavte limity a sledujte výdavky podľa kategórie",
+        "goal_setting": "🎯 Finančné Ciele",
+        "goal_desc": "Vytvorte a monitorujte ciele úspor s termínmi",
+        "ai_insights": "🤖 AI Finančná Analýza",
+        "ai_desc": "Získajte personalizované odporúčania a predpovede",
+        "cloud_sync": "☁️ Cloudové Zálohovanie a Synchronizácia",
+        "cloud_desc": "Bezpečné zálohovanie údajov a synchronizácia medzi zariadeniami"
+      },
+      "quick_links": {
+        "title": "Príručka Rýchleho Štartu",
+        "add_first": "Pridávanie vašej prvej transakcie",
+        "upload_receipt": "Nahrávanie fotografií účteniek pre OCR skenovanie",
+        "mobile_qr": "Mobilné QR nahrávanie: Kliknite na 'Nahrať Obrázok' → 'Skenovať s Telefónom' pre skenovanie účteniek medzi zariadeniami",
+        "edit_transactions": "Úprava transakcií: Kliknite na akúkoľvek transakciu v zoznamoch alebo widgetoch panela pre úpravu",
+        "set_budgets": "Nastavovanie rozpočtov: Prejdite na stránku Rozpočty a vytvorte limity výdavkov založené na kategóriách (Standard+)",
+        "create_goals": "Vytváranie cieľov: Použite stránku Ciele na nastavenie cieľov úspor s termínmi (Standard+)",
+        "view_calendar": "Zobrazenie kalendára: Skontrolujte stránku Kalendár pre mesačný prehľad transakcií v mriežke (Standard+)",
+        "manage_categories": "Správa kategórií: Použite stránku Kategórie na vytvorenie vlastných kategórií výdavkov/príjmov",
+        "check_reports": "Kontrola správ: Stránka Správy zobrazuje rozdelenie výdavkov a finančnú analýzu",
+        "ai_predictions": "AI predpovede: Stránka Trendy poskytuje prognózy a analýzu vzorov (Premium)",
+        "cloud_backup": "Cloudové zálohovanie: Stránka Správy Údajov pre automatické zálohovanie a obnovenie (Premium)",
+        "subscription": "Predplatné: Stránka Profil pre aktualizácie plánu a správu fakturácie"
+      },
+      "support": {
+        "title": "Získanie Pomoci",
+        "chat_ai": "Použite tento AI chat pre okamžitú pomoc s funkciami aplikácie",
+        "faq_check": "Skontrolujte sekciu Často Kladených Otázok nižšie pre bežné otázky",
+        "email_support": "Kontaktujte podporu na info@finanzerpro.com pre technické problémy",
+        "help_center": "Navštívte Centrum Pomoci pre podrobné príručky a návody"
+      }
+    },
+    "chat": {
+      "placeholder": "Spýtajte sa ma čokoľvek o FinanzerPro...",
+      "send": "Odoslať",
+      "initial_message": "Ahoj! Som váš asistent FinanzerPro. Môžem vám pomôcť s otázkami o používaní aplikácie, predplatných plánoch, funkciách a ďalšom. Čo by ste sa chceli dozvedieť?",
+      "error_response": "Prepáčte, mám teraz problémy. Prosím skúste to znovu neskôr.",
+      "thinking": "Premýšľam..."
+    },
+    "plans": {
+      "title": "Predplatné Plány",
+      "description": "Vyberte si plán, ktorý najlepšie vyhovuje vašim potrebám finančnej správy",
+      "free": "Bezplatný",
+      "standard": "Štandardný", 
+      "premium": "Premium",
+      "price_free": "$0",
+      "price_standard": "$4.99",
+      "price_premium": "$9.99",
+      "per_month": "/mesiac",
+      "features": {
+        "free": [
+          "Až 100 transakcií",
+          "Základné sledovanie transakcií", 
+          "Jednoduchý panel",
+          "Responzívny mobilný dizajn"
+        ],
+        "standard": [
+          "Až 100 transakcií",
+          "OCR skenovanie účteniek",
+          "AI kategorizácia výdavkov", 
+          "Správa rozpočtov",
+          "Finančné ciele",
+          "Pripomienky transakcií",
+          "Kalendárové zobrazenie",
+          "Základné reportovanie"
+        ],
+        "premium": [
+          "Neobmedzené transakcie",
+          "Pokročilé AI poznatky",
+          "Predpovede trendov",
+          "Cloudové zálohovanie a synchronizácia",
+          "Import/export údajov", 
+          "Pokročilé analýzy",
+          "Prioritná podpora",
+          "Viacero formátov údajov"
+        ]
+      }
+    }
+  },
+
   "cookies": {
     "seo": {
       "title": "Pravidlá používania cookies - FinanzerPro",

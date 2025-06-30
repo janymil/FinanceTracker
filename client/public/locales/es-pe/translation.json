@@ -2020,6 +2020,119 @@
     }
   },
 
+  "help": {
+    "seo": {
+      "title": "Ayuda y Documentación - Guía del Usuario de FinanzerPro | Funciones y Soporte",
+      "description": "Documentación completa de FinanzerPro que cubre seguimiento de gastos, escaneo OCR de recibos, categorización con IA, presupuestos, objetivos y todas las funciones. Obtén ayuda con configuración, solución de problemas y maximización de tu gestión financiera.",
+      "keywords": "ayuda finanzerpro, guía rastreador gastos, tutorial escaneo recibos, ayuda categorización IA, documentación app presupuesto, soporte finanzas personales, tutorial gestión financiera"
+    },
+    "page": {
+      "title": "Documentación de FinanzerPro",
+      "subtitle": "Guía completa para gestionar tus finanzas con las poderosas funciones de FinanzerPro"
+    },
+    "tabs": {
+      "overview": "Resumen",
+      "features": "Funciones", 
+      "plans": "Planes",
+      "guide": "Guía de Usuario",
+      "faq": "Preguntas Frecuentes"
+    },
+    "overview": {
+      "getting_started": {
+        "title": "Comenzando",
+        "description": "¡Bienvenido a FinanzerPro! Esta guía completa te ayudará a dominar la gestión de finanzas personales con nuestra plataforma inteligente.",
+        "create_account": "Crea tu cuenta gratuita para comenzar",
+        "add_transactions": "Agrega tu primera transacción manualmente o usando escaneo de recibos",
+        "set_budgets": "Configura presupuestos y objetivos financieros (planes Standard+)",
+        "explore_ai": "Explora perspectivas y recomendaciones impulsadas por IA (Premium)",
+        "mobile_friendly": "Usa en cualquier dispositivo - diseño completamente responsivo"
+      },
+      "key_features": {
+        "title": "Funciones Clave",
+        "expense_tracking": "📊 Seguimiento Inteligente de Gastos",
+        "expense_desc": "Categorización automática con perspectivas impulsadas por IA",
+        "receipt_ocr": "📷 Escaneo OCR de Recibos",
+        "receipt_desc": "Extrae datos de transacciones de fotos instantáneamente",
+        "budget_management": "💰 Gestión de Presupuestos",
+        "budget_desc": "Establece límites y rastrea gastos por categoría",
+        "goal_setting": "🎯 Objetivos Financieros",
+        "goal_desc": "Crea y monitorea metas de ahorro con fechas límite",
+        "ai_insights": "🤖 Análisis Financiero con IA",
+        "ai_desc": "Obtén recomendaciones personalizadas y predicciones",
+        "cloud_sync": "☁️ Respaldo y Sincronización en la Nube",
+        "cloud_desc": "Respaldo seguro de datos y sincronización entre dispositivos"
+      },
+      "quick_links": {
+        "title": "Guía de Inicio Rápido",
+        "add_first": "Agregando tu primera transacción",
+        "upload_receipt": "Subiendo fotos de recibos para escaneo OCR",
+        "mobile_qr": "Subida QR móvil: Haz clic en 'Subir Imagen' → 'Escanear con Teléfono' para escaneo de recibos entre dispositivos",
+        "edit_transactions": "Editando transacciones: Haz clic en cualquier transacción en listas o widgets del panel para modificar",
+        "set_budgets": "Configurando presupuestos: Ve a la página de Presupuestos y crea límites de gasto basados en categorías (Standard+)",
+        "create_goals": "Creando objetivos: Usa la página de Objetivos para establecer metas de ahorro con fechas límite (Standard+)",
+        "view_calendar": "Viendo calendario: Revisa la página de Calendario para vista de cuadrícula mensual de transacciones (Standard+)",
+        "manage_categories": "Gestionando categorías: Usa la página de Categorías para crear categorías personalizadas de gastos/ingresos",
+        "check_reports": "Revisando reportes: La página de Reportes muestra desgloses de gastos y análisis financiero",
+        "ai_predictions": "Predicciones IA: La página de Tendencias proporciona pronósticos y análisis de patrones (Premium)",
+        "cloud_backup": "Respaldo en la nube: Página de Gestión de Datos para respaldo automático y restauración (Premium)",
+        "subscription": "Suscripción: Página de Perfil para actualizaciones de plan y gestión de facturación"
+      },
+      "support": {
+        "title": "Obteniendo Ayuda",
+        "chat_ai": "Usa este chat con IA para ayuda inmediata con funciones de la app",
+        "faq_check": "Revisa la sección de Preguntas Frecuentes abajo para preguntas comunes",
+        "email_support": "Contacta soporte en info@finanzerpro.com para problemas técnicos",
+        "help_center": "Visita el Centro de Ayuda para guías detalladas y tutoriales"
+      }
+    },
+    "chat": {
+      "placeholder": "Pregúntame cualquier cosa sobre FinanzerPro...",
+      "send": "Enviar",
+      "initial_message": "¡Hola! Soy tu asistente de FinanzerPro. Puedo ayudarte con preguntas sobre el uso de la app, planes de suscripción, funciones y más. ¿Qué te gustaría saber?",
+      "error_response": "Lo siento, estoy teniendo problemas ahora mismo. Por favor intenta de nuevo más tarde.",
+      "thinking": "Pensando..."
+    },
+    "plans": {
+      "title": "Planes de Suscripción",
+      "description": "Elige el plan que mejor se adapte a tus necesidades de gestión financiera",
+      "free": "Gratuito",
+      "standard": "Estándar", 
+      "premium": "Premium",
+      "price_free": "$0",
+      "price_standard": "$4.99",
+      "price_premium": "$9.99",
+      "per_month": "/mes",
+      "features": {
+        "free": [
+          "Hasta 100 transacciones",
+          "Seguimiento básico de transacciones", 
+          "Panel simple",
+          "Diseño responsivo móvil"
+        ],
+        "standard": [
+          "Hasta 100 transacciones",
+          "Escaneo OCR de recibos",
+          "Categorización de gastos con IA", 
+          "Gestión de presupuestos",
+          "Objetivos financieros",
+          "Recordatorios de transacciones",
+          "Vista de calendario",
+          "Reportes básicos"
+        ],
+        "premium": [
+          "Transacciones ilimitadas",
+          "Perspectivas avanzadas con IA",
+          "Predicciones de tendencias",
+          "Respaldo y sincronización en la nube",
+          "Importación/exportación de datos", 
+          "Análisis avanzados",
+          "Soporte prioritario",
+          "Múltiples formatos de datos"
+        ]
+      }
+    }
+  },
+
   "cookies": {
     "seo": {
       "title": "Política de Cookies - FinanzerPro",
