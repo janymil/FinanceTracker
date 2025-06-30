@@ -20,10 +20,16 @@ export default function Navigation() {
   const [, setLocation] = useLocation();
 
   const handleLogout = async () => {
-    // Clear user session data while preserving AI tips and theme
-    clearUserSession();
-    // Use default Clerk signOut - let Clerk handle the redirect
-    await signOut();
+    try {
+      // Clear user session data while preserving AI tips and theme
+      clearUserSession();
+      // Use default Clerk signOut with proper redirect
+      await signOut({ redirectUrl: '/' });
+    } catch (error) {
+      console.error('Logout error:', error);
+      // If signOut fails, still redirect to home
+      window.location.href = '/';
+    }
   };
 
   return (

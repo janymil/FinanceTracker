@@ -93,10 +93,16 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { signOut } = useClerk();
   
   const handleLogout = async () => {
-    // Clear user session data while preserving global preferences
-    clearUserSession();
-    // Use default Clerk signOut - let Clerk handle the redirect
-    await signOut({ redirectUrl: '/' });
+    try {
+      // Clear user session data while preserving global preferences
+      clearUserSession();
+      // Use default Clerk signOut with proper redirect
+      await signOut({ redirectUrl: '/' });
+    } catch (error) {
+      console.error('Logout error:', error);
+      // If signOut fails, still redirect to home
+      window.location.href = '/';
+    }
   };
   const { theme, toggleTheme } = useTheme();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
