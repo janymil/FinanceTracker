@@ -858,6 +858,32 @@
   "How can I get help or support?": "¿Cómo puedo obtener ayuda o soporte?",
   "Use this AI chat assistant for immediate help, check our comprehensive documentation below, or contact our support team through the contact page for personalized assistance.": "Usa este asistente de chat IA para ayuda inmediata, revisa nuestra documentación completa a continuación, o contacta a nuestro equipo de soporte a través de la página de contacto para asistencia personalizada.",
 
+  "Recent Transactions Widget": "Widget de Transacciones Recientes",
+  "Shows last 5 transactions with edit/delete options": "Muestra las últimas 5 transacciones con opciones de editar/eliminar",
+  "One-click editing, category icons, amount formatting, receipt thumbnails, recurring transaction indicators": "Edición con un clic, iconos de categoría, formato de montos, miniaturas de recibos, indicadores de transacciones recurrentes",
+
+  "Budget Overview Widget (Standard+)": "Widget de Vista General del Presupuesto (Standard+)",
+  "Monitor budget progress across all categories": "Monitorea el progreso del presupuesto en todas las categorías",
+  "Progress bars, percentage completion, color-coded status (green/yellow/red), overspending alerts": "Barras de progreso, porcentaje de finalización, estado codificado por colores (verde/amarillo/rojo), alertas de sobregasto",
+
+  "Financial Health Score": "Puntuación de Salud Financiera",
+  "Calculate and display financial wellness score": "Calcula y muestra la puntuación de bienestar financiero",
+  "Free Users": "Usuarios Gratuitos",
+  "Simple calculation based on income/expense ratio": "Cálculo simple basado en la proporción ingresos/gastos",
+  "Standard+ Users": "Usuarios Standard+",
+  "AI-powered analysis with detailed recommendations and improvement suggestions": "Análisis impulsado por IA con recomendaciones detalladas y sugerencias de mejora",
+
+  "AI Financial Tips (Premium)": "Consejos Financieros IA (Premium)",
+  "Personalized financial advice based on spending patterns": "Consejos financieros personalizados basados en patrones de gasto",
+  "AI-generated tips, trend analysis, actionable recommendations, persistent across sessions": "Consejos generados por IA, análisis de tendencias, recomendaciones accionables, persistentes entre sesiones",
+
+  "Financial Mascot (Premium)": "Mascota Financiera (Premium)",
+  "Floating on dashboard": "Flotante en el tablero",
+  "Personalized AI companion reflecting financial health": "Compañero IA personalizado que refleja la salud financiera",
+  "Draggable positioning, mood changes based on spending, unique traits per user, hide/restore options": "Posicionamiento arrastrable, cambios de humor basados en el gasto, rasgos únicos por usuario, opciones de ocultar/restaurar",
+
+  "Transaction Management": "Gestión de Transacciones",
+
   "require_plan": {
     "compact": {
       "feature_title": "Función {{plan}}",

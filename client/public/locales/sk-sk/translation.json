@@ -825,6 +825,74 @@
   "How do recurring transactions work?": "Ako fungujú opakujúce sa transakcie?",
   "Standard+ users can mark transactions as recurring (weekly, monthly, yearly). The system shows upcoming reminders in the dashboard widget and detects patterns automatically. Set end dates or leave open-ended for ongoing bills.": "Standard+ používatelia môžu označiť transakcie ako opakujúce sa (týždenne, mesačne, ročne). Systém zobrazuje nadchádzajúce pripomienky vo widgete nástenky a automaticky detekuje vzory. Nastavte koncové dátumy alebo ich nechajte otvorené pre pokračujúce účty.",
 
+  "Can I create custom categories?": "Môžem vytvoriť vlastné kategórie?",
+  "Yes, create unlimited custom categories with personalized names, colors, and icons. Choose from income, expense, or goal types. Custom categories appear alongside 15+ predefined categories in all dropdown menus.": "Áno, vytvorte neobmedzené vlastné kategórie s personalizovanými názvami, farbami a ikonami. Vyberte si z typov príjmov, výdavkov alebo cieľov. Vlastné kategórie sa zobrazujú spolu s viac ako 15 preddefinovanými kategóriami vo všetkých rozbaľovacích ponukách.",
+
+  "How is the Financial Health Score calculated?": "Ako sa počíta Skóre Finančného Zdravia?",
+  "Free users see a simple calculation based on income/expense ratio. Standard+ users get AI-powered analysis evaluating spending habits, budget adherence, savings rate, and goal progress with detailed improvement recommendations.": "Bezplatní používatelia vidia jednoduchý výpočet založený na pomere príjmov/výdavkov. Standard+ používatelia dostávajú AI analýzu hodnotiacu návyky utrácania, dodržiavanie rozpočtu, úspornú mieru a pokrok cieľov s podrobnými odporúčaniami na zlepšenie.",
+
+  "How does budget tracking work?": "Ako funguje sledovanie rozpočtu?",
+  "Standard+ users create budgets for categories with weekly/monthly/yearly limits. Progress bars show spending with color-coded status: green (under budget), yellow (approaching limit), red (over budget). Receive overspending alerts automatically.": "Standard+ používatelia vytvárajú rozpočty pre kategórie s týždennými/mesačnými/ročnými limitmi. Pokrokové lišty zobrazujú výdavky s farebne kódovaným stavom: zelená (pod rozpočtom), žltá (blíži sa k limitu), červená (nad rozpočtom). Automaticky dostávajte upozornenia na prekročenie rozpočtu.",
+
+  "Can I share goals with family members?": "Môžem zdieľať ciele s rodinnými príslušníkmi?",
+  "Yes, Standard+ users can create collaborative goals and invite family members or partners. Track shared contributions, view progress together, and celebrate achievements as a team for joint savings efforts.": "Áno, Standard+ používatelia môžu vytvárať kolaboratívne ciele a pozývať rodinnýich príslušníkov alebo partnerov. Sledujte zdieľané príspevky, spoločne sledujte pokrok a oslavujte úspechy ako tím pre spoločné úsporné úsilie.",
+
+  "What is the calendar view feature?": "Čo je funkcia kalendárového zobrazenia?",
+  "Standard+ users can view transactions in a monthly calendar grid showing daily spending totals and transaction previews. Navigate between months to see spending patterns over time with mobile-responsive design.": "Standard+ používatelia môžu zobrazovať transakcie v mesačnej kalendárovej mriežke zobrazujúcej denné súčty výdavkov a náhľady transakcií. Navigujte medzi mesiacmi pre zobrazenie vzorov utrácania v čase s mobilne responzívnym dizajnom.",
+
+  "What are AI trend predictions?": "Čo sú AI predpovede trendov?",
+  "Premium users get AI-powered financial forecasting showing spending predictions, income projections, budget recommendations, and goal timeline estimates. Uses machine learning to analyze patterns and predict future financial trends.": "Premium používatelia dostávajú AI finančné prognózy zobrazujúce predpovede výdavkov, projekcie príjmov, odporúčania rozpočtu a odhady časových plánov cieľov. Používa strojové učenie na analýzu vzorov a predpovedanie budúcich finančných trendov.",
+
+  "What is the Financial Mascot feature?": "Čo je funkcia Finančnej Maskoty?",
+  "Premium users get a personalized AI companion that reflects financial health through mood changes and visual indicators. The mascot is draggable around the screen, has unique traits based on your profile, and can be hidden/restored.": "Premium používatelia dostávajú personalizovaného AI spoločníka, ktorý odráža finančné zdravie prostredníctvom zmien nálady a vizuálnych indikátorov. Maskota sa dá presúvať po obrazovke, má jedinečné vlastnosti založené na vašom profile a môže sa skryť/obnoviť.",
+
+  "How does cloud backup work?": "Ako funguje cloudové zálohovanie?",
+  "Premium users get automatic daily backups at 2:00 AM storing all transactions, budgets, goals, categories, and receipt images securely. Manual backup options available with complete restore functionality to recover all data.": "Premium používatelia dostávajú automatické denné zálohy o 2:00 ráno bezpečne ukladajúce všetky transakcie, rozpočty, ciele, kategórie a obrázky účteniek. Dostupné sú možnosti manuálneho zálohovania s kompletnou funkciou obnovy na obnovenie všetkých údajov.",
+
+  "Can I import data from other financial apps?": "Môžem importovať údaje z iných finančných aplikácií?",
+  "Premium users can import from Mint, QuickBooks, YNAB, Personal Capital, and bank exports. Features include column mapping, data validation, preview before import, and batch processing with error handling.": "Premium používatelia môžu importovať z Mint, QuickBooks, YNAB, Personal Capital a bankových exportov. Funkcie zahŕňajú mapovanie stĺpcov, validáciu údajov, náhľad pred importom a dávkové spracovanie s riešením chýb.",
+
+  "Can I use my phone's camera for receipts?": "Môžem použiť kameru telefónu na účtenky?",
+  "Yes, mobile browsers support direct camera access. Choose 'Take Photo' to use your camera or 'Choose from Gallery' to select existing photos. QR code scanning allows cross-device upload from phone to computer.": "Áno, mobilné prehliadače podporujú priamy prístup ku kamere. Vyberte 'Odfotiť' na použitie kamery alebo 'Vybrať z Galérie' na výber existujúcich fotiek. Skenovanie QR kódu umožňuje nahrávanie medzi zariadeniami z telefónu na počítač.",
+
+  "How do I filter and view reports?": "Ako filtrujem a zobrazujem reporty?",
+  "Use month dropdowns and period filters (week/month/quarter/year) on the Reports page. View financial overviews, category breakdowns, and analytics. Premium users get advanced trend analysis and comparative reports.": "Použite rozbaľovacie ponuky mesiacov a filtre období (týždeň/mesiac/štvrťrok/rok) na stránke Reportov. Zobrazujte finančné prehľady, rozdelenia kategórií a analýzy. Premium používatelia dostávajú pokročilé analýzy trendov a porovnávacie reporty.",
+
+  "How do plan upgrades and downgrades work?": "Ako fungujú aktualizácie a zníženia plánov?",
+  "Upgrades apply immediately with prorated billing. Downgrades are scheduled for the end of your current billing period. Access subscription management through Profile page with full billing transparency and Stripe customer portal integration.": "Aktualizácie sa aplikujú okamžite s pomernou fakturáciou. Zníženia sú naplánované na koniec vášho aktuálneho fakturačného obdobia. Prístup k správe predplatného cez stránku Profilu s úplnou transparentnosťou fakturácie a integráciou Stripe zákazníckeho portálu.",
+
+  "Is the app fully mobile-friendly?": "Je aplikácia plne kompatibilná s mobiles?",
+  "Yes, complete responsive design with touch-friendly interfaces, mobile navigation, collapsible filters, optimized forms, and camera integration. All desktop functionality is accessible on mobile browsers without requiring app downloads.": "Áno, kompletný responzívny dizajn s dotykovými rozhraniami, mobilnou navigáciou, zbaliteľnými filtrami, optimalizovanými formulármi a integráciou kamery. Všetky desktop funkcie sú dostupné v mobilných prehliadačoch bez potreby sťahovania aplikácií.",
+
+  "How can I get help or support?": "Ako môžem získať pomoc alebo podporu?",
+  "Use this AI chat assistant for immediate help, check our comprehensive documentation below, or contact our support team through the contact page for personalized assistance.": "Použite tohto AI chat asistenta pre okamžitú pomoc, skontrolujte našu kompletnú dokumentáciu nižšie, alebo kontaktujte náš tím podpory cez stránku kontaktov pre personalizovanú pomoc.",
+
+  "Recent Transactions Widget": "Widget Nedávnych Transakcií",
+  "Shows last 5 transactions with edit/delete options": "Zobrazuje posledných 5 transakcií s možnosťami úpravy/vymazania",
+  "One-click editing, category icons, amount formatting, receipt thumbnails, recurring transaction indicators": "Úprava jedným kliknutím, ikony kategórií, formátovanie súm, miniatúry účteniek, indikátory opakujúcich sa transakcií",
+
+  "Budget Overview Widget (Standard+)": "Widget Prehľadu Rozpočtu (Standard+)",
+  "Monitor budget progress across all categories": "Monitoruje pokrok rozpočtu vo všetkých kategóriách",
+  "Progress bars, percentage completion, color-coded status (green/yellow/red), overspending alerts": "Pokrokové lišty, percentuálne dokončenie, farebne kódovaný stav (zelená/žltá/červená), upozornenia na prekročenie rozpočtu",
+
+  "Financial Health Score": "Skóre Finančného Zdravia",
+  "Calculate and display financial wellness score": "Vypočíta a zobrazí skóre finančného wellness",
+  "Free Users": "Bezplatní Používatelia",
+  "Simple calculation based on income/expense ratio": "Jednoduchý výpočet založený na pomere príjmov/výdavkov",
+  "Standard+ Users": "Standard+ Používatelia",
+  "AI-powered analysis with detailed recommendations and improvement suggestions": "AI analýza s podrobnými odporúčaniami a návrhmi na zlepšenie",
+
+  "AI Financial Tips (Premium)": "AI Finančné Tipy (Premium)",
+  "Personalized financial advice based on spending patterns": "Personalizované finančné poradenstvo založené na vzoroch utrácania",
+  "AI-generated tips, trend analysis, actionable recommendations, persistent across sessions": "AI generované tipy, analýza trendov, uskutočniteľné odporúčania, perzistentné medzi sedeniami",
+
+  "Financial Mascot (Premium)": "Finančná Maskota (Premium)",
+  "Floating on dashboard": "Plávajúca na nástenke",
+  "Personalized AI companion reflecting financial health": "Personalizovaný AI spoločník odrážajúci finančné zdravie",
+  "Draggable positioning, mood changes based on spending, unique traits per user, hide/restore options": "Presúvateľné umiestnenie, zmeny nálady na základe utrácania, jedinečné vlastnosti pre každého používateľa, možnosti skrytia/obnovenia",
+
+  "Transaction Management": "Správa Transakcií",
+
   "require_plan": {
     "compact": {
       "feature_title": "{{plan}} Funkcia",

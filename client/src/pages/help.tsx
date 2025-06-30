@@ -722,11 +722,11 @@ export default function Help() {
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Financial Mascot (Premium)</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Financial Mascot (Premium)')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Floating on dashboard<br/>
-                              <strong>Function:</strong> Personalized AI companion reflecting financial health<br/>
-                              <strong>Features:</strong> Draggable positioning, mood changes based on spending, unique traits per user, hide/restore options
+                              <strong>{t('Location')}:</strong> {t('Floating on dashboard')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Personalized AI companion reflecting financial health')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Draggable positioning, mood changes based on spending, unique traits per user, hide/restore options')}
                             </p>
                           </div>
                         </div>
@@ -736,7 +736,7 @@ export default function Help() {
                       <div className="border-l-4 border-green-500 pl-4">
                         <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
                           <DollarSign className="h-5 w-5" />
-                          Transaction Management
+                          {t('Transaction Management')}
                         </h4>
                         <div className="space-y-4">
                           <div>
