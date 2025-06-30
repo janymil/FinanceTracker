@@ -1438,6 +1438,22 @@
     }
   },
 
+  "expense_reminders": {
+    "reminder_created": "Recordatorio Creado",
+    "created_successfully": "El recordatorio de gasto se ha configurado exitosamente",
+    "reminder_completed": "Recordatorio Completado",
+    "completed_successfully": "Recordatorio de gasto marcado como completado",
+    "reminder_deleted": "Recordatorio Eliminado",
+    "deleted_successfully": "El recordatorio de gasto ha sido eliminado",
+    "edit_reminder": "Editar Recordatorio",
+    "create_reminder": "Crear Recordatorio Financiero",
+    "placeholder_notes": "Notas adicionales sobre este gasto",
+    "select_category": "Seleccionar categoría",
+    "update_reminder": "Actualizar Recordatorio",
+    "create_reminder_button": "Crear Recordatorio",
+    "copied_to_clipboard": "Nota de referencia copiada al portapapeles"
+  },
+
   "types": {
     "expense": "gasto",
     "income": "ingreso",

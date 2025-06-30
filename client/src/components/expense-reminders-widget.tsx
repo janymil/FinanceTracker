@@ -214,7 +214,7 @@ export default function FinancialRemindersWidget() {
               <DialogContent className="max-w-md">
                 <DialogHeader>
                   <DialogTitle>
-                    {editingReminder ? "Edit Reminder" : "Create Financial Reminder"}
+                    {editingReminder ? t("expense_reminders.edit_reminder") : t("expense_reminders.create_reminder")}
                   </DialogTitle>
                   <DialogDescription>
                     Set up a reminder for an upcoming expense, payment, or income
@@ -237,7 +237,7 @@ export default function FinancialRemindersWidget() {
                       id="description"
                       value={newReminder.description}
                       onChange={(e) => setNewReminder({ ...newReminder, description: e.target.value })}
-                      placeholder="Additional notes about this expense"
+                      placeholder={t("expense_reminders.placeholder_notes")}
                       rows={2}
                     />
                   </div>
@@ -273,7 +273,7 @@ export default function FinancialRemindersWidget() {
                         onValueChange={(value) => setNewReminder({ ...newReminder, categoryId: value })}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
+                          <SelectValue placeholder={t("expense_reminders.select_category")} />
                         </SelectTrigger>
                         <SelectContent>
                           {allCategories.map((category: Category) => (
@@ -395,7 +395,7 @@ export default function FinancialRemindersWidget() {
                       disabled={!newReminder.title || !newReminder.dueDate}
                       className="flex-1"
                     >
-                      {editingReminder ? "Update" : "Create"} Reminder
+                      {editingReminder ? t("expense_reminders.update_reminder") : t("expense_reminders.create_reminder_button")}
                     </Button>
                   </div>
                 </div>
@@ -459,7 +459,7 @@ export default function FinancialRemindersWidget() {
                                 navigator.clipboard.writeText(reminder.referenceNote || '');
                                 toast({
                                   title: "Copied!",
-                                  description: "Reference note copied to clipboard",
+                                  description: t("expense_reminders.copied_to_clipboard"),
                                 });
                               }}
                               className="inline-flex items-center gap-1 text-xs bg-gray-500 hover:bg-gray-600 text-white px-2 py-1 rounded-md transition-colors"

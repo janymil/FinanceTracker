@@ -1361,6 +1361,22 @@
     }
   },
 
+  "expense_reminders": {
+    "reminder_created": "Reminder Created",
+    "created_successfully": "Expense reminder has been set successfully",
+    "reminder_completed": "Reminder Completed",
+    "completed_successfully": "Expense reminder marked as completed",
+    "reminder_deleted": "Reminder Deleted",
+    "deleted_successfully": "Expense reminder has been deleted",
+    "edit_reminder": "Edit Reminder",
+    "create_reminder": "Create Financial Reminder",
+    "placeholder_notes": "Additional notes about this expense",
+    "select_category": "Select category",
+    "update_reminder": "Update Reminder",
+    "create_reminder_button": "Create Reminder",
+    "copied_to_clipboard": "Reference note copied to clipboard"
+  },
+
   "types": {
     "expense": "expense",
     "income": "income",
