@@ -496,19 +496,19 @@ export default function Help() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Shield className="h-5 w-5" />
-                      Security & Privacy
+                      {t('Security & Privacy')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2 text-sm">
-                      <li>• Industry-standard data encryption</li>
-                      <li>• Secure authentication with Clerk</li>
-                      <li>• Private data isolation</li>
-                      <li>• GDPR compliance and privacy controls</li>
-                      <li>• Cookie consent management</li>
-                      <li>• Secure API endpoints</li>
-                      <li>• Regular security audits</li>
-                      <li>• Data ownership transparency</li>
+                      <li>• {t('Industry-standard data encryption')}</li>
+                      <li>• {t('Secure authentication with Clerk')}</li>
+                      <li>• {t('Private data isolation')}</li>
+                      <li>• {t('GDPR compliance and privacy controls')}</li>
+                      <li>• {t('Cookie consent management')}</li>
+                      <li>• {t('Secure API endpoints')}</li>
+                      <li>• {t('Regular security audits')}</li>
+                      <li>• {t('Data ownership transparency')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -539,7 +539,7 @@ export default function Help() {
 
                 <Card className="relative border-primary">
                   <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-primary">Most Popular</Badge>
+                    <Badge className="bg-primary">{t('Most Popular')}</Badge>
                   </div>
                   <CardHeader>
                     <CardTitle className="text-center">{t('help.plans.standard')}</CardTitle>
