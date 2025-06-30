@@ -331,8 +331,8 @@ export class DatabaseStorage implements IStorage {
         await db.insert(recurringTransactions).values({
           userId: transaction.userId,
           categoryId: transaction.categoryId,
-          description: transaction.description,
-          amount: transaction.amount,
+          description: transaction.description, // Use original unencrypted description
+          amount: transaction.amount, // Use original unencrypted amount
           type: transaction.type,
           frequency: transaction.recurringFrequency,
           startDate: transaction.date,
@@ -401,13 +401,13 @@ export class DatabaseStorage implements IStorage {
 
         // Only update fields that are explicitly provided
         if (transaction.amount !== undefined) {
-            updateFields.amount = transaction.amount;
+            updateFields.amount = transaction.amount; // Keep amount unencrypted for database compatibility
         }
         if (transaction.description !== undefined) {
-            updateFields.description = transaction.description;
+            updateFields.description = DataEncryption.encryptDescription(transaction.description);
         }
         if (transaction.referenceNote !== undefined) {
-            updateFields.referenceNote = transaction.referenceNote;
+            updateFields.referenceNote = transaction.referenceNote ? DataEncryption.encrypt(transaction.referenceNote) : null;
         }
         if (transaction.categoryId !== undefined) {
             updateFields.categoryId = transaction.categoryId;
@@ -437,12 +437,12 @@ export class DatabaseStorage implements IStorage {
             .where(and(eq(transactions.id, id), eq(transactions.userId, transaction.userId!)))
             .returning();
 
-        // Return value without decryption (encryption disabled)
+        // Return value with proper decryption
         return {
             ...updatedTransaction,
-            amount: updatedTransaction.amount,
-            description: updatedTransaction.description,
-            referenceNote: updatedTransaction.referenceNote
+            amount: updatedTransaction.amount, // Keep amount as-is since it's not encrypted
+            description: DataEncryption.decryptDescription(updatedTransaction.description),
+            referenceNote: updatedTransaction.referenceNote ? DataEncryption.decrypt(updatedTransaction.referenceNote) : null
         };
   }
 
@@ -911,9 +911,9 @@ export class DatabaseStorage implements IStorage {
     futureTransactions.forEach(transaction => {
       reminders.push({
         id: `future_${transaction.id}`,
-        title: transaction.description,
+        title: DataEncryption.decryptDescription(transaction.description), // Decrypt the description
         description: `${transaction.type === 'expense' ? 'Payment' : 'Income'} scheduled`,
-        amount: transaction.amount,
+        amount: transaction.amount, // Amount is not encrypted, so use as-is
         dueDate: transaction.date,
         type: transaction.type as 'income' | 'expense',
         categoryName: transaction.categoryName || 'Uncategorized',
@@ -963,9 +963,9 @@ export class DatabaseStorage implements IStorage {
       if (nextOccurrence && nextOccurrence <= futureDate && nextOccurrence >= now) {
         const reminder = {
           id: `recurring_${recurring.id}`,
-          title: recurring.description,
+          title: DataEncryption.decryptDescription(recurring.description), // Decrypt the description
           description: recurring.recurringFrequency, // Just send the frequency, let client translate
-          amount: recurring.amount,
+          amount: recurring.amount, // Amount is not encrypted, so use as-is
           dueDate: nextOccurrence,
           type: recurring.type as 'income' | 'expense',
           categoryName: recurring.categoryName || 'Uncategorized',
