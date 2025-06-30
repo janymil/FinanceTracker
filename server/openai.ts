@@ -1274,11 +1274,12 @@ export async function generateContextualFinancialTips(
   actionable: boolean;
 }> }> {
   const normalizedLanguage = normalizeLanguageCode(language);
+  const { summary, transactions, budgets, goals = [], selectedMonth } = data;
+  
+  // Initialize UnifiedAICache with 72 hours TTL
+  const cache = new UnifiedAICache('contextual-tips', userId, selectedMonth);
+  
   try {
-    const { summary, transactions, budgets, goals = [], selectedMonth } = data;
-    
-    // Initialize UnifiedAICache with 72 hours TTL
-    const cache = new UnifiedAICache('contextual-tips', userId, selectedMonth);
 
     // Check cache first with language-aware key
     const cacheKey = { ...data, language: normalizedLanguage };
@@ -1759,7 +1760,8 @@ export async function parseBankStatement(text: string, language: string = 'en-us
 
   try {
     // Check cache first
-    const cached = await UnifiedAICache.get('parseBankStatement', 'system', cacheKey);
+    const cache = new UnifiedAICache('parseBankStatement', 'system');
+    const cached = await cache.get(cacheKey);
     if (cached) {
       console.log('Using cached bank statement parsing result');
       return cached;
@@ -1835,7 +1837,7 @@ Respond ONLY with valid JSON. No explanations or additional text.`;
       };
 
       // Cache the result for 1 hour
-      await UnifiedAICache.set('parseBankStatement', 'system', cacheKey, formattedResult, 3600);
+      await cache.set(cacheKey, formattedResult, false, 72);
 
       return formattedResult;
     }
