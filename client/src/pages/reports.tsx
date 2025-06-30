@@ -26,6 +26,8 @@ export default function Reports() {
   const [, setLocation] = useLocation();
   const [selectedPeriod, setSelectedPeriod] = useState("month");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  
+
   const { currency } = useCurrency();
   const displayCurrency = currency || '$';
   const { t } = useTranslation();
@@ -155,7 +157,13 @@ export default function Reports() {
               </p>
             </div>
             <div className="flex items-center space-x-4">
-              <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+              <Select value={selectedPeriod} onValueChange={(value) => {
+                setSelectedPeriod(value);
+                // Clear month selection when period is changed to avoid conflicts
+                if (value !== "month") {
+                  setSelectedMonth(null);
+                }
+              }}>
                 <SelectTrigger className="w-40">
                   <Calendar className="h-4 w-4 mr-2" />
                   <SelectValue />
