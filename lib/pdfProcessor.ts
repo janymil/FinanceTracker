@@ -69,8 +69,11 @@ class PDFSecurityManager {
   static sanitizeExtractedText(text: string, securityLog: SecurityEvent[]): string {
     PDFSecurityManager.logSecurityEvent(securityLog, 'text_sanitization_start', 'success');
     
-    // Remove potential sensitive patterns that shouldn't be in transactions
+    // COMPREHENSIVE anonymization for AI processing
     let sanitized = text;
+    
+    // Remove personal names (common patterns)
+    sanitized = sanitized.replace(/\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/g, '[NAME_REDACTED]');
     
     // Remove social security numbers (xxx-xx-xxxx)
     sanitized = sanitized.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[SSN_REDACTED]');
@@ -81,10 +84,26 @@ class PDFSecurityManager {
       return `****-****-****-${last4}`;
     });
     
+    // Remove account numbers (8+ consecutive digits)
+    sanitized = sanitized.replace(/\b\d{8,20}\b/g, '[ACCOUNT_REDACTED]');
+    
     // Remove routing numbers in isolation (9 digits starting with 0,1,2,3)
     sanitized = sanitized.replace(/\b[0-3]\d{8}\b/g, '[ROUTING_REDACTED]');
     
-    PDFSecurityManager.logSecurityEvent(securityLog, 'text_sanitization_complete', 'success', `Processed ${text.length} chars`);
+    // Remove email addresses
+    sanitized = sanitized.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL_REDACTED]');
+    
+    // Remove phone numbers
+    sanitized = sanitized.replace(/\b(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}\b/g, '[PHONE_REDACTED]');
+    
+    // Remove addresses (street numbers + street names)
+    sanitized = sanitized.replace(/\b\d+\s+[A-Z][a-z]+(\s+[A-Z][a-z]+)*\s+(St|Street|Ave|Avenue|Rd|Road|Dr|Drive|Blvd|Boulevard|Ln|Lane|Way|Ct|Court)\b/gi, '[ADDRESS_REDACTED]');
+    
+    // Remove balance information lines (preserves transaction data)
+    sanitized = sanitized.replace(/^.*balance.*$/gmi, '[BALANCE_REDACTED]');
+    sanitized = sanitized.replace(/^.*total.*$/gmi, '[TOTAL_REDACTED]');
+    
+    PDFSecurityManager.logSecurityEvent(securityLog, 'text_sanitization_complete', 'success', `Anonymized ${text.length} chars`);
     return sanitized;
   }
 
