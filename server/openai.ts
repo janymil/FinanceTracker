@@ -296,12 +296,77 @@ Analyze this transaction and provide consistent categorization:`
 }
 
 export async function categorizeExpense(description: string, amount: number, language: string = 'en-us'): Promise<ExpenseCategorizationResult> {
-  // Fallback function for when user categories are not available
-  return {
-    category: 'Other',
-    confidence: 0.1,
-    reasoning: 'Fallback categorization - user categories not available'
-  };
+  const normalizedLanguage = normalizeLanguageCode(language);
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (category, reasoning) must be in ${getLanguageLabel(normalizedLanguage)}.
+
+You are an intelligent financial categorization expert. Analyze the merchant/business name and use your knowledge to determine what type of business it is, then assign the most appropriate category.
+
+ANALYSIS APPROACH:
+1. Identify the merchant/business type from the description
+2. Understand what industry/service they provide
+3. Match to the most logical category based on business nature
+4. Use intelligent business analysis, not keyword matching
+
+BUSINESS TYPE ANALYSIS (use intelligence, not rules):
+- Grocery stores, supermarkets, restaurants → Food & Dining related
+- Gas stations, public transport, car services → Transportation related  
+- Tech services, software, hosting → Business/Technology related
+- Streaming, games, entertainment venues → Entertainment related
+- Utilities, phone bills, internet → Bills & Utilities related
+- Medical, pharmacy, health services → Healthcare related
+- Hotels, airlines, travel → Travel related
+- Clothing, electronics, general retail → Shopping related
+- Rent, mortgage, home improvement → Home & Garden related
+- Salon, spa, cosmetics → Personal Care related
+- Courses, books, tuition → Education related
+
+IMPORTANT: Analyze the business name intelligently. Don't just match keywords - understand what the business actually does.
+
+Respond with JSON in this exact format:
+{
+  "category": "category_name",
+  "confidence": 0.95,
+  "reasoning": "Brief explanation of business type and why this category fits"
+}`
+        },
+        {
+          role: "user",
+          content: `Description: "${description}"
+Amount: $${amount}
+
+Analyze this merchant intelligently:
+1. What type of business is this?
+2. What industry/service do they provide?
+3. Which category best matches their business nature?
+
+Use your intelligence to categorize correctly.`
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.2
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+
+    return {
+      category: result.category || 'Other',
+      confidence: Math.max(0, Math.min(1, result.confidence || 0.5)),
+      reasoning: result.reasoning || 'Unable to determine category'
+    };
+  } catch (error) {
+    console.error('Error categorizing expense (fallback):', error);
+    return {
+      category: 'Other',
+      confidence: 0.1,
+      reasoning: 'Error occurred during categorization'
+    };
+  }
 }
 
 export async function generateFinancialTips(

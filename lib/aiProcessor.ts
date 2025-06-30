@@ -89,6 +89,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
           fallbackResult = await generateExpensePredictions(userId, payload.transactions);
           break;
         case 'categorizeExpense':
+          const { categorizeExpense } = await import('../server/openai');
           fallbackResult = await categorizeExpense(payload.description, payload.amount, payload.language);
           break;
         case 'parseBankStatement':
