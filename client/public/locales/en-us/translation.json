@@ -1377,6 +1377,17 @@
     "copied_to_clipboard": "Reference note copied to clipboard"
   },
 
+  "reminders": {
+    "notifications_not_supported": "Notifications not supported",
+    "browser_not_support": "Your browser doesn't support notifications",
+    "notifications_blocked": "Notifications blocked",
+    "enable_in_settings": "Please enable notifications in your browser settings",
+    "notifications_enabled": "Notifications enabled",
+    "will_receive_notifications": "You'll now receive reminder notifications",
+    "notifications_denied": "Notifications denied",
+    "wont_receive_notifications": "You won't receive browser notifications"
+  },
+
   "types": {
     "expense": "expense",
     "income": "income",

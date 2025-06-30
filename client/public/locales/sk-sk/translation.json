@@ -1510,6 +1510,17 @@
     "copied_to_clipboard": "Referenčná poznámka skopírovaná do schránky"
   },
 
+  "reminders": {
+    "notifications_not_supported": "Notifikácie nie sú podporované",
+    "browser_not_support": "Váš prehliadač nepodporuje notifikácie",
+    "notifications_blocked": "Notifikácie sú blokované",
+    "enable_in_settings": "Prosím povoľte notifikácie v nastaveniach vášho prehliadača",
+    "notifications_enabled": "Notifikácie povolené",
+    "will_receive_notifications": "Teraz budete dostávať pripomienky",
+    "notifications_denied": "Notifikácie zamietnuté",
+    "wont_receive_notifications": "Nebudete dostávať notifikácie z prehliadača"
+  },
+
   "types": {
     "expense": "výdavok",
     "income": "príjem",

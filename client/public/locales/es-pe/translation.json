@@ -1454,6 +1454,17 @@
     "copied_to_clipboard": "Nota de referencia copiada al portapapeles"
   },
 
+  "reminders": {
+    "notifications_not_supported": "Notificaciones no soportadas",
+    "browser_not_support": "Tu navegador no soporta notificaciones",
+    "notifications_blocked": "Notificaciones bloqueadas",
+    "enable_in_settings": "Por favor habilita las notificaciones en la configuración de tu navegador",
+    "notifications_enabled": "Notificaciones habilitadas",
+    "will_receive_notifications": "Ahora recibirás notificaciones de recordatorios",
+    "notifications_denied": "Notificaciones denegadas",
+    "wont_receive_notifications": "No recibirás notificaciones del navegador"
+  },
+
   "types": {
     "expense": "gasto",
     "income": "ingreso",
