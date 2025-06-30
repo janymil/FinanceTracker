@@ -185,7 +185,7 @@ export default function ProfilePage() {
                 <div>
                   <h3 className="font-semibold text-lg">{t('profile.Current Plan')}</h3>
                   <p className="text-muted-foreground">
-                    {t('You are currently on the {{plan}} plan', { plan: authUser.plan || 'Free' })}
+                    {t('profile.You are currently on the {{plan}} plan', { plan: authUser.plan || 'Free' })}
                   </p>
                 </div>
                 <Badge variant="secondary" className="bg-premium text-premium-foreground">
