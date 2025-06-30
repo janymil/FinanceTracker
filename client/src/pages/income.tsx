@@ -465,7 +465,7 @@ export default function Income() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <RequirePlan plan="standard" feature={t("common.recurring_transactions")}>
+                  <RequirePlan plan="standard" feature={t("common.recurring_transactions")} compact>
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="recurring"
@@ -763,58 +763,60 @@ export default function Income() {
                   <SelectContent>
                     {incomeCategories.map((category: Category) => (
                       <SelectItem key={category.id} value={category.id.toString()}>
-                        {category.name}
+                        {getLocalizedCategoryName(category, t)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="editRecurring"
-                  checked={editingTransaction.isRecurring}
-                  onCheckedChange={(checked) => setEditingTransaction({
-                    ...editingTransaction,
-                    isRecurring: checked as boolean
-                  })}
-                />
-                <Label htmlFor="editRecurring">{t("income.recurring_income")}</Label>
-              </div>
-              {editingTransaction.isRecurring && (
-                <>
-                  <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="editFrequency">{t("common.frequency")}</Label>
-                    <Select 
-                      value={editingTransaction.recurringFrequency} 
-                      onValueChange={(value) => setEditingTransaction({
-                        ...editingTransaction,
-                        recurringFrequency: value as any
-                      })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="weekly">{t("common.weekly")}</SelectItem>
-                        <SelectItem value="monthly">{t("common.monthly")}</SelectItem>
-                        <SelectItem value="yearly">{t("common.yearly")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="editEndDate">{t("common.end_date")} ({t("common.optional")})</Label>
-                    <Input
-                      id="editEndDate"
-                      type="date"
-                      value={editingTransaction.recurringEndDate || ""}
-                      onChange={(e) => setEditingTransaction({
-                        ...editingTransaction,
-                        recurringEndDate: e.target.value
-                      })}
-                    />
-                  </div>
-                </>
-              )}
+              <RequirePlan plan="standard" feature={t("common.recurring_transactions")} compact>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="editRecurring"
+                    checked={editingTransaction.isRecurring}
+                    onCheckedChange={(checked) => setEditingTransaction({
+                      ...editingTransaction,
+                      isRecurring: checked as boolean
+                    })}
+                  />
+                  <Label htmlFor="editRecurring">{t("income.recurring_income")}</Label>
+                </div>
+                {editingTransaction.isRecurring && (
+                  <>
+                    <div className="grid w-full items-center gap-1.5">
+                      <Label htmlFor="editFrequency">{t("common.frequency")}</Label>
+                      <Select 
+                        value={editingTransaction.recurringFrequency} 
+                        onValueChange={(value) => setEditingTransaction({
+                          ...editingTransaction,
+                          recurringFrequency: value as any
+                        })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="weekly">{t("common.weekly")}</SelectItem>
+                          <SelectItem value="monthly">{t("common.monthly")}</SelectItem>
+                          <SelectItem value="yearly">{t("common.yearly")}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid w-full items-center gap-1.5">
+                      <Label htmlFor="editEndDate">{t("common.end_date")} ({t("common.optional")})</Label>
+                      <Input
+                        id="editEndDate"
+                        type="date"
+                        value={editingTransaction.recurringEndDate || ""}
+                        onChange={(e) => setEditingTransaction({
+                          ...editingTransaction,
+                          recurringEndDate: e.target.value
+                        })}
+                      />
+                    </div>
+                  </>
+                )}
+              </RequirePlan>
               <div className="grid w-full items-center gap-1.5">
                 <Label htmlFor="editReferenceNote">{t("common.reference_note")}</Label>
                 <Input
