@@ -2550,5 +2550,55 @@
       "email": "Email: info@finanzerpro.com",
       "address": "Address: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120"
     }
+  },
+  "subscribe": {
+    "title": "Choose Your Plan",
+    "subtitle": "Unlock powerful financial management features with your subscription",
+    "back_to_home": "Back to Home",
+    "current_plan": "This is your plan",
+    "subscribe_now": "Subscribe Now",
+    "processing": "Processing...",
+    "most_popular": "Most Popular",
+    "best_value": "Best Value",
+    "best_value_discount": "Best Value - 17% Off",
+    "plan_title": "{{plan}} Plan",
+    "per_month": "/month",
+    "per_year": "/year",
+    "billing_description": "Billed monthly, cancel anytime",
+    "save_per_year": "Save ${{amount}} per year",
+    "discount_percentage": "17% Off",
+    "subscribe_for_month": "Subscribe for ${{price}}/month",
+    "subscribe_for_year": "Subscribe for ${{price}}/year",
+    "already_have_account": "Already have an account?",
+    "sign_in_here": "Sign in here",
+    "billing": {
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "save_percentage": "Save 17%"
+    },
+    "plans": {
+      "standard": {
+        "features": {
+          "0": "Everything in Free plan",
+          "1": "Goals and budget management",
+          "2": "Interactive charts and reports",
+          "3": "AI expense categorization",
+          "4": "Calendar view and reminders",
+          "5": "Unlimited transaction history"
+        }
+      },
+      "premium": {
+        "features": {
+          "0": "Everything in Standard plan",
+          "1": "AI financial tips and insights",
+          "2": "Advanced trends analysis",
+          "3": "Expense prediction",
+          "4": "Daily personalized recommendations",
+          "5": "Cloud data backup",
+          "6": "Data management (CSV, PDF)",
+          "7": "Priority email support"
+        }
+      }
+    }
   }
 }

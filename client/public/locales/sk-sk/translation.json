@@ -2572,5 +2572,55 @@
       "email": "Email: info@finanzerpro.com",
       "address": "Adresa: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120"
     }
+  },
+  "subscribe": {
+    "title": "Vyberte Si Svoj Plán",
+    "subtitle": "Odomknite výkonné funkcie správy financií s vaším predplatným",
+    "back_to_home": "Späť na Domov",
+    "current_plan": "Toto je váš plán",
+    "subscribe_now": "Predplatiť Teraz",
+    "processing": "Spracováva sa...",
+    "most_popular": "Najpopulárnejší",
+    "best_value": "Najlepšia Hodnota",
+    "best_value_discount": "Najlepšia Hodnota - 17% Zľava",
+    "plan_title": "{{plan}} Plán",
+    "per_month": "/mesiac",
+    "per_year": "/rok",
+    "billing_description": "Fakturované mesačne, zrušte kedykoľvek",
+    "save_per_year": "Ušetrite ${{amount}} ročne",
+    "discount_percentage": "17% Zľava",
+    "subscribe_for_month": "Predplatiť za ${{price}}/mesiac",
+    "subscribe_for_year": "Predplatiť za ${{price}}/rok",
+    "already_have_account": "Už máte účet?",
+    "sign_in_here": "Prihláste sa tu",
+    "billing": {
+      "monthly": "Mesačne",
+      "yearly": "Ročne",
+      "save_percentage": "Ušetrite 17%"
+    },
+    "plans": {
+      "standard": {
+        "features": {
+          "0": "Všetko z Bezplatného plánu",
+          "1": "Správa cieľov a rozpočtov",
+          "2": "Interaktívne grafy a správy",
+          "3": "AI kategorizácia výdavkov",
+          "4": "Kalendárny pohľad a pripomienky",
+          "5": "Neobmedzená história transakcií"
+        }
+      },
+      "premium": {
+        "features": {
+          "0": "Všetko zo Štandardného plánu",
+          "1": "AI finančné tipy a analýzy",
+          "2": "Pokročilá analýza trendov",
+          "3": "Predpoveď výdavkov",
+          "4": "Denné personalizované odporúčania",
+          "5": "Zálohovanie dát v cloude",
+          "6": "Správa dát (CSV, PDF)",
+          "7": "Prioritná e-mailová podpora"
+        }
+      }
+    }
   }
 }

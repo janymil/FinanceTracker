@@ -347,11 +347,11 @@ export default function Subscribe() {
                         : 'bg-purple-600 text-white'
                     }`}>
                       {isCurrentPlan('premium', 'yearly') ? (
-                        'Current Plan'
+                        t('subscribe.current_plan')
                       ) : (
                         <>
                           <Crown className="h-3 w-3 mr-1" />
-                          Best Value
+                          {t('subscribe.best_value')}
                         </>
                       )}
                     </Badge>
@@ -360,16 +360,16 @@ export default function Subscribe() {
                     <div className="p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-purple-100 dark:bg-purple-900">
                       <Crown className="h-8 w-8 text-purple-600" />
                     </div>
-                    <CardTitle className="text-3xl">{plans.premium.name} Plan</CardTitle>
+                    <CardTitle className="text-3xl">{t('subscribe.plan_title', { plan: plans.premium.name })}</CardTitle>
                     <div className="text-5xl font-bold mb-2 text-purple-600">
                       ${plans.premium.yearly}
-                      <span className="text-lg font-normal text-gray-500">/year</span>
+                      <span className="text-lg font-normal text-gray-500">{t('subscribe.per_year')}</span>
                     </div>
                     <CardDescription>
-                      Save ${((plans.premium.monthly * 12) - plans.premium.yearly).toFixed(2)} per year
+                      {t('subscribe.save_per_year', { amount: ((plans.premium.monthly * 12) - plans.premium.yearly).toFixed(2) })}
                     </CardDescription>
                     <Badge className="mt-2 bg-green-100 text-green-800">
-                      Best Value - 17% Off
+                      {t('subscribe.best_value_discount')}
                     </Badge>
                   </CardHeader>
                   <CardContent className="p-8">
@@ -398,7 +398,7 @@ export default function Subscribe() {
                       ) : (
                         <>
                           <CreditCard className="h-5 w-5 mr-2" />
-                          {loading ? 'Processing...' : `Subscribe for $${plans.premium.yearly}/year`}
+                          {loading ? t('subscribe.processing') : t('subscribe.subscribe_for_year', { price: plans.premium.yearly })}
                         </>
                       )}
                     </Button>
@@ -412,12 +412,12 @@ export default function Subscribe() {
           {!user && (
             <div className="text-center mt-8">
               <p className="text-gray-600 dark:text-gray-300">
-                Already have an account?{' '}
+                {t('subscribe.already_have_account')}{' '}
                 <a 
                   href="/sign-in-clerk"
                   className="text-blue-600 hover:text-blue-700 font-medium"
                 >
-                  Sign in here
+                  {t('subscribe.sign_in_here')}
                 </a>
               </p>
             </div>

@@ -2525,5 +2525,55 @@
       "email": "Correo: info@finanzerpro.com",
       "address": "Dirección: NutriNova LLC, 2105 Vista Oeste NW, Albuquerque, NM 87120"
     }
+  },
+  "subscribe": {
+    "title": "Elige Tu Plan",
+    "subtitle": "Desbloquea potentes funciones de gestión financiera con tu suscripción",
+    "back_to_home": "Volver al Inicio",
+    "current_plan": "Este es tu plan",
+    "subscribe_now": "Suscribirse Ahora",
+    "processing": "Procesando...",
+    "most_popular": "Más Popular",
+    "best_value": "Mejor Valor",
+    "best_value_discount": "Mejor Valor - 17% de Descuento",
+    "plan_title": "Plan {{plan}}",
+    "per_month": "/mes",
+    "per_year": "/año",
+    "billing_description": "Facturado mensualmente, cancela en cualquier momento",
+    "save_per_year": "Ahorra ${{amount}} por año",
+    "discount_percentage": "17% de Descuento",
+    "subscribe_for_month": "Suscribirse por ${{price}}/mes",
+    "subscribe_for_year": "Suscribirse por ${{price}}/año",
+    "already_have_account": "¿Ya tienes una cuenta?",
+    "sign_in_here": "Inicia sesión aquí",
+    "billing": {
+      "monthly": "Mensual",
+      "yearly": "Anual",
+      "save_percentage": "Ahorra 17%"
+    },
+    "plans": {
+      "standard": {
+        "features": {
+          "0": "Todo en el plan Gratuito",
+          "1": "Gestión de metas y presupuestos",
+          "2": "Gráficos e informes interactivos",
+          "3": "Categorización de gastos con IA",
+          "4": "Vista de calendario y recordatorios",
+          "5": "Historial de transacciones ilimitado"
+        }
+      },
+      "premium": {
+        "features": {
+          "0": "Todo en el plan Estándar",
+          "1": "Consejos financieros e insights con IA",
+          "2": "Análisis avanzado de tendencias",
+          "3": "Predicción de gastos",
+          "4": "Recomendaciones personalizadas diarias",
+          "5": "Respaldo de datos en la nube",
+          "6": "Gestión de datos (CSV, PDF)",
+          "7": "Soporte por correo prioritario"
+        }
+      }
+    }
   }
 }
