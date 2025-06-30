@@ -14,6 +14,8 @@ export interface ExtractedTransaction {
   type: 'income' | 'expense';
   confidence: number; // 0-1 confidence score
   rawText?: string; // original text for verification
+  detectedFormat?: string; // format type detected
+  category?: string | null; // AI-suggested category
 }
 
 export interface PDFProcessingResult {
@@ -154,6 +156,46 @@ async function performOCROnPDF(pdfBuffer: Buffer): Promise<string> {
 }
 
 /**
+ * Add AI categorization to extracted transactions
+ */
+async function addAICategorization(
+  transactions: ExtractedTransaction[],
+  language: string
+): Promise<ExtractedTransaction[]> {
+  try {
+    // Import categorization function
+    const { categorizeExpense } = await import('../server/openai');
+    
+    const categorizedTransactions = await Promise.all(
+      transactions.map(async (transaction) => {
+        try {
+          if (transaction.description && transaction.amount !== 0) {
+            const categorization = await categorizeExpense(
+              transaction.description,
+              Math.abs(transaction.amount),
+              language
+            );
+            
+            transaction.category = categorization.category;
+            console.log(`Categorized "${transaction.description}" as "${categorization.category}"`);
+          }
+        } catch (error) {
+          console.error(`Failed to categorize transaction: ${transaction.description}`, error);
+          // Keep transaction without category rather than failing the whole batch
+        }
+        
+        return transaction;
+      })
+    );
+
+    return categorizedTransactions;
+  } catch (error) {
+    console.error('AI categorization failed, returning transactions without categories:', error);
+    return transactions;
+  }
+}
+
+/**
  * Parse transactions using AI with bank-specific prompts
  */
 async function parseTransactionsWithAI(
@@ -194,14 +236,19 @@ async function parseTransactionsWithAI(
     const result = JSON.parse(response.choices[0].message.content || '{}');
     
     if (result.transactions && Array.isArray(result.transactions)) {
-      return result.transactions.map((tx: any) => ({
+      const parsedTransactions = result.transactions.map((tx: any) => ({
         date: tx.date || '',
         description: tx.description || '',
         amount: parseFloat(tx.amount) || 0,
         type: tx.type || 'expense',
         confidence: tx.confidence || 0.8,
-        rawText: tx.rawText || ''
+        rawText: tx.rawText || '',
+        detectedFormat: tx.detectedFormat || 'unknown',
+        category: null as string | null // Will be filled by categorization
       }));
+
+      // Add AI categorization for each transaction
+      return await addAICategorization(parsedTransactions, language);
     }
 
     return [];
@@ -219,53 +266,129 @@ function createBankStatementPrompt(language: string): string {
   const languageLabel = language.startsWith('es') ? 'Spanish' : 
                        language.startsWith('sk') ? 'Slovak' : 'English';
 
-  return `You are a financial data extraction expert. Analyze bank statement text and extract ALL transactions.
+  return `You are an expert financial data extraction system specialized in bank statement analysis. 
 
-CRITICAL INSTRUCTIONS:
-- Return valid JSON with "transactions" array
-- Each transaction must have: date, description, amount, type, confidence
-- Convert dates to YYYY-MM-DD format
-- Amount: positive numbers for income/deposits, negative for expenses/withdrawals
-- Type: "income" for deposits/credits, "expense" for withdrawals/debits
-- Confidence: 0.0-1.0 based on data clarity
+CRITICAL MISSION: Extract ALL transactions with 100% accuracy from bank statement text.
 
-HANDLE MULTIPLE FORMATS:
-Format A: Date | Description | Amount (+/- signs)
-Format B: Date | Description | Debit | Credit (separate columns)
-Format C: Date | Description | Amount (expenses as negative numbers)
-Format D: Running balance format with transaction amounts
-
-COMMON PATTERNS TO RECOGNIZE:
-- Opening/closing balances (ignore these)
-- ATM withdrawals, deposits, transfers
-- Direct debits, standing orders
-- Card payments, online transfers
-- Interest payments, fees, charges
-- Salary deposits, refunds
-
-EXAMPLE OUTPUT:
+MANDATORY JSON OUTPUT FORMAT:
 {
   "transactions": [
     {
-      "date": "2025-06-15",
-      "description": "ATM Withdrawal - Main Street",
-      "amount": -100.00,
-      "type": "expense",
-      "confidence": 0.95,
-      "rawText": "15/06/2025 ATM WITHDRAWAL MAIN ST -$100.00"
-    },
-    {
-      "date": "2025-06-14", 
-      "description": "Salary Deposit",
-      "amount": 2500.00,
-      "type": "income",
-      "confidence": 0.98,
-      "rawText": "14/06/2025 SALARY DEPOSIT +$2,500.00"
+      "date": "YYYY-MM-DD",
+      "description": "Clean transaction description",
+      "amount": number (positive for income, negative for expenses),
+      "type": "income" or "expense",
+      "confidence": 0.0-1.0,
+      "rawText": "original text line",
+      "detectedFormat": "format_type"
     }
-  ]
+  ],
+  "statementInfo": {
+    "accountNumber": "if found",
+    "bankName": "if identifiable",
+    "statementPeriod": "date range if found"
+  }
 }
 
-RESPOND IN ${languageLabel} for descriptions when possible, but keep JSON structure in English.`;
+HANDLE ALL BANK FORMATS:
+
+FORMAT A - SIGNED AMOUNTS:
+Date | Description | Amount
+01/15/2025 | ATM Withdrawal | -$100.00
+01/16/2025 | Salary Deposit | +$2,500.00
+
+FORMAT B - DEBIT/CREDIT COLUMNS:
+Date | Description | Debit | Credit
+01/15/2025 | ATM Withdrawal | $100.00 | 
+01/16/2025 | Salary Deposit |  | $2,500.00
+
+FORMAT C - NEGATIVE EXPENSES:
+Date | Description | Amount
+01/15/2025 | ATM Withdrawal | -100.00
+01/16/2025 | Salary Deposit | 2500.00
+
+FORMAT D - RUNNING BALANCE:
+Date | Description | Amount | Balance
+01/15/2025 | ATM Withdrawal | -100.00 | $1,400.00
+01/16/2025 | Salary Deposit | +2500.00 | $3,900.00
+
+FORMAT E - EUROPEAN STYLE:
+Date | Description | Amount
+15.01.2025 | ATM Withdrawal | -100,00 EUR
+16.01.2025 | Salary Deposit | 2.500,00 EUR
+
+SMART PARSING RULES:
+
+1. DATE DETECTION:
+   - MM/DD/YYYY, DD/MM/YYYY, YYYY-MM-DD
+   - DD.MM.YYYY, MM-DD-YYYY
+   - Jan 15, 2025, 15 Jan 2025
+   - Convert ALL to YYYY-MM-DD
+
+2. AMOUNT PROCESSING:
+   - Remove currency symbols ($, €, £, etc.)
+   - Handle thousands separators (1,000.00 or 1.000,00)
+   - Detect decimal formats (.00 vs ,00)
+   - Process +/- signs or debit/credit columns
+   - Ignore balance columns
+
+3. TRANSACTION TYPE LOGIC:
+   - Debit column, negative amounts, withdrawals → "expense"
+   - Credit column, positive amounts, deposits → "income"
+   - Keywords: withdrawal, payment, fee, charge → "expense"
+   - Keywords: deposit, credit, refund, interest → "income"
+
+4. DESCRIPTION CLEANING:
+   - Remove redundant bank codes
+   - Clean merchant names
+   - Preserve essential details
+   - Remove trailing spaces/numbers
+
+5. CONFIDENCE SCORING:
+   - 0.95+: Clear date, amount, description
+   - 0.80-0.94: Minor formatting issues
+   - 0.60-0.79: Partial data extraction
+   - Below 0.60: Questionable data
+
+IGNORE THESE LINES:
+- Account balances (opening/closing)
+- Statement headers/footers
+- Page numbers
+- Total summaries
+- Account information blocks
+
+BANK-SPECIFIC PATTERNS:
+- Chase: "DEBIT CARD PURCHASE"
+- Wells Fargo: "POS DEBIT"
+- Bank of America: "ATM WITHDRAWAL"
+- Citi: "ONLINE PAYMENT"
+- European banks: "SEPA TRANSFER"
+
+ERROR HANDLING:
+- If date unclear → confidence 0.4
+- If amount unclear → confidence 0.3
+- If both unclear → skip transaction
+- Report parsing issues in confidence score
+
+LANGUAGE: Respond in ${languageLabel} for transaction descriptions while maintaining JSON structure.
+
+EXAMPLES OF COMPLEX SCENARIOS:
+
+Multi-line transaction:
+"01/15/2025 AMAZON.COM
+AMZN MKTP US
+Purchase -$45.99"
+→ Combine into single description: "Amazon.com Purchase"
+
+Split debit/credit:
+"01/15/2025 | Transfer | $500.00 | $500.00"
+→ Two transactions: outgoing expense (-500) and incoming income (+500)
+
+European decimal format:
+"15.01.2025 | Grocery Store | -125,45 EUR"
+→ Convert to: amount: -125.45
+
+Your mission: Extract every legitimate transaction with maximum accuracy and proper categorization.`;
 }
 
 /**
