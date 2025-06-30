@@ -3315,6 +3315,46 @@
     "Unknown error occurred": "Unknown error occurred",
     "Error": "Error",
     "Failed to open subscription management: {{errorMessage}}": "Failed to open subscription management: {{errorMessage}}"
+  },
+
+  "pdf": {
+    "anonymization_preview": {
+      "title": "Data Anonymization Preview",
+      "subtitle": "Review how your PDF data is anonymized before AI processing",
+      "processing": "Processing and anonymizing PDF...",
+      "safety_overview": "Safety Overview",
+      "safe": "Safe",
+      "original_size": "Original Size",
+      "anonymized_size": "Anonymized Size",
+      "characters": "characters",
+      "redactions": "Redactions",
+      "safety_score": "Safety Score",
+      "detected_data": "Detected Sensitive Data",
+      "found": "found",
+      "name": "Names",
+      "account": "Account Numbers",
+      "ssn": "SSN/IDs",
+      "email": "Email Addresses",
+      "phone": "Phone Numbers",
+      "address": "Addresses",
+      "balance": "Balance Info",
+      "anonymized_data": "Anonymized Data",
+      "sent_to_ai": "Sent to AI",
+      "original_data": "Original Data",
+      "stays_local": "Stays Local",
+      "ai_processing_data": "Data Sent for AI Processing",
+      "ai_data_description": "This anonymized data is sent to OpenAI for transaction parsing. All sensitive information has been removed.",
+      "original_data_title": "Original PDF Data",
+      "original_data_description": "This original data never leaves your device and is NOT sent to any AI service.",
+      "hide_original": "Hide Original",
+      "show_original": "Show Original",
+      "hidden_for_privacy": "Hidden for privacy protection",
+      "click_to_view": "Click \"Show Original\" to view",
+      "security_log": "Security Processing Log",
+      "privacy_first": "Privacy-first AI processing",
+      "cancel": "Cancel",
+      "proceed": "Proceed with AI Processing"
+    }
   }
 
 }

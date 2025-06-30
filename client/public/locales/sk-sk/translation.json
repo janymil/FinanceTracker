@@ -3497,5 +3497,45 @@
     "profile.Upgrade Your Plan": "Vylepšiť Váš Plán",
     "profile.View Pricing Plans": "Zobraziť Cenové Plány",
     "profile.Upgrade to Standard ($4.99/month) or Premium ($9.99/month) for advanced features": "Vylepšite na Štandardný ($4.99/mesiac) alebo Prémiový ($9.99/mesiac) pre pokročilé funkcie"
+  },
+
+  "pdf": {
+    "anonymization_preview": {
+      "title": "Náhľad Anonymizácie Údajov",
+      "subtitle": "Skontrolujte, ako sú vaše PDF údaje anonymizované pred spracovaním AI",
+      "processing": "Spracováva a anonymizuje PDF...",
+      "safety_overview": "Prehľad Bezpečnosti",
+      "safe": "Bezpečné",
+      "original_size": "Pôvodná Veľkosť",
+      "anonymized_size": "Anonymizovaná Veľkosť",
+      "characters": "znakov",
+      "redactions": "Redakcie",
+      "safety_score": "Skóre Bezpečnosti",
+      "detected_data": "Detegované Citlivé Údaje",
+      "found": "nájdené",
+      "name": "Mená",
+      "account": "Čísla Účtov",
+      "ssn": "SSN/IDs",
+      "email": "E-mailové Adresy",
+      "phone": "Telefónne Čísla",
+      "address": "Adresy",
+      "balance": "Info o Zostatku",
+      "anonymized_data": "Anonymizované Údaje",
+      "sent_to_ai": "Poslané do AI",
+      "original_data": "Pôvodné Údaje",
+      "stays_local": "Zostáva Lokálne",
+      "ai_processing_data": "Údaje Poslané na Spracovanie AI",
+      "ai_data_description": "Tieto anonymizované údaje sa posielajú do OpenAI na analýzu transakcií. Všetky citlivé informácie boli odstránené.",
+      "original_data_title": "Pôvodné PDF Údaje",
+      "original_data_description": "Tieto pôvodné údaje nikdy neopustia vaše zariadenie a NEPOSIELAJÚ sa žiadnej AI službe.",
+      "hide_original": "Skryť Pôvodné",
+      "show_original": "Zobraziť Pôvodné",
+      "hidden_for_privacy": "Skryté kvôli ochrane súkromia",
+      "click_to_view": "Kliknite na \"Zobraziť Pôvodné\" pre zobrazenie",
+      "security_log": "Záznam Bezpečnostného Spracovania",
+      "privacy_first": "AI spracovanie zamerané na súkromie",
+      "cancel": "Zrušiť",
+      "proceed": "Pokračovať v AI Spracovaní"
+    }
   }
 }

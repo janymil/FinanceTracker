@@ -3378,6 +3378,46 @@
         }
       }
     }
+  },
+
+  "pdf": {
+    "anonymization_preview": {
+      "title": "Vista Previa de Anonimización de Datos",
+      "subtitle": "Revisa cómo se anonimizan los datos de tu PDF antes del procesamiento de IA",
+      "processing": "Procesando y anonimizando PDF...",
+      "safety_overview": "Resumen de Seguridad",
+      "safe": "Seguro",
+      "original_size": "Tamaño Original",
+      "anonymized_size": "Tamaño Anonimizado",
+      "characters": "caracteres",
+      "redactions": "Redacciones",
+      "safety_score": "Puntuación de Seguridad",
+      "detected_data": "Datos Sensibles Detectados",
+      "found": "encontrado",
+      "name": "Nombres",
+      "account": "Números de Cuenta",
+      "ssn": "SSN/IDs",
+      "email": "Direcciones de Email",
+      "phone": "Números de Teléfono",
+      "address": "Direcciones",
+      "balance": "Info de Saldo",
+      "anonymized_data": "Datos Anonimizados",
+      "sent_to_ai": "Enviado a IA",
+      "original_data": "Datos Originales",
+      "stays_local": "Se Mantiene Local",
+      "ai_processing_data": "Datos Enviados para Procesamiento de IA",
+      "ai_data_description": "Estos datos anonimizados se envían a OpenAI para análisis de transacciones. Toda la información sensible ha sido eliminada.",
+      "original_data_title": "Datos Originales del PDF",
+      "original_data_description": "Estos datos originales nunca salen de tu dispositivo y NO se envían a ningún servicio de IA.",
+      "hide_original": "Ocultar Original",
+      "show_original": "Mostrar Original",
+      "hidden_for_privacy": "Oculto por protección de privacidad",
+      "click_to_view": "Haz clic en \"Mostrar Original\" para ver",
+      "security_log": "Registro de Procesamiento de Seguridad",
+      "privacy_first": "Procesamiento de IA centrado en privacidad",
+      "cancel": "Cancelar",
+      "proceed": "Proceder con Procesamiento de IA"
+    }
   }
 
 }
