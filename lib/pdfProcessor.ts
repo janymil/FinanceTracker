@@ -413,7 +413,7 @@ export async function processBankStatementPDF(
         message: 'Parsing transactions with AI...'
       });
       
-      const transactions = await parseTransactionsWithAI(extractedText, language);
+      const transactions = await parseTransactionsWithAI(extractedText, language, userId);
       
       onProgress?.({
         stage: 'categorization',
