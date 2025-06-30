@@ -27,6 +27,22 @@ export interface PDFProcessingResult {
   errors: string[];
   confidence: number; // overall confidence score
   securityLog: SecurityEvent[]; // Security audit trail
+  duplicates?: DuplicateDetection[]; // Potential duplicate transactions
+}
+
+export interface DuplicateDetection {
+  extractedTransaction: ExtractedTransaction;
+  existingTransactions: ExistingTransaction[];
+  similarityScore: number; // 0-1 confidence of duplicate
+  matchReasons: string[]; // Why it's considered a duplicate
+}
+
+export interface ExistingTransaction {
+  id: number;
+  date: string;
+  description: string;
+  amount: number;
+  type: 'income' | 'expense';
 }
 
 interface SecurityEvent {
@@ -156,7 +172,8 @@ class PDFSecurityManager {
  */
 export async function processBankStatementPDF(
   pdfBuffer: Buffer,
-  language: string = 'en-us'
+  language: string = 'en-us',
+  existingTransactions: ExistingTransaction[] = []
 ): Promise<PDFProcessingResult> {
   const result: PDFProcessingResult = {
     transactions: [],
@@ -164,7 +181,8 @@ export async function processBankStatementPDF(
     processingMethod: 'text',
     errors: [],
     confidence: 0,
-    securityLog: []
+    securityLog: [],
+    duplicates: []
   };
 
   // Array to track buffers for secure cleanup
@@ -234,6 +252,12 @@ export async function processBankStatementPDF(
     PDFSecurityManager.secureMemoryCleanup(buffers, result.securityLog);
   }
 
+  // Step 6: Duplicate detection if existing transactions provided
+  if (existingTransactions.length > 0 && result.transactions.length > 0) {
+    result.duplicates = detectDuplicateTransactions(result.transactions, existingTransactions);
+    PDFSecurityManager.logSecurityEvent(result.securityLog, 'duplicate_detection_complete', 'success', `Found ${result.duplicates?.length || 0} potential duplicates`);
+  }
+
   return result;
 }
 
@@ -278,6 +302,173 @@ function assessTextQuality(text: string): number {
   if (hasAmountPattern) score += 0.3;
 
   return Math.min(score, 1);
+}
+
+/**
+ * Detect duplicate transactions between extracted and existing transactions
+ */
+function detectDuplicateTransactions(
+  extractedTransactions: ExtractedTransaction[],
+  existingTransactions: ExistingTransaction[]
+): DuplicateDetection[] {
+  const duplicates: DuplicateDetection[] = [];
+
+  for (const extracted of extractedTransactions) {
+    const potentialDuplicates: ExistingTransaction[] = [];
+    const matchReasons: string[] = [];
+    let highestSimilarity = 0;
+
+    for (const existing of existingTransactions) {
+      const similarity = calculateTransactionSimilarity(extracted, existing);
+      
+      if (similarity >= 0.7) { // 70% similarity threshold
+        potentialDuplicates.push(existing);
+        highestSimilarity = Math.max(highestSimilarity, similarity);
+        
+        // Track specific match reasons
+        if (extracted.date === existing.date) {
+          matchReasons.push('Exact date match');
+        }
+        if (Math.abs(extracted.amount - existing.amount) < 0.01) {
+          matchReasons.push('Exact amount match');
+        }
+        if (calculateDescriptionSimilarity(extracted.description, existing.description) > 0.8) {
+          matchReasons.push('Very similar description');
+        }
+      }
+    }
+
+    if (potentialDuplicates.length > 0) {
+      duplicates.push({
+        extractedTransaction: extracted,
+        existingTransactions: potentialDuplicates,
+        similarityScore: highestSimilarity,
+        matchReasons: Array.from(new Set(matchReasons)) // Remove duplicates
+      });
+    }
+  }
+
+  return duplicates;
+}
+
+/**
+ * Calculate similarity score between two transactions
+ */
+function calculateTransactionSimilarity(
+  extracted: ExtractedTransaction,
+  existing: ExistingTransaction
+): number {
+  let score = 0;
+  
+  // Date similarity (40% weight)
+  const dateSimilarity = calculateDateSimilarity(extracted.date, existing.date);
+  score += dateSimilarity * 0.4;
+  
+  // Amount similarity (35% weight)
+  const amountSimilarity = calculateAmountSimilarity(extracted.amount, existing.amount);
+  score += amountSimilarity * 0.35;
+  
+  // Description similarity (20% weight)
+  const descSimilarity = calculateDescriptionSimilarity(extracted.description, existing.description);
+  score += descSimilarity * 0.2;
+  
+  // Type similarity (5% weight)
+  const typeSimilarity = extracted.type === existing.type ? 1 : 0;
+  score += typeSimilarity * 0.05;
+  
+  return score;
+}
+
+/**
+ * Calculate date similarity (exact match = 1, within 3 days = 0.5, otherwise 0)
+ */
+function calculateDateSimilarity(date1: string, date2: string): number {
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+  
+  if (d1.toDateString() === d2.toDateString()) {
+    return 1; // Exact date match
+  }
+  
+  const diffDays = Math.abs((d1.getTime() - d2.getTime()) / (1000 * 60 * 60 * 24));
+  
+  if (diffDays <= 3) {
+    return 0.5; // Within 3 days
+  }
+  
+  return 0;
+}
+
+/**
+ * Calculate amount similarity (exact = 1, within 1% = 0.8, within 5% = 0.5)
+ */
+function calculateAmountSimilarity(amount1: number, amount2: number): number {
+  const diff = Math.abs(amount1 - amount2);
+  
+  if (diff < 0.01) {
+    return 1; // Exact match (considering rounding)
+  }
+  
+  const percentDiff = diff / Math.max(Math.abs(amount1), Math.abs(amount2));
+  
+  if (percentDiff <= 0.01) {
+    return 0.8; // Within 1%
+  }
+  
+  if (percentDiff <= 0.05) {
+    return 0.5; // Within 5%
+  }
+  
+  return 0;
+}
+
+/**
+ * Calculate description similarity using Levenshtein distance
+ */
+function calculateDescriptionSimilarity(desc1: string, desc2: string): number {
+  const s1 = desc1.toLowerCase().trim();
+  const s2 = desc2.toLowerCase().trim();
+  
+  if (s1 === s2) {
+    return 1;
+  }
+  
+  const distance = levenshteinDistance(s1, s2);
+  const maxLength = Math.max(s1.length, s2.length);
+  
+  if (maxLength === 0) {
+    return 1;
+  }
+  
+  return 1 - (distance / maxLength);
+}
+
+/**
+ * Calculate Levenshtein distance between two strings
+ */
+function levenshteinDistance(str1: string, str2: string): number {
+  const matrix = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null));
+  
+  for (let i = 0; i <= str1.length; i++) {
+    matrix[0][i] = i;
+  }
+  
+  for (let j = 0; j <= str2.length; j++) {
+    matrix[j][0] = j;
+  }
+  
+  for (let j = 1; j <= str2.length; j++) {
+    for (let i = 1; i <= str1.length; i++) {
+      const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+      matrix[j][i] = Math.min(
+        matrix[j][i - 1] + 1, // deletion
+        matrix[j - 1][i] + 1, // insertion
+        matrix[j - 1][i - 1] + indicator // substitution
+      );
+    }
+  }
+  
+  return matrix[str2.length][str1.length];
 }
 
 /**
