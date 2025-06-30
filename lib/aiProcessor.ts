@@ -7,7 +7,8 @@ import {
   generateSpendingInsights,
   generateAIFinancialHealthScore,
   generateTrendPredictions,
-  generateExpensePredictions
+  generateExpensePredictions,
+  parseBankStatement
 } from '../server/openai.js';
 
 function hashObject(obj: any): string {
@@ -78,6 +79,9 @@ export async function runAI(task: string, userId: string, payload: Record<string
           break;
         case 'expense-predictions':
           fallbackResult = await generateExpensePredictions(userId, payload.transactions);
+          break;
+        case 'parseBankStatement':
+          fallbackResult = await parseBankStatement(payload.text, payload.language || 'en-us');
           break;
         default:
           throw new Error(`No local fallback available for task: ${task}`);

@@ -1748,3 +1748,102 @@ Provide an AI-powered financial health score that adapts to this user's specific
     };
   }
 }
+
+/**
+ * Parse bank statement text and extract transactions using AI - Server Fallback
+ * This function mirrors the external AI processor for when external service is unavailable
+ */
+export async function parseBankStatement(text: string, language: string = 'en-us'): Promise<{ transactions: any[] }> {
+  const languageLabel = getLanguageLabel(language);
+  const cacheKey = `bank_statement_parsing_${language}`;
+
+  try {
+    // Check cache first
+    const cached = await UnifiedAICache.get('parseBankStatement', 'system', cacheKey);
+    if (cached) {
+      console.log('Using cached bank statement parsing result');
+      return cached;
+    }
+
+    const bankStatementPrompt = `You are an expert financial data extraction system specialized in bank statement analysis. 
+
+CRITICAL MISSION: Extract ALL transactions with 100% accuracy from bank statement text.
+CRITICAL: You MUST respond exclusively in ${languageLabel}. ${languageLabel !== 'English' ? 'Never use English words.' : ''}
+
+MANDATORY JSON OUTPUT FORMAT:
+{
+  "transactions": [
+    {
+      "date": "YYYY-MM-DD",
+      "description": "Transaction description in ${languageLabel}",
+      "amount": 123.45,
+      "type": "income" or "expense",
+      "confidence": 0.95,
+      "rawText": "Original text from statement",
+      "detectedFormat": "Format type detected"
+    }
+  ]
+}
+
+EXTRACTION RULES:
+1. Date Formats: Support DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD, and text dates
+2. Amount Detection: Handle various currency symbols (€, $, £, Kč) and number formats
+3. Transaction Types: income (deposits, transfers in, salary) vs expense (payments, transfers out, fees)
+4. Description: Clean merchant/payee names, remove bank codes
+5. Confidence: 0.9+ for clear transactions, 0.7-0.9 for moderate clarity, <0.7 for unclear
+6. Skip: Header/footer text, account summaries, balance information
+
+CRITICAL QUALITY STANDARDS:
+- Zero missed transactions
+- 100% accurate date parsing
+- Correct positive/negative amount handling
+- Clean, readable descriptions in ${languageLabel}
+- High confidence scores for clear data
+
+Respond ONLY with valid JSON. No explanations or additional text.`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: bankStatementPrompt
+        },
+        {
+          role: "user",
+          content: `Please analyze this bank statement text and extract all transactions:\n\n${text}`
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.1
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    
+    if (result.transactions && Array.isArray(result.transactions)) {
+      const formattedResult = {
+        transactions: result.transactions.map((tx: any) => ({
+          date: tx.date || '',
+          description: tx.description || '',
+          amount: parseFloat(tx.amount) || 0,
+          type: tx.type || 'expense',
+          confidence: tx.confidence || 0.8,
+          rawText: tx.rawText || '',
+          detectedFormat: tx.detectedFormat || 'unknown',
+          category: null // Will be filled by categorization
+        }))
+      };
+
+      // Cache the result for 1 hour
+      await UnifiedAICache.set('parseBankStatement', 'system', cacheKey, formattedResult, 3600);
+
+      return formattedResult;
+    }
+
+    return { transactions: [] };
+
+  } catch (error) {
+    console.error('Bank statement parsing error (server fallback):', error);
+    throw new Error('Failed to parse bank statement transactions');
+  }
+}
