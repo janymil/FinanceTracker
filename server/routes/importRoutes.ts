@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { isAuthenticated, getUserId } from "../clerkAuth";
+import { isAuthenticated, getUserId, authenticateUser } from "../clerkAuth";
 import { storage } from "../storage";
 import { z } from "zod";
 import { 
@@ -636,6 +636,92 @@ export function registerImportRoutes(app: Express) {
       
       return res.status(500).json({ 
         error: error instanceof Error ? error.message : 'Failed to process PDF bank statement',
+        success: false
+      });
+    }
+  });
+
+  // Final import endpoint - actually saves transactions and creates new categories
+  app.post('/api/import/bank-statement/confirm', authenticateUser, upload.none(), async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const { transactions, newCategories } = req.body;
+      
+      if (!transactions || !Array.isArray(transactions)) {
+        return res.status(400).json({ error: 'Transactions array is required' });
+      }
+
+      console.log(`Processing final import for ${transactions.length} transactions with ${newCategories?.length || 0} new categories`);
+
+      // Step 1: Create new categories if any were suggested
+      const categoryNameToIdMap: Record<string, number> = {};
+      
+      if (newCategories && Array.isArray(newCategories)) {
+        for (const categoryName of newCategories) {
+          if (categoryName && typeof categoryName === 'string') {
+            try {
+              const newCategory = await storage.createCategory(userId, {
+                name: categoryName,
+                type: 'expense',
+                description: `Auto-created from bank statement import`
+              });
+              categoryNameToIdMap[categoryName] = newCategory.id;
+              console.log(`Created new category: ${categoryName} (ID: ${newCategory.id})`);
+            } catch (error) {
+              console.error(`Failed to create category ${categoryName}:`, error);
+            }
+          }
+        }
+      }
+
+      // Step 2: Process and save transactions
+      const savedTransactions = [];
+      const errors = [];
+
+      for (const transaction of transactions) {
+        try {
+          // Map category name to ID if it's a new category
+          let categoryId = transaction.categoryId;
+          if (!categoryId && transaction.category && categoryNameToIdMap[transaction.category]) {
+            categoryId = categoryNameToIdMap[transaction.category];
+          }
+
+          const transactionData = {
+            amount: Math.abs(parseFloat(transaction.amount)),
+            description: transaction.description,
+            date: transaction.date,
+            type: transaction.type || 'expense',
+            categoryId: categoryId || null,
+            reference: transaction.reference || null,
+            recurring: false,
+            receiptUrl: null
+          };
+
+          const savedTransaction = await storage.createTransaction(userId, transactionData);
+          savedTransactions.push(savedTransaction);
+        } catch (error) {
+          console.error(`Failed to save transaction: ${transaction.description}`, error);
+          errors.push(`Failed to save: ${transaction.description}`);
+        }
+      }
+
+      console.log(`Import completed: ${savedTransactions.length} transactions saved, ${errors.length} errors`);
+
+      return res.json({
+        success: true,
+        savedTransactions: savedTransactions.length,
+        createdCategories: Object.keys(categoryNameToIdMap).length,
+        errors: errors
+      });
+
+    } catch (error) {
+      console.error('Final import error:', error);
+      return res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Failed to complete import',
         success: false
       });
     }
