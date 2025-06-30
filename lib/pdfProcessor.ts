@@ -315,7 +315,15 @@ export async function processBankStatementPDF(
     }
 
     // Step 1: Try PDF text extraction first
-    const pdf = await getPdfParser();
+    let pdf: any;
+    try {
+      const module = await import('pdf-parse');
+      pdf = module.default || module;
+    } catch (error) {
+      console.error('Failed to import pdf-parse:', error);
+      result.errors.push('PDF parsing library not available');
+      return result;
+    }
     const pdfData = await pdf(pdfBuffer);
     result.totalPages = pdfData.numpages;
 
