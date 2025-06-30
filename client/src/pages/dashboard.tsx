@@ -611,41 +611,42 @@ export default function Dashboard() {
                             </label>
                           </div>
 
-                        {newTransaction.isRecurring && (
-                          <div className="grid grid-cols-2 gap-4 pl-6">
-                            <div>
-                              <Label htmlFor="frequency">{t("Frequency")}</Label>
-                              <Select
-                                value={newTransaction.recurringFrequency}
-                                onValueChange={(value) => setNewTransaction({ 
-                                  ...newTransaction, 
-                                  recurringFrequency: value as "weekly" | "monthly" | "yearly" 
-                                })}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder={t("Select frequency")} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="weekly">{t("Weekly")}</SelectItem>
-                                  <SelectItem value="monthly">{t("Monthly")}</SelectItem>
-                                  <SelectItem value="yearly">{t("Yearly")}</SelectItem>
-                                </SelectContent>
-                              </Select>
+                          {newTransaction.isRecurring && (
+                            <div className="grid grid-cols-2 gap-4 pl-6">
+                              <div>
+                                <Label htmlFor="frequency">{t("Frequency")}</Label>
+                                <Select
+                                  value={newTransaction.recurringFrequency}
+                                  onValueChange={(value) => setNewTransaction({ 
+                                    ...newTransaction, 
+                                    recurringFrequency: value as "weekly" | "monthly" | "yearly" 
+                                  })}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder={t("Select frequency")} />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="weekly">{t("Weekly")}</SelectItem>
+                                    <SelectItem value="monthly">{t("Monthly")}</SelectItem>
+                                    <SelectItem value="yearly">{t("Yearly")}</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label htmlFor="endDate">{t("End Date (Optional)")}</Label>
+                                <Input
+                                  id="endDate"
+                                  type="date"
+                                  value={newTransaction.recurringEndDate}
+                                  onChange={(e) => setNewTransaction({ 
+                                    ...newTransaction, 
+                                    recurringEndDate: e.target.value 
+                                  })}
+                                />
+                              </div>
                             </div>
-                            <div>
-                              <Label htmlFor="endDate">{t("End Date (Optional)")}</Label>
-                              <Input
-                                id="endDate"
-                                type="date"
-                                value={newTransaction.recurringEndDate}
-                                onChange={(e) => setNewTransaction({ 
-                                  ...newTransaction, 
-                                  recurringEndDate: e.target.value 
-                                })}
-                              />
-                            </div>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </RequirePlan>
 
