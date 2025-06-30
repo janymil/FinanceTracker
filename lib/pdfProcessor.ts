@@ -297,8 +297,8 @@ export async function processBankStatementPDF(
       return result;
     }
 
-    // Step 1: Try PDF text extraction first (dynamic import to avoid startup issues)
-    const { default: pdf } = await import('pdf-parse');
+    // Step 1: Try PDF text extraction first
+    const pdf = require('pdf-parse');
     const pdfData = await pdf(pdfBuffer);
     result.totalPages = pdfData.numpages;
 
