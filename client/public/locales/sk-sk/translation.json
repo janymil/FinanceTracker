@@ -1628,6 +1628,21 @@
     }
   },
 
+  "upload": {
+    "invalid_file_type": "Neplatný typ súboru",
+    "please_select_image": "Prosím vyberte obrázok",
+    "upload_failed": "Nahrávanie zlyhalo",
+    "please_try_again": "Prosím skúste to znovu",
+    "missing_information": "Chýbajúce informácie",
+    "please_fill_required": "Prosím vyplňte všetky povinné polia",
+    "transaction_saved": "Transakcia uložená",
+    "receipt_saved_description": "Údaje z účtenky boli uložené ako transakcia",
+    "save_failed": "Ukladanie zlyhalo",
+    "save_failed_description": "Nepodarilo sa uložiť transakciu. Prosím skúste to znovu.",
+    "transaction_description_placeholder": "Popis transakcie",
+    "select_category_placeholder": "Vybrať kategóriu"
+  },
+
   "trends": {
     "title": "Pokročilá analýza trendov",
     "subtitle": "Hlboké poznatky o vašich finančných vzorcoch a prognózach",
