@@ -3,6 +3,7 @@ import { useCurrency } from '@/context/CurrencyContext';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Settings, Check, Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const PRESET_CURRENCIES = [
   // Major global currencies
@@ -35,6 +36,7 @@ interface CurrencySelectorProps {
 export function CurrencySelector({ className = '', variant = 'icon' }: CurrencySelectorProps) {
   const { currency, setCurrency, canChangeCurrency, hasTransactions } = useCurrency();
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
 
   const handleCurrencyChange = (newCurrency: string) => {
     if (canChangeCurrency) {
@@ -56,7 +58,7 @@ export function CurrencySelector({ className = '', variant = 'icon' }: CurrencyS
             variant="ghost"
             size="sm"
             className={`h-8 w-8 p-0 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 ${className}`}
-            title="Change Currency"
+            title={t("currency.change_currency")}
           >
             <Settings className="h-4 w-4" />
           </Button>
