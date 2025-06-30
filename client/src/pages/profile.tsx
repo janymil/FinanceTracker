@@ -39,12 +39,12 @@ export default function ProfilePage() {
         if (response.status === 400 && errorData.message?.includes('No active subscription')) {
           toast({
             title: t('profile.No Stripe Subscription'),
-            description: t('You currently have premium access but no Stripe subscription. Contact support or visit the pricing page to set up billing.'),
+            description: t('profile.You currently have premium access but no Stripe subscription. Contact support or visit the pricing page to set up billing.'),
             variant: "destructive",
           });
           return;
         }
-        throw new Error(errorData.message || t('Failed to create customer portal session'));
+        throw new Error(errorData.message || t('profile.Failed to create customer portal session'));
       }
 
       const { url } = await response.json();
@@ -65,22 +65,22 @@ export default function ProfilePage() {
   return (
     <div className="container mx-auto py-6 px-4 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">{t('Profile Settings')}</h1>
+        <h1 className="text-3xl font-bold mb-2">{t('profile.Profile Settings')}</h1>
         <p className="text-muted-foreground">
-          {t('Manage your account settings and preferences')}
+          {t('profile.Manage your account settings and preferences')}
         </p>
       </div>
 
       {/* User Profile Header */}
       <div className="flex items-center space-x-4 mb-8 p-6 border rounded-lg bg-card">
         <Avatar className="h-20 w-20">
-          <AvatarImage src={user.imageUrl} alt={user.fullName || t('User')} />
+          <AvatarImage src={user.imageUrl} alt={user.fullName || t('profile.User')} />
           <AvatarFallback>
             {user.fullName ? user.fullName.charAt(0).toUpperCase() : user.primaryEmailAddress?.emailAddress.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         <div className="flex-1">
-          <h2 className="text-2xl font-semibold">{user.fullName || t('User')}</h2>
+          <h2 className="text-2xl font-semibold">{user.fullName || t('profile.User')}</h2>
           <p className="text-muted-foreground">{user.primaryEmailAddress?.emailAddress}</p>
           <div className="flex items-center gap-2 mt-2">
             <Badge variant="secondary" className="bg-premium text-premium-foreground">
@@ -94,19 +94,19 @@ export default function ProfilePage() {
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
           <TabsTrigger value="profile" className="flex items-center gap-1 text-xs md:text-sm">
             <User className="h-3 w-3 md:h-4 md:w-4" />
-            <span>{t('Profile')}</span>
+            <span>{t('profile.Profile')}</span>
           </TabsTrigger>
           <TabsTrigger value="notifications" className="flex items-center gap-1 text-xs md:text-sm">
             <Bell className="h-3 w-3 md:h-4 md:w-4" />
-            <span>{t('Notifications')}</span>
+            <span>{t('profile.Notifications')}</span>
           </TabsTrigger>
           <TabsTrigger value="preferences" className="flex items-center gap-1 text-xs md:text-sm">
             <Palette className="h-3 w-3 md:h-4 md:w-4" />
-            <span>{t('Preferences')}</span>
+            <span>{t('profile.Preferences')}</span>
           </TabsTrigger>
           <TabsTrigger value="subscription" className="flex items-center gap-1 text-xs md:text-sm">
             <CreditCard className="h-3 w-3 md:h-4 md:w-4" />
-            <span>{t('Subscription')}</span>
+            <span>{t('profile.Subscription')}</span>
           </TabsTrigger>
         </TabsList>
 
@@ -114,16 +114,16 @@ export default function ProfilePage() {
         <TabsContent value="profile">
           <Card>
             <CardHeader>
-              <CardTitle>{t('Account Management')}</CardTitle>
+              <CardTitle>{t('profile.Account Management')}</CardTitle>
               <CardDescription>
-                {t("Manage your profile details, security settings, password, and connected accounts through Clerk's secure interface")}
+                {t('profile.Manage your profile details, security settings, password, and connected accounts through Clerks secure interface')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {/* Mobile Navigation Hint */}
               <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg md:hidden">
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  💡 <strong>{t('Tip')}:</strong> {t('Use the menu button (☰) in the top-left corner below to access Account Settings and Security options.')}
+                  💡 <strong>{t('profile.Tip')}:</strong> {t('profile.Use the menu button (☰) in the top-left corner below to access Account Settings and Security options.')}
                 </p>
               </div>
 
@@ -156,7 +156,7 @@ export default function ProfilePage() {
         <TabsContent value="preferences">
           <Card>
             <CardHeader>
-              <CardTitle>{t('Preferences')}</CardTitle>
+              <CardTitle>{t('profile.Preferences')}</CardTitle>
               <CardDescription>
                 {t('Customize your app preferences')}
               </CardDescription>
