@@ -301,7 +301,8 @@ export async function processBankStatementPDF(
   pdfBuffer: Buffer,
   language: string = 'en-us',
   existingTransactions: ExistingTransaction[] = [],
-  onProgress?: (progress: ProcessingProgress) => void
+  onProgress?: (progress: ProcessingProgress) => void,
+  userId?: string
 ): Promise<PDFProcessingResult> {
   const result: PDFProcessingResult = {
     transactions: [],
@@ -936,21 +937,39 @@ async function addAICategorization(
   userId: string
 ): Promise<ExtractedTransaction[]> {
   try {
-    // For now, use the enhanced basic categorization
-    // TODO: Implement user-specific categorization logic
+    // Import storage to fetch user categories
+    const { storage } = await import('../server/storage');
+    const { categorizeExpenseWithUserCategories } = await import('../server/openai');
+    
+    // Fetch user's existing expense categories
+    const userCategories = await storage.getCategories(userId);
+    const expenseCategories = userCategories.filter(cat => cat.type === 'expense');
+    
+    console.log(`Found ${expenseCategories.length} user expense categories for categorization`);
+    
     const categorizedTransactions = await Promise.all(
       transactions.map(async (transaction) => {
         try {
           if (transaction.description && transaction.amount !== 0) {
-            const { categorizeExpense } = await import('../server/openai');
-            const categorization = await categorizeExpense(
+            const result = await categorizeExpenseWithUserCategories(
               transaction.description,
               Math.abs(transaction.amount),
+              expenseCategories,
               language
             );
             
-            transaction.category = categorization.category;
-            console.log(`AI Categorized "${transaction.description}" as "${categorization.category}"`);
+            if (result.categoryId) {
+              // Matched existing category
+              const matchedCategory = expenseCategories.find(cat => cat.id === result.categoryId);
+              transaction.category = matchedCategory?.name || 'Other';
+              console.log(`AI matched "${transaction.description}" to existing category "${matchedCategory?.name}"`);
+            } else if (result.suggestedCategory) {
+              // New category suggested
+              transaction.category = result.suggestedCategory;
+              console.log(`AI suggested new category "${result.suggestedCategory}" for "${transaction.description}"`);
+            } else {
+              transaction.category = 'Other';
+            }
           }
         } catch (error) {
           console.error(`Failed to categorize transaction: ${transaction.description}`, error);
@@ -973,7 +992,8 @@ async function addAICategorization(
  */
 async function parseTransactionsWithAI(
   text: string, 
-  language: string
+  language: string,
+  userId?: string
 ): Promise<ExtractedTransaction[]> {
   
   try {
@@ -996,7 +1016,7 @@ async function parseTransactionsWithAI(
       }));
 
       // Add AI categorization for each transaction
-      return await addAICategorization(parsedTransactions, language, 'system'); // TODO: Pass actual user ID
+      return await addAICategorization(parsedTransactions, language, userId || 'system');
     }
 
     return [];

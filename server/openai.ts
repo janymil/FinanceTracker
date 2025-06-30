@@ -79,64 +79,52 @@ export interface FinancialHealthData {
   warnings: string[];
 }
 
-export async function categorizeExpense(description: string, amount: number, language: string = 'en-us'): Promise<ExpenseCategorizationResult> {
+export async function categorizeExpenseWithUserCategories(
+  description: string, 
+  amount: number, 
+  userCategories: Array<{id: number, name: string, type: string}>,
+  language: string = 'en-us'
+): Promise<{categoryId?: number, suggestedCategory?: string, confidence: number, reasoning: string}> {
   const normalizedLanguage = normalizeLanguageCode(language);
   try {
-    // Cache removed - direct OpenAI call
+    const userCategoryList = userCategories.map(cat => `- ${cat.name} (ID: ${cat.id})`).join('\n');
+    
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
-          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content (category, confidence, reasoning) must be in ${getLanguageLabel(normalizedLanguage)}.
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content must be in ${getLanguageLabel(normalizedLanguage)}.
 
-You are an expert financial categorization assistant with extensive knowledge of global merchants, payment processors, and business types. Analyze the expense description and amount to determine the most appropriate category.
+You are an expert financial categorization assistant. Your task is to analyze transactions and either:
+1. Match them to the user's existing categories, OR
+2. Suggest a new category if none of the existing ones fit
 
-Available categories with specific examples:
-- Food & Dining (Migros, Coop, ALDI, Lidl, Tottus, restaurants, groceries, takeout)
-- Transportation (gas, public transport, parking, car maintenance, ride-sharing)
-- Shopping (clothes, electronics, general retail, Casa Ideas, Plaza Norte)
-- Entertainment (movies, concerts, games, streaming services, SoundCloud, Suno)
-- Bills & Utilities (electricity, water, internet, phone bills, yallo.ch mobile services)
-- Healthcare (medical, pharmacy, insurance, Amavita)
-- Travel (hotels, flights, vacation expenses)
-- Education (courses, books, tuition)
-- Home & Garden (rent, mortgage, home improvement, furniture)
-- Personal Care (salon, spa, cosmetics)
-- Business (Replit development tools, OpenAI services, Hostinger hosting, Bunny.net CDN, office supplies, professional services, Anytime Mailbox)
-- Other (miscellaneous expenses only when no other category fits)
+USER'S EXISTING CATEGORIES:
+${userCategoryList}
 
-IMPORTANT MERCHANT RECOGNITION:
-- yallo.ch = Swiss mobile operator → Bills & Utilities
-- Replit = Development platform → Business
-- OpenAI = AI services → Business
-- Hostinger = Web hosting → Business
-- Bunny.net = CDN services → Business
-- SoundCloud = Music streaming → Entertainment
-- Migros, Coop, ALDI, Lidl = Grocery stores → Food & Dining
-- Amavita = Swiss pharmacy → Healthcare
-- Cash withdrawals = Other (unless specific purpose is clear)
+ANALYSIS RULES:
+- First, try to match the transaction to one of the user's existing categories
+- Only suggest a new category if the transaction clearly doesn't fit any existing category
+- Use your knowledge of merchants, businesses, and transaction types to make intelligent matches
+- Consider business type, merchant names, and transaction patterns
 
 Respond with JSON in this exact format:
 {
-  "category": "category_name",
+  "categoryId": 123,  // Use this if transaction matches an existing category (use the ID)
+  "suggestedCategory": "New Category Name",  // Use this only if no existing category fits
   "confidence": 0.95,
   "reasoning": "Brief explanation of why this category was chosen"
-}`
+}
+
+IMPORTANT: Use either "categoryId" OR "suggestedCategory", never both.`
         },
         {
           role: "user",
-          content: `Description: "${description}"
+          content: `Transaction Description: "${description}"
 Amount: $${amount}
 
-Please analyze this merchant/description carefully and categorize appropriately. Pay special attention to:
-- Technology/development services (Replit, OpenAI, hosting services) → Business
-- Mobile/telecom services (yallo.ch, phone carriers) → Bills & Utilities  
-- Streaming/entertainment platforms → Entertainment
-- Grocery stores and supermarkets → Food & Dining
-- Known brand names and their business types
-
-Categorize this expense with high confidence when you recognize the merchant.`
+Analyze this transaction and determine if it matches any of my existing categories, or if I need a new category.`
         }
       ],
       response_format: { type: "json_object" },
@@ -144,24 +132,30 @@ Categorize this expense with high confidence when you recognize the merchant.`
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
-
-    const categorization = {
-      category: result.category || 'Other',
+    
+    return {
+      categoryId: result.categoryId || undefined,
+      suggestedCategory: result.suggestedCategory || undefined,
       confidence: Math.max(0, Math.min(1, result.confidence || 0.5)),
       reasoning: result.reasoning || 'Unable to determine category'
     };
-
-    // Cache system removed
-    
-    return categorization;
   } catch (error) {
-    console.error('Error categorizing expense:', error);
+    console.error('Error categorizing expense with user categories:', error);
     return {
-      category: 'Other',
+      suggestedCategory: 'Other',
       confidence: 0.1,
       reasoning: 'Error occurred during categorization'
     };
   }
+}
+
+export async function categorizeExpense(description: string, amount: number, language: string = 'en-us'): Promise<ExpenseCategorizationResult> {
+  // Fallback function for when user categories are not available
+  return {
+    category: 'Other',
+    confidence: 0.1,
+    reasoning: 'Fallback categorization - user categories not available'
+  };
 }
 
 export async function generateFinancialTips(

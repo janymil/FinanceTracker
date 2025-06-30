@@ -607,7 +607,7 @@ export function registerImportRoutes(app: Express) {
       };
 
       // Process the PDF using our hybrid approach with duplicate detection and progress tracking
-      const processingResult = await processBankStatementPDF(req.file.buffer, language, formattedExisting, onProgress);
+      const processingResult = await processBankStatementPDF(req.file.buffer, language, formattedExisting, onProgress, userId);
 
       // Validate extracted transactions
       const validationResult = validateTransactions(processingResult.transactions);
