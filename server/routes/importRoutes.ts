@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { isAuthenticated, getUserId, authenticateUser } from "../clerkAuth";
+import { isAuthenticated, getUserId } from "../clerkAuth";
 import { storage } from "../storage";
 import { z } from "zod";
 import { 
@@ -641,38 +641,49 @@ export function registerImportRoutes(app: Express) {
     }
   });
 
-  // Final import endpoint - actually saves transactions and creates new categories
-  app.post('/api/import/bank-statement/confirm', authenticateUser, upload.none(), async (req: Request, res: Response) => {
+  // Final import endpoint - saves transactions and creates user-edited categories
+  app.post('/api/import/bank-statement/confirm', isAuthenticated, async (req: any, res: any) => {
     try {
-      const userId = req.user?.id;
+      const userId = getUserId(req);
       if (!userId) {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
-      const { transactions, newCategories } = req.body;
+      const { transactions, categoryMappings } = req.body;
       
       if (!transactions || !Array.isArray(transactions)) {
         return res.status(400).json({ error: 'Transactions array is required' });
       }
 
-      console.log(`Processing final import for ${transactions.length} transactions with ${newCategories?.length || 0} new categories`);
+      console.log(`Processing final import for ${transactions.length} transactions with category mappings`);
 
-      // Step 1: Create new categories if any were suggested
+      // Step 1: Create new categories from user-edited names
       const categoryNameToIdMap: Record<string, number> = {};
       
-      if (newCategories && Array.isArray(newCategories)) {
-        for (const categoryName of newCategories) {
-          if (categoryName && typeof categoryName === 'string') {
+      if (categoryMappings && typeof categoryMappings === 'object') {
+        for (const [originalName, userEditedName] of Object.entries(categoryMappings)) {
+          if (userEditedName && typeof userEditedName === 'string') {
             try {
-              const newCategory = await storage.createCategory(userId, {
-                name: categoryName,
-                type: 'expense',
-                description: `Auto-created from bank statement import`
-              });
-              categoryNameToIdMap[categoryName] = newCategory.id;
-              console.log(`Created new category: ${categoryName} (ID: ${newCategory.id})`);
+              // Check if category already exists
+              const existingCategories = await storage.getCategories(userId);
+              const existingCategory = existingCategories.find(cat => 
+                cat.name.toLowerCase() === userEditedName.toLowerCase() && cat.type === 'expense'
+              );
+              
+              if (existingCategory) {
+                categoryNameToIdMap[originalName] = existingCategory.id;
+                console.log(`Using existing category: ${userEditedName} (ID: ${existingCategory.id})`);
+              } else {
+                const newCategory = await storage.createCategory(userId, {
+                  name: userEditedName,
+                  type: 'expense',
+                  description: `Created from bank statement import`
+                });
+                categoryNameToIdMap[originalName] = newCategory.id;
+                console.log(`Created new category: ${userEditedName} (ID: ${newCategory.id})`);
+              }
             } catch (error) {
-              console.error(`Failed to create category ${categoryName}:`, error);
+              console.error(`Failed to create/find category ${userEditedName}:`, error);
             }
           }
         }
@@ -684,9 +695,14 @@ export function registerImportRoutes(app: Express) {
 
       for (const transaction of transactions) {
         try {
-          // Map category name to ID if it's a new category
-          let categoryId = transaction.categoryId;
-          if (!categoryId && transaction.category && categoryNameToIdMap[transaction.category]) {
+          // Determine category ID
+          let categoryId = null;
+          
+          if (transaction.categoryId) {
+            // Existing category ID
+            categoryId = transaction.categoryId;
+          } else if (transaction.category && categoryNameToIdMap[transaction.category]) {
+            // New category created from mapping
             categoryId = categoryNameToIdMap[transaction.category];
           }
 
@@ -695,7 +711,7 @@ export function registerImportRoutes(app: Express) {
             description: transaction.description,
             date: transaction.date,
             type: transaction.type || 'expense',
-            categoryId: categoryId || null,
+            categoryId: categoryId,
             reference: transaction.reference || null,
             recurring: false,
             receiptUrl: null
