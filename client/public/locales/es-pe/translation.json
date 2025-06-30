@@ -2006,6 +2006,27 @@
       "consent_button": "Consiento al Procesamiento Seguro"
     },
     
+    "duplicate_warning": {
+      "title": "Posibles Transacciones Duplicadas Detectadas",
+      "description": "Encontramos transacciones que podrían ya existir en tu cuenta. Revisa las coincidencias a continuación y elige qué transacciones importar.",
+      "found_title": "Transacciones Duplicadas Encontradas",
+      "found_description": "Se encontraron {{count}} posible(s) duplicado(s). Por favor revisa antes de importar.",
+      "found_count": "Se encontraron {{count}} posible(s) duplicado(s) de {{total}} transacciones extraídas.",
+      "new_transaction": "Nueva Transacción (del PDF)",
+      "existing_matches": "Transacción(es) Similar(es) Existente(s)",
+      "similarity_score": "Similitud: {{score}}%",
+      "high_match": "Coincidencia Alta",
+      "possible_match": "Posible Coincidencia",
+      "exclude_transaction": "Excluir esta transacción",
+      "include_transaction": "Incluir esta transacción",
+      "match_reasons": "Por qué esto podría ser un duplicado:",
+      "will_import": "Se importarán {{count}} de {{total}} transacciones",
+      "cancel": "Cancelar Importación",
+      "proceed": "Proceder con Importación",
+      "proceeding_title": "Procediendo con Importación",
+      "proceeding_description": "Importando {{count}} transacciones seleccionadas"
+    },
+    
     "backup_tab": "Respaldo",
     "cloud_backup_status": "Estado de Respaldo en la Nube",
     "automatic_backup_enabled": "Respaldo Automático Activado",

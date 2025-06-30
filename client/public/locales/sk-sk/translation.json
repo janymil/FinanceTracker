@@ -1985,6 +1985,27 @@
       "consent_button": "Súhlasím s Bezpečným Spracovaním"
     },
     
+    "duplicate_warning": {
+      "title": "Zistené Možné Duplicitné Transakcie",
+      "description": "Našli sme transakcie, ktoré už môžu existovať vo vašom účte. Skontrolujte zhody nižšie a vyberte, ktoré transakcie importovať.",
+      "found_title": "Nájdené Duplicitné Transakcie",
+      "found_description": "Našlo sa {{count}} možný(ch) duplikát(ov). Prosím skontrolujte pred importom.",
+      "found_count": "Našlo sa {{count}} možný(ch) duplikát(ov) z {{total}} extrahovaných transakcií.",
+      "new_transaction": "Nová Transakcia (z PDF)",
+      "existing_matches": "Existujúca/e Podobná/é Transakcia/e",
+      "similarity_score": "Podobnosť: {{score}}%",
+      "high_match": "Vysoká Zhoda",
+      "possible_match": "Možná Zhoda",
+      "exclude_transaction": "Vylúčiť túto transakciu",
+      "include_transaction": "Zahrnúť túto transakciu",
+      "match_reasons": "Prečo by to mohol byť duplikát:",
+      "will_import": "Importuje sa {{count}} z {{total}} transakcií",
+      "cancel": "Zrušiť Import",
+      "proceed": "Pokračovať s Importom",
+      "proceeding_title": "Pokračuje Import",
+      "proceeding_description": "Importuje sa {{count}} vybraných transakcií"
+    },
+    
     "backup_tab": "Záloha",
     "cloud_backup_status": "Stav Zálohy v Cloude",
     "automatic_backup_enabled": "Automatická Záloha Aktivovaná",

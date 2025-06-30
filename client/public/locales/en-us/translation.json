@@ -1859,6 +1859,27 @@
       "consent_button": "I Consent to Secure Processing"
     },
     
+    "duplicate_warning": {
+      "title": "Potential Duplicate Transactions Detected",
+      "description": "We found transactions that may already exist in your account. Review the matches below and choose which transactions to import.",
+      "found_title": "Duplicate Transactions Found",
+      "found_description": "Found {{count}} potential duplicate(s). Please review before importing.",
+      "found_count": "Found {{count}} potential duplicate(s) out of {{total}} extracted transactions.",
+      "new_transaction": "New Transaction (from PDF)",
+      "existing_matches": "Existing Similar Transaction(s)",
+      "similarity_score": "Similarity: {{score}}%",
+      "high_match": "High Match",
+      "possible_match": "Possible Match",
+      "exclude_transaction": "Exclude this transaction",
+      "include_transaction": "Include this transaction",
+      "match_reasons": "Why this might be a duplicate:",
+      "will_import": "Will import {{count}} of {{total}} transactions",
+      "cancel": "Cancel Import",
+      "proceed": "Proceed with Import",
+      "proceeding_title": "Proceeding with Import",
+      "proceeding_description": "Importing {{count}} selected transactions"
+    },
+    
     "backup_tab": "Backup",
     "cloud_backup_status": "Cloud Backup Status",
     "automatic_backup_enabled": "Automatic Backup Enabled",
