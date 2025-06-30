@@ -667,48 +667,48 @@ export default function Help() {
                         </h4>
                         <div className="space-y-4">
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Financial Summary Cards</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Financial Summary Cards')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Top of dashboard<br/>
-                              <strong>Function:</strong> Display total income, expenses, and balance for selected month<br/>
-                              <strong>Features:</strong> Auto-updates with new transactions, clickable for detailed breakdown, color-coded positive/negative values
+                              <strong>{t('Location')}:</strong> {t('Top of dashboard')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Display total income, expenses, and balance for selected month')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Auto-updates with new transactions, clickable for detailed breakdown, color-coded positive/negative values')}
                             </p>
                           </div>
                           
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Quick Transaction Entry</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Quick Transaction Entry')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Header "+" button or dashboard "Add Transaction" button<br/>
-                              <strong>Function:</strong> Add new income or expense transactions<br/>
-                              <strong>Features:</strong> Form validation, category selection, date picker, recurring transaction option (Standard+), receipt upload (Standard+)
+                              <strong>{t('Location')}:</strong> {t('Header "+" button or dashboard "Add Transaction" button')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Add new income or expense transactions')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Form validation, category selection, date picker, recurring transaction option (Standard+), receipt upload (Standard+)')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Recent Transactions Widget</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Recent Transactions Widget')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Left column of dashboard<br/>
-                              <strong>Function:</strong> Shows last 5 transactions with edit/delete options<br/>
-                              <strong>Features:</strong> One-click editing, category icons, amount formatting, receipt thumbnails, recurring transaction indicators
+                              <strong>{t('Location')}:</strong> {t('Left column of dashboard')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Shows last 5 transactions with edit/delete options')}<br/>
+                              <strong>{t('Features')}:</strong> {t('One-click editing, category icons, amount formatting, receipt thumbnails, recurring transaction indicators')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Budget Overview Widget (Standard+)</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Budget Overview Widget (Standard+)')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Right column of dashboard<br/>
-                              <strong>Function:</strong> Monitor budget progress across all categories<br/>
-                              <strong>Features:</strong> Progress bars, percentage completion, color-coded status (green/yellow/red), overspending alerts
+                              <strong>{t('Location')}:</strong> {t('Right column of dashboard')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Monitor budget progress across all categories')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Progress bars, percentage completion, color-coded status (green/yellow/red), overspending alerts')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Financial Health Score</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Financial Health Score')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Right column of dashboard<br/>
-                              <strong>Function:</strong> Calculate and display financial wellness score<br/>
-                              <strong>Free Users:</strong> Simple calculation based on income/expense ratio<br/>
-                              <strong>Standard+ Users:</strong> AI-powered analysis with detailed recommendations and improvement suggestions
+                              <strong>{t('Location')}:</strong> {t('Right column of dashboard')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Calculate and display financial wellness score')}<br/>
+                              <strong>{t('Free Users')}:</strong> {t('Simple calculation based on income/expense ratio')}<br/>
+                              <strong>{t('Standard+ Users')}:</strong> {t('AI-powered analysis with detailed recommendations and improvement suggestions')}
                             </p>
                           </div>
 
