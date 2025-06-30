@@ -58,7 +58,7 @@ export function registerBudgetRoutes(app: Express) {
         return res.status(403).json({ message: "Budget not found or access denied" });
       }
 
-      const updateData: any = {};
+      const updateData: any = { userId }; // Include userId for ownership verification
       if (categoryId !== undefined) updateData.categoryId = parseInt(categoryId);
       if (amount !== undefined) updateData.amount = String(amount);
       if (startDate !== undefined) updateData.startDate = new Date(startDate);
