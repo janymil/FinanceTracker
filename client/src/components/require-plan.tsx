@@ -7,6 +7,7 @@ import UpgradePrompt from './upgrade-prompt';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { Target, Crosshair, BarChart3, Calendar, TrendingUp, Users, Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 type PlanType = 'free' | 'standard' | 'premium';
 
@@ -25,87 +26,88 @@ const planHierarchy: Record<PlanType, number> = {
   premium: 2,
 };
 
-// Feature configurations for upgrade prompts
-const featureConfigs = {
+// Feature configurations for upgrade prompts - using translation function
+const getFeatureConfigs = (t: any) => ({
   budget: {
-    feature: "Budget Management",
-    description: "Take control of your spending with advanced budget tracking and management tools",
+    feature: t('require_plan.features.budget.title'),
+    description: t('require_plan.features.budget.description'),
     benefits: [
-      "Set spending limits for different expense categories",
-      "Monitor your progress against budget goals", 
-      "Get notified when approaching budget limits"
+      t('require_plan.features.budget.benefits.0'),
+      t('require_plan.features.budget.benefits.1'),
+      t('require_plan.features.budget.benefits.2')
     ],
     icon: Target
   },
   goals: {
-    feature: "Financial Goals",
-    description: "Set and track your financial goals with intelligent progress monitoring",
+    feature: t('require_plan.features.goals.title'),
+    description: t('require_plan.features.goals.description'),
     benefits: [
-      "Create custom savings and debt payoff goals",
-      "Track progress with visual indicators",
-      "Get motivated with milestone celebrations"
+      t('require_plan.features.goals.benefits.0'),
+      t('require_plan.features.goals.benefits.1'),
+      t('require_plan.features.goals.benefits.2')
     ],
     icon: Crosshair
   },
   analytics: {
-    feature: "Advanced Analytics",
-    description: "Deep insights into your financial patterns with AI-powered analysis",
+    feature: t('require_plan.features.analytics.title'),
+    description: t('require_plan.features.analytics.description'),
     benefits: [
-      "Interactive charts and trend analysis",
-      "AI-powered spending insights",
-      "Export reports in multiple formats"
+      t('require_plan.features.analytics.benefits.0'),
+      t('require_plan.features.analytics.benefits.1'),
+      t('require_plan.features.analytics.benefits.2')
     ],
     icon: BarChart3
   },
   trends: {
-    feature: "Trend Analysis",
-    description: "Visualize your financial trends with advanced charting and predictions",
+    feature: t('require_plan.features.trends.title'),
+    description: t('require_plan.features.trends.description'),
     benefits: [
-      "Long-term trend visualization",
-      "Predictive spending analysis",
-      "Seasonal pattern recognition"
+      t('require_plan.features.trends.benefits.0'),
+      t('require_plan.features.trends.benefits.1'),
+      t('require_plan.features.trends.benefits.2')
     ],
     icon: TrendingUp
   },
   calendar: {
-    feature: "Calendar View",
-    description: "View your financial activities in an intuitive calendar interface",
+    feature: t('require_plan.features.calendar.title'),
+    description: t('require_plan.features.calendar.description'),
     benefits: [
-      "Monthly and weekly financial calendar",
-      "Transaction scheduling and reminders",
-      "Visual spending patterns by date"
+      t('require_plan.features.calendar.benefits.0'),
+      t('require_plan.features.calendar.benefits.1'),
+      t('require_plan.features.calendar.benefits.2')
     ],
     icon: Calendar
   },
   export: {
-    feature: "Data Management",
-    description: "Export and manage your financial data with CSV or PDF format for external analysis or record keeping.",
+    feature: t('require_plan.features.export.title'),
+    description: t('require_plan.features.export.description'),
     benefits: [
-      "Export transactions to CSV format",
-      "Generate PDF reports",
-      "Backup your financial data",
-      "Share data with accountants"
+      t('require_plan.features.export.benefits.0'),
+      t('require_plan.features.export.benefits.1'),
+      t('require_plan.features.export.benefits.2'),
+      t('require_plan.features.export.benefits.3')
     ],
     requiredPlan: "premium" as PlanType,
     icon: BarChart3
   },
   collaborative: {
-    feature: "Collaborative Goals",
-    description: "Work together with friends and family to achieve shared financial goals",
+    feature: t('require_plan.features.collaborative.title'),
+    description: t('require_plan.features.collaborative.description'),
     benefits: [
-      "Create shared savings goals with others",
-      "Track group progress in real-time",
-      "Send invitations and manage participants",
-      "Celebrate milestones together"
+      t('require_plan.features.collaborative.benefits.0'),
+      t('require_plan.features.collaborative.benefits.1'),
+      t('require_plan.features.collaborative.benefits.2'),
+      t('require_plan.features.collaborative.benefits.3')
     ],
     icon: Users
   }
-};
+});
 
 export default function RequirePlan({ plan, children, feature, description, benefits, compact }: RequirePlanProps) {
   const { isLoaded, isSignedIn, user } = useUser();
   const isReady = isLoaded && isSignedIn && !!user?.id;
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   // Check for successful upgrade in URL parameters
   useEffect(() => {
@@ -163,6 +165,7 @@ export default function RequirePlan({ plan, children, feature, description, bene
     else if (path.includes('/collaborative')) featureKey = 'collaborative';
   }
 
+  const featureConfigs = getFeatureConfigs(t);
   const config = featureConfigs[featureKey as keyof typeof featureConfigs];
 
   // Show compact version if explicitly requested via prop OR if in dialog context
@@ -175,22 +178,22 @@ export default function RequirePlan({ plan, children, feature, description, bene
           </div>
           <div className="flex-1">
             <h4 className="font-semibold text-blue-900 dark:text-blue-100 text-lg">
-              {plan.charAt(0).toUpperCase() + plan.slice(1)} Feature
+              {t('require_plan.compact.feature_title', { plan: t(`plans.${plan}`) })}
             </h4>
             <p className="text-sm text-blue-700 dark:text-blue-300">
-              Available with {plan.charAt(0).toUpperCase() + plan.slice(1)} plan
+              {t('require_plan.compact.available_with', { plan: t(`plans.${plan}`) })}
             </p>
           </div>
         </div>
         <div className="flex gap-2">
           <Link href="/subscribe">
             <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
-              Upgrade Now
+              {t('require_plan.compact.upgrade_now')}
             </Button>
           </Link>
           <Link href="/subscribe">
             <Button size="sm" variant="outline" className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-400 dark:hover:bg-blue-900/30">
-              View Plans
+              {t('require_plan.compact.view_plans')}
             </Button>
           </Link>
         </div>
@@ -201,9 +204,13 @@ export default function RequirePlan({ plan, children, feature, description, bene
   return (
     <UpgradePrompt
       requiredPlan={plan}
-      feature={feature || config?.feature || "Premium Feature"}
-      description={description || config?.description || "This feature requires a higher subscription plan"}
-      benefits={benefits || config?.benefits || ["Access advanced features", "Get premium support", "Unlock full potential"]}
+      feature={feature || config?.feature || t('require_plan.default.feature')}
+      description={description || config?.description || t('require_plan.default.description')}
+      benefits={benefits || config?.benefits || [
+        t('require_plan.default.benefits.0'),
+        t('require_plan.default.benefits.1'),
+        t('require_plan.default.benefits.2')
+      ]}
       icon={config?.icon}
     />
   );

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown, Lock, Target, TrendingUp, BarChart3, Calendar, Check } from "lucide-react";
 import { Link } from "wouter";
+import { useTranslation } from 'react-i18next';
 
 interface UpgradePromptProps {
   requiredPlan: 'free' | 'standard' | 'premium';
