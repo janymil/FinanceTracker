@@ -1028,68 +1028,98 @@ export default function Help() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                          Available for Standard and Premium subscribers
+                  <div className="space-y-4">
+                    {faqItems.map((item) => (
+                      <div key={item.id} className="border rounded-lg">
+                        <button
+                          className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg"
+                          onClick={() => setExpandedFaq(expandedFaq === item.id ? null : item.id)}
+                        >
+                          <span className="font-medium">{t(item.question)}</span>
+                          <div className={`transform transition-transform ${expandedFaq === item.id ? 'rotate-180' : ''}`}>
+                            ↓
+                          </div>
+                        </button>
+                        {expandedFaq === item.id && (
+                          <div className="px-4 pb-4 text-sm text-gray-600 dark:text-gray-300">
+                            {t(item.answer)}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="chat" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Bot className="h-6 w-6" />
+                    {t('AI Assistant')}
+                  </CardTitle>
+                  <CardDescription>
+                    {t('Get instant help with our AI-powered chat assistant')}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="h-64 border rounded-lg p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+                      {chatMessages.length === 0 ? (
+                        <p className="text-gray-500 text-center">
+                          {t('Start a conversation by asking a question about FinanzerPro features')}
                         </p>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium mb-2">How to Scan Receipts</h4>
-                        
-                        <div className="mb-4">
-                          <h5 className="font-medium text-sm mb-2 text-blue-600 dark:text-blue-400">Desktop/Web Upload:</h5>
-                          <ol className="text-sm text-gray-600 dark:text-gray-300 space-y-2 ml-4">
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">1.</span>
-                              Navigate to Expenses, Income, or Transactions page
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">2.</span>
-                              Click the "Upload Image" button next to "Add Transaction"
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">3.</span>
-                              Choose "Take Photo" (mobile camera) or "Choose from Gallery"
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">4.</span>
-                              Select or capture a clear image of your receipt
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">5.</span>
-                              Wait for OCR processing - extracted data will appear automatically
-                            </li>
-                          </ol>
+                      ) : (
+                        chatMessages.map((message, index) => (
+                          <div
+                            key={index}
+                            className={`mb-4 p-3 rounded-lg ${
+                              message.role === 'user'
+                                ? 'bg-primary text-primary-foreground ml-8'
+                                : 'bg-white dark:bg-gray-800 mr-8'
+                            }`}
+                          >
+                            <div className="text-sm font-medium mb-1">
+                              {message.role === 'user' ? t('You') : t('AI Assistant')}
+                            </div>
+                            <div className="text-sm">{message.content}</div>
+                          </div>
+                        ))
+                      )}
+                      {isLoading && (
+                        <div className="flex items-center gap-2 text-gray-500">
+                          <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full"></div>
+                          {t('AI is thinking...')}
                         </div>
-
-                        <div>
-                          <h5 className="font-medium text-sm mb-2 text-green-600 dark:text-green-400">Mobile QR Code Upload:</h5>
-                          <ol className="text-sm text-gray-600 dark:text-gray-300 space-y-2 ml-4">
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">1.</span>
-                              From your computer, click "Upload Image" and select "Scan with Phone"
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">2.</span>
-                              A QR code will appear on your screen
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">3.</span>
-                              Use your phone's camera to scan the QR code
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">4.</span>
-                              Take a photo of your receipt using your phone
-                            </li>
-                            <li className="flex gap-2">
-                              <span className="font-medium text-primary">5.</span>
-                              Data automatically appears in your computer's transaction form
-                            </li>
-                          </ol>
-                        </div>
-                      </div>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        placeholder={t('Ask about FinanzerPro features...')}
+                        onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                        disabled={isLoading}
+                      />
+                      <Button
+                        onClick={handleSendMessage}
+                        disabled={!chatInput.trim() || isLoading}
+                        size="icon"
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </AppLayout>
+  );
+}
 
                       <div>
                         <h4 className="font-medium mb-2">What Gets Extracted</h4>
@@ -1254,6 +1284,7 @@ export default function Help() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
       </div>
     </AppLayout>
   );
