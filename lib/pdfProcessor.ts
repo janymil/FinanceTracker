@@ -939,7 +939,7 @@ async function addAICategorization(
   try {
     // Import storage to fetch user categories
     const { storage } = await import('../server/storage');
-    const { categorizeExpenseWithUserCategories } = await import('../server/openai');
+    const { categorizeExpenseWithUserCategories, categorizeIncomeWithUserCategories } = await import('../server/openai');
     
     // Fetch user's existing expense categories
     const userCategories = await storage.getCategories(userId);
@@ -951,29 +951,61 @@ async function addAICategorization(
       transactions.map(async (transaction) => {
         try {
           if (transaction.description && transaction.amount !== 0) {
-            const result = await categorizeExpenseWithUserCategories(
-              transaction.description,
-              Math.abs(transaction.amount),
-              expenseCategories,
-              language
-            );
-            
-            if (result.categoryId) {
-              // Matched existing category
-              const matchedCategory = expenseCategories.find(cat => cat.id === result.categoryId);
-              transaction.category = matchedCategory?.name || 'Other';
-              console.log(`AI matched "${transaction.description}" to existing category "${matchedCategory?.name}"`);
-            } else if (result.suggestedCategory) {
-              // New category suggested
-              transaction.category = result.suggestedCategory;
-              console.log(`AI suggested new category "${result.suggestedCategory}" for "${transaction.description}"`);
-            } else {
-              transaction.category = 'Other';
+            // Only categorize expense transactions - income transactions don't need expense categorization
+            if (transaction.type === 'expense') {
+              const result = await categorizeExpenseWithUserCategories(
+                transaction.description,
+                Math.abs(transaction.amount),
+                expenseCategories,
+                language
+              );
+              
+              if (result.categoryId) {
+                // Matched existing category
+                const matchedCategory = expenseCategories.find(cat => cat.id === result.categoryId);
+                transaction.category = matchedCategory?.name || 'Other';
+                console.log(`AI matched "${transaction.description}" to existing category "${matchedCategory?.name}"`);
+              } else if (result.suggestedCategory) {
+                // New category suggested
+                transaction.category = result.suggestedCategory;
+                console.log(`AI suggested new category "${result.suggestedCategory}" for "${transaction.description}"`);
+              } else {
+                transaction.category = 'Other';
+              }
+            } else if (transaction.type === 'income') {
+              // For income transactions, fetch income categories or suggest appropriate income categories
+              const userCategories = await storage.getCategories(userId);
+              const incomeCategories = userCategories.filter(cat => cat.type === 'income');
+              
+              if (incomeCategories.length > 0) {
+                // Try to match to existing income categories
+                const result = await categorizeIncomeWithUserCategories(
+                  transaction.description,
+                  Math.abs(transaction.amount),
+                  incomeCategories,
+                  language
+                );
+                
+                if (result.categoryId) {
+                  const matchedCategory = incomeCategories.find(cat => cat.id === result.categoryId);
+                  transaction.category = matchedCategory?.name || 'Income';
+                  console.log(`AI matched income "${transaction.description}" to existing category "${matchedCategory?.name}"`);
+                } else if (result.suggestedCategory) {
+                  transaction.category = result.suggestedCategory;
+                  console.log(`AI suggested new income category "${result.suggestedCategory}" for "${transaction.description}"`);
+                } else {
+                  transaction.category = 'Income';
+                }
+              } else {
+                // No income categories exist, suggest appropriate ones
+                transaction.category = 'Income'; // Fallback to generic income category
+                console.log(`No income categories exist, using generic "Income" for "${transaction.description}"`);
+              }
             }
           }
         } catch (error) {
           console.error(`Failed to categorize transaction: ${transaction.description}`, error);
-          transaction.category = 'Other';
+          transaction.category = transaction.type === 'income' ? 'Income' : 'Other';
         }
         
         return transaction;

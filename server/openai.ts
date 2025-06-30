@@ -79,6 +79,95 @@ export interface FinancialHealthData {
   warnings: string[];
 }
 
+export async function categorizeIncomeWithUserCategories(
+  description: string, 
+  amount: number, 
+  userCategories: Array<{id: number, name: string, type: string}>,
+  language: string = 'en-us'
+): Promise<{categoryId?: number, suggestedCategory?: string, confidence: number, reasoning: string}> {
+  const normalizedLanguage = normalizeLanguageCode(language);
+  try {
+    const userCategoryList = userCategories.map(cat => `- ${cat.name} (ID: ${cat.id})`).join('\n');
+    
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content must be in ${getLanguageLabel(normalizedLanguage)}.
+
+You are an expert financial categorization system for INCOME transactions. Your job is to provide CONSISTENT categorization for money coming into accounts.
+
+USER'S EXISTING INCOME CATEGORIES:
+${userCategoryList}
+
+INCOME PATTERN RECOGNITION:
+💰 SALARY/WAGES: Regular employment income, payroll deposits
+💼 FREELANCE/BUSINESS: Client payments, business income, consulting fees
+🎯 INVESTMENTS: Dividends, interest payments, capital gains
+🎁 TRANSFERS: Money transfers from other accounts, family transfers  
+📱 TOP-UP DEPOSITS: Mobile account recharges, wallet deposits (incoming money)
+🏦 REFUNDS: Store refunds, service refunds, tax refunds
+💸 OTHER INCOME: Miscellaneous income sources
+
+INCOME CATEGORIZATION LOGIC:
+1. Analyze the source/description of the incoming money
+2. Match to appropriate income category based on source type
+3. "Top-Up by *6612" = someone adding money to your account = Income/Transfer
+4. Regular employer names = Salary/Wages
+5. Client/business names = Freelance/Business income
+6. Bank interest/dividends = Investment income
+
+Respond with JSON in this exact format:
+{
+  "categoryId": 123,  // Use this if transaction matches an existing category
+  "suggestedCategory": "Income Category Name",  // Use this only if no existing category fits
+  "confidence": 0.95,
+  "reasoning": "Brief explanation of income source analysis"
+}
+
+IMPORTANT: Use either "categoryId" OR "suggestedCategory", never both.`
+        },
+        {
+          role: "user",
+          content: `Income Description: "${description}"
+Amount: +$${amount}
+
+INCOME ANALYSIS:
+1. This is money COMING INTO the account (positive income)
+2. Identify the source of this income
+3. Match to appropriate income category
+
+Examples:
+- "Top-Up by *6612" = Someone depositing money → Transfer/Deposit income
+- "ACME CORP PAYROLL" = Employer payment → Salary/Wages
+- "FREELANCE CLIENT ABC" = Client payment → Freelance/Business income
+
+Analyze this income transaction:`
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.1
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    
+    return {
+      categoryId: result.categoryId || undefined,
+      suggestedCategory: result.suggestedCategory || undefined,
+      confidence: Math.max(0, Math.min(1, result.confidence || 0.5)),
+      reasoning: result.reasoning || 'Unable to determine income category'
+    };
+  } catch (error) {
+    console.error('Error categorizing income with user categories:', error);
+    return {
+      suggestedCategory: 'Income',
+      confidence: 0.1,
+      reasoning: 'Error occurred during income categorization'
+    };
+  }
+}
+
 export async function categorizeExpenseWithUserCategories(
   description: string, 
   amount: number, 
@@ -96,41 +185,70 @@ export async function categorizeExpenseWithUserCategories(
           role: "system",
           content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content must be in ${getLanguageLabel(normalizedLanguage)}.
 
-You are an expert financial categorization assistant with deep knowledge of merchants, businesses, and spending patterns. Your task is to analyze transactions and either:
-1. Match them to the user's existing categories, OR
-2. Suggest a new category if none of the existing ones fit
+You are an expert financial categorization system with comprehensive merchant database knowledge. Your job is to provide CONSISTENT, INTELLIGENT categorization by analyzing merchant patterns and business types.
 
 USER'S EXISTING CATEGORIES:
 ${userCategoryList}
 
-MERCHANT ANALYSIS RULES:
-- Analyze the merchant name, transaction description, and amount to understand the business type
-- Recognize common merchant patterns:
-  * Grocery stores: Walmart, Target, Kroger, Safeway, Whole Foods, local markets
-  * Restaurants: McDonald's, Starbucks, local restaurant names, delivery services
-  * Gas stations: Shell, BP, Exxon, Chevron, local fuel stops
-  * Utilities: Electric company, gas company, water department, internet providers
-  * Retail: Amazon, department stores, clothing stores, electronics stores
-  * Healthcare: Pharmacy, doctor offices, hospitals, dental clinics
-  * Transportation: Uber, Lyft, taxi services, parking, tolls, public transit
-  * Entertainment: Netflix, Spotify, movie theaters, gaming, streaming services
-  * Financial: Bank fees, interest charges, loan payments, insurance
-  * Home/Maintenance: Hardware stores, contractors, cleaning services, repairs
+CONSISTENCY RULES - CRITICAL:
+- ALWAYS categorize the same merchant the same way (Luigi Acampora should ALWAYS get the same category)
+- Analyze the merchant name first, then context clues
+- Use business pattern recognition for consistency
 
-CATEGORIZATION STRATEGY:
-- First analyze what type of business the merchant is
-- Match the business type to the user's existing categories based on purpose/function
-- Consider transaction patterns (recurring vs one-time, amount ranges)
-- Look for keywords in descriptions that indicate category type
-- Use business knowledge to make intelligent category matches
-- Only suggest new categories when the transaction truly doesn't fit existing ones
+MERCHANT PATTERN RECOGNITION:
+🍕 RESTAURANTS & DINING: 
+- Personal names (Luigi Acampora, Mario's, Giuseppe's) = Restaurant/Dining
+- Chain restaurants (McDonald's, Starbucks, KFC, Burger King)
+- Words: "Restaurant", "Cafe", "Pizza", "Bar", "Bistro"
+
+🛒 GROCERY & FOOD STORES:
+- Migros, Coop, ALDI, Lidl, Walmart, Target, Kroger, Whole Foods
+- Words: "Market", "Supermarket", "Grocery", "Food"
+
+🚗 TRANSPORTATION:
+- Gas stations: Shell, BP, Exxon, Chevron, Mobil
+- Transport: Uber, Lyft, taxi, parking, metro, bus
+- Words: "Gas", "Fuel", "Transport", "Parking"
+
+💻 BUSINESS/PROFESSIONAL:
+- Tech services: Replit, OpenAI, Hostinger, Bunny.net, GitHub
+- Office supplies, professional services, software subscriptions
+
+🎯 RETAIL/SHOPPING:
+- Department stores: Amazon, Casa Ideas, Plaza Norte, Target (non-food)
+- Clothing, electronics, general retail
+
+📱 BILLS & UTILITIES:
+- Internet, phone, electricity, water, gas bills
+- yallo.ch (Swiss mobile), Swisscom, utility companies
+
+🎬 ENTERTAINMENT:
+- Streaming: Netflix, Spotify, SoundCloud, Apple Music
+- Gaming, movies, concerts, entertainment venues
+
+💳 CASH/ATM:
+- ATM withdrawals, cash transactions
+- Keywords: "Cash withdrawal", "ATM", "Withdrawal"
+
+SMART CATEGORIZATION LOGIC:
+1. Extract merchant name from description
+2. Check if merchant fits known patterns
+3. Match business type to user's existing categories
+4. If multiple categories could fit, choose the most specific/appropriate one
+5. Suggest new category only if no existing category makes sense
+
+CONSISTENCY EXAMPLES:
+- "Luigi Acampora" → ALWAYS Restaurant (personal name pattern)
+- "Migros" → ALWAYS Grocery/Food (known Swiss grocery chain)
+- "Replit" → ALWAYS Business/Professional (development platform)
+- "Cash withdrawal" → ALWAYS Cash/ATM category
 
 Respond with JSON in this exact format:
 {
-  "categoryId": 123,  // Use this if transaction matches an existing category (use the ID)
+  "categoryId": 123,  // Use this if transaction matches an existing category
   "suggestedCategory": "New Category Name",  // Use this only if no existing category fits
   "confidence": 0.95,
-  "reasoning": "Brief explanation of why this category was chosen"
+  "reasoning": "Brief explanation of merchant analysis and category choice"
 }
 
 IMPORTANT: Use either "categoryId" OR "suggestedCategory", never both.`
@@ -140,20 +258,19 @@ IMPORTANT: Use either "categoryId" OR "suggestedCategory", never both.`
           content: `Transaction Description: "${description}"
 Amount: $${amount}
 
-ANALYSIS STEPS:
-1. Identify the merchant/business from the description
-2. Determine what type of business this is (grocery, restaurant, utility, etc.)
-3. Look at the amount to understand the transaction scale
-4. Match this business type to my existing categories based on spending purpose
-5. If no existing category fits the business type, suggest a new appropriate category
+DETAILED ANALYSIS REQUIRED:
+1. Extract the merchant name from the description
+2. Identify the business type using pattern recognition
+3. Find the best matching existing category
+4. Ensure consistency - same merchant = same category always
 
-Examples of good matching:
-- "WALMART SUPERCENTER" → Match to "Groceries" category (if user has it)
-- "STARBUCKS COFFEE" → Match to "Dining Out" or "Coffee" category (if user has it)
-- "SHELL GAS STATION" → Match to "Transportation" or "Gas" category (if user has it)
-- "NETFLIX.COM" → Match to "Entertainment" or "Subscriptions" category (if user has it)
+Merchant Analysis Examples:
+- "Luigi Acampora" = Personal name → Restaurant business
+- "Migros" = Swiss grocery chain → Food/Grocery business  
+- "Top-Up by *6612" = Mobile top-up → Telecommunications/Bills business
+- "Replit" = Development platform → Business/Professional service
 
-Analyze this transaction and determine if it matches any of my existing categories, or if I need a new category.`
+Analyze this transaction and provide consistent categorization:`
         }
       ],
       response_format: { type: "json_object" },
