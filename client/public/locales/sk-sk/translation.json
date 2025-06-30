@@ -1971,7 +1971,7 @@
       "bank_secrecy": "Zákon o Bankovom Tajomstve",
       "ai_processing_title": "Transparentnosť AI Spracovania",
       "ai_provider": "Poskytovateľ AI Služby: OpenAI (GPT-4) s podnikovou bezpečnosťou",
-      "ai_anonymization": "Anonymizácia Údajov: Citlivé informácie odstránené pred AI analýzou",
+      "ai_anonymization": "KRITICKÉ: Len anonymizované údaje odoslané do OpenAI - Všetky citlivé informácie (SSN, čísla účtov, osobné údaje) úplne odstránené pred AI spracovaním",
       "ai_retention": "Bez Retencie Údajov: AI poskytovatelia neukladajú obsah vášho bankového výpisu",
       "ai_purpose": "Účel: Len kategorizácia transakcií a finančné insights",
       "user_rights_title": "Vaše Práva a Kontrola",

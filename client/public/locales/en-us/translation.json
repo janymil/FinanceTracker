@@ -1845,7 +1845,7 @@
       "bank_secrecy": "Bank Secrecy Act",
       "ai_processing_title": "AI Processing Transparency",
       "ai_provider": "AI Service Provider: OpenAI (GPT-4) with enterprise-grade security",
-      "ai_anonymization": "Data Anonymization: Sensitive information removed before AI analysis",
+      "ai_anonymization": "CRITICAL: Only anonymized data sent to OpenAI - All sensitive information (SSNs, account numbers, personal details) completely removed before AI processing",
       "ai_retention": "No Data Retention: AI providers do not store your bank statement content",
       "ai_purpose": "Purpose: Transaction categorization and financial insights only",
       "user_rights_title": "Your Rights and Control",

@@ -1992,7 +1992,7 @@
       "bank_secrecy": "Ley de Secreto Bancario",
       "ai_processing_title": "Transparencia en Procesamiento IA",
       "ai_provider": "Proveedor de Servicio IA: OpenAI (GPT-4) con seguridad de grado empresarial",
-      "ai_anonymization": "Anonimización de Datos: Información sensible eliminada antes del análisis IA",
+      "ai_anonymization": "CRÍTICO: Solo datos anonimizados enviados a OpenAI - Toda información sensible (SSNs, números de cuenta, detalles personales) completamente eliminada antes del procesamiento IA",
       "ai_retention": "Sin Retención de Datos: Los proveedores IA no almacenan el contenido de tu estado de cuenta",
       "ai_purpose": "Propósito: Solo categorización de transacciones e insights financieros",
       "user_rights_title": "Tus Derechos y Control",

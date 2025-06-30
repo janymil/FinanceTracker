@@ -115,9 +115,9 @@ export function PDFSecurityModal({ isOpen, onClose, onConsent }: PDFSecurityModa
                   <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                   <span>{t('export.pdf_security.ai_provider')}</span>
                 </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <span>{t('export.pdf_security.ai_anonymization')}</span>
+                <div className="flex items-start gap-2 bg-purple-100 dark:bg-purple-800/30 p-2 rounded border border-purple-300 dark:border-purple-700">
+                  <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0 text-purple-800 dark:text-purple-200" />
+                  <span className="font-semibold text-purple-800 dark:text-purple-200">{t('export.pdf_security.ai_anonymization')}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
