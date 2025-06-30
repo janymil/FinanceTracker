@@ -756,8 +756,7 @@ export default function Help() {
                           </div>
                         </AccordionTrigger>
                         <AccordionContent className="pt-4">
-                          <div className="grid gap-6 md:grid-cols-2">
-                        <div className="space-y-4">
+                          <div className="space-y-4">
                           <div>
                             <h5 className="font-medium text-sm mb-2">Transaction Entry Forms</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
