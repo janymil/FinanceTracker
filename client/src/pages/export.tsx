@@ -14,6 +14,7 @@ import { useClerkUserReady } from '@/hooks/useClerkUserReady';
 import { useAuth } from '@clerk/clerk-react';
 import { PDFSecurityModal } from '@/components/PDFSecurityModal';
 import { DuplicateWarningModal } from '@/components/DuplicateWarningModal';
+import { PDFProcessingProgress } from '@/components/PDFProcessingProgress';
 import { 
   Download, 
   Upload, 
@@ -150,6 +151,7 @@ export default function ExportPage() {
   const [pdfProcessingResult, setPdfProcessingResult] = useState<PDFProcessingResult | null>(null);
   const [previewTransactions, setPreviewTransactions] = useState<PreviewTransaction[]>([]);
   const [isProcessingPDF, setIsProcessingPDF] = useState(false);
+  const [processingSessionId, setProcessingSessionId] = useState<string | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [selectedTransactions, setSelectedTransactions] = useState<Set<number>>(new Set());
   const [isImportingFromPreview, setIsImportingFromPreview] = useState(false);
@@ -355,6 +357,9 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
       return;
     }
 
+    // Generate unique session ID for progress tracking
+    const sessionId = `pdf-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    setProcessingSessionId(sessionId);
     setIsProcessingPDF(true);
     setPdfProcessingResult(null);
     setPreviewTransactions([]);
@@ -372,7 +377,8 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'x-user-language': localStorage.getItem('language') || 'en-us'
+          'x-user-language': localStorage.getItem('language') || 'en-us',
+          'x-session-id': sessionId
         },
         body: formData
       });

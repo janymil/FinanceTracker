@@ -232,7 +232,35 @@ function convertCSVToJSON(csvData: Record<string, any>[]): any {
   return result;
 }
 
+// Store active SSE connections for progress updates
+const progressConnections = new Map<string, Express.Response>();
+
 export function registerImportRoutes(app: Express) {
+  
+  // SSE endpoint for PDF processing progress
+  app.get('/api/import/pdf-progress/:sessionId', isAuthenticated, (req, res) => {
+    const { sessionId } = req.params;
+    
+    // Set headers for SSE
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Cache-Control'
+    });
+
+    // Store connection for this session
+    progressConnections.set(sessionId, res);
+
+    // Send initial connection confirmation
+    res.write(`data: ${JSON.stringify({ stage: 'connected', percentage: 0, message: 'Connected to progress stream' })}\n\n`);
+
+    // Clean up on client disconnect
+    req.on('close', () => {
+      progressConnections.delete(sessionId);
+    });
+  });
   // Get import logs for a user
   app.get('/api/import-logs', isAuthenticated, async (req: any, res) => {
     try {
@@ -545,10 +573,11 @@ export function registerImportRoutes(app: Express) {
         return res.status(400).json({ error: 'No PDF file uploaded' });
       }
 
-      // Get user language from request
+      // Get session ID for progress tracking
+      const sessionId = req.headers['x-session-id'] as string || Date.now().toString();
       const language = req.headers['x-user-language'] as string || 'en-us';
 
-      console.log(`Processing PDF bank statement for user ${userId}, file size: ${req.file.size} bytes`);
+      console.log(`Processing PDF bank statement for user ${userId}, session ${sessionId}, file size: ${req.file.size} bytes`);
 
       // Get existing transactions for duplicate detection (last 6 months)
       const sixMonthsAgo = new Date();
@@ -569,8 +598,16 @@ export function registerImportRoutes(app: Express) {
 
       console.log(`Found ${formattedExisting.length} existing transactions for duplicate detection`);
 
-      // Process the PDF using our hybrid approach with duplicate detection
-      const processingResult = await processBankStatementPDF(req.file.buffer, language, formattedExisting);
+      // Progress callback function
+      const onProgress = (progress: any) => {
+        const connection = progressConnections.get(sessionId);
+        if (connection) {
+          connection.write(`data: ${JSON.stringify(progress)}\n\n`);
+        }
+      };
+
+      // Process the PDF using our hybrid approach with duplicate detection and progress tracking
+      const processingResult = await processBankStatementPDF(req.file.buffer, language, formattedExisting, onProgress);
 
       // Validate extracted transactions
       const validationResult = validateTransactions(processingResult.transactions);
