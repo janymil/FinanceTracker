@@ -37,7 +37,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
 import TransactionFilters from "@/components/TransactionFilters";
 import { useDateFormat } from "@/hooks/useDateFormat";
-import { getMonthDateRange } from "@/lib/dateRangeUtils";
+import { getMonthDateRange, getDateRangeForFilter, isDateInRange } from "@/lib/dateRangeUtils";
 
 interface Transaction {
   id: number;
@@ -274,61 +274,9 @@ export default function Transactions() {
     let matchesDate = true;
     if (dateRange !== "all" && !selectedMonth) {
       const transactionDate = new Date(transaction.date);
-      const today = new Date();
-      const currentYear = today.getFullYear();
-
-      switch (dateRange) {
-        case "today":
-          matchesDate = transactionDate.toDateString() === today.toDateString();
-          break;
-        case "week":
-          const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-          matchesDate = transactionDate >= weekAgo;
-          break;
-        case "month":
-          const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-          matchesDate = transactionDate >= monthAgo;
-          break;
-        case "current-month":
-          const currentMonth = today.getMonth();
-          matchesDate = transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear;
-          break;
-        case "jan":
-          matchesDate = transactionDate.getMonth() === 0 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "feb":
-          matchesDate = transactionDate.getMonth() === 1 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "mar":
-          matchesDate = transactionDate.getMonth() === 2 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "apr":
-          matchesDate = transactionDate.getMonth() === 3 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "may":
-          matchesDate = transactionDate.getMonth() === 4 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "jun":
-          matchesDate = transactionDate.getMonth() === 5 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "jul":
-          matchesDate = transactionDate.getMonth() === 6 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "aug":
-          matchesDate = transactionDate.getMonth() === 7 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "sep":
-          matchesDate = transactionDate.getMonth() === 8 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "oct":
-          matchesDate = transactionDate.getMonth() === 9 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "nov":
-          matchesDate = transactionDate.getMonth() === 10 && transactionDate.getFullYear() === currentYear;
-          break;
-        case "dec":
-          matchesDate = transactionDate.getMonth() === 11 && transactionDate.getFullYear() === currentYear;
-          break;
+      const dateRangeFilter = getDateRangeForFilter(dateRange);
+      if (dateRangeFilter) {
+        matchesDate = isDateInRange(transactionDate, dateRangeFilter);
       }
     }
 

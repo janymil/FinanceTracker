@@ -35,7 +35,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useCurrency } from "@/context/CurrencyContext";
 import { useTranslation } from "react-i18next";
 import { useDateFormat } from "@/hooks/useDateFormat";
-import { getMonthDateRange } from "@/lib/dateRangeUtils";
+import { getMonthDateRange, getDateRangeForFilter, isDateInRange } from "@/lib/dateRangeUtils";
 
 import TransactionFilters from "@/components/TransactionFilters";
 
@@ -245,28 +245,9 @@ export default function Income() {
     let matchesDate = true;
     if (dateRange !== "all") {
       const transactionDate = new Date(transaction.date);
-      const today = new Date();
-      const currentYear = today.getFullYear();
-      const currentMonth = today.getMonth();
-      
-      switch (dateRange) {
-        case "this-month":
-          matchesDate = transactionDate.getFullYear() === currentYear && 
-                       transactionDate.getMonth() === currentMonth;
-          break;
-        case "last-month":
-          const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-          const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-          matchesDate = transactionDate.getFullYear() === lastMonthYear && 
-                       transactionDate.getMonth() === lastMonth;
-          break;
-        case "this-year":
-          matchesDate = transactionDate.getFullYear() === currentYear;
-          break;
-        case "last-30-days":
-          const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-          matchesDate = transactionDate >= thirtyDaysAgo;
-          break;
+      const dateRangeFilter = getDateRangeForFilter(dateRange);
+      if (dateRangeFilter) {
+        matchesDate = isDateInRange(transactionDate, dateRangeFilter);
       }
     }
     

@@ -199,6 +199,38 @@ export function getDateRangeForFilter(filterType: string): DateRange | null {
     case "current-month":
       return getCurrentMonthOnlyDateRange();
       
+    case "this-month":
+      return getCurrentMonthOnlyDateRange();
+      
+    case "last-month":
+      const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0, 23, 59, 59, 999);
+      return {
+        startDate: lastMonthDate,
+        endDate: lastMonthEnd,
+        startISO: lastMonthDate.toISOString(),
+        endISO: lastMonthEnd.toISOString()
+      };
+      
+    case "this-year":
+      const yearStart = new Date(today.getFullYear(), 0, 1);
+      const yearEnd = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
+      return {
+        startDate: yearStart,
+        endDate: yearEnd,
+        startISO: yearStart.toISOString(),
+        endISO: yearEnd.toISOString()
+      };
+      
+    case "last-30-days":
+      const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+      return {
+        startDate: thirtyDaysAgo,
+        endDate: today,
+        startISO: thirtyDaysAgo.toISOString(),
+        endISO: today.toISOString()
+      };
+      
     case "jan":
     case "feb":
     case "mar":
