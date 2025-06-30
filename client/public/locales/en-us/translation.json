@@ -1432,11 +1432,6 @@
     "failed_to_cleanup_expired_cache": "Failed to cleanup expired cache"
   },
 
-  "currency": {
-    "change_currency": "Change Currency",
-    "currency_settings": "Currency Settings"
-  },
-
   "types": {
     "expense": "expense",
     "income": "income",

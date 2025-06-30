@@ -1559,12 +1559,6 @@
     "investments": "Investície"
   },
 
-  "admin": {
-    "failed_to_clear_function_cache": "Nepodarilo sa vymazať funkčný cache",
-    "failed_to_clear_user_cache": "Nepodarilo sa vymazať používateľský cache",
-    "failed_to_cleanup_expired_cache": "Nepodarilo sa vyčistiť expirovaný cache"
-  },
-
   "types": {
     "expense": "výdavok",
     "income": "príjem",
