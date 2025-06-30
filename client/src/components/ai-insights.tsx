@@ -139,11 +139,11 @@ export default function AIInsights({ data }: AIInsightsProps) {
       insights.push({
         id: "positive-cashflow",
         type: "achievement",
-        title: t("ai_insights.positive_cash_flow"),
-        description: t("ai_insights.savings_rate", { rate: savingsRate.toFixed(1) }),
+        title: t("insights.positive_cash_flow"),
+        description: t("insights.savings_rate", { rate: savingsRate.toFixed(1) }),
         impact: "medium",
         amount: totalIncome - totalExpenses,
-        recommendation: savingsRate < 20 ? t("ai_insights.increase_savings_rate") : t("ai_insights.excellent_savings"),
+        recommendation: savingsRate < 20 ? t("insights.increase_savings_rate") : t("insights.excellent_savings"),
         actionable: savingsRate < 20
       });
     }
@@ -187,14 +187,14 @@ export default function AIInsights({ data }: AIInsightsProps) {
           insights.push({
             id: "spending-trend",
             type: "trend",
-            title: spendingChange > 0 ? t("ai_insights.spending_increased") : t("ai_insights.spending_decreased"),
-            description: t("ai_insights.spending_change_description", { 
-              direction: spendingChange > 0 ? t("ai_insights.increased") : t("ai_insights.decreased"),
+            title: spendingChange > 0 ? t("insights.spending_increased") : t("insights.spending_decreased"),
+            description: t("insights.spending_change_description", { 
+              direction: spendingChange > 0 ? t("insights.increased") : t("insights.decreased"),
               percentage: Math.abs(spendingChange).toFixed(1)
             }),
             impact: Math.abs(spendingChange) > 25 ? "high" : "medium",
             amount: Math.abs(totalExpenses - lastMonthExpenses),
-            recommendation: spendingChange > 0 ? t("ai_insights.review_recent_purchases") : t("ai_insights.great_expense_reduction"),
+            recommendation: spendingChange > 0 ? t("insights.review_recent_purchases") : t("insights.great_expense_reduction"),
             actionable: spendingChange > 0
           });
         }

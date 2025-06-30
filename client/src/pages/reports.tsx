@@ -204,7 +204,7 @@ export default function Reports() {
             </TabsTrigger>
             <TabsTrigger value="insights" className="flex items-center gap-1 text-xs md:text-sm">
               <Brain className="h-3 w-3 md:h-4 md:w-4" />
-              <span>{t("reports.ai_insights")}</span>
+              <span>{t("reports.insights")}</span>
             </TabsTrigger>
           </TabsList>
 

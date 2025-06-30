@@ -1151,7 +1151,7 @@
     "summary": "Súhrn",
     "analytics": "Analýzy",
     "auto_tag": "Auto-označenie",
-    "ai_insights": "AI Poznatky",
+    "insights": "Poznatky",
     "income_vs_expenses_trend": "Trend Príjmov vs Výdavkov",
     "track_cash_flow": "Sleduj svoj peňažný tok v čase s interaktívnym priblížením a pozorovaniami",
     "exporting_chart": "Exportujem graf...",
@@ -1970,11 +1970,13 @@
     "restore": "Obnoviť"
   },
 
-  "ai_insights": {
-    "title": "AI Poznatky",
-    "loading": "Načítavam AI poznatky...",
+  "insights": {
+    "title": "Poznatky",
+    "description": "Matematické poznatky založené na vašich finančných údajach a trendoch míňania",
+    "loading": "Načítavam poznatky...",
     "no_insights": "Žiadne poznatky nie sú k dispozícii",
-    "upgrade_for_insights": "Vylepšite na Standard alebo Premium plán pre prístup k AI poznatkom",
+    "add_transactions": "Pridajte transakcie na generovanie finančných poznatkov",
+    "upgrade_for_insights": "Vylepšite na Standard alebo Premium plán pre prístup k poznatkom",
     "impact_high": "Vysoký",
     "impact_medium": "Stredný", 
     "impact_low": "Nízky",
