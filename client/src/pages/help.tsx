@@ -1116,6 +1116,22 @@ export default function Help() {
             </TabsContent>
           </Tabs>
         </div>
+
+        {/* Sidebar */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-6 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Links</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <a href="/dashboard" className="block text-blue-600 hover:text-blue-800">Dashboard</a>
+                <a href="/transactions" className="block text-blue-600 hover:text-blue-800">Transactions</a>
+                <a href="/budgets" className="block text-blue-600 hover:text-blue-800">Budgets</a>
+                <a href="/goals" className="block text-blue-600 hover:text-blue-800">Goals</a>
+              </CardContent>
+            </Card>
+          </div>
         </div>
         </div>
       </div>
