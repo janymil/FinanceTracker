@@ -155,7 +155,7 @@ export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
                 disabled={loading}
                 className={`w-full bg-${plan.color}-600 hover:bg-${plan.color}-700`}
               >
-                {loading ? 'Processing...' : `Upgrade to ${plan.name}`}
+                {loading ? t('upgrade.processing') : t('upgrade.upgrade_to', { plan: plan.name })}
               </Button>
               
               <Button
@@ -163,7 +163,7 @@ export function UpgradePrompt({ currentPlan, onDismiss }: UpgradePromptProps) {
                 onClick={handleDismiss}
                 className="w-full"
               >
-                Maybe later
+                {t('upgrade.maybe_later')}
               </Button>
             </div>
           </div>

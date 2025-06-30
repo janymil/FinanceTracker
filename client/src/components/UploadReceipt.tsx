@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Camera, Upload, FileText, AlertCircle, CheckCircle, Save, Edit } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from 'react-i18next';
 
 interface UploadReceiptProps {
   onReceiptProcessed?: (receiptData: any) => void;
@@ -39,6 +40,7 @@ interface FormData {
 export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   
@@ -71,8 +73,8 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
   const handleFileSelect = async (file: File) => {
     if (!file.type.startsWith('image/')) {
       toast({
-        title: "Invalid file type",
-        description: "Please select an image",
+        title: t('upload.invalid_file_type'),
+        description: t('upload.please_select_image'),
         variant: "destructive"
       });
       return;

@@ -1463,6 +1463,38 @@
     "error_description": "Failed to set currency. Please try again."
   },
 
+  "upgrade": {
+    "standard_name": "Standard",
+    "standard_price": "$4.99/month",
+    "premium_name": "Premium", 
+    "premium_price": "$9.99/month",
+    "complete_upgrade": "Complete Your {{plan}} Upgrade",
+    "ready_to_activate": "Ready to activate",
+    "selected_plan_description": "You selected the {{plan}} plan. Complete your upgrade to unlock all features.",
+    "what_you_get": "What you'll get:",
+    "more_features": "+{{count}} more features",
+    "cancel_anytime": "Cancel anytime",
+    "processing": "Processing...",
+    "upgrade_to": "Upgrade to {{plan}}",
+    "maybe_later": "Maybe later",
+    "standard_features": {
+      "goals": "Goals and budget management",
+      "charts": "Interactive charts and reports",
+      "ai_categorization": "AI expense categorization", 
+      "calendar": "Calendar view and reminders",
+      "unlimited_history": "Unlimited transaction history"
+    },
+    "premium_features": {
+      "everything": "Everything in Standard plan",
+      "ai_tips": "AI financial tips and insights",
+      "trends": "Advanced trends analysis",
+      "prediction": "Expense prediction", 
+      "recommendations": "Daily personalized recommendations",
+      "backup": "Cloud data backup",
+      "data_management": "Data management (CSV, PDF)"
+    }
+  },
+
   "trends": {
     "title": "Advanced Trends Analysis",
     "subtitle": "Deep insights into your financial patterns and forecasting",

@@ -1596,6 +1596,38 @@
     "error_description": "Nepodarilo sa nastaviť menu. Prosím skúste to znovu."
   },
 
+  "upgrade": {
+    "standard_name": "Štandard",
+    "standard_price": "$4.99/mesiac",
+    "premium_name": "Premium", 
+    "premium_price": "$9.99/mesiac",
+    "complete_upgrade": "Dokončite vašu {{plan}} aktualizáciu",
+    "ready_to_activate": "Pripravené na aktiváciu",
+    "selected_plan_description": "Vybrali ste {{plan}} plán. Dokončite aktualizáciu na odomknutie všetkých funkcií.",
+    "what_you_get": "Čo získate:",
+    "more_features": "+{{count}} ďalších funkcií",
+    "cancel_anytime": "Zrušte kedykoľvek",
+    "processing": "Spracováva sa...",
+    "upgrade_to": "Aktualizovať na {{plan}}",
+    "maybe_later": "Možno neskôr",
+    "standard_features": {
+      "goals": "Správa cieľov a rozpočtov",
+      "charts": "Interaktívne grafy a správy",
+      "ai_categorization": "AI kategorizácia výdavkov", 
+      "calendar": "Kalendárny pohľad a pripomienky",
+      "unlimited_history": "Neobmedzená história transakcií"
+    },
+    "premium_features": {
+      "everything": "Všetko zo Štandardného plánu",
+      "ai_tips": "AI finančné tipy a poznatky",
+      "trends": "Pokročilá analýza trendov",
+      "prediction": "Predikcia výdavkov", 
+      "recommendations": "Denné personalizované odporúčania",
+      "backup": "Zálohovanie údajov v cloude",
+      "data_management": "Správa údajov (CSV, PDF)"
+    }
+  },
+
   "trends": {
     "title": "Pokročilá analýza trendov",
     "subtitle": "Hlboké poznatky o vašich finančných vzorcoch a prognózach",

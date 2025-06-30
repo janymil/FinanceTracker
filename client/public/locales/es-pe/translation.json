@@ -1540,6 +1540,38 @@
     "error_description": "Error al configurar la moneda. Por favor inténtalo de nuevo."
   },
 
+  "upgrade": {
+    "standard_name": "Estándar",
+    "standard_price": "$4.99/mes",
+    "premium_name": "Premium", 
+    "premium_price": "$9.99/mes",
+    "complete_upgrade": "Completa tu Actualización {{plan}}",
+    "ready_to_activate": "Listo para activar",
+    "selected_plan_description": "Seleccionaste el plan {{plan}}. Completa tu actualización para desbloquear todas las funciones.",
+    "what_you_get": "Lo que obtendrás:",
+    "more_features": "+{{count}} funciones más",
+    "cancel_anytime": "Cancela en cualquier momento",
+    "processing": "Procesando...",
+    "upgrade_to": "Actualizar a {{plan}}",
+    "maybe_later": "Tal vez más tarde",
+    "standard_features": {
+      "goals": "Gestión de metas y presupuestos",
+      "charts": "Gráficos interactivos e informes",
+      "ai_categorization": "Categorización de gastos con IA", 
+      "calendar": "Vista de calendario y recordatorios",
+      "unlimited_history": "Historial de transacciones ilimitado"
+    },
+    "premium_features": {
+      "everything": "Todo en el plan Estándar",
+      "ai_tips": "Consejos financieros e insights con IA",
+      "trends": "Análisis avanzado de tendencias",
+      "prediction": "Predicción de gastos", 
+      "recommendations": "Recomendaciones personalizadas diarias",
+      "backup": "Respaldo de datos en la nube",
+      "data_management": "Gestión de datos (CSV, PDF)"
+    }
+  },
+
   "trends": {
     "title": "Análisis Avanzado de Tendencias",
     "subtitle": "Perspectivas profundas sobre tus patrones financieros y pronósticos",
