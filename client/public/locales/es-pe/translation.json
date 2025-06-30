@@ -1503,6 +1503,12 @@
     "investments": "Inversiones"
   },
 
+  "admin": {
+    "failed_to_clear_function_cache": "Error al limpiar caché de función",
+    "failed_to_clear_user_cache": "Error al limpiar caché de usuario",
+    "failed_to_cleanup_expired_cache": "Error al limpiar caché expirado"
+  },
+
   "types": {
     "expense": "gasto",
     "income": "ingreso",

@@ -1426,6 +1426,12 @@
     "investments": "Investments"
   },
 
+  "admin": {
+    "failed_to_clear_function_cache": "Failed to clear function cache",
+    "failed_to_clear_user_cache": "Failed to clear user cache",
+    "failed_to_cleanup_expired_cache": "Failed to cleanup expired cache"
+  },
+
   "types": {
     "expense": "expense",
     "income": "income",

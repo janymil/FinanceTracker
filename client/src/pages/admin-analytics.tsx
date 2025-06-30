@@ -14,6 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Users, UserPlus, Edit, Trash2, Crown, Shield, TrendingUp, Search, Filter, RefreshCw, Zap, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface User {
   id: string;
@@ -57,6 +58,7 @@ export default function AdminAnalytics() {
   const [isDeletingUser, setIsDeletingUser] = useState(false);
   const [isSyncingUsers, setIsSyncingUsers] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Check authentication status on component mount
   useEffect(() => {
@@ -148,7 +150,7 @@ export default function AdminAnalytics() {
 
       const result = await response.json();
       toast({
-        title: "Success",
+        title: t("common.success"),
         description: result.message,
       });
 
@@ -158,8 +160,8 @@ export default function AdminAnalytics() {
       refetchUsers();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to clear function cache",
+        title: t("common.error"),
+        description: t("admin.failed_to_clear_function_cache"),
         variant: "destructive",
       });
     }
@@ -181,7 +183,7 @@ export default function AdminAnalytics() {
 
       const result = await response.json();
       toast({
-        title: "Success",
+        title: t("common.success"),
         description: result.message,
       });
 
@@ -191,8 +193,8 @@ export default function AdminAnalytics() {
       refetchUsers();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to clear user cache",
+        title: t("common.error"),
+        description: t("admin.failed_to_clear_user_cache"),
         variant: "destructive",
       });
     }
@@ -214,7 +216,7 @@ export default function AdminAnalytics() {
 
       const result = await response.json();
       toast({
-        title: "Success",
+        title: t("common.success"),
         description: result.message,
       });
 
@@ -224,8 +226,8 @@ export default function AdminAnalytics() {
       refetchUsers();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to cleanup expired cache",
+        title: t("common.error"),
+        description: t("admin.failed_to_cleanup_expired_cache"),
         variant: "destructive",
       });
     }
@@ -257,12 +259,12 @@ export default function AdminAnalytics() {
       await queryClient.invalidateQueries({ queryKey: ['/api/admin-analytics/overview'] });
 
       toast({
-        title: "Success",
+        title: t("common.success"),
         description: "Admin login successful",
       });
     } catch (error) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: "Invalid admin password",
         variant: "destructive",
       });
@@ -292,12 +294,12 @@ export default function AdminAnalytics() {
       await queryClient.refetchQueries({ queryKey: ['admin-analytics-overview'] });
       setNewUser({ email: "", firstName: "", lastName: "", plan: "free" });
       toast({
-        title: "Success",
+        title: t("common.success"),
         description: "User created successfully",
       });
     } catch (error) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: "Failed to create user",
         variant: "destructive",
       });
@@ -332,12 +334,12 @@ export default function AdminAnalytics() {
       await queryClient.refetchQueries({ queryKey: ['admin-analytics-overview'] });
       setEditingUser(null);
       toast({
-        title: "Success",
+        title: t("common.success"),
         description: "User updated successfully",
       });
     } catch (error) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: "Failed to update user",
         variant: "destructive",
       });
@@ -371,13 +373,13 @@ export default function AdminAnalytics() {
       await queryClient.refetchQueries({ queryKey: ['admin-analytics-overview'] });
       
       toast({
-        title: "Success",
+        title: t("common.success"),
         description: "User deleted successfully",
       });
     } catch (error: any) {
       console.error('Error deleting user:', error);
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message || "Failed to delete user",
         variant: "destructive",
       });
@@ -414,7 +416,7 @@ export default function AdminAnalytics() {
       }
     } catch (error) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: "Failed to sync users with Clerk",
         variant: "destructive",
       });
