@@ -731,8 +731,7 @@ export default function Help() {
                             </p>
                           </div>
                         </div>
-                        </AccordionContent>
-                      </AccordionItem>
+                      </div>
 
                       {/* Transaction Management */}
                       <div className="border-l-4 border-green-500 pl-4">
@@ -995,22 +994,24 @@ export default function Help() {
                               </div>
                             </div>
                           </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-                  <Separator />
-
-                  <div>
-                    <h3 className="font-semibold mb-4 flex items-center gap-2">
-                      <Camera className="h-5 w-5" />
-                      Receipt OCR Scanning (Standard+)
-                    </h3>
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                          Available for Standard and Premium subscribers
+            <TabsContent value="faq" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <HelpCircle className="h-6 w-6" />
+                    {t('Frequently Asked Questions')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
                         </p>
                       </div>
 
