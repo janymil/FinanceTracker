@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, FileText, Brain, Download, Zap, Crown, RotateCcw } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from "date-fns";
+import { getMonthDateRange, getCustomDateRange, getCurrentMonthDateRange } from "@/lib/dateRangeUtils";
 import RequirePlan from "@/components/require-plan";
 import MonthFilter from "@/components/month-filter";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -41,10 +42,8 @@ export default function Reports() {
 
     // If a specific month is selected, use that month's dates
     if (selectedMonth) {
-      const [year, month] = selectedMonth.split('-');
-      const monthStart = new Date(parseInt(year), parseInt(month) - 1, 1);
-      const monthEnd = new Date(parseInt(year), parseInt(month), 0);
-      return { startDate: monthStart, endDate: monthEnd };
+      const { startDate, endDate } = getMonthDateRange(selectedMonth);
+      return { startDate, endDate };
     }
 
     // Otherwise use the selected period
@@ -61,7 +60,8 @@ export default function Reports() {
         weekEnd.setHours(23, 59, 59, 999);
         return { startDate: weekStart, endDate: weekEnd };
       case "month":
-        return { startDate: startOfMonth(now), endDate: endOfMonth(now) };
+        const { startDate: monthStart, endDate: monthEnd } = getCurrentMonthDateRange();
+        return { startDate: monthStart, endDate: monthEnd };
       case "quarter":
         const quarterStart = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
         const quarterEnd = new Date(quarterStart);

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, FileText } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useClerkUserReady } from '@/hooks/useClerkUserReady';
+import { getCurrentMonthDateRange } from '@/lib/dateRangeUtils';
 
 interface MonthlySummary {
   totalIncome: number;
@@ -207,9 +208,9 @@ export function ExportTools() {
     
     try {
       // Process transactions to get monthly summary
-      const now = new Date();
-      const currentMonth = now.toLocaleDateString('en-US', { month: 'long' });
-      const currentYear = now.getFullYear();
+      const { startDate, endDate } = getCurrentMonthDateRange();
+      const currentMonth = startDate.toLocaleDateString('en-US', { month: 'long' });
+      const currentYear = startDate.getFullYear();
       
       // Calculate category breakdown
       const categoryBreakdown: { [key: string]: number } = {};
@@ -217,8 +218,8 @@ export function ExportTools() {
       transactions
         .filter(t => {
           const transactionDate = new Date(t.date);
-          return transactionDate.getMonth() === now.getMonth() && 
-                 transactionDate.getFullYear() === currentYear &&
+          return transactionDate >= startDate && 
+                 transactionDate <= endDate &&
                  t.type === 'expense';
         })
         .forEach(t => {
