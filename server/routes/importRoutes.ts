@@ -12,13 +12,30 @@ import {
   validateDataSecurity
 } from "../../lib/importHelpers";
 import { eq } from "drizzle-orm";
-import { dailyRecommendations } from "../../shared/schema";
 import { db } from "../db";
 import { 
   saveImportLog, 
   createImportSummary, 
   determineImportStatus 
 } from "../../lib/saveImportLog";
+import multer from "multer";
+import { processBankStatementPDF, validateTransactions } from "../../lib/pdfProcessor";
+import { getCurrentLanguageForAPI } from "../../lib/languageUtils";
+
+// Configure multer for PDF uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit for PDFs
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed'));
+    }
+  }
+});
 
 // Validation schemas for import data
 const importTransactionSchema = z.object({
@@ -512,6 +529,57 @@ export function registerImportRoutes(app: Express) {
       return res.status(500).json({ 
         message: "Failed to import data", 
         error: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
+  });
+
+  // PDF Bank Statement Upload Route
+  app.post("/api/import/pdf-statement", upload.single('pdf'), async (req, res) => {
+    try {
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ error: 'No PDF file uploaded' });
+      }
+
+      // Get user language from request
+      const language = req.headers['x-user-language'] as string || 'en-us';
+
+      console.log(`Processing PDF bank statement for user ${userId}, file size: ${req.file.size} bytes`);
+
+      // Process the PDF using our hybrid approach
+      const processingResult = await processBankStatementPDF(req.file.buffer, language);
+
+      // Validate extracted transactions
+      const validationResult = validateTransactions(processingResult.transactions);
+
+      // Prepare response with processing details
+      const response = {
+        success: true,
+        processingMethod: processingResult.processingMethod,
+        totalPages: processingResult.totalPages,
+        extractedTransactions: validationResult.valid.length,
+        invalidTransactions: validationResult.invalid.length,
+        overallConfidence: processingResult.confidence,
+        errors: processingResult.errors,
+        transactions: validationResult.valid,
+        invalidData: validationResult.invalid,
+        preview: true // Indicates this is for preview, not final import
+      };
+
+      console.log(`PDF processing completed: ${validationResult.valid.length} valid transactions extracted`);
+
+      return res.json(response);
+
+    } catch (error) {
+      console.error('PDF processing error:', error);
+      
+      return res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Failed to process PDF bank statement',
+        success: false
       });
     }
   });
