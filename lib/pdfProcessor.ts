@@ -55,6 +55,7 @@ export interface ProcessingProgress {
   message: string;
   transactionsProcessed?: number;
   totalTransactions?: number;
+  overallProgress?: number; // New field for continuous progress
 }
 
 export interface AnonymizationPreviewData {
@@ -421,10 +422,15 @@ export async function processBankStatementPDF(
         message: `AI processing complete, categorizing ${transactions.length} transactions...`
       });
       
-      // Keep transactions unencrypted for preview - encryption happens during database save
-      result.transactions = transactions;
+      // Step 4: Add AI categorization with progress tracking (75% to 95%)
+      if (transactions.length > 0 && userId) {
+        const categorizedTransactions = await addAICategorization(transactions, language, userId, onProgress);
+        result.transactions = categorizedTransactions;
+      } else {
+        result.transactions = transactions;
+      }
       
-      result.confidence = calculateOverallConfidence(transactions);
+      result.confidence = calculateOverallConfidence(result.transactions);
     } else {
       result.errors.push('No readable text found in PDF');
       result.confidence = 0;
@@ -961,7 +967,7 @@ async function addAICategorization(
             language: language,
             userTransactions: userTransactions.map(tx => ({
               description: tx.description,
-              category: tx.categoryName || 'Uncategorized',
+              category: (tx as any).categoryName || 'Uncategorized',
               amount: tx.amount,
               type: tx.type,
               date: tx.date
@@ -1032,8 +1038,8 @@ async function parseTransactionsWithAI(
         category: null as string | null // Will be filled by categorization
       }));
 
-      // Add AI categorization for each transaction
-      return await addAICategorization(parsedTransactions, language, userId || 'system');
+      // Return transactions without categorization - will be categorized separately with progress tracking
+      return parsedTransactions;
     }
 
     return [];
