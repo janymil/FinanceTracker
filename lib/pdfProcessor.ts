@@ -937,74 +937,43 @@ async function addAICategorization(
   userId: string
 ): Promise<ExtractedTransaction[]> {
   try {
-    // Import storage to fetch user categories
+    // Import storage to fetch user data
     const { storage } = await import('../server/storage');
-    const { categorizeExpenseWithUserCategories, categorizeIncomeWithUserCategories } = await import('../server/openai');
     
-    // Fetch user's existing expense categories
+    // Fetch user's existing categories AND transaction history for intelligent categorization
     const userCategories = await storage.getCategories(userId);
-    const expenseCategories = userCategories.filter(cat => cat.type === 'expense');
+    const userTransactions = await storage.getUserTransactions(userId, 500); // Get recent 500 transactions for pattern analysis
     
-    console.log(`Found ${expenseCategories.length} user expense categories for categorization`);
+    console.log(`Intelligent AI categorization: Found ${userCategories.length} categories and ${userTransactions.length} historical transactions`);
     
     const categorizedTransactions = await Promise.all(
       transactions.map(async (transaction) => {
         try {
           if (transaction.description && transaction.amount !== 0) {
-            // Only categorize expense transactions - income transactions don't need expense categorization
-            if (transaction.type === 'expense') {
-              const result = await categorizeExpenseWithUserCategories(
-                transaction.description,
-                Math.abs(transaction.amount),
-                expenseCategories,
-                language
-              );
-              
-              if (result.categoryId) {
-                // Matched existing category
-                const matchedCategory = expenseCategories.find(cat => cat.id === result.categoryId);
-                transaction.category = matchedCategory?.name || 'Other';
-                console.log(`AI matched "${transaction.description}" to existing category "${matchedCategory?.name}"`);
-              } else if (result.suggestedCategory) {
-                // New category suggested
-                transaction.category = result.suggestedCategory;
-                console.log(`AI suggested new category "${result.suggestedCategory}" for "${transaction.description}"`);
-              } else {
-                transaction.category = 'Other';
-              }
-            } else if (transaction.type === 'income') {
-              // For income transactions, fetch income categories or suggest appropriate income categories
-              const userCategories = await storage.getCategories(userId);
-              const incomeCategories = userCategories.filter(cat => cat.type === 'income');
-              
-              if (incomeCategories.length > 0) {
-                // Try to match to existing income categories
-                const result = await categorizeIncomeWithUserCategories(
-                  transaction.description,
-                  Math.abs(transaction.amount),
-                  incomeCategories,
-                  language
-                );
-                
-                if (result.categoryId) {
-                  const matchedCategory = incomeCategories.find(cat => cat.id === result.categoryId);
-                  transaction.category = matchedCategory?.name || 'Income';
-                  console.log(`AI matched income "${transaction.description}" to existing category "${matchedCategory?.name}"`);
-                } else if (result.suggestedCategory) {
-                  transaction.category = result.suggestedCategory;
-                  console.log(`AI suggested new income category "${result.suggestedCategory}" for "${transaction.description}"`);
-                } else {
-                  transaction.category = 'Income';
-                }
-              } else {
-                // No income categories exist, suggest appropriate ones
-                transaction.category = 'Income'; // Fallback to generic income category
-                console.log(`No income categories exist, using generic "Income" for "${transaction.description}"`);
-              }
-            }
+            // Use intelligent AI categorization with user transaction history
+            const categorizationResult = await runAI('categorizeExpense', userId, {
+              description: transaction.description,
+              amount: Math.abs(transaction.amount),
+              language: language,
+              userTransactions: userTransactions.map(tx => ({
+                description: tx.description,
+                category: tx.categoryName,
+                amount: tx.amount,
+                type: tx.type,
+                date: tx.date
+              })),
+              userCategories: userCategories.map(cat => ({
+                id: cat.id,
+                name: cat.name,
+                type: cat.type
+              }))
+            });
+            
+            transaction.category = categorizationResult.category || 'Other';
+            console.log(`Intelligent AI categorized "${transaction.description}" as "${transaction.category}"`);
           }
         } catch (error) {
-          console.error(`Failed to categorize transaction: ${transaction.description}`, error);
+          console.error(`Intelligent categorization failed for "${transaction.description}":`, error);
           transaction.category = transaction.type === 'income' ? 'Income' : 'Other';
         }
         

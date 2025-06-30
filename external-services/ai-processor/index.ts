@@ -231,48 +231,78 @@ Analyze this transaction and determine if it matches any of my existing categori
 }
 
 // Legacy function for backward compatibility
-export async function categorizeExpense(description: string, amount: number, language: string = 'en-us'): Promise<ExpenseCategorizationResult> {
+export async function categorizeExpense(
+  description: string, 
+  amount: number, 
+  language: string = 'en-us',
+  userTransactions: any[] = [],
+  userCategories: any[] = []
+): Promise<ExpenseCategorizationResult> {
   try {
-    // Direct OpenAI processing only
+    // Analyze user's existing transaction patterns for personalization
+    const userCategories = new Set();
+    const merchantPatterns = new Map();
+    
+    // Extract user's categories and merchant patterns
+    userTransactions.forEach(transaction => {
+      if (transaction.category && transaction.category !== 'Uncategorized') {
+        userCategories.add(transaction.category);
+        
+        // Build merchant pattern recognition
+        const merchant = transaction.description.toLowerCase();
+        if (!merchantPatterns.has(merchant)) {
+          merchantPatterns.set(merchant, transaction.category);
+        }
+      }
+    });
+
+    // Build personalized context
+    const userCategoriesList = Array.from(userCategories);
+    const merchantExamples = Array.from(merchantPatterns.entries())
+      .slice(0, 10) // Limit to avoid token overflow
+      .map(([merchant, category]) => `"${merchant}" → ${category}`)
+      .join('\n');
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
-          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(language)}. ${getLanguageLabel(language) !== 'English' ? 'Never use English words.' : ''} ALL text content (category, confidence, reasoning) must be in ${getLanguageLabel(language)}.
-          
-You are an expert financial categorization assistant with extensive knowledge of global merchants, payment processors, and business types. Analyze the expense description and amount to determine the most appropriate category.
+          content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(language)}. ${getLanguageLabel(language) !== 'English' ? 'Never use English words.' : ''} ALL text content (category, reasoning) must be in ${getLanguageLabel(language)}.
 
-Available categories with specific examples:
-- Food & Dining (Migros, Coop, ALDI, Lidl, Tottus, restaurants, groceries, takeout)
-- Transportation (gas, public transport, parking, car maintenance, ride-sharing)
-- Shopping (clothes, electronics, general retail, Casa Ideas, Plaza Norte)
-- Entertainment (movies, concerts, games, streaming services, SoundCloud, Suno)
-- Bills & Utilities (electricity, water, internet, phone bills, yallo.ch mobile services)
-- Healthcare (medical, pharmacy, insurance, Amavita)
-- Travel (hotels, flights, vacation expenses)
-- Education (courses, books, tuition)
-- Home & Garden (rent, mortgage, home improvement, furniture)
-- Personal Care (salon, spa, cosmetics)
-- Business (Replit development tools, OpenAI services, Hostinger hosting, Bunny.net CDN, office supplies, professional services, Anytime Mailbox)
-- Other (miscellaneous expenses only when no other category fits)
+You are an intelligent financial categorization expert. Analyze the merchant/business name and use your knowledge to determine what type of business it is, then assign the most appropriate category.
 
-IMPORTANT MERCHANT RECOGNITION:
-- yallo.ch = Swiss mobile operator → Bills & Utilities
-- Replit = Development platform → Business
-- OpenAI = AI services → Business
-- Hostinger = Web hosting → Business
-- Bunny.net = CDN services → Business
-- SoundCloud = Music streaming → Entertainment
-- Migros, Coop, ALDI, Lidl = Grocery stores → Food & Dining
-- Amavita = Swiss pharmacy → Healthcare
-- Cash withdrawals = Other (unless specific purpose is clear)
+ANALYSIS APPROACH:
+1. Identify the merchant/business type from the description
+2. Understand what industry/service they provide
+3. Match to the most logical category based on business nature
+4. Use the user's existing categories when they fit
+5. Be consistent with similar merchants the user has used before
+
+${userCategoriesList.length > 0 ? `
+USER'S EXISTING CATEGORIES:
+${userCategoriesList.join(', ')}
+
+USER'S MERCHANT PATTERNS (learn from these):
+${merchantExamples}
+` : ''}
+
+BUSINESS TYPE HINTS (not rules, use intelligence):
+- Grocery stores, supermarkets, restaurants → Food & Dining related
+- Gas stations, public transport, car services → Transportation related  
+- Tech services, software, hosting → Business/Technology related
+- Streaming, games, entertainment venues → Entertainment related
+- Utilities, phone bills, internet → Bills & Utilities related
+- Medical, pharmacy, health services → Healthcare related
+- Hotels, airlines, travel → Travel related
+
+IMPORTANT: Analyze the business name intelligently. Don't just match keywords - understand what the business actually does.
 
 Respond with JSON in this exact format:
 {
   "category": "category_name",
   "confidence": 0.95,
-  "reasoning": "Brief explanation of why this category was chosen"
+  "reasoning": "Brief explanation of business type and why this category fits"
 }`
         },
         {
@@ -280,18 +310,17 @@ Respond with JSON in this exact format:
           content: `Description: "${description}"
 Amount: $${amount}
 
-Please analyze this merchant/description carefully and categorize appropriately. Pay special attention to:
-- Technology/development services (Replit, OpenAI, hosting services) → Business
-- Mobile/telecom services (yallo.ch, phone carriers) → Bills & Utilities  
-- Streaming/entertainment platforms → Entertainment
-- Grocery stores and supermarkets → Food & Dining
-- Known brand names and their business types
+Analyze this merchant intelligently:
+1. What type of business is this?
+2. What industry/service do they provide?
+3. Which category best matches their business nature?
+4. Have I used similar merchants before? (check patterns above)
 
-Categorize this expense with high confidence when you recognize the merchant.`
+Use your intelligence to categorize correctly.`
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.1
+      temperature: 0.2
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
@@ -301,9 +330,6 @@ Categorize this expense with high confidence when you recognize the merchant.`
       confidence: Math.max(0, Math.min(1, result.confidence || 0.5)),
       reasoning: result.reasoning || 'Unable to determine category'
     };
-
-
-
 
     return categorization;
   } catch (error) {
