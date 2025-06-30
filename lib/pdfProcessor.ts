@@ -934,7 +934,8 @@ async function performOCROnPDF(pdfBuffer: Buffer): Promise<string> {
 async function addAICategorization(
   transactions: ExtractedTransaction[],
   language: string,
-  userId: string
+  userId: string,
+  onProgress?: (progress: ProcessingProgress) => void
 ): Promise<ExtractedTransaction[]> {
   try {
     // Import storage to fetch user data
@@ -946,40 +947,55 @@ async function addAICategorization(
     
     console.log(`Intelligent AI categorization: Found ${userCategories.length} categories and ${userTransactions.length} historical transactions`);
     
-    const categorizedTransactions = await Promise.all(
-      transactions.map(async (transaction) => {
-        try {
-          if (transaction.description && transaction.amount !== 0) {
-            // Use intelligent AI categorization with user transaction history
-            const categorizationResult = await runAI('categorizeExpense', userId, {
-              description: transaction.description,
-              amount: Math.abs(transaction.amount),
-              language: language,
-              userTransactions: userTransactions.map(tx => ({
-                description: tx.description,
-                category: tx.categoryName || 'Uncategorized',
-                amount: tx.amount,
-                type: tx.type,
-                date: tx.date
-              })),
-              userCategories: userCategories.map(cat => ({
-                id: cat.id,
-                name: cat.name,
-                type: cat.type
-              }))
-            });
-            
-            transaction.category = categorizationResult.category || 'Other';
-            console.log(`Intelligent AI categorized "${transaction.description}" as "${transaction.category}"`);
-          }
-        } catch (error) {
-          console.error(`Intelligent categorization failed for "${transaction.description}":`, error);
-          transaction.category = transaction.type === 'income' ? 'Income' : 'Other';
+    const categorizedTransactions: ExtractedTransaction[] = [];
+    const totalTransactions = transactions.length;
+    
+    for (let i = 0; i < transactions.length; i++) {
+      const transaction = transactions[i];
+      try {
+        if (transaction.description && transaction.amount !== 0) {
+          // Use intelligent AI categorization with user transaction history
+          const categorizationResult = await runAI('categorizeExpense', userId, {
+            description: transaction.description,
+            amount: Math.abs(transaction.amount),
+            language: language,
+            userTransactions: userTransactions.map(tx => ({
+              description: tx.description,
+              category: tx.categoryName || 'Uncategorized',
+              amount: tx.amount,
+              type: tx.type,
+              date: tx.date
+            })),
+            userCategories: userCategories.map(cat => ({
+              id: cat.id,
+              name: cat.name,
+              type: cat.type
+            }))
+          });
+          
+          transaction.category = categorizationResult.category || 'Other';
+          console.log(`Intelligent AI categorized "${transaction.description}" as "${transaction.category}"`);
         }
-        
-        return transaction;
-      })
-    );
+      } catch (error) {
+        console.error(`Intelligent categorization failed for "${transaction.description}":`, error);
+        transaction.category = transaction.type === 'income' ? 'Income' : 'Other';
+      }
+      
+      categorizedTransactions.push(transaction);
+      
+      // Update progress: from 75% to 95% based on categorization progress
+      const categorizationProgress = (i + 1) / totalTransactions;
+      const overallProgress = 75 + (categorizationProgress * 20); // 75% + 20% for categorization
+      
+      onProgress?.({
+        stage: 'categorization',
+        percentage: Math.round(categorizationProgress * 100),
+        overallProgress: Math.round(overallProgress),
+        message: `AI categorizing transaction ${i + 1} of ${totalTransactions}...`,
+        transactionsProcessed: i + 1,
+        totalTransactions: totalTransactions
+      });
+    }
 
     return categorizedTransactions;
   } catch (error) {

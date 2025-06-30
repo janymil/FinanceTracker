@@ -9,6 +9,7 @@ export interface ProcessingProgress {
   message: string;
   transactionsProcessed?: number;
   totalTransactions?: number;
+  overallProgress?: number; // New field for continuous progress
 }
 
 interface PDFProcessingProgressProps {
@@ -44,7 +45,8 @@ export function PDFProcessingProgress({ sessionId, onComplete, onError }: PDFPro
   const [progress, setProgress] = useState<ProcessingProgress>({
     stage: 'connected',
     percentage: 0,
-    message: 'Connecting to processing stream...'
+    message: 'Connecting to processing stream...',
+    overallProgress: 0
   });
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
   const [hasError, setHasError] = useState(false);
@@ -122,11 +124,11 @@ export function PDFProcessingProgress({ sessionId, onComplete, onError }: PDFPro
             {getStageMessage(progress.stage, progress.message)}
           </span>
           <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
-            {progress.percentage}%
+            {progress.overallProgress || progress.percentage}%
           </span>
         </div>
         <Progress 
-          value={progress.percentage} 
+          value={progress.overallProgress || progress.percentage} 
           className="h-3 bg-gray-200 dark:bg-gray-700"
         />
       </div>
