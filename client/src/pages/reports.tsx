@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, FileText, Brain, Download, Zap, Crown, RotateCcw } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, subYears } from "date-fns";
-import { getMonthDateRange, getCustomDateRange, getCurrentMonthDateRange } from "@/lib/dateRangeUtils";
+import { getMonthDateRange, getCustomDateRange, getCurrentMonthDateRange, getDateRangeForFilter } from "@/lib/dateRangeUtils";
 import RequirePlan from "@/components/require-plan";
 import MonthFilter from "@/components/month-filter";
 import { useCurrency } from "@/context/CurrencyContext";
