@@ -651,6 +651,96 @@
     }
   },
 
+  "require_plan": {
+    "compact": {
+      "feature_title": "{{plan}} Funkcia",
+      "available_with": "Dostupné s {{plan}} plánom",
+      "upgrade_now": "Upgradovať Teraz",
+      "view_plans": "Zobraziť Plány"
+    },
+    "upgrade": {
+      "feature_title": "{{plan}} Funkcia",
+      "feature_description": "Táto funkcia je dostupná pre {{plan}} predplatiteľov",
+      "button": "Upgradovať na {{plan}}"
+    },
+    "default": {
+      "feature": "Prémiová Funkcia",
+      "description": "Táto funkcia vyžaduje vyšší predplatiteľský plán",
+      "benefits": [
+        "Prístup k pokročilým funkciám",
+        "Prémiová podpora",
+        "Odomknúť plný potenciál"
+      ]
+    },
+    "features": {
+      "budget": {
+        "title": "Správa Rozpočtu",
+        "description": "Prevezmi kontrolu nad svojimi výdavkami s pokročilými nástrojmi na sledovanie a správu rozpočtu",
+        "benefits": [
+          "Nastav limity výdavkov pre rôzne kategórie",
+          "Sleduj svoj pokrok voči rozpočtovým cieľom",
+          "Dostávaj upozornenia pri blížení sa k limitom"
+        ]
+      },
+      "goals": {
+        "title": "Finančné Ciele",
+        "description": "Nastav a sleduj svoje finančné ciele s inteligentným monitorovaním pokroku",
+        "benefits": [
+          "Vytvor vlastné ciele úspor a splácania dlhov",
+          "Sleduj pokrok s vizuálnymi indikátormi",
+          "Motivuj sa s oslavami míľnikov"
+        ]
+      },
+      "analytics": {
+        "title": "Pokročilé Analýzy",
+        "description": "Hlboké poznatky do tvojich finančných vzorov s AI analýzou",
+        "benefits": [
+          "Interaktívne grafy a analýza trendov",
+          "AI poznatky o výdavkoch",
+          "Export reportov v rôznych formátoch"
+        ]
+      },
+      "trends": {
+        "title": "Analýza Trendov",
+        "description": "Vizualizuj svoje finančné trendy s pokročilými grafmi a predpoveďami",
+        "benefits": [
+          "Dlhodobá vizualizácia trendov",
+          "Prediktívna analýza výdavkov",
+          "Rozpoznávanie sezónnych vzorov"
+        ]
+      },
+      "calendar": {
+        "title": "Kalendárny Pohľad",
+        "description": "Zobrazuj svoje finančné aktivity v intuitívnom kalendárovom rozhraní",
+        "benefits": [
+          "Mesačný a týždenný finančný kalendár",
+          "Plánovanie transakcií a pripomienky",
+          "Vizuálne vzory výdavkov podľa dátumu"
+        ]
+      },
+      "export": {
+        "title": "Správa Dát",
+        "description": "Exportuj a spravuj svoje finančné dáta vo formáte CSV alebo PDF pre externú analýzu alebo vedenie záznamov.",
+        "benefits": [
+          "Export transakcií do CSV formátu",
+          "Generovanie PDF reportov",
+          "Zálohovanie finančných dát",
+          "Zdieľanie dát s účtovníkmi"
+        ]
+      },
+      "collaborative": {
+        "title": "Spolupracujúce Ciele",
+        "description": "Pracuj spolu s priateľmi a rodinou na dosahovaní spoločných finančných cieľov",
+        "benefits": [
+          "Vytvor zdieľané úsporné ciele s ostatnými",
+          "Sleduj skupinový pokrok v reálnom čase",
+          "Pošli pozvánky a spravuj účastníkov",
+          "Oslavuj míľniky spoločne"
+        ]
+      }
+    }
+  },
+
   "reports": {
     "title": "Pokročilé Prehľady a Analýzy",
     "subtitle": "AI-poháňané poznatky, interaktívne grafy a komplexná finančná analýza",

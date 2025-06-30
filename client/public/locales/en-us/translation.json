@@ -653,6 +653,96 @@
     }
   },
 
+  "require_plan": {
+    "compact": {
+      "feature_title": "{{plan}} Feature",
+      "available_with": "Available with {{plan}} plan",
+      "upgrade_now": "Upgrade Now",
+      "view_plans": "View Plans"
+    },
+    "upgrade": {
+      "feature_title": "{{plan}} Feature",
+      "feature_description": "This feature is available for {{plan}} subscribers",
+      "button": "Upgrade to {{plan}}"
+    },
+    "default": {
+      "feature": "Premium Feature",
+      "description": "This feature requires a higher subscription plan",
+      "benefits": [
+        "Access advanced features",
+        "Get premium support",
+        "Unlock full potential"
+      ]
+    },
+    "features": {
+      "budget": {
+        "title": "Budget Management",
+        "description": "Take control of your spending with advanced budget tracking and management tools",
+        "benefits": [
+          "Set spending limits for different expense categories",
+          "Monitor your progress against budget goals",
+          "Get notified when approaching budget limits"
+        ]
+      },
+      "goals": {
+        "title": "Financial Goals",
+        "description": "Set and track your financial goals with intelligent progress monitoring",
+        "benefits": [
+          "Create custom savings and debt payoff goals",
+          "Track progress with visual indicators",
+          "Get motivated with milestone celebrations"
+        ]
+      },
+      "analytics": {
+        "title": "Advanced Analytics",
+        "description": "Deep insights into your financial patterns with AI-powered analysis",
+        "benefits": [
+          "Interactive charts and trend analysis",
+          "AI-powered spending insights",
+          "Export reports in multiple formats"
+        ]
+      },
+      "trends": {
+        "title": "Trend Analysis",
+        "description": "Visualize your financial trends with advanced charting and predictions",
+        "benefits": [
+          "Long-term trend visualization",
+          "Predictive spending analysis",
+          "Seasonal pattern recognition"
+        ]
+      },
+      "calendar": {
+        "title": "Calendar View",
+        "description": "View your financial activities in an intuitive calendar interface",
+        "benefits": [
+          "Monthly and weekly financial calendar",
+          "Transaction scheduling and reminders",
+          "Visual spending patterns by date"
+        ]
+      },
+      "export": {
+        "title": "Data Management",
+        "description": "Export and manage your financial data with CSV or PDF format for external analysis or record keeping.",
+        "benefits": [
+          "Export transactions to CSV format",
+          "Generate PDF reports",
+          "Backup your financial data",
+          "Share data with accountants"
+        ]
+      },
+      "collaborative": {
+        "title": "Collaborative Goals",
+        "description": "Work together with friends and family to achieve shared financial goals",
+        "benefits": [
+          "Create shared savings goals with others",
+          "Track group progress in real-time",
+          "Send invitations and manage participants",
+          "Celebrate milestones together"
+        ]
+      }
+    }
+  },
+
   "reports": {
     "title": "Advanced Reports & Analytics",
     "subtitle": "AI-powered insights, interactive charts, and comprehensive financial analysis",

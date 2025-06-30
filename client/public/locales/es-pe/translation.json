@@ -642,6 +642,96 @@
     }
   },
 
+  "require_plan": {
+    "compact": {
+      "feature_title": "Función {{plan}}",
+      "available_with": "Disponible con plan {{plan}}",
+      "upgrade_now": "Actualizar Ahora",
+      "view_plans": "Ver Planes"
+    },
+    "upgrade": {
+      "feature_title": "Función {{plan}}",
+      "feature_description": "Esta función está disponible para suscriptores {{plan}}",
+      "button": "Actualizar a {{plan}}"
+    },
+    "default": {
+      "feature": "Función Premium",
+      "description": "Esta función requiere un plan de suscripción superior",
+      "benefits": [
+        "Acceso a funciones avanzadas",
+        "Soporte premium",
+        "Desbloquear todo el potencial"
+      ]
+    },
+    "features": {
+      "budget": {
+        "title": "Gestión de Presupuesto",
+        "description": "Toma el control de tus gastos con herramientas avanzadas de seguimiento y gestión de presupuesto",
+        "benefits": [
+          "Establece límites de gasto para diferentes categorías",
+          "Monitorea tu progreso hacia metas presupuestarias",
+          "Recibe notificaciones al acercarte a los límites"
+        ]
+      },
+      "goals": {
+        "title": "Metas Financieras",
+        "description": "Establece y rastrea tus metas financieras con monitoreo inteligente de progreso",
+        "benefits": [
+          "Crea metas personalizadas de ahorro y pago de deudas",
+          "Rastrea el progreso con indicadores visuales",
+          "Motívate con celebraciones de hitos"
+        ]
+      },
+      "analytics": {
+        "title": "Análisis Avanzado",
+        "description": "Perspectivas profundas de tus patrones financieros con análisis impulsado por IA",
+        "benefits": [
+          "Gráficos interactivos y análisis de tendencias",
+          "Perspectivas de gastos impulsadas por IA",
+          "Exportar informes en múltiples formatos"
+        ]
+      },
+      "trends": {
+        "title": "Análisis de Tendencias",
+        "description": "Visualiza tus tendencias financieras con gráficos avanzados y predicciones",
+        "benefits": [
+          "Visualización de tendencias a largo plazo",
+          "Análisis predictivo de gastos",
+          "Reconocimiento de patrones estacionales"
+        ]
+      },
+      "calendar": {
+        "title": "Vista de Calendario",
+        "description": "Ve tus actividades financieras en una interfaz de calendario intuitiva",
+        "benefits": [
+          "Calendario financiero mensual y semanal",
+          "Programación de transacciones y recordatorios",
+          "Patrones visuales de gastos por fecha"
+        ]
+      },
+      "export": {
+        "title": "Gestión de Datos",
+        "description": "Exporta y gestiona tus datos financieros en formato CSV o PDF para análisis externo o mantenimiento de registros.",
+        "benefits": [
+          "Exportar transacciones a formato CSV",
+          "Generar informes PDF",
+          "Respaldar tus datos financieros",
+          "Compartir datos con contadores"
+        ]
+      },
+      "collaborative": {
+        "title": "Metas Colaborativas",
+        "description": "Trabaja junto con amigos y familia para lograr metas financieras compartidas",
+        "benefits": [
+          "Crea metas de ahorro compartidas con otros",
+          "Rastrea el progreso grupal en tiempo real",
+          "Envía invitaciones y gestiona participantes",
+          "Celebra hitos juntos"
+        ]
+      }
+    }
+  },
+
   "reports": {
     "title": "Informes y Análisis Avanzados",
     "subtitle": "Perspectivas potenciadas por IA, gráficos interactivos y análisis financiero integral",

@@ -20,6 +20,7 @@ export default function UpgradePrompt({
   benefits, 
   icon: Icon = Lock 
 }: UpgradePromptProps) {
+  const { t } = useTranslation();
   const planColors = {
     free: {
       gradient: "from-gray-100 to-slate-100 dark:from-gray-900 dark:to-slate-900",
@@ -60,10 +61,10 @@ export default function UpgradePrompt({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Crown className="h-5 w-5 text-yellow-500" />
-            {requiredPlan ? requiredPlan.charAt(0).toUpperCase() + requiredPlan.slice(1) : 'Premium'} Feature
+            {t('require_plan.upgrade.feature_title', { plan: t(`plans.${requiredPlan}`) })}
           </CardTitle>
           <CardDescription>
-            This feature is available for {requiredPlan || 'premium'} subscribers
+            {t('require_plan.upgrade.feature_description', { plan: t(`plans.${requiredPlan}`) })}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -82,7 +83,7 @@ export default function UpgradePrompt({
             <Link href="/subscribe">
               <Button size="lg" className={`${colors.accent} hover:opacity-90 text-white`}>
                 <Crown className="h-4 w-4 mr-2" />
-                Upgrade to {requiredPlan ? requiredPlan.charAt(0).toUpperCase() + requiredPlan.slice(1) : 'Premium'}
+                {t('require_plan.upgrade.button', { plan: t(`plans.${requiredPlan}`) })}
               </Button>
             </Link>
           </div>
