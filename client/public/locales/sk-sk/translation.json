@@ -3536,6 +3536,22 @@
       "privacy_first": "AI spracovanie zamerané na súkromie",
       "cancel": "Zrušiť",
       "proceed": "Pokračovať v AI Spracovaní"
+    },
+    "processing": {
+      "title": "Spracovávanie Bankového Výpisu",
+      "subtitle": "Extrakcia transakcií s AI prebieha",
+      "connected": "Pripojené k prúdu spracovania",
+      "pdf_validation": "Bezpečnostná Validácia",
+      "text_extraction": "Extrakcia Textu",
+      "ocr_fallback": "OCR Spracovanie",
+      "ai_parsing": "AI Analýza",
+      "categorization": "Kategorizácia",
+      "duplicate_detection": "Detekcia Duplikátov",
+      "complete": "Spracovanie Dokončené",
+      "validation": "Bezpečnostná Validácia",
+      "extraction": "Extrakcia Textu",
+      "error": "Nastala chyba spracovania",
+      "transactions_processed": "Spracované {{processed}} z {{total}} transakcií"
     }
   }
 }

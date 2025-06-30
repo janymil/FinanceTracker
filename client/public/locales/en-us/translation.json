@@ -1818,6 +1818,7 @@
     "recent_imports": "Recent Imports",
     "records_count": "{{count}} records",
     "no_import_history": "No import history yet",
+    "processing_error": "Processing Error",
     
     "pdf_security": {
       "modal_title": "Bank-Grade Security for PDF Processing",

@@ -3417,6 +3417,22 @@
       "privacy_first": "Procesamiento de IA centrado en privacidad",
       "cancel": "Cancelar",
       "proceed": "Proceder con Procesamiento de IA"
+    },
+    "processing": {
+      "title": "Procesando Estado de Cuenta Bancario",
+      "subtitle": "Extracción de transacciones con IA en progreso",
+      "connected": "Conectado al flujo de procesamiento",
+      "pdf_validation": "Validación de Seguridad",
+      "text_extraction": "Extracción de Texto",
+      "ocr_fallback": "Procesamiento OCR",
+      "ai_parsing": "Análisis de IA",
+      "categorization": "Categorización",
+      "duplicate_detection": "Detección de Duplicados",
+      "complete": "Procesamiento Completo",
+      "validation": "Validación de Seguridad",
+      "extraction": "Extracción de Texto",
+      "error": "Ocurrió un error de procesamiento",
+      "transactions_processed": "Procesado {{processed}} de {{total}} transacciones"
     }
   }
 
