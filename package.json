@@ -116,6 +116,7 @@
     "svix": "^1.67.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "tesseract.js": "^6.0.1",
     "tw-animate-css": "^1.2.5",
     "vaul": "^1.1.2",
     "vite-plugin-ssr": "^0.4.85",

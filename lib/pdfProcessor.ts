@@ -329,22 +329,27 @@ export async function processBankStatementPDF(
       }
     };
 
-    // Step 2: If text quality is poor, use OCR fallback
+    // Step 2: If text quality is poor, use LOCAL OCR fallback
     if (textQuality < 0.5) {
-      console.log('Poor text quality detected, falling back to OCR...');
+      console.log('Poor text quality detected, falling back to LOCAL OCR...');
+      PDFSecurityManager.logSecurityEvent(result.securityLog, 'local_ocr_fallback_start', 'success', 'Using privacy-first local OCR');
+      
       try {
-        // Convert PDF to images and perform OCR
-        const ocrText = await performOCROnPDF(pdfBuffer);
+        // Use local OCR that doesn't send data to external services
+        const ocrText = await performLocalOCROnPDF(pdfBuffer, result.securityLog);
         if (ocrText.length > extractedText.length * 0.8) {
           extractedText = ocrText;
           result.processingMethod = 'ocr';
           textQuality = assessTextQuality(extractedText);
+          PDFSecurityManager.logSecurityEvent(result.securityLog, 'local_ocr_success', 'success', `Extracted ${ocrText.length} chars locally`);
         } else {
           result.processingMethod = 'hybrid';
+          PDFSecurityManager.logSecurityEvent(result.securityLog, 'hybrid_processing', 'success', 'Combined text extraction and local OCR');
         }
       } catch (ocrError) {
-        console.error('OCR fallback failed:', ocrError);
-        result.errors.push('OCR processing failed, using original text extraction');
+        console.error('Local OCR fallback failed:', ocrError);
+        result.errors.push('Local OCR processing failed, using original text extraction');
+        PDFSecurityManager.logSecurityEvent(result.securityLog, 'local_ocr_failed', 'warning', ocrError instanceof Error ? ocrError.message : 'Unknown OCR error');
       }
     }
 
@@ -681,7 +686,89 @@ function levenshteinDistance(str1: string, str2: string): number {
 }
 
 /**
- * Perform OCR on PDF by converting to images
+ * Perform LOCAL OCR on PDF using Tesseract.js (privacy-first, no external services)
+ */
+async function performLocalOCROnPDF(pdfBuffer: Buffer, securityLog: SecurityEvent[]): Promise<string> {
+  try {
+    PDFSecurityManager.logSecurityEvent(securityLog, 'local_ocr_start', 'success', 'Starting local Tesseract OCR processing');
+    
+    // Dynamic imports for Tesseract.js
+    const { createWorker } = await import('tesseract.js');
+    const { fromBuffer } = await import('pdf2pic');
+    
+    console.log('Converting PDF to images for LOCAL OCR processing...');
+    
+    // Configure pdf2pic for in-memory processing (no external data transmission)
+    const convert = fromBuffer(pdfBuffer, {
+      density: 200,
+      format: "png",
+      width: 2000,
+      height: 2000
+    });
+    
+    // Convert all pages to images in memory
+    const convertedPages = await convert.bulk(-1, { responseType: "buffer" });
+    
+    if (!convertedPages || convertedPages.length === 0) {
+      PDFSecurityManager.logSecurityEvent(securityLog, 'pdf_conversion_failed', 'error', 'No pages converted from PDF');
+      return '';
+    }
+    
+    PDFSecurityManager.logSecurityEvent(securityLog, 'pdf_conversion_success', 'success', `Converted ${convertedPages.length} pages locally`);
+    
+    // Initialize Tesseract worker for LOCAL processing
+    const worker = await createWorker('eng', 1, {
+      logger: (m) => console.log(`Tesseract: ${m.status} ${m.progress}`)
+    });
+    
+    let combinedText = '';
+    
+    try {
+      // Process each page locally with Tesseract
+      for (let i = 0; i < convertedPages.length; i++) {
+        const page = convertedPages[i];
+        if (page && page.buffer) {
+          try {
+            console.log(`Performing LOCAL OCR on page ${i + 1}/${convertedPages.length}`);
+            
+            // OCR processing happens entirely in Node.js - no external transmission
+            const { data } = await worker.recognize(page.buffer);
+            
+            if (data.text && data.text.trim()) {
+              combinedText += `\n--- PAGE ${i + 1} ---\n${data.text}\n`;
+              PDFSecurityManager.logSecurityEvent(securityLog, `local_ocr_page_${i + 1}`, 'success', 
+                `Extracted ${data.text.length} chars locally (confidence: ${data.confidence}%)`);
+            }
+          } catch (pageError) {
+            console.error(`Local OCR failed for page ${i + 1}:`, pageError);
+            PDFSecurityManager.logSecurityEvent(securityLog, `local_ocr_page_${i + 1}_failed`, 'warning', 
+              pageError instanceof Error ? pageError.message : 'Unknown page OCR error');
+          }
+        }
+      }
+    } finally {
+      // Cleanup Tesseract worker
+      await worker.terminate();
+      PDFSecurityManager.logSecurityEvent(securityLog, 'tesseract_cleanup', 'success', 'Local OCR worker terminated');
+    }
+    
+    console.log(`LOCAL OCR completed. Extracted ${combinedText.length} characters without external transmission`);
+    PDFSecurityManager.logSecurityEvent(securityLog, 'local_ocr_complete', 'success', 
+      `Total extraction: ${combinedText.length} chars - all processing local`);
+    
+    return combinedText.trim();
+    
+  } catch (error) {
+    console.error('Local OCR processing failed:', error);
+    PDFSecurityManager.logSecurityEvent(securityLog, 'local_ocr_error', 'error', 
+      error instanceof Error ? error.message : 'Unknown local OCR error');
+    throw new Error(`Local OCR processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * DEPRECATED: Google Cloud Vision OCR (sends data to external servers)
+ * Kept for reference but should not be used for sensitive financial data
  */
 async function performOCROnPDF(pdfBuffer: Buffer): Promise<string> {
   try {
