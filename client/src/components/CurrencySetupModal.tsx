@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from 'react-i18next';
 
 // Currency list with unique symbols only - no duplicates
 const CURRENCY_OPTIONS = [
@@ -39,6 +40,7 @@ export function CurrencySetupModal({ isOpen, onClose, onSelectCurrency }: Curren
   const [selectedCurrency, setSelectedCurrency] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
   
 
 
@@ -48,15 +50,15 @@ export function CurrencySetupModal({ isOpen, onClose, onSelectCurrency }: Curren
     <Dialog open={isOpen} onOpenChange={() => {}} modal={true}>
       <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle className="text-xl">Welcome to FinanzerPro! 🌎</DialogTitle>
+          <DialogTitle className="text-xl">{t('currency.welcome_title')}</DialogTitle>
           <DialogDescription className="text-base">
-            Please choose your preferred currency to get started. You can change this later until you add your first transaction.
+            {t('currency.welcome_description')}
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
           <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-            🌎 Choose from 15 currencies including Latin American options:
+            {t('currency.choose_description')}
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -72,8 +74,8 @@ export function CurrencySetupModal({ isOpen, onClose, onSelectCurrency }: Curren
                     });
                     
                     toast({
-                      title: "Currency Set Successfully", 
-                      description: `Your currency has been set to ${currency.symbol}. Use the gear icon in the header to change it before adding transactions.`,
+                      title: t('currency.success_title'), 
+                      description: t('currency.success_description', { symbol: currency.symbol }),
                     });
                     
                     onSelectCurrency(currency.symbol);
@@ -81,8 +83,8 @@ export function CurrencySetupModal({ isOpen, onClose, onSelectCurrency }: Curren
                   } catch (error) {
                     console.error('Failed to update currency:', error);
                     toast({
-                      title: "Error",
-                      description: "Failed to set currency. Please try again.",
+                      title: t('currency.error_title'),
+                      description: t('currency.error_description'),
                       variant: "destructive",
                     });
                   } finally {

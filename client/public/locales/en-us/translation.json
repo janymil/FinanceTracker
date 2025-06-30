@@ -1453,6 +1453,16 @@
     "premium": "Premium"
   },
 
+  "currency": {
+    "welcome_title": "Welcome to FinanzerPro! 🌎",
+    "welcome_description": "Please choose your preferred currency to get started. You can change this later until you add your first transaction.",
+    "choose_description": "🌎 Choose from 15 currencies including Latin American options:",
+    "success_title": "Currency Set Successfully",
+    "success_description": "Your currency has been set to {{symbol}}. Use the gear icon in the header to change it before adding transactions.",
+    "error_title": "Error",
+    "error_description": "Failed to set currency. Please try again."
+  },
+
   "trends": {
     "title": "Advanced Trends Analysis",
     "subtitle": "Deep insights into your financial patterns and forecasting",
