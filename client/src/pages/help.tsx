@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { 
@@ -657,14 +658,22 @@ export default function Help() {
 
                   <div>
                     <h3 className="font-semibold mb-4">{t('Comprehensive Feature Documentation')}</h3>
-                    <div className="space-y-8">
-                      
+                    
+                    <Accordion type="multiple" className="w-full space-y-4">
                       {/* Dashboard Functions */}
-                      <div className="border-l-4 border-blue-500 pl-4">
-                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
-                          <BarChart3 className="h-5 w-5" />
-                          {t('Dashboard Functions')}
-                        </h4>
+                      <AccordionItem value="dashboard" className="border rounded-lg p-4">
+                        <AccordionTrigger className="text-left">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                              <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-lg">{t('Dashboard Functions')}</h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-300">{t('Your financial command center with widgets and insights')}</p>
+                            </div>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-4">
                         <div className="space-y-4">
                           <div>
                             <h5 className="font-medium text-sm mb-2">{t('Financial Summary Cards')}</h5>
@@ -730,14 +739,24 @@ export default function Help() {
                             </p>
                           </div>
                         </div>
-                      </div>
+                        </AccordionContent>
+                      </AccordionItem>
 
                       {/* Transaction Management */}
-                      <div className="border-l-4 border-green-500 pl-4">
-                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
-                          <DollarSign className="h-5 w-5" />
-                          {t('Transaction Management')}
-                        </h4>
+                      <AccordionItem value="transactions" className="border rounded-lg p-4">
+                        <AccordionTrigger className="text-left">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                              <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-lg">{t('Transaction Management')}</h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-300">{t('Record and manage your income and expenses')}</p>
+                            </div>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-4">
+                          <div className="grid gap-6 md:grid-cols-2">
                         <div className="space-y-4">
                           <div>
                             <h5 className="font-medium text-sm mb-2">Transaction Entry Forms</h5>
@@ -778,11 +797,11 @@ export default function Help() {
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Receipt OCR Processing (Standard+)</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Receipt OCR Processing (Standard+)')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Upload Image buttons on transaction pages<br/>
-                              <strong>Function:</strong> Extract transaction data from receipt photos<br/>
-                              <strong>Features:</strong> Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload
+                              <strong>{t('Location')}:</strong> {t('Upload Image buttons on transaction pages')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Extract transaction data from receipt photos')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload')}
                             </p>
                           </div>
                         </div>
@@ -1010,8 +1029,9 @@ export default function Help() {
                             </p>
                           </div>
                         </div>
-                      </div>
-                    </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
                   </div>
 
                   <Separator />
