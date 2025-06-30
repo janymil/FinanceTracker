@@ -96,18 +96,34 @@ export async function categorizeExpenseWithUserCategories(
           role: "system",
           content: `CRITICAL: You MUST respond exclusively in ${getLanguageLabel(normalizedLanguage)}. ${getLanguageLabel(normalizedLanguage) !== 'English' ? 'Never use English words.' : ''} ALL text content must be in ${getLanguageLabel(normalizedLanguage)}.
 
-You are an expert financial categorization assistant. Your task is to analyze transactions and either:
+You are an expert financial categorization assistant with deep knowledge of merchants, businesses, and spending patterns. Your task is to analyze transactions and either:
 1. Match them to the user's existing categories, OR
 2. Suggest a new category if none of the existing ones fit
 
 USER'S EXISTING CATEGORIES:
 ${userCategoryList}
 
-ANALYSIS RULES:
-- First, try to match the transaction to one of the user's existing categories
-- Only suggest a new category if the transaction clearly doesn't fit any existing category
-- Use your knowledge of merchants, businesses, and transaction types to make intelligent matches
-- Consider business type, merchant names, and transaction patterns
+MERCHANT ANALYSIS RULES:
+- Analyze the merchant name, transaction description, and amount to understand the business type
+- Recognize common merchant patterns:
+  * Grocery stores: Walmart, Target, Kroger, Safeway, Whole Foods, local markets
+  * Restaurants: McDonald's, Starbucks, local restaurant names, delivery services
+  * Gas stations: Shell, BP, Exxon, Chevron, local fuel stops
+  * Utilities: Electric company, gas company, water department, internet providers
+  * Retail: Amazon, department stores, clothing stores, electronics stores
+  * Healthcare: Pharmacy, doctor offices, hospitals, dental clinics
+  * Transportation: Uber, Lyft, taxi services, parking, tolls, public transit
+  * Entertainment: Netflix, Spotify, movie theaters, gaming, streaming services
+  * Financial: Bank fees, interest charges, loan payments, insurance
+  * Home/Maintenance: Hardware stores, contractors, cleaning services, repairs
+
+CATEGORIZATION STRATEGY:
+- First analyze what type of business the merchant is
+- Match the business type to the user's existing categories based on purpose/function
+- Consider transaction patterns (recurring vs one-time, amount ranges)
+- Look for keywords in descriptions that indicate category type
+- Use business knowledge to make intelligent category matches
+- Only suggest new categories when the transaction truly doesn't fit existing ones
 
 Respond with JSON in this exact format:
 {
@@ -123,6 +139,19 @@ IMPORTANT: Use either "categoryId" OR "suggestedCategory", never both.`
           role: "user",
           content: `Transaction Description: "${description}"
 Amount: $${amount}
+
+ANALYSIS STEPS:
+1. Identify the merchant/business from the description
+2. Determine what type of business this is (grocery, restaurant, utility, etc.)
+3. Look at the amount to understand the transaction scale
+4. Match this business type to my existing categories based on spending purpose
+5. If no existing category fits the business type, suggest a new appropriate category
+
+Examples of good matching:
+- "WALMART SUPERCENTER" → Match to "Groceries" category (if user has it)
+- "STARBUCKS COFFEE" → Match to "Dining Out" or "Coffee" category (if user has it)
+- "SHELL GAS STATION" → Match to "Transportation" or "Gas" category (if user has it)
+- "NETFLIX.COM" → Match to "Entertainment" or "Subscriptions" category (if user has it)
 
 Analyze this transaction and determine if it matches any of my existing categories, or if I need a new category.`
         }
