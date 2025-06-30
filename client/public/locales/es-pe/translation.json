@@ -1572,6 +1572,21 @@
     }
   },
 
+  "upload": {
+    "invalid_file_type": "Tipo de archivo inválido",
+    "please_select_image": "Por favor selecciona una imagen",
+    "upload_failed": "Error al subir",
+    "please_try_again": "Por favor inténtalo de nuevo",
+    "missing_information": "Información faltante",
+    "please_fill_required": "Por favor completa todos los campos requeridos",
+    "transaction_saved": "Transacción guardada",
+    "receipt_saved_description": "Los datos del recibo han sido guardados como una transacción",
+    "save_failed": "Error al guardar",
+    "save_failed_description": "Error al guardar la transacción. Por favor inténtalo de nuevo.",
+    "transaction_description_placeholder": "Descripción de la transacción",
+    "select_category_placeholder": "Seleccionar categoría"
+  },
+
   "trends": {
     "title": "Análisis Avanzado de Tendencias",
     "subtitle": "Perspectivas profundas sobre tus patrones financieros y pronósticos",

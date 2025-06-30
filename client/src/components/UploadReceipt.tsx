@@ -126,8 +126,8 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
         message: 'Failed to process receipt'
       });
       toast({
-        title: "Upload failed",
-        description: "Please try again",
+        title: t('upload.upload_failed'),
+        description: t('upload.please_try_again'),
         variant: "destructive"
       });
     }
@@ -163,8 +163,8 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
   const handleSaveTransaction = async () => {
     if (!formData.amount || !formData.description || !formData.categoryId) {
       toast({
-        title: "Missing information",
-        description: "Please fill in all required fields",
+        title: t('upload.missing_information'),
+        description: t('upload.please_fill_required'),
         variant: "destructive"
       });
       return;
@@ -197,8 +197,8 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
       }
 
       toast({
-        title: "Transaction saved",
-        description: "Receipt data has been saved as a transaction",
+        title: t('upload.transaction_saved'),
+        description: t('upload.receipt_saved_description'),
       });
 
       // Reset the component
@@ -211,8 +211,8 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
     } catch (error) {
       console.error('Error saving transaction:', error);
       toast({
-        title: "Save failed",
-        description: "Failed to save transaction. Please try again.",
+        title: t('upload.save_failed'),
+        description: t('upload.save_failed_description'),
         variant: "destructive"
       });
     }
@@ -357,7 +357,7 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
                       id="description"
                       value={formData.description}
                       onChange={(e) => handleFormChange('description', e.target.value)}
-                      placeholder="Transaction description"
+                      placeholder={t('upload.transaction_description_placeholder')}
                     />
                   </div>
                   
@@ -375,7 +375,7 @@ export default function UploadReceipt({ onReceiptProcessed }: UploadReceiptProps
                     <Label htmlFor="category">Category *</Label>
                     <Select value={formData.categoryId} onValueChange={(value) => handleFormChange('categoryId', value)}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder={t('upload.select_category_placeholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map((category) => (

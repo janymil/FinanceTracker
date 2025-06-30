@@ -1495,6 +1495,21 @@
     }
   },
 
+  "upload": {
+    "invalid_file_type": "Invalid file type",
+    "please_select_image": "Please select an image",
+    "upload_failed": "Upload failed",
+    "please_try_again": "Please try again",
+    "missing_information": "Missing information",
+    "please_fill_required": "Please fill in all required fields",
+    "transaction_saved": "Transaction saved",
+    "receipt_saved_description": "Receipt data has been saved as a transaction",
+    "save_failed": "Save failed",
+    "save_failed_description": "Failed to save transaction. Please try again.",
+    "transaction_description_placeholder": "Transaction description",
+    "select_category_placeholder": "Select category"
+  },
+
   "trends": {
     "title": "Advanced Trends Analysis",
     "subtitle": "Deep insights into your financial patterns and forecasting",
