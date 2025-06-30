@@ -187,11 +187,14 @@ export default function AIInsights({ data }: AIInsightsProps) {
           insights.push({
             id: "spending-trend",
             type: "trend",
-            title: spendingChange > 0 ? "Spending Increased" : "Spending Decreased",
-            description: `Your expenses ${spendingChange > 0 ? 'increased' : 'decreased'} by ${Math.abs(spendingChange).toFixed(1)}% from last month`,
+            title: spendingChange > 0 ? t("ai_insights.spending_increased") : t("ai_insights.spending_decreased"),
+            description: t("ai_insights.spending_change_description", { 
+              direction: spendingChange > 0 ? t("ai_insights.increased") : t("ai_insights.decreased"),
+              percentage: Math.abs(spendingChange).toFixed(1)
+            }),
             impact: Math.abs(spendingChange) > 25 ? "high" : "medium",
             amount: Math.abs(totalExpenses - lastMonthExpenses),
-            recommendation: spendingChange > 0 ? "Review recent purchases to identify spending increases" : "Great job reducing expenses!",
+            recommendation: spendingChange > 0 ? t("ai_insights.review_recent_purchases") : t("ai_insights.great_expense_reduction"),
             actionable: spendingChange > 0
           });
         }

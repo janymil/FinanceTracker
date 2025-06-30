@@ -1970,6 +1970,35 @@
     "restore": "Obnoviť"
   },
 
+  "ai_insights": {
+    "title": "AI Poznatky",
+    "loading": "Načítavam AI poznatky...",
+    "no_insights": "Žiadne poznatky nie sú k dispozícii",
+    "upgrade_for_insights": "Vylepšite na Standard alebo Premium plán pre prístup k AI poznatkom",
+    "impact_high": "Vysoký",
+    "impact_medium": "Stredný", 
+    "impact_low": "Nízky",
+    "recommendation": "Odporúčanie",
+    "take_action": "Vykonať Akciu",
+    "high_spending_alert": "Upozornenie na Vysoké Výdavky",
+    "high_spending_description": "Minuli ste {{percentage}}% svojho príjmu tento mesiac",
+    "review_expense_categories": "Zvážte preskúmanie najväčších kategórií výdavkov",
+    "category_focus_opportunity": "Príležitosť na Zameranie Kategórie",
+    "category_spending_percentage": "{{category}} predstavuje {{percentage}}% vašich výdavkov",
+    "consider_budget_limit": "Zvážte nastavenie rozpočtového limitu pre {{category}}",
+    "positive_cash_flow": "Pozitívny Peňažný Tok",
+    "savings_rate": "Šetríte {{rate}}% svojho príjmu tento mesiac",
+    "increase_savings_rate": "Zvážte zvýšenie miery úspor na 20%",
+    "excellent_savings": "Vynikajúca miera úspor!",
+    "spending_increased": "Výdavky sa Zvýšili",
+    "spending_decreased": "Výdavky sa Znížili",
+    "spending_change_description": "Vaše výdavky sa {{direction}} o {{percentage}}% oproti minulému mesiacu",
+    "increased": "zvýšili",
+    "decreased": "znížili",
+    "review_recent_purchases": "Preskúmajte nedávne nákupy na identifikáciu nárastu výdavkov",
+    "great_expense_reduction": "Skvelá práca pri znižovaní výdavkov!"
+  },
+
   "upload": {
     "drag_drop": "Pretiahnite a pustite obrázok sem, alebo kliknite na prehliadanie",
     "processing": "Spracovávam váš účet...",
