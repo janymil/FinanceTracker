@@ -42,7 +42,7 @@ interface ExportOptions {
 }
 
 interface ImportOptions {
-  source: "csv" | "excel" | "json" | "mint" | "quickbooks" | "ynab" | "personalcapital" | "bank";
+  source: "csv" | "excel" | "json" | "mint" | "quickbooks" | "ynab" | "personalcapital" | "bank" | "pdf-statement";
   mapColumns: boolean;
   skipFirstRow: boolean;
   dateFormat: string;
@@ -50,6 +50,30 @@ interface ImportOptions {
   categoryMapping: "auto" | "manual" | "skip";
   duplicateHandling: "skip" | "overwrite" | "rename";
   validationLevel: "strict" | "flexible" | "permissive";
+}
+
+interface PDFProcessingResult {
+  success: boolean;
+  processingMethod: 'text' | 'ocr' | 'hybrid';
+  totalPages: number;
+  extractedTransactions: number;
+  invalidTransactions: number;
+  overallConfidence: number;
+  errors: string[];
+  transactions: any[];
+  invalidData: any[];
+  preview: boolean;
+}
+
+interface PreviewTransaction {
+  date: string;
+  description: string;
+  amount: number;
+  type: 'income' | 'expense';
+  confidence: number;
+  category?: string;
+  rawText?: string;
+  detectedFormat?: string;
 }
 
 export default function ExportPage() {
@@ -99,6 +123,14 @@ export default function ExportPage() {
   } | null>(null);
   const [importLogs, setImportLogs] = useState<any[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+
+  // PDF processing state
+  const [pdfProcessingResult, setPdfProcessingResult] = useState<PDFProcessingResult | null>(null);
+  const [previewTransactions, setPreviewTransactions] = useState<PreviewTransaction[]>([]);
+  const [isProcessingPDF, setIsProcessingPDF] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [selectedTransactions, setSelectedTransactions] = useState<Set<number>>(new Set());
+  const [isImportingFromPreview, setIsImportingFromPreview] = useState(false);
 
   // Import functionality
   const handleDownloadExample = () => {
@@ -258,6 +290,166 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
     } finally {
       setIsImporting(false);
     }
+  };
+
+  // PDF Bank Statement Processing Functions
+  const handlePDFUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      toast({
+        title: t('export.invalid_file'),
+        description: 'Please select a PDF file.',
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessingPDF(true);
+    setPdfProcessingResult(null);
+    setPreviewTransactions([]);
+
+    try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error(t('export.auth_required'));
+      }
+
+      const formData = new FormData();
+      formData.append('pdf', file);
+
+      const response = await fetch('/api/import/pdf-statement', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'x-user-language': localStorage.getItem('language') || 'en-us'
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to process PDF');
+      }
+
+      const result: PDFProcessingResult = await response.json();
+      setPdfProcessingResult(result);
+      setPreviewTransactions(result.transactions);
+      
+      // Select all transactions by default
+      const allIndices = new Set(result.transactions.map((_, index) => index));
+      setSelectedTransactions(allIndices);
+      
+      setShowPreviewModal(true);
+
+      toast({
+        title: 'PDF Processing Complete',
+        description: `Extracted ${result.extractedTransactions} transactions with ${(result.overallConfidence * 100).toFixed(0)}% confidence.`,
+      });
+
+    } catch (error) {
+      console.error('PDF processing error:', error);
+      toast({
+        title: 'PDF Processing Failed',
+        description: error instanceof Error ? error.message : 'Failed to process PDF',
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingPDF(false);
+    }
+  };
+
+  const handleImportSelectedTransactions = async () => {
+    if (!pdfProcessingResult || selectedTransactions.size === 0) return;
+
+    setIsImportingFromPreview(true);
+
+    try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error(t('export.auth_required'));
+      }
+
+      const transactionsToImport = previewTransactions.filter((_, index) => 
+        selectedTransactions.has(index)
+      );
+
+      // Convert to import format
+      const importData = transactionsToImport.map(tx => ({
+        dataType: 'transaction',
+        transactionType: tx.type,
+        amount: Math.abs(tx.amount),
+        description: tx.description,
+        date: tx.date,
+        category: tx.category || '',
+        isRecurring: false,
+        recurringFrequency: ''
+      }));
+
+      const response = await fetch('/api/import-data', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          content: importData.map(row => 
+            Object.values(row).join(',')
+          ).join('\n'),
+          format: 'csv',
+          options: {
+            ...importOptions,
+            skipFirstRow: false
+          }
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Import failed');
+      }
+
+      const result = await response.json();
+      
+      setShowPreviewModal(false);
+      setImportResults(result.summary);
+      loadImportLogs();
+
+      toast({
+        title: 'Transactions Imported Successfully',
+        description: `Imported ${selectedTransactions.size} transactions from your bank statement.`,
+      });
+
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: 'Import Failed',
+        description: error instanceof Error ? error.message : 'Failed to import transactions',
+        variant: "destructive",
+      });
+    } finally {
+      setIsImportingFromPreview(false);
+    }
+  };
+
+  const toggleTransactionSelection = (index: number) => {
+    const newSelection = new Set(selectedTransactions);
+    if (newSelection.has(index)) {
+      newSelection.delete(index);
+    } else {
+      newSelection.add(index);
+    }
+    setSelectedTransactions(newSelection);
+  };
+
+  const selectAllTransactions = () => {
+    const allIndices = new Set(previewTransactions.map((_, index) => index));
+    setSelectedTransactions(allIndices);
+  };
+
+  const deselectAllTransactions = () => {
+    setSelectedTransactions(new Set());
   };
 
   // Backup status state
@@ -712,6 +904,24 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                             </div>
                           </div>
                         </div>
+                        <div 
+                          className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                            importOptions.source === 'pdf-statement' 
+                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20' 
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                          onClick={() => setImportOptions(prev => ({ ...prev, source: 'pdf-statement' }))}
+                        >
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <div className="font-medium">PDF Bank Statement</div>
+                              <div className="text-sm text-muted-foreground">
+                                Extract transactions from bank statement PDF
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -734,8 +944,8 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                         <input
                           ref={fileInputRef}
                           type="file"
-                          accept=".csv,.json"
-                          onChange={handleFileSelect}
+                          accept={importOptions.source === 'pdf-statement' ? '.pdf' : '.csv,.json'}
+                          onChange={importOptions.source === 'pdf-statement' ? handlePDFUpload : handleFileSelect}
                           className="hidden"
                         />
                         <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />

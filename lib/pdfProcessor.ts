@@ -3,7 +3,6 @@
  * Hybrid approach: PDF text extraction → OCR fallback → AI parsing
  */
 
-import pdf from 'pdf-parse';
 import { performOCR } from '../server/uploadReceipt';
 import { getCurrentLanguageForAPI } from './languageUtils';
 
