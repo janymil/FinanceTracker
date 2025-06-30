@@ -48,6 +48,9 @@ interface ChatMessage {
 
 export default function Help() {
   const { t } = useTranslation();
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const { user } = useUser();
   const [, setLocation] = useLocation();
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
