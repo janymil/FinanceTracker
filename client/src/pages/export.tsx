@@ -1030,52 +1030,64 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
                     </div>
                     <div className="flex-1">
                       <h3 className="font-medium mb-3">{t('export.step3_title')}</h3>
-                      <div 
-                        className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer"
-                        onClick={importOptions.source === 'pdf-statement' ? handlePDFUploadClick : () => fileInputRef.current?.click()}
-                        onDrop={handleFileDrop}
-                        onDragOver={handleDragOver}
-                      >
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept={importOptions.source === 'pdf-statement' ? '.pdf' : '.csv,.json'}
-                          onChange={importOptions.source === 'pdf-statement' ? handlePDFUpload : handleFileSelect}
-                          className="hidden"
+                      {isProcessingPDF && processingSessionId ? (
+                        <PDFProcessingProgress 
+                          sessionId={processingSessionId}
+                          onComplete={(success) => {
+                            setIsProcessingPDF(false);
+                            setProcessingSessionId(null);
+                            if (success) {
+                              console.log('PDF processing completed successfully');
+                            }
+                          }}
+                          onError={(error) => {
+                            setIsProcessingPDF(false);
+                            setProcessingSessionId(null);
+                            toast({
+                              title: t('export.processing_error'),
+                              description: error,
+                              variant: "destructive",
+                            });
+                          }}
                         />
-                        {isProcessingPDF ? (
-                          <Loader2 className="h-8 w-8 text-blue-500 mx-auto mb-2 animate-spin" />
-                        ) : (
+                      ) : (
+                        <div 
+                          className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer"
+                          onClick={importOptions.source === 'pdf-statement' ? handlePDFUploadClick : () => fileInputRef.current?.click()}
+                          onDrop={handleFileDrop}
+                          onDragOver={handleDragOver}
+                        >
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept={importOptions.source === 'pdf-statement' ? '.pdf' : '.csv,.json'}
+                            onChange={importOptions.source === 'pdf-statement' ? handlePDFUpload : handleFileSelect}
+                            className="hidden"
+                          />
                           <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                        )}
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {isProcessingPDF ? (
-                            <>
-                              <span className="font-medium text-blue-600">Processing PDF...</span>
-                              <br />
-                              <span className="text-xs">Extracting transactions with AI</span>
-                            </>
-                          ) : selectedFile ? (
-                            <>
-                              <span className="font-medium text-green-600">{selectedFile.name}</span>
-                              <br />
-                              <span className="text-xs">{t('export.click_to_change_file')}</span>
-                            </>
-                          ) : importOptions.source === 'pdf-statement' ? (
-                            <>
-                              Drop your bank statement PDF here or click to browse
-                              <br />
-                              <span className="text-xs">Supports PDF files with transaction data</span>
-                            </>
-                          ) : (
-                            <>
-                              {t('export.drop_file_text', { format: importOptions.source.toUpperCase() })}
-                              <br />
-                              <span className="text-xs">{t('export.supports_files')}</span>
-                            </>
-                          )}
-                        </p>
-                      </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            {selectedFile ? (
+                              <>
+                                <span className="font-medium text-green-600">{selectedFile.name}</span>
+                                <br />
+                                <span className="text-xs">{t('export.click_to_change_file')}</span>
+                              </>
+                            ) : importOptions.source === 'pdf-statement' ? (
+                              <>
+                                Drop your bank statement PDF here or click to browse
+                                <br />
+                                <span className="text-xs">Supports PDF files with transaction data</span>
+                              </>
+                            ) : (
+                              <>
+                                {t('export.drop_file_text', { format: importOptions.source.toUpperCase() })}
+                                <br />
+                                <span className="text-xs">{t('export.supports_files')}</span>
+                              </>
+                            )}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

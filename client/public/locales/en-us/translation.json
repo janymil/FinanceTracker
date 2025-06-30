@@ -3354,6 +3354,22 @@
       "privacy_first": "Privacy-first AI processing",
       "cancel": "Cancel",
       "proceed": "Proceed with AI Processing"
+    },
+    "processing": {
+      "title": "Processing Bank Statement",
+      "subtitle": "AI-powered transaction extraction in progress",
+      "connected": "Connected to processing stream",
+      "pdf_validation": "Security Validation",
+      "text_extraction": "Text Extraction",
+      "ocr_fallback": "OCR Processing",
+      "ai_parsing": "AI Analysis",
+      "categorization": "Categorization",
+      "duplicate_detection": "Duplicate Detection",
+      "complete": "Processing Complete",
+      "validation": "Security Validation",
+      "extraction": "Text Extraction",
+      "error": "Processing error occurred",
+      "transactions_processed": "Processed {{processed}} of {{total}} transactions"
     }
   }
 
