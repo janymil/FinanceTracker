@@ -50,10 +50,17 @@ export function registerBudgetRoutes(app: Express) {
       }
 
       const id = parseInt(req.params.id);
-      const { categoryId, amount, startDate, endDate, period } = req.body;
+      const { categoryId, amount, startDate, endDate, period = 'monthly' } = req.body;
 
       // Security: Verify budget ownership before update
       const existingBudget = await storage.getBudget(id);
+      console.log('Budget update debug:', {
+        budgetId: id,
+        userId,
+        existingBudget: existingBudget ? { id: existingBudget.id, userId: existingBudget.userId } : null,
+        requestBody: req.body
+      });
+      
       if (!existingBudget || existingBudget.userId !== userId) {
         return res.status(403).json({ message: "Budget not found or access denied" });
       }
@@ -65,6 +72,7 @@ export function registerBudgetRoutes(app: Express) {
       if (endDate !== undefined) updateData.endDate = new Date(endDate);
       if (period !== undefined) updateData.period = String(period);
 
+      console.log('Update data being sent:', updateData);
       const budget = await storage.updateBudget(id, updateData);
       return res.json(budget);
     } catch (error) {

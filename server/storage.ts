@@ -531,7 +531,20 @@ export class DatabaseStorage implements IStorage {
       .where(eq(budgets.id, id))
       .limit(1);
 
+    console.log('Storage updateBudget debug:', {
+      budgetId: id,
+      existingBudget: existingBudget[0] || null,
+      budgetUserIdFromRequest: budget.userId,
+      existingBudgetLength: existingBudget.length
+    });
+
     if (!existingBudget.length || existingBudget[0].userId !== budget.userId) {
+      console.log('Budget update failed - ownership check:', {
+        noBudgetFound: !existingBudget.length,
+        userIdMismatch: existingBudget.length > 0 ? existingBudget[0].userId !== budget.userId : 'N/A',
+        existingUserId: existingBudget[0]?.userId,
+        requestUserId: budget.userId
+      });
       throw new Error("Budget not found or unauthorized access");
     }
 
