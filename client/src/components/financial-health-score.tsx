@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useTranslation } from "react-i18next";
 
 interface FinancialHealthProps {
   summary?: {
@@ -18,6 +19,7 @@ interface FinancialHealthProps {
 
 export default function FinancialHealthScore({ summary, budgets }: FinancialHealthProps) {
   // This component is designed for free users and provides mathematical calculations only
+  const { t } = useTranslation();
 
   const calculateHealthScore = () => {
     if (!summary) return { score: 0, status: 'Loading...', color: 'gray' };
@@ -29,29 +31,29 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
     const incomeExpenseRatio = summary.totalIncome > 0 ? Math.abs(summary.totalExpenses) / summary.totalIncome : 0;
     if (incomeExpenseRatio <= 0.5) {
       score += 30;
-      factors.push({ name: 'Spending Control', score: 30, max: 30, status: 'excellent' });
+      factors.push({ name: t('financial_health.spending_control'), score: 30, max: 30, status: 'excellent' });
     } else if (incomeExpenseRatio <= 0.8) {
       score += 20;
-      factors.push({ name: 'Spending Control', score: 20, max: 30, status: 'good' });
+      factors.push({ name: t('financial_health.spending_control'), score: 20, max: 30, status: 'good' });
     } else {
       score += 10;
-      factors.push({ name: 'Spending Control', score: 10, max: 30, status: 'needs improvement' });
+      factors.push({ name: t('financial_health.spending_control'), score: 10, max: 30, status: 'needs improvement' });
     }
 
     // Savings rate (25% weight)
     const savingsRate = summary.totalIncome > 0 ? summary.netBalance / summary.totalIncome : 0;
     if (savingsRate >= 0.2) {
       score += 25;
-      factors.push({ name: 'Savings Rate', score: 25, max: 25, status: 'excellent' });
+      factors.push({ name: t('financial_health.savings_rate'), score: 25, max: 25, status: 'excellent' });
     } else if (savingsRate >= 0.1) {
       score += 18;
-      factors.push({ name: 'Savings Rate', score: 18, max: 25, status: 'good' });
+      factors.push({ name: t('financial_health.savings_rate'), score: 18, max: 25, status: 'good' });
     } else if (savingsRate >= 0) {
       score += 10;
-      factors.push({ name: 'Savings Rate', score: 10, max: 25, status: 'fair' });
+      factors.push({ name: t('financial_health.savings_rate'), score: 10, max: 25, status: 'fair' });
     } else {
       score += 0;
-      factors.push({ name: 'Savings Rate', score: 0, max: 25, status: 'critical' });
+      factors.push({ name: t('financial_health.savings_rate'), score: 0, max: 25, status: 'critical' });
     }
 
     // Budget adherence (25% weight)
@@ -59,25 +61,25 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
     const budgetUsage = totalBudget > 0 ? Math.abs(summary.totalExpenses) / totalBudget : 0;
     if (budgetUsage <= 0.8) {
       score += 25;
-      factors.push({ name: 'Budget Adherence', score: 25, max: 25, status: 'excellent' });
+      factors.push({ name: t('financial_health.budget_adherence'), score: 25, max: 25, status: 'excellent' });
     } else if (budgetUsage <= 1.0) {
       score += 18;
-      factors.push({ name: 'Budget Adherence', score: 18, max: 25, status: 'good' });
+      factors.push({ name: t('financial_health.budget_adherence'), score: 18, max: 25, status: 'good' });
     } else {
       score += 8;
-      factors.push({ name: 'Budget Adherence', score: 8, max: 25, status: 'needs improvement' });
+      factors.push({ name: t('financial_health.budget_adherence'), score: 8, max: 25, status: 'needs improvement' });
     }
 
     // Financial stability (20% weight)
     if (summary.netBalance > 0 && summary.totalIncome > Math.abs(summary.totalExpenses)) {
       score += 20;
-      factors.push({ name: 'Financial Stability', score: 20, max: 20, status: 'excellent' });
+      factors.push({ name: t('financial_health.financial_stability'), score: 20, max: 20, status: 'excellent' });
     } else if (summary.netBalance >= 0) {
       score += 12;
-      factors.push({ name: 'Financial Stability', score: 12, max: 20, status: 'good' });
+      factors.push({ name: t('financial_health.financial_stability'), score: 12, max: 20, status: 'good' });
     } else {
       score += 5;
-      factors.push({ name: 'Financial Stability', score: 5, max: 20, status: 'needs attention' });
+      factors.push({ name: t('financial_health.financial_stability'), score: 5, max: 20, status: 'needs attention' });
     }
 
     let status = 'Excellent';
