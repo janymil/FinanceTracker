@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { 
@@ -659,13 +659,21 @@ export default function Help() {
                   <div>
                     <h3 className="font-semibold mb-4">{t('Comprehensive Feature Documentation')}</h3>
                     
-                    <div className="space-y-8">
+                    <Accordion type="multiple" className="w-full space-y-4">
                       {/* Dashboard Functions */}
-                      <div className="border-l-4 border-blue-500 pl-4">
-                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
-                          <BarChart3 className="h-5 w-5" />
-                          {t('Dashboard Functions')}
-                        </h4>
+                      <AccordionItem value="dashboard" className="border rounded-lg p-4">
+                        <AccordionTrigger className="text-left">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                              <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-lg">{t('Dashboard Functions')}</h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-300">{t('Your financial command center with widgets and insights')}</p>
+                            </div>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-4">
                         <div className="space-y-4">
                           <div>
                             <h5 className="font-medium text-sm mb-2">{t('Financial Summary Cards')}</h5>
@@ -731,14 +739,24 @@ export default function Help() {
                             </p>
                           </div>
                         </div>
-                      </div>
+                        </AccordionContent>
+                      </AccordionItem>
 
                       {/* Transaction Management */}
-                      <div className="border-l-4 border-green-500 pl-4">
-                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
-                          <DollarSign className="h-5 w-5" />
-                          {t('Transaction Management')}
-                        </h4>
+                      <AccordionItem value="transactions" className="border rounded-lg p-4">
+                        <AccordionTrigger className="text-left">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                              <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-lg">{t('Transaction Management')}</h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-300">{t('Record and manage your income and expenses')}</p>
+                            </div>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-4">
+                          <div className="grid gap-6 md:grid-cols-2">
                         <div className="space-y-4">
                           <div>
                             <h5 className="font-medium text-sm mb-2">Transaction Entry Forms</h5>
@@ -980,196 +998,81 @@ export default function Help() {
                         </div>
                       </div>
 
-                            <div className="space-y-4">
-                              {/* Mobile Features */}
-                              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                <h5 className="font-medium text-sm mb-2 flex items-center gap-2">
-                                  <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
-                                  Mobile Features
-                                </h5>
-                                <div className="text-xs text-gray-500 space-y-1">
-                                  <div><strong>Function:</strong> Full mobile optimization for all features</div>
-                                  <div><strong>Features:</strong> Touch-friendly interfaces, mobile navigation, responsive layouts, camera integration</div>
-                                </div>
-                              </div>
-                            </div>
+                      {/* Mobile Features */}
+                      <div className="border-l-4 border-pink-500 pl-4">
+                        <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
+                          <Camera className="h-5 w-5" />
+                          Mobile Features
+                        </h4>
+                        <div className="space-y-4">
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Responsive Design</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Function:</strong> Full mobile optimization for all features<br/>
+                              <strong>Features:</strong> Touch-friendly interfaces, mobile navigation, responsive layouts, optimized forms
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">Mobile Camera Integration</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Function:</strong> Direct camera access for receipt scanning<br/>
+                              <strong>Features:</strong> Camera capture, gallery selection, image preview, auto-focus optimization
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="font-medium text-sm mb-2">QR Code Cross-Device Upload</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              <strong>Function:</strong> Scan receipts on mobile, process on desktop<br/>
+                              <strong>Features:</strong> QR code generation, anonymous mobile access, real-time polling, automatic form population
+                            </p>
                           </div>
                         </div>
-                      </div>
-                    </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
 
-            <TabsContent value="faq" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <HelpCircle className="h-6 w-6" />
-                    {t('Frequently Asked Questions')}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      {
-                        question: t("What is FinanzerPro?"),
-                        answer: t("FinanzerPro is a comprehensive personal finance management application that helps you track expenses, manage budgets, set financial goals, and gain insights into your spending patterns with AI-powered analysis.")
-                      },
-                      {
-                        question: t("Is my financial data secure?"),
-                        answer: t("Yes, we use bank-level security with AES-256 encryption, secure cloud storage, and strict privacy policies. Your data is encrypted both in transit and at rest, and we never share your personal financial information with third parties.")
-                      },
-                      {
-                        question: t("What's the difference between Free, Standard, and Premium plans?"),
-                        answer: t("Free includes basic transaction tracking and simple budgeting. Standard adds OCR receipt scanning, advanced budgets, goals, and export features. Premium includes AI financial insights, personalized tips, collaborative goals, and priority support.")
-                      }
-                    ].map((faq, index) => (
-                      <div key={index} className="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0">
-                        <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-                          {faq.question}
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {faq.answer}
+                  <Separator />
+
+                  <div>
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                      <Camera className="h-5 w-5" />
+                      Receipt OCR Scanning (Standard+)
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                          Available for Standard and Premium subscribers
                         </p>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
 
-            <TabsContent value="plans" className="space-y-4">
-              <div className="grid gap-6 md:grid-cols-3">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span>{t('Free')}</span>
-                      <Badge variant="secondary">$0</Badge>
-                    </CardTitle>
-                    <CardDescription>{t('Perfect for getting started')}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <ul className="space-y-2">
-                      {(t('help.plans.features.free', { returnObjects: true }) as string[]).map((feature, index) => (
-                        <li key={index} className="flex items-center gap-2 text-sm">
-                          <div className="h-2 w-2 bg-blue-500 rounded-full" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span>{t('Standard')}</span>
-                      <Badge variant="default">$9.99/mo</Badge>
-                    </CardTitle>
-                    <CardDescription>{t('Most popular for individuals')}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <ul className="space-y-2">
-                      {(t('help.plans.features.standard', { returnObjects: true }) as string[]).map((feature, index) => (
-                        <li key={index} className="flex items-center gap-2 text-sm">
-                          <div className="h-2 w-2 bg-orange-500 rounded-full" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span>{t('Premium')}</span>
-                      <Badge variant="destructive">$19.99/mo</Badge>
-                    </CardTitle>
-                    <CardDescription>{t('Advanced features and AI insights')}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <ul className="space-y-2">
-                      {(t('help.plans.features.premium', { returnObjects: true }) as string[]).map((feature, index) => (
-                        <li key={index} className="flex items-center gap-2 text-sm">
-                          <div className="h-2 w-2 bg-green-500 rounded-full" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        {/* AI Chat Assistant */}
-        <div className="lg:col-span-1">
-          <Card className="h-[600px] flex flex-col">
-            <CardHeader className="flex-shrink-0">
-              <CardTitle className="flex items-center gap-2">
-                <Bot className="h-5 w-5 text-primary" />
-                {t('AI Assistant')}
-              </CardTitle>
-              <CardDescription>
-                {t('Ask me anything about FinanzerPro')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col">
-              <ScrollArea className="flex-1 pr-4">
-                <div className="space-y-4">
-                  {messages.map((message, index) => (
-                    <div
-                      key={index}
-                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                          message.role === 'user'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-gray-100 dark:bg-gray-800'
-                        }`}
-                      >
-                        {message.content}
-                      </div>
-                    </div>
-                  ))}
-                  {isLoading && (
-                    <div className="flex justify-start">
-                      <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 text-sm">
-                        {t('Typing...')}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-              <div className="flex gap-2 pt-4">
-                <Input
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  placeholder={t('Ask a question...')}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  disabled={isLoading}
-                />
-                <Button 
-                  onClick={handleSendMessage} 
-                  disabled={isLoading || !inputMessage.trim()}
-                  size="icon"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-    </AppLayout>
-  );
-}
+                      <div>
+                        <h4 className="font-medium mb-2">How to Scan Receipts</h4>
+                        
+                        <div className="mb-4">
+                          <h5 className="font-medium text-sm mb-2 text-blue-600 dark:text-blue-400">Desktop/Web Upload:</h5>
+                          <ol className="text-sm text-gray-600 dark:text-gray-300 space-y-2 ml-4">
+                            <li className="flex gap-2">
+                              <span className="font-medium text-primary">1.</span>
+                              Navigate to Expenses, Income, or Transactions page
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="font-medium text-primary">2.</span>
+                              Click the "Upload Image" button next to "Add Transaction"
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="font-medium text-primary">3.</span>
+                              Choose "Take Photo" (mobile camera) or "Choose from Gallery"
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="font-medium text-primary">4.</span>
+                              Select or capture a clear image of your receipt
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="font-medium text-primary">5.</span>
+                              Wait for OCR processing - extracted data will appear automatically
                             </li>
                           </ol>
                         </div>
