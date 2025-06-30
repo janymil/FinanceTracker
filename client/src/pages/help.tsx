@@ -740,49 +740,49 @@ export default function Help() {
                         </h4>
                         <div className="space-y-4">
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Transaction Entry Forms</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Transaction Entry Forms')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Expenses, Income, and Transactions pages<br/>
-                              <strong>Function:</strong> Add new financial transactions with complete details<br/>
-                              <strong>Fields:</strong> Amount, description, date, category, notes, recurring options<br/>
-                              <strong>Validation:</strong> Required fields, positive amounts, valid dates, category selection
+                              <strong>{t('Location')}:</strong> {t('Expenses, Income, and Transactions pages')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Add new financial transactions with complete details')}<br/>
+                              <strong>{t('Fields')}:</strong> {t('Amount, description, date, category, notes, recurring options')}<br/>
+                              <strong>{t('Validation')}:</strong> {t('Required fields, positive amounts, valid dates, category selection')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Transaction Lists and Filtering</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Transaction Lists and Filtering')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> All transaction pages<br/>
-                              <strong>Function:</strong> View, search, and filter transaction history<br/>
-                              <strong>Filters:</strong> Month selection, category filtering, transaction type, date ranges<br/>
-                              <strong>Features:</strong> Responsive design, mobile-friendly collapsible filters, real-time search
+                              <strong>{t('Location')}:</strong> {t('All transaction pages')}<br/>
+                              <strong>{t('Function')}:</strong> {t('View, search, and filter transaction history')}<br/>
+                              <strong>{t('Filters')}:</strong> {t('Month selection, category filtering, transaction type, date ranges')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Responsive design, mobile-friendly collapsible filters, real-time search')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Transaction Editing and Deletion</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Transaction Editing and Deletion')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Transaction list items and dashboard widgets<br/>
-                              <strong>Function:</strong> Modify or remove existing transactions<br/>
-                              <strong>Features:</strong> Inline editing, confirmation dialogs, immediate UI updates, undo options
+                              <strong>{t('Location')}:</strong> {t('Transaction list items and dashboard widgets')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Modify or remove existing transactions')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Inline editing, confirmation dialogs, immediate UI updates, undo options')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Recurring Transactions (Standard+)</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Recurring Transactions (Standard+)')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Transaction forms and reminders widget<br/>
-                              <strong>Function:</strong> Set up automatic transaction detection and reminders<br/>
-                              <strong>Features:</strong> Frequency selection (weekly, monthly, yearly), end date options, reminder notifications
+                              <strong>{t('Location')}:</strong> {t('Transaction forms and reminders widget')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Set up automatic transaction detection and reminders')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Frequency selection (weekly, monthly, yearly), end date options, reminder notifications')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Receipt OCR Processing (Standard+)</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Receipt OCR Processing (Standard+)')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Upload Image buttons on transaction pages<br/>
-                              <strong>Function:</strong> Extract transaction data from receipt photos<br/>
-                              <strong>Features:</strong> Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload
+                              <strong>{t('Location')}:</strong> {t('Upload Image buttons on transaction pages')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Extract transaction data from receipt photos')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload')}
                             </p>
                           </div>
                         </div>
@@ -792,32 +792,32 @@ export default function Help() {
                       <div className="border-l-4 border-purple-500 pl-4">
                         <h4 className="font-medium flex items-center gap-2 mb-3 text-lg">
                           <Target className="h-5 w-5" />
-                          Category Management
+                          {t('Category Management')}
                         </h4>
                         <div className="space-y-4">
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Category Creation and Editing</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Category Creation and Editing')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Location:</strong> Categories page<br/>
-                              <strong>Function:</strong> Create custom expense and income categories<br/>
-                              <strong>Features:</strong> Custom names, color selection, icon choices, type assignment (income/expense/goal)
+                              <strong>{t('Location')}:</strong> {t('Categories page')}<br/>
+                              <strong>{t('Function')}:</strong> {t('Create custom expense and income categories')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Custom names, color selection, icon choices, type assignment (income/expense/goal)')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">Predefined Categories</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('Predefined Categories')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Available:</strong> 20+ built-in categories for common expenses and income<br/>
-                              <strong>Examples:</strong> Food & Dining, Transportation, Shopping, Bills & Utilities, Healthcare, Entertainment, Salary, Freelancing<br/>
-                              <strong>Features:</strong> Professional icons, optimized colors, cannot be deleted
+                              <strong>{t('Available')}:</strong> {t('20+ built-in categories for common expenses and income')}<br/>
+                              <strong>{t('Examples')}:</strong> {t('Food & Dining, Transportation, Shopping, Bills & Utilities, Healthcare, Entertainment, Salary, Freelancing')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Professional icons, optimized colors, cannot be deleted')}
                             </p>
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-sm mb-2">AI Auto-Categorization (Standard+)</h5>
+                            <h5 className="font-medium text-sm mb-2">{t('AI Auto-Categorization (Standard+)')}</h5>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                              <strong>Function:</strong> Automatically suggest categories based on transaction descriptions<br/>
-                              <strong>Features:</strong> Machine learning analysis, merchant recognition, user preference learning, manual override options
+                              <strong>{t('Function')}:</strong> {t('Automatically suggest categories based on transaction descriptions')}<br/>
+                              <strong>{t('Features')}:</strong> {t('Machine learning analysis, merchant recognition, user preference learning, manual override options')}
                             </p>
                           </div>
                         </div>

@@ -892,6 +892,28 @@
   "Draggable positioning, mood changes based on spending, unique traits per user, hide/restore options": "Presúvateľné umiestnenie, zmeny nálady na základe utrácania, jedinečné vlastnosti pre každého používateľa, možnosti skrytia/obnovenia",
 
   "Transaction Management": "Správa Transakcií",
+  "Transaction Entry Forms": "Formuláre na Zadávanie Transakcií",
+  "Expenses, Income, and Transactions pages": "Stránky Výdavkov, Príjmov a Transakcií",
+  "Add new financial transactions with complete details": "Pridanie nových finančných transakcií s kompletnými detailmi",
+  "Amount, description, date, category, notes, recurring options": "Suma, popis, dátum, kategória, poznámky, opakujúce sa možnosti",
+  "Required fields, positive amounts, valid dates, category selection": "Povinné polia, kladné sumy, platné dátumy, výber kategórie",
+  "Transaction Lists and Filtering": "Zoznamy Transakcií a Filtrovanie",
+  "All transaction pages": "Všetky stránky transakcií",
+  "View, search, and filter transaction history": "Zobrazenie, vyhľadávanie a filtrovanie histórie transakcií",
+  "Month selection, category filtering, transaction type, date ranges": "Výber mesiaca, filtrovanie kategórií, typ transakcie, rozsahy dátumov",
+  "Responsive design, mobile-friendly collapsible filters, real-time search": "Responzívny dizajn, mobilne priateľské zbaliteľné filtre, vyhľadávanie v reálnom čase",
+  "Transaction Editing and Deletion": "Úprava a Vymazanie Transakcií",
+  "Transaction list items and dashboard widgets": "Položky zoznamu transakcií a widgety nástenky",
+  "Modify or remove existing transactions": "Úprava alebo odstránenie existujúcich transakcií",
+  "Inline editing, confirmation dialogs, immediate UI updates, undo options": "Inline úpravy, potvrdzovacie dialógy, okamžité aktualizácie UI, možnosti vrátenia",
+  "Recurring Transactions (Standard+)": "Opakujúce sa Transakcie (Standard+)",
+  "Transaction forms and reminders widget": "Formuláre transakcií a widget pripomienok",
+  "Set up automatic transaction detection and reminders": "Nastavenie automatickej detekcie transakcií a pripomienok",
+  "Frequency selection (weekly, monthly, yearly), end date options, reminder notifications": "Výber frekvencie (týždenne, mesačne, ročne), možnosti koncového dátumu, notifikácie pripomienok",
+  "Receipt OCR Processing (Standard+)": "Spracovanie OCR Účteniek (Standard+)",
+  "Upload Image buttons on transaction pages": "Tlačidlá Nahrať Obrázok na stránkach transakcií",
+  "Extract transaction data from receipt photos": "Extrahovanie údajov transakcií z fotiek účteniek",
+  "Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload": "Google Cloud Vision OCR, AI kategorizácia, podpora mobilnej kamery, QR kód nahrávanie medzi zariadeniami",
 
   "require_plan": {
     "compact": {

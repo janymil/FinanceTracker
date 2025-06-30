@@ -883,6 +883,28 @@
   "Draggable positioning, mood changes based on spending, unique traits per user, hide/restore options": "Posicionamiento arrastrable, cambios de humor basados en el gasto, rasgos únicos por usuario, opciones de ocultar/restaurar",
 
   "Transaction Management": "Gestión de Transacciones",
+  "Transaction Entry Forms": "Formularios de Entrada de Transacciones",
+  "Expenses, Income, and Transactions pages": "Páginas de Gastos, Ingresos y Transacciones",
+  "Add new financial transactions with complete details": "Agregar nuevas transacciones financieras con detalles completos",
+  "Amount, description, date, category, notes, recurring options": "Monto, descripción, fecha, categoría, notas, opciones recurrentes",
+  "Required fields, positive amounts, valid dates, category selection": "Campos obligatorios, montos positivos, fechas válidas, selección de categoría",
+  "Transaction Lists and Filtering": "Listas de Transacciones y Filtrado",
+  "All transaction pages": "Todas las páginas de transacciones",
+  "View, search, and filter transaction history": "Ver, buscar y filtrar historial de transacciones",
+  "Month selection, category filtering, transaction type, date ranges": "Selección de mes, filtrado por categoría, tipo de transacción, rangos de fechas",
+  "Responsive design, mobile-friendly collapsible filters, real-time search": "Diseño responsivo, filtros colapsables compatibles con móviles, búsqueda en tiempo real",
+  "Transaction Editing and Deletion": "Edición y Eliminación de Transacciones",
+  "Transaction list items and dashboard widgets": "Elementos de lista de transacciones y widgets del tablero",
+  "Modify or remove existing transactions": "Modificar o eliminar transacciones existentes",
+  "Inline editing, confirmation dialogs, immediate UI updates, undo options": "Edición en línea, diálogos de confirmación, actualizaciones inmediatas de UI, opciones de deshacer",
+  "Recurring Transactions (Standard+)": "Transacciones Recurrentes (Standard+)",
+  "Transaction forms and reminders widget": "Formularios de transacciones y widget de recordatorios",
+  "Set up automatic transaction detection and reminders": "Configurar detección automática de transacciones y recordatorios",
+  "Frequency selection (weekly, monthly, yearly), end date options, reminder notifications": "Selección de frecuencia (semanal, mensual, anual), opciones de fecha de finalización, notificaciones de recordatorio",
+  "Receipt OCR Processing (Standard+)": "Procesamiento OCR de Recibos (Standard+)",
+  "Upload Image buttons on transaction pages": "Botones de Cargar Imagen en páginas de transacciones",
+  "Extract transaction data from receipt photos": "Extraer datos de transacciones de fotos de recibos",
+  "Google Cloud Vision OCR, AI categorization, mobile camera support, QR code cross-device upload": "OCR de Google Cloud Vision, categorización IA, soporte de cámara móvil, carga QR entre dispositivos",
 
   "require_plan": {
     "compact": {
