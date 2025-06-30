@@ -1048,6 +1048,8 @@
   "Handwritten receipts work better when text is clear": "Ručne písané účtenky fungujú lepšie keď je text jasný",
   "Multiple items on one receipt create one transaction for the total": "Viacero položiek na jednej účtenke vytvorí jednu transakciu za celkový súčet",
 
+  "Ask about FinanzerPro features...": "Opýtajte sa na funkcie FinanzerPro...",
+
   "require_plan": {
     "compact": {
       "feature_title": "{{plan}} Funkcia",

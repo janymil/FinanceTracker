@@ -1039,6 +1039,8 @@
   "Handwritten receipts work better when text is clear": "Los recibos escritos a mano funcionan mejor cuando el texto es claro",
   "Multiple items on one receipt create one transaction for the total": "Múltiples artículos en un recibo crean una transacción por el total",
 
+  "Ask about FinanzerPro features...": "Pregunta sobre las características de FinanzerPro...",
+
   "require_plan": {
     "compact": {
       "feature_title": "Función {{plan}}",

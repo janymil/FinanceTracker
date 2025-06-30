@@ -962,6 +962,8 @@
   "Handwritten receipts work better when text is clear": "Handwritten receipts work better when text is clear",
   "Multiple items on one receipt create one transaction for the total": "Multiple items on one receipt create one transaction for the total",
 
+  "Ask about FinanzerPro features...": "Ask about FinanzerPro features...",
+
   "require_plan": {
     "compact": {
       "feature_title": "{{plan}} Feature",

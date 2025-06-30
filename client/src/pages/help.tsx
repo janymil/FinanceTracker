@@ -1228,7 +1228,7 @@ export default function Help() {
                 <Input
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  placeholder="Ask about FinanzerPro features..."
+                  placeholder={t('Ask about FinanzerPro features...')}
                   onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                   disabled={isLoading}
                 />
