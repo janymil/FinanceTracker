@@ -82,24 +82,24 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
       factors.push({ name: t('financial_health.financial_stability'), score: 5, max: 20, status: 'needs attention' });
     }
 
-    let status = 'Excellent';
+    let status = t('financial_health.status.excellent');
     let color = 'green';
     let icon = CheckCircle;
 
     if (score >= 80) {
-      status = 'Excellent';
+      status = t('financial_health.status.excellent');
       color = 'green';
       icon = CheckCircle;
     } else if (score >= 65) {
-      status = 'Good';
+      status = t('financial_health.status.good');
       color = 'blue';
       icon = TrendingUp;
     } else if (score >= 50) {
-      status = 'Fair';
+      status = t('financial_health.status.fair');
       color = 'yellow';
       icon = Shield;
     } else {
-      status = 'Needs Improvement';
+      status = t('financial_health.status.needs_improvement');
       color = 'red';
       icon = AlertTriangle;
     }
@@ -115,7 +115,7 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <StatusIcon className={`h-5 w-5 text-${healthData.color}-600`} />
-          Financial Health Score
+          {t('financial_health.title')}
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -123,22 +123,22 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
               </TooltipTrigger>
               <TooltipContent className="max-w-sm p-4 text-sm">
                 <div className="space-y-2">
-                  <div className="font-semibold">How Your Financial Health Score is Calculated:</div>
+                  <div className="font-semibold">{t('financial_health.tooltip.calculation_title')}</div>
                   <div>
-                    <strong>Spending Control (30%):</strong> Compares your expenses to income. Lower expense ratio = higher score.
+                    <strong>{t('financial_health.tooltip.spending_control_title')}</strong> {t('financial_health.tooltip.spending_control_desc')}
                   </div>
                   <div>
-                    <strong>Savings Rate (25%):</strong> Measures how much you save. Aim for 10-20% of income.
+                    <strong>{t('financial_health.tooltip.savings_rate_title')}</strong> {t('financial_health.tooltip.savings_rate_desc')}
                   </div>
                   <div>
-                    <strong>Budget Adherence (25%):</strong> How well you stick to your budgets. Under budget = excellent.
+                    <strong>{t('financial_health.tooltip.budget_adherence_title')}</strong> {t('financial_health.tooltip.budget_adherence_desc')}
                   </div>
                   <div>
-                    <strong>Financial Stability (20%):</strong> Overall balance between income and expenses.
+                    <strong>{t('financial_health.tooltip.financial_stability_title')}</strong> {t('financial_health.tooltip.financial_stability_desc')}
                   </div>
                   <div className="mt-3 pt-2 border-t border-gray-200">
-                    <strong>Score Ranges:</strong><br />
-                    80-100: Excellent | 65-79: Good | 50-64: Fair | Below 50: Needs Improvement
+                    <strong>{t('financial_health.tooltip.score_ranges')}</strong><br />
+                    {t('financial_health.tooltip.score_ranges_detail')}
                   </div>
                 </div>
               </TooltipContent>
@@ -173,7 +173,7 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
 
         <div className="space-y-3">
           <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">
-            Score Breakdown:
+{t('financial_health.score_breakdown')}
           </h4>
           {(healthData.factors || []).map((factor, index) => (
             <div key={index} className="flex justify-between items-center text-xs">
@@ -192,17 +192,17 @@ export default function FinancialHealthScore({ summary, budgets }: FinancialHeal
 
         <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
           <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
-            <p className="font-medium">Recommendations:</p>
+            <p className="font-medium">{t('financial_health.recommendations')}</p>
             {healthData.score < 80 && (
               <ul className="list-disc list-inside space-y-1 ml-2">
-                {(healthData.factors || []).find(f => f.name === 'Spending Control' && f.score < 25) && (
-                  <li>Review and reduce unnecessary expenses</li>
+                {(healthData.factors || []).find(f => f.name === t('financial_health.spending_control') && f.score < 25) && (
+                  <li>{t('financial_health.recommendation_expenses')}</li>
                 )}
-                {(healthData.factors || []).find(f => f.name === 'Savings Rate' && f.score < 20) && (
-                  <li>Aim to save at least 10-20% of income</li>
+                {(healthData.factors || []).find(f => f.name === t('financial_health.savings_rate') && f.score < 20) && (
+                  <li>{t('financial_health.recommendation_savings')}</li>
                 )}
-                {(healthData.factors || []).find(f => f.name === 'Budget Adherence' && f.score < 20) && (
-                  <li>Create and stick to monthly budgets</li>
+                {(healthData.factors || []).find(f => f.name === t('financial_health.budget_adherence') && f.score < 20) && (
+                  <li>{t('financial_health.recommendation_budgets')}</li>
                 )}
               </ul>
             )}
