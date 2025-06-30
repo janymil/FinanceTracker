@@ -465,7 +465,7 @@ export default function Income() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <RequirePlan requiredPlan="standard" feature={t("common.recurring_transactions")}>
+                  <RequirePlan plan="standard" feature={t("common.recurring_transactions")}>
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="recurring"
