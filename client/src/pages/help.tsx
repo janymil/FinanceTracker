@@ -292,9 +292,9 @@ export default function Help() {
   return (
     <AppLayout isPublicPage={true}>
       <SEO 
-        title={t('help.seo.title')}
-        description={t('help.seo.description')}
-        keywords={t('help.seo.keywords')}
+        title="Help & Documentation - FinanzerPro User Guide | Features & Support"
+        description="Complete FinanzerPro documentation covering expense tracking, receipt OCR scanning, AI categorization, budgeting, goals, and all features. Get help with setup, troubleshooting, and maximizing your financial management."
+        keywords="finanzerpro help, expense tracker guide, receipt scanning tutorial, AI categorization help, budget app documentation, personal finance support, financial management tutorial"
         canonical="https://finanzerpro.com/help"
       />
       <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -303,20 +303,20 @@ export default function Help() {
         <div className="lg:col-span-2">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              {t('help.page.title')}
+              {t('FinanzerPro Documentation')}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              {t('help.page.subtitle')}
+              {t('Complete guide to managing your finances with FinanzerPro\'s powerful features')}
             </p>
           </div>
 
           <Tabs defaultValue="overview" className="w-full">
             <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="overview">{t('help.tabs.overview')}</TabsTrigger>
-              <TabsTrigger value="features">{t('help.tabs.features')}</TabsTrigger>
-              <TabsTrigger value="plans">{t('help.tabs.plans')}</TabsTrigger>
-              <TabsTrigger value="guide">{t('help.tabs.guide')}</TabsTrigger>
-              <TabsTrigger value="faq">{t('help.tabs.faq')}</TabsTrigger>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="features">Features</TabsTrigger>
+              <TabsTrigger value="plans">Plans</TabsTrigger>
+              <TabsTrigger value="guide">User Guide</TabsTrigger>
+              <TabsTrigger value="faq">FAQ</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
