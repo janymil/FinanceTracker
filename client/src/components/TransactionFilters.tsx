@@ -151,7 +151,7 @@ export default function TransactionFilters({
                   <SelectContent>
                     <SelectItem value="all">{t("All Time")}</SelectItem>
                     <SelectItem value="today">{t("Today")}</SelectItem>
-                    <SelectItem value="week">{t("Last Week")}</SelectItem>
+                    <SelectItem value="last-week">{t("Last Week")}</SelectItem>
                     <SelectItem value="last-month">{t("Last Month")}</SelectItem>
                     <SelectItem value="current-month">{t("This Month")}</SelectItem>
                     <SelectItem value="jan">{t("January")}</SelectItem>

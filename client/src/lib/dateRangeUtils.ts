@@ -187,6 +187,31 @@ export function getDateRangeForFilter(filterType: string): DateRange | null {
         endISO: today.toISOString()
       };
       
+    case "last-week":
+      // Calculate the previous calendar week (Monday to Sunday)
+      const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const daysSinceMonday = currentDay === 0 ? 6 : currentDay - 1; // Adjust for Sunday being 0
+      
+      // Get start of current week (Monday)
+      const startOfCurrentWeek = new Date(today);
+      startOfCurrentWeek.setDate(today.getDate() - daysSinceMonday);
+      startOfCurrentWeek.setHours(0, 0, 0, 0);
+      
+      // Calculate previous week start and end
+      const lastWeekStart = new Date(startOfCurrentWeek);
+      lastWeekStart.setDate(startOfCurrentWeek.getDate() - 7);
+      
+      const lastWeekEnd = new Date(startOfCurrentWeek);
+      lastWeekEnd.setDate(startOfCurrentWeek.getDate() - 1);
+      lastWeekEnd.setHours(23, 59, 59, 999);
+      
+      return {
+        startDate: lastWeekStart,
+        endDate: lastWeekEnd,
+        startISO: lastWeekStart.toISOString(),
+        endISO: lastWeekEnd.toISOString()
+      };
+      
     case "month":
       const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
       return {
