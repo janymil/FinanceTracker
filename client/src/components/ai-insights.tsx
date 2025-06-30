@@ -95,11 +95,11 @@ export default function AIInsights({ data }: AIInsightsProps) {
       insights.push({
         id: "high-spending",
         type: "warning",
-        title: t("ai_insights.high_spending_alert"),
-        description: t("ai_insights.high_spending_description", { percentage: ((totalExpenses / totalIncome) * 100).toFixed(0) }),
+        title: t("insights.high_spending_alert"),
+        description: t("insights.high_spending_description", { percentage: ((totalExpenses / totalIncome) * 100).toFixed(0) }),
         impact: "high",
         amount: totalExpenses,
-        recommendation: t("ai_insights.review_expense_categories"),
+        recommendation: t("insights.review_expense_categories"),
         actionable: true
       });
     }
@@ -120,15 +120,15 @@ export default function AIInsights({ data }: AIInsightsProps) {
       insights.push({
         id: "category-dominance",
         type: "suggestion",
-        title: t("ai_insights.category_focus_opportunity"),
-        description: t("ai_insights.category_spending_percentage", { 
+        title: t("insights.category_focus_opportunity"),
+        description: t("insights.category_spending_percentage", { 
           category: topCategory[0], 
           percentage: ((topCategory[1] as number / totalExpenses) * 100).toFixed(0) 
         }),
         impact: "medium",
         category: topCategory[0] as string,
         amount: topCategory[1] as number,
-        recommendation: t("ai_insights.consider_budget_limit", { category: topCategory[0] }),
+        recommendation: t("insights.consider_budget_limit", { category: topCategory[0] }),
         actionable: true
       });
     }
@@ -249,11 +249,11 @@ export default function AIInsights({ data }: AIInsightsProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Brain className="h-5 w-5" />
-          {t("ai_insights.title")}
+          {t("insights.title")}
           <Badge className="bg-premium text-white">{t("plans.premium")}</Badge>
         </CardTitle>
         <CardDescription>
-          {t("ai_insights.description")}
+          {t("insights.description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -261,10 +261,10 @@ export default function AIInsights({ data }: AIInsightsProps) {
           <div className="text-center py-8">
             <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              {t("ai_insights.no_insights")}
+              {t("insights.no_insights")}
             </h3>
             <p className="text-gray-600 dark:text-gray-300">
-              {t("ai_insights.add_transactions")}
+              {t("insights.add_transactions")}
             </p>
           </div>
         ) : (
@@ -291,7 +291,7 @@ export default function AIInsights({ data }: AIInsightsProps) {
                             "border-gray-300 text-gray-700"
                           }
                         >
-                          {t(`ai_insights.impact_${insight.impact}`)}
+                          {t(`insights.impact_${insight.impact}`)}
                         </Badge>
                       </div>
                       
@@ -308,7 +308,7 @@ export default function AIInsights({ data }: AIInsightsProps) {
                       
                       {insight.recommendation && (
                         <div className="mt-3 p-3 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">
-                          <p className="text-sm font-medium mb-1">{t("ai_insights.recommendation")}:</p>
+                          <p className="text-sm font-medium mb-1">{t("insights.recommendation")}:</p>
                           <p className="text-sm text-gray-600 dark:text-gray-300">
                             {insight.recommendation}
                           </p>
@@ -319,7 +319,7 @@ export default function AIInsights({ data }: AIInsightsProps) {
                               className="mt-2"
                               onClick={() => handleTakeAction(insight)}
                             >
-                              {t("ai_insights.take_action")}
+                              {t("insights.take_action")}
                               <ArrowRight className="h-3 w-3 ml-1" />
                             </Button>
                           )}
