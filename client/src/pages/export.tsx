@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import RequirePlan from '@/components/require-plan';
 import { useClerkUserReady } from '@/hooks/useClerkUserReady';
 import { useAuth } from '@clerk/clerk-react';
+import { PDFSecurityModal } from '@/components/PDFSecurityModal';
 import { 
   Download, 
   Upload, 
@@ -1600,9 +1601,15 @@ goal,,,,,,,,,,8000,1000,2025-06-01,Vacation`;
         </Dialog>
 
         {/* Security Disclosure Modal */}
-        <Dialog open={showSecurityDisclosure} onOpenChange={setShowSecurityDisclosure}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
+        <PDFSecurityModal
+          isOpen={showSecurityDisclosure}
+          onClose={() => setShowSecurityDisclosure(false)}
+          onConsent={handleSecurityConsent}
+        />
+      </div>
+    </RequirePlan>
+  );
+}
               <DialogTitle className="flex items-center gap-2 text-xl">
                 <Shield className="h-6 w-6 text-green-600" />
                 Bank-Grade Security for PDF Processing
