@@ -49,6 +49,14 @@ export interface PDFProcessingResult {
   anonymizationPreview?: AnonymizationPreviewData; // Preview data for user confirmation
 }
 
+export interface ProcessingProgress {
+  stage: 'pdf_validation' | 'text_extraction' | 'ocr_fallback' | 'ai_parsing' | 'categorization' | 'duplicate_detection' | 'complete';
+  percentage: number; // 0-100
+  message: string;
+  transactionsProcessed?: number;
+  totalTransactions?: number;
+}
+
 export interface AnonymizationPreviewData {
   originalText: string;
   anonymizedText: string;
@@ -287,12 +295,13 @@ class PDFSecurityManager {
 }
 
 /**
- * Main PDF processing pipeline with enhanced security
+ * Main PDF processing pipeline with enhanced security and progress tracking
  */
 export async function processBankStatementPDF(
   pdfBuffer: Buffer,
   language: string = 'en-us',
-  existingTransactions: ExistingTransaction[] = []
+  existingTransactions: ExistingTransaction[] = [],
+  onProgress?: (progress: ProcessingProgress) => void
 ): Promise<PDFProcessingResult> {
   const result: PDFProcessingResult = {
     transactions: [],
@@ -309,12 +318,23 @@ export async function processBankStatementPDF(
 
   try {
     // Step 0: Security validation
+    onProgress?.({
+      stage: 'pdf_validation',
+      percentage: 5,
+      message: 'Validating PDF security...'
+    });
+    
     if (!PDFSecurityManager.validatePDFSecurity(pdfBuffer, result.securityLog)) {
       result.errors.push('PDF failed security validation');
       return result;
     }
 
     // Step 1: Try PDF text extraction first
+    onProgress?.({
+      stage: 'text_extraction',
+      percentage: 15,
+      message: 'Extracting text from PDF...'
+    });
     let pdf: any;
     try {
       const module = await import('pdf-parse');
@@ -356,6 +376,12 @@ export async function processBankStatementPDF(
 
     // Step 2: If text quality is poor, use LOCAL OCR fallback
     if (textQuality < 0.5) {
+      onProgress?.({
+        stage: 'ocr_fallback',
+        percentage: 35,
+        message: 'Text quality poor, using local OCR...'
+      });
+      
       console.log('Poor text quality detected, falling back to LOCAL OCR...');
       PDFSecurityManager.logSecurityEvent(result.securityLog, 'local_ocr_fallback_start', 'success', 'Using privacy-first local OCR');
       
@@ -380,7 +406,19 @@ export async function processBankStatementPDF(
 
     // Step 3: AI parsing with bank-specific prompts
     if (extractedText.trim().length > 0) {
+      onProgress?.({
+        stage: 'ai_parsing',
+        percentage: 50,
+        message: 'Parsing transactions with AI...'
+      });
+      
       const transactions = await parseTransactionsWithAI(extractedText, language);
+      
+      onProgress?.({
+        stage: 'categorization',
+        percentage: 75,
+        message: `AI processing complete, categorizing ${transactions.length} transactions...`
+      });
       
       // Keep transactions unencrypted for preview - encryption happens during database save
       result.transactions = transactions;
@@ -403,9 +441,21 @@ export async function processBankStatementPDF(
 
   // Step 6: Duplicate detection if existing transactions provided
   if (existingTransactions.length > 0 && result.transactions.length > 0) {
+    onProgress?.({
+      stage: 'duplicate_detection',
+      percentage: 90,
+      message: 'Checking for duplicate transactions...'
+    });
+    
     result.duplicates = detectDuplicateTransactions(result.transactions, existingTransactions);
     PDFSecurityManager.logSecurityEvent(result.securityLog, 'duplicate_detection_complete', 'success', `Found ${result.duplicates?.length || 0} potential duplicates`);
   }
+
+  onProgress?.({
+    stage: 'complete',
+    percentage: 100,
+    message: `Processing complete! Extracted ${result.transactions.length} transactions`
+  });
 
   return result;
 }
