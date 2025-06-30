@@ -88,6 +88,9 @@ export async function runAI(task: string, userId: string, payload: Record<string
         case 'expense-predictions':
           fallbackResult = await generateExpensePredictions(userId, payload.transactions);
           break;
+        case 'categorizeExpense':
+          fallbackResult = await categorizeExpense(payload.description, payload.amount, payload.language);
+          break;
         case 'parseBankStatement':
           fallbackResult = await parseBankStatement(payload.text, payload.language || 'en-us');
           break;
