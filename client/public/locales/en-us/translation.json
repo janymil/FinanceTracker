@@ -621,6 +621,38 @@
   "decreasing": "decreasing", 
   "stable": "stable",
 
+  "financial_health": {
+    "title": "Financial Health Score",
+    "spending_control": "Spending Control",
+    "savings_rate": "Savings Rate",
+    "budget_adherence": "Budget Adherence",
+    "financial_stability": "Financial Stability",
+    "status": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "needs_improvement": "Needs Improvement"
+    },
+    "score_breakdown": "Score Breakdown:",
+    "recommendations": "Recommendations:",
+    "recommendation_expenses": "Review and reduce unnecessary expenses",
+    "recommendation_savings": "Aim to save at least 10-20% of income",
+    "recommendation_budgets": "Create and stick to monthly budgets",
+    "tooltip": {
+      "calculation_title": "How Your Financial Health Score is Calculated:",
+      "spending_control_title": "Spending Control (30%):",
+      "spending_control_desc": "Compares your expenses to income. Lower expense ratio = higher score.",
+      "savings_rate_title": "Savings Rate (25%):",
+      "savings_rate_desc": "Measures how much you save. Aim for 10-20% of income.",
+      "budget_adherence_title": "Budget Adherence (25%):",
+      "budget_adherence_desc": "How well you stick to your budgets. Under budget = excellent.",
+      "financial_stability_title": "Financial Stability (20%):",
+      "financial_stability_desc": "Overall balance between income and expenses.",
+      "score_ranges": "Score Ranges:",
+      "score_ranges_detail": "80-100: Excellent | 65-79: Good | 50-64: Fair | Below 50: Needs Improvement"
+    }
+  },
+
   "reports": {
     "title": "Advanced Reports & Analytics",
     "subtitle": "AI-powered insights, interactive charts, and comprehensive financial analysis",

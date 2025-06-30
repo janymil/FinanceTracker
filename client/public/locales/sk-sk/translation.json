@@ -619,6 +619,38 @@
   "aiAnalysisSection": "Sekcia AI analýzy",
   "analysisInProgress": "Analýza prebieha...",
 
+  "financial_health": {
+    "title": "Skóre Finančného Zdravia",
+    "spending_control": "Kontrola Výdavkov",
+    "savings_rate": "Miera Úspor",
+    "budget_adherence": "Dodržiavanie Rozpočtu",
+    "financial_stability": "Finančná Stabilita",
+    "status": {
+      "excellent": "Výborné",
+      "good": "Dobré",
+      "fair": "Uspokojivé",
+      "needs_improvement": "Potrebuje Zlepšenie"
+    },
+    "score_breakdown": "Rozpis Skóre:",
+    "recommendations": "Odporúčania:",
+    "recommendation_expenses": "Skontrolujte a znížte nepotrebné výdavky",
+    "recommendation_savings": "Snažte sa šetriť aspoň 10-20% príjmu",
+    "recommendation_budgets": "Vytvorte a dodržiavajte mesačné rozpočty",
+    "tooltip": {
+      "calculation_title": "Ako sa počíta Vaše Skóre Finančného Zdravia:",
+      "spending_control_title": "Kontrola Výdavkov (30%):",
+      "spending_control_desc": "Porovnáva Vaše výdavky s príjmom. Nižší pomer výdavkov = vyššie skóre.",
+      "savings_rate_title": "Miera Úspor (25%):",
+      "savings_rate_desc": "Meria koľko šetríte. Cieľ je 10-20% príjmu.",
+      "budget_adherence_title": "Dodržiavanie Rozpočtu (25%):",
+      "budget_adherence_desc": "Ako dobre dodržiavate rozpočty. Pod rozpočtom = výborné.",
+      "financial_stability_title": "Finančná Stabilita (20%):",
+      "financial_stability_desc": "Celková rovnováha medzi príjmom a výdavkami.",
+      "score_ranges": "Rozsahy Skóre:",
+      "score_ranges_detail": "80-100: Výborné | 65-79: Dobré | 50-64: Uspokojivé | Pod 50: Potrebuje Zlepšenie"
+    }
+  },
+
   "reports": {
     "title": "Pokročilé Prehľady a Analýzy",
     "subtitle": "AI-poháňané poznatky, interaktívne grafy a komplexná finančná analýza",

@@ -610,6 +610,38 @@
   "Prediction factors": "Factores de predicción",
   "No Category Data Available": "No Hay Datos de Categoría Disponibles",
 
+  "financial_health": {
+    "title": "Puntuación de Salud Financiera",
+    "spending_control": "Control de Gastos",
+    "savings_rate": "Tasa de Ahorro",
+    "budget_adherence": "Cumplimiento del Presupuesto",
+    "financial_stability": "Estabilidad Financiera",
+    "status": {
+      "excellent": "Excelente",
+      "good": "Bueno",
+      "fair": "Regular",
+      "needs_improvement": "Necesita Mejora"
+    },
+    "score_breakdown": "Desglose de Puntuación:",
+    "recommendations": "Recomendaciones:",
+    "recommendation_expenses": "Revisa y reduce gastos innecesarios",
+    "recommendation_savings": "Intenta ahorrar al menos 10-20% de tus ingresos",
+    "recommendation_budgets": "Crea y cumple presupuestos mensuales",
+    "tooltip": {
+      "calculation_title": "Cómo se Calcula tu Puntuación de Salud Financiera:",
+      "spending_control_title": "Control de Gastos (30%):",
+      "spending_control_desc": "Compara tus gastos con los ingresos. Menor proporción de gastos = mayor puntuación.",
+      "savings_rate_title": "Tasa de Ahorro (25%):",
+      "savings_rate_desc": "Mide cuánto ahorras. El objetivo es 10-20% de los ingresos.",
+      "budget_adherence_title": "Cumplimiento del Presupuesto (25%):",
+      "budget_adherence_desc": "Qué tan bien cumples tus presupuestos. Dentro del presupuesto = excelente.",
+      "financial_stability_title": "Estabilidad Financiera (20%):",
+      "financial_stability_desc": "Equilibrio general entre ingresos y gastos.",
+      "score_ranges": "Rangos de Puntuación:",
+      "score_ranges_detail": "80-100: Excelente | 65-79: Bueno | 50-64: Regular | Menos de 50: Necesita Mejora"
+    }
+  },
+
   "reports": {
     "title": "Informes y Análisis Avanzados",
     "subtitle": "Perspectivas potenciadas por IA, gráficos interactivos y análisis financiero integral",
