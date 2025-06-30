@@ -82,14 +82,14 @@ export default function Help() {
       const data = await response.json();
       setChatMessages(prev => [...prev, {
         role: "assistant",
-        content: data.response || "I'm sorry, I couldn't generate a response. Please try again.",
+        content: data.response || t('help.chat.error_response'),
         timestamp: new Date()
       }]);
     } catch (error) {
       console.error('Help chat error:', error);
       setChatMessages(prev => [...prev, {
         role: "assistant",
-        content: "Sorry, I'm having trouble right now. Please try again later.",
+        content: t('help.chat.error_response'),
         timestamp: new Date()
       }]);
     } finally {
@@ -292,9 +292,9 @@ export default function Help() {
   return (
     <AppLayout isPublicPage={true}>
       <SEO 
-        title="Help & Documentation - FinanzerPro User Guide | Features & Support"
-        description="Complete FinanzerPro documentation covering expense tracking, receipt OCR scanning, AI categorization, budgeting, goals, and all features. Get help with setup, troubleshooting, and maximizing your financial management."
-        keywords="finanzerpro help, expense tracker guide, receipt scanning tutorial, AI categorization help, budget app documentation, personal finance support, financial management tutorial"
+        title={t('help.seo.title')}
+        description={t('help.seo.description')}
+        keywords={t('help.seo.keywords')}
         canonical="https://finanzerpro.com/help"
       />
       <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -303,20 +303,20 @@ export default function Help() {
         <div className="lg:col-span-2">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              FinanzerPro Documentation
+              {t('help.page.title')}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              Complete guide to managing your finances with FinanzerPro's powerful features
+              {t('help.page.subtitle')}
             </p>
           </div>
 
           <Tabs defaultValue="overview" className="w-full">
             <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="features">Features</TabsTrigger>
-              <TabsTrigger value="plans">Plans</TabsTrigger>
-              <TabsTrigger value="guide">User Guide</TabsTrigger>
-              <TabsTrigger value="faq">FAQ</TabsTrigger>
+              <TabsTrigger value="overview">{t('help.tabs.overview')}</TabsTrigger>
+              <TabsTrigger value="features">{t('help.tabs.features')}</TabsTrigger>
+              <TabsTrigger value="plans">{t('help.tabs.plans')}</TabsTrigger>
+              <TabsTrigger value="guide">{t('help.tabs.guide')}</TabsTrigger>
+              <TabsTrigger value="faq">{t('help.tabs.faq')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -521,15 +521,15 @@ export default function Help() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="relative">
                   <CardHeader>
-                    <CardTitle className="text-center">Free</CardTitle>
+                    <CardTitle className="text-center">{t('help.plans.free')}</CardTitle>
                     <CardDescription className="text-center">
-                      <span className="text-3xl font-bold">$0</span>
-                      <span className="text-sm">/month</span>
+                      <span className="text-3xl font-bold">{t('help.plans.price_free')}</span>
+                      <span className="text-sm">{t('help.plans.per_month')}</span>
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="space-y-2">
-                      {planFeatures.free.map((feature, index) => (
+                      {(t('help.plans.features.free', { returnObjects: true }) as string[]).map((feature, index) => (
                         <li key={index} className="flex items-center gap-2 text-sm">
                           <div className="h-2 w-2 bg-green-500 rounded-full" />
                           {feature}
@@ -544,15 +544,15 @@ export default function Help() {
                     <Badge className="bg-primary">Most Popular</Badge>
                   </div>
                   <CardHeader>
-                    <CardTitle className="text-center">Standard</CardTitle>
+                    <CardTitle className="text-center">{t('help.plans.standard')}</CardTitle>
                     <CardDescription className="text-center">
-                      <span className="text-3xl font-bold">$4.99</span>
-                      <span className="text-sm">/month</span>
+                      <span className="text-3xl font-bold">{t('help.plans.price_standard')}</span>
+                      <span className="text-sm">{t('help.plans.per_month')}</span>
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="space-y-2">
-                      {planFeatures.standard.map((feature, index) => (
+                      {(t('help.plans.features.standard', { returnObjects: true }) as string[]).map((feature, index) => (
                         <li key={index} className="flex items-center gap-2 text-sm">
                           <div className="h-2 w-2 bg-green-500 rounded-full" />
                           {feature}
@@ -564,15 +564,15 @@ export default function Help() {
 
                 <Card className="relative">
                   <CardHeader>
-                    <CardTitle className="text-center">Premium</CardTitle>
+                    <CardTitle className="text-center">{t('help.plans.premium')}</CardTitle>
                     <CardDescription className="text-center">
-                      <span className="text-3xl font-bold">$9.99</span>
-                      <span className="text-sm">/month</span>
+                      <span className="text-3xl font-bold">{t('help.plans.price_premium')}</span>
+                      <span className="text-sm">{t('help.plans.per_month')}</span>
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="space-y-2">
-                      {planFeatures.premium.map((feature, index) => (
+                      {(t('help.plans.features.premium', { returnObjects: true }) as string[]).map((feature, index) => (
                         <li key={index} className="flex items-center gap-2 text-sm">
                           <div className="h-2 w-2 bg-green-500 rounded-full" />
                           {feature}
