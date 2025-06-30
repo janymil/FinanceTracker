@@ -49,27 +49,17 @@ export default function Reports() {
     // Otherwise use the selected period
     switch (selectedPeriod) {
       case "week":
-        const today = new Date(now);
-        const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-        const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert Sunday=0 to Sunday=6, Monday=1 to Monday=0
-        const weekStart = new Date(today);
-        weekStart.setDate(today.getDate() - daysFromMonday); // Start of current week (Monday)
-        weekStart.setHours(0, 0, 0, 0);
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6); // End of current week (Sunday)
-        weekEnd.setHours(23, 59, 59, 999);
-        return { startDate: weekStart, endDate: weekEnd };
+        const weekRange = getDateRangeForFilter("this-week");
+        return weekRange ? { startDate: weekRange.startDate, endDate: weekRange.endDate } : { startDate: startOfMonth(now), endDate: endOfMonth(now) };
       case "month":
         const { startDate: monthStart, endDate: monthEnd } = getCurrentMonthDateRange();
         return { startDate: monthStart, endDate: monthEnd };
       case "quarter":
-        const quarterStart = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
-        const quarterEnd = new Date(quarterStart);
-        quarterEnd.setMonth(quarterStart.getMonth() + 3);
-        quarterEnd.setDate(0);
-        return { startDate: quarterStart, endDate: quarterEnd };
+        const quarterRange = getDateRangeForFilter("quarter");
+        return quarterRange ? { startDate: quarterRange.startDate, endDate: quarterRange.endDate } : { startDate: startOfMonth(now), endDate: endOfMonth(now) };
       case "year":
-        return { startDate: startOfYear(now), endDate: endOfYear(now) };
+        const yearRange = getDateRangeForFilter("year");
+        return yearRange ? { startDate: yearRange.startDate, endDate: yearRange.endDate } : { startDate: startOfYear(now), endDate: endOfYear(now) };
       default:
         return { startDate: startOfMonth(now), endDate: endOfMonth(now) };
     }

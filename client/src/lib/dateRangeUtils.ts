@@ -247,6 +247,54 @@ export function getDateRangeForFilter(filterType: string): DateRange | null {
         endISO: yearEnd.toISOString()
       };
       
+    case "this-week":
+      // Calculate current calendar week (Monday to Sunday)
+      const thisWeekDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const thisWeekDaysSinceMonday = thisWeekDay === 0 ? 6 : thisWeekDay - 1; // Adjust for Sunday being 0
+      
+      // Get start of current week (Monday)
+      const thisWeekStart = new Date(today);
+      thisWeekStart.setDate(today.getDate() - thisWeekDaysSinceMonday);
+      thisWeekStart.setHours(0, 0, 0, 0);
+      
+      // Calculate current week end (Sunday)
+      const thisWeekEnd = new Date(thisWeekStart);
+      thisWeekEnd.setDate(thisWeekStart.getDate() + 6);
+      thisWeekEnd.setHours(23, 59, 59, 999);
+      
+      return {
+        startDate: thisWeekStart,
+        endDate: thisWeekEnd,
+        startISO: thisWeekStart.toISOString(),
+        endISO: thisWeekEnd.toISOString()
+      };
+      
+    case "quarter":
+      // Calculate current quarter
+      const quarterStartMonth = Math.floor(today.getMonth() / 3) * 3;
+      const quarterStart = new Date(today.getFullYear(), quarterStartMonth, 1);
+      quarterStart.setHours(0, 0, 0, 0);
+      
+      const quarterEnd = new Date(today.getFullYear(), quarterStartMonth + 3, 0, 23, 59, 59, 999);
+      
+      return {
+        startDate: quarterStart,
+        endDate: quarterEnd,
+        startISO: quarterStart.toISOString(),
+        endISO: quarterEnd.toISOString()
+      };
+      
+    case "year":
+      const currentYearStart = new Date(today.getFullYear(), 0, 1);
+      currentYearStart.setHours(0, 0, 0, 0);
+      const currentYearEnd = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
+      return {
+        startDate: currentYearStart,
+        endDate: currentYearEnd,
+        startISO: currentYearStart.toISOString(),
+        endISO: currentYearEnd.toISOString()
+      };
+      
     case "last-30-days":
       const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
       return {
