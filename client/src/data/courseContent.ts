@@ -301,15 +301,17 @@ export const COURSE_CONTENT: CourseModule[] = [
     levels: [
       {
         id: "cashflow-level-1",
-        title: "💡 Welcome & The Power of Cash Flow Awareness",
-        description: "Discover how cash flow awareness gives you control over your financial life",
+        title: "💡 Cash Flow Psychology & Financial Control Mastery",
+        description: "Master the psychological foundations of money management and discover how 78% of Americans break free from paycheck-to-paycheck living through strategic cash flow awareness",
         difficulty: "Beginner",
         estimatedTime: "5 minutes",
         xpReward: 50,
         learningObjectives: [
-          "Understand what cash flow is and why it matters",
-          "Recognize how tracking cash flow helps you spot financial leaks",
-          "Develop awareness of your current financial situation"
+          "Master the psychology of money flow and financial control fundamentals",
+          "Discover how 78% of Americans live paycheck-to-paycheck and break this cycle",
+          "Learn the river analogy system for visualizing income and expense flows",
+          "Understand why cash flow tracking is the #1 predictor of financial success",
+          "Analyze real case studies of people saving $2,400+ annually through awareness"
         ],
         tabs: [
           {
