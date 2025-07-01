@@ -334,7 +334,7 @@ function extractLanguageFromPath(path: string): { language: string | null; clean
 }
 
 // SSR routes for SEO - only serve to crawlers (both root and language-prefixed)
-const seoRoutes = ['/', '/pricing', '/help', '/contact', '/auth', '/privacy-policy', '/terms-of-service', '/cookie-policy'];
+const seoRoutes = ['/', '/pricing', '/help', '/contact', '/auth', '/privacy-policy', '/terms-of-service', '/cookie-policy', '/features'];
 
 // Handle root routes (e.g., /pricing)
 seoRoutes.forEach(route => {
