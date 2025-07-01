@@ -79,13 +79,6 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
       badge: null,
     },
     {
-      title: "Financial Courses",
-      icon: BookOpen,
-      href: `/${currentLang}/courses`,
-      requiredPlan: "free",
-      badge: null,
-    },
-    {
       title: t("Transactions"),
       icon: CreditCard,
       href: `/${currentLang}/transactions`,

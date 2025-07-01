@@ -43,11 +43,12 @@ import {
   Sun,
   Repeat,
   HelpCircle,
-  Gift
+  Gift,
+  BookOpen
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import RequirePlan from "@/components/require-plan";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -76,6 +77,10 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { user } = useAuth();
   const { user: clerkUser } = useUser();
   const { isReady } = useClerkUserReady();
+  const [currentPath] = useLocation();
+  
+  // Extract current language from URL to build language-aware links
+  const currentLang = currentPath.match(/^\/([a-z]{2})\//)?.[1] || 'en';
 
   // Helper functions for category localization
   const isPredefinedCategory = (category: any): boolean => {
@@ -519,6 +524,12 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
                 <Link href="/profile">
                   <User className="h-4 w-4 mr-2" />
 {t("Profile & Account Configuration")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/${currentLang}/courses`}>
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Financial Courses
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
