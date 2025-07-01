@@ -7,7 +7,7 @@ import { Calculator as CalculatorIcon, TrendingUp, TrendingDown, DollarSign } fr
 import { Calculator as CalculatorType } from '@/data/courseContent';
 
 interface CalculatorProps {
-  calculator: CalculatorType;
+  calculator?: CalculatorType;
 }
 
 export function Calculator({ calculator }: CalculatorProps) {
@@ -18,6 +18,27 @@ export function Calculator({ calculator }: CalculatorProps) {
     status?: string;
     message?: string;
   }>({});
+
+  // If no calculator provided, render a placeholder
+  if (!calculator) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <CalculatorIcon className="h-5 w-5 text-blue-600" />
+            <CardTitle className="text-lg">Calculator</CardTitle>
+          </div>
+          <CardDescription>Interactive tools will appear here as you progress through the lesson.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center p-8 text-center">
+            <CalculatorIcon className="h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-sm text-muted-foreground">Complete the lesson content to unlock interactive calculators!</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const handleInputChange = (fieldId: string, value: string) => {
     const numValue = parseFloat(value) || 0;
@@ -96,14 +117,14 @@ export function Calculator({ calculator }: CalculatorProps) {
       <CardHeader>
         <div className="flex items-center gap-2">
           <CalculatorIcon className="h-5 w-5 text-blue-600" />
-          <CardTitle className="text-lg">{calculator.title}</CardTitle>
+          <CardTitle className="text-lg">{calculator?.title || 'Calculator'}</CardTitle>
         </div>
-        <CardDescription>{calculator.description}</CardDescription>
+        <CardDescription>{calculator?.description || 'Interactive calculator'}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Input Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {calculator.fields.map((field) => (
+          {calculator?.fields?.map((field) => (
             <div key={field.id} className="space-y-2">
               <Label htmlFor={field.id}>
                 {field.label}
