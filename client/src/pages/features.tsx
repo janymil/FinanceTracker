@@ -29,6 +29,53 @@ import {
   FileText
 } from 'lucide-react';
 
+// Helper function to get current language for video files
+function getCurrentLanguageForAPI(): string {
+  if (typeof window !== 'undefined' && (window as any).i18next) {
+    const lang = (window as any).i18next.language;
+    return lang.startsWith('es') ? 'es-pe' : lang.startsWith('sk') ? 'sk-sk' : 'en-us';
+  }
+  return 'en-us';
+}
+
+// Static video card component
+function DemoVideoCard({ title, description, demoType }: { 
+  title: string; 
+  description: string; 
+  demoType: 'categorization' | 'tips' | 'health' 
+}) {
+  const language = getCurrentLanguageForAPI();
+  const videoPath = `/demo-videos/${demoType}-demo-${language}.mp4`;
+
+  return (
+    <Card className="h-full">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-primary" />
+          {title}
+        </CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg flex items-center justify-center mb-4">
+          <video 
+            controls 
+            className="w-full h-full rounded-lg"
+            poster={`/images/demo-${demoType}-thumbnail.jpg`}
+          >
+            <source src={videoPath} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <Button className="w-full" size="sm">
+          <Sparkles className="mr-2 h-4 w-4" />
+          Watch Demo
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function FeaturesPage() {
   const { t, i18n } = useTranslation();
   const [, setLocation] = useLocation();
