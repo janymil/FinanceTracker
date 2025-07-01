@@ -32,8 +32,14 @@ export function AnonymousHeader({ showHelpContact = true }: AnonymousHeaderProps
             {showHelpContact && (
               <>
                 <button 
-                  onClick={() => setLocation('/features')} 
-                  className="hidden sm:block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  onClick={() => {
+                    // Get current language from URL or localStorage
+                    const currentPath = window.location.pathname;
+                    const langMatch = currentPath.match(/^\/([a-z]{2})\//);
+                    const currentLang = langMatch ? langMatch[1] : localStorage.getItem('preferredLanguage') || 'en';
+                    setLocation(`/${currentLang}/features`);
+                  }} 
+                  className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                 >
                   {t('nav.features')}
                 </button>
