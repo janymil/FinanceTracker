@@ -49,6 +49,7 @@ export default function FeaturesPage() {
   const [dataMonths, setDataMonths] = useState([12]);
   const [trendStrength, setTrendStrength] = useState([3]);
   const [pagesInStatement, setPagesInStatement] = useState([5]);
+  const [historicalMonths, setHistoricalMonths] = useState([6]);
   const [recsFollowed, setRecsFollowed] = useState([4]);
   const [contextFactors, setContextFactors] = useState([5]);
   const [primaryScore, setPrimaryScore] = useState([75]);
@@ -168,6 +169,18 @@ export default function FeaturesPage() {
       ]
     },
     {
+      id: 'predictions',
+      icon: TrendingUp,
+      title: 'Expense Predictions',
+      badge: 'Premium',
+      description: 'Advanced predictive analytics that forecast future expense patterns based on your historical data, seasonal trends, and business growth indicators.',
+      benefits: [
+        { title: 'Future Forecasting', desc: 'Predict expenses up to 6 months ahead' },
+        { title: 'Seasonal Analysis', desc: 'Account for seasonal business variations' },
+        { title: 'Budget Planning', desc: 'Data-driven budget creation for future periods' }
+      ]
+    },
+    {
       id: 'trends',
       icon: BarChart3,
       title: 'AI Trend Predictions',
@@ -230,6 +243,10 @@ export default function FeaturesPage() {
     return Math.floor(pagesInStatement[0] * 8.5); // Average 8.5 transactions per page
   };
 
+  const calculatePredictionRange = () => {
+    return Math.min(12, Math.floor(historicalMonths[0] * 1.5)); // Max 12 months prediction
+  };
+
   return (
     <AppLayout isPublicPage={true}>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -242,12 +259,12 @@ export default function FeaturesPage() {
               AI-Powered Financial Intelligence
             </h1>
             <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-4xl mx-auto">
-              Transform your business finances with 8 intelligent AI features that learn, adapt, and optimize your financial decisions in real-time.
+              Transform your business finances with 9 intelligent AI features that learn, adapt, and optimize your financial decisions in real-time.
             </p>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold">8</div>
+                <div className="text-3xl md:text-4xl font-bold">9</div>
                 <div className="text-sm opacity-80">AI Functions</div>
               </div>
               <div className="text-center">
@@ -340,7 +357,7 @@ export default function FeaturesPage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Complete AI Feature Suite</h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              Explore each of our 8 intelligent AI functions designed to revolutionize your financial management
+              Explore each of our 9 intelligent AI functions designed to revolutionize your financial management
             </p>
           </div>
 
@@ -485,6 +502,39 @@ export default function FeaturesPage() {
                       <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-blue-600">
                         <div className="text-sm text-muted-foreground">Estimated Financial Health Score:</div>
                         <div className="text-xl font-bold text-blue-600">{calculateHealthScore()}/100</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {activeTab === 'predictions' && (
+                <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Prediction Range Calculator</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between mb-2">
+                          <span>Historical data months:</span>
+                          <span className="font-semibold">{historicalMonths[0]} months</span>
+                        </div>
+                        <Slider
+                          value={historicalMonths}
+                          onValueChange={setHistoricalMonths}
+                          max={24}
+                          min={3}
+                          step={1}
+                        />
+                      </div>
+                      <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-blue-600">
+                        <div className="text-sm text-muted-foreground">Prediction range available:</div>
+                        <div className="text-xl font-bold text-blue-600">{calculatePredictionRange()} months ahead</div>
+                      </div>
+                      <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-green-600">
+                        <div className="text-sm text-muted-foreground">Prediction accuracy:</div>
+                        <div className="text-xl font-bold text-green-600">{Math.min(95, Math.floor(65 + (historicalMonths[0] * 1.1)))}%</div>
                       </div>
                     </div>
                   </CardContent>
