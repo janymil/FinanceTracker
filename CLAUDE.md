@@ -52,7 +52,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Key Tables**: users, transactions, budgets, goals, categories, ai_cache
 
 ### External Services Integration
-- **AI Processing**: External Fly.io service at `finanzerpro-ai-processor.fly.dev`
+- **AI Processing**: External Fly.io service at `finanzerpro.fly.dev`
 - **File Storage**: Bunny.net CDN for receipts and exports
 - **OCR**: Local Tesseract.js (privacy-first, no external data transmission)
 - **Email**: SendGrid for notifications and alerts

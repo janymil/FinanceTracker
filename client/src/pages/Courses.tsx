@@ -272,7 +272,14 @@ export default function Courses() {
   }
 
   // Active tab state for content view
-  const [activeTab, setActiveTab] = useState(currentLevel?.tabs?.[0]?.id || 'overview');
+  const [activeTab, setActiveTab] = useState('overview');
+  
+  // Update active tab when currentLevel changes
+  React.useEffect(() => {
+    if (currentLevel?.tabs?.[0]?.id) {
+      setActiveTab(currentLevel.tabs[0].id);
+    }
+  }, [currentLevel]);
 
   // Content/Exercise view
   if (currentLevel && !showResults) {
