@@ -13,19 +13,19 @@ import {
   BookOpen, 
   CheckCircle2, 
   Lock,
-  Flame,
-  Zap,
-  Calculator,
-  ShoppingCart,
-  TrendingUp,
-  Award,
   Lightbulb,
   AlertTriangle,
+  Zap,
   ListChecks,
-  BarChart3
+  BarChart3,
+  Flame,
+  ShoppingCart,
+  TrendingUp,
+  Award
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { COURSE_CONTENT, ACHIEVEMENT_BADGES, type CourseModule, type Achievement, type Exercise, type CourseLevel } from "@/data/courseContent";
+import { Calculator } from "@/components/Calculator";
 
 // Extended types for user progress
 interface CourseLevelWithProgress extends CourseLevel {
