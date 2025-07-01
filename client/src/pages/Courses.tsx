@@ -274,9 +274,11 @@ export default function Courses() {
   // Content/Exercise view
   if (currentLevel && !showResults) {
     if (viewMode === 'content') {
-      // Content learning view
+      const [activeTab, setActiveTab] = useState(currentLevel.tabs?.[0]?.id || 'overview');
+      
+      // Content learning view with tabs
       return (
-        <div className="container mx-auto p-6 max-w-4xl">
+        <div className="container mx-auto p-6 max-w-6xl">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -290,94 +292,162 @@ export default function Courses() {
 
           {/* Learning Objectives */}
           <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+            <CardContent className="p-4">
+              <h3 className="font-semibold mb-2 flex items-center gap-2">
                 <Target className="w-5 h-5" />
-                Learning Objectives
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
+                Learning Objectives:
+              </h3>
+              <ul className="list-disc list-inside text-sm space-y-1">
                 {currentLevel.learningObjectives.map((objective, index) => (
-                  <li key={index} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    {objective}
-                  </li>
+                  <li key={index}>{objective}</li>
                 ))}
               </ul>
             </CardContent>
           </Card>
 
-          {/* Content Blocks */}
-          <div className="space-y-6 mb-8">
-            {currentLevel.content.map((block, index) => (
-              <Card key={block.id} className="overflow-hidden">
-                <CardContent className="p-6">
-                  {block.type === 'text' && (
-                    <div>
-                      {block.title && <h3 className="text-lg font-semibold mb-3">{block.title}</h3>}
-                      <p className="text-base leading-relaxed">{block.content}</p>
-                    </div>
-                  )}
-                  
-                  {block.type === 'example' && (
-                    <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Lightbulb className="w-5 h-5 text-blue-600" />
-                        <h3 className="text-lg font-semibold text-blue-800">{block.title}</h3>
+          {/* Tabs Navigation */}
+          {currentLevel.tabs && currentLevel.tabs.length > 0 ? (
+            <>
+              <div className="mb-6">
+                <div className="flex flex-wrap gap-2 border-b">
+                  {currentLevel.tabs.map((tab) => (
+                    <Button
+                      key={tab.id}
+                      variant={activeTab === tab.id ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setActiveTab(tab.id)}
+                      className="flex items-center gap-2"
+                    >
+                      <span>{tab.icon}</span>
+                      {tab.title}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tab Content with Calculator Integration */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                {/* Left Side - Content (2 columns) */}
+                <div className="lg:col-span-2 space-y-6">
+                  {currentLevel.tabs
+                    .filter(tab => tab.id === activeTab)
+                    .map(tab => (
+                      <div key={tab.id} className="space-y-6">
+                        {tab.content.map((block, index) => (
+                          <Card key={index}>
+                            <CardContent className="p-6">
+                              {block.type === 'text' && (
+                                <div>
+                                  {block.title && <h3 className="text-xl font-semibold mb-3">{block.title}</h3>}
+                                  <p className="text-muted-foreground whitespace-pre-line">{block.content}</p>
+                                </div>
+                              )}
+                              
+                              {block.type === 'example' && (
+                                <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Lightbulb className="w-5 h-5 text-blue-600" />
+                                    <h3 className="text-lg font-semibold text-blue-800">{block.title}</h3>
+                                  </div>
+                                  <p className="text-blue-700 whitespace-pre-line">{block.content}</p>
+                                </div>
+                              )}
+                              
+                              {block.type === 'tip' && (
+                                <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-r">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Zap className="w-5 h-5 text-green-600" />
+                                    <h3 className="text-lg font-semibold text-green-800">{block.title}</h3>
+                                  </div>
+                                  <p className="text-green-700 whitespace-pre-line">{block.content}</p>
+                                </div>
+                              )}
+                              
+                              {block.type === 'warning' && (
+                                <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-r">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <AlertTriangle className="w-5 h-5 text-red-600" />
+                                    <h3 className="text-lg font-semibold text-red-800">{block.title}</h3>
+                                  </div>
+                                  <p className="text-red-700 whitespace-pre-line">{block.content}</p>
+                                </div>
+                              )}
+                              
+                              {block.type === 'step' && (
+                                <div className="bg-purple-50 border-l-4 border-purple-400 p-4 rounded-r">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <ListChecks className="w-5 h-5 text-purple-600" />
+                                    <h3 className="text-lg font-semibold text-purple-800">{block.title}</h3>
+                                  </div>
+                                  <div className="text-purple-700 whitespace-pre-line">{block.content}</div>
+                                </div>
+                              )}
+                              
+                              {block.type === 'visual' && (
+                                <div className="bg-indigo-50 border-l-4 border-indigo-400 p-4 rounded-r">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <BarChart3 className="w-5 h-5 text-indigo-600" />
+                                    <h3 className="text-lg font-semibold text-indigo-800">{block.title}</h3>
+                                  </div>
+                                  <p className="text-indigo-700 mb-3 whitespace-pre-line">{block.content}</p>
+                                  {block.visual && (
+                                    <div className="bg-white p-3 rounded border">
+                                      <div className="text-sm">
+                                        {Object.entries(block.visual.data).map(([key, value]) => (
+                                          <div key={key} className="mb-2">
+                                            <strong className="capitalize">{key.replace('_', ' ')}:</strong>
+                                            <ul className="ml-4 list-disc">
+                                              {Array.isArray(value) ? value.map((item, i) => (
+                                                <li key={i} className="text-gray-600">{item}</li>
+                                              )) : (
+                                                <li className="text-gray-600">{String(value)}</li>
+                                              )}
+                                            </ul>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        ))}
                       </div>
-                      <p className="text-blue-700">{block.content}</p>
-                    </div>
-                  )}
-                  
-                  {block.type === 'tip' && (
-                    <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-r">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Zap className="w-5 h-5 text-green-600" />
-                        <h3 className="text-lg font-semibold text-green-800">{block.title}</h3>
+                    ))
+                  }
+                </div>
+
+                {/* Right Side - Calculator (1 column) */}
+                <div className="lg:col-span-1">
+                  {currentLevel.tabs && 
+                    currentLevel.tabs
+                      .filter(tab => tab.id === activeTab)
+                      .map(tab => tab.calculator && (
+                        <Calculator key={tab.id} calculator={tab.calculator} />
+                      ))
+                  }
+                </div>
+              </div>
+            </>
+          ) : (
+            // Fallback to regular content if no tabs
+            <div className="space-y-6 mb-8">
+              {currentLevel.content.map((block, index) => (
+                <Card key={index}>
+                  <CardContent className="p-6">
+                    {/* Regular content blocks rendering */}
+                    {block.type === 'text' && (
+                      <div>
+                        {block.title && <h3 className="text-lg font-semibold mb-3">{block.title}</h3>}
+                        <p className="text-base leading-relaxed">{block.content}</p>
                       </div>
-                      <p className="text-green-700">{block.content}</p>
-                    </div>
-                  )}
-                  
-                  {block.type === 'warning' && (
-                    <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-r">
-                      <div className="flex items-center gap-2 mb-2">
-                        <AlertTriangle className="w-5 h-5 text-red-600" />
-                        <h3 className="text-lg font-semibold text-red-800">{block.title}</h3>
-                      </div>
-                      <p className="text-red-700">{block.content}</p>
-                    </div>
-                  )}
-                  
-                  {block.type === 'step' && (
-                    <div className="bg-purple-50 border-l-4 border-purple-400 p-4 rounded-r">
-                      <div className="flex items-center gap-2 mb-2">
-                        <ListChecks className="w-5 h-5 text-purple-600" />
-                        <h3 className="text-lg font-semibold text-purple-800">{block.title}</h3>
-                      </div>
-                      <div className="text-purple-700 whitespace-pre-line">{block.content}</div>
-                    </div>
-                  )}
-                  
-                  {block.type === 'visual' && (
-                    <div className="bg-indigo-50 border-l-4 border-indigo-400 p-4 rounded-r">
-                      <div className="flex items-center gap-2 mb-2">
-                        <BarChart3 className="w-5 h-5 text-indigo-600" />
-                        <h3 className="text-lg font-semibold text-indigo-800">{block.title}</h3>
-                      </div>
-                      <p className="text-indigo-700 mb-3">{block.content}</p>
-                      {block.visual && (
-                        <div className="bg-white p-3 rounded border">
-                          <pre className="text-sm text-gray-600">{JSON.stringify(block.visual.data, null, 2)}</pre>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
           {/* Continue to exercises */}
           <div className="text-center">
