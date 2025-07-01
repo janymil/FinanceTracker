@@ -1,5 +1,4 @@
-// Financial Literacy Course Content - Structure Only
-// Actual content comes from translation files
+// Financial Literacy Course Content
 
 export interface ContentItem {
   id: string;
@@ -60,7 +59,7 @@ export type CourseModule = Course;
 export type CourseLevel = Level;
 export type ContentBlock = ContentItem;
 
-// Course structure - titles and content come from translation files
+// Course structure
 export const COURSE_CONTENT: Course[] = [
   {
     id: "cashflow-mastery",
