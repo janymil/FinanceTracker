@@ -271,10 +271,12 @@ export default function Courses() {
     );
   }
 
+  // Active tab state for content view
+  const [activeTab, setActiveTab] = useState(currentLevel?.tabs?.[0]?.id || 'overview');
+
   // Content/Exercise view
   if (currentLevel && !showResults) {
     if (viewMode === 'content') {
-      const [activeTab, setActiveTab] = useState(currentLevel.tabs?.[0]?.id || 'overview');
       
       // Content learning view with tabs
       return (
