@@ -13,7 +13,7 @@ export interface BlockedCountryConfig {
 // Configuration for blocked countries
 export const GEO_BLOCKING_CONFIG = {
   // Enable/disable geo-blocking entirely
-  enabled: false, // Temporarily disabled due to API failures
+  enabled: true, // Re-enabled to block India
   
   // Blocked countries with reasons
   blockedCountries: [
