@@ -340,7 +340,7 @@ export default function FeaturesPage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Complete AI Feature Suite</h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              Explore each of our 9 intelligent AI functions designed to revolutionize your financial management
+              Explore each of our 8 intelligent AI functions designed to revolutionize your financial management
             </p>
           </div>
 
@@ -485,6 +485,39 @@ export default function FeaturesPage() {
                       <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-blue-600">
                         <div className="text-sm text-muted-foreground">Estimated Financial Health Score:</div>
                         <div className="text-xl font-bold text-blue-600">{calculateHealthScore()}/100</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {activeTab === 'statements' && (
+                <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Statement Processing Calculator</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between mb-2">
+                          <span>Pages in statement:</span>
+                          <span className="font-semibold">{pagesInStatement[0]} pages</span>
+                        </div>
+                        <Slider
+                          value={pagesInStatement}
+                          onValueChange={setPagesInStatement}
+                          max={20}
+                          min={1}
+                          step={1}
+                        />
+                      </div>
+                      <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-blue-600">
+                        <div className="text-sm text-muted-foreground">Estimated transactions extracted:</div>
+                        <div className="text-xl font-bold text-blue-600">{calculateExtractedTransactions()} transactions</div>
+                      </div>
+                      <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-green-600">
+                        <div className="text-sm text-muted-foreground">Processing time saved:</div>
+                        <div className="text-xl font-bold text-green-600">{Math.floor(calculateExtractedTransactions() * 1.5)} minutes</div>
                       </div>
                     </div>
                   </CardContent>
