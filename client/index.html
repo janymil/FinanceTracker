@@ -14,22 +14,29 @@
     <meta name="author" content="FinanzerPro" />
     <link rel="canonical" href="https://finanzerpro.com" />
     
-    <!-- Google Analytics - Production Only -->
+    <!-- Google Analytics & Google Ads - Production Only -->
     <script>
-      // Only load Google Analytics in production
+      // Only load tracking in production
       if (window.location.hostname === 'finanzerpro.com') {
-        (function() {
-          var script = document.createElement('script');
-          script.async = true;
-          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-PRRBGDT20Q';
-          document.head.appendChild(script);
-          
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-PRRBGDT20Q');
-          window.gtag = gtag;
-        })();
+        // Load gtag library
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=AW-17290659470';
+        document.head.appendChild(script);
+        
+        // Initialize gtag and configure both tracking codes
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        
+        // Google Analytics
+        gtag('config', 'G-PRRBGDT20Q');
+        
+        // Google Ads Conversion
+        gtag('config', 'AW-17290659470');
+        
+        // Make gtag globally available
+        window.gtag = gtag;
       }
     </script>
     
