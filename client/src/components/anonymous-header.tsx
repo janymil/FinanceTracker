@@ -32,6 +32,12 @@ export function AnonymousHeader({ showHelpContact = true }: AnonymousHeaderProps
             {showHelpContact && (
               <>
                 <button 
+                  onClick={() => setLocation('/features')} 
+                  className="hidden sm:block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  {t('nav.features')}
+                </button>
+                <button 
                   onClick={() => setLocation('/help')} 
                   className="hidden sm:block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                 >

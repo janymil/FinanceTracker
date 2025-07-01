@@ -49,6 +49,7 @@ import ProfilePage from "./pages/profile";
 import AdminAnalytics from "@/pages/admin-analytics";
 import MobileUpload from "@/pages/mobile-upload/sessionId";
 import RedeemPage from "@/pages/redeem";
+import FeaturesPage from "@/pages/features";
 
 
 // Optimized loading state

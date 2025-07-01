@@ -43,7 +43,11 @@ export function Footer({ sidebarCollapsed }: FooterProps) {
           <div className="space-y-4">
             <h4 className="font-semibold">{t("Product")}</h4>
             <ul className="space-y-2 text-sm">
-              {/* Pricing removed as requested */}
+              <li>
+                <Link href="/features" onClick={handleLinkClick} className="text-muted-foreground hover:text-foreground transition-colors">
+                  {t("AI Features")}
+                </Link>
+              </li>
             </ul>
           </div>
 
