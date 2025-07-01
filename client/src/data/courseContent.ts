@@ -1,5 +1,4 @@
 // Financial Literacy Course Content
-import { TFunction } from 'i18next';
 
 export interface ContentItem {
   id: string;
@@ -60,12 +59,12 @@ export type CourseModule = Course;
 export type CourseLevel = Level;
 export type ContentBlock = ContentItem;
 
-// Function to generate course content with translations
-export const getCourseContent = (t: TFunction): Course[] => [
+// Course structure based on translation files
+export const COURSE_CONTENT: Course[] = [
   {
     id: "cashflow-mastery",
-    title: t('courses.modules.cashflow-mastery.title'),
-    description: t('courses.modules.cashflow-mastery.description'),
+    title: "Cash Flow Mastery",
+    description: "Master the art of money management with advanced budgeting and cash flow systems",
     category: "Financial Management",
     difficulty: "Beginner",
     estimatedTime: "60 minutes",
