@@ -1,0 +1,47 @@
+**Core AI Functions (9 Total)**
+
+**1. Transaction Categorization**
+
+- **`categorizeExpense`** - Automatically categorizes transactions using AI analysis of merchant names and transaction patterns
+
+**2. Financial Tips & Insights**
+
+- **`generateContextualFinancialTips`** - Provides personalized financial advice based on current month's spending, budgets, and goals
+- **`generateFinancialTips`** - Generates comprehensive financial analysis with 4-section structured insights (spending patterns, saving recommendations, budget optimization, advanced analysis)
+- **`generateSpendingInsights`** - Analyzes expense transactions to identify unusual patterns, optimization opportunities, and spending trends
+
+**3. Financial Health Analysis**
+
+- **`generateAIFinancialHealthScore`** - Calculates personalized financial health scores (0-100) with detailed factor breakdown and AI analysis
+- **`generateFinancialHealthScore`** - Alternative financial health scoring system
+
+**4. Predictive Analytics**
+
+- **`generateTrendPredictions`** - Provides AI-powered forecasting for category spending and financial trends
+- **`generateExpensePredictions`** - Predicts future expense patterns based on historical data
+- **`generateDailyRecommendations`** - Generates daily personalized financial recommendations
+
+**AI Architecture**
+
+**Dual Processing System:**
+
+- **External Fly.io AI Processor** (`external-services/ai-processor/index.ts`) - Stateless OpenAI service
+- **Server Fallback** (`server/openai.ts`) - Local OpenAI processing when external service unavailable
+
+**Unified AI Cache System:**
+
+- All functions use `UnifiedAICache` for performance optimization
+- TTL values range from 24 hours (daily recommendations) to 168 hours (financial tips)
+- User-isolated caching with language-aware keys
+
+**Multilingual Support:**
+
+- All AI functions support English, Spanish, and Slovak
+- Language parameters passed through normalized codes (en-us, es-pe, sk-sk)
+- AI responses generated in user's preferred language
+
+**Premium Features:**
+
+- Most AI functions are available to Standard+ subscribers
+- Basic expense categorization available to all users
+- Advanced AI analysis (financial health, predictions) requires Premium subscription

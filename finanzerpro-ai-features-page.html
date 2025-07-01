@@ -1,0 +1,2025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Financial Features | FinanzerPro - Smart Business Finance Management</title>
+    <meta name="description" content="Discover FinanzerPro's 9 intelligent AI features that automate expense tracking, provide personalized financial insights, and optimize your business finances with multilingual support.">
+    <meta name="keywords" content="AI financial management, smart expense tracking, business finance automation, financial insights, multilingual finance app">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="AI-Powered Financial Features | FinanzerPro">
+    <meta property="og:description" content="Transform your business finances with 9 intelligent AI features - from automatic categorization to predictive analytics. Available in English, Spanish, and Slovak.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://finanzerpro.com/features">
+    <meta property="og:image" content="https://finanzerpro.com/images/ai-features-preview.jpg">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI-Powered Financial Features | FinanzerPro">
+    <meta name="twitter:description" content="9 intelligent AI features for smart business finance management">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Section */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 20px 0;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .language-selector {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .lang-btn {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            background: transparent;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .lang-btn.active,
+        .lang-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 80px 0;
+            text-align: center;
+            color: white;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .hero .subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .ai-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #fff;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            background: white;
+            margin-top: -50px;
+            border-radius: 50px 50px 0 0;
+            position: relative;
+            z-index: 10;
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 60px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Interactive AI Demo */
+        .ai-demo-section {
+            margin: 80px 0;
+            padding: 60px;
+            background: linear-gradient(135deg, #f8faff 0%, #e8f4fd 100%);
+            border-radius: 30px;
+            border: 2px solid #e1ecf4;
+        }
+        
+        .demo-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+        
+        .demo-input {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .demo-output {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 40px;
+            border-radius: 20px;
+            color: white;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1ecf4;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .demo-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            width: 100%;
+        }
+        
+        .demo-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Feature Tabs */
+        .features-section {
+            margin: 80px 0;
+        }
+        
+        .tab-navigation {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+        
+        .tab-btn {
+            padding: 15px 25px;
+            border: 2px solid #e1ecf4;
+            background: white;
+            color: #666;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .tab-btn.active,
+        .tab-btn:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e1ecf4;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .feature-header {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .feature-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1a1a1a;
+        }
+        
+        .feature-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .feature-description {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+        
+        .feature-benefits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .benefit-card {
+            padding: 20px;
+            background: #f8faff;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .benefit-title {
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        
+        .benefit-desc {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* Interactive Tools */
+        .interactive-tool {
+            background: linear-gradient(135deg, #f8faff, #e8f4fd);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid #e1ecf4;
+        }
+        
+        .tool-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+        }
+        
+        .slider-container {
+            margin: 20px 0;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            cursor: pointer;
+            border: none;
+        }
+        
+        .calculation-result {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #667eea;
+        }
+        
+        /* Multilingual Support Section */
+        .multilingual-section {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 80px 0;
+            margin: 80px 0;
+            border-radius: 30px;
+            text-align: center;
+        }
+        
+        .multilingual-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+        
+        .language-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .language-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .language-flag {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        .language-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .language-desc {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            text-align: center;
+            padding: 80px 0;
+            background: linear-gradient(135deg, #f8faff, #e8f4fd);
+            border-radius: 30px;
+            margin: 80px 0;
+        }
+        
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .cta-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .cta-btn {
+            padding: 18px 40px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .cta-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .cta-btn.secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .demo-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .feature-header {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .tab-navigation {
+                flex-direction: column;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .language-selector {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">FinanzerPro</div>
+                <div class="language-selector">
+                    <button class="lang-btn active" data-lang="en" onclick="switchLanguage('en')">
+                        <span data-t="header.english">English</span>
+                    </button>
+                    <button class="lang-btn" data-lang="es" onclick="switchLanguage('es')">
+                        <span data-t="header.spanish">Español</span>
+                    </button>
+                    <button class="lang-btn" data-lang="sk" onclick="switchLanguage('sk')">
+                        <span data-t="header.slovak">Slovenčina</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1 data-t="hero.title">AI-Powered Financial Intelligence</h1>
+            <p class="subtitle" data-t="hero.subtitle">Transform your business finances with 9 intelligent AI features that learn, adapt, and optimize your financial decisions in real-time.</p>
+            
+            <div class="ai-stats">
+                <div class="stat-card">
+                    <span class="stat-number">9</span>
+                    <div class="stat-label" data-t="stats.ai_functions">AI Functions</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">3</span>
+                    <div class="stat-label" data-t="stats.languages">Languages</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">95%</span>
+                    <div class="stat-label" data-t="stats.accuracy">Accuracy Rate</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">24/7</span>
+                    <div class="stat-label" data-t="stats.availability">AI Availability</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Interactive AI Demo -->
+            <section class="ai-demo-section">
+                <h2 class="section-title" data-t="demo.title">Try Our AI Categorization</h2>
+                <p class="section-subtitle" data-t="demo.subtitle">See how our AI instantly categorizes your expenses with intelligent analysis</p>
+                
+                <div class="demo-container">
+                    <div class="demo-input">
+                        <h3 data-t="demo.input_title">Enter Transaction Details</h3>
+                        <input type="text" class="input-field" id="merchantName" placeholder="Merchant name (e.g., Starbucks)" data-t-placeholder="demo.merchant_placeholder">
+                        <input type="number" class="input-field" id="amount" placeholder="Amount (e.g., 15.50)" data-t-placeholder="demo.amount_placeholder">
+                        <select class="input-field" id="demoLanguage">
+                            <option value="en" data-t="demo.english">English</option>
+                            <option value="es" data-t="demo.spanish">Spanish</option>
+                            <option value="sk" data-t="demo.slovak">Slovak</option>
+                        </select>
+                        <button class="demo-btn" onclick="runAIDemo()" data-t="demo.analyze_btn">
+                            <span class="btn-text">Analyze with AI</span>
+                            <span class="loading hidden"></span>
+                        </button>
+                    </div>
+                    
+                    <div class="demo-output">
+                        <div id="demoResult">
+                            <h3 data-t="demo.output_title">AI Analysis Result</h3>
+                            <p data-t="demo.output_placeholder">Enter transaction details to see AI categorization in action...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="features-section">
+                <h2 class="section-title" data-t="features.title">Complete AI Feature Suite</h2>
+                <p class="section-subtitle" data-t="features.subtitle">Explore each of our 9 intelligent AI functions designed to revolutionize your financial management</p>
+                
+                <!-- Tab Navigation -->
+                <div class="tab-navigation">
+                    <button class="tab-btn active" onclick="showTab('categorization')" data-t="tabs.categorization">Smart Categorization</button>
+                    <button class="tab-btn" onclick="showTab('tips')" data-t="tabs.tips">Financial Tips</button>
+                    <button class="tab-btn" onclick="showTab('insights')" data-t="tabs.insights">Spending Insights</button>
+                    <button class="tab-btn" onclick="showTab('health')" data-t="tabs.health">Health Score</button>
+                    <button class="tab-btn" onclick="showTab('predictions')" data-t="tabs.predictions">Predictions</button>
+                    <button class="tab-btn" onclick="showTab('trends')" data-t="tabs.trends">Trend Analysis</button>
+                    <button class="tab-btn" onclick="showTab('recommendations')" data-t="tabs.recommendations">Daily Tips</button>
+                    <button class="tab-btn" onclick="showTab('contextual')" data-t="tabs.contextual">Contextual Advice</button>
+                    <button class="tab-btn" onclick="showTab('alternative')" data-t="tabs.alternative">Alternative Scoring</button>
+                </div>
+
+                <!-- Tab Contents -->
+                
+                <!-- Smart Categorization Tab -->
+                <div id="categorization" class="tab-content active">
+                    <div class="feature-header">
+                        <div class="feature-icon">🎯</div>
+                        <div>
+                            <h3 class="feature-title" data-t="categorization.title">Smart Transaction Categorization</h3>
+                        </div>
+                        <div class="feature-badge" data-t="categorization.badge">All Plans</div>
+                    </div>
+                    
+                    <p class="feature-description" data-t="categorization.description">
+                        Our AI automatically categorizes every transaction with 95% accuracy by analyzing merchant names, transaction patterns, and your spending history. No more manual sorting - just intelligent automation.
+                    </p>
+                    
+                    <div class="feature-benefits">
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="categorization.benefit1_title">Instant Categorization</div>
+                            <div class="benefit-desc" data-t="categorization.benefit1_desc">Every transaction is automatically sorted the moment it's imported</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="categorization.benefit2_title">Learning Algorithm</div>
+                            <div class="benefit-desc" data-t="categorization.benefit2_desc">Gets smarter with your spending patterns over time</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="categorization.benefit3_title">Custom Categories</div>
+                            <div class="benefit-desc" data-t="categorization.benefit3_desc">Adapts to your business-specific category structure</div>
+                        </div>
+                    </div>
+                    
+                    <div class="interactive-tool">
+                        <h4 class="tool-title" data-t="categorization.tool_title">Categorization Accuracy Calculator</h4>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span data-t="categorization.transactions_per_month">Transactions per month:</span>
+                                <span id="transactionCount">100</span>
+                            </div>
+                            <input type="range" min="50" max="1000" value="100" class="slider" id="transactionSlider" oninput="updateCategorizationCalc()">
+                        </div>
+                        <div class="calculation-result">
+                            <div data-t="categorization.time_saved">Time saved per month:</div>
+                            <div class="result-value" id="timeSaved">3.3 hours</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Tips Tab -->
+                <div id="tips" class="tab-content">
+                    <div class="feature-header">
+                        <div class="feature-icon">💡</div>
+                        <div>
+                            <h3 class="feature-title" data-t="tips.title">Comprehensive Financial Tips</h3>
+                        </div>
+                        <div class="feature-badge" data-t="tips.badge">Standard+</div>
+                    </div>
+                    
+                    <p class="feature-description" data-t="tips.description">
+                        Get detailed 4-section financial analysis covering spending patterns, saving recommendations, budget optimization, and advanced insights tailored to your business needs.
+                    </p>
+                    
+                    <div class="feature-benefits">
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="tips.benefit1_title">Spending Patterns</div>
+                            <div class="benefit-desc" data-t="tips.benefit1_desc">Deep analysis of your spending behaviors and trends</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="tips.benefit2_title">Saving Strategies</div>
+                            <div class="benefit-desc" data-t="tips.benefit2_desc">Personalized recommendations to optimize your cash flow</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="tips.benefit3_title">Budget Optimization</div>
+                            <div class="benefit-desc" data-t="tips.benefit3_desc">Smart adjustments to maximize your budget efficiency</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="tips.benefit4_title">Advanced Analysis</div>
+                            <div class="benefit-desc" data-t="tips.benefit4_desc">Professional-grade financial insights and forecasting</div>
+                        </div>
+                    </div>
+                    
+                    <div class="interactive-tool">
+                        <h4 class="tool-title" data-t="tips.tool_title">Potential Savings Calculator</h4>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span data-t="tips.monthly_expenses">Monthly expenses:</span>
+                                <span>$<span id="expensesAmount">5000</span></span>
+                            </div>
+                            <input type="range" min="1000" max="20000" value="5000" step="100" class="slider" id="expensesSlider" oninput="updateSavingsCalc()">
+                        </div>
+                        <div class="calculation-result">
+                            <div data-t="tips.potential_savings">Potential monthly savings (5-15%):</div>
+                            <div class="result-value" id="potentialSavings">$250 - $750</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spending Insights Tab -->
+                <div id="insights" class="tab-content">
+                    <div class="feature-header">
+                        <div class="feature-icon">📊</div>
+                        <div>
+                            <h3 class="feature-title" data-t="insights.title">Intelligent Spending Insights</h3>
+                        </div>
+                        <div class="feature-badge" data-t="insights.badge">Standard+</div>
+                    </div>
+                    
+                    <p class="feature-description" data-t="insights.description">
+                        Advanced analysis of your expense transactions to identify unusual patterns, optimization opportunities, and spending trends that matter to your business growth.
+                    </p>
+                    
+                    <div class="feature-benefits">
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="insights.benefit1_title">Anomaly Detection</div>
+                            <div class="benefit-desc" data-t="insights.benefit1_desc">Automatically identifies unusual spending patterns</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="insights.benefit2_title">Trend Analysis</div>
+                            <div class="benefit-desc" data-t="insights.benefit2_desc">Spots emerging trends in your business expenses</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="insights.benefit3_title">Optimization Tips</div>
+                            <div class="benefit-desc" data-t="insights.benefit3_desc">Actionable recommendations to reduce costs</div>
+                        </div>
+                    </div>
+                    
+                    <div class="interactive-tool">
+                        <h4 class="tool-title" data-t="insights.tool_title">Insight Frequency Calculator</h4>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span data-t="insights.business_size">Business transaction volume:</span>
+                                <span id="businessSize">Medium</span>
+                            </div>
+                            <input type="range" min="1" max="3" value="2" class="slider" id="businessSlider" oninput="updateInsightsCalc()">
+                        </div>
+                        <div class="calculation-result">
+                            <div data-t="insights.insights_per_month">AI insights per month:</div>
+                            <div class="result-value" id="insightsCount">12-15 insights</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health Score Tab -->
+                <div id="health" class="tab-content">
+                    <div class="feature-header">
+                        <div class="feature-icon">❤️</div>
+                        <div>
+                            <h3 class="feature-title" data-t="health.title">AI Financial Health Score</h3>
+                        </div>
+                        <div class="feature-badge" data-t="health.badge">Premium</div>
+                    </div>
+                    
+                    <p class="feature-description" data-t="health.description">
+                        Comprehensive financial health analysis with personalized scoring (0-100) that includes detailed factor breakdown, risk assessment, and AI-powered improvement recommendations.
+                    </p>
+                    
+                    <div class="feature-benefits">
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="health.benefit1_title">Real-time Scoring</div>
+                            <div class="benefit-desc" data-t="health.benefit1_desc">Live financial health score from 0-100</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="health.benefit2_title">Factor Analysis</div>
+                            <div class="benefit-desc" data-t="health.benefit2_desc">Detailed breakdown of what affects your score</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="health.benefit3_title">Improvement Plan</div>
+                            <div class="benefit-desc" data-t="health.benefit3_desc">Actionable steps to boost your financial health</div>
+                        </div>
+                    </div>
+                    
+                    <div class="interactive-tool">
+                        <h4 class="tool-title" data-t="health.tool_title">Health Score Simulator</h4>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span data-t="health.savings_rate">Savings rate:</span>
+                                <span id="savingsRate">15%</span>
+                            </div>
+                            <input type="range" min="0" max="50" value="15" class="slider" id="savingsSlider" oninput="updateHealthCalc()">
+                        </div>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span data-t="health.budget_adherence">Budget adherence:</span>
+                                <span id="budgetAdherence">80%</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="80" class="slider" id="budgetSlider" oninput="updateHealthCalc()">
+                        </div>
+                        <div class="calculation-result">
+                            <div data-t="health.estimated_score">Estimated Financial Health Score:</div>
+                            <div class="result-value" id="healthScore">75/100</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Predictions Tab -->
+                <div id="predictions" class="tab-content">
+                    <div class="feature-header">
+                        <div class="feature-icon">🔮</div>
+                        <div>
+                            <h3 class="feature-title" data-t="predictions.title">Expense Predictions</h3>
+                        </div>
+                        <div class="feature-badge" data-t="predictions.badge">Premium</div>
+                    </div>
+                    
+                    <p class="feature-description" data-t="predictions.description">
+                        Advanced predictive analytics that forecast future expense patterns based on your historical data, seasonal trends, and business growth indicators.
+                    </p>
+                    
+                    <div class="feature-benefits">
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="predictions.benefit1_title">Future Forecasting</div>
+                            <div class="benefit-desc" data-t="predictions.benefit1_desc">Predict expenses up to 6 months ahead</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="predictions.benefit2_title">Seasonal Analysis</div>
+                            <div class="benefit-desc" data-t="predictions.benefit2_desc">Account for seasonal business variations</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="predictions.benefit3_title">Budget Planning</div>
+                            <div class="benefit-desc" data-t="predictions.benefit3_desc">Data-driven budget creation for future periods</div>
+                        </div>
+                    </div>
+                    
+                    <div class="interactive-tool">
+                        <h4 class="tool-title" data-t="predictions.tool_title">Prediction Accuracy Estimator</h4>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span data-t="predictions.data_months">Historical data (months):</span>
+                                <span id="dataMonths">12</span>
+                            </div>
+                            <input type="range" min="3" max="36" value="12" class="slider" id="dataSlider" oninput="updatePredictionCalc()">
+                        </div>
+                        <div class="calculation-result">
+                            <div data-t="predictions.accuracy_rate">Prediction accuracy:</div>
+                            <div class="result-value" id="predictionAccuracy">85%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trend Analysis Tab -->
+                <div id="trends" class="tab-content">
+                    <div class="feature-header">
+                        <div class="feature-icon">📈</div>
+                        <div>
+                            <h3 class="feature-title" data-t="trends.title">AI Trend Predictions</h3>
+                        </div>
+                        <div class="feature-badge" data-t="trends.badge">Premium</div>
+                    </div>
+                    
+                    <p class="feature-description" data-t="trends.description">
+                        Sophisticated trend analysis that provides AI-powered forecasting for category spending, identifies emerging patterns, and predicts financial trajectory changes.
+                    </p>
+                    
+                    <div class="feature-benefits">
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="trends.benefit1_title">Category Trends</div>
+                            <div class="benefit-desc" data-t="trends.benefit1_desc">Track spending trends by expense category</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="trends.benefit2_title">Growth Indicators</div>
+                            <div class="benefit-desc" data-t="trends.benefit2_desc">Identify business growth or decline signals</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="trends.benefit3_title">Market Adaptation</div>
+                            <div class="benefit-desc" data-t="trends.benefit3_desc">Adjust strategies based on trend predictions</div>
+                        </div>
+                    </div>
+                    
+                    <div class="interactive-tool">
+                        <h4 class="tool-title" data-t="trends.tool_title">Trend Impact Calculator</h4>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span data-t="trends.trend_strength">Trend strength:</span>
+                                <span id="trendStrength">Moderate</span>
+                            </div>
+                            <input type="range" min="1" max="5" value="3" class="slider" id="trendSlider" oninput="updateTrendCalc()">
+                        </div>
+                        <div class="calculation-result">
+                            <div data-t="trends.business_impact">Potential business impact:</div>
+                            <div class="result-value" id="trendImpact">15% expense change</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Recommendations Tab -->
+                <div id="recommendations" class="tab-content">
+                    <div class="feature-header">
+                        <div class="feature-icon">🌅</div>
+                        <div>
+                            <h3 class="feature-title" data-t="recommendations.title">Daily AI Recommendations</h3>
+                        </div>
+                        <div class="feature-badge" data-t="recommendations.badge">Standard+</div>
+                    </div>
+                    
+                    <p class="feature-description" data-t="recommendations.description">
+                        Start each day with personalized financial recommendations generated by AI analysis of your recent activity, upcoming obligations, and optimization opportunities.
+                    </p>
+                    
+                    <div class="feature-benefits">
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="recommendations.benefit1_title">Daily Fresh Insights</div>
+                            <div class="benefit-desc" data-t="recommendations.benefit1_desc">New recommendations every 24 hours</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="recommendations.benefit2_title">Action-Oriented</div>
+                            <div class="benefit-desc" data-t="recommendations.benefit2_desc">Specific steps you can take today</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="recommendations.benefit3_title">Priority-Based</div>
+                            <div class="benefit-desc" data-t="recommendations.benefit3_desc">Most important recommendations first</div>
+                        </div>
+                    </div>
+                    
+                    <div class="interactive-tool">
+                        <h4 class="tool-title" data-t="recommendations.tool_title">Daily Value Calculator</h4>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span data-t="recommendations.recommendations_followed">Recommendations followed per week:</span>
+                                <span id="recsFollowed">4</span>
+                            </div>
+                            <input type="range" min="0" max="7" value="4" class="slider" id="recsSlider" oninput="updateRecommendationCalc()">
+                        </div>
+                        <div class="calculation-result">
+                            <div data-t="recommendations.monthly_impact">Monthly financial impact:</div>
+                            <div class="result-value" id="recImpact">$400 improved cash flow</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contextual Advice Tab -->
+                <div id="contextual" class="tab-content">
+                    <div class="feature-header">
+                        <div class="feature-icon">🎯</div>
+                        <div>
+                            <h3 class="feature-title" data-t="contextual.title">Contextual Financial Tips</h3>
+                        </div>
+                        <div class="feature-badge" data-t="contextual.badge">Standard+</div>
+                    </div>
+                    
+                    <p class="feature-description" data-t="contextual.description">
+                        Intelligent financial advice that adapts to your current month's spending, budget status, and goal progress to provide the most relevant guidance when you need it.
+                    </p>
+                    
+                    <div class="feature-benefits">
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="contextual.benefit1_title">Real-time Context</div>
+                            <div class="benefit-desc" data-t="contextual.benefit1_desc">Advice based on current financial situation</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="contextual.benefit2_title">Goal-Aligned</div>
+                            <div class="benefit-desc" data-t="contextual.benefit2_desc">Tips that help achieve your specific goals</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="contextual.benefit3_title">Budget-Aware</div>
+                            <div class="benefit-desc" data-t="contextual.benefit3_desc">Considers your budget constraints and targets</div>
+                        </div>
+                    </div>
+                    
+                    <div class="interactive-tool">
+                        <h4 class="tool-title" data-t="contextual.tool_title">Context Relevance Score</h4>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span data-t="contextual.context_factors">Active context factors:</span>
+                                <span id="contextFactors">5</span>
+                            </div>
+                            <input type="range" min="1" max="10" value="5" class="slider" id="contextSlider" oninput="updateContextualCalc()">
+                        </div>
+                        <div class="calculation-result">
+                            <div data-t="contextual.relevance_score">Tip relevance score:</div>
+                            <div class="result-value" id="contextScore">85%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alternative Scoring Tab -->
+                <div id="alternative" class="tab-content">
+                    <div class="feature-header">
+                        <div class="feature-icon">⚖️</div>
+                        <div>
+                            <h3 class="feature-title" data-t="alternative.title">Alternative Health Scoring</h3>
+                        </div>
+                        <div class="feature-badge" data-t="alternative.badge">Premium</div>
+                    </div>
+                    
+                    <p class="feature-description" data-t="alternative.description">
+                        Secondary financial health scoring system that provides alternative perspectives on your financial wellness using different algorithms and weighting factors.
+                    </p>
+                    
+                    <div class="feature-benefits">
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="alternative.benefit1_title">Dual Perspective</div>
+                            <div class="benefit-desc" data-t="alternative.benefit1_desc">Compare two different scoring methodologies</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="alternative.benefit2_title">Comprehensive View</div>
+                            <div class="benefit-desc" data-t="alternative.benefit2_desc">Get a complete picture of financial health</div>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-title" data-t="alternative.benefit3_title">Validation</div>
+                            <div class="benefit-desc" data-t="alternative.benefit3_desc">Cross-validate your financial assessment</div>
+                        </div>
+                    </div>
+                    
+                    <div class="interactive-tool">
+                        <h4 class="tool-title" data-t="alternative.tool_title">Score Comparison Tool</h4>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span data-t="alternative.primary_score">Primary health score:</span>
+                                <span id="primaryScore">75</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="75" class="slider" id="primarySlider" oninput="updateAlternativeCalc()">
+                        </div>
+                        <div class="calculation-result">
+                            <div data-t="alternative.alternative_score">Alternative score estimate:</div>
+                            <div class="result-value" id="altScore">72 (+/- 8 points)</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Multilingual Support Section -->
+            <section class="multilingual-section">
+                <div class="container">
+                    <h2 class="section-title" data-t="multilingual.title">Global Financial Intelligence</h2>
+                    <p class="section-subtitle" data-t="multilingual.subtitle">Our AI speaks your language and understands your cultural financial context</p>
+                    
+                    <div class="multilingual-grid">
+                        <div class="language-card">
+                            <div class="language-flag">🇺🇸</div>
+                            <div class="language-name" data-t="multilingual.english_title">English</div>
+                            <div class="language-desc" data-t="multilingual.english_desc">Complete AI analysis in English with US business context and financial terminology</div>
+                        </div>
+                        <div class="language-card">
+                            <div class="language-flag">🇪🇸</div>
+                            <div class="language-name" data-t="multilingual.spanish_title">Español</div>
+                            <div class="language-desc" data-t="multilingual.spanish_desc">Análisis completo de IA en español con contexto empresarial y terminología financiera latinoamericana</div>
+                        </div>
+                        <div class="language-card">
+                            <div class="language-flag">🇸🇰</div>
+                            <div class="language-name" data-t="multilingual.slovak_title">Slovenčina</div>
+                            <div class="language-desc" data-t="multilingual.slovak_desc">Kompletná AI analýza v slovenčine s kontextom európskeho podnikania a finančnou terminológiou</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Call to Action Section -->
+            <section class="cta-section">
+                <h2 class="cta-title" data-t="cta.title">Ready to Transform Your Financial Management?</h2>
+                <p class="cta-subtitle" data-t="cta.subtitle">Join thousands of entrepreneurs who have revolutionized their business finances with AI-powered insights</p>
+                
+                <div class="cta-buttons">
+                    <a href="#" class="cta-btn primary" data-t="cta.start_free">Start Free Trial</a>
+                    <a href="#" class="cta-btn secondary" data-t="cta.watch_demo">Watch Demo</a>
+                </div>
+                
+                <div style="margin-top: 30px; font-size: 14px; color: #666;">
+                    <span data-t="cta.guarantee">✓ 30-day money-back guarantee</span> •
+                    <span data-t="cta.no_credit_card"> No credit card required</span> •
+                    <span data-t="cta.cancel_anytime"> Cancel anytime</span>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // Translation data
+        const translations = {
+            en: {
+                header: {
+                    english: "English",
+                    spanish: "Español", 
+                    slovak: "Slovenčina"
+                },
+                hero: {
+                    title: "AI-Powered Financial Intelligence",
+                    subtitle: "Transform your business finances with 9 intelligent AI features that learn, adapt, and optimize your financial decisions in real-time."
+                },
+                stats: {
+                    ai_functions: "AI Functions",
+                    languages: "Languages", 
+                    accuracy: "Accuracy Rate",
+                    availability: "AI Availability"
+                },
+                demo: {
+                    title: "Try Our AI Categorization",
+                    subtitle: "See how our AI instantly categorizes your expenses with intelligent analysis",
+                    input_title: "Enter Transaction Details",
+                    merchant_placeholder: "Merchant name (e.g., Starbucks)",
+                    amount_placeholder: "Amount (e.g., 15.50)",
+                    english: "English",
+                    spanish: "Spanish",
+                    slovak: "Slovak",
+                    analyze_btn: "Analyze with AI",
+                    output_title: "AI Analysis Result",
+                    output_placeholder: "Enter transaction details to see AI categorization in action..."
+                },
+                features: {
+                    title: "Complete AI Feature Suite",
+                    subtitle: "Explore each of our 9 intelligent AI functions designed to revolutionize your financial management"
+                },
+                tabs: {
+                    categorization: "Smart Categorization",
+                    tips: "Financial Tips",
+                    insights: "Spending Insights", 
+                    health: "Health Score",
+                    predictions: "Predictions",
+                    trends: "Trend Analysis",
+                    recommendations: "Daily Tips",
+                    contextual: "Contextual Advice",
+                    alternative: "Alternative Scoring"
+                },
+                categorization: {
+                    title: "Smart Transaction Categorization",
+                    badge: "All Plans",
+                    description: "Our AI automatically categorizes every transaction with 95% accuracy by analyzing merchant names, transaction patterns, and your spending history. No more manual sorting - just intelligent automation.",
+                    benefit1_title: "Instant Categorization",
+                    benefit1_desc: "Every transaction is automatically sorted the moment it's imported",
+                    benefit2_title: "Learning Algorithm", 
+                    benefit2_desc: "Gets smarter with your spending patterns over time",
+                    benefit3_title: "Custom Categories",
+                    benefit3_desc: "Adapts to your business-specific category structure",
+                    tool_title: "Categorization Accuracy Calculator",
+                    transactions_per_month: "Transactions per month:",
+                    time_saved: "Time saved per month:"
+                },
+                tips: {
+                    title: "Comprehensive Financial Tips",
+                    badge: "Standard+",
+                    description: "Get detailed 4-section financial analysis covering spending patterns, saving recommendations, budget optimization, and advanced insights tailored to your business needs.",
+                    benefit1_title: "Spending Patterns",
+                    benefit1_desc: "Deep analysis of your spending behaviors and trends",
+                    benefit2_title: "Saving Strategies",
+                    benefit2_desc: "Personalized recommendations to optimize your cash flow",
+                    benefit3_title: "Budget Optimization",
+                    benefit3_desc: "Smart adjustments to maximize your budget efficiency",
+                    benefit4_title: "Advanced Analysis",
+                    benefit4_desc: "Professional-grade financial insights and forecasting",
+                    tool_title: "Potential Savings Calculator",
+                    monthly_expenses: "Monthly expenses:",
+                    potential_savings: "Potential monthly savings (5-15%):"
+                },
+                insights: {
+                    title: "Intelligent Spending Insights",
+                    badge: "Standard+",
+                    description: "Advanced analysis of your expense transactions to identify unusual patterns, optimization opportunities, and spending trends that matter to your business growth.",
+                    benefit1_title: "Anomaly Detection",
+                    benefit1_desc: "Automatically identifies unusual spending patterns",
+                    benefit2_title: "Trend Analysis",
+                    benefit2_desc: "Spots emerging trends in your business expenses",
+                    benefit3_title: "Optimization Tips",
+                    benefit3_desc: "Actionable recommendations to reduce costs",
+                    tool_title: "Insight Frequency Calculator",
+                    business_size: "Business transaction volume:",
+                    insights_per_month: "AI insights per month:"
+                },
+                health: {
+                    title: "AI Financial Health Score",
+                    badge: "Premium",
+                    description: "Comprehensive financial health analysis with personalized scoring (0-100) that includes detailed factor breakdown, risk assessment, and AI-powered improvement recommendations.",
+                    benefit1_title: "Real-time Scoring",
+                    benefit1_desc: "Live financial health score from 0-100",
+                    benefit2_title: "Factor Analysis",
+                    benefit2_desc: "Detailed breakdown of what affects your score",
+                    benefit3_title: "Improvement Plan",
+                    benefit3_desc: "Actionable steps to boost your financial health",
+                    tool_title: "Health Score Simulator",
+                    savings_rate: "Savings rate:",
+                    budget_adherence: "Budget adherence:",
+                    estimated_score: "Estimated Financial Health Score:"
+                },
+                predictions: {
+                    title: "Expense Predictions",
+                    badge: "Premium",
+                    description: "Advanced predictive analytics that forecast future expense patterns based on your historical data, seasonal trends, and business growth indicators.",
+                    benefit1_title: "Future Forecasting",
+                    benefit1_desc: "Predict expenses up to 6 months ahead",
+                    benefit2_title: "Seasonal Analysis",
+                    benefit2_desc: "Account for seasonal business variations",
+                    benefit3_title: "Budget Planning",
+                    benefit3_desc: "Data-driven budget creation for future periods",
+                    tool_title: "Prediction Accuracy Estimator",
+                    data_months: "Historical data (months):",
+                    accuracy_rate: "Prediction accuracy:"
+                },
+                trends: {
+                    title: "AI Trend Predictions",
+                    badge: "Premium",
+                    description: "Sophisticated trend analysis that provides AI-powered forecasting for category spending, identifies emerging patterns, and predicts financial trajectory changes.",
+                    benefit1_title: "Category Trends",
+                    benefit1_desc: "Track spending trends by expense category",
+                    benefit2_title: "Growth Indicators",
+                    benefit2_desc: "Identify business growth or decline signals",
+                    benefit3_title: "Market Adaptation",
+                    benefit3_desc: "Adjust strategies based on trend predictions",
+                    tool_title: "Trend Impact Calculator",
+                    trend_strength: "Trend strength:",
+                    business_impact: "Potential business impact:"
+                },
+                recommendations: {
+                    title: "Daily AI Recommendations",
+                    badge: "Standard+",
+                    description: "Start each day with personalized financial recommendations generated by AI analysis of your recent activity, upcoming obligations, and optimization opportunities.",
+                    benefit1_title: "Daily Fresh Insights",
+                    benefit1_desc: "New recommendations every 24 hours",
+                    benefit2_title: "Action-Oriented",
+                    benefit2_desc: "Specific steps you can take today",
+                    benefit3_title: "Priority-Based",
+                    benefit3_desc: "Most important recommendations first",
+                    tool_title: "Daily Value Calculator",
+                    recommendations_followed: "Recommendations followed per week:",
+                    monthly_impact: "Monthly financial impact:"
+                },
+                contextual: {
+                    title: "Contextual Financial Tips",
+                    badge: "Standard+",
+                    description: "Intelligent financial advice that adapts to your current month's spending, budget status, and goal progress to provide the most relevant guidance when you need it.",
+                    benefit1_title: "Real-time Context",
+                    benefit1_desc: "Advice based on current financial situation",
+                    benefit2_title: "Goal-Aligned",
+                    benefit2_desc: "Tips that help achieve your specific goals",
+                    benefit3_title: "Budget-Aware",
+                    benefit3_desc: "Considers your budget constraints and targets",
+                    tool_title: "Context Relevance Score",
+                    context_factors: "Active context factors:",
+                    relevance_score: "Tip relevance score:"
+                },
+                alternative: {
+                    title: "Alternative Health Scoring",
+                    badge: "Premium",
+                    description: "Secondary financial health scoring system that provides alternative perspectives on your financial wellness using different algorithms and weighting factors.",
+                    benefit1_title: "Dual Perspective",
+                    benefit1_desc: "Compare two different scoring methodologies",
+                    benefit2_title: "Comprehensive View",
+                    benefit2_desc: "Get a complete picture of financial health",
+                    benefit3_title: "Validation",
+                    benefit3_desc: "Cross-validate your financial assessment",
+                    tool_title: "Score Comparison Tool",
+                    primary_score: "Primary health score:",
+                    alternative_score: "Alternative score estimate:"
+                },
+                multilingual: {
+                    title: "Global Financial Intelligence",
+                    subtitle: "Our AI speaks your language and understands your cultural financial context",
+                    english_title: "English",
+                    english_desc: "Complete AI analysis in English with US business context and financial terminology",
+                    spanish_title: "Español",
+                    spanish_desc: "Complete AI analysis in Spanish with Latin American business context and financial terminology",
+                    slovak_title: "Slovenčina",
+                    slovak_desc: "Complete AI analysis in Slovak with European business context and financial terminology"
+                },
+                cta: {
+                    title: "Ready to Transform Your Financial Management?",
+                    subtitle: "Join thousands of entrepreneurs who have revolutionized their business finances with AI-powered insights",
+                    start_free: "Start Free Trial",
+                    watch_demo: "Watch Demo",
+                    guarantee: "✓ 30-day money-back guarantee",
+                    no_credit_card: "No credit card required",
+                    cancel_anytime: "Cancel anytime"
+                }
+            },
+            es: {
+                header: {
+                    english: "English",
+                    spanish: "Español",
+                    slovak: "Slovenčina"
+                },
+                hero: {
+                    title: "Inteligencia Financiera Impulsada por IA",
+                    subtitle: "Transforma las finanzas de tu negocio con 9 funciones inteligentes de IA que aprenden, se adaptan y optimizan tus decisiones financieras en tiempo real."
+                },
+                stats: {
+                    ai_functions: "Funciones IA",
+                    languages: "Idiomas",
+                    accuracy: "Precisión",
+                    availability: "Disponibilidad IA"
+                },
+                demo: {
+                    title: "Prueba Nuestra Categorización IA",
+                    subtitle: "Ve cómo nuestra IA categoriza instantáneamente tus gastos con análisis inteligente",
+                    input_title: "Ingresa Detalles de Transacción",
+                    merchant_placeholder: "Nombre del comerciante (ej., Starbucks)",
+                    amount_placeholder: "Cantidad (ej., 15.50)",
+                    english: "Inglés",
+                    spanish: "Español",
+                    slovak: "Eslovaco",
+                    analyze_btn: "Analizar con IA",
+                    output_title: "Resultado del Análisis IA",
+                    output_placeholder: "Ingresa detalles de transacción para ver la categorización IA en acción..."
+                },
+                features: {
+                    title: "Suite Completa de Funciones IA",
+                    subtitle: "Explora cada una de nuestras 9 funciones inteligentes de IA diseñadas para revolucionar tu gestión financiera"
+                },
+                tabs: {
+                    categorization: "Categorización Inteligente",
+                    tips: "Consejos Financieros",
+                    insights: "Análisis de Gastos",
+                    health: "Puntuación de Salud",
+                    predictions: "Predicciones",
+                    trends: "Análisis de Tendencias",
+                    recommendations: "Consejos Diarios",
+                    contextual: "Consejos Contextuales",
+                    alternative: "Puntuación Alternativa"
+                },
+                categorization: {
+                    title: "Categorización Inteligente de Transacciones",
+                    badge: "Todos los Planes",
+                    description: "Nuestra IA categoriza automáticamente cada transacción con 95% de precisión analizando nombres de comerciantes, patrones de transacciones e historial de gastos. No más clasificación manual - solo automatización inteligente.",
+                    benefit1_title: "Categorización Instantánea",
+                    benefit1_desc: "Cada transacción se clasifica automáticamente al momento de importarse",
+                    benefit2_title: "Algoritmo de Aprendizaje",
+                    benefit2_desc: "Se vuelve más inteligente con tus patrones de gasto con el tiempo",
+                    benefit3_title: "Categorías Personalizadas",
+                    benefit3_desc: "Se adapta a la estructura de categorías específica de tu negocio",
+                    tool_title: "Calculadora de Precisión de Categorización",
+                    transactions_per_month: "Transacciones por mes:",
+                    time_saved: "Tiempo ahorrado por mes:"
+                },
+                tips: {
+                    title: "Consejos Financieros Integrales",
+                    badge: "Estándar+",
+                    description: "Obtén análisis financiero detallado de 4 secciones cubriendo patrones de gasto, recomendaciones de ahorro, optimización de presupuesto e insights avanzados adaptados a las necesidades de tu negocio.",
+                    benefit1_title: "Patrones de Gasto",
+                    benefit1_desc: "Análisis profundo de tus comportamientos y tendencias de gasto",
+                    benefit2_title: "Estrategias de Ahorro",
+                    benefit2_desc: "Recomendaciones personalizadas para optimizar tu flujo de caja",
+                    benefit3_title: "Optimización de Presupuesto",
+                    benefit3_desc: "Ajustes inteligentes para maximizar la eficiencia de tu presupuesto",
+                    benefit4_title: "Análisis Avanzado",
+                    benefit4_desc: "Insights financieros y pronósticos de nivel profesional",
+                    tool_title: "Calculadora de Ahorros Potenciales",
+                    monthly_expenses: "Gastos mensuales:",
+                    potential_savings: "Ahorros mensuales potenciales (5-15%):"
+                },
+                insights: {
+                    title: "Análisis Inteligente de Gastos",
+                    badge: "Estándar+",
+                    description: "Análisis avanzado de tus transacciones de gastos para identificar patrones inusuales, oportunidades de optimización y tendencias de gasto importantes para el crecimiento de tu negocio.",
+                    benefit1_title: "Detección de Anomalías",
+                    benefit1_desc: "Identifica automáticamente patrones de gasto inusuales",
+                    benefit2_title: "Análisis de Tendencias",
+                    benefit2_desc: "Detecta tendencias emergentes en los gastos de tu negocio",
+                    benefit3_title: "Consejos de Optimización",
+                    benefit3_desc: "Recomendaciones accionables para reducir costos",
+                    tool_title: "Calculadora de Frecuencia de Insights",
+                    business_size: "Volumen de transacciones del negocio:",
+                    insights_per_month: "Insights de IA por mes:"
+                },
+                health: {
+                    title: "Puntuación de Salud Financiera IA",
+                    badge: "Premium",
+                    description: "Análisis integral de salud financiera con puntuación personalizada (0-100) que incluye desglose detallado de factores, evaluación de riesgos y recomendaciones de mejora impulsadas por IA.",
+                    benefit1_title: "Puntuación en Tiempo Real",
+                    benefit1_desc: "Puntuación de salud financiera en vivo de 0-100",
+                    benefit2_title: "Análisis de Factores",
+                    benefit2_desc: "Desglose detallado de lo que afecta tu puntuación",
+                    benefit3_title: "Plan de Mejora",
+                    benefit3_desc: "Pasos accionables para mejorar tu salud financiera",
+                    tool_title: "Simulador de Puntuación de Salud",
+                    savings_rate: "Tasa de ahorro:",
+                    budget_adherence: "Adherencia al presupuesto:",
+                    estimated_score: "Puntuación Estimada de Salud Financiera:"
+                },
+                predictions: {
+                    title: "Predicciones de Gastos",
+                    badge: "Premium",
+                    description: "Análisis predictivo avanzado que pronostica patrones futuros de gastos basados en datos históricos, tendencias estacionales e indicadores de crecimiento empresarial.",
+                    benefit1_title: "Pronósticos Futuros",
+                    benefit1_desc: "Predice gastos hasta 6 meses adelante",
+                    benefit2_title: "Análisis Estacional",
+                    benefit2_desc: "Considera variaciones estacionales del negocio",
+                    benefit3_title: "Planificación de Presupuesto",
+                    benefit3_desc: "Creación de presupuestos basada en datos para períodos futuros",
+                    tool_title: "Estimador de Precisión de Predicción",
+                    data_months: "Datos históricos (meses):",
+                    accuracy_rate: "Precisión de predicción:"
+                },
+                trends: {
+                    title: "Predicciones de Tendencias IA",
+                    badge: "Premium",
+                    description: "Análisis sofisticado de tendencias que proporciona pronósticos impulsados por IA para gastos por categoría, identifica patrones emergentes y predice cambios en la trayectoria financiera.",
+                    benefit1_title: "Tendencias por Categoría",
+                    benefit1_desc: "Rastrea tendencias de gasto por categoría de gastos",
+                    benefit2_title: "Indicadores de Crecimiento",
+                    benefit2_desc: "Identifica señales de crecimiento o declive empresarial",
+                    benefit3_title: "Adaptación al Mercado",
+                    benefit3_desc: "Ajusta estrategias basándose en predicciones de tendencias",
+                    tool_title: "Calculadora de Impacto de Tendencias",
+                    trend_strength: "Fuerza de tendencia:",
+                    business_impact: "Impacto potencial en el negocio:"
+                },
+                recommendations: {
+                    title: "Recomendaciones Diarias IA",
+                    badge: "Estándar+",
+                    description: "Comienza cada día con recomendaciones financieras personalizadas generadas por análisis IA de tu actividad reciente, obligaciones próximas y oportunidades de optimización.",
+                    benefit1_title: "Insights Diarios Frescos",
+                    benefit1_desc: "Nuevas recomendaciones cada 24 horas",
+                    benefit2_title: "Orientado a la Acción",
+                    benefit2_desc: "Pasos específicos que puedes tomar hoy",
+                    benefit3_title: "Basado en Prioridades",
+                    benefit3_desc: "Las recomendaciones más importantes primero",
+                    tool_title: "Calculadora de Valor Diario",
+                    recommendations_followed: "Recomendaciones seguidas por semana:",
+                    monthly_impact: "Impacto financiero mensual:"
+                },
+                contextual: {
+                    title: "Consejos Financieros Contextuales",
+                    badge: "Estándar+",
+                    description: "Consejos financieros inteligentes que se adaptan a los gastos del mes actual, estado del presupuesto y progreso de objetivos para proporcionar la orientación más relevante cuando la necesitas.",
+                    benefit1_title: "Contexto en Tiempo Real",
+                    benefit1_desc: "Consejos basados en la situación financiera actual",
+                    benefit2_title: "Alineado con Objetivos",
+                    benefit2_desc: "Consejos que ayudan a lograr tus objetivos específicos",
+                    benefit3_title: "Consciente del Presupuesto",
+                    benefit3_desc: "Considera las limitaciones y objetivos de tu presupuesto",
+                    tool_title: "Puntuación de Relevancia del Contexto",
+                    context_factors: "Factores de contexto activos:",
+                    relevance_score: "Puntuación de relevancia del consejo:"
+                },
+                alternative: {
+                    title: "Puntuación de Salud Alternativa",
+                    badge: "Premium",
+                    description: "Sistema secundario de puntuación de salud financiera que proporciona perspectivas alternativas sobre tu bienestar financiero usando diferentes algoritmos y factores de ponderación.",
+                    benefit1_title: "Perspectiva Dual",
+                    benefit1_desc: "Compara dos metodologías de puntuación diferentes",
+                    benefit2_title: "Vista Integral",
+                    benefit2_desc: "Obtén una imagen completa de la salud financiera",
+                    benefit3_title: "Validación",
+                    benefit3_desc: "Valida cruzadamente tu evaluación financiera",
+                    tool_title: "Herramienta de Comparación de Puntuaciones",
+                    primary_score: "Puntuación de salud primaria:",
+                    alternative_score: "Estimación de puntuación alternativa:"
+                },
+                multilingual: {
+                    title: "Inteligencia Financiera Global",
+                    subtitle: "Nuestra IA habla tu idioma y entiende tu contexto financiero cultural",
+                    english_title: "English",
+                    english_desc: "Análisis completo de IA en inglés con contexto empresarial estadounidense y terminología financiera",
+                    spanish_title: "Español",
+                    spanish_desc: "Análisis completo de IA en español con contexto empresarial latinoamericano y terminología financiera",
+                    slovak_title: "Slovenčina",
+                    slovak_desc: "Análisis completo de IA en eslovaco con contexto empresarial europeo y terminología financiera"
+                },
+                cta: {
+                    title: "¿Listo para Transformar tu Gestión Financiera?",
+                    subtitle: "Únete a miles de emprendedores que han revolucionado las finanzas de sus negocios con insights impulsados por IA",
+                    start_free: "Comenzar Prueba Gratuita",
+                    watch_demo: "Ver Demo",
+                    guarantee: "✓ Garantía de devolución de dinero de 30 días",
+                    no_credit_card: "No se requiere tarjeta de crédito",
+                    cancel_anytime: "Cancela en cualquier momento"
+                }
+            },
+            sk: {
+                header: {
+                    english: "English",
+                    spanish: "Español",
+                    slovak: "Slovenčina"
+                },
+                hero: {
+                    title: "Finančná Inteligencia Poháňaná AI",
+                    subtitle: "Transformujte podnikové financie pomocou 9 inteligentných AI funkcií, ktoré sa učia, prispôsobujú a optimalizujú vaše finančné rozhodnutia v reálnom čase."
+                },
+                stats: {
+                    ai_functions: "AI Funkcie",
+                    languages: "Jazyky",
+                    accuracy: "Presnosť",
+                    availability: "AI Dostupnosť"
+                },
+                demo: {
+                    title: "Vyskúšajte Našu AI Kategorizáciu",
+                    subtitle: "Pozrite si, ako naša AI okamžite kategorizuje vaše výdavky pomocou inteligentnej analýzy",
+                    input_title: "Zadajte Detaily Transakcie",
+                    merchant_placeholder: "Názov obchodníka (napr., Starbucks)",
+                    amount_placeholder: "Suma (napr., 15.50)",
+                    english: "Angličtina",
+                    spanish: "Španielčina",
+                    slovak: "Slovenčina",
+                    analyze_btn: "Analyzovať pomocou AI",
+                    output_title: "Výsledok AI Analýzy",
+                    output_placeholder: "Zadajte detaily transakcie, aby ste videli AI kategorizáciu v akcii..."
+                },
+                features: {
+                    title: "Kompletná Sada AI Funkcií",
+                    subtitle: "Preskúmajte každú z našich 9 inteligentných AI funkcií navrhnutých na revolúciu vo vašom finančnom riadení"
+                },
+                tabs: {
+                    categorization: "Inteligentná Kategorizácia",
+                    tips: "Finančné Rady",
+                    insights: "Analýza Výdavkov",
+                    health: "Zdravotné Skóre",
+                    predictions: "Predikcie",
+                    trends: "Analýza Trendov",
+                    recommendations: "Denné Rady",
+                    contextual: "Kontextové Rady",
+                    alternative: "Alternatívne Skóre"
+                },
+                categorization: {
+                    title: "Inteligentná Kategorizácia Transakcií",
+                    badge: "Všetky Plány",
+                    description: "Naša AI automaticky kategorizuje každú transakciu s 95% presnosťou analyzovaním názvov obchodníkov, vzorov transakcií a histórie výdavkov. Už žiadne manuálne triedenie - len inteligentná automatizácia.",
+                    benefit1_title: "Okamžitá Kategorizácia",
+                    benefit1_desc: "Každá transakcia sa automaticky zoradia v okamihu importu",
+                    benefit2_title: "Učiaci sa Algoritmus",
+                    benefit2_desc: "Stáva sa inteligentnejším s vašimi vzorikmi výdavkov v čase",
+                    benefit3_title: "Vlastné Kategórie",
+                    benefit3_desc: "Prispôsobuje sa štruktúre kategórií špecifickej pre váš podnik",
+                    tool_title: "Kalkulačka Presnosti Kategorizácie",
+                    transactions_per_month: "Transakcie za mesiac:",
+                    time_saved: "Ušetrený čas za mesiac:"
+                },
+                tips: {
+                    title: "Komplexné Finančné Rady",
+                    badge: "Štandard+",
+                    description: "Získajte podrobnú 4-sekčnú finančnú analýzu pokrývajúcu vzory výdavkov, odporúčania na sporenie, optimalizáciu rozpočtu a pokročilé poznatky prispôsobené potrebám vášho podnikania.",
+                    benefit1_title: "Vzory Výdavkov",
+                    benefit1_desc: "Hlboká analýza vašich správaní a trendov výdavkov",
+                    benefit2_title: "Stratégie Sporenia",
+                    benefit2_desc: "Personalizované odporúčania na optimalizáciu peňažného toku",
+                    benefit3_title: "Optimalizácia Rozpočtu",
+                    benefit3_desc: "Inteligentné úpravy na maximalizáciu efektívnosti rozpočtu",
+                    benefit4_title: "Pokročilá Analýza",
+                    benefit4_desc: "Finančné poznatky a predpovede na profesionálnej úrovni",
+                    tool_title: "Kalkulačka Potenciálnych Úspor",
+                    monthly_expenses: "Mesačné výdavky:",
+                    potential_savings: "Potenciálne mesačné úspory (5-15%):"
+                },
+                insights: {
+                    title: "Inteligentné Poznatky o Výdavkoch",
+                    badge: "Štandard+",
+                    description: "Pokročilá analýza vašich výdavkových transakcií na identifikáciu neobvyklých vzorov, príležitostí na optimalizáciu a trendov výdavkov dôležitých pre rast vášho podnikania.",
+                    benefit1_title: "Detekcia Anomálií",
+                    benefit1_desc: "Automaticky identifikuje neobvyklé vzory výdavkov",
+                    benefit2_title: "Analýza Trendov",
+                    benefit2_desc: "Objavuje vznikajúce trendy vo výdavkoch vášho podnikania",
+                    benefit3_title: "Optimalizačné Rady",
+                    benefit3_desc: "Realizovateľné odporúčania na zníženie nákladov",
+                    tool_title: "Kalkulačka Frekvencie Poznatkov",
+                    business_size: "Objem transakcií podnikania:",
+                    insights_per_month: "AI poznatky za mesiac:"
+                },
+                health: {
+                    title: "AI Skóre Finančného Zdravia",
+                    badge: "Premium",
+                    description: "Komplexná analýza finančného zdravia s personalizovaným skórovaním (0-100), ktorá zahŕňa podrobný rozpis faktorov, hodnotenie rizík a AI-poháňané odporúčania na zlepšenie.",
+                    benefit1_title: "Skórovanie v Reálnom Čase",
+                    benefit1_desc: "Živé skóre finančného zdravia od 0-100",
+                    benefit2_title: "Analýza Faktorov",
+                    benefit2_desc: "Podrobný rozpis toho, čo ovplyvňuje vaše skóre",
+                    benefit3_title: "Plán Zlepšenia",
+                    benefit3_desc: "Realizovateľné kroky na zlepšenie finančného zdravia",
+                    tool_title: "Simulátor Skóre Zdravia",
+                    savings_rate: "Miera sporenia:",
+                    budget_adherence: "Dodržiavanie rozpočtu:",
+                    estimated_score: "Odhadované Skóre Finančného Zdravia:"
+                },
+                predictions: {
+                    title: "Predikcie Výdavkov",
+                    badge: "Premium",
+                    description: "Pokročilá prediktívna analytika, ktorá predpovedá budúce vzory výdavkov na základe historických údajov, sezónnych trendov a indikátorov rastu podnikania.",
+                    benefit1_title: "Budúce Predpovede",
+                    benefit1_desc: "Predpovedá výdavky až 6 mesiacov dopredu",
+                    benefit2_title: "Sezónna Analýza",
+                    benefit2_desc: "Zohľadňuje sezónne variácie podnikania",
+                    benefit3_title: "Plánovanie Rozpočtu",
+                    benefit3_desc: "Tvorba rozpočtu založená na údajoch pre budúce obdobia",
+                    tool_title: "Odhadovač Presnosti Predikcie",
+                    data_months: "Historické údaje (mesiace):",
+                    accuracy_rate: "Presnosť predikcie:"
+                },
+                trends: {
+                    title: "AI Predikcie Trendov",
+                    badge: "Premium",
+                    description: "Sofistikovaná analýza trendov, ktorá poskytuje AI-poháňané predpovede pre výdavky podľa kategórií, identifikuje vznikajúce vzory a predpovedá zmeny finančnej trajektórie.",
+                    benefit1_title: "Trendy Kategórií",
+                    benefit1_desc: "Sleduje trendy výdavkov podľa kategórie výdavkov",
+                    benefit2_title: "Indikátory Rastu",
+                    benefit2_desc: "Identifikuje signály rastu alebo poklesu podnikania",
+                    benefit3_title: "Adaptácia na Trh",
+                    benefit3_desc: "Upravuje stratégie na základe predikciíí trendov",
+                    tool_title: "Kalkulačka Dopadu Trendu",
+                    trend_strength: "Sila trendu:",
+                    business_impact: "Potenciálny dopad na podnikanie:"
+                },
+                recommendations: {
+                    title: "Denné AI Odporúčania",
+                    badge: "Štandard+",
+                    description: "Začnite každý deň s personalizovanými finančnými odporúčaniami generovanými AI analýzou vašej nedávnej aktivity, nadchádzajúcich záväzkov a príležitostí na optimalizáciu.",
+                    benefit1_title: "Denné Čerstvé Poznatky",
+                    benefit1_desc: "Nové odporúčania každých 24 hodín",
+                    benefit2_title: "Orientované na Akciu",
+                    benefit2_desc: "Konkrétne kroky, ktoré môžete podniknúť dnes",
+                    benefit3_title: "Založené na Prioritách",
+                    benefit3_desc: "Najdôležitejšie odporúčania na prvom mieste",
+                    tool_title: "Kalkulačka Dennej Hodnoty",
+                    recommendations_followed: "Odporúčania dodržané za týždeň:",
+                    monthly_impact: "Mesačný finančný dopad:"
+                },
+                contextual: {
+                    title: "Kontextové Finančné Rady",
+                    badge: "Štandard+",
+                    description: "Inteligentné finančné rady, ktoré sa prispôsobujú výdavkom aktuálneho mesiaca, stavu rozpočtu a pokroku cieľov, aby poskytli najrelevantnejšie vedenie, keď ho potrebujete.",
+                    benefit1_title: "Kontext v Reálnom Čase",
+                    benefit1_desc: "Rady založené na aktuálnej finančnej situácii",
+                    benefit2_title: "Zladené s Cieľmi",
+                    benefit2_desc: "Rady, ktoré pomáhajú dosiahnuť vaše špecifické ciele",
+                    benefit3_title: "Vedomé o Rozpočte",
+                    benefit3_desc: "Zohľadňuje obmedzenia a ciele vášho rozpočtu",
+                    tool_title: "Skóre Relevantnosti Kontextu",
+                    context_factors: "Aktívne kontextové faktory:",
+                    relevance_score: "Skóre relevantnosti rady:"
+                },
+                alternative: {
+                    title: "Alternatívne Skórovanie Zdravia",
+                    badge: "Premium",
+                    description: "Sekundárny systém skórovania finančného zdravia, ktorý poskytuje alternatívne perspektívy na vaše finančné zdravie pomocou rôznych algoritmov a váhových faktorov.",
+                    benefit1_title: "Duálna Perspektíva",
+                    benefit1_desc: "Porovnáva dve rôzne metodológie skórovania",
+                    benefit2_title: "Komplexný Pohľad",
+                    benefit2_desc: "Získajte úplný obraz finančného zdravia",
+                    benefit3_title: "Validácia",
+                    benefit3_desc: "Krížovo validuje vaše finančné hodnotenie",
+                    tool_title: "Nástroj Porovnania Skóre",
+                    primary_score: "Primárne skóre zdravia:",
+                    alternative_score: "Odhad alternatívneho skóre:"
+                },
+                multilingual: {
+                    title: "Globálna Finančná Inteligencia",
+                    subtitle: "Naša AI hovorí vaším jazykom a rozumie vášmu kultúrnemu finančnému kontextu",
+                    english_title: "English",
+                    english_desc: "Kompletná AI analýza v angličtine s kontextom amerického podnikania a finančnou terminológiou",
+                    spanish_title: "Español",
+                    spanish_desc: "Kompletná AI analýza v španielčine s kontextom latinsko-amerického podnikania a finančnou terminológiou",
+                    slovak_title: "Slovenčina",
+                    slovak_desc: "Kompletná AI analýza v slovenčine s kontextom európskeho podnikania a finančnou terminológiou"
+                },
+                cta: {
+                    title: "Pripravený Transformovať Vaše Finančné Riadenie?",
+                    subtitle: "Pripojte sa k tisícom podnikateľov, ktorí revolucionalizovali financie svojho podnikania pomocou AI-poháňaných poznatkov",
+                    start_free: "Začať Bezplatnú Skúšku",
+                    watch_demo: "Pozrieť Demo",
+                    guarantee: "✓ 30-dňová garancia vrátenia peňazí",
+                    no_credit_card: "Nie je potrebná kreditná karta",
+                    cancel_anytime: "Zrušte kedykoľvek"
+                }
+            }
+        };
+
+        // Current language
+        let currentLanguage = 'en';
+
+        // Translation function
+        function t(key) {
+            const keys = key.split('.');
+            let value = translations[currentLanguage];
+            
+            for (const k of keys) {
+                if (value && value[k]) {
+                    value = value[k];
+                } else {
+                    return key; // Return key if translation not found
+                }
+            }
+            
+            return value;
+        }
+
+        // Update all translated elements
+        function updateTranslations() {
+            const elements = document.querySelectorAll('[data-t]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-t');
+                element.textContent = t(key);
+            });
+
+            // Update placeholders
+            const placeholderElements = document.querySelectorAll('[data-t-placeholder]');
+            placeholderElements.forEach(element => {
+                const key = element.getAttribute('data-t-placeholder');
+                element.placeholder = t(key);
+            });
+        }
+
+        // Switch language function
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update active button
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-lang') === lang) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            updateTranslations();
+        }
+
+        // Tab functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // AI Demo functionality
+        function runAIDemo() {
+            const merchantName = document.getElementById('merchantName').value;
+            const amount = document.getElementById('amount').value;
+            const language = document.getElementById('demoLanguage').value;
+            const resultDiv = document.getElementById('demoResult');
+            const btnText = document.querySelector('.btn-text');
+            const loading = document.querySelector('.loading');
+            
+            if (!merchantName || !amount) {
+                alert(t('demo.fill_fields') || 'Please fill in all fields');
+                return;
+            }
+            
+            // Show loading
+            btnText.classList.add('hidden');
+            loading.classList.remove('hidden');
+            
+            // Simulate AI processing
+            setTimeout(() => {
+                const categories = {
+                    en: ['Food & Dining', 'Office Supplies', 'Transportation', 'Software & Technology', 'Marketing & Advertising'],
+                    es: ['Comida y Restaurantes', 'Suministros de Oficina', 'Transporte', 'Software y Tecnología', 'Marketing y Publicidad'],
+                    sk: ['Jedlo a Reštaurácie', 'Kancelárske Potreby', 'Doprava', 'Software a Technológie', 'Marketing a Reklama']
+                };
+                
+                const randomCategory = categories[language][Math.floor(Math.random() * categories[language].length)];
+                const confidence = Math.floor(Math.random() * 15) + 85; // 85-99%
+                
+                const results = {
+                    en: `
+                        <h3>✅ AI Categorization Complete</h3>
+                        <div style="margin: 20px 0;">
+                            <strong>Merchant:</strong> ${merchantName}<br>
+                            <strong>Amount:</strong> $${amount}<br>
+                            <strong>Suggested Category:</strong> <span style="color: #667eea; font-weight: bold;">${randomCategory}</span><br>
+                            <strong>Confidence:</strong> ${confidence}%<br>
+                            <strong>Processing Time:</strong> 0.3 seconds
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; margin-top: 15px;">
+                            <strong>AI Analysis:</strong> Based on merchant name patterns and transaction amount, this appears to be a ${randomCategory.toLowerCase()} expense with high confidence.
+                        </div>
+                    `,
+                    es: `
+                        <h3>✅ Categorización IA Completa</h3>
+                        <div style="margin: 20px 0;">
+                            <strong>Comerciante:</strong> ${merchantName}<br>
+                            <strong>Cantidad:</strong> $${amount}<br>
+                            <strong>Categoría Sugerida:</strong> <span style="color: #667eea; font-weight: bold;">${randomCategory}</span><br>
+                            <strong>Confianza:</strong> ${confidence}%<br>
+                            <strong>Tiempo de Procesamiento:</strong> 0.3 segundos
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; margin-top: 15px;">
+                            <strong>Análisis IA:</strong> Basado en patrones de nombres de comerciantes y monto de transacción, esto parece ser un gasto de ${randomCategory.toLowerCase()} con alta confianza.
+                        </div>
+                    `,
+                    sk: `
+                        <h3>✅ AI Kategorizácia Dokončená</h3>
+                        <div style="margin: 20px 0;">
+                            <strong>Obchodník:</strong> ${merchantName}<br>
+                            <strong>Suma:</strong> $${amount}<br>
+                            <strong>Navrhovaná Kategória:</strong> <span style="color: #667eea; font-weight: bold;">${randomCategory}</span><br>
+                            <strong>Spoľahlivosť:</strong> ${confidence}%<br>
+                            <strong>Čas Spracovania:</strong> 0.3 sekúnd
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; margin-top: 15px;">
+                            <strong>AI Analýza:</strong> Na základe vzorov názvov obchodníkov a sumy transakcie sa zdá, že ide o výdavok typu ${randomCategory.toLowerCase()} s vysokou spoľahlivosťou.
+                        </div>
+                    `
+                };
+                
+                resultDiv.innerHTML = results[language];
+                
+                // Hide loading
+                btnText.classList.remove('hidden');
+                loading.classList.add('hidden');
+            }, 1500);
+        }
+
+        // Interactive calculator functions
+        function updateCategorizationCalc() {
+            const transactions = document.getElementById('transactionSlider').value;
+            document.getElementById('transactionCount').textContent = transactions;
+            
+            // Calculate time saved (2 minutes per transaction manually)
+            const timeSaved = (transactions * 2 / 60).toFixed(1);
+            document.getElementById('timeSaved').textContent = `${timeSaved} hours`;
+        }
+
+        function updateSavingsCalc() {
+            const expenses = document.getElementById('expensesSlider').value;
+            document.getElementById('expensesAmount').textContent = expenses;
+            
+            const minSavings = Math.floor(expenses * 0.05);
+            const maxSavings = Math.floor(expenses * 0.15);
+            document.getElementById('potentialSavings').textContent = `$${minSavings} - $${maxSavings}`;
+        }
+
+        function updateInsightsCalc() {
+            const businessSize = document.getElementById('businessSlider').value;
+            const sizes = ['Small', 'Medium', 'Large'];
+            const sizesEs = ['Pequeño', 'Mediano', 'Grande'];
+            const sizesSk = ['Malý', 'Stredný', 'Veľký'];
+            
+            const sizeLabels = {
+                en: sizes[businessSize - 1],
+                es: sizesEs[businessSize - 1],
+                sk: sizesSk[businessSize - 1]
+            };
+            
+            document.getElementById('businessSize').textContent = sizeLabels[currentLanguage];
+            
+            const insights = [
+                '8-10 insights',
+                '12-15 insights', 
+                '18-25 insights'
+            ];
+            
+            document.getElementById('insightsCount').textContent = insights[businessSize - 1];
+        }
+
+        function updateHealthCalc() {
+            const savings = document.getElementById('savingsSlider').value;
+            const budget = document.getElementById('budgetSlider').value;
+            
+            document.getElementById('savingsRate').textContent = `${savings}%`;
+            document.getElementById('budgetAdherence').textContent = `${budget}%`;
+            
+            // Simple health score calculation
+            const healthScore = Math.min(100, Math.floor((parseInt(savings) * 1.5) + (parseInt(budget) * 0.5)));
+            document.getElementById('healthScore').textContent = `${healthScore}/100`;
+        }
+
+        function updatePredictionCalc() {
+            const months = document.getElementById('dataSlider').value;
+            document.getElementById('dataMonths').textContent = months;
+            
+            // More data = higher accuracy
+            const accuracy = Math.min(95, 60 + (months * 1.2));
+            document.getElementById('predictionAccuracy').textContent = `${Math.floor(accuracy)}%`;
+        }
+
+        function updateTrendCalc() {
+            const strength = document.getElementById('trendSlider').value;
+            const strengthLabels = {
+                en: ['Very Weak', 'Weak', 'Moderate', 'Strong', 'Very Strong'],
+                es: ['Muy Débil', 'Débil', 'Moderado', 'Fuerte', 'Muy Fuerte'],
+                sk: ['Veľmi Slabý', 'Slabý', 'Mierny', 'Silný', 'Veľmi Silný']
+            };
+            
+            document.getElementById('trendStrength').textContent = strengthLabels[currentLanguage][strength - 1];
+            
+            const impact = strength * 5;
+            document.getElementById('trendImpact').textContent = `${impact}% expense change`;
+        }
+
+        function updateRecommendationCalc() {
+            const recs = document.getElementById('recsSlider').value;
+            document.getElementById('recsFollowed').textContent = recs;
+            
+            const impact = recs * 100;
+            document.getElementById('recImpact').textContent = `$${impact} improved cash flow`;
+        }
+
+        function updateContextualCalc() {
+            const factors = document.getElementById('contextSlider').value;
+            document.getElementById('contextFactors').textContent = factors;
+            
+            const relevance = Math.min(95, 50 + (factors * 5));
+            document.getElementById('contextScore').textContent = `${relevance}%`;
+        }
+
+        function updateAlternativeCalc() {
+            const primary = document.getElementById('primarySlider').value;
+            document.getElementById('primaryScore').textContent = primary;
+            
+            // Alternative score varies by +/- 8 points
+            const variance = Math.floor(Math.random() * 16) - 8;
+            const altScore = Math.max(0, Math.min(100, parseInt(primary) + variance));
+            document.getElementById('altScore').textContent = `${altScore} (+/- 8 points)`;
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTranslations();
+            updateCategorizationCalc();
+            updateSavingsCalc();
+            updateInsightsCalc();
+            updateHealthCalc();
+            updatePredictionCalc();
+            updateTrendCalc();
+            updateRecommendationCalc();
+            updateContextualCalc();
+            updateAlternativeCalc();
+        });
+    </script>
+</body>
+</html>
