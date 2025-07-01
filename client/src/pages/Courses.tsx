@@ -95,21 +95,39 @@ export default function Courses() {
           estimatedTime: '30 minutes',
           xpReward: 100,
           learningObjectives: [
-            t('courses.modules.cashflow-mastery.levels.cashflow-level-1.objectives.0'),
-            t('courses.modules.cashflow-mastery.levels.cashflow-level-1.objectives.1'),
-            t('courses.modules.cashflow-mastery.levels.cashflow-level-1.objectives.2')
+            "Understand what cash flow is and why it matters",
+            "Recognize how tracking cash flow helps you spot financial leaks",
+            "Develop awareness of your current financial situation"
           ],
           tabs: [
             {
               id: 'basics',
-              title: t('courses.modules.cashflow-mastery.tabs.basics'),
+              title: 'Cash Flow Fundamentals',
               icon: '📊',
               content: [
                 {
                   id: 'pipeline-intro',
                   type: 'text' as const,
-                  title: t('courses.modules.cashflow-mastery.levels.cashflow-level-1.content.level1.pipeline.title'),
-                  content: t('courses.modules.cashflow-mastery.levels.cashflow-level-1.content.level1.pipeline.content')
+                  title: '📊 Your Cash Flow Pipeline',
+                  content: `**VISUAL: Cash Flow Pipeline**
+
+\`\`\`
+INCOME SOURCES        CASH FLOW            EXPENSE CATEGORIES
+                      PIPELINE
+💼 Salary         ──┐                    ┌── 🏠 Housing
+💰 Side Work      ──┤                    ├── 🚗 Transportation
+📈 Investments    ──┤       💰💰💰       ├── 🍕 Food
+🎁 Other Income   ──┘                    ├── 💊 Healthcare
+                                         ├── 🎮 Entertainment
+                                         └── 💳 Debt Payments
+\`\`\`
+
+**The Pipeline Shows:**
+• **Width** = Amount of money
+• **Color** = Type of category
+• **Flow Direction** = Where your money goes
+
+**Key Insight:** Most people focus on the income side but ignore the expense side. True cash flow mastery requires optimizing BOTH sides of the pipeline.`
                 }
               ]
             }
@@ -118,17 +136,17 @@ export default function Courses() {
             {
               id: 'cashflow-ex-1',
               type: 'multiple-choice' as const,
-              question: t('courses.exercises.cashFlowReflection.question'),
+              question: 'What is the most important benefit of tracking your cash flow?',
               options: [
-                t('courses.exercises.cashFlowReflection.options.0'),
-                t('courses.exercises.cashFlowReflection.options.1'),
-                t('courses.exercises.cashFlowReflection.options.2'),
-                t('courses.exercises.cashFlowReflection.options.3')
+                'To impress your financial advisor',
+                'To identify where your money is actually going and spot financial leaks',
+                'To make complicated spreadsheets',
+                'To compare yourself with others'
               ],
-              correctAnswer: t('courses.exercises.cashFlowReflection.options.1'),
+              correctAnswer: 'To identify where your money is actually going and spot financial leaks',
               feedback: {
-                correct: t('courses.exercises.cashFlowReflection.feedback.correct'),
-                incorrect: t('courses.exercises.cashFlowReflection.feedback.incorrect')
+                correct: 'Exactly! Cash flow tracking reveals your spending patterns and helps you plug financial leaks before they drain your wealth.',
+                incorrect: 'Not quite. The main benefit is gaining awareness of your spending patterns so you can make informed financial decisions.'
               },
               points: 10
             }
