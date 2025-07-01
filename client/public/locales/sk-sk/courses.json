@@ -43,6 +43,48 @@
     "loading": "Načítavajú sa Kurzy Finančnej Gramotnosti...",
     "noTabsMessage": "Obsah je organizovaný v kartách hore. Prosím vyber kartu na zobrazenie obsahu lekcie.",
     "modules": {
+      "cashflow-mastery": {
+        "title": "Majstrovstvo v Peňažnom Toku",
+        "description": "Ovládnite umenie správy peňazí s pokročilými systémami rozpočtovania a peňažného toku",
+        "levels": {
+          "cashflow-level-1": {
+            "title": "💡 Víta a Sila Povedomia o Peňažnom Toku",
+            "description": "Objavte, ako vám povedomie o peňažnom toku dá kontrolu nad vaším finančným životom"
+          },
+          "cashflow-level-2": {
+            "title": "🔍 Identifikácia a Mapovanie Zdrojov Príjmov",
+            "description": "Naučte sa identifikovať každý zdroj príjmov, vrátane skrytých zárobkov"
+          },
+          "cashflow-level-3": {
+            "title": "⚖️ Aktívne vs. Pasívne Príjmy",
+            "description": "Pochopte kľúčové rozdiely medzi aktívnymi a pasívnymi príjmami"
+          },
+          "cashflow-level-4": {
+            "title": "🤖 Automatizácia Sledovania Príjmov",
+            "description": "Nastavte automatizované systémy na efektívne sledovanie príjmov a výdavkov"
+          },
+          "cashflow-level-5": {
+            "title": "🚀 Stratégie na Zvýšenie Príjmov o 20-50%",
+            "description": "Naučte sa akčné stratégie na výrazné zvýšenie príjmov do 12 mesiacov"
+          },
+          "cashflow-level-6": {
+            "title": "📋 Vytvorte Svoj Personalizovaný Plán Peňažného Toku",
+            "description": "Spojte všetko do komplexného 12-mesačného plánu peňažného toku"
+          }
+        }
+      },
+      "debt-elimination": {
+        "title": "Eliminácia Dlhov",
+        "description": "Systematicky zničte dlhy a vybudujte neotrasiteľnú finančnú slobodu"
+      },
+      "investment-fundamentals": {
+        "title": "Základy Investovania",
+        "description": "Ovládnite základy investovania na budovanie dlhodobého bohatstva a finančnej slobody"
+      },
+      "solo-entrepreneur-finance": {
+        "title": "Financie pre Samostatných Podnikateľov",
+        "description": "Ovládnite finančné zručnosti, ktoré každý samostatný podnikateľ potrebuje na budovanie a rozširovanie svojho podnikania"
+      },
       "financialMindset": {
         "title": "Finančné Myslenie a Psychológia",
         "description": "Ovládni psychológiu peňazí a vybuduj si bohaté myslenie, ktoré povedie k úspechu",

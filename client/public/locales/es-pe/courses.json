@@ -45,7 +45,33 @@
     "modules": {
       "cashflow-mastery": {
         "title": "Dominio del Flujo de Efectivo",
-        "description": "Domina el arte de la gestión del dinero con sistemas avanzados de presupuesto y flujo de efectivo"
+        "description": "Domina el arte de la gestión del dinero con sistemas avanzados de presupuesto y flujo de efectivo",
+        "levels": {
+          "cashflow-level-1": {
+            "title": "💡 Bienvenida y el Poder de la Conciencia del Flujo de Efectivo",
+            "description": "Descubra cómo la conciencia del flujo de efectivo le da control sobre su vida financiera"
+          },
+          "cashflow-level-2": {
+            "title": "🔍 Identificación y Mapeo de Fuentes de Ingresos",
+            "description": "Aprenda a identificar cada fuente de ingresos, incluidas las ganancias ocultas"
+          },
+          "cashflow-level-3": {
+            "title": "⚖️ Ingresos Activos vs. Pasivos",
+            "description": "Comprenda las diferencias clave entre ingresos activos y pasivos"
+          },
+          "cashflow-level-4": {
+            "title": "🤖 Automatización del Seguimiento de Ingresos",
+            "description": "Configure sistemas automatizados para rastrear ingresos y gastos de manera eficiente"
+          },
+          "cashflow-level-5": {
+            "title": "🚀 Estrategias para Aumentar Ingresos en 20-50%",
+            "description": "Aprenda estrategias accionables para aumentar significativamente sus ingresos en 12 meses"
+          },
+          "cashflow-level-6": {
+            "title": "📋 Cree Su Plan Personalizado de Flujo de Efectivo",
+            "description": "Reúna todo en un plan integral de flujo de efectivo de 12 meses"
+          }
+        }
       },
       "debt-elimination": {
         "title": "Eliminación de Deudas",

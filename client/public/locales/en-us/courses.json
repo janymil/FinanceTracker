@@ -43,6 +43,48 @@
     "loading": "Loading Financial Literacy Courses...",
     "noTabsMessage": "Content is organized in tabs above. Please select a tab to view the lesson content.",
     "modules": {
+      "cashflow-mastery": {
+        "title": "Cash Flow Mastery",
+        "description": "Master the art of money management with advanced budgeting and cash flow systems",
+        "levels": {
+          "cashflow-level-1": {
+            "title": "💡 Welcome & The Power of Cash Flow Awareness",
+            "description": "Discover how cash flow awareness gives you control over your financial life"
+          },
+          "cashflow-level-2": {
+            "title": "🔍 Income Source Identification and Mapping",
+            "description": "Learn to identify every income source, including hidden earnings"
+          },
+          "cashflow-level-3": {
+            "title": "⚖️ Active vs. Passive Income",
+            "description": "Understand the key differences between active and passive income"
+          },
+          "cashflow-level-4": {
+            "title": "🤖 Automating Income Tracking",
+            "description": "Set up automated systems to track income and expenses efficiently"
+          },
+          "cashflow-level-5": {
+            "title": "🚀 Strategies to Boost Income by 20-50%",
+            "description": "Learn actionable strategies to significantly increase your income within 12 months"
+          },
+          "cashflow-level-6": {
+            "title": "📋 Create Your Personalized Cash Flow Plan",
+            "description": "Bring everything together into a comprehensive 12-month cash flow plan"
+          }
+        }
+      },
+      "debt-elimination": {
+        "title": "Debt Elimination Mastery",
+        "description": "Destroy debt systematically and build unshakeable financial freedom"
+      },
+      "investment-fundamentals": {
+        "title": "Investment Fundamentals",
+        "description": "Master the basics of investing to build long-term wealth and financial freedom"
+      },
+      "solo-entrepreneur-finance": {
+        "title": "Solo Entrepreneur Finance",
+        "description": "Master the financial skills every solo entrepreneur needs to build and scale their business"
+      },
       "financialMindset": {
         "title": "Financial Mindset & Psychology",
         "description": "Master the psychology of money and build a wealthy mindset that drives success",

@@ -624,7 +624,9 @@ export default function Courses() {
                   <div className="space-y-2">
                     {module.levels.slice(0, 3).map((level) => (
                       <div key={level.id} className="flex items-center justify-between">
-                        <span className="text-sm truncate">{level.title}</span>
+                        <span className="text-sm truncate">
+                          {t(`courses.modules.${module.id}.levels.${level.id}.title`, level.title)}
+                        </span>
                         <div className="flex items-center gap-1">
                           <Badge variant="outline" className="text-xs">+{level.xpReward} XP</Badge>
                         </div>
