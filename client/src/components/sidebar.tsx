@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   BarChart3,
+  BookOpen,
   Calendar,
   Crown,
   CreditCard,
@@ -74,6 +75,13 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
       title: t("Dashboard"),
       icon: LayoutDashboard,
       href: `/${currentLang}/dashboard`,
+      requiredPlan: "free",
+      badge: null,
+    },
+    {
+      title: "Financial Courses",
+      icon: BookOpen,
+      href: `/${currentLang}/courses`,
       requiredPlan: "free",
       badge: null,
     },
