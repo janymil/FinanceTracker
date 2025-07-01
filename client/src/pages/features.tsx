@@ -256,28 +256,28 @@ export default function FeaturesPage() {
         <div className="relative max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              AI-Powered Financial Intelligence
+              {t('features.hero.title')}
             </h1>
             <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-4xl mx-auto">
-              Transform your business finances with 9 intelligent AI features that learn, adapt, and optimize your financial decisions in real-time.
+              {t('features.hero.subtitle')}
             </p>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
               <div className="text-center">
                 <div className="text-3xl md:text-4xl font-bold">9</div>
-                <div className="text-sm opacity-80">AI Functions</div>
+                <div className="text-sm opacity-80">{t('features.hero.stats.ai_functions')}</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl md:text-4xl font-bold">3</div>
-                <div className="text-sm opacity-80">Languages</div>
+                <div className="text-sm opacity-80">{t('features.hero.stats.languages')}</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl md:text-4xl font-bold">95%</div>
-                <div className="text-sm opacity-80">Accuracy Rate</div>
+                <div className="text-sm opacity-80">{t('features.hero.stats.accuracy_rate')}</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl md:text-4xl font-bold">24/7</div>
-                <div className="text-sm opacity-80">AI Availability</div>
+                <div className="text-sm opacity-80">{t('features.hero.stats.ai_availability')}</div>
               </div>
             </div>
           </div>

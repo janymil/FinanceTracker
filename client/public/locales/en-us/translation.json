@@ -3374,6 +3374,249 @@
       "error": "Processing error occurred",
       "transactions_processed": "Processed {{processed}} of {{total}} transactions"
     }
+  },
+
+  "features": {
+    "hero": {
+      "title": "AI-Powered Financial Intelligence",
+      "subtitle": "Transform your business finances with 9 intelligent AI features that learn, adapt, and optimize your financial decisions in real-time.",
+      "stats": {
+        "ai_functions": "AI Functions",
+        "languages": "Languages",
+        "accuracy_rate": "Accuracy Rate",
+        "ai_availability": "AI Availability"
+      }
+    },
+    "demo": {
+      "title": "Try Our AI Categorization",
+      "subtitle": "Experience how our AI automatically categorizes transactions",
+      "merchant_label": "Merchant Name",
+      "merchant_placeholder": "e.g., Starbucks, Office Depot, etc.",
+      "amount_label": "Amount",
+      "amount_placeholder": "e.g., 25.99",
+      "language_label": "Language",
+      "demo_button": "Test AI Categorization",
+      "demo_loading": "AI is analyzing...",
+      "signup_prompt": "Want to use all AI features?",
+      "signup_button": "Sign Up Free",
+      "fill_fields": "Please fill in all fields",
+      "languages": {
+        "en": "English",
+        "es": "Spanish",
+        "sk": "Slovak"
+      }
+    },
+    "section": {
+      "title": "Complete AI Feature Suite",
+      "subtitle": "Explore each of our 9 intelligent AI functions designed to revolutionize your financial management"
+    },
+    "categorization": {
+      "title": "Smart Transaction Categorization",
+      "badge": "All Plans",
+      "description": "Our AI automatically categorizes every transaction with 95% accuracy by analyzing merchant names, transaction patterns, and your spending history. No more manual sorting - just intelligent automation.",
+      "benefits": {
+        "instant": {
+          "title": "Instant Categorization",
+          "desc": "Every transaction is automatically sorted the moment it's imported"
+        },
+        "learning": {
+          "title": "Learning Algorithm",
+          "desc": "Gets smarter with your spending patterns over time"
+        },
+        "custom": {
+          "title": "Custom Categories",
+          "desc": "Adapts to your business-specific category structure"
+        }
+      }
+    },
+    "tips": {
+      "title": "AI Financial Analysis",
+      "badge": "Standard+",
+      "description": "Get detailed 4-section financial analysis covering spending patterns, saving recommendations, budget optimization, and advanced insights tailored to your business needs.",
+      "benefits": {
+        "patterns": {
+          "title": "Spending Patterns",
+          "desc": "Deep analysis of your spending behaviors and trends"
+        },
+        "strategies": {
+          "title": "Saving Strategies",
+          "desc": "Personalized recommendations to optimize your cash flow"
+        },
+        "optimization": {
+          "title": "Budget Optimization",
+          "desc": "Smart adjustments to maximize your budget efficiency"
+        },
+        "analysis": {
+          "title": "Advanced Analysis",
+          "desc": "Professional-grade financial insights and forecasting"
+        }
+      }
+    },
+    "insights": {
+      "title": "Intelligent Spending Insights",
+      "badge": "Standard+",
+      "description": "Advanced analysis of your expense transactions to identify unusual patterns, optimization opportunities, and spending trends that matter to your business growth.",
+      "benefits": {
+        "anomaly": {
+          "title": "Anomaly Detection",
+          "desc": "Automatically identifies unusual spending patterns"
+        },
+        "trend": {
+          "title": "Trend Analysis",
+          "desc": "Spots emerging trends in your business expenses"
+        },
+        "optimization": {
+          "title": "Optimization Tips",
+          "desc": "Actionable recommendations to reduce costs"
+        }
+      }
+    },
+    "health": {
+      "title": "Health Score",
+      "badge": "Premium",
+      "description": "Comprehensive financial health analysis with personalized scoring (0-100) that includes detailed factor breakdown, risk assessment, and AI-powered improvement recommendations.",
+      "benefits": {
+        "scoring": {
+          "title": "Real-time Scoring",
+          "desc": "Live financial health score from 0-100"
+        },
+        "analysis": {
+          "title": "Factor Analysis",
+          "desc": "Detailed breakdown of what affects your score"
+        },
+        "plan": {
+          "title": "Improvement Plan",
+          "desc": "Actionable steps to boost your financial health"
+        }
+      }
+    },
+    "statements": {
+      "title": "AI Bank Statement Parser",
+      "badge": "All Plans",
+      "description": "Advanced OCR and AI-powered extraction of transactions from bank statement PDFs and images with multilingual support and 95%+ accuracy in transaction detection.",
+      "benefits": {
+        "processing": {
+          "title": "PDF Processing",
+          "desc": "Extract transactions from any bank statement format"
+        },
+        "ocr": {
+          "title": "OCR Technology",
+          "desc": "Local processing with privacy-first approach"
+        },
+        "categorization": {
+          "title": "Smart Categorization",
+          "desc": "Automatically categorize extracted transactions"
+        }
+      }
+    },
+    "predictions": {
+      "title": "Expense Predictions",
+      "badge": "Premium",
+      "description": "Advanced predictive analytics that forecast future expense patterns based on your historical data, seasonal trends, and business growth indicators.",
+      "benefits": {
+        "forecasting": {
+          "title": "Future Forecasting",
+          "desc": "Predict expenses up to 6 months ahead"
+        },
+        "seasonal": {
+          "title": "Seasonal Analysis",
+          "desc": "Account for seasonal business variations"
+        },
+        "planning": {
+          "title": "Budget Planning",
+          "desc": "Data-driven budget creation for future periods"
+        }
+      }
+    },
+    "trends": {
+      "title": "AI Trend Predictions",
+      "badge": "Premium",
+      "description": "Sophisticated trend analysis that provides AI-powered forecasting for category spending, identifies emerging patterns, and predicts financial trajectory changes.",
+      "benefits": {
+        "category": {
+          "title": "Category Trends",
+          "desc": "Track spending trends by expense category"
+        },
+        "growth": {
+          "title": "Growth Indicators",
+          "desc": "Identify business growth or decline signals"
+        },
+        "adaptation": {
+          "title": "Market Adaptation",
+          "desc": "Adjust strategies based on trend predictions"
+        }
+      }
+    },
+    "recommendations": {
+      "title": "Daily AI Recommendations",
+      "badge": "Standard+",
+      "description": "Start each day with personalized financial recommendations generated by AI analysis of your recent activity, upcoming obligations, and optimization opportunities.",
+      "benefits": {
+        "daily": {
+          "title": "Daily Fresh Insights",
+          "desc": "New recommendations every 24 hours"
+        },
+        "action": {
+          "title": "Action-Oriented",
+          "desc": "Specific steps you can take today"
+        },
+        "priority": {
+          "title": "Priority-Based",
+          "desc": "Most important recommendations first"
+        }
+      }
+    },
+    "contextual": {
+      "title": "Smart Financial Advisor",
+      "badge": "Standard+",
+      "description": "Intelligent financial advice that adapts to your current month's spending, budget status, and goal progress to provide the most relevant guidance when you need it.",
+      "benefits": {
+        "realtime": {
+          "title": "Real-time Context",
+          "desc": "Advice based on current financial situation"
+        },
+        "goal": {
+          "title": "Goal-Aligned",
+          "desc": "Tips that help achieve your specific goals"
+        },
+        "budget": {
+          "title": "Budget-Aware",
+          "desc": "Considers your budget constraints and targets"
+        }
+      }
+    },
+    "calculators": {
+      "business_impact": "Business Impact Calculator",
+      "scoring": "Scoring Simulator",
+      "prediction_range": "Prediction Range Calculator",
+      "statement_processing": "Statement Processing Calculator",
+      "trend_strength": "Trend Strength Calculator",
+      "recommendation_effectiveness": "Recommendation Effectiveness Calculator",
+      "contextual_relevance": "Contextual Relevance Calculator",
+      "monthly_transactions": "Monthly transactions",
+      "monthly_expenses": "Monthly expenses",
+      "business_size": "Business size (employees)",
+      "savings_rate": "Savings rate",
+      "budget_adherence": "Budget adherence",
+      "historical_months": "Historical data months",
+      "pages_statement": "Pages in statement",
+      "trend_strength_level": "Trend strength",
+      "recommendations_followed": "Recommendations followed",
+      "contextual_factors": "Contextual factors considered",
+      "estimated_time_saved": "Estimated time saved",
+      "predicted_accuracy": "Predicted accuracy",
+      "estimated_health_score": "Estimated Financial Health Score",
+      "prediction_range_available": "Prediction range available",
+      "estimated_transactions": "Estimated transactions extracted",
+      "processing_time_saved": "Processing time saved",
+      "trend_confidence": "Trend confidence level",
+      "weekly_value": "Weekly value generated",
+      "relevance_score": "Relevance score",
+      "months_ahead": "months ahead",
+      "transactions": "transactions",
+      "minutes": "minutes",
+      "per_week": "per week"
+    }
   }
 
 }

@@ -3436,6 +3436,249 @@
       "error": "Ocurrió un error de procesamiento",
       "transactions_processed": "Procesado {{processed}} de {{total}} transacciones"
     }
+  },
+
+  "features": {
+    "hero": {
+      "title": "Inteligencia Financiera Potenciada por IA",
+      "subtitle": "Transforma las finanzas de tu negocio con 9 funciones inteligentes de IA que aprenden, se adaptan y optimizan tus decisiones financieras en tiempo real.",
+      "stats": {
+        "ai_functions": "Funciones de IA",
+        "languages": "Idiomas",
+        "accuracy_rate": "Tasa de Precisión",
+        "ai_availability": "Disponibilidad de IA"
+      }
+    },
+    "demo": {
+      "title": "Prueba Nuestra Categorización IA",
+      "subtitle": "Experimenta cómo nuestra IA categoriza automáticamente las transacciones",
+      "merchant_label": "Nombre del Comerciante",
+      "merchant_placeholder": "ej., Starbucks, Office Depot, etc.",
+      "amount_label": "Cantidad",
+      "amount_placeholder": "ej., 25.99",
+      "language_label": "Idioma",
+      "demo_button": "Probar Categorización IA",
+      "demo_loading": "La IA está analizando...",
+      "signup_prompt": "¿Quieres usar todas las funciones de IA?",
+      "signup_button": "Regístrate Gratis",
+      "fill_fields": "Por favor completa todos los campos",
+      "languages": {
+        "en": "Inglés",
+        "es": "Español",
+        "sk": "Eslovaco"
+      }
+    },
+    "section": {
+      "title": "Suite Completa de Funciones IA",
+      "subtitle": "Explora cada una de nuestras 9 funciones inteligentes de IA diseñadas para revolucionar tu gestión financiera"
+    },
+    "categorization": {
+      "title": "Categorización Inteligente de Transacciones",
+      "badge": "Todos los Planes",
+      "description": "Nuestra IA categoriza automáticamente cada transacción con 95% de precisión analizando nombres de comerciantes, patrones de transacciones y tu historial de gastos. No más ordenamiento manual - solo automatización inteligente.",
+      "benefits": {
+        "instant": {
+          "title": "Categorización Instantánea",
+          "desc": "Cada transacción se ordena automáticamente al momento de importarse"
+        },
+        "learning": {
+          "title": "Algoritmo de Aprendizaje",
+          "desc": "Se vuelve más inteligente con tus patrones de gasto a lo largo del tiempo"
+        },
+        "custom": {
+          "title": "Categorías Personalizadas",
+          "desc": "Se adapta a la estructura de categorías específica de tu negocio"
+        }
+      }
+    },
+    "tips": {
+      "title": "Análisis Financiero IA",
+      "badge": "Estándar+",
+      "description": "Obtén análisis financiero detallado de 4 secciones que cubre patrones de gasto, recomendaciones de ahorro, optimización de presupuesto e insights avanzados adaptados a las necesidades de tu negocio.",
+      "benefits": {
+        "patterns": {
+          "title": "Patrones de Gasto",
+          "desc": "Análisis profundo de tus comportamientos y tendencias de gasto"
+        },
+        "strategies": {
+          "title": "Estrategias de Ahorro",
+          "desc": "Recomendaciones personalizadas para optimizar tu flujo de caja"
+        },
+        "optimization": {
+          "title": "Optimización de Presupuesto",
+          "desc": "Ajustes inteligentes para maximizar la eficiencia de tu presupuesto"
+        },
+        "analysis": {
+          "title": "Análisis Avanzado",
+          "desc": "Insights financieros y pronósticos de nivel profesional"
+        }
+      }
+    },
+    "insights": {
+      "title": "Insights Inteligentes de Gastos",
+      "badge": "Estándar+",
+      "description": "Análisis avanzado de tus transacciones de gastos para identificar patrones inusuales, oportunidades de optimización y tendencias de gasto que importan para el crecimiento de tu negocio.",
+      "benefits": {
+        "anomaly": {
+          "title": "Detección de Anomalías",
+          "desc": "Identifica automáticamente patrones de gasto inusuales"
+        },
+        "trend": {
+          "title": "Análisis de Tendencias",
+          "desc": "Detecta tendencias emergentes en los gastos de tu negocio"
+        },
+        "optimization": {
+          "title": "Consejos de Optimización",
+          "desc": "Recomendaciones accionables para reducir costos"
+        }
+      }
+    },
+    "health": {
+      "title": "Puntuación de Salud",
+      "badge": "Premium",
+      "description": "Análisis integral de salud financiera con puntuación personalizada (0-100) que incluye desglose detallado de factores, evaluación de riesgos y recomendaciones de mejora potenciadas por IA.",
+      "benefits": {
+        "scoring": {
+          "title": "Puntuación en Tiempo Real",
+          "desc": "Puntuación de salud financiera en vivo de 0-100"
+        },
+        "analysis": {
+          "title": "Análisis de Factores",
+          "desc": "Desglose detallado de lo que afecta tu puntuación"
+        },
+        "plan": {
+          "title": "Plan de Mejora",
+          "desc": "Pasos accionables para impulsar tu salud financiera"
+        }
+      }
+    },
+    "statements": {
+      "title": "Analizador IA de Estados Bancarios",
+      "badge": "Todos los Planes",
+      "description": "OCR avanzado y extracción potenciada por IA de transacciones desde PDFs e imágenes de estados bancarios con soporte multiidioma y 95%+ de precisión en detección de transacciones.",
+      "benefits": {
+        "processing": {
+          "title": "Procesamiento de PDF",
+          "desc": "Extrae transacciones de cualquier formato de estado bancario"
+        },
+        "ocr": {
+          "title": "Tecnología OCR",
+          "desc": "Procesamiento local con enfoque que prioriza la privacidad"
+        },
+        "categorization": {
+          "title": "Categorización Inteligente",
+          "desc": "Categoriza automáticamente las transacciones extraídas"
+        }
+      }
+    },
+    "predictions": {
+      "title": "Predicciones de Gastos",
+      "badge": "Premium",
+      "description": "Análisis predictivo avanzado que pronostica patrones futuros de gastos basándose en tus datos históricos, tendencias estacionales e indicadores de crecimiento empresarial.",
+      "benefits": {
+        "forecasting": {
+          "title": "Pronóstico Futuro",
+          "desc": "Predice gastos hasta 6 meses por adelantado"
+        },
+        "seasonal": {
+          "title": "Análisis Estacional",
+          "desc": "Considera las variaciones estacionales del negocio"
+        },
+        "planning": {
+          "title": "Planificación de Presupuesto",
+          "desc": "Creación de presupuesto basada en datos para períodos futuros"
+        }
+      }
+    },
+    "trends": {
+      "title": "Predicciones IA de Tendencias",
+      "badge": "Premium",
+      "description": "Análisis sofisticado de tendencias que proporciona pronósticos potenciados por IA para gastos por categoría, identifica patrones emergentes y predice cambios de trayectoria financiera.",
+      "benefits": {
+        "category": {
+          "title": "Tendencias por Categoría",
+          "desc": "Rastrea tendencias de gasto por categoría de gastos"
+        },
+        "growth": {
+          "title": "Indicadores de Crecimiento",
+          "desc": "Identifica señales de crecimiento o declive empresarial"
+        },
+        "adaptation": {
+          "title": "Adaptación al Mercado",
+          "desc": "Ajusta estrategias basadas en predicciones de tendencias"
+        }
+      }
+    },
+    "recommendations": {
+      "title": "Recomendaciones Diarias IA",
+      "badge": "Estándar+",
+      "description": "Comienza cada día con recomendaciones financieras personalizadas generadas por análisis IA de tu actividad reciente, obligaciones próximas y oportunidades de optimización.",
+      "benefits": {
+        "daily": {
+          "title": "Insights Diarios Frescos",
+          "desc": "Nuevas recomendaciones cada 24 horas"
+        },
+        "action": {
+          "title": "Orientado a la Acción",
+          "desc": "Pasos específicos que puedes tomar hoy"
+        },
+        "priority": {
+          "title": "Basado en Prioridades",
+          "desc": "Las recomendaciones más importantes primero"
+        }
+      }
+    },
+    "contextual": {
+      "title": "Asesor Financiero Inteligente",
+      "badge": "Estándar+",
+      "description": "Asesoramiento financiero inteligente que se adapta al gasto de tu mes actual, estado del presupuesto y progreso de metas para proporcionar la orientación más relevante cuando la necesitas.",
+      "benefits": {
+        "realtime": {
+          "title": "Contexto en Tiempo Real",
+          "desc": "Consejos basados en tu situación financiera actual"
+        },
+        "goal": {
+          "title": "Alineado con Metas",
+          "desc": "Consejos que ayudan a lograr tus metas específicas"
+        },
+        "budget": {
+          "title": "Consciente del Presupuesto",
+          "desc": "Considera tus restricciones y objetivos presupuestarios"
+        }
+      }
+    },
+    "calculators": {
+      "business_impact": "Calculadora de Impacto Empresarial",
+      "scoring": "Simulador de Puntuación",
+      "prediction_range": "Calculadora de Rango de Predicción",
+      "statement_processing": "Calculadora de Procesamiento de Estados",
+      "trend_strength": "Calculadora de Fuerza de Tendencias",
+      "recommendation_effectiveness": "Calculadora de Efectividad de Recomendaciones",
+      "contextual_relevance": "Calculadora de Relevancia Contextual",
+      "monthly_transactions": "Transacciones mensuales",
+      "monthly_expenses": "Gastos mensuales",
+      "business_size": "Tamaño del negocio (empleados)",
+      "savings_rate": "Tasa de ahorro",
+      "budget_adherence": "Adherencia al presupuesto",
+      "historical_months": "Meses de datos históricos",
+      "pages_statement": "Páginas en estado",
+      "trend_strength_level": "Fuerza de tendencia",
+      "recommendations_followed": "Recomendaciones seguidas",
+      "contextual_factors": "Factores contextuales considerados",
+      "estimated_time_saved": "Tiempo estimado ahorrado",
+      "predicted_accuracy": "Precisión predicha",
+      "estimated_health_score": "Puntuación de Salud Financiera Estimada",
+      "prediction_range_available": "Rango de predicción disponible",
+      "estimated_transactions": "Transacciones estimadas extraídas",
+      "processing_time_saved": "Tiempo de procesamiento ahorrado",
+      "trend_confidence": "Nivel de confianza de tendencia",
+      "weekly_value": "Valor semanal generado",
+      "relevance_score": "Puntuación de relevancia",
+      "months_ahead": "meses por adelantado",
+      "transactions": "transacciones",
+      "minutes": "minutos",
+      "per_week": "por semana"
+    }
   }
 
 }

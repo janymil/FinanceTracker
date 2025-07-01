@@ -3555,5 +3555,249 @@
       "error": "Nastala chyba spracovania",
       "transactions_processed": "Spracované {{processed}} z {{total}} transakcií"
     }
+  },
+
+  "features": {
+    "hero": {
+      "title": "AI-poháňaná finančná inteligencia",
+      "subtitle": "Transformujte podnikové financie s 9 inteligentnými AI funkciami, ktoré sa učia, adaptujú a optimalizujú vaše finančné rozhodnutia v reálnom čase.",
+      "stats": {
+        "ai_functions": "AI funkcie",
+        "languages": "Jazyky",
+        "accuracy_rate": "Presnosť",
+        "ai_availability": "Dostupnosť AI"
+      }
+    },
+    "demo": {
+      "title": "Vyskúšajte našu AI kategorizáciu",
+      "subtitle": "Zažite ako naša AI automaticky kategorizuje transakcie",
+      "merchant_label": "Názov obchodníka",
+      "merchant_placeholder": "napr., Starbucks, Office Depot, atď.",
+      "amount_label": "Suma",
+      "amount_placeholder": "napr., 25.99",
+      "language_label": "Jazyk",
+      "demo_button": "Testovať AI kategorizáciu",
+      "demo_loading": "AI analyzuje...",
+      "signup_prompt": "Chcete používať všetky AI funkcie?",
+      "signup_button": "Zaregistrovať sa zadarmo",
+      "fill_fields": "Prosím vyplňte všetky polia",
+      "languages": {
+        "en": "Angličtina",
+        "es": "Španielčina",
+        "sk": "Slovenčina"
+      }
+    },
+    "section": {
+      "title": "Kompletná AI funkčná sada",
+      "subtitle": "Preskúmajte každú z našich 9 inteligentných AI funkcií navrhnutých na revolúciu vo vašom finančnom riadení"
+    },
+    "categorization": {
+      "title": "Inteligentná kategorizácia transakcií",
+      "badge": "Všetky plány",
+      "description": "Naša AI automaticky kategorizuje každú transakciu s 95% presnosťou analýzou názvov obchodníkov, vzorcov transakcií a vašej histórie výdavkov. Už žiadne manuálne triedenie - len inteligentná automatizácia.",
+      "benefits": {
+        "instant": {
+          "title": "Okamžitá kategorizácia",
+          "desc": "Každá transakcia je automaticky zariadená v momente importu"
+        },
+        "learning": {
+          "title": "Učiaci sa algoritmus",
+          "desc": "Stáva sa inteligentnejším s vašimi vzorcami výdavkov časom"
+        },
+        "custom": {
+          "title": "Vlastné kategórie",
+          "desc": "Prispôsobuje sa vašej podnik-špecifickej štruktúre kategórií"
+        }
+      }
+    },
+    "tips": {
+      "title": "AI finančná analýza",
+      "badge": "Štandard+",
+      "description": "Získajte detailnú 4-sekčnú finančnú analýzu pokrývajúcu vzorce výdavkov, odporúčania úspor, optimalizáciu rozpočtu a pokročilé poznatky prispôsobené potrebám vašej firmy.",
+      "benefits": {
+        "patterns": {
+          "title": "Vzorce výdavkov",
+          "desc": "Hlboká analýza vašich správaní a trendov výdavkov"
+        },
+        "strategies": {
+          "title": "Stratégie úspor",
+          "desc": "Personalizované odporúčania na optimalizáciu peňažného toku"
+        },
+        "optimization": {
+          "title": "Optimalizácia rozpočtu",
+          "desc": "Inteligentné úpravy na maximalizáciu efektívnosti rozpočtu"
+        },
+        "analysis": {
+          "title": "Pokročilá analýza",
+          "desc": "Finančné poznatky a prognózy profesionálnej úrovne"
+        }
+      }
+    },
+    "insights": {
+      "title": "Inteligentné poznatky o výdavkoch",
+      "badge": "Štandard+",
+      "description": "Pokročilá analýza vašich výdavkových transakcií na identifikáciu neobvyklých vzorcov, príležitostí optimalizácie a trendov výdavkov dôležitých pre rast vašej firmy.",
+      "benefits": {
+        "anomaly": {
+          "title": "Detekcia anomálií",
+          "desc": "Automaticky identifikuje neobvyklé vzorce výdavkov"
+        },
+        "trend": {
+          "title": "Analýza trendov",
+          "desc": "Odhaľuje nové trendy vo výdavkoch vašej firmy"
+        },
+        "optimization": {
+          "title": "Tipy na optimalizáciu",
+          "desc": "Uskutočniteľné odporúčania na zníženie nákladov"
+        }
+      }
+    },
+    "health": {
+      "title": "Zdravotné skóre",
+      "badge": "Prémiový",
+      "description": "Komplexná analýza finančného zdravia s personalizovaným hodnotením (0-100) zahŕňajúca detailný rozpis faktorov, hodnotenie rizík a AI-poháňané odporúčania na zlepšenie.",
+      "benefits": {
+        "scoring": {
+          "title": "Hodnotenie v reálnom čase",
+          "desc": "Živé skóre finančného zdravia od 0-100"
+        },
+        "analysis": {
+          "title": "Analýza faktorov",
+          "desc": "Detailný rozpis toho, čo ovplyvňuje vaše skóre"
+        },
+        "plan": {
+          "title": "Plán zlepšenia",
+          "desc": "Uskutočniteľné kroky na posilnenie finančného zdravia"
+        }
+      }
+    },
+    "statements": {
+      "title": "AI analyzátor bankových výpisov",
+      "badge": "Všetky plány",
+      "description": "Pokročilé OCR a AI-poháňaná extrakcia transakcií z PDF a obrázkov bankových výpisov s viacjazyčnou podporou a 95%+ presnosťou detekcie transakcií.",
+      "benefits": {
+        "processing": {
+          "title": "Spracovanie PDF",
+          "desc": "Extraktujte transakcie z akéhokoľvek formátu bankového výpisu"
+        },
+        "ocr": {
+          "title": "OCR technológia",
+          "desc": "Lokálne spracovanie s prístupom prioritizujúcim súkromie"
+        },
+        "categorization": {
+          "title": "Inteligentná kategorizácia",
+          "desc": "Automaticky kategorizuje extraktované transakcie"
+        }
+      }
+    },
+    "predictions": {
+      "title": "Predpovede výdavkov",
+      "badge": "Prémiový",
+      "description": "Pokročilá prediktívna analytika, ktorá predpovedá budúce vzorce výdavkov na základe vašich historických údajov, sezónnych trendov a indikátorov rastu firmy.",
+      "benefits": {
+        "forecasting": {
+          "title": "Budúce prognózovanie",
+          "desc": "Predpovedá výdavky až 6 mesiacov dopredu"
+        },
+        "seasonal": {
+          "title": "Sezónna analýza",
+          "desc": "Zohľadňuje sezónne variácie podnikania"
+        },
+        "planning": {
+          "title": "Plánovanie rozpočtu",
+          "desc": "Tvorba rozpočtu založená na údajoch pre budúce obdobia"
+        }
+      }
+    },
+    "trends": {
+      "title": "AI predpovede trendov",
+      "badge": "Prémiový",
+      "description": "Sofistikovaná analýza trendov poskytujúca AI-poháňané prognózy pre výdavky podľa kategórií, identifikuje nové vzorce a predpovedá zmeny finančnej trajektórie.",
+      "benefits": {
+        "category": {
+          "title": "Trendy kategórií",
+          "desc": "Sleduje trendy výdavkov podľa kategórie výdavkov"
+        },
+        "growth": {
+          "title": "Indikátory rastu",
+          "desc": "Identifikuje signály rastu alebo poklesu firmy"
+        },
+        "adaptation": {
+          "title": "Adaptácia na trh",
+          "desc": "Upravuje stratégie na základe predpovedí trendov"
+        }
+      }
+    },
+    "recommendations": {
+      "title": "Denné AI odporúčania",
+      "badge": "Štandard+",
+      "description": "Začnite každý deň s personalizovanými finančnými odporúčaniami generovanými AI analýzou vašej nedávnej aktivity, nadchádzajúcich povinností a príležitostí optimalizácie.",
+      "benefits": {
+        "daily": {
+          "title": "Denné čerstvé poznatky",
+          "desc": "Nové odporúčania každých 24 hodín"
+        },
+        "action": {
+          "title": "Orientované na akciu",
+          "desc": "Konkrétne kroky, ktoré môžete urobiť dnes"
+        },
+        "priority": {
+          "title": "Založené na prioritách",
+          "desc": "Najdôležitejšie odporúčania prvé"
+        }
+      }
+    },
+    "contextual": {
+      "title": "Inteligentný finančný poradca",
+      "badge": "Štandard+",
+      "description": "Inteligentné finančné poradenstvo, ktoré sa prispôsobuje vašim aktuálnym mesačným výdavkom, stavu rozpočtu a pokroku cieľov na poskytnutie najrelevantnejšieho vedenia keď ho potrebujete.",
+      "benefits": {
+        "realtime": {
+          "title": "Kontext v reálnom čase",
+          "desc": "Rady založené na aktuálnej finančnej situácii"
+        },
+        "goal": {
+          "title": "Zladené s cieľmi",
+          "desc": "Tipy, ktoré pomáhajú dosiahnuť vaše konkrétne ciele"
+        },
+        "budget": {
+          "title": "Vedomé rozpočtu",
+          "desc": "Zohľadňuje vaše rozpočtové obmedzenia a ciele"
+        }
+      }
+    },
+    "calculators": {
+      "business_impact": "Kalkulačka podnikového dopadu",
+      "scoring": "Simulátor hodnotenia",
+      "prediction_range": "Kalkulačka rozsahu predpovedí",
+      "statement_processing": "Kalkulačka spracovania výpisov",
+      "trend_strength": "Kalkulačka sily trendov",
+      "recommendation_effectiveness": "Kalkulačka účinnosti odporúčaní",
+      "contextual_relevance": "Kalkulačka kontextovej relevantnosti",
+      "monthly_transactions": "Mesačné transakcie",
+      "monthly_expenses": "Mesačné výdavky",
+      "business_size": "Veľkosť firmy (zamestnanci)",
+      "savings_rate": "Miera úspor",
+      "budget_adherence": "Dodržiavanie rozpočtu",
+      "historical_months": "Mesiace historických údajov",
+      "pages_statement": "Strán vo výpise",
+      "trend_strength_level": "Sila trendu",
+      "recommendations_followed": "Nasledované odporúčania",
+      "contextual_factors": "Zohľadnené kontextové faktory",
+      "estimated_time_saved": "Odhadovaný ušetrený čas",
+      "predicted_accuracy": "Predpovedaná presnosť",
+      "estimated_health_score": "Odhadované skóre finančného zdravia",
+      "prediction_range_available": "Dostupný rozsah predpovedí",
+      "estimated_transactions": "Odhadované extraktované transakcie",
+      "processing_time_saved": "Ušetrený čas spracovania",
+      "trend_confidence": "Úroveň dôvery trendu",
+      "weekly_value": "Týždenná generovaná hodnota",
+      "relevance_score": "Skóre relevantnosti",
+      "months_ahead": "mesiacov dopredu",
+      "transactions": "transakcie",
+      "minutes": "minúty",
+      "per_week": "za týždeň"
+    }
   }
+
 }
