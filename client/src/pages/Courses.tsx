@@ -470,8 +470,8 @@ export default function Courses() {
                     className="w-full"
                     disabled={isLocked}
                     onClick={() => {
-                      const nextLevel = module.levels.find(level => !level.isCompleted) || module.levels[0];
-                      startLesson(module, nextLevel);
+                      // For now, always start with the first level since we don't have progress tracking
+                      startLesson(module, module.levels[0]);
                     }}
                   >
                     {isLocked ? 'Locked' : progress === 0 ? 'Start Course' : 'Continue'}
