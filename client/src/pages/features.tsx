@@ -8,6 +8,7 @@ import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocation } from 'wouter';
+import { AppLayout } from '@/components/AppLayout';
 import { 
   Brain, 
   Target, 
@@ -62,26 +63,44 @@ export default function FeaturesPage() {
     
     setDemoLoading(true);
     
-    // Simulate AI processing
-    setTimeout(() => {
-      const categories = {
-        en: ['Food & Dining', 'Office Supplies', 'Transportation', 'Software & Technology', 'Marketing & Advertising'],
-        es: ['Comida y Restaurantes', 'Suministros de Oficina', 'Transporte', 'Software y Tecnología', 'Marketing y Publicidad'],
-        sk: ['Jedlo a Reštaurácie', 'Kancelárske Potreby', 'Doprava', 'Software a Technológie', 'Marketing a Reklama']
-      };
-      
-      const randomCategory = categories[demoLanguage as keyof typeof categories][Math.floor(Math.random() * 5)];
-      const confidence = Math.floor(Math.random() * 15) + 85;
+    try {
+      // Call the real AI categorization API
+      const response = await fetch('/api/ai/categorize-expense', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-language': demoLanguage === 'en' ? 'en-us' : demoLanguage === 'es' ? 'es-pe' : 'sk-sk'
+        },
+        body: JSON.stringify({
+          description: merchantName,
+          amount: parseFloat(amount)
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to categorize expense');
+      }
+
+      const result = await response.json();
       
       const results = {
-        en: `✅ AI Categorization Complete\n\nMerchant: ${merchantName}\nAmount: $${amount}\nSuggested Category: ${randomCategory}\nConfidence: ${confidence}%\nProcessing Time: 0.3 seconds\n\nAI Analysis: Based on merchant name patterns and transaction amount, this appears to be a ${randomCategory.toLowerCase()} expense with high confidence.`,
-        es: `✅ Categorización IA Completa\n\nComerciante: ${merchantName}\nCantidad: $${amount}\nCategoría Sugerida: ${randomCategory}\nConfianza: ${confidence}%\nTiempo de Procesamiento: 0.3 segundos\n\nAnálisis IA: Basado en patrones de nombres de comerciantes y monto de transacción, esto parece ser un gasto de ${randomCategory.toLowerCase()} con alta confianza.`,
-        sk: `✅ AI Kategorizácia Dokončená\n\nObchodník: ${merchantName}\nSuma: $${amount}\nNavrhovaná Kategória: ${randomCategory}\nSpoľahlivosť: ${confidence}%\nČas Spracovania: 0.3 sekúnd\n\nAI Analýza: Na základe vzorov názvov obchodníkov a sumy transakcie sa zdá, že ide o výdavok typu ${randomCategory.toLowerCase()} s vysokou spoľahlivosťou.`
+        en: `✅ Real AI Categorization Complete\n\nMerchant: ${merchantName}\nAmount: $${amount}\nSuggested Category: ${result.category}\nConfidence: ${Math.round(result.confidence * 100)}%\nProcessing Time: ${result.processingTime || '0.3'} seconds\n\nAI Analysis: ${result.reasoning || 'Based on merchant analysis and spending patterns.'}`,
+        es: `✅ Categorización IA Real Completa\n\nComerciante: ${merchantName}\nCantidad: $${amount}\nCategoría Sugerida: ${result.category}\nConfianza: ${Math.round(result.confidence * 100)}%\nTiempo de Procesamiento: ${result.processingTime || '0.3'} segundos\n\nAnálisis IA: ${result.reasoning || 'Basado en análisis del comerciante y patrones de gasto.'}`,
+        sk: `✅ Skutočná AI Kategorizácia Dokončená\n\nObchodník: ${merchantName}\nSuma: $${amount}\nNavrhovaná Kategória: ${result.category}\nSpoľahlivosť: ${Math.round(result.confidence * 100)}%\nČas Spracovania: ${result.processingTime || '0.3'} sekúnd\n\nAI Analýza: ${result.reasoning || 'Na základe analýzy obchodníka a vzorov výdavkov.'}`
       };
       
       setDemoResult(results[demoLanguage as keyof typeof results]);
+    } catch (error) {
+      console.error('AI Demo Error:', error);
+      const errorResults = {
+        en: `❌ AI Demo Error\n\nPlease sign up for a free account to test the real AI categorization system.\n\nThis demo requires authentication to access our AI services.`,
+        es: `❌ Error de Demo IA\n\nPor favor regístrate para una cuenta gratuita para probar el sistema real de categorización IA.\n\nEsta demo requiere autenticación para acceder a nuestros servicios de IA.`,
+        sk: `❌ Chyba AI Demo\n\nProsím zaregistrujte sa pre bezplatný účet na testovanie skutočného AI kategorizačného systému.\n\nTáto demo vyžaduje autentifikáciu pre prístup k našim AI službám.`
+      };
+      setDemoResult(errorResults[demoLanguage as keyof typeof errorResults]);
+    } finally {
       setDemoLoading(false);
-    }, 1500);
+    }
   };
 
   const aiFeatures = [
@@ -218,7 +237,8 @@ export default function FeaturesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+    <AppLayout isPublicPage={true}>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-700 text-white">
         <div className="absolute inset-0 bg-black/20"></div>
@@ -551,7 +571,8 @@ export default function FeaturesPage() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }
