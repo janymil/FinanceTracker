@@ -1,4 +1,5 @@
 // Financial Literacy Course Content
+import { useTranslation } from 'react-i18next';
 
 export interface ContentItem {
   id: string;
