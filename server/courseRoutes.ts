@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { requireAuth } from "./auth.js";
 import { storage } from "./storage.js";
 import { generateFinancialLiteracyCourse, generateAchievementBadges } from "./courseContentGenerator.js";
+import { isAuthenticated, getUserId } from "./clerkAuth.js";
 import { z } from "zod";
 
 const router = Router();
@@ -29,12 +29,16 @@ router.get("/api/courses/badges", async (req, res) => {
 });
 
 // Get user's course progress
-router.get("/api/courses/progress", requireAuth, async (req, res) => {
+router.get("/api/courses/progress", isAuthenticated, async (req: any, res) => {
   try {
-    const userId = req.auth.userId;
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    
     const progress = await storage.getUserCourseProgress(userId);
     const stats = await storage.getUserLearningStats(userId);
-    const achievements = await storage.getUserAchievements(userId);
+    const achievements = await storage.getUserCourseAchievements(userId);
     
     res.json({ 
       progress: progress || [],

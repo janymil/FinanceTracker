@@ -224,7 +224,7 @@ export interface IStorage {
     timeSpent: number;
     lessonCompleted: boolean;
   }): Promise<void>;
-  getUserAchievements(userId: string): Promise<UserAchievement[]>;
+  getUserCourseAchievements(userId: string): Promise<UserAchievement[]>;
   awardAchievement(userId: string, badgeId: string): Promise<UserAchievement>;
 }
 
@@ -2548,6 +2548,169 @@ export class DatabaseStorage implements IStorage {
       .returning();
 
     return result.length > 0;
+  }
+
+  // Course-related operations implementation
+  async getUserCourseProgress(userId: string): Promise<CourseProgress[]> {
+    return await db
+      .select()
+      .from(courseProgress)
+      .where(eq(courseProgress.userId, userId))
+      .orderBy(desc(courseProgress.updatedAt));
+  }
+
+  async updateCourseProgress(userId: string, progress: {
+    moduleId: string;
+    levelId: string;
+    score: number;
+    timeSpent: number;
+    isCompleted: boolean;
+    completedAt: Date | null;
+  }): Promise<void> {
+    const existing = await db
+      .select()
+      .from(courseProgress)
+      .where(
+        and(
+          eq(courseProgress.userId, userId),
+          eq(courseProgress.moduleId, progress.moduleId),
+          eq(courseProgress.levelId, progress.levelId)
+        )
+      );
+
+    if (existing.length > 0) {
+      // Update existing progress
+      await db
+        .update(courseProgress)
+        .set({
+          score: progress.score,
+          attempts: sql`${courseProgress.attempts} + 1`,
+          bestScore: sql`GREATEST(${courseProgress.bestScore}, ${progress.score})`,
+          timeSpent: sql`${courseProgress.timeSpent} + ${progress.timeSpent}`,
+          isCompleted: progress.isCompleted,
+          completedAt: progress.completedAt,
+          updatedAt: new Date()
+        })
+        .where(
+          and(
+            eq(courseProgress.userId, userId),
+            eq(courseProgress.moduleId, progress.moduleId),
+            eq(courseProgress.levelId, progress.levelId)
+          )
+        );
+    } else {
+      // Create new progress record
+      await db
+        .insert(courseProgress)
+        .values({
+          userId,
+          moduleId: progress.moduleId,
+          levelId: progress.levelId,
+          score: progress.score,
+          attempts: 1,
+          bestScore: progress.score,
+          timeSpent: progress.timeSpent,
+          isCompleted: progress.isCompleted,
+          completedAt: progress.completedAt
+        });
+    }
+  }
+
+  async getUserLearningStats(userId: string): Promise<LearningStats | null> {
+    const [stats] = await db
+      .select()
+      .from(learningStats)
+      .where(eq(learningStats.userId, userId));
+    
+    return stats || null;
+  }
+
+  async updateLearningStats(userId: string, updates: {
+    xpGained: number;
+    timeSpent: number;
+    lessonCompleted: boolean;
+  }): Promise<void> {
+    const existing = await db
+      .select()
+      .from(learningStats)
+      .where(eq(learningStats.userId, userId));
+
+    const today = new Date();
+    const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+    if (existing.length > 0) {
+      const stats = existing[0];
+      const lastLearningDate = stats.lastLearningDate;
+      const lastDateOnly = lastLearningDate ? new Date(lastLearningDate.getFullYear(), lastLearningDate.getMonth(), lastLearningDate.getDate()) : null;
+      
+      // Calculate streak
+      let newStreak = stats.currentStreak;
+      if (lastDateOnly) {
+        const daysDiff = Math.floor((todayDateOnly.getTime() - lastDateOnly.getTime()) / (1000 * 60 * 60 * 24));
+        if (daysDiff === 0) {
+          // Same day, keep current streak
+        } else if (daysDiff === 1) {
+          // Consecutive day, increment streak
+          newStreak = stats.currentStreak + 1;
+        } else {
+          // Streak broken, reset to 1
+          newStreak = 1;
+        }
+      } else {
+        // First learning session
+        newStreak = 1;
+      }
+
+      await db
+        .update(learningStats)
+        .set({
+          totalXp: sql`${learningStats.totalXp} + ${updates.xpGained}`,
+          currentStreak: newStreak,
+          longestStreak: sql`GREATEST(${learningStats.longestStreak}, ${newStreak})`,
+          lastLearningDate: today,
+          totalLessonsCompleted: updates.lessonCompleted 
+            ? sql`${learningStats.totalLessonsCompleted} + 1`
+            : learningStats.totalLessonsCompleted,
+          totalTimeSpent: sql`${learningStats.totalTimeSpent} + ${updates.timeSpent}`,
+          updatedAt: today
+        })
+        .where(eq(learningStats.userId, userId));
+    } else {
+      // Create new stats record
+      await db
+        .insert(learningStats)
+        .values({
+          userId,
+          totalXp: updates.xpGained,
+          currentStreak: 1,
+          longestStreak: 1,
+          lastLearningDate: today,
+          totalLessonsCompleted: updates.lessonCompleted ? 1 : 0,
+          totalTimeSpent: updates.timeSpent,
+          averageScore: "0.00"
+        });
+    }
+  }
+
+  async getUserCourseAchievements(userId: string): Promise<UserAchievement[]> {
+    return await db
+      .select()
+      .from(userAchievements)
+      .where(eq(userAchievements.userId, userId))
+      .orderBy(desc(userAchievements.earnedAt));
+  }
+
+  async awardAchievement(userId: string, badgeId: string): Promise<UserAchievement> {
+    const [achievement] = await db
+      .insert(userAchievements)
+      .values({
+        userId,
+        badgeId,
+        notified: false
+      })
+      .returning();
+
+    return achievement;
   }
 }
 
