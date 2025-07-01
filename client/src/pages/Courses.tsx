@@ -14,47 +14,25 @@ import {
   CheckCircle2, 
   Lock,
   Flame,
-  Zap
+  Zap,
+  Calculator,
+  ShoppingCart,
+  TrendingUp,
+  Award
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { COURSE_CONTENT, ACHIEVEMENT_BADGES, type CourseModule, type Achievement, type Exercise, type CourseLevel } from "@/data/courseContent";
 
-// Types from backend
-interface Exercise {
-  id: string;
-  type: 'multiple-choice' | 'drag-drop' | 'true-false' | 'matching' | 'scenario';
-  question: string;
-  explanation?: string;
-  options?: string[];
-  correctAnswer: string | string[];
-  feedback: {
-    correct: string;
-    incorrect: string;
-  };
-  points: number;
-}
-
-interface CourseLevel {
-  id: string;
-  moduleId: string;
-  levelNumber: number;
-  title: string;
-  description: string;
-  xpReward: number;
-  exercises: Exercise[];
+// Extended types for user progress
+interface CourseLevelWithProgress extends CourseLevel {
   isCompleted?: boolean;
   score?: number;
   bestScore?: number;
   attempts?: number;
 }
 
-interface CourseModule {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  totalLevels: number;
-  estimatedTime: string;
-  levels: CourseLevel[];
+interface CourseModuleWithProgress extends CourseModule {
+  levels: CourseLevelWithProgress[];
 }
 
 interface LearningStats {
@@ -63,15 +41,6 @@ interface LearningStats {
   longestStreak: number;
   totalLessonsCompleted: number;
   averageScore: string;
-}
-
-interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  color: string;
-  xpReward: number;
 }
 
 export default function Courses() {
@@ -84,21 +53,13 @@ export default function Courses() {
 
   const queryClient = useQueryClient();
 
-  // Fetch course content
-  const { data: courseData, isLoading: courseLoading } = useQuery({
-    queryKey: ['/api/courses/content'],
-    enabled: true
-  });
-
-  // Fetch user progress
+  // Use static course content
+  const modules: CourseModule[] = COURSE_CONTENT;
+  const achievements: Achievement[] = ACHIEVEMENT_BADGES;
+  
+  // Fetch user progress from backend
   const { data: progressData, isLoading: progressLoading } = useQuery({
     queryKey: ['/api/courses/progress'],
-    enabled: true
-  });
-
-  // Fetch achievement badges
-  const { data: badgesData } = useQuery({
-    queryKey: ['/api/courses/badges'],
     enabled: true
   });
 
@@ -112,15 +73,14 @@ export default function Courses() {
     }
   });
 
-  const modules: CourseModule[] = (courseData as any)?.modules || [];
+  // User learning stats (fallback to demo data for now)
   const stats: LearningStats = (progressData as any)?.stats || {
-    totalXp: 0,
-    currentStreak: 0,
-    longestStreak: 0,
-    totalLessonsCompleted: 0,
-    averageScore: "0.00"
+    totalXp: 125, // Demo value to show progress
+    currentStreak: 3,
+    longestStreak: 5,
+    totalLessonsCompleted: 4,
+    averageScore: "87.5"
   };
-  const achievements: Achievement[] = (badgesData as any)?.badges || [];
 
   // Calculate completion percentage for a module
   const getModuleProgress = (module: CourseModule): number => {
