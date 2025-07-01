@@ -26,6 +26,30 @@ export interface Exercise {
   points: number;
 }
 
+export interface TabSection {
+  id: string;
+  title: string;
+  icon: string;
+  content: ContentBlock[];
+  calculator?: Calculator;
+}
+
+export interface Calculator {
+  type: "income" | "budget" | "expense" | "savings" | "debt" | "cashflow";
+  title: string;
+  description: string;
+  fields: CalculatorField[];
+}
+
+export interface CalculatorField {
+  id: string;
+  label: string;
+  type: "number" | "select" | "percentage";
+  placeholder?: string;
+  options?: string[];
+  required: boolean;
+}
+
 export interface CourseLevel {
   id: string;
   moduleId: string;
@@ -35,6 +59,7 @@ export interface CourseLevel {
   xpReward: number;
   learningObjectives: string[];
   content: ContentBlock[];
+  tabs?: TabSection[];
   exercises: Exercise[];
 }
 
@@ -75,86 +100,129 @@ export const COURSE_CONTENT: CourseModule[] = [
             type: "text",
             title: "Welcome to Financial Freedom!",
             content: "You're about to learn the most important financial skill: budgeting. Think of budgeting as your money's GPS - it tells every dollar where to go so you reach your financial destination. By the end of this lesson, you'll know exactly how money flows in and out of your life."
-          },
+          }
+        ],
+        tabs: [
           {
-            id: "money-flow-visual",
-            type: "visual",
-            title: "The Money Flow Diagram",
-            content: "Picture your finances like a river system. Money flows IN (income) and flows OUT (expenses). The goal is to control these flows so more comes in than goes out.",
-            visual: {
-              type: "illustration",
-              data: {
-                inflow: ["💼 Job Salary", "💻 Side Hustle", "📈 Investments", "🏠 Rental Income"],
-                outflow: ["🏠 Housing", "🍕 Food", "🚗 Transportation", "🎯 Savings"]
+            id: "income-basics",
+            title: "Income Tracking",
+            icon: "💰",
+            content: [
+              {
+                id: "income-deep-dive",
+                type: "text",
+                title: "Income: Your Financial Fuel",
+                content: "Income is ANY money that flows into your accounts. Most people think only about their main job, but successful budgeters track ALL income sources. This includes your salary, freelance work, investment returns, gifts, refunds, cashback rewards, and even that $20 you found in your old jacket!"
+              },
+              {
+                id: "income-types",
+                type: "visual",
+                title: "Types of Income Sources",
+                content: "Discover all the ways money can flow into your life:",
+                visual: {
+                  type: "comparison",
+                  data: {
+                    regular: ["💼 Job Salary", "💻 Freelance Work", "🏠 Rental Income", "📈 Investment Dividends"],
+                    irregular: ["🎁 Gifts & Bonuses", "💳 Cashback Rewards", "📱 App Earnings", "🔄 Refunds & Returns"]
+                  }
+                }
               }
+            ],
+            calculator: {
+              type: "income",
+              title: "Monthly Income Calculator",
+              description: "Calculate your total monthly income from all sources",
+              fields: [
+                { id: "salary", label: "Monthly Salary", type: "number", placeholder: "4000", required: true },
+                { id: "freelance", label: "Freelance Income", type: "number", placeholder: "500", required: false },
+                { id: "dividends", label: "Investment Dividends", type: "number", placeholder: "75", required: false },
+                { id: "rental", label: "Rental Income", type: "number", placeholder: "200", required: false },
+                { id: "cashback", label: "Cashback & Rewards", type: "number", placeholder: "25", required: false },
+                { id: "other", label: "Other Income", type: "number", placeholder: "0", required: false }
+              ]
             }
           },
           {
-            id: "income-deep-dive",
-            type: "text",
-            title: "Income: Your Financial Fuel",
-            content: "Income is ANY money that flows into your accounts. Most people think only about their main job, but successful budgeters track ALL income sources. This includes your salary, freelance work, investment returns, gifts, refunds, cashback rewards, and even that $20 you found in your old jacket!"
-          },
-          {
-            id: "income-calculator",
-            type: "example",
-            title: "💡 Interactive Income Calculator",
-            content: "Meet Alex, a marketing professional:\n\n📊 MONTHLY INCOME BREAKDOWN:\n• Full-time job: $4,200\n• Weekend consulting: $600\n• Investment dividends: $75\n• Cashback rewards: $25\n• Total Monthly Income: $4,900\n\n🎯 PRO TIP: Track everything for 30 days. You might be surprised how much 'extra' income you actually have!"
-          },
-          {
-            id: "expense-categories-deep",
-            type: "text",
-            title: "Expenses: Where Your Money Goes",
-            content: "Every expense falls into two categories: FIXED (same amount monthly) or VARIABLE (changes monthly). Knowing the difference is crucial because you can't easily change fixed expenses, but you have control over variable ones."
-          },
-          {
-            id: "expense-breakdown",
-            type: "visual",
-            title: "🏠 The Expense House",
-            content: "Think of your expenses like a house with different rooms. Fixed expenses are like the foundation - stable but hard to change. Variable expenses are like the furniture - you can rearrange them!",
-            visual: {
-              type: "comparison",
-              data: {
-                foundation_fixed: [
-                  "🏠 Rent/Mortgage: $1,400",
-                  "📱 Phone Plan: $85",
-                  "🚗 Car Payment: $320",
-                  "💊 Insurance: $180",
-                  "🎓 Student Loan: $250"
-                ],
-                flexible_variable: [
-                  "🛒 Groceries: $300-500",
-                  "⛽ Gas: $80-150",
-                  "🍿 Entertainment: $100-400",
-                  "👕 Clothing: $50-200",
-                  "🍕 Dining Out: $150-350"
-                ]
+            id: "expense-basics",
+            title: "Expense Categories",
+            icon: "💸",
+            content: [
+              {
+                id: "expense-categories-deep",
+                type: "text",
+                title: "Expenses: Where Your Money Goes",
+                content: "Every expense falls into two categories: FIXED (same amount monthly) or VARIABLE (changes monthly). Knowing the difference is crucial because you can't easily change fixed expenses, but you have control over variable ones."
+              },
+              {
+                id: "expense-breakdown",
+                type: "visual",
+                title: "🏠 The Expense House",
+                content: "Think of your expenses like a house with different rooms. Fixed expenses are like the foundation - stable but hard to change. Variable expenses are like the furniture - you can rearrange them!",
+                visual: {
+                  type: "comparison",
+                  data: {
+                    foundation_fixed: [
+                      "🏠 Rent/Mortgage: $1,400",
+                      "📱 Phone Plan: $85",
+                      "🚗 Car Payment: $320",
+                      "💊 Insurance: $180",
+                      "🎓 Student Loan: $250"
+                    ],
+                    flexible_variable: [
+                      "🛒 Groceries: $300-500",
+                      "⛽ Gas: $80-150",
+                      "🍿 Entertainment: $100-400",
+                      "👕 Clothing: $50-200",
+                      "🍕 Dining Out: $150-350"
+                    ]
+                  }
+                }
               }
+            ],
+            calculator: {
+              type: "expense",
+              title: "Monthly Expense Calculator",
+              description: "Track your fixed and variable expenses",
+              fields: [
+                { id: "housing", label: "Housing (Rent/Mortgage)", type: "number", placeholder: "1400", required: true },
+                { id: "utilities", label: "Utilities", type: "number", placeholder: "150", required: true },
+                { id: "phone", label: "Phone Plan", type: "number", placeholder: "85", required: true },
+                { id: "insurance", label: "Insurance", type: "number", placeholder: "180", required: true },
+                { id: "groceries", label: "Groceries", type: "number", placeholder: "400", required: true },
+                { id: "transportation", label: "Transportation", type: "number", placeholder: "300", required: true },
+                { id: "entertainment", label: "Entertainment", type: "number", placeholder: "200", required: false },
+                { id: "dining", label: "Dining Out", type: "number", placeholder: "250", required: false }
+              ]
             }
           },
           {
-            id: "cash-flow-game",
-            type: "example",
-            title: "🎮 The Cash Flow Game",
-            content: "Let's play with real numbers! Follow Sam's monthly journey:\n\n💰 INCOME: $3,800\n📊 FIXED EXPENSES: $2,100\n📈 VARIABLE EXPENSES: $1,200\n\n🧮 THE MATH:\n$3,800 (income) - $3,300 (total expenses) = +$500 (positive cash flow)\n\n🎉 RESULT: Sam saves $500 monthly! That's $6,000 per year toward goals!"
-          },
-          {
-            id: "danger-signs",
-            type: "warning",
-            title: "⚠️ Red Flag Warning Signs",
-            content: "DANGER ZONE: If your expenses exceed income, you're in negative cash flow. Warning signs: Using credit cards for basic needs, borrowing money monthly, avoiding bank statements, stress about money every week. If this sounds familiar, don't panic - this course will help you fix it!"
-          },
-          {
-            id: "quick-wins",
-            type: "tip",
-            title: "🚀 3 Quick Wins (Do These Today!)",
-            content: "1️⃣ INCOME AUDIT: Write down ALL money sources from last month\n2️⃣ EXPENSE SNAPSHOT: Check your bank statement - categorize last 10 transactions as fixed or variable\n3️⃣ CASH FLOW CHECK: Calculate your basic cash flow: Total Income - Total Expenses = ?"
-          },
-          {
-            id: "success-story",
-            type: "example",
-            title: "🌟 Real Success Story",
-            content: "Jessica, 28, felt overwhelmed by money. After learning income vs expenses, she discovered she was spending $200/month on forgotten subscriptions! By canceling unused services and tracking her variable expenses, she went from -$150 monthly cash flow to +$350. Six months later, she had her first $2,000 emergency fund!"
+            id: "cashflow-analysis",
+            title: "Cash Flow Analysis",
+            icon: "📊",
+            content: [
+              {
+                id: "cash-flow-game",
+                type: "example",
+                title: "🎮 The Cash Flow Game",
+                content: "Let's play with real numbers! Follow Sam's monthly journey:\n\n💰 INCOME: $3,800\n📊 FIXED EXPENSES: $2,100\n📈 VARIABLE EXPENSES: $1,200\n\n🧮 THE MATH:\n$3,800 (income) - $3,300 (total expenses) = +$500 (positive cash flow)\n\n🎉 RESULT: Sam saves $500 monthly! That's $6,000 per year toward goals!"
+              },
+              {
+                id: "danger-signs",
+                type: "warning",
+                title: "⚠️ Red Flag Warning Signs",
+                content: "DANGER ZONE: If your expenses exceed income, you're in negative cash flow. Warning signs: Using credit cards for basic needs, borrowing money monthly, avoiding bank statements, stress about money every week. If this sounds familiar, don't panic - this course will help you fix it!"
+              }
+            ],
+            calculator: {
+              type: "cashflow",
+              title: "Cash Flow Calculator",
+              description: "Calculate your monthly cash flow and see if you're saving or overspending",
+              fields: [
+                { id: "total_income", label: "Total Monthly Income", type: "number", placeholder: "4000", required: true },
+                { id: "fixed_expenses", label: "Total Fixed Expenses", type: "number", placeholder: "2100", required: true },
+                { id: "variable_expenses", label: "Total Variable Expenses", type: "number", placeholder: "1200", required: true }
+              ]
+            }
           }
         ],
         exercises: [
