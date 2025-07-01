@@ -297,103 +297,136 @@ export const COURSE_CONTENT: CourseModule[] = [
     icon: "TrendingUp",
     estimatedTime: "60 minutes",
     difficulty: "Beginner",
-    totalLevels: 4,
+    totalLevels: 6,
     levels: [
       {
         id: "cashflow-level-1",
-        title: "💰 Income Optimization & Tracking",
-        description: "Maximize and track all income sources for complete financial visibility",
+        title: "💡 Welcome & The Power of Cash Flow Awareness",
+        description: "Discover how cash flow awareness gives you control over your financial life",
         difficulty: "Beginner",
-        estimatedTime: "15 minutes",
-        xpReward: 100,
+        estimatedTime: "5 minutes",
+        xpReward: 50,
         learningObjectives: [
-          "Identify and optimize all income sources including hidden revenue streams",
-          "Set up automated income tracking systems",
-          "Understand the difference between active and passive income",
-          "Create strategies to increase income by 20-50% within 12 months"
+          "Understand what cash flow is and why it matters",
+          "Recognize how tracking cash flow helps you spot financial leaks",
+          "Develop awareness of your current financial situation"
         ],
         tabs: [
           {
-            id: "income-streams",
-            title: "Income Streams",
-            icon: "💵",
+            id: "cash-flow-basics",
+            title: "Cash Flow Basics",
+            icon: "💰",
             content: [
               {
-                id: "income-audit",
-                type: "tool",
-                title: "🔍 The Complete Income Audit",
-                content: "**PRIMARY INCOME SOURCES:**\n• Salary/wages (including overtime, bonuses)\n• Business/freelance income\n• Investment returns (dividends, interest, capital gains)\n• Rental income\n\n**HIDDEN INCOME SOURCES (Often overlooked):**\n• Cash back rewards (credit cards, apps)\n• Tax refunds (treat as income planning)\n• Gifts and financial support\n• Selling unused items\n• Gig economy earnings\n• Subscription/membership refunds\n• Insurance reimbursements\n\n**ACTION STEP:**\nTrack ALL income for 30 days. Most people discover 10-15% more income than they realized."
+                id: "what-is-cash-flow",
+                type: "text",
+                title: "💰 What is Cash Flow?",
+                content: "Cash flow is the lifeblood of your finances. Simply put, it's the money coming in (income) and the money going out (expenses) over a specific period.\n\nThink of it like a river:\n• **Money IN** = tributaries feeding the river (salary, side gigs, investments)\n• **Money OUT** = water flowing downstream (rent, groceries, entertainment)\n• **Cash Flow** = the net result of this flow\n\nWhen more money flows IN than OUT, you have positive cash flow. When more flows OUT than IN, you have negative cash flow - and that's when financial stress begins."
               },
               {
-                id: "income-boosting",
-                type: "challenge",
-                title: "🚀 30-Day Income Boost Challenge",
-                content: "**Week 1: Optimize Current Income**\n• Negotiate salary/rate increase\n• Claim all available benefits\n• Maximize cash back and rewards\n\n**Week 2: Activate Side Income**\n• Sell unused items ($500+ target)\n• Start one gig economy activity\n• Offer a skill-based service\n\n**Week 3: Passive Income Setup**\n• Open high-yield savings account\n• Research dividend investments\n• Explore rental opportunities\n\n**Week 4: Scale & Systematize**\n• Automate income tracking\n• Set up recurring revenue streams\n• Plan next month's income growth\n\n**Goal: Increase monthly income by $500-2000**"
+                id: "alex-case-study",
+                type: "example",
+                title: "🎯 Case Study: Alex's $200 Monthly Discovery",
+                content: "Meet Alex, a 28-year-old marketing professional earning $4,500/month. Alex always felt broke despite having a decent salary.\n\n**The Problem:** Alex had no idea where the money was going.\n\n**The Solution:** Alex spent 30 minutes reviewing bank statements and discovered:\n• Netflix: $15/month ✓ (still using)\n• Spotify: $10/month ✓ (still using) \n• Adobe Creative: $53/month ❌ (hadn't used in 8 months)\n• Gym membership: $89/month ❌ (going once per month)\n• Food delivery apps: $312/month ❌ (ordering 4-5 times/week)\n\n**The Result:** By canceling unused subscriptions and cooking 3 more meals per week, Alex freed up $200/month - that's $2,400 per year!\n\n**Alex's words:** \"I couldn't believe I was throwing away $200 every month. That money now goes straight to my emergency fund.\""
+              },
+              {
+                id: "cash-flow-diagram",
+                type: "tool",
+                title: "📊 Your Cash Flow Pipeline",
+                content: "**VISUAL: Cash Flow Pipeline**\n\n```\nINCOME SOURCES          CASH FLOW          EXPENSE CATEGORIES\n                           PIPELINE\n💼 Salary         ──┐                    ┌── 🏠 Housing\n💰 Side Gig       ──┤                    ├── 🚗 Transportation  \n📈 Investments    ──┤       💰💰💰       ├── 🍕 Food\n🎁 Other Income   ──┘                    ├── 💊 Healthcare\n                                         ├── 🎮 Entertainment\n                                         └── 💳 Debt Payments\n```\n\n**The Pipeline Shows:**\n• **Width** = Amount of money\n• **Color** = Category type\n• **Flow Direction** = Where your money goes\n\n**Key Insight:** Most people focus on the income side but ignore the expense side. True cash flow mastery requires optimizing BOTH sides of the pipeline."
               }
             ]
           }
         ],
         exercises: [
           {
-            id: "income-calculation",
-            type: "calculator",
-            question: "If you earn $4,000/month from your job, $300/month from side gigs, $50/month in cash back, and $200/month from investments, what's your total monthly income?",
-            options: ["$4,200", "$4,500", "$4,550", "$4,750"],
-            correctAnswer: "$4,550",
-            explanation: "Total income = $4,000 + $300 + $50 + $200 = $4,550 per month. Every income source counts toward your financial foundation.",
+            id: "cash-flow-reflection",
+            type: "true-false",
+            question: "Cash flow is only about tracking income, not expenses.",
+            options: ["True", "False"],
+            correctAnswer: "False",
+            explanation: "Cash flow tracks both money coming in (income) AND money going out (expenses). You need to monitor both sides to understand your complete financial picture.",
             feedback: {
-              correct: "💰 Perfect calculation! You understand the importance of tracking ALL income sources.",
-              incorrect: "Don't forget to add ALL income sources: job ($4,000) + side gigs ($300) + cash back ($50) + investments ($200) = $4,550"
+              correct: "🎯 Correct! Cash flow is about both income AND expenses - the complete picture of your money movement.",
+              incorrect: "Cash flow includes both income and expenses. It's the complete picture of money flowing in and out of your life."
             },
             points: 25
           }
         ]
       },
       {
-        id: "cashflow-level-2",
-        title: "📊 Advanced Budgeting Systems",
-        description: "Implement bulletproof budgeting systems that actually work in real life",
+        id: "cashflow-level-2", 
+        title: "🔍 Identifying & Mapping Income Streams",
+        description: "Learn to identify every income source, including hidden earnings",
         difficulty: "Beginner",
-        estimatedTime: "15 minutes",
+        estimatedTime: "10 minutes",
         xpReward: 100,
         learningObjectives: [
-          "Choose and implement the optimal budgeting system for your lifestyle",
-          "Automate your budget to eliminate decision fatigue",
-          "Handle irregular income and expenses like a pro",
-          "Build flexibility into your budget for real-world scenarios"
+          "Identify all current income sources, both obvious and hidden",
+          "Map your complete income landscape",
+          "Discover overlooked revenue streams"
         ],
         tabs: [
           {
-            id: "budgeting-systems",
-            title: "Budgeting Systems",
-            icon: "📊",
+            id: "income-mapping",
+            title: "Income Mapping",
+            icon: "🗺️",
             content: [
               {
-                id: "budget-comparison",
-                type: "example",
-                title: "🏆 The Best Budgeting Systems Compared",
-                content: "**50/30/20 RULE (Best for beginners)**\n• 50% Needs (rent, groceries, utilities)\n• 30% Wants (entertainment, dining out)\n• 20% Savings & debt payment\n✅ Simple, flexible, hard to mess up\n\n**ZERO-BASED BUDGET (Best for detail lovers)**\n• Every dollar gets assigned a job\n• Income - Expenses = $0\n• Track every category precisely\n✅ Maximum control and optimization\n\n**PAY YOURSELF FIRST (Best for wealth builders)**\n• Save/invest 20-30% immediately\n• Live on the remaining 70-80%\n• Automate everything possible\n✅ Forces savings, builds wealth fast\n\n**ENVELOPE METHOD (Best for overspenders)**\n• Cash envelopes for each category\n• When envelope is empty, stop spending\n• Digital versions available\n✅ Prevents overspending completely"
+                id: "income-categories",
+                type: "tool",
+                title: "🔍 The Complete Income Map",
+                content: "**PRIMARY INCOME SOURCES (The Obvious Ones):**\n• 💼 Salary or wages from your job\n• 🏢 Business or freelance income\n• 📈 Investment returns (dividends, interest)\n• 🏠 Rental income from property\n• 💰 Pension or retirement income\n\n**HIDDEN INCOME SOURCES (Often Forgotten):**\n• 💳 Credit card cashback and rewards\n• 🎁 Tax refunds (average $2,800 annually)\n• 👨‍👩‍👧‍👦 Gifts from family or friends\n• 📦 Money from selling unused items\n• 🚗 Gig economy earnings (Uber, DoorDash)\n• 📱 App-based income (surveys, cashback apps)\n• 🔄 Refunds from cancelled subscriptions\n• 🛡️ Insurance claim payouts\n• 🎓 Scholarship or grant money\n• 💼 Side consulting or tutoring\n\n**THE INCOME AUDIT CHECKLIST:**\n□ Check last 3 months of bank statements\n□ Review all deposit sources\n□ Include one-time payments\n□ Count irregular income\n□ Don't forget cash payments\n□ Include bartering or trade value"
               },
               {
-                id: "automation-setup",
-                type: "tool",
-                title: "🤖 Budget Automation Blueprint",
-                content: "**AUTOMATED MONEY FLOW:**\n\n**Paycheck hits account →**\n1. Emergency fund (20% until 6 months saved)\n2. Debt payments (minimum + extra)\n3. Retirement/investments (10-20%)\n4. Fixed expenses (rent, utilities, insurance)\n5. Variable expenses (food, gas, entertainment)\n\n**SET UP THESE AUTOMATIONS:**\n• Direct deposit split between accounts\n• Automatic transfers on payday\n• Bill pay for all fixed expenses\n• Investment contributions\n• Savings transfers\n\n**RESULT: Your budget runs itself**\nYou only need to manage day-to-day spending in 2-3 categories."
+                id: "priya-case-study",
+                type: "example", 
+                title: "💡 Case Study: Priya's $600 Annual Discovery",
+                content: "Priya, a 32-year-old teacher, thought she only had her $48,000 salary as income. But when she did a complete income audit, here's what she found:\n\n**OBVIOUS INCOME:**\n• Teaching salary: $48,000/year ✓\n\n**HIDDEN INCOME DISCOVERED:**\n• Credit card cashback: $180/year (1.5% on $12k spending)\n• Tax refund: $1,200/year (she forgot to count this!)\n• Sold textbooks and supplies: $150/year\n• Tutoring during summer: $800/year\n• Survey apps during commute: $72/year\n• Gift money from relatives: $300/year\n\n**TOTAL HIDDEN INCOME: $2,702/year**\n\n**Priya's Reaction:** \"I had no idea I was earning an extra $225 per month! This changed how I thought about my financial situation completely.\"\n\n**The Lesson:** Most people underestimate their total income by 10-20% because they only think about their main job."
+              },
+              {
+                id: "income-exercise",
+                type: "interactive",
+                title: "✍️ Your Personal Income Mapping Exercise",
+                content: "**STEP 1: List Your Primary Income**\nWrite down your main income sources:\n• Job/salary: $______/month\n• Business income: $______/month\n• Investment income: $______/month\n• Other regular income: $______/month\n\n**STEP 2: Hunt for Hidden Income**\nLook at your bank statements and list:\n• Cashback/rewards: $______/month\n• One-time sales: $______/month\n• Gifts received: $______/month\n• Side gig income: $______/month\n• Other discoveries: $______/month\n\n**STEP 3: Calculate Your Total**\nAdd everything up:\nTotal Monthly Income: $______\nTotal Annual Income: $______\n\n**GOAL:** Find at least 3 income sources beyond your main job.\n\n**GAMIFICATION:** Earn 10 points for each income source you identify!"
               }
             ]
           }
         ],
         exercises: [
           {
-            id: "budget-allocation",
+            id: "overlooked-income",
             type: "multiple-choice",
-            question: "Using the 50/30/20 rule with a $5,000 monthly income, how much should you allocate to savings and debt payment?",
-            options: ["$500", "$750", "$1,000", "$1,500"],
-            correctAnswer: "$1,000",
-            explanation: "20% of $5,000 = $1,000 should go to savings and debt payment in the 50/30/20 budget system.",
+            question: "Which of these is an example of commonly overlooked income?",
+            options: [
+              "Monthly salary",
+              "Quarterly dividends", 
+              "Selling unused gift cards",
+              "Freelance contract payments"
+            ],
+            correctAnswer: "Selling unused gift cards",
+            explanation: "Selling unused gift cards is often overlooked because it's irregular and people don't think of it as 'real income.' However, it's money coming into your pocket and should be counted.",
             feedback: {
-              correct: "💡 Exactly! 20% of your income should go to savings and debt payment.",
-              incorrect: "In the 50/30/20 rule, 20% goes to savings and debt payment. 20% of $5,000 = $1,000"
+              correct: "🎯 Exactly! Small, irregular income like gift card sales is often forgotten but adds up over time.",
+              incorrect: "Gift card sales are commonly overlooked because they're small and irregular, but they count as income!"
+            },
+            points: 30
+          },
+          {
+            id: "income-sources-count",
+            type: "multiple-choice",
+            question: "How many income sources should you aim to identify in your income mapping exercise?",
+            options: [
+              "Just your main job",
+              "At least 3 sources",
+              "Exactly 5 sources", 
+              "As many as possible"
+            ],
+            correctAnswer: "At least 3 sources",
+            explanation: "The goal is to find at least 3 income sources beyond your main job. This helps you see the complete picture of money flowing into your life.",
+            feedback: {
+              correct: "✅ Perfect! Finding at least 3 sources gives you a comprehensive view of your income landscape.",
+              incorrect: "The goal is at least 3 sources beyond your main job to get a complete income picture."
             },
             points: 25
           }
@@ -401,49 +434,72 @@ export const COURSE_CONTENT: CourseModule[] = [
       },
       {
         id: "cashflow-level-3",
-        title: "🎯 Expense Optimization & Cost Cutting",
-        description: "Cut expenses strategically without sacrificing quality of life",
-        difficulty: "Intermediate",
-        estimatedTime: "15 minutes",
-        xpReward: 120,
+        title: "⚖️ Active vs. Passive Income",
+        description: "Understand the key differences between active and passive income",
+        difficulty: "Beginner", 
+        estimatedTime: "10 minutes",
+        xpReward: 100,
         learningObjectives: [
-          "Identify the 20% of expenses that consume 80% of your budget",
-          "Negotiate bills and subscriptions to save $100-500+ monthly",
-          "Optimize spending for maximum value and satisfaction",
-          "Create systems to prevent lifestyle inflation"
+          "Distinguish between active and passive income types",
+          "Understand tax and time implications of each income type",
+          "Learn how to balance both for financial stability"
         ],
         tabs: [
           {
-            id: "expense-analysis",
-            title: "Expense Analysis",
-            icon: "🔍",
+            id: "income-types",
+            title: "Income Types",
+            icon: "⚖️",
             content: [
               {
-                id: "expense-audit",
-                type: "tool",
-                title: "🎯 The Expense Optimization Formula",
-                content: "**STEP 1: The 80/20 Expense Analysis**\nIdentify which expenses consume 80% of your spending:\n• Housing (rent/mortgage, utilities)\n• Transportation (car payment, gas, insurance)\n• Food (groceries, dining out)\n• Insurance (health, life, auto)\n\n**STEP 2: Optimization Priority Matrix**\n🔥 HIGH IMPACT + EASY = Attack first\n⚠️ HIGH IMPACT + HARD = Plan carefully\n💡 LOW IMPACT + EASY = Quick wins\n❌ LOW IMPACT + HARD = Ignore\n\n**STEP 3: The Negotiation Hit List**\n• Internet/cable bill\n• Insurance premiums\n• Subscription services\n• Credit card interest rates\n• Bank fees\n\n**REALISTIC SAVINGS TARGET: $200-800/month**"
+                id: "active-vs-passive",
+                type: "example",
+                title: "⚖️ Active vs. Passive Income: The Complete Breakdown",
+                content: "**ACTIVE INCOME: You Trade Time for Money**\n\n**Characteristics:**\n• Requires your direct time and effort\n• Income stops when you stop working\n• Limited by hours available\n• Immediate payment for work done\n• Higher tax rates (ordinary income tax)\n\n**Examples:**\n• Hourly wage or salary\n• Freelance or consulting work\n• Commission-based sales\n• Service-based business income\n\n**PASSIVE INCOME: Money Works While You Sleep**\n\n**Characteristics:**\n• Minimal ongoing effort after initial setup\n• Income continues without active work\n• Scalable beyond your time\n• Often taxed at lower rates\n• Takes time to build up\n\n**Examples:**\n• Rental property income\n• Dividend stocks\n• Royalties from books/music\n• Investment interest\n• Business you don't actively manage\n\n**TAX IMPLICATIONS:**\n• **Active Income:** Taxed as ordinary income (22-37% for higher earners)\n• **Passive Income:** Often taxed as capital gains (0-20% for most people)\n\n**TIME IMPLICATIONS:**\n• **Active:** Limited by your available time (24 hours/day)\n• **Passive:** Not limited by your time - can earn 24/7"
               },
               {
-                id: "negotiation-scripts",
+                id: "lisa-transformation",
+                type: "example",
+                title: "🏆 Case Study: Lisa's Active-to-Passive Transformation",
+                content: "**LISA'S STARTING POINT:**\nLisa, a graphic designer, was earning $75/hour freelancing but was exhausted from trading time for money.\n\n**THE PROBLEM:**\n• Working 30 hours/week = $2,250/week maximum\n• No income during vacation or sick days\n• Constantly chasing new clients\n• High stress from income uncertainty\n\n**LISA'S TRANSFORMATION STRATEGY:**\n\n**Phase 1: Document Everything (Months 1-3)**\n• Recorded all her design processes\n• Created templates and systems\n• Built a portfolio of her best work\n\n**Phase 2: Create Passive Products (Months 4-8)**\n• Launched online design course: \"Logo Design Mastery\"\n• Created design template marketplace\n• Built email list of potential customers\n\n**Phase 3: Scale Passive Income (Months 9-12)**\n• Course sales: $3,200/month\n• Template sales: $1,800/month\n• Affiliate partnerships: $600/month\n\n**THE RESULTS AFTER 12 MONTHS:**\n• **Active income:** $4,500/month (20 hours/week)\n• **Passive income:** $5,600/month (5 hours/week maintenance)\n• **Total time:** Reduced from 30 to 25 hours/week\n• **Total income:** Increased from $9,000 to $10,100/month\n\n**Lisa's Words:** \"I now earn more money working fewer hours, and I have income streams that don't require me to be 'on' all the time.\""
+              },
+              {
+                id: "income-balance-strategy",
                 type: "tool",
-                title: "💬 Bill Negotiation Scripts That Work",
-                content: "**INTERNET/CABLE SCRIPT:**\n\"Hi, I've been a loyal customer for [X years] and I'm reviewing my expenses. I see [competitor] is offering [better deal]. What can you do to keep my business?\"\n\n**INSURANCE SCRIPT:**\n\"I'm shopping around for insurance and found quotes $X lower. I'd prefer to stay with you - can you match or beat this rate?\"\n\n**CREDIT CARD SCRIPT:**\n\"I've been a good customer with on-time payments. I'd like to request a lower interest rate on my account.\"\n\n**SUBSCRIPTION CANCELLATION:**\n\"I need to cancel my subscription due to budget constraints.\" (They'll often offer discounts to keep you)\n\n**SUCCESS RATE: 60-80% get some discount**\n**AVERAGE SAVINGS: $30-100 per bill**"
+                title: "📊 The Income Balance Strategy",
+                content: "**THE WEALTH BUILDING PROGRESSION:**\n\n**Stage 1: ACTIVE INCOME FOUNDATION (Months 1-12)**\n• Focus: Maximize your active income first\n• Goal: Increase salary, rates, or hours\n• Target: Build solid active income base\n• Reason: You need money to invest in passive income\n\n**Stage 2: PASSIVE INCOME SEEDS (Year 1-2)**\n• Focus: Plant passive income seeds\n• Goal: Start small passive income streams\n• Target: 10-20% of total income from passive sources\n• Examples: High-yield savings, index funds, small rental\n\n**Stage 3: PASSIVE INCOME GROWTH (Year 2-5)**\n• Focus: Scale successful passive streams\n• Goal: Grow passive income substantially\n• Target: 30-50% of total income from passive sources\n• Strategy: Reinvest passive income to compound growth\n\n**Stage 4: FINANCIAL INDEPENDENCE (Year 5+)**\n• Focus: Passive income covers living expenses\n• Goal: Active income becomes optional\n• Target: 70%+ of expenses covered by passive income\n• Result: True financial freedom achieved\n\n**THE GOLDEN RATIO FOR FINANCIAL FREEDOM:**\nPassive Income ≥ 70% of Monthly Expenses = Financial Independence\n\n**PRACTICAL EXAMPLE:**\n• Monthly expenses: $4,000\n• Required passive income: $2,800 (70%)\n• Active income can drop to: $1,200\n• Result: You can choose your work, not need it"
               }
             ]
           }
         ],
         exercises: [
           {
-            id: "expense-prioritization",
-            type: "drag-drop",
-            question: "Rank these expenses by optimization priority (highest impact first):",
-            options: ["$1,500 rent", "$500 car payment", "$300 groceries", "$50 streaming services"],
-            correctAnswer: ["$1,500 rent", "$500 car payment", "$300 groceries", "$50 streaming services"],
-            explanation: "Always prioritize your largest expenses first. A 10% reduction in rent ($150) has more impact than eliminating all streaming services ($50).",
+            id: "passive-income-quiz",
+            type: "multiple-choice",
+            question: "Which of these is considered passive income?",
+            options: [
+              "Hourly wage from part-time job",
+              "Commission from sales calls", 
+              "Monthly rental income from property",
+              "Freelance writing payments"
+            ],
+            correctAnswer: "Monthly rental income from property",
+            explanation: "Rental income is passive because once the property is rented, it generates income without requiring your active daily involvement (though some management is needed).",
             feedback: {
-              correct: "🎯 Perfect prioritization! Focus on big expenses for maximum impact.",
-              incorrect: "Remember: optimize large expenses first. Even small percentage savings on big expenses beat eliminating small expenses entirely."
+              correct: "🏠 Exactly! Rental income continues flowing whether you're working, sleeping, or on vacation.",
+              incorrect: "Rental income is passive - it doesn't require your daily active work like hourly wages or sales calls do."
+            },
+            points: 30
+          },
+          {
+            id: "income-categorization",
+            type: "multiple-choice",
+            question: "Which income type requires your active time and effort?",
+            options: ["Dividend payments", "Consulting hourly rate", "Book royalties", "Investment interest"],
+            correctAnswer: "Consulting hourly rate",
+            explanation: "Active income requires your time and effort (consulting, overtime). Passive income continues without your daily involvement (dividends, royalties).",
+            feedback: {
+              correct: "⚖️ Perfect! Consulting requires your active time and effort to earn income.",
+              incorrect: "Remember: Active income requires your time, passive income works without your daily involvement."
             },
             points: 35
           }
@@ -451,45 +507,242 @@ export const COURSE_CONTENT: CourseModule[] = [
       },
       {
         id: "cashflow-level-4",
-        title: "📈 Cash Flow Optimization & Forecasting",
-        description: "Advanced cash flow management and financial forecasting techniques",
-        difficulty: "Intermediate",
-        estimatedTime: "15 minutes",
-        xpReward: 150,
+        title: "🤖 Automating Income Tracking",
+        description: "Set up automated systems to track income and expenses efficiently",
+        difficulty: "Beginner",
+        estimatedTime: "10 minutes", 
+        xpReward: 120,
         learningObjectives: [
-          "Create rolling 12-month cash flow forecasts",
-          "Optimize timing of income and expenses for maximum cash flow",
-          "Handle seasonal variations and irregular income like a pro",
-          "Build cash flow cushions that prevent financial stress"
+          "Learn to set up automated income tracking systems",
+          "Choose the right tools for your financial situation",
+          "Reduce time spent on manual financial tracking"
         ],
         tabs: [
           {
-            id: "cash-flow-forecasting",
-            title: "Cash Flow Forecasting",
-            icon: "📊",
+            id: "automation-tools",
+            title: "Automation Tools",
+            icon: "🔧",
             content: [
               {
-                id: "forecasting-tool",
+                id: "automation-benefits",
+                type: "text",
+                title: "⚡ Why Automate Your Income Tracking?",
+                content: "**THE MANUAL TRACKING PROBLEM:**\n• Takes 30+ minutes every week\n• Easy to forget or postpone\n• Prone to human error\n• Inconsistent data collection\n• Difficult to spot trends\n\n**THE AUTOMATION SOLUTION:**\n• Tracks everything automatically 24/7\n• Never misses a transaction\n• 95%+ accuracy vs. 60-70% manual\n• Instant alerts for unusual activity\n• Clear trends and patterns visible\n• Saves 25+ hours annually"
+              },
+              {
+                id: "tracking-tools",
                 type: "tool",
-                title: "🔮 12-Month Cash Flow Forecasting",
-                content: "**MONTHLY CASH FLOW FORMULA:**\nBeginning Balance + Income - Expenses = Ending Balance\n\n**CREATE YOUR FORECAST:**\n1. **Fixed Income**: Salary, recurring revenue\n2. **Variable Income**: Bonuses, seasonal income\n3. **Fixed Expenses**: Rent, insurance, loan payments\n4. **Variable Expenses**: Utilities, groceries, entertainment\n5. **Irregular Expenses**: Annual fees, maintenance, taxes\n\n**CASH FLOW OPTIMIZATION STRATEGIES:**\n• Time large purchases after bonus/tax refund\n• Negotiate payment terms with vendors\n• Maintain 3-6 month expense buffer\n• Use credit card float strategically (pay in full)\n• Plan for seasonal variations\n\n**RESULT: Never be surprised by cash flow issues**"
+                title: "🛠️ Income Tracking Tools by Experience Level",
+                content: "**BEGINNER LEVEL (Free & Simple)**\n\n**Mint (Free)**\n• Automatic bank account connection\n• Basic income/expense categorization\n• Monthly email summaries\n• Mobile app with notifications\n• Best for: Getting started with automation\n\n**Your Bank's App (Free)**\n• Built-in spending categorization\n• Account balance alerts\n• Transaction search and filtering\n• Best for: Simple tracking with existing accounts\n\n**INTERMEDIATE LEVEL ($5-15/month)**\n\n**YNAB - You Need A Budget ($14/month)**\n• Detailed income and expense tracking\n• Goal-based budgeting system\n• Real-time sync across devices\n• Educational resources included\n• Best for: Serious budgeters who want control\n\n**Personal Capital (Free + Premium)**\n• Investment tracking + cash flow\n• Net worth monitoring\n• Retirement planning tools\n• Best for: People with investments to track\n\n**ADVANCED LEVEL ($15-50/month)**\n\n**QuickBooks Self-Employed ($15/month)**\n• Business income tracking\n• Tax category preparation\n• Mileage tracking\n• Best for: Freelancers and side hustlers\n\n**Tiller ($79/year)**\n• Spreadsheet-based automation\n• Full customization control\n• Works with Google Sheets/Excel\n• Best for: Spreadsheet lovers who want automation\n\n**DIY OPTION: Simple Spreadsheet**\n```\nDate | Source | Amount | Category | Notes\n1/15 | Salary | $3,500 | Job | Bi-weekly pay\n1/18 | Uber | $45 | Side Gig | Weekend driving\n1/20 | Dividends | $25 | Investments | VTSAX quarterly\n```"
+              },
+              {
+                id: "maria-automation",
+                type: "example",
+                title: "📱 Case Study: Maria's 90% Time Reduction",
+                content: "**MARIA'S BEFORE STATE:**\n• Spent 45 minutes every Sunday manually categorizing expenses\n• Used a complex Excel spreadsheet with 20+ categories\n• Often forgot to track cash purchases\n• Frequently made data entry errors\n• Dreaded the weekly \"money admin\" time\n\n**MARIA'S AUTOMATION SETUP:**\n\n**Tool Choice:** YNAB ($14/month)\n**Setup Time:** 2 hours initial setup\n\n**What She Automated:**\n• All bank accounts connected automatically\n• Credit card transactions imported daily\n• Income automatically categorized by source\n• Mobile app for quick cash transaction entry\n• Weekly automated reports emailed\n\n**MARIA'S RESULTS AFTER 3 MONTHS:**\n• **Time spent weekly:** 45 minutes → 5 minutes\n• **Data accuracy:** 65% → 95%\n• **Financial awareness:** Increased dramatically\n• **Money stress:** Significantly reduced\n• **Unexpected discovery:** Found $150/month in subscription waste\n\n**Maria's Quote:** \"I wish I had done this years ago. I actually look forward to checking my finances now because everything is so clear and automatic.\"\n\n**THE SETUP PROCESS:**\n1. Choose your tool based on complexity needs\n2. Connect all bank and credit card accounts\n3. Set up automatic categorization rules\n4. Download mobile app for on-the-go tracking\n5. Schedule weekly 5-minute review sessions\n6. Set up alerts for unusual transactions"
               }
             ]
           }
         ],
         exercises: [
           {
-            id: "cash-flow-scenario",
-            type: "scenario",
-            question: "Your business has seasonal income: $8,000 in good months (8 months) and $3,000 in slow months (4 months). Monthly expenses are $5,000. What's your average monthly surplus/deficit?",
-            options: ["$1,500 surplus", "$1,000 surplus", "$500 surplus", "$0 (break even)"],
-            correctAnswer: "$500 surplus",
-            explanation: "Annual income: ($8,000 × 8) + ($3,000 × 4) = $76,000. Annual expenses: $5,000 × 12 = $60,000. Annual surplus: $16,000. Monthly average: $16,000 ÷ 12 = $1,333 surplus. However, need to account for cash flow timing - answer should be $500 surplus accounting for the seasonal variation management needs.",
+            id: "automation-tool-quiz",
+            type: "multiple-choice", 
+            question: "Which tool would be best for someone who wants automated tracking but loves working with spreadsheets?",
+            options: [
+              "Mint (free basic tracking)",
+              "YNAB (detailed budgeting)",
+              "Tiller (spreadsheet automation)",
+              "Bank app (simple tracking)"
+            ],
+            correctAnswer: "Tiller (spreadsheet automation)",
+            explanation: "Tiller combines automation with spreadsheet flexibility, automatically importing data into Google Sheets or Excel while letting you customize everything.",
             feedback: {
-              correct: "📊 Great cash flow analysis! You understand the importance of averaging AND timing.",
-              incorrect: "Don't forget to account for seasonal cash flow management. While you're profitable annually, the timing matters for cash flow planning."
+              correct: "📊 Perfect match! Tiller gives you automation plus the spreadsheet control you love.",
+              incorrect: "Tiller is designed specifically for people who want automation but prefer working with spreadsheets."
             },
-            points: 45
+            points: 30
+          },
+          {
+            id: "automation-benefits",
+            type: "true-false",
+            question: "Automated income tracking saves about 25+ hours annually compared to manual tracking.",
+            options: ["True", "False"],
+            correctAnswer: "True", 
+            explanation: "Manual tracking typically takes 30+ minutes weekly (26+ hours annually). Automation reduces this to 5 minutes weekly (4.3 hours annually), saving 21+ hours.",
+            feedback: {
+              correct: "⏰ Exactly! Automation saves 25+ hours per year that you can spend on more important things.",
+              incorrect: "The math: 30 min/week manual (26 hrs/year) vs 5 min/week automated (4 hrs/year) = 22+ hours saved annually."
+            },
+            points: 25
+          }
+        ]
+      },
+      {
+        id: "cashflow-level-5",
+        title: "🚀 Strategies to Boost Income by 20-50%",
+        description: "Learn actionable strategies to significantly increase your income within 12 months",
+        difficulty: "Intermediate",
+        estimatedTime: "15 minutes",
+        xpReward: 150,
+        learningObjectives: [
+          "Master salary negotiation tactics and preparation",
+          "Identify profitable side hustles aligned with your skills",
+          "Start simple investment strategies for additional income",
+          "Create a systematic approach to income growth"
+        ],
+        tabs: [
+          {
+            id: "salary-negotiation",
+            title: "Salary Negotiation",
+            icon: "💼", 
+            content: [
+              {
+                id: "negotiation-prep",
+                type: "tool",
+                title: "💰 Salary Negotiation: The Evidence-Based Approach",
+                content: "**THE SHOCKING STATISTICS:**\n• 57% of people NEVER negotiate salary\n• Those who negotiate earn $1M+ more over their careers\n• Average successful negotiation: 10-20% increase\n• 80% of managers expect salary negotiation\n\n**STEP 1: DOCUMENT YOUR ACHIEVEMENTS**\n\nCreate a \"Value Portfolio\" with specific examples:\n• **Quantified Results:** \"Increased sales by 25% ($50K revenue)\"\n• **Cost Savings:** \"Automated process, saving 10 hours/week\"\n• **Leadership:** \"Led team of 5 on successful project\"\n• **Skills Added:** \"Learned Python, now handling data analysis\"\n• **Client Feedback:** \"Received 4.8/5 customer satisfaction rating\"\n\n**STEP 2: RESEARCH MARKET RATES**\n\nUse multiple sources:\n• Glassdoor.com (company-specific data)\n• PayScale.com (location-adjusted)\n• Salary.com (industry benchmarks)\n• LinkedIn Salary Insights\n• Network contacts in similar roles\n\n**Create a range:**\n• Low: 10th percentile for your role\n• Target: 50th percentile\n• High: 75th percentile\n\n**STEP 3: TIMING IS EVERYTHING**\n\n**Best Times:**\n• Annual review period\n• After completing major project\n• When company is performing well\n• After receiving job offer elsewhere\n\n**Worst Times:**\n• During layoffs or budget cuts\n• After making significant mistakes\n• When your boss is stressed\n• Right after starting (wait 6+ months)"
+              },
+              {
+                id: "negotiation-script",
+                type: "example",
+                title: "📝 The Proven Negotiation Script",
+                content: "**THE CONVERSATION FRAMEWORK:**\n\n**Opening (Show appreciation):**\n\"I really enjoy working here and want to continue growing with the company. I'd like to discuss my compensation based on my contributions and market research.\"\n\n**Present your case (Show evidence):**\n\"Over the past year, I've [specific achievement]. This resulted in [quantified impact]. I've also taken on [additional responsibilities] and developed skills in [new areas].\"\n\n**Show market data:**\n\"I've researched market rates for similar roles in our area, and the range is $X to $Y. Based on my experience and contributions, I believe $Z would be appropriate.\"\n\n**Make the ask:**\n\"I'd like to discuss adjusting my salary to $[specific amount] to reflect my contributions and market value.\"\n\n**HANDLING COMMON RESPONSES:**\n\n**\"Budget is tight right now\"**\n→ \"I understand. Could we discuss a timeline for review? Also, are there other forms of compensation we could explore, like additional PTO or professional development budget?\"\n\n**\"You're already paid competitively\"**\n→ \"I appreciate that perspective. Here's the market data I found [show research]. How does our compensation philosophy account for these market rates and my specific contributions?\"\n\n**\"Let me think about it\"**\n→ \"Of course. What additional information would be helpful? I'm happy to provide more documentation of my impact. When would be a good time to follow up?\""
+              }
+            ]
+          },
+          {
+            id: "side-hustles",
+            title: "Side Hustles",
+            icon: "💡",
+            content: [
+              {
+                id: "side-hustle-framework",
+                type: "tool", 
+                title: "🎯 Side Hustle Selection Framework",
+                content: "**CHOOSE BASED ON YOUR SITUATION:**\n\n**LOW TIME COMMITMENT (1-5 hours/week)**\n\n**Skills Required: Basic**\n• Food delivery (DoorDash, Uber Eats): $15-25/hour\n• Online surveys (Swagbucks, UserTesting): $5-15/hour\n• Selling unused items: $200-1000 one-time\n• Pet sitting (Rover): $20-40/day\n\n**Skills Required: Intermediate**\n• Freelance writing: $25-75/hour\n• Virtual assistance: $15-35/hour\n• Online tutoring: $20-60/hour\n• Social media management: $25-50/hour\n\n**MEDIUM TIME COMMITMENT (5-15 hours/week)**\n\n**Creative Skills:**\n• Graphic design: $30-100/hour\n• Photography: $50-200/session\n• Video editing: $25-75/hour\n• Web design: $500-5000/project\n\n**Professional Skills:**\n• Consulting in your expertise: $50-200/hour\n• Bookkeeping: $25-50/hour\n• Project management: $40-80/hour\n• Training/coaching: $50-150/hour\n\n**HIGH TIME COMMITMENT (15+ hours/week)**\n\n**Scalable Businesses:**\n• E-commerce store: $200-5000+/month\n• Online course creation: $500-10000+/month\n• YouTube channel: $100-5000+/month\n• Real estate wholesaling: $1000-10000/deal\n\n**THE SIDE HUSTLE EVALUATION MATRIX:**\n\nRate each opportunity (1-5 scale):\n• **Time Investment:** How many hours required?\n• **Skill Match:** Do you already have the skills?\n• **Income Potential:** What's the earning potential?\n• **Enjoyment Factor:** Will you enjoy the work?\n• **Growth Potential:** Can this scale over time?\n\n**Multiply: Skill Match × Income Potential = Priority Score**"
+              },
+              {
+                id: "jordan-success-story",
+                type: "example",
+                title: "🏆 Case Study: Jordan's 40% Income Boost",
+                content: "**JORDAN'S STARTING POINT:**\n• Age: 29, Marketing Coordinator\n• Base salary: $52,000/year ($4,333/month)\n• Goal: Increase income to buy a house\n\n**JORDAN'S STRATEGY:**\n\n**Month 1-2: Salary Negotiation Prep**\n• Documented achievements from past year\n• Researched market rates ($55K-65K range)\n• Prepared evidence portfolio\n\n**Month 3: The Negotiation**\n• Asked for $58,000 (12% increase)\n• Got $56,000 (8% increase)\n• **Result:** +$333/month\n\n**Month 4-6: Side Hustle Launch**\n• Started freelance social media management\n• Used existing marketing skills\n• Found 2 small business clients\n• **Result:** +$800/month\n\n**Month 7-12: The Extra Income Stream**\n• Rented out spare bedroom on Airbnb\n• Average 20 nights/month at $45/night\n• **Result:** +$900/month\n\n**JORDAN'S FINAL RESULTS:**\n• **Original income:** $4,333/month\n• **New total income:** $6,033/month\n• **Increase:** 39% ($1,700/month)\n• **Annual increase:** $20,400\n\n**Jordan's Words:** \"I thought I needed a new job to make more money. Turns out I just needed to be more strategic about the job I had and add income streams that used my existing skills.\"\n\n**KEY SUCCESS FACTORS:**\n1. Started with salary negotiation (lowest effort, high impact)\n2. Chose side hustle matching existing skills\n3. Added passive income stream (rental)\n4. Systematic approach over 12 months"
+              }
+            ]
+          },
+          {
+            id: "investment-basics",
+            title: "Investment Basics",
+            icon: "📈",
+            content: [
+              {
+                id: "simple-investing",
+                type: "tool",
+                title: "📈 Simple Investment Strategies for Income Growth",
+                content: "**BEGINNER-FRIENDLY INVESTMENTS:**\n\n**High-Yield Savings Account**\n• Expected return: 4-5% annually\n• Risk level: Very low (FDIC insured)\n• Minimum: $0-100\n• Income type: Interest (passive)\n• Best for: Emergency fund, short-term goals\n\n**Index Funds (S&P 500)**\n• Expected return: 8-10% annually (historical average)\n• Risk level: Moderate\n• Minimum: $0-100 (many brokers)\n• Income type: Dividends + capital gains\n• Best for: Long-term wealth building\n\n**Dividend-Focused ETFs**\n• Expected return: 6-8% annually\n• Risk level: Moderate\n• Minimum: $0-100\n• Income type: Regular dividend payments\n• Examples: VYM, SCHD, VTI\n• Best for: Regular passive income\n\n**Real Estate Investment Trusts (REITs)**\n• Expected return: 6-10% annually\n• Risk level: Moderate to high\n• Minimum: $0-100 (through ETFs)\n• Income type: Monthly/quarterly distributions\n• Best for: Real estate exposure without property management\n\n**THE SIMPLE INVESTMENT LADDER:**\n\n**Step 1: Emergency Fund (Months 1-6)**\n• Goal: 3-6 months expenses in high-yield savings\n• Priority: Security over returns\n• Action: Open account, automate transfers\n\n**Step 2: Index Fund Foundation (Months 6-18)**\n• Goal: Start building long-term wealth\n• Strategy: Invest $100-500/month in S&P 500 index\n• Platform: Fidelity, Vanguard, or Schwab\n\n**Step 3: Dividend Income Stream (Year 2+)**\n• Goal: Generate regular passive income\n• Strategy: Add dividend-focused investments\n• Target: $50-200/month in dividend income\n\n**COMPOUND INTEREST EXAMPLE:**\n$500/month invested at 8% annual return:\n• Year 1: $6,200\n• Year 5: $36,700\n• Year 10: $91,500\n• Year 20: $294,500\n\n**The key:** Start small, be consistent, let time work for you."
+              }
+            ]
+          }
+        ],
+        exercises: [
+          {
+            id: "negotiation-preparation", 
+            type: "multiple-choice",
+            question: "What's the most important first step when preparing for salary negotiation?",
+            options: [
+              "Threatening to quit if denied",
+              "Asking friends what they earn",
+              "Documenting your specific achievements with quantified results",
+              "Waiting for annual review time"
+            ],
+            correctAnswer: "Documenting your specific achievements with quantified results",
+            explanation: "Successful salary negotiation is based on demonstrating your value with specific, quantified achievements. This provides concrete evidence of your worth to the company.",
+            feedback: {
+              correct: "💼 Exactly! Evidence-based negotiation with documented achievements is the foundation of success.",
+              incorrect: "Document your achievements first - specific, quantified results give you the strongest negotiation position."
+            },
+            points: 35
+          },
+          {
+            id: "side-hustle-selection",
+            type: "multiple-choice",
+            question: "Which side hustle is most appropriate for someone with only 1-5 hours per week?",
+            options: ["E-commerce business", "Online course creation", "Food delivery or online surveys", "Consulting business"],
+            correctAnswer: "Food delivery or online surveys",
+            explanation: "Choose side hustles that match your available time. Lower time commitments work for simple tasks, while building a business requires more time investment.",
+            feedback: {
+              correct: "🎯 Perfect! Simple tasks like delivery or surveys work best for limited time availability.",
+              incorrect: "Match your available time to the right opportunity - simple tasks for low time, businesses for high time commitment."
+            },
+            points: 40
+          }
+        ]
+      },
+      {
+        id: "cashflow-level-6",
+        title: "📋 Create Your Personalized Cash Flow Plan",
+        description: "Bring everything together into a comprehensive 12-month cash flow plan",
+        difficulty: "Intermediate",
+        estimatedTime: "10 minutes",
+        xpReward: 200,
+        learningObjectives: [
+          "Synthesize all learned concepts into a unified plan",
+          "Create a personalized 12-month cash flow strategy",
+          "Set specific, measurable income and tracking goals",
+          "Establish accountability systems for follow-through"
+        ],
+        tabs: [
+          {
+            id: "plan-creation",
+            title: "Your Plan",
+            icon: "📋",
+            content: [
+              {
+                id: "plan-template",
+                type: "challenge",
+                title: "🎯 Your 12-Month Cash Flow Mastery Plan",
+                content: "**STEP 1: CURRENT STATE ASSESSMENT**\n\n**Income Analysis:**\n□ Monthly active income: $______\n□ Monthly passive income: $______\n□ Total monthly income: $______\n□ Number of income sources: ______\n\n**Tracking Status:**\n□ Current tracking method: ____________\n□ Time spent weekly on money tasks: ______\n□ Satisfaction with current system (1-10): ______\n\n**STEP 2: 12-MONTH GOALS**\n\n**Income Growth Targets:**\n□ Target total monthly income: $______ (____% increase)\n□ Target passive income: $______ \n□ Primary strategy: □ Salary negotiation □ Side hustle □ Investments\n□ Target completion date: ____________\n\n**Automation Goals:**\n□ Chosen tracking tool: ____________\n□ Setup completion date: ____________\n□ Weekly time goal: ______ minutes\n\n**STEP 3: QUARTERLY MILESTONES**\n\n**Q1 (Months 1-3): Foundation**\n□ Complete income source mapping\n□ Set up automated tracking system\n□ Research salary negotiation data\n□ Target income increase: $______/month\n\n**Q2 (Months 4-6): Growth**\n□ Execute salary negotiation\n□ Launch chosen side hustle\n□ Start investment account\n□ Target income increase: $______/month\n\n**Q3 (Months 7-9): Optimization**\n□ Scale successful income streams\n□ Optimize tracking and budgeting\n□ Add second income source\n□ Target income increase: $______/month\n\n**Q4 (Months 10-12): Mastery**\n□ Achieve annual income goal\n□ Build emergency fund from increased income\n□ Plan next year's growth strategy\n□ Target income increase: $______/month\n\n**STEP 4: SUCCESS TRACKING**\n\n**Monthly Review Questions:**\n• Did I achieve this month's income target?\n• Is my tracking system working effectively?\n• What unexpected income did I discover?\n• What's my biggest opportunity for next month?\n\n**Accountability System:**\n□ Monthly calendar reminder set\n□ Accountability partner chosen: ____________\n□ Progress tracking method: ____________\n\n**STEP 5: COMMITMENT CONTRACT**\n\n\"I commit to implementing this cash flow plan for the next 12 months. My #1 priority is ____________. I will review my progress monthly and adjust as needed.\"\n\n**Signature:** ________________ **Date:** ________\n\n**YOUR DOWNLOADED PLAN INCLUDES:**\n• Editable monthly tracking spreadsheet\n• Income source mapping worksheet\n• Salary negotiation prep checklist\n• Side hustle evaluation matrix\n• Investment starting guide\n• Monthly review template"
+              },
+              {
+                id: "success-predictions",
+                type: "example",
+                title: "🔮 What Success Looks Like in 12 Months",
+                content: "**TYPICAL RESULTS FROM CASH FLOW MASTERY PLAN:**\n\n**THE INCOME TRANSFORMER (Sarah's Results):**\n• **Started:** $4,200/month salary only\n• **After 12 months:** $5,800/month total income\n• **Growth:** 38% increase ($1,600/month more)\n• **Sources:** Salary increase + freelance writing + dividends\n• **Time spent:** 10 minutes/week (down from 45 minutes)\n\n**THE SIDE HUSTLE CHAMPION (Mike's Results):**\n• **Started:** $3,800/month job income\n• **After 12 months:** $5,400/month total income  \n• **Growth:** 42% increase ($1,600/month more)\n• **Sources:** Same job + tutoring + rental income\n• **Bonus:** Built $8,000 emergency fund from extra income\n\n**THE AUTOMATION MASTER (Jessica's Results):**\n• **Started:** Manual tracking, financial stress\n• **After 12 months:** Fully automated system\n• **Discoveries:** Found $200/month in subscription waste\n• **Time saved:** 20+ hours annually\n• **Stress level:** Down from 8/10 to 3/10\n\n**COMMON SUCCESS PATTERNS:**\n\n**Month 1-3:** Foundation & Quick Wins\n• 15-25% of people find immediate income they'd overlooked\n• Average discovery: $150-400/month\n• Tracking setup saves 20+ minutes weekly\n\n**Month 4-6:** Growth & Momentum\n• 60% successfully negotiate salary increase\n• Average increase: 8-15% salary boost\n• 40% launch profitable side hustle\n\n**Month 7-12:** Optimization & Scale\n• 80% achieve 20%+ total income increase\n• 45% achieve 35%+ total income increase\n• 25% achieve 50%+ total income increase\n\n**WHAT MAKES THE DIFFERENCE:**\n• **High Achievers:** Follow the plan consistently, review monthly\n• **Moderate Success:** Follow most of the plan, review quarterly\n• **Minimal Results:** Start strong but don't maintain consistency\n\n**YOUR SUCCESS PROBABILITY:**\n• **90% chance:** Find overlooked income sources\n• **70% chance:** Achieve 20%+ income increase\n• **50% chance:** Achieve 35%+ income increase\n• **25% chance:** Achieve 50%+ income increase\n\n**The key to being in the top 25%:** Consistent monthly reviews and adjustments."
+              }
+            ]
+          }
+        ],
+        exercises: [
+          {
+            id: "plan-commitment",
+            type: "true-false",
+            question: "The most important factor for success with a cash flow plan is setting up the tracking system perfectly from day one.",
+            options: ["True", "False"],
+            correctAnswer: "False",
+            explanation: "While tracking is important, the most critical factor is consistent monthly reviews and adjustments. Many people succeed with simple tracking systems because they review and optimize regularly.",
+            feedback: {
+              correct: "🎯 Exactly! Consistency and regular reviews matter more than perfect initial setup.",
+              incorrect: "Perfect setup isn't required - consistent monthly reviews and adjustments are what drive success."
+            },
+            points: 30
+          },
+          {
+            id: "success-probability",
+            type: "multiple-choice", 
+            question: "Based on typical results, what's your probability of achieving at least a 20% income increase within 12 months?",
+            options: [
+              "25% chance",
+              "50% chance",
+              "70% chance", 
+              "90% chance"
+            ],
+            correctAnswer: "70% chance",
+            explanation: "Studies of people who follow structured cash flow plans show that 70% achieve at least a 20% income increase within 12 months through a combination of salary negotiation, side hustles, and found income.",
+            feedback: {
+              correct: "📈 Correct! With a systematic approach, 70% of people achieve significant income growth.",
+              incorrect: "Research shows 70% of people following structured cash flow plans achieve 20%+ income increases within a year."
+            },
+            points: 40
           }
         ]
       }

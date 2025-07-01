@@ -180,8 +180,28 @@
         "description": "Master the art of money management with advanced budgeting and cash flow systems",
         "levels": {
           "cashflowLevel1": {
-            "title": "💰 Income Optimization & Tracking",
-            "description": "Maximize and track all income sources for complete financial visibility"
+            "title": "💡 Welcome & The Power of Cash Flow Awareness",
+            "description": "Discover how cash flow awareness gives you control over your financial life"
+          },
+          "cashflowLevel2": {
+            "title": "🔍 Identifying & Mapping Income Streams",
+            "description": "Learn to identify every income source, including hidden earnings"
+          },
+          "cashflowLevel3": {
+            "title": "⚖️ Active vs. Passive Income",
+            "description": "Understand the key differences between active and passive income"
+          },
+          "cashflowLevel4": {
+            "title": "🤖 Automating Income Tracking",
+            "description": "Set up automated systems to track income and expenses efficiently"
+          },
+          "cashflowLevel5": {
+            "title": "🚀 Strategies to Boost Income by 20-50%",
+            "description": "Learn actionable strategies to significantly increase your income within 12 months"
+          },
+          "cashflowLevel6": {
+            "title": "📋 Create Your Personalized Cash Flow Plan",
+            "description": "Bring everything together into a comprehensive 12-month cash flow plan"
           }
         }
       },

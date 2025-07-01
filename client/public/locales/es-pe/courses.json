@@ -43,6 +43,22 @@
     "loading": "Cargando Cursos de Educación Financiera...",
     "noTabsMessage": "El contenido está organizado en pestañas arriba. Por favor selecciona una pestaña para ver el contenido de la lección.",
     "modules": {
+      "cashflow-mastery": {
+        "title": "Dominio del Flujo de Efectivo",
+        "description": "Domina el arte de la gestión del dinero con sistemas avanzados de presupuesto y flujo de efectivo"
+      },
+      "debt-elimination": {
+        "title": "Eliminación de Deudas",
+        "description": "Destruye las deudas sistemáticamente y construye libertad financiera inquebrantable"
+      },
+      "investment-fundamentals": {
+        "title": "Fundamentos de Inversión",
+        "description": "Domina los conceptos básicos de la inversión para construir riqueza a largo plazo y libertad financiera"
+      },
+      "solo-entrepreneur-finance": {
+        "title": "Finanzas para Emprendedores Independientes",
+        "description": "Domina las habilidades financieras que todo emprendedor independiente necesita para construir y escalar su negocio"
+      },
       "financialMindset": {
         "title": "Mentalidad y Psicología Financiera",
         "description": "Domina la psicología del dinero y construye una mentalidad próspera que impulse el éxito",
@@ -121,7 +137,69 @@
       },
       "cashFlowMastery": {
         "title": "Dominio del Flujo de Efectivo",
-        "description": "Domina el arte de la gestión del dinero con sistemas avanzados de presupuesto y flujo de efectivo"
+        "description": "Domina el arte de la gestión del dinero con sistemas avanzados de presupuesto y flujo de efectivo",
+        "levels": {
+          "cashflowLevel1": {
+            "title": "💡 Bienvenida y el Poder de la Conciencia del Flujo de Efectivo",
+            "description": "Descubra cómo la conciencia del flujo de efectivo le da control sobre su vida financiera",
+            "tabs": {
+              "cashFlowBasics": {
+                "title": "Conceptos Básicos del Flujo de Efectivo",
+                "whatIsCashFlow": {
+                  "title": "💰 ¿Qué es el Flujo de Efectivo?",
+                  "content": "El flujo de efectivo es la sangre vital de sus finanzas. Simplemente, es el dinero que entra (ingresos) y el dinero que sale (gastos) durante un período específico.\n\nPiénselo como un río:\n• **Dinero ENTRANTE** = afluentes alimentando el río (salario, trabajos secundarios, inversiones)\n• **Dinero SALIENTE** = agua fluyendo río abajo (alquiler, comestibles, entretenimiento)\n• **Flujo de Efectivo** = el resultado neto de este flujo\n\nCuando entra más dinero del que sale, tiene flujo de efectivo positivo. Cuando sale más del que entra, tiene flujo de efectivo negativo - y ahí es cuando comienza el estrés financiero."
+                },
+                "alexCaseStudy": {
+                  "title": "🎯 Caso de Estudio: El Descubrimiento de $200 Mensuales de Alex",
+                  "content": "Conozca a Alex, un profesional de marketing de 28 años que gana $4,500 al mes. Alex siempre se sentía sin dinero a pesar de tener un salario decente.\n\n**El Problema:** Alex no tenía idea de a dónde iba el dinero.\n\n**La Solución:** Alex pasó 30 minutos revisando estados de cuenta bancarios y descubrió:\n• Netflix: $15/mes ✓ (todavía lo usa)\n• Spotify: $10/mes ✓ (todavía lo usa)\n• Adobe Creative: $53/mes ❌ (no lo había usado en 8 meses)\n• Membresía del gimnasio: $89/mes ❌ (iba una vez al mes)\n• Apps de entrega de comida: $312/mes ❌ (pedía 4-5 veces por semana)\n\n**El Resultado:** Al cancelar suscripciones no utilizadas y cocinar 3 comidas más por semana, Alex liberó $200 al mes - ¡eso es $2,400 al año!\n\n**Palabras de Alex:** \"No podía creer que estaba tirando $200 cada mes. Ahora ese dinero va directo a mi fondo de emergencia.\""
+                },
+                "cashFlowDiagram": {
+                  "title": "📊 Su Tubería de Flujo de Efectivo",
+                  "content": "**VISUAL: Tubería de Flujo de Efectivo**\n\n```\nFUENTES DE INGRESOS     TUBERÍA DE           CATEGORÍAS DE GASTOS\n                       FLUJO DE EFECTIVO\n💼 Salario         ──┐                    ┌── 🏠 Vivienda\n💰 Trabajo Extra   ──┤                    ├── 🚗 Transporte\n📈 Inversiones     ──┤       💰💰💰       ├── 🍕 Comida\n🎁 Otros Ingresos  ──┘                    ├── 💊 Salud\n                                         ├── 🎮 Entretenimiento\n                                         └── 💳 Pagos de Deudas\n```\n\n**La Tubería Muestra:**\n• **Ancho** = Cantidad de dinero\n• **Color** = Tipo de categoría\n• **Dirección del Flujo** = A dónde va su dinero\n\n**Información Clave:** La mayoría de la gente se enfoca en el lado de los ingresos pero ignora el lado de los gastos. El verdadero dominio del flujo de efectivo requiere optimizar AMBOS lados de la tubería."
+                }
+              }
+            },
+            "exercises": {
+              "cashFlowReflection": {
+                "question": "El flujo de efectivo solo se trata de rastrear ingresos, no gastos.",
+                "explanation": "El flujo de efectivo rastrea tanto el dinero que entra (ingresos) Y el dinero que sale (gastos). Necesita monitorear ambos lados para entender su panorama financiero completo.",
+                "feedback": {
+                  "correct": "🎯 ¡Correcto! El flujo de efectivo se trata tanto de ingresos Y gastos - el panorama completo del movimiento de su dinero.",
+                  "incorrect": "El flujo de efectivo incluye tanto ingresos como gastos. Es el panorama completo del dinero que fluye dentro y fuera de su vida."
+                }
+              }
+            }
+          },
+          "cashflowLevel2": {
+            "title": "🔍 Identificación y Mapeo de Fuentes de Ingresos",
+            "description": "Aprenda a identificar cada fuente de ingresos, incluidas las ganancias ocultas",
+            "tabs": {
+              "incomeMapping": {
+                "title": "Mapeo de Ingresos",
+                "incomeCategories": {
+                  "title": "🔍 El Mapa Completo de Ingresos",
+                  "content": "**FUENTES DE INGRESOS PRIMARIAS (Las Obvias):**\n• 💼 Salario o sueldos de su trabajo\n• 🏢 Ingresos de negocio o freelance\n• 📈 Retornos de inversión (dividendos, intereses)\n• 🏠 Ingresos de alquiler de propiedades\n• 💰 Pensión o ingresos de jubilación\n\n**FUENTES DE INGRESOS OCULTAS (A menudo olvidadas):**\n• 💳 Cashback y recompensas de tarjetas de crédito\n• 🎁 Reembolsos de impuestos (promedio $2,800 anuales)\n• 👨‍👩‍👧‍👦 Regalos de familia o amigos\n• 📦 Dinero de vender artículos no utilizados\n• 🚗 Ganancias de la economía gig (Uber, DoorDash)\n• 📱 Ingresos basados en apps (encuestas, apps de cashback)\n• 🔄 Reembolsos de suscripciones canceladas\n• 🛡️ Pagos de reclamaciones de seguros\n• 🎓 Dinero de becas o subvenciones\n• 💼 Consultoría o tutoría secundaria\n\n**LISTA DE VERIFICACIÓN DE AUDITORÍA DE INGRESOS:**\n□ Revisar últimos 3 meses de estados de cuenta bancarios\n□ Revisar todas las fuentes de depósitos\n□ Incluir pagos únicos\n□ Contar ingresos irregulares\n□ No olvidar pagos en efectivo\n□ Incluir valor de trueque o intercambio"
+                }
+              }
+            }
+          },
+          "cashflowLevel3": {
+            "title": "⚖️ Ingresos Activos vs. Pasivos",
+            "description": "Comprenda las diferencias clave entre ingresos activos y pasivos"
+          },
+          "cashflowLevel4": {
+            "title": "🤖 Automatización del Seguimiento de Ingresos",
+            "description": "Configure sistemas automatizados para rastrear ingresos y gastos de manera eficiente"
+          },
+          "cashflowLevel5": {
+            "title": "🚀 Estrategias para Aumentar Ingresos en 20-50%",
+            "description": "Aprenda estrategias accionables para aumentar significativamente sus ingresos en 12 meses"
+          },
+          "cashflowLevel6": {
+            "title": "📋 Cree Su Plan Personalizado de Flujo de Efectivo",
+            "description": "Reúna todo en un plan integral de flujo de efectivo de 12 meses"
+          }
+        }
       },
       "debtElimination": {
         "title": "Dominio de Eliminación de Deudas",

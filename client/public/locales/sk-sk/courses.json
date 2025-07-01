@@ -121,7 +121,33 @@
       },
       "cashFlowMastery": {
         "title": "Majstrovstvo Cash Flow",
-        "description": "Ovládnite umenie správy peňazí s pokročilými systémami rozpočtovania a cash flow"
+        "description": "Ovládnite umenie správy peňazí s pokročilými systémami rozpočtovania a cash flow",
+        "levels": {
+          "cashflowLevel1": {
+            "title": "💡 Vitajte a Sila Povedomia o Cash Flow",
+            "description": "Objavte, ako vám povedomie o cash flow dáva kontrolu nad vaším finančným životom"
+          },
+          "cashflowLevel2": {
+            "title": "🔍 Identifikácia a Mapovanie Zdrojov Príjmov",
+            "description": "Naučte sa identifikovať každý zdroj príjmov, vrátane skrytých ziskov"
+          },
+          "cashflowLevel3": {
+            "title": "⚖️ Aktívne vs. Pasívne Príjmy",
+            "description": "Pochopte kľúčové rozdiely medzi aktívnymi a pasívnymi príjmami"
+          },
+          "cashflowLevel4": {
+            "title": "🤖 Automatizácia Sledovania Príjmov",
+            "description": "Nastavte automatizované systémy na efektívne sledovanie príjmov a výdajov"
+          },
+          "cashflowLevel5": {
+            "title": "🚀 Stratégie na Zvýšenie Príjmov o 20-50%",
+            "description": "Naučte sa realizovateľné stratégie na výrazné zvýšenie príjmov do 12 mesiacov"
+          },
+          "cashflowLevel6": {
+            "title": "📋 Vytvorte Svoj Personalizovaný Plán Cash Flow",
+            "description": "Spojte všetko do komplexného 12-mesačného plánu cash flow"
+          }
+        }
       },
       "debtElimination": {
         "title": "Majstrovstvo Eliminácie Dlhov",

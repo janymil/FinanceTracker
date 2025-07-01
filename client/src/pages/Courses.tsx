@@ -585,8 +585,12 @@ export default function Courses() {
                       {React.createElement(getIcon(module.icon), { className: "h-6 w-6" })}
                     </div>
                     <div>
-                      <CardTitle className="text-lg">{module.title}</CardTitle>
-                      <CardDescription className="text-sm">{module.description}</CardDescription>
+                      <CardTitle className="text-lg">
+                        {t(`courses.modules.${module.id}.title`, module.title)}
+                      </CardTitle>
+                      <CardDescription className="text-sm">
+                        {t(`courses.modules.${module.id}.description`, module.description)}
+                      </CardDescription>
                     </div>
                   </div>
                   {isLocked && <Lock className="w-5 h-5 text-muted-foreground" />}
