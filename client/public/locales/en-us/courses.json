@@ -71,6 +71,58 @@
             "title": "📋 Create Your Personalized Cash Flow Plan",
             "description": "Bring everything together into a comprehensive 12-month cash flow plan"
           }
+        },
+        "tabs": {
+          "cashFlowBasics": "Cash Flow Basics",
+          "incomeMapping": "Income Mapping",
+          "activeVsPassive": "Active vs Passive",
+          "automationTools": "Automation Tools",
+          "salaryNegotiation": "Salary Negotiation",
+          "sideHustles": "Side Hustles",
+          "investmentBasics": "Investment Basics",
+          "planCreation": "Your Plan"
+        },
+        "content": {
+          "level1": {
+            "whatIsCashFlow": {
+              "title": "💰 What is Cash Flow?",
+              "content": "Cash flow is the lifeblood of your finances. Simply put, it's money coming in (income) and money going out (expenses) over a specific period.\n\nThink of it like a river:\n• **Money FLOWING IN** = tributaries feeding the river (salary, side gigs, investments)\n• **Money FLOWING OUT** = water flowing downstream (rent, groceries, entertainment)\n• **Cash Flow** = the net result of this flow\n\nWhen more money flows in than out, you have positive cash flow. When more flows out than in, you have negative cash flow - and that's when financial stress begins."
+            },
+            "alexCaseStudy": {
+              "title": "🎯 Case Study: Alex's $200 Monthly Discovery",
+              "content": "Meet Alex, a 28-year-old marketing professional earning $4,500 per month. Alex always felt broke despite having a decent salary.\n\n**The Problem:** Alex had no idea where the money was going.\n\n**The Solution:** Alex spent 30 minutes reviewing bank statements and discovered:\n• Netflix: $15/month ✓ (still using it)\n• Spotify: $10/month ✓ (still using it)\n• Adobe Creative: $53/month ❌ (hadn't used it in 8 months)\n• Gym membership: $89/month ❌ (went once a month)\n• Food delivery apps: $312/month ❌ (ordering 4-5 times per week)\n\n**The Result:** By canceling unused subscriptions and cooking 3 more meals per week, Alex freed up $200 per month - that's $2,400 per year!\n\n**Alex's Words:** \"I couldn't believe I was throwing away $200 every month. Now that money goes straight to my emergency fund.\""
+            },
+            "cashFlowDiagram": {
+              "title": "📊 Your Cash Flow Pipeline",
+              "content": "**VISUAL: Cash Flow Pipeline**\n\n```\nINCOME SOURCES        CASH FLOW           EXPENSE CATEGORIES\n                      PIPELINE\n💼 Salary         ──┐                    ┌── 🏠 Housing\n💰 Side Work      ──┤                    ├── 🚗 Transportation\n📈 Investments    ──┤       💰💰💰       ├── 🍕 Food\n🎁 Other Income   ──┘                    ├── 💊 Health\n                                         ├── 🎮 Entertainment\n                                         └── 💳 Debt Payments\n```\n\n**The Pipeline Shows:**\n• **Width** = Amount of money\n• **Color** = Type of category\n• **Flow Direction** = Where your money goes\n\n**Key Insight:** Most people focus on the income side but ignore the expense side. True cash flow mastery requires optimizing BOTH sides of the pipeline."
+            }
+          },
+          "level2": {
+            "incomeCategories": {
+              "title": "🔍 The Complete Income Map",
+              "content": "**PRIMARY INCOME SOURCES (The Obvious Ones):**\n• 💼 Salary or wages from your job\n• 🏢 Business or freelance income\n• 📈 Investment returns (dividends, interest)\n• 🏠 Rental income from properties\n• 💰 Pension or retirement income\n\n**HIDDEN INCOME SOURCES (Often Forgotten):**\n• 💳 Credit card cashback and rewards\n• 🎁 Tax refunds (average $2,800 annually)\n• 👨‍👩‍👧‍👦 Gifts from family or friends\n• 📦 Money from selling unused items\n• 🚗 Gig economy earnings (Uber, DoorDash)\n• 📱 App-based income (surveys, cashback apps)\n• 🔄 Refunds from canceled subscriptions\n• 🛡️ Insurance claim payouts\n• 🎓 Scholarship or grant money\n• 💼 Side consulting or tutoring\n\n**INCOME AUDIT CHECKLIST:**\n□ Review last 3 months of bank statements\n□ Check all deposit sources\n□ Include one-time payments\n□ Count irregular income\n□ Don't forget cash payments\n□ Include bartering or trade value"
+            },
+            "incomeOptimization": {
+              "title": "🚀 Income Optimization Strategies",
+              "content": "**MAXIMIZE YOUR PRIMARY INCOME:**\n\n1. **Annual Salary Review:**\n   • Research market rates for your position\n   • Document your achievements and quantify results\n   • Schedule regular check-ins with your manager\n   • Present a clear case with specific numbers\n\n2. **Skill Development ROI:**\n   • Identify high-value skills in your industry\n   • Calculate potential income increase per skill\n   • Invest in certifications that employers value\n   • Track completion rates and apply immediately\n\n3. **Performance Metrics:**\n   • Exceed targets by 10-20% consistently\n   • Take on additional responsibilities\n   • Mentor junior team members\n   • Lead cross-functional projects\n\n**ACTIVATE HIDDEN INCOME SOURCES:**\n\n• **Credit Card Optimization:** Switch to cards with 2-5% cashback in your top spending categories\n• **Tax Strategy:** Contribute to 401k/IRA to increase refund potential\n• **Cashback Apps:** Use Rakuten, Honey, Capital One Shopping for all online purchases\n• **Selling Strategy:** List unused items on Facebook Marketplace, eBay, or Poshmark\n• **Referral Programs:** Leverage employer, bank, and service referral bonuses"
+            }
+          },
+          "level3": {
+            "activeVsPassive": {
+              "title": "⚡ Active vs Passive Income Mastery",
+              "content": "**ACTIVE INCOME (Trade Time for Money):**\n• Salary from employment\n• Freelance project payments\n• Consulting fees\n• Service-based business income\n• Commission-based sales\n\n**Characteristics:**\n✓ Immediate and predictable\n✓ Higher control over income timing\n✗ Limited by hours available\n✗ Income stops when you stop working\n\n**PASSIVE INCOME (Money Works for You):**\n• Dividend-paying stocks\n• Rental property income\n• Royalties from intellectual property\n• Interest from high-yield savings\n• Peer-to-peer lending returns\n\n**Characteristics:**\n✓ Generates income while you sleep\n✓ Scalable without trading more time\n✗ Requires upfront investment or work\n✗ May take time to generate significant income\n\n**THE TRANSITION STRATEGY:**\n\n**Phase 1 (Months 1-6):** Optimize Active Income\n• Negotiate salary increase\n• Develop high-value skills\n• Take on profitable side projects\n• Save 20-30% of increased income\n\n**Phase 2 (Months 7-18):** Build Passive Foundation\n• Invest saved money in dividend ETFs\n• Research real estate investment options\n• Create digital products or courses\n• Explore peer-to-peer lending\n\n**Phase 3 (18+ Months):** Scale Passive Streams\n• Reinvest passive income returns\n• Add new income streams quarterly\n• Automate income collection processes\n• Track passive income growth vs active income"
+            }
+          },
+          "exercises": {
+            "cashFlowReflection": {
+              "question": "Cash flow is only about tracking income, not expenses.",
+              "explanation": "Cash flow tracks both money coming in (income) AND money going out (expenses). You need to monitor both sides to understand your complete financial picture.",
+              "feedback": {
+                "correct": "🎯 Correct! Cash flow is about both income AND expenses - the complete picture of your money movement.",
+                "incorrect": "Cash flow includes both income and expenses. It's the complete picture of money flowing in and out of your life."
+              }
+            }
+          }
         }
       },
       "debt-elimination": {

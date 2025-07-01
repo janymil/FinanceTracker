@@ -233,8 +233,12 @@ export default function Courses() {
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold">{currentLevel.title}</h1>
-              <p className="text-muted-foreground">{selectedModule?.title}</p>
+              <h1 className="text-2xl font-bold">
+                {t(`courses.modules.${selectedModule?.id}.levels.${currentLevel.id}.title`, currentLevel.title)}
+              </h1>
+              <p className="text-muted-foreground">
+                {t(`courses.modules.${selectedModule?.id}.title`, selectedModule?.title || "")}
+              </p>
             </div>
             <Button variant="outline" onClick={returnToModules}>
               Exit Lesson
@@ -264,7 +268,7 @@ export default function Courses() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-xl">
                       <span>{tab.icon}</span>
-                      {tab.title}
+                      {t(`courses.modules.${selectedModule?.id}.tabs.${tab.id}`, tab.title)}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>

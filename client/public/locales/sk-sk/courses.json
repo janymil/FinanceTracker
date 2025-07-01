@@ -71,6 +71,48 @@
             "title": "📋 Vytvorte Svoj Personalizovaný Plán Peňažného Toku",
             "description": "Spojte všetko do komplexného 12-mesačného plánu peňažného toku"
           }
+        },
+        "tabs": {
+          "cashFlowBasics": "Základy Peňažného Toku",
+          "incomeMapping": "Mapovanie Príjmov",
+          "activeVsPassive": "Aktívne vs Pasívne",
+          "automationTools": "Nástroje Automatizácie",
+          "salaryNegotiation": "Vyjednávanie Platu",
+          "sideHustles": "Vedľajšie Zárobky",
+          "investmentBasics": "Základy Investovania",
+          "planCreation": "Váš Plán"
+        },
+        "content": {
+          "level1": {
+            "whatIsCashFlow": {
+              "title": "💰 Čo je Peňažný Tok?",
+              "content": "Peňažný tok je životnou silou vašich financií. Jednoducho povedané, sú to peniaze prichádzajúce (príjmy) a peniaze odchádzajúce (výdavky) počas určitého obdobia.\n\nPredstavte si to ako rieku:\n• **Peniaze PRÚDIACE DOVNÚTRA** = prítoky napájajúce rieku (plat, vedľajšie zárobky, investície)\n• **Peniaze PRÚDIACE VEN** = voda tečúca po prúde (nájom, potraviny, zábava)\n• **Peňažný Tok** = čistý výsledok tohto toku\n\nKeď viac peňazí prúdi dovnútra ako von, máte pozitívny peňažný tok. Keď viac prúdi von ako dovnútra, máte negatívny peňažný tok - a tam začína finančný stres."
+            },
+            "alexCaseStudy": {
+              "title": "🎯 Prípadová Štúdia: Alexovo Objavenie $200 Mesačne",
+              "content": "Spoznajte Alexa, 28-ročného marketingového profesionála, ktorý zarába $4,500 mesačne. Alex sa vždy cítil bez peňazí napriek tomu, že mal slušný plat.\n\n**Problém:** Alex nemal tušenia, kam peniaze odchádzajú.\n\n**Riešenie:** Alex strávil 30 minút prezeraním bankových výpisov a objavil:\n• Netflix: $15/mesiac ✓ (stále to používa)\n• Spotify: $10/mesiac ✓ (stále to používa)\n• Adobe Creative: $53/mesiac ❌ (nepoužíval to 8 mesiacov)\n• Členstvo v posilňovni: $89/mesiac ❌ (išiel raz za mesiac)\n• Aplikácie na donášku jedla: $312/mesiac ❌ (objednával 4-5 krát za týždeň)\n\n**Výsledok:** Zrušením nevyužívaných predplatných a varením 3 ďalších jedál za týždeň Alex uvoľnil $200 mesačne - to je $2,400 ročne!\n\n**Alexove slová:** \"Nemohol som uveriť, že každý mesiac vyhadzujem $200. Teraz tie peniaze idú priamo do môjho núdzového fondu.\""
+            },
+            "cashFlowDiagram": {
+              "title": "📊 Váš Potrubný Systém Peňažného Toku",
+              "content": "**VIZUÁL: Potrubný Systém Peňažného Toku**\n\n```\nZDROJE PRÍJMOV        POTRUBNÝ SYSTÉM      KATEGÓRIE VÝDAVKOV\n                     PEŇAŽNÉHO TOKU\n💼 Plat           ──┐                    ┌── 🏠 Bývanie\n💰 Vedľajšia Práca ──┤                    ├── 🚗 Doprava\n📈 Investície     ──┤       💰💰💰       ├── 🍕 Jedlo\n🎁 Iné Príjmy     ──┘                    ├── 💊 Zdravie\n                                         ├── 🎮 Zábava\n                                         └── 💳 Splátky Dlhov\n```\n\n**Potrubný Systém Ukazuje:**\n• **Šírka** = Množstvo peňazí\n• **Farba** = Typ kategórie\n• **Smer Toku** = Kam vaše peniaze idú\n\n**Kľúčové Pozorovaniet:** Väčšina ľudí sa zameriava na stranu príjmov, ale ignoruje stranu výdavkov. Skutočné ovládanie peňažného toku vyžaduje optimalizáciu OBOCH strán potrubného systému."
+            }
+          },
+          "level2": {
+            "incomeCategories": {
+              "title": "🔍 Kompletná Mapa Príjmov",
+              "content": "**PRIMÁRNE ZDROJE PRÍJMOV (Zrejmé):**\n• 💼 Plat alebo mzda z vašej práce\n• 🏢 Príjmy z podnikania alebo freelancingu\n• 📈 Výnosy z investícií (dividendy, úroky)\n• 🏠 Príjmy z prenájmu nehnuteľností\n• 💰 Dôchodok alebo príjmy z dôchodku\n\n**SKRYTÉ ZDROJE PRÍJMOV (Často zabudnuté):**\n• 💳 Cashback a odmeny z kreditných kariet\n• 🎁 Daňové vrátky (priemerne $2,800 ročne)\n• 👨‍👩‍👧‍👦 Darčeky od rodiny alebo priateľov\n• 📦 Peniaze z predaja nepoužívaných predmetov\n• 🚗 Zárobky z gig ekonomiky (Uber, DoorDash)\n• 📱 Príjmy z aplikácií (prieskumy, cashback aplikácie)\n• 🔄 Vrátky z zrušených predplatných\n• 🛡️ Výplaty z poistných nárokov\n• 🎓 Štipendijné alebo grantové peniaze\n• 💼 Vedľajšie poradenstvo alebo doučovanie\n\n**KONTROLNÝ ZOZNAM AUDITU PRÍJMOV:**\n□ Prekontrolovať posledné 3 mesiace bankových výpisov\n□ Skontrolovať všetky zdroje vkladov\n□ Zahrnúť jednorazové platby\n□ Počítať nepravidelné príjmy\n□ Nezabudnúť na hotovostné platby\n□ Zahrnúť hodnotu výmeny alebo barteru"
+            }
+          },
+          "exercises": {
+            "cashFlowReflection": {
+              "question": "Peňažný tok sa týka len sledovania príjmov, nie výdavkov.",
+              "explanation": "Peňažný tok sleduje ako peniaze prichádzajúce (príjmy) AJ peniaze odchádzajúce (výdavky). Potrebujete monitorovať obe strany, aby ste pochopili svoj kompletný finančný obraz.",
+              "feedback": {
+                "correct": "🎯 Správne! Peňažný tok sa týka ako príjmov AJ výdavkov - kompletný obraz pohybu vašich peňazí.",
+                "incorrect": "Peňažný tok zahŕňa ako príjmy tak výdavky. Je to kompletný obraz peňazí tečúcich do a z vášho života."
+              }
+            }
+          }
         }
       },
       "debt-elimination": {
