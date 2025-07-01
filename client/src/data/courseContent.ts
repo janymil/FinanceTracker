@@ -1,15 +1,11 @@
-// Financial Literacy Course Content
-// Comprehensive educational material with interactive exercises
+// High-quality, engaging financial literacy course content
+// Comprehensive educational content following modern edtech principles and gamification best practices
 
 export interface ContentBlock {
   id: string;
-  type: 'text' | 'example' | 'tip' | 'warning' | 'visual' | 'step';
+  type: 'text' | 'example' | 'tip' | 'warning' | 'scenario' | 'interactive';
   title?: string;
   content: string;
-  visual?: {
-    type: 'chart' | 'illustration' | 'comparison';
-    data: any;
-  };
 }
 
 export interface Exercise {
@@ -31,35 +27,17 @@ export interface TabSection {
   title: string;
   icon: string;
   content: ContentBlock[];
-  calculator?: Calculator;
-}
-
-export interface Calculator {
-  type: "income" | "budget" | "expense" | "savings" | "debt" | "cashflow";
-  title: string;
-  description: string;
-  fields: CalculatorField[];
-}
-
-export interface CalculatorField {
-  id: string;
-  label: string;
-  type: "number" | "select" | "percentage";
-  placeholder?: string;
-  options?: string[];
-  required: boolean;
 }
 
 export interface CourseLevel {
   id: string;
-  moduleId: string;
-  levelNumber: number;
   title: string;
   description: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  estimatedTime: string;
   xpReward: number;
   learningObjectives: string[];
-  content: ContentBlock[];
-  tabs?: TabSection[];
+  tabs: TabSection[];
   exercises: Exercise[];
 }
 
@@ -68,8 +46,9 @@ export interface CourseModule {
   title: string;
   description: string;
   icon: string;
-  totalLevels: number;
   estimatedTime: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  totalLevels: number;
   levels: CourseLevel[];
 }
 
@@ -77,1309 +56,798 @@ export const COURSE_CONTENT: CourseModule[] = [
   {
     id: "budgeting-basics",
     title: "Budgeting Basics",
-    description: "Master the fundamentals of managing your money effectively",
+    description: "Master the fundamentals of personal budgeting with real-world strategies that actually work",
     icon: "Calculator",
-    totalLevels: 3,
-    estimatedTime: "25 minutes",
+    estimatedTime: "15 minutes",
+    difficulty: "Beginner",
+    totalLevels: 1,
+    totalLevels: 1,
     levels: [
       {
-        id: "budgeting-1",
-        moduleId: "budgeting-basics",
-        levelNumber: 1,
-        title: "Understanding Income vs Expenses",
-        description: "Learn to identify and categorize your money flow",
-        xpReward: 15,
+        id: "level-1",
+        title: "Foundation - Understanding Your Money Flow",
+        description: "Learn to track and categorize your financial flow like a pro",
+        difficulty: "Beginner",
+        estimatedTime: "5 minutes",
+        xpReward: 50,
         learningObjectives: [
-          "Distinguish between income and expenses",
-          "Categorize different types of expenses",
-          "Calculate basic cash flow"
-        ],
-        content: [
-          {
-            id: "welcome-intro",
-            type: "text",
-            title: "Welcome to Financial Freedom!",
-            content: "You're about to learn the most important financial skill: budgeting. Think of budgeting as your money's GPS - it tells every dollar where to go so you reach your financial destination. By the end of this lesson, you'll know exactly how money flows in and out of your life."
-          }
+          "Identify all sources of income, including hidden ones",
+          "Categorize expenses into needs vs wants effectively", 
+          "Understand cash flow patterns and timing",
+          "Recognize money leaks that drain your budget"
         ],
         tabs: [
           {
-            id: "income-basics",
+            id: "income-tracking",
             title: "Income Tracking",
             icon: "💰",
             content: [
               {
-                id: "income-deep-dive",
+                id: "income-intro",
                 type: "text",
-                title: "Income: Your Financial Fuel",
-                content: "Income is ANY money that flows into your accounts. Most people think only about their main job, but successful budgeters track ALL income sources. This includes your salary, freelance work, investment returns, gifts, refunds, cashback rewards, and even that $20 you found in your old jacket!"
+                title: "Beyond Your Paycheck: The Complete Income Picture",
+                content: "Most people think income is just their salary. Wrong! Let's discover ALL the money flowing into your life.\n\nTrue income includes: your main job, side hustles, freelance work, rental income, investment dividends, cash gifts, tax refunds, cashback rewards, and even money you find in old coat pockets.\n\nWhy does this matter? Because tracking only your main salary gives you an incomplete picture. You might have $300 more per month than you realize!"
               },
               {
-                id: "income-types",
-                type: "visual",
-                title: "Types of Income Sources",
-                content: "Discover all the ways money can flow into your life:",
-                visual: {
-                  type: "comparison",
-                  data: {
-                    regular: ["💼 Job Salary", "💻 Freelance Work", "🏠 Rental Income", "📈 Investment Dividends"],
-                    irregular: ["🎁 Gifts & Bonuses", "💳 Cashback Rewards", "📱 App Earnings", "🔄 Refunds & Returns"]
-                  }
-                }
+                id: "income-example",
+                type: "example", 
+                title: "Sarah's Income Discovery",
+                content: "Sarah thought she made $3,200/month from her job. After tracking everything for one month, she discovered:\n\n• Main job: $3,200\n• Weekend tutoring: $320\n• Cashback rewards: $45\n• Tax refund (monthly avg): $150\n• Selling old items: $80\n\nTotal: $3,795/month - that's $595 more than she thought! This extra money completely changed her budget strategy."
+              },
+              {
+                id: "income-tip",
+                type: "tip",
+                title: "The 30-Day Income Challenge",
+                content: "For the next 30 days, track EVERY dollar that enters your life. Use your phone's notes app or a simple notebook. Include:\n\n✓ Paychecks and freelance payments\n✓ Cash from friends (even $5 for coffee)\n✓ Refunds and cashback\n✓ Money from selling items\n✓ Gift money\n\nAt month's end, you'll be amazed at your real income number!"
+              },
+              {
+                id: "income-warning",
+                type: "warning",
+                title: "The Irregular Income Trap",
+                content: "If your income varies monthly (freelancers, commission workers, seasonal jobs), NEVER budget based on your best month. Instead:\n\n• Calculate your lowest 3 months average\n• Use that as your baseline budget\n• Treat higher months as bonus money for savings/debt payoff\n\nThis prevents the feast-or-famine cycle that destroys budgets."
               }
-            ],
-            calculator: {
-              type: "income",
-              title: "Monthly Income Calculator",
-              description: "Calculate your total monthly income from all sources",
-              fields: [
-                { id: "salary", label: "Monthly Salary", type: "number", placeholder: "4000", required: true },
-                { id: "freelance", label: "Freelance Income", type: "number", placeholder: "500", required: false },
-                { id: "dividends", label: "Investment Dividends", type: "number", placeholder: "75", required: false },
-                { id: "rental", label: "Rental Income", type: "number", placeholder: "200", required: false },
-                { id: "cashback", label: "Cashback & Rewards", type: "number", placeholder: "25", required: false },
-                { id: "other", label: "Other Income", type: "number", placeholder: "0", required: false }
-              ]
-            }
+            ]
           },
           {
-            id: "expense-basics",
+            id: "expense-categories",
             title: "Expense Categories",
-            icon: "💸",
+            icon: "🏷️",
             content: [
               {
-                id: "expense-categories-deep",
+                id: "expense-intro",
                 type: "text",
-                title: "Expenses: Where Your Money Goes",
-                content: "Every expense falls into two categories: FIXED (same amount monthly) or VARIABLE (changes monthly). Knowing the difference is crucial because you can't easily change fixed expenses, but you have control over variable ones."
+                title: "The Smart Way to Categorize Your Spending",
+                content: "Most budgeting advice gives you 20+ categories that overwhelm and confuse. We're going simple with the 4-Category System that actually works:\n\n1. **Fixed Needs** (rent, insurance, debt minimums)\n2. **Variable Needs** (groceries, gas, utilities)\n3. **Wants** (entertainment, dining out, hobbies)\n4. **Future You** (savings, investments, extra debt payments)\n\nThis system is simple enough to follow but detailed enough to control your money."
               },
               {
-                id: "expense-breakdown",
-                type: "visual",
-                title: "🏠 The Expense House",
-                content: "Think of your expenses like a house with different rooms. Fixed expenses are like the foundation - stable but hard to change. Variable expenses are like the furniture - you can rearrange them!",
-                visual: {
-                  type: "comparison",
-                  data: {
-                    foundation_fixed: [
-                      "🏠 Rent/Mortgage: $1,400",
-                      "📱 Phone Plan: $85",
-                      "🚗 Car Payment: $320",
-                      "💊 Insurance: $180",
-                      "🎓 Student Loan: $250"
-                    ],
-                    flexible_variable: [
-                      "🛒 Groceries: $300-500",
-                      "⛽ Gas: $80-150",
-                      "🍿 Entertainment: $100-400",
-                      "👕 Clothing: $50-200",
-                      "🍕 Dining Out: $150-350"
-                    ]
-                  }
-                }
+                id: "expense-scenario",
+                type: "scenario",
+                title: "The Latte Factor Myth",
+                content: "You've heard 'skip the $5 latte and save $1,800/year.' But what if I told you that advice misses the point?\n\nThe real question isn't whether you can afford a latte. It's whether you're spending intentionally.\n\nIf you budget $50/month for coffee and genuinely enjoy it, buy the latte! But if you're mindlessly spending $150/month on coffee while struggling to save, that's the real problem.\n\nThink about it: What's one expense you spend on automatically without really enjoying it anymore?"
+              },
+              {
+                id: "expense-interactive",
+                type: "interactive",
+                title: "Quick Category Challenge",
+                content: "Look at your last 5 purchases (check your phone's payment apps). For each one, ask:\n\n1. Which category does this fit?\n2. Did I plan this purchase?\n3. Did it bring me joy or value?\n4. Would I buy it again?\n\nThis quick exercise reveals your spending patterns instantly. Most people discover they have 2-3 'autopilot' expenses they don't even enjoy anymore."
+              },
+              {
+                id: "expense-tip",
+                type: "tip",
+                title: "The 24-Hour Rule for Wants",
+                content: "Before buying anything in the 'Wants' category over $50, wait 24 hours. Put the item in your online cart but don't buy it.\n\nReturn the next day and ask: 'Do I still want this? Do I have space for it? Does it align with my goals?'\n\nThis simple pause prevents 70% of impulse purchases. Your future self will thank you!"
               }
-            ],
-            calculator: {
-              type: "expense",
-              title: "Monthly Expense Calculator",
-              description: "Track your fixed and variable expenses",
-              fields: [
-                { id: "housing", label: "Housing (Rent/Mortgage)", type: "number", placeholder: "1400", required: true },
-                { id: "utilities", label: "Utilities", type: "number", placeholder: "150", required: true },
-                { id: "phone", label: "Phone Plan", type: "number", placeholder: "85", required: true },
-                { id: "insurance", label: "Insurance", type: "number", placeholder: "180", required: true },
-                { id: "groceries", label: "Groceries", type: "number", placeholder: "400", required: true },
-                { id: "transportation", label: "Transportation", type: "number", placeholder: "300", required: true },
-                { id: "entertainment", label: "Entertainment", type: "number", placeholder: "200", required: false },
-                { id: "dining", label: "Dining Out", type: "number", placeholder: "250", required: false }
-              ]
-            }
+            ]
           },
           {
-            id: "cashflow-analysis",
+            id: "cash-flow-basics",
             title: "Cash Flow Analysis",
             icon: "📊",
             content: [
               {
-                id: "cash-flow-game",
-                type: "example",
-                title: "🎮 The Cash Flow Game",
-                content: "Let's play with real numbers! Follow Sam's monthly journey:\n\n💰 INCOME: $3,800\n📊 FIXED EXPENSES: $2,100\n📈 VARIABLE EXPENSES: $1,200\n\n🧮 THE MATH:\n$3,800 (income) - $3,300 (total expenses) = +$500 (positive cash flow)\n\n🎉 RESULT: Sam saves $500 monthly! That's $6,000 per year toward goals!"
+                id: "cashflow-intro",
+                type: "text",
+                title: "Cash Flow: The Secret to Never Being Broke",
+                content: "Cash flow isn't about how much you make - it's about WHEN money comes in versus when it goes out. Master this, and you'll never stress about money timing again.\n\nCash flow timing matters because:\n• Rent is due on the 1st, but you get paid on the 15th\n• Annual insurance payments hit all at once\n• Holiday spending clusters in December\n• Car repairs never happen at convenient times\n\nGood cash flow management means having money available when you need it, not just overall."
               },
               {
-                id: "danger-signs",
+                id: "cashflow-example",
+                type: "example",
+                title: "Mike's Cash Flow Nightmare (And Solution)",
+                content: "Mike earns $4,000/month but was always broke by month-end. His problem? Terrible cash flow timing:\n\n**Old Pattern:**\n• Gets paid on 15th and 30th ($2,000 each)\n• Rent due 1st ($1,200)\n• Always short for first 2 weeks\n\n**Solution:**\n• Opened a 'Bill Pay' savings account\n• Automatically saves $1,500 each payday\n• Bills get paid from this account\n• No more cash flow stress!\n\nNow Mike's money flows smoothly all month long."
+              },
+              {
+                id: "cashflow-tip",
+                type: "tip",
+                title: "The Cash Flow Calendar Trick",
+                content: "Create a simple calendar showing:\n\n📅 When money comes IN (paychecks, freelance payments)\n💸 When money goes OUT (rent, bills, subscriptions)\n\nLook for gaps where expenses exceed incoming money. These are your 'danger zones' where you need extra cash available.\n\nPro tip: If you get paid twice monthly, save half your rent from the first paycheck. This eliminates the biggest cash flow challenge most people face!"
+              },
+              {
+                id: "cashflow-warning",
                 type: "warning",
-                title: "⚠️ Red Flag Warning Signs",
-                content: "DANGER ZONE: If your expenses exceed income, you're in negative cash flow. Warning signs: Using credit cards for basic needs, borrowing money monthly, avoiding bank statements, stress about money every week. If this sounds familiar, don't panic - this course will help you fix it!"
+                title: "The Annual Expense Ambush",
+                content: "Annual expenses destroy budgets because they feel like emergencies but aren't. Common annual ambushes:\n\n• Car registration and insurance renewals\n• Holiday and birthday gifts\n• Tax preparation fees\n• Amazon Prime renewals\n• Vacation costs\n\nSolution: Calculate your total annual expenses, divide by 12, and save that amount monthly in a separate 'Annual Expenses' account. When these 'surprise' bills hit, you're ready!"
               }
-            ],
-            calculator: {
-              type: "cashflow",
-              title: "Cash Flow Calculator",
-              description: "Calculate your monthly cash flow and see if you're saving or overspending",
-              fields: [
-                { id: "total_income", label: "Total Monthly Income", type: "number", placeholder: "4000", required: true },
-                { id: "fixed_expenses", label: "Total Fixed Expenses", type: "number", placeholder: "2100", required: true },
-                { id: "variable_expenses", label: "Total Variable Expenses", type: "number", placeholder: "1200", required: true }
-              ]
-            }
+            ]
           }
         ],
         exercises: [
           {
-            id: "income-detective-exercise",
+            id: "ex-1-income",
             type: "multiple-choice",
-            question: "Sarah discovers she has more income sources than she thought! Besides her $4,000 monthly salary, she found $25 in cashback rewards, $50 in dividends, and $200 from her spare room rental. What's her TOTAL monthly income?",
-            options: ["$4,000", "$4,075", "$4,275", "$4,325"],
-            correctAnswer: "$4,275",
-            explanation: "Total income = $4,000 (salary) + $25 (cashback) + $50 (dividends) + $200 (rental) = $4,275. Every dollar counts!",
-            feedback: {
-              correct: "Perfect! You tracked ALL income sources like a financial detective!",
-              incorrect: "Don't forget to include ALL income sources - salary, cashback, dividends, and rental income."
-            },
-            points: 15
-          },
-          {
-            id: "expense-categorization-challenge",
-            type: "multiple-choice",
-            question: "Which expense would give you the MOST control to reduce if you needed to save money quickly?",
-            options: ["Rent ($1,200/month)", "Student loan payment ($250/month)", "Dining out ($300/month)", "Car insurance ($120/month)"],
-            correctAnswer: "Dining out ($300/month)",
-            explanation: "Dining out is a variable expense you control daily. Fixed expenses like rent, loans, and insurance are harder to change quickly.",
-            feedback: {
-              correct: "Smart thinking! Variable expenses give you immediate control over your spending.",
-              incorrect: "Look for the variable expense - something you can control day-to-day, not fixed contracts."
-            },
-            points: 15
-          },
-          {
-            id: "cash-flow-scenario",
-            type: "multiple-choice",
-            question: "Jordan has $3,800 income, $2,100 fixed expenses, and $1,200 variable expenses. They want to save $6,000 for a vacation in 12 months. What should they do?",
+            question: "Sarah discovers she has $595 more monthly income than she thought. What's the smartest first move with this extra money?",
             options: [
-              "Impossible - they're already at $0 cash flow",
-              "Cut variable expenses by $100/month to save $500/month",
-              "Get a second job - their current budget is maxed out",
-              "Use credit cards for the vacation"
+              "Increase her fun spending by $595",
+              "Save $400 and increase fun spending by $195", 
+              "Put it all toward debt payoff immediately",
+              "Ignore it since it's not guaranteed"
             ],
-            correctAnswer: "Cut variable expenses by $100/month to save $500/month",
-            explanation: "Current cash flow: $3,800 - $3,300 = $500/month. They need $6,000 ÷ 12 = $500/month. They're already there! Or cut $100 in variables for extra buffer.",
+            correctAnswer: "Save $400 and increase fun spending by $195",
+            explanation: "A balanced approach works best. Save most of the 'found' money (it builds good habits) but allow some lifestyle improvement to stay motivated.",
             feedback: {
-              correct: "Excellent math! You calculated their current cash flow and vacation savings goal perfectly.",
-              incorrect: "Calculate their current cash flow first: Income - Total Expenses. Then compare to their savings goal."
-            },
-            points: 20
-          },
-          {
-            id: "money-flow-mastery",
-            type: "multiple-choice",
-            question: "Using the 'Money Flow' concept from the lesson, which strategy would have the BIGGEST impact on building wealth?",
-            options: [
-              "Focus only on increasing income (bigger inflow)",
-              "Focus only on cutting expenses (smaller outflow)",
-              "Increase income by $200 AND cut expenses by $200",
-              "Wait until you earn more to start managing money flow"
-            ],
-            correctAnswer: "Increase income by $200 AND cut expenses by $200",
-            explanation: "The combined approach gives you $400 more monthly cash flow ($4,800/year)! Managing both sides of the money flow equation maximizes wealth building.",
-            feedback: {
-              correct: "Brilliant! You understand that managing both inflow AND outflow creates the biggest wealth-building impact.",
-              incorrect: "Think about the total impact on cash flow. What happens when you improve BOTH sides of the money flow equation?"
-            },
-            points: 20
-          },
-          {
-            id: "financial-awareness-challenge",
-            type: "multiple-choice",
-            question: "Based on the lesson's 'surprise spending' examples, what's the MOST effective first step to take control of your finances?",
-            options: [
-              "Immediately cut all fun spending",
-              "Track every expense for 7 days to find surprise spending",
-              "Set up a complicated budget with 20 categories",
-              "Focus only on big expenses like rent"
-            ],
-            correctAnswer: "Track every expense for 7 days to find surprise spending",
-            explanation: "Awareness comes before control! Like Jordan's $539 in surprise spending, you can't manage what you don't measure. Track first, then optimize.",
-            feedback: {
-              correct: "Perfect! You understand that financial awareness is the foundation of financial control.",
-              incorrect: "Remember the lesson about becoming an 'expense detective' - you need to see where money goes before you can control it."
-            },
-            points: 15
-          }
-        ]
-      },
-      {
-        id: "budgeting-2",
-        moduleId: "budgeting-basics",
-        levelNumber: 2,
-        title: "Creating Your First Budget",
-        description: "Build a practical budget that actually works",
-        xpReward: 20,
-        learningObjectives: [
-          "Learn the 50/30/20 budgeting rule",
-          "Create budget categories that work for you",
-          "Set realistic spending limits"
-        ],
-        content: [
-          {
-            id: "budget-revolution",
-            type: "text",
-            title: "🚀 The Budget Revolution Starts Here!",
-            content: "Forget everything you think you know about budgeting. We're not talking about restricting your life - we're talking about DESIGNING your life! A budget is your financial blueprint that transforms chaos into control, stress into confidence, and dreams into achievable goals."
-          },
-          {
-            id: "budget-myths",
-            type: "warning",
-            title: "💥 Budget Myths That Keep People Broke",
-            content: "MYTH 1: 'Budgets are restrictive' → TRUTH: Budgets give you permission to spend guilt-free!\nMYTH 2: 'Budgets are complicated' → TRUTH: Start with 3 simple categories!\nMYTH 3: 'I don't make enough to budget' → TRUTH: The less you make, the MORE you need a budget!\nMYTH 4: 'Budgets are boring' → TRUTH: Budgets are your ticket to freedom!"
-          },
-          {
-            id: "50-30-20-masterclass",
-            type: "visual",
-            title: "🎯 The 50/30/20 Rule: Your Financial Foundation",
-            content: "This isn't just a rule - it's a lifestyle framework used by millions of successful people worldwide. Here's how to make it work for YOU:",
-            visual: {
-              type: "chart",
-              data: {
-                needs_50: {
-                  percentage: 50,
-                  description: "NEEDS (Survival)",
-                  examples: ["🏠 Housing", "🍎 Groceries", "⚡ Utilities", "🚗 Transportation", "📱 Phone"],
-                  rule: "If you can't live without it for 30 days, it's a need"
-                },
-                wants_30: {
-                  percentage: 30,
-                  description: "WANTS (Lifestyle)",
-                  examples: ["🍕 Dining Out", "🎬 Entertainment", "☕ Coffee Shops", "👕 Shopping", "🎮 Hobbies"],
-                  rule: "Everything that makes life enjoyable but isn't essential"
-                },
-                savings_20: {
-                  percentage: 20,
-                  description: "SAVINGS & DEBT (Future You)",
-                  examples: ["💰 Emergency Fund", "🏖️ Vacation Fund", "💳 Debt Payments", "📈 Investments", "🎯 Goals"],
-                  rule: "Pay your future self first - this is non-negotiable!"
-                }
-              }
-            }
-          },
-          {
-            id: "budget-builder-interactive",
-            type: "example",
-            title: "🛠️ Interactive Budget Builder",
-            content: "Let's build Maya's budget step-by-step!\n\n💼 MAYA'S SITUATION:\n• Monthly Income: $4,500\n• Age: 26, Marketing Manager\n• Goal: Save for apartment down payment\n\n📊 APPLYING 50/30/20:\n🏠 NEEDS (50% = $2,250):\n• Rent: $1,400\n• Groceries: $350\n• Utilities: $150\n• Phone: $75\n• Car Insurance: $125\n• Gas: $150\n\n🎯 WANTS (30% = $1,350):\n• Restaurants: $400\n• Entertainment: $300\n• Gym: $50\n• Coffee/Treats: $200\n• Shopping: $250\n• Miscellaneous: $150\n\n💰 SAVINGS (20% = $900):\n• Emergency Fund: $300\n• Down Payment: $400\n• Retirement: $200\n\n✨ RESULT: Balanced life + $4,800/year toward apartment!"
-          },
-          {
-            id: "customization-guide",
-            type: "step",
-            title: "🎨 Customize Your Budget Like a Pro",
-            content: "The 50/30/20 rule is your starting point, not your prison! Here's how to adapt it:\n\n📈 HIGH EARNERS: Try 50/20/30 (more savings)\n🏠 HIGH RENT AREAS: Try 60/25/15 (temporarily)\n💸 DEBT PAYOFF MODE: Try 50/20/30 (extra to debt)\n🎓 STUDENTS: Try 70/20/10 (survival mode)\n\n🔑 THE GOLDEN RULES:\n1. Needs should never exceed 60%\n2. Always save SOMETHING (even $25)\n3. Track for 3 months before major changes\n4. Adjust monthly based on reality"
-          },
-          {
-            id: "budgeting-tools",
-            type: "tip",
-            title: "🔧 Modern Budgeting Tools (Choose Your Weapon!)",
-            content: "📱 SMARTPHONE APPS:\n• Mint (Free, automatic tracking)\n• YNAB (You Need A Budget - advanced)\n• EveryDollar (Dave Ramsey's app)\n\n📊 SPREADSHEETS:\n• Google Sheets (free templates)\n• Excel budget templates\n• Custom tracking sheets\n\n📝 OLD SCHOOL:\n• Pen and paper (surprisingly effective!)\n• Envelope method with cash\n• Bullet journal budgeting\n\n🎯 PRO TIP: The best budget is the one you'll actually use!"
-          },
-          {
-            id: "budget-psychology",
-            type: "text",
-            title: "🧠 The Psychology of Successful Budgeting",
-            content: "Your budget isn't just about math - it's about mindset! Successful budgeters think differently. They see a budget as permission to spend, not restriction. They automate what they can, and review what they must. They're not perfect, but they're consistent. Most importantly, they understand that budgeting is a skill that improves with practice."
-          },
-          {
-            id: "first-budget-challenge",
-            type: "example",
-            title: "🏁 Your First Budget Challenge",
-            content: "Ready to create your first budget? Here's your action plan:\n\n📋 WEEK 1: Track everything you spend (use your phone's notes app)\n📊 WEEK 2: Categorize last month's expenses into needs/wants\n🎯 WEEK 3: Apply 50/30/20 to your actual income\n🔄 WEEK 4: Adjust based on reality and set up tracking system\n\n🏆 REWARD: Once you complete this challenge, you'll have a working budget that fits YOUR life!"
-          },
-          {
-            id: "common-mistakes",
-            type: "warning",
-            title: "⚠️ Budget Killers (Avoid These Traps!)",
-            content: "🚫 PERFECTIONISM: Expecting to nail it immediately\n🚫 COMPLEXITY: Making 47 categories for everything\n🚫 INFLEXIBILITY: Never adjusting when life changes\n🚫 GUILT: Beating yourself up for overspending\n🚫 COMPARISON: Using someone else's budget percentages\n\n✅ INSTEAD: Start simple, be flexible, adjust monthly, celebrate progress!"
-          }
-        ],
-        exercises: [
-          {
-            id: "budget-rule-exercise",
-            type: "multiple-choice",
-            question: "In the 50/30/20 rule, what percentage goes to wants?",
-            options: ["50%", "30%", "20%", "70%"],
-            correctAnswer: "30%",
-            explanation: "The 50/30/20 rule allocates 30% of your income to wants (entertainment, dining out, hobbies).",
-            feedback: {
-              correct: "Right! 30% goes to wants - the fun stuff that makes life enjoyable.",
-              incorrect: "Remember: 50% needs, 30% wants, 20% savings and debt payment."
+              correct: "Exactly! The 70/30 split (save most, enjoy some) creates sustainable financial habits.",
+              incorrect: "Not quite. The best approach balances saving with enjoyment to maintain motivation."
             },
             points: 10
           },
           {
-            id: "budget-category-exercise",
-            type: "multiple-choice",
-            question: "Which category does 'rent' belong to in the 50/30/20 rule?",
-            options: ["Wants (30%)", "Needs (50%)", "Savings (20%)", "None of these"],
-            correctAnswer: "Needs (50%)",
-            explanation: "Rent is a necessity for shelter, so it goes in the Needs category (50%).",
+            id: "ex-2-categories",
+            type: "matching",
+            question: "Match each expense to the correct category in our 4-Category System:",
+            options: ["Rent payment", "Netflix subscription", "Emergency fund contribution", "Grocery shopping"],
+            correctAnswer: ["Fixed Needs", "Wants", "Future You", "Variable Needs"],
+            explanation: "Fixed Needs don't change month to month. Variable Needs fluctuate but are necessary. Wants are optional. Future You is money for your future self.",
             feedback: {
-              correct: "Exactly! Rent is a basic need for housing.",
-              incorrect: "Think about it: is rent something you need or want?"
+              correct: "Perfect! You understand how to categorize expenses for effective budgeting.",
+              incorrect: "Review the 4-Category System. Think about whether each expense is necessary and whether the amount changes monthly."
+            },
+            points: 15
+          },
+          {
+            id: "ex-3-cashflow",
+            type: "true-false", 
+            question: "True or False: If you earn $3,000/month and spend $2,800/month, you have good cash flow management.",
+            correctAnswer: "False",
+            explanation: "Earning more than you spend is great, but cash flow management is about TIMING. You need money available when bills are due, not just a positive monthly balance.",
+            feedback: {
+              correct: "Correct! Cash flow is about timing, not just the total amounts.",
+              incorrect: "Remember: cash flow management is about having money available when you need it, not just earning more than you spend overall."
             },
             points: 10
-          },
-          {
-            id: "budget-calculation-exercise",
-            type: "multiple-choice",
-            question: "If you earn $5,000/month, how much should you save using the 50/30/20 rule?",
-            options: ["$500", "$750", "$1,000", "$1,500"],
-            correctAnswer: "$1,000",
-            explanation: "20% of $5,000 = $1,000 should go to savings and debt payment.",
-            feedback: {
-              correct: "Perfect! $1,000 is 20% of $5,000 for savings.",
-              incorrect: "Calculate 20% of $5,000. What's $5,000 × 0.20?"
-            },
-            points: 15
-          }
-        ]
-      },
-      {
-        id: "budgeting-3",
-        moduleId: "budgeting-basics",
-        levelNumber: 3,
-        title: "Budget Optimization Strategies",
-        description: "Fine-tune your budget for maximum effectiveness",
-        xpReward: 25,
-        learningObjectives: [
-          "Identify areas to cut expenses",
-          "Prioritize spending based on values",
-          "Adjust budget when life changes"
-        ],
-        content: [
-          {
-            id: "optimization-mindset",
-            type: "text",
-            title: "🎯 Welcome to Budget Mastery Level!",
-            content: "You've mastered the basics, now it's time to become a budget optimization ninja! This isn't about cutting everything you enjoy - it's about getting MAXIMUM value from every dollar while still living the life you want. You're about to learn the advanced strategies that separate budget masters from budget beginners."
-          },
-          {
-            id: "expense-detective",
-            type: "example",
-            title: "🕵️ Become an Expense Detective",
-            content: "Time to investigate where your money REALLY goes! Meet Jordan's shocking discovery:\n\n📊 JORDAN'S MONTHLY INVESTIGATION:\n• Coffee shops: $127 (thought it was $50)\n• Subscription services: $89 (forgot half of them)\n• Impulse Amazon purchases: $156\n• Convenience store snacks: $73\n• Rideshare instead of walking: $94\n\n💰 TOTAL SURPRISE SPENDING: $539/month = $6,468/year!\n\nThat's a European vacation Jordan didn't know they were missing!"
-          },
-          {
-            id: "audit-framework",
-            type: "step",
-            title: "🔍 The 7-Day Money Audit Challenge",
-            content: "Transform into a financial detective with this systematic approach:\n\n📱 DAY 1-3: Track EVERYTHING\n• Use your phone to photograph every receipt\n• Note every digital transaction immediately\n• Include cash, cards, apps, subscriptions\n\n📊 DAY 4-5: Categorize & Analyze\n• Group expenses by type (coffee, subscriptions, etc.)\n• Calculate weekly totals for each category\n• Multiply by 4.3 to get monthly estimates\n\n🎯 DAY 6-7: Identify Patterns\n• When do you spend most? (stress, boredom, celebration?)\n• What triggers impulse purchases?\n• Which expenses surprised you most?\n\n🏆 RESULT: Complete money awareness in one week!"
-          },
-          {
-            id: "cutting-strategies",
-            type: "visual",
-            title: "⚡ Smart Money-Saving Strategies",
-            content: "Choose your optimization weapons based on your lifestyle:",
-            visual: {
-              type: "comparison",
-              data: {
-                easy_wins: [
-                  "🔍 Subscription audit (save $50-200/month)",
-                  "📞 Negotiate bills (save $30-100/month)",
-                  "🍳 Cook 2 extra meals at home (save $80/month)",
-                  "☕ Make coffee at home 3 days/week (save $60/month)",
-                  "🚶 Walk/bike short trips (save $40/month)"
-                ],
-                lifestyle_changes: [
-                  "🏠 House-sit for free accommodation",
-                  "🚗 Car-share instead of owning",
-                  "📚 Library for books/movies/events",
-                  "🎯 Buy generic brands (save 20-40%)",
-                  "🛒 Shop with lists (avoid impulse buys)"
-                ],
-                advanced_moves: [
-                  "💳 Credit card rewards optimization",
-                  "🏦 High-yield savings accounts",
-                  "📱 Cashback apps and browser extensions",
-                  "🎟️ Employee discounts and perks",
-                  "💰 Side hustle for extra income"
-                ]
-              }
-            }
-          },
-          {
-            id: "value-based-spending",
-            type: "tip",
-            title: "💎 Value-Based Spending: The Secret Sauce",
-            content: "Stop cutting randomly! Align spending with your core values:\n\n🎯 THE VALUE FILTER:\n1. List your top 5 life values (family, travel, health, etc.)\n2. Review each expense: 'Does this support my values?'\n3. CUT expenses that don't align\n4. INCREASE spending on value-aligned items\n\n✨ EXAMPLE: Love travel but buying daily lattes?\n• Cut lattes ($150/month) → Travel fund ($1,800/year)\n• Result: European trip funded by coffee shop redirected spending!"
-          },
-          {
-            id: "negotiation-masterclass",
-            type: "example",
-            title: "💪 Bill Negotiation Masterclass",
-            content: "Transform from bill accepter to bill negotiator!\n\n📞 THE NEGOTIATION SCRIPT:\n1. Research competitor prices first\n2. Call during weekday business hours\n3. Be polite but persistent\n4. Ask: 'What's the best rate you can offer?'\n5. Mention you're considering switching\n6. Ask for supervisor if needed\n\n🏆 SUCCESS STORIES:\n• Phone bill: $85 → $45 (saved $480/year)\n• Internet: $70 → $45 (saved $300/year)\n• Insurance: $150 → $110 (saved $480/year)\n• Credit card rate: 18% → 12% (saved hundreds)\n\n💡 PRO TIP: Call annually - companies offer new customer rates to retain you!"
-          },
-          {
-            id: "automation-optimization",
-            type: "step",
-            title: "🤖 Automate Your Budget Optimization",
-            content: "Set up systems that save money while you sleep:\n\n💰 AUTOMATIC SAVINGS INCREASES:\n• Auto-transfer raises (save 50% of any pay increase)\n• Round-up apps (save spare change automatically)\n• Weekly micro-transfers ($25 every Friday)\n\n📱 MONEY-SAVING APPS:\n• Honey/Capital One Shopping (coupon automation)\n• Rakuten (cashback on purchases)\n• Trim (cancels forgotten subscriptions)\n• Mint/YNAB (spending alerts)\n\n🔄 MONTHLY OPTIMIZATION ROUTINE:\n• Review last month's spending (15 minutes)\n• Adjust next month's budget (10 minutes)\n• Check for new bills to negotiate (5 minutes)\n• Celebrate wins and plan improvements (5 minutes)"
-          },
-          {
-            id: "lifestyle-inflation",
-            type: "warning",
-            title: "⚠️ Beware the Lifestyle Inflation Trap!",
-            content: "The #1 budget killer: spending more just because you earn more!\n\n🚨 WARNING SIGNS:\n• Got a raise? Immediately upgraded your lifestyle\n• Income increased but savings stayed the same\n• 'I deserve it' becomes your spending motto\n• Expenses magically match income every month\n\n✅ INFLATION DEFENSE STRATEGIES:\n• Save 50% of every raise before lifestyle changes\n• Wait 6 months before making major upgrades\n• Calculate hourly cost of purchases (that $200 dinner = 5 hours of work?)\n• Practice gratitude for what you already have"
-          },
-          {
-            id: "budget-mastery-challenge",
-            type: "example",
-            title: "🏆 30-Day Budget Mastery Challenge",
-            content: "Ready to become a budget optimization expert?\n\n📅 WEEK 1: Detective Work\n• Complete 7-day money audit\n• Identify top 3 spending surprises\n• Research one bill negotiation opportunity\n\n📅 WEEK 2: Quick Wins\n• Cancel one unused subscription\n• Cook 3 extra meals at home\n• Use cashback app for all purchases\n\n📅 WEEK 3: Value Alignment\n• Define your top 5 life values\n• Redirect one 'non-value' expense to savings\n• Automate one new savings transfer\n\n📅 WEEK 4: Optimization\n• Negotiate one monthly bill\n• Set up automatic budget review system\n• Plan next month's value-based spending\n\n🎁 REWARD: Average participants save $200-400/month!"
-          },
-          {
-            id: "advanced-tips",
-            type: "tip",
-            title: "🎭 Pro Budget Hacks (Insider Secrets)",
-            content: "Ready for the advanced course? Here are insider secrets:\n\n🎯 THE 24-HOUR RULE: Sleep on purchases over $50\n🛒 GROCERY GAME: Shop after meals, use lists, stick to perimeter\n💳 CREDIT CARD CYCLING: Use rewards cards, pay in full monthly\n📊 THE 1% RULE: Improve budget by 1% monthly (compound effect!)\n🎉 CELEBRATION FUND: Budget for fun so you don't feel deprived\n📱 PRICE COMPARISON: Check 3 sources before any purchase over $100\n\n🔮 MINDSET SHIFT: Think in annual costs ($5/day = $1,825/year!)"
-          }
-        ],
-        exercises: [
-          {
-            id: "expense-cutting-exercise",
-            type: "multiple-choice",
-            question: "What's the best first step to reduce expenses?",
-            options: ["Cut all entertainment", "Cancel unused subscriptions", "Stop eating out completely", "Quit your gym membership"],
-            correctAnswer: "Cancel unused subscriptions",
-            explanation: "Canceling unused subscriptions is low-impact but saves money immediately. You won't miss services you're not using!",
-            feedback: {
-              correct: "Smart choice! Easy wins first - cancel what you don't use.",
-              incorrect: "Start with easy cuts that don't affect your quality of life."
-            },
-            points: 10
-          },
-          {
-            id: "coffee-calculation",
-            type: "multiple-choice",
-            question: "If you buy a $5 coffee every workday, how much do you spend yearly?",
-            options: ["$600", "$1,200", "$1,300", "$1,800"],
-            correctAnswer: "$1,300",
-            explanation: "$5 × 5 days × 52 weeks = $1,300 per year. That's a significant amount that could go toward savings!",
-            feedback: {
-              correct: "Exactly! Small daily expenses add up to big yearly costs.",
-              incorrect: "Calculate: $5 per day × 5 days per week × 52 weeks per year."
-            },
-            points: 15
-          },
-          {
-            id: "budget-adjustment-exercise",
-            type: "multiple-choice",
-            question: "When should you update your budget?",
-            options: ["Never, once it's set", "Only when you get a new job", "Monthly or when major life changes occur", "Only at the end of the year"],
-            correctAnswer: "Monthly or when major life changes occur",
-            explanation: "Regular budget reviews help you stay on track. Update when your income, expenses, or priorities change.",
-            feedback: {
-              correct: "Perfect! Regular updates keep your budget realistic and effective.",
-              incorrect: "Budgets need regular attention to stay relevant to your current situation."
-            },
-            points: 15
           }
         ]
       }
     ]
   },
-  {
-    id: "smart-saving",
-    title: "Smart Saving Strategies",
-    description: "Build wealth through strategic saving techniques",
-    icon: "PiggyBank",
-    totalLevels: 3,
-    estimatedTime: "30 minutes",
-    levels: [
-      {
-        id: "saving-1",
-        moduleId: "smart-saving",
-        levelNumber: 1,
-        title: "Emergency Fund Basics",
-        description: "Create your financial safety net",
-        xpReward: 15,
-        learningObjectives: [
-          "Understand why emergency funds are crucial",
-          "Calculate your emergency fund target",
-          "Learn where to keep emergency savings"
-        ],
-        content: [
-          {
-            id: "emergency-fund-definition",
-            type: "text",
-            title: "What is an Emergency Fund?",
-            content: "An emergency fund is money set aside for unexpected expenses: job loss, medical bills, car repairs, or home maintenance. It's your financial cushion that prevents you from going into debt when life happens."
-          },
-          {
-            id: "emergency-fund-size",
-            type: "visual",
-            title: "How Much Do You Need?",
-            content: "Start with $1,000 for beginners. Build to 3-6 months of expenses. High earners or single-income families should aim for 6-12 months.",
-            visual: {
-              type: "chart",
-              data: {
-                beginner: 1000,
-                stable: 15000,
-                conservative: 30000
-              }
-            }
-          },
-          {
-            id: "emergency-example",
-            type: "example",
-            title: "Emergency Fund in Action",
-            content: "Maria's car needs $800 in repairs. Without an emergency fund, she'd put it on a credit card at 18% interest. With her emergency fund, she pays cash and avoids debt. That's financial peace of mind!"
-          },
-          {
-            id: "where-to-save",
-            type: "tip",
-            title: "Where to Keep Emergency Money",
-            content: "Keep emergency funds in a high-yield savings account. It should be easily accessible but separate from your checking account. Don't invest emergency funds - you need stability, not growth."
-          }
-        ],
-        exercises: [
-          {
-            id: "emergency-fund-purpose",
-            type: "multiple-choice",
-            question: "What is the main purpose of an emergency fund?",
-            options: ["To invest in stocks", "To cover unexpected expenses", "To buy luxury items", "To pay monthly bills"],
-            correctAnswer: "To cover unexpected expenses",
-            explanation: "Emergency funds are specifically for unexpected costs like medical bills, car repairs, or job loss.",
-            feedback: {
-              correct: "Exactly! Emergency funds are your safety net for life's surprises.",
-              incorrect: "Think about the word 'emergency' - what kind of expenses would that cover?"
-            },
-            points: 10
-          },
-          {
-            id: "emergency-fund-size-exercise",
-            type: "multiple-choice",
-            question: "If your monthly expenses are $3,000, what's a good emergency fund target?",
-            options: ["$3,000", "$6,000", "$9,000-$18,000", "$50,000"],
-            correctAnswer: "$9,000-$18,000",
-            explanation: "3-6 months of expenses means $9,000-$18,000 for someone with $3,000 monthly expenses.",
-            feedback: {
-              correct: "Perfect! 3-6 months of expenses provides good security.",
-              incorrect: "Calculate 3-6 months worth of your monthly expenses."
-            },
-            points: 15
-          },
-          {
-            id: "emergency-fund-location",
-            type: "multiple-choice",
-            question: "Where should you keep your emergency fund?",
-            options: ["Stock market", "High-yield savings account", "Under your mattress", "Cryptocurrency"],
-            correctAnswer: "High-yield savings account",
-            explanation: "High-yield savings accounts offer easy access, FDIC protection, and some interest growth - perfect for emergency funds.",
-            feedback: {
-              correct: "Great choice! Safe, accessible, and earns some interest.",
-              incorrect: "Emergency funds need to be safe and easily accessible when needed."
-            },
-            points: 10
-          }
-        ]
-      },
-      {
-        id: "saving-2",
-        moduleId: "smart-saving",
-        levelNumber: 2,
-        title: "Setting and Achieving Savings Goals",
-        description: "Turn dreams into achievable financial targets",
-        xpReward: 20,
-        learningObjectives: [
-          "Set SMART savings goals",
-          "Calculate how much to save monthly",
-          "Choose the right savings account type"
-        ],
-        content: [
-          {
-            id: "smart-goals",
-            type: "text",
-            title: "SMART Savings Goals",
-            content: "Make goals Specific, Measurable, Achievable, Relevant, and Time-bound. Instead of 'save money,' try 'save $5,000 for a vacation to Japan by December 2025.'"
-          },
-          {
-            id: "goal-examples",
-            type: "example",
-            title: "Real Savings Goals",
-            content: "Short-term (1 year): $2,400 for new laptop, $3,000 for vacation. Medium-term (2-5 years): $20,000 for car down payment, $15,000 for wedding. Long-term (5+ years): $50,000 for house down payment, $500,000 for retirement."
-          },
-          {
-            id: "savings-calculation",
-            type: "step",
-            title: "How Much to Save Monthly",
-            content: "1. Set your goal amount 2. Decide your timeline 3. Divide goal by months 4. Example: $6,000 vacation in 12 months = $500/month 5. Add 10% buffer for unexpected delays"
-          },
-          {
-            id: "account-types",
-            type: "visual",
-            title: "Savings Account Types",
-            content: "Regular savings (0.01% APY), High-yield savings (4-5% APY), Money market (3-4% APY), CDs (4-5% APY, locked up)",
-            visual: {
-              type: "comparison",
-              data: {
-                regular: "0.01% APY",
-                highYield: "4-5% APY", 
-                moneyMarket: "3-4% APY",
-                cd: "4-5% APY (locked)"
-              }
-            }
-          }
-        ],
-        exercises: [
-          {
-            id: "smart-goal-exercise",
-            type: "multiple-choice",
-            question: "Which is a SMART savings goal?",
-            options: ["Save money", "Save more this year", "Save $10,000 for emergency fund by December 2025", "Save a lot for retirement"],
-            correctAnswer: "Save $10,000 for emergency fund by December 2025",
-            explanation: "This goal is Specific ($10,000), Measurable (can track progress), Achievable (reasonable amount), Relevant (emergency fund), and Time-bound (by December 2025).",
-            feedback: {
-              correct: "Excellent! This goal has all the SMART criteria.",
-              incorrect: "Look for the goal that's specific, measurable, and has a deadline."
-            },
-            points: 15
-          },
-          {
-            id: "monthly-savings-calculation",
-            type: "multiple-choice",
-            question: "To save $6,000 in 18 months, how much should you save monthly?",
-            options: ["$300", "$333", "$350", "$400"],
-            correctAnswer: "$333",
-            explanation: "$6,000 ÷ 18 months = $333 per month. Always round up to ensure you meet your goal!",
-            feedback: {
-              correct: "Perfect calculation! $333 per month gets you to your goal.",
-              incorrect: "Divide your total goal by the number of months: $6,000 ÷ 18."
-            },
-            points: 15
-          },
-          {
-            id: "account-type-exercise", 
-            type: "multiple-choice",
-            question: "For a vacation fund you'll use in 2 years, what's the best account type?",
-            options: ["Regular savings", "High-yield savings", "Stock market", "Checking account"],
-            correctAnswer: "High-yield savings",
-            explanation: "High-yield savings accounts offer better interest than regular savings while keeping your money safe and accessible for your 2-year timeline.",
-            feedback: {
-              correct: "Smart choice! High-yield savings balances growth with safety.",
-              incorrect: "Consider what offers good interest while keeping your money safe and accessible."
-            },
-            points: 10
-          }
-        ]
-      },
-      {
-        id: "saving-3",
-        moduleId: "smart-saving",
-        levelNumber: 3,
-        title: "Automating Your Savings",
-        description: "Make saving effortless with automation",
-        xpReward: 25,
-        learningObjectives: [
-          "Set up automatic transfers",
-          "Use the pay yourself first strategy",
-          "Optimize savings with high-yield accounts"
-        ],
-        content: [
-          {
-            id: "automation-benefits",
-            type: "text",
-            title: "Why Automate Savings?",
-            content: "Automation removes the decision and temptation. When savings happen automatically, you can't forget or spend the money elsewhere. It's the #1 strategy successful savers use."
-          },
-          {
-            id: "pay-yourself-first",
-            type: "tip",
-            title: "Pay Yourself First",
-            content: "Set up automatic transfers right after payday, before you have a chance to spend the money. Treat savings like a non-negotiable bill you must pay to yourself."
-          },
-          {
-            id: "automation-setup",
-            type: "step",
-            title: "Setting Up Automatic Savings",
-            content: "1. Open a separate high-yield savings account 2. Calculate your monthly savings amount 3. Set up automatic transfer for payday 4. Start small if needed - even $25/month builds the habit 5. Increase the amount whenever you get a raise"
-          },
-          {
-            id: "round-up-apps",
-            type: "example",
-            title: "Round-Up Savings Apps",
-            content: "Apps like Acorns or Qapital round up your purchases and save the spare change. Buy coffee for $4.35? They save $0.65. Small amounts add up - many people save $50-200/month this way!"
-          }
-        ],
-        exercises: [
-          {
-            id: "automation-timing",
-            type: "multiple-choice",
-            question: "When is the best time to set up automatic savings transfers?",
-            options: ["End of the month", "Right after payday", "Middle of the month", "Whenever you remember"],
-            correctAnswer: "Right after payday",
-            explanation: "Right after payday ensures the money is saved before you have a chance to spend it elsewhere. Pay yourself first!",
-            feedback: {
-              correct: "Exactly! Pay yourself first, right when the money comes in.",
-              incorrect: "Think about when you're most likely to have money available to save."
-            },
-            points: 10
-          },
-          {
-            id: "round-up-calculation",
-            type: "multiple-choice",
-            question: "If you make 20 purchases per week averaging $0.50 round-ups, how much would you save monthly?",
-            options: ["$20", "$30", "$40", "$50"],
-            correctAnswer: "$40",
-            explanation: "20 purchases × $0.50 round-up × 4 weeks = $40 per month. Round-up savings can really add up!",
-            feedback: {
-              correct: "Great math! Round-up apps can save significant amounts painlessly.",
-              incorrect: "Calculate: 20 purchases × $0.50 × 4 weeks per month."
-            },
-            points: 15
-          },
-          {
-            id: "savings-increase-strategy",
-            type: "multiple-choice",
-            question: "What's the best strategy when you get a raise?",
-            options: ["Spend it all on lifestyle upgrades", "Save 100% of the raise", "Increase savings by 50% of the raise", "Don't change anything"],
-            correctAnswer: "Increase savings by 50% of the raise",
-            explanation: "Saving 50% of raises helps you build wealth while still enjoying some lifestyle improvements. It's a balanced approach to wealth building.",
-            feedback: {
-              correct: "Perfect balance! Build wealth while enjoying some lifestyle improvement.",
-              incorrect: "Consider a strategy that builds wealth while still allowing some enjoyment of increased income."
-            },
-            points: 15
-          }
-        ]
-      }
-    ]
-  },
+  
   {
     id: "debt-management",
     title: "Debt Management",
-    description: "Take control of debt and build a debt-free future",
-    icon: "CreditCard",
-    totalLevels: 3,
-    estimatedTime: "35 minutes",
-    levels: [
-      {
-        id: "debt-1",
-        moduleId: "debt-management",
-        levelNumber: 1,
-        title: "Understanding Different Types of Debt",
-        description: "Learn about good debt vs bad debt",
-        xpReward: 15,
-        learningObjectives: [
-          "Distinguish between good and bad debt",
-          "Understand interest rates and their impact",
-          "Recognize debt warning signs"
-        ],
-        content: [
-          {
-            id: "debt-definition",
-            type: "text",
-            title: "What is Debt?",
-            content: "Debt is money you owe to someone else. It includes credit cards, loans, mortgages, and even money borrowed from family. All debt costs money through interest or opportunity cost."
-          },
-          {
-            id: "good-vs-bad-debt",
-            type: "visual",
-            title: "Good Debt vs Bad Debt",
-            content: "Good debt helps you build wealth or generate income: mortgages, student loans, business loans. Bad debt purchases depreciating assets: credit cards, auto loans, personal loans.",
-            visual: {
-              type: "comparison",
-              data: {
-                good: ["Mortgage (builds equity)", "Student loans (increases earning potential)", "Business loans (generate income)"],
-                bad: ["Credit cards (high interest)", "Auto loans (depreciating asset)", "Personal loans (consumption)"]
-              }
-            }
-          },
-          {
-            id: "interest-impact",
-            type: "example",
-            title: "The Power of Interest Rates",
-            content: "A $5,000 credit card debt at 18% interest takes 47 years to pay off with minimum payments, costing $13,931 total. The same debt at 6% takes 25 years and costs $7,177. Interest rates matter!"
-          },
-          {
-            id: "debt-warning-signs",
-            type: "warning",
-            title: "Debt Warning Signs",
-            content: "Red flags: Only making minimum payments, using credit for basic needs, borrowing to pay other debts, maxed out credit cards, avoiding looking at statements. If any apply, take action now!"
-          }
-        ],
-        exercises: [
-          {
-            id: "good-bad-debt-exercise",
-            type: "multiple-choice",
-            question: "Which of these is typically considered 'good debt'?",
-            options: ["Credit card debt", "Auto loan", "Mortgage", "Personal loan"],
-            correctAnswer: "Mortgage",
-            explanation: "Mortgages are good debt because they help you build equity and wealth through homeownership.",
-            feedback: {
-              correct: "Right! Mortgages help you build equity and wealth over time.",
-              incorrect: "Think about which debt helps you build wealth or assets that appreciate."
-            },
-            points: 10
-          },
-          {
-            id: "interest-rate-exercise",
-            type: "multiple-choice",
-            question: "Why do interest rates matter so much with debt?",
-            options: ["They don't really matter", "Higher rates mean you pay much more over time", "They only affect monthly payments", "Banks set them randomly"],
-            correctAnswer: "Higher rates mean you pay much more over time",
-            explanation: "Higher interest rates dramatically increase the total amount you'll pay over the life of the debt.",
-            feedback: {
-              correct: "Exactly! Interest rates have a huge compound effect over time.",
-              incorrect: "Consider how interest accumulates over months and years of payments."
-            },
-            points: 15
-          },
-          {
-            id: "debt-warning-exercise",
-            type: "multiple-choice",
-            question: "Which is a major debt warning sign?",
-            options: ["Paying off cards monthly", "Having a mortgage", "Only making minimum payments", "Using cash for purchases"],
-            correctAnswer: "Only making minimum payments",
-            explanation: "Only making minimum payments means you're barely covering interest, and the debt will take decades to pay off.",
-            feedback: {
-              correct: "Red flag! Minimum payments keep you in debt for years.",
-              incorrect: "Look for the behavior that keeps you trapped in debt longer."
-            },
-            points: 10
-          }
-        ]
-      },
-      {
-        id: "debt-2",
-        moduleId: "debt-management",
-        levelNumber: 2,
-        title: "Debt Payoff Strategies",
-        description: "Learn proven methods to eliminate debt faster",
-        xpReward: 20,
-        learningObjectives: [
-          "Compare debt snowball vs avalanche methods",
-          "Calculate debt payoff timelines",
-          "Create a debt elimination plan"
-        ],
-        content: [
-          {
-            id: "debt-strategies-intro",
-            type: "text",
-            title: "Two Proven Debt Strategies",
-            content: "The Debt Snowball and Debt Avalanche are both effective. Snowball pays smallest debts first for motivation. Avalanche pays highest interest rates first for maximum savings."
-          },
-          {
-            id: "debt-snowball",
-            type: "step",
-            title: "Debt Snowball Method",
-            content: "1. List all debts smallest to largest 2. Pay minimums on all debts 3. Put extra money toward smallest debt 4. When smallest is paid off, roll that payment to next smallest 5. Repeat until debt-free"
-          },
-          {
-            id: "debt-avalanche",
-            type: "step",
-            title: "Debt Avalanche Method",
-            content: "1. List all debts by interest rate (highest first) 2. Pay minimums on all debts 3. Put extra money toward highest interest debt 4. When paid off, roll payment to next highest rate 5. Saves more money mathematically"
-          },
-          {
-            id: "debt-comparison",
-            type: "example",
-            title: "Snowball vs Avalanche Example",
-            content: "Sarah has: Card A: $500 at 15%, Card B: $2,000 at 22%, Card C: $8,000 at 18%. Snowball: Pay Card A first (motivation). Avalanche: Pay Card B first (saves $140/year in interest). Choose based on your personality!"
-          }
-        ],
-        exercises: [
-          {
-            id: "snowball-method-exercise",
-            type: "multiple-choice",
-            question: "In the debt snowball method, which debt do you pay off first?",
-            options: ["Highest interest rate", "Largest balance", "Smallest balance", "Newest debt"],
-            correctAnswer: "Smallest balance",
-            explanation: "Debt snowball focuses on smallest balance first to build motivation and momentum through quick wins.",
-            feedback: {
-              correct: "Right! Snowball is about motivation through quick wins.",
-              incorrect: "Remember: snowball method prioritizes psychological wins over math."
-            },
-            points: 10
-          },
-          {
-            id: "avalanche-method-exercise",
-            type: "multiple-choice",
-            question: "What's the main advantage of the debt avalanche method?",
-            options: ["Faster psychological wins", "Saves the most money in interest", "Easiest to understand", "Works for everyone"],
-            correctAnswer: "Saves the most money in interest",
-            explanation: "Avalanche method mathematically saves the most money by targeting highest interest rates first.",
-            feedback: {
-              correct: "Exactly! Avalanche is the mathematically optimal approach.",
-              incorrect: "Think about what happens when you eliminate high-interest debt first."
-            },
-            points: 15
-          },
-          {
-            id: "debt-strategy-choice",
-            type: "multiple-choice",
-            question: "Which debt strategy should you choose?",
-            options: ["Always use snowball", "Always use avalanche", "Choose based on your personality and motivation style", "It doesn't matter"],
-            correctAnswer: "Choose based on your personality and motivation style",
-            explanation: "The best strategy is the one you'll stick with. If you need motivation, use snowball. If you're motivated by saving money, use avalanche.",
-            feedback: {
-              correct: "Perfect! The best plan is the one you'll actually follow.",
-              incorrect: "Consider that personal psychology matters as much as math in debt payoff."
-            },
-            points: 15
-          }
-        ]
-      },
-      {
-        id: "debt-3", 
-        moduleId: "debt-management",
-        levelNumber: 3,
-        title: "Avoiding Future Debt Traps",
-        description: "Build habits to stay debt-free long-term",
-        xpReward: 25,
-        learningObjectives: [
-          "Recognize predatory lending practices",
-          "Build emergency funds to avoid debt",
-          "Use credit cards responsibly"
-        ],
-        content: [
-          {
-            id: "predatory-lending",
-            type: "warning",
-            title: "Avoid Predatory Lending",
-            content: "Watch out for: Payday loans (400%+ APR), title loans, rent-to-own stores, and cash advance apps. These trap you in cycles of debt with extremely high costs."
-          },
-          {
-            id: "emergency-fund-debt-prevention",
-            type: "tip",
-            title: "Emergency Funds Prevent Debt",
-            content: "Most debt comes from emergencies without savings. A $1,000 emergency fund prevents most credit card debt. Build it before aggressively paying off debt."
-          },
-          {
-            id: "credit-card-rules",
-            type: "step",
-            title: "Credit Card Best Practices",
-            content: "1. Pay full balance monthly 2. Never spend more than you have in cash 3. Use for rewards/protection, not borrowing 4. Keep utilization under 30% 5. Don't close old cards (hurts credit score)"
-          },
-          {
-            id: "debt-free-mindset",
-            type: "text",
-            title: "Building a Debt-Free Mindset",
-            content: "Think of debt as an emergency, not a tool. Live below your means. If you can't afford it with cash, you can't afford it. Build wealth through saving and investing, not borrowing."
-          }
-        ],
-        exercises: [
-          {
-            id: "predatory-lending-exercise",
-            type: "multiple-choice",
-            question: "Which is a sign of predatory lending?",
-            options: ["Low interest rates", "400%+ annual interest rates", "Long repayment terms", "Credit checks required"],
-            correctAnswer: "400%+ annual interest rates",
-            explanation: "Extremely high interest rates (like 400% APR) are a hallmark of predatory lending designed to trap borrowers.",
-            feedback: {
-              correct: "Red flag! Those rates are designed to trap you in debt.",
-              incorrect: "Look for the practice that's clearly designed to exploit borrowers."
-            },
-            points: 10
-          },
-          {
-            id: "emergency-fund-debt-exercise",
-            type: "multiple-choice",
-            question: "How does an emergency fund help you avoid debt?",
-            options: ["It earns high interest", "It prevents using credit cards for unexpected expenses", "It's required by law", "It increases your credit score"],
-            correctAnswer: "It prevents using credit cards for unexpected expenses",
-            explanation: "Emergency funds give you cash for unexpected expenses, so you don't need to borrow money or use credit cards.",
-            feedback: {
-              correct: "Exactly! Cash reserves prevent borrowing in emergencies.",
-              incorrect: "Think about what happens when emergencies arise without savings."
-            },
-            points: 15
-          },
-          {
-            id: "credit-card-usage-exercise",
-            type: "multiple-choice",
-            question: "What's the best way to use credit cards?",
-            options: ["Carry a small balance to build credit", "Pay only the minimum each month", "Pay the full balance monthly", "Use them for emergency loans"],
-            correctAnswer: "Pay the full balance monthly",
-            explanation: "Paying the full balance monthly gives you the benefits of credit cards (rewards, protection) without interest charges.",
-            feedback: {
-              correct: "Perfect! Get the benefits without the interest costs.",
-              incorrect: "Think about how to get credit card benefits while avoiding interest charges."
-            },
-            points: 15
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: "investment-fundamentals",
-    title: "Investment Fundamentals",
-    description: "Start building wealth through smart investing",
+    description: "Strategic approaches to eliminate debt and build financial freedom",
     icon: "TrendingUp",
-    totalLevels: 3,
-    estimatedTime: "40 minutes",
+    estimatedTime: "12 minutes",
+    difficulty: "Beginner",
+    totalLevels: 1,
     levels: [
       {
-        id: "investment-1",
-        moduleId: "investment-fundamentals",
-        levelNumber: 1,
-        title: "Investment Basics",
-        description: "Understand the fundamentals of investing",
-        xpReward: 15,
+        id: "debt-level-1",
+        title: "Understanding Your Debt",
+        description: "Get a clear picture of your debt situation and create an action plan",
+        difficulty: "Beginner",
+        estimatedTime: "4 minutes", 
+        xpReward: 40,
         learningObjectives: [
-          "Learn what investing really means",
-          "Understand different investment types",
-          "Grasp the power of compound interest"
+          "Calculate your true debt picture",
+          "Understand different types of debt",
+          "Learn debt prioritization strategies",
+          "Identify quick wins for debt reduction"
         ],
-        content: [
+        tabs: [
           {
-            id: "investing-definition",
-            type: "text",
-            title: "What is Investing?",
-            content: "Investing is putting your money to work to generate more money over time. Instead of just saving, you're buying assets that can grow in value or produce income."
-          },
-          {
-            id: "investment-types",
-            type: "visual",
-            title: "Types of Investments",
-            content: "Stocks (own pieces of companies), Bonds (loan money to companies/governments), Real Estate (physical property), Index Funds (baskets of many stocks)",
-            visual: {
-              type: "illustration",
-              data: {
-                stocks: "Ownership in companies",
-                bonds: "Loans you make",
-                realEstate: "Physical property",
-                indexFunds: "Diversified baskets"
+            id: "debt-assessment",
+            title: "Debt Assessment",
+            icon: "📋",
+            content: [
+              {
+                id: "debt-intro",
+                type: "text",
+                title: "Your Debt Reality Check",
+                content: "Most people avoid looking at their total debt because it's scary. But here's the truth: the number doesn't change whether you look at it or not. What changes is your power to do something about it.\n\nWe're going to face your debt head-on and create a plan that works. No shame, no judgment - just clear action steps.\n\nFirst, gather these documents:\n• Credit card statements\n• Student loan details\n• Car loan information\n• Personal loan documents\n• Any money owed to family/friends"
+              },
+              {
+                id: "debt-example",
+                type: "example",
+                title: "Jessica's Debt Wake-Up Call",
+                content: "Jessica avoided checking her debt for months. When she finally faced it:\n\n• Credit Card 1: $3,200 (22% APR)\n• Credit Card 2: $1,800 (18% APR)\n• Student Loan: $18,000 (6% APR)\n• Car Loan: $12,000 (4% APR)\n\nTotal: $35,000\n\nScary? Yes. But now she had a clear target. Within 2 years, she paid off both credit cards and made serious progress on other debts. The first step was just knowing the numbers."
+              },
+              {
+                id: "debt-tip",
+                type: "tip",
+                title: "The Debt Inventory Method",
+                content: "Create a simple list with 4 columns:\n\n1. Debt Name (which card/loan)\n2. Balance Owed\n3. Interest Rate (APR)\n4. Minimum Payment\n\nThen calculate:\n• Total debt amount\n• Total minimum payments\n• Average interest rate\n\nThis 5-minute exercise gives you complete clarity on your debt situation. Knowledge is power!"
               }
-            }
-          },
-          {
-            id: "compound-interest",
-            type: "example",
-            title: "The Magic of Compound Interest",
-            content: "Start with $1,000 earning 7% annually. After 10 years: $1,967. After 20 years: $3,870. After 30 years: $7,612. Time is your biggest advantage in investing!"
-          },
-          {
-            id: "investing-vs-saving",
-            type: "tip",
-            title: "Investing vs Saving",
-            content: "Savings accounts protect your money but don't beat inflation. Investing carries risk but historically grows wealth over time. Use both: save for emergencies, invest for long-term goals."
+            ]
           }
         ],
         exercises: [
           {
-            id: "investing-definition-exercise",
+            id: "debt-ex-1",
             type: "multiple-choice",
-            question: "What is the main goal of investing?",
-            options: ["Keep money safe", "Generate more money over time", "Avoid paying taxes", "Get rich quick"],
-            correctAnswer: "Generate more money over time",
-            explanation: "Investing aims to grow your money over time through asset appreciation and income generation.",
+            question: "If you have limited extra money for debt payoff, which debt should you typically pay off first?",
+            options: [
+              "The largest balance",
+              "The debt with the highest interest rate",
+              "The debt with the lowest balance",
+              "Student loans because they're 'good debt'"
+            ],
+            correctAnswer: "The debt with the highest interest rate",
+            explanation: "Paying off high-interest debt first saves you the most money in interest charges over time. This is called the 'avalanche method.'",
             feedback: {
-              correct: "Exactly! Investing is about long-term wealth building.",
-              incorrect: "Think about why people choose investing over just saving money."
+              correct: "Correct! High-interest debt costs you the most money, so eliminating it first saves you more.",
+              incorrect: "While there are different strategies, paying off high-interest debt first typically saves the most money in the long run."
             },
             points: 10
+          }
+        ]
+      }
+    ]
+  },
+
+  {
+    id: "smart-saving-strategies", 
+    title: "Smart Saving Strategies",
+    description: "Transform from broke to wealthy with psychologically proven saving systems that work on autopilot",
+    icon: "ShoppingCart",
+    estimatedTime: "45 minutes",
+    difficulty: "Intermediate",
+    totalLevels: 3,
+    levels: [
+      {
+        id: "saving-psychology-mastery",
+        title: "💰 The Savings Psychology Revolution",
+        description: "Hack your brain to make saving money feel as addictive as spending it",
+        difficulty: "Beginner",
+        estimatedTime: "12 minutes",
+        xpReward: 100,
+        learningObjectives: [
+          "Master the psychology triggers that make saving effortless and exciting",
+          "Identify and eliminate your personal money leaks that drain $300-800 monthly",
+          "Build neural pathways that make saving feel like winning a game",
+          "Create your personalized savings identity transformation"
+        ],
+        tabs: [
+          {
+            id: "psychology-mastery",
+            title: "Psychology Mastery",
+            icon: "🧠",
+            content: [
+              {
+                id: "savings-revolution-intro",
+                type: "text",
+                title: "🚀 Welcome to the Savings Revolution!",
+                content: "You're about to discover why 95% of people fail at saving (and how to join the successful 5%). This isn't about willpower or cutting out coffee - it's about rewiring your brain to crave wealth building.\n\nBy the end of this lesson, saving money will feel like leveling up in your favorite video game. You'll actually get excited about watching your money grow!"
+              },
+              {
+                id: "successful-saver-psychology",
+                type: "example",
+                title: "🎯 The Millionaire Mindset Secret",
+                content: "Research from Harvard Business School reveals successful savers think completely differently:\n\n**Average Person Thinks:**\n❌ 'I'm giving up something I want'\n❌ 'Saving is boring and restrictive'\n❌ 'I'll start saving when I earn more'\n❌ 'Small amounts don't matter'\n\n**Millionaire Mindset:**\n✅ 'I'm buying my future freedom'\n✅ 'Saving is exciting wealth building'\n✅ 'I pay myself first, always'\n✅ 'Every dollar is a wealth seed'\n\nThe difference? Millionaires see saving as the most profitable investment they'll ever make - investing in themselves!"
+              },
+              {
+                id: "psychology-hacks",
+                type: "interactive",
+                title: "🎮 Brain Hacking Challenge",
+                content: "Try this 2-minute psychology experiment:\n\n1. **Close your eyes** and imagine yourself 10 years from now, financially free\n2. **Feel the emotions** - no money stress, unlimited options, true choice\n3. **Open your eyes** and look at any item you're considering buying\n4. **Ask:** 'Is this item worth delaying my financial freedom?'\n\nMost people discover 70% of their purchases suddenly feel less important. Your brain just experienced the power of future-focused thinking!\n\n💡 **Pro Tip:** Do this exercise before any purchase over $50. Watch your spending transform instantly."
+              },
+              {
+                id: "instant-vs-future-battle",
+                type: "scenario",
+                title: "⚔️ The Internal Money War",
+                content: "Every spending decision is a battle between two versions of yourself:\n\n**🔥 Instant You (The Spender):**\n• Wants everything NOW\n• Ignores consequences\n• Uses emotions to justify purchases\n• Thinks 'I deserve this'\n• Lives paycheck to paycheck\n\n**💎 Future You (The Wealth Builder):**\n• Thinks 10 years ahead\n• Values long-term happiness\n• Makes logical money decisions\n• Invests in appreciation\n• Builds generational wealth\n\nWho's winning your money war? Every dollar you save is a victory for Future You. Every impulse purchase is Instant You stealing from your dreams.\n\nWhich version of yourself do you want to strengthen?"
+              }
+            ]
           },
           {
-            id: "investment-types-exercise",
-            type: "multiple-choice",
-            question: "When you buy stock, you are:",
-            options: ["Lending money to a company", "Buying physical property", "Becoming a partial owner of a company", "Storing money safely"],
-            correctAnswer: "Becoming a partial owner of a company",
-            explanation: "Stocks represent ownership shares in companies. When you buy stock, you own a tiny piece of that business.",
-            feedback: {
-              correct: "Right! Stock ownership makes you a shareholder in the company.",
-              incorrect: "Think about what 'stock' or 'shares' represent in relation to companies."
-            },
-            points: 15
+            id: "money-leak-detective",
+            title: "Money Leak Detective",
+            icon: "🕵️",
+            content: [
+              {
+                id: "money-leak-intro",
+                type: "text",
+                title: "🕵️ Become a Money Leak Detective",
+                content: "The average person hemorrhages $400-800 monthly in 'money leaks' - small expenses that provide zero value but drain wealth. We're going to find YOUR leaks and redirect that money toward building your dreams!\n\nMoney leaks are sneaky because they:\n• Feel small individually ($5 here, $15 there)\n• Happen automatically (subscriptions, habits)\n• Provide minimal joy or value\n• Add up to massive wealth theft over time\n\nReady to catch these financial criminals in action?"
+              },
+              {
+                id: "common-money-leaks",
+                type: "warning",
+                title: "🚨 The Wealth Killer List",
+                content: "**The Big 5 Money Leaks:**\n\n💸 **Subscription Creep** ($50-150/month)\n• Streaming services you forgot about\n• Apps with auto-renewing subscriptions\n• Gym memberships you never use\n• Software subscriptions gathering digital dust\n\n☕ **Convenience Addiction** ($80-200/month)\n• Daily coffee shop visits\n• Food delivery fees and tips\n• Convenience store price markups\n• Gas station snacks and drinks\n\n🛒 **Impulse Shopping** ($100-300/month)\n• Amazon 'quick purchases'\n• Checkout line additions\n• Sale items you don't need\n• Emotional spending during stress\n\n🚗 **Transportation Waste** ($50-150/month)\n• Uber/Lyft for walkable distances\n• Premium gas when regular works fine\n• Expensive parking when free options exist\n• Car washes you could do yourself\n\n📱 **Digital Drain** ($30-80/month)\n• In-app purchases and upgrades\n• Premium features you rarely use\n• Multiple music/video subscriptions\n• Cloud storage you don't need"
+              },
+              {
+                id: "leak-audit-challenge",
+                type: "interactive",
+                title: "🔍 The 7-Day Money Leak Audit",
+                content: "**Your Mission:** Track every expense for 7 days and identify your personal money leaks.\n\n**Day 1-3: Investigation Phase**\n✓ Photo every receipt (even $1 purchases)\n✓ Log every digital transaction immediately\n✓ Note your emotions when spending\n✓ Track time and location of purchases\n\n**Day 4-5: Pattern Recognition**\n✓ Group similar expenses together\n✓ Calculate weekly totals by category\n✓ Identify your biggest spending triggers\n✓ Spot recurring 'autopilot' purchases\n\n**Day 6-7: Wealth Recovery**\n✓ Circle expenses that provided zero value\n✓ Calculate potential monthly/yearly savings\n✓ Choose 3 leaks to eliminate immediately\n✓ Set up automatic transfers for saved money\n\n**Expected Result:** Most people find $200-500 in monthly money leaks they can redirect to wealth building!"
+              },
+              {
+                id: "value-based-spending",
+                type: "tip",
+                title: "💎 The Value Filter System",
+                content: "Stop cutting randomly! Align spending with your core values:\n\n**Step 1: Define Your Values**\nList your top 5 life values (examples: family, freedom, health, travel, security)\n\n**Step 2: Apply the Value Filter**\nBefore any purchase over $25, ask: 'Does this support my core values?'\n\n**Step 3: Redirect Non-Value Spending**\n✅ Value-aligned: Spend guilt-free and enjoy fully\n❌ Non-aligned: Redirect money to savings with excitement\n\n**Real Example:**\nSarah values travel and health. She:\n• CUT: $200/month on clothes (not value-aligned)\n• KEPT: $150/month gym + healthy food (health value)\n• ADDED: $150/month travel fund (travel value)\n• RESULT: Same spending, perfect alignment, plus $50/month extra savings!\n\nValue-based spending doesn't feel like sacrifice - it feels like investing in what matters most."
+              }
+            ]
           },
           {
-            id: "compound-interest-exercise",
+            id: "habit-engineering",
+            title: "Habit Engineering",
+            icon: "⚙️",
+            content: [
+              {
+                id: "habit-science",
+                type: "text",
+                title: "⚙️ The Science of Unbreakable Savings Habits",
+                content: "Forget willpower - it's unreliable and exhausting! We're going to engineer your environment so saving becomes as automatic as brushing your teeth.\n\nHabit science reveals:\n• 45% of daily actions are habits, not decisions\n• Environmental design beats willpower 10-to-1\n• Small habits compound into massive life changes\n• Automation eliminates decision fatigue\n\nYou're about to build a savings system that works even when motivation disappears!"
+              },
+              {
+                id: "habit-loop-mastery",
+                type: "example",
+                title: "🔄 The Millionaire Habit Loop",
+                content: "Every powerful habit follows the same 3-step loop. Master this pattern and saving becomes effortless:\n\n**1. CUE (Trigger) →**\n• Payday notification arrives\n• Weekly money check-in alarm\n• Morning coffee routine\n• End-of-month budget review\n\n**2. ROUTINE (Action) →**\n• Transfer money to savings\n• Review and adjust goals\n• Celebrate progress made\n• Plan next month's targets\n\n**3. REWARD (Feeling) →**\n• Pride in growing wealth\n• Peace of mind about future\n• Excitement about goals\n• Sense of control and power\n\n**Real Example:**\nTom's Million-Dollar Habit:\n• **CUE:** Friday morning coffee\n• **ROUTINE:** Transfer $100 to investments while drinking coffee\n• **REWARD:** Checks account balance and feels wealthy\n\nAfter 2 months, Tom craved his 'wealth building coffee time.' The habit became addictive!"
+              },
+              {
+                id: "environment-design",
+                type: "interactive",
+                title: "🏗️ Design Your Wealth Environment",
+                content: "**Your 24-Hour Environment Makeover:**\n\n**REMOVE SPENDING FRICTION:**\n□ Delete shopping apps from phone\n□ Unsubscribe from promotional emails\n□ Remove saved credit cards from browsers\n□ Set up waiting periods for large purchases\n\n**ADD SAVING FRICTION:**\n□ Set up automatic transfers (make saving effortless)\n□ Use separate banks for checking vs. savings\n□ Set savings goals as phone wallpaper\n□ Join online savings communities for support\n\n**CREATE VISUAL REMINDERS:**\n□ Progress chart on bathroom mirror\n□ Goal photos on refrigerator\n□ Savings thermometer in workspace\n□ Wealth affirmations as phone lock screen\n\n**Psychological Principle:** Make good choices easier and bad choices harder. Your environment should guide you toward wealth building without willpower."
+              },
+              {
+                id: "micro-habits",
+                type: "tip",
+                title: "🌱 Micro-Habits That Create Millionaires",
+                content: "Start impossibly small to build unstoppable momentum:\n\n**Week 1:** Save $1 per day ($7 total)\n**Week 2:** Save $2 per day ($14 total)\n**Week 3:** Save $3 per day ($21 total)\n**Week 4:** Save $5 per day ($35 total)\n\nBy month 2, you're naturally saving $150/month!\n\n**The Science:** Small wins create confidence. Confidence creates bigger actions. Bigger actions create life transformation.\n\n**Advanced Micro-Habits:**\n• Round up every purchase to the nearest dollar, save the difference\n• Save every $5 bill you receive\n• Put loose change in a jar daily\n• Save the amount of any avoided impulse purchase\n\nThese tiny actions feel effortless but compound into wealth-building momentum!"
+              }
+            ]
+          }
+        ],
+        exercises: [
+          {
+            id: "psychology-mastery-quiz",
             type: "multiple-choice",
-            question: "What makes compound interest so powerful?",
-            options: ["High interest rates", "Earning interest on your interest", "Government guarantees", "No risk involved"],
-            correctAnswer: "Earning interest on your interest",
-            explanation: "Compound interest means you earn returns not just on your original money, but also on all the gains from previous years.",
+            question: "According to the millionaire mindset research, what's the key difference between successful savers and everyone else?",
+            options: [
+              "They earn significantly more money",
+              "They see saving as buying their future freedom, not giving up something",
+              "They never spend money on anything fun",
+              "They use complicated investment strategies"
+            ],
+            correctAnswer: "They see saving as buying their future freedom, not giving up something",
+            explanation: "The mindset shift from 'sacrifice' to 'investment in freedom' is the foundation of effortless saving. When you see every saved dollar as buying future options, saving becomes exciting instead of restrictive.",
             feedback: {
-              correct: "Perfect! Your money makes money, then that money makes money too.",
-              incorrect: "Think about what happens to the interest you earn each year."
+              correct: "🎯 Exactly! This psychology shift transforms saving from painful to powerful.",
+              incorrect: "The key is mindset, not income level or restriction. Successful savers get excited about building their future freedom."
             },
-            points: 15
+            points: 25
+          },
+          {
+            id: "money-leak-detection",
+            type: "scenario",
+            question: "Alex tracks expenses and finds: $120/month unused subscriptions, $85/month convenience store purchases, $150/month impulse online shopping. What's the best strategy?",
+            options: [
+              "Cancel everything immediately and save all $355/month",
+              "Cancel subscriptions ($120), reduce convenience spending by half ($42.50), redirect impulse money to goals",
+              "Keep everything the same to avoid feeling deprived",
+              "Only cancel subscriptions since they're the easiest to eliminate"
+            ],
+            correctAnswer: "Cancel subscriptions ($120), reduce convenience spending by half ($42.50), redirect impulse money to goals",
+            explanation: "Strategic reduction works better than dramatic cuts. Cancel subscriptions (zero value), reduce convenience spending gradually, and redirect impulse money to exciting goals. This creates sustainable change without feeling deprived.",
+            feedback: {
+              correct: "🕵️ Perfect detective work! Strategic reduction creates lasting change without deprivation.",
+              incorrect: "The best approach balances immediate savings with sustainable lifestyle changes."
+            },
+            points: 30
+          },
+          {
+            id: "habit-loop-application",
+            type: "multiple-choice",
+            question: "Using the Habit Loop science, what would be the most effective CUE to trigger automatic saving behavior?",
+            options: [
+              "Hoping to remember to save when you feel motivated",
+              "Setting up a payday notification that triggers an automatic transfer",
+              "Waiting until the end of the month to see if there's money left",
+              "Only saving when you have extra money after all expenses"
+            ],
+            correctAnswer: "Setting up a payday notification that triggers an automatic transfer",
+            explanation: "A consistent, reliable cue (payday notification) paired with an automatic action (transfer) eliminates decision fatigue and builds the habit naturally. The best savers automate the routine so it happens without thinking.",
+            feedback: {
+              correct: "⚙️ Brilliant! You understand that automation beats motivation every time.",
+              incorrect: "Remember: successful habits need consistent, reliable cues that trigger automatic actions."
+            },
+            points: 25
+          },
+          {
+            id: "value-alignment-challenge",
+            type: "true-false",
+            question: "True or False: The Value Filter System means you should cut all non-essential spending to maximize savings.",
+            correctAnswer: "False",
+            explanation: "The Value Filter System means spending intentionally on what matters most to you while cutting spending that doesn't align with your values. It's about optimization, not elimination.",
+            feedback: {
+              correct: "💎 Correct! Value-based spending is about alignment, not restriction.",
+              incorrect: "The Value Filter isn't about cutting everything - it's about spending intentionally on what truly matters to you."
+            },
+            points: 20
           }
         ]
       },
       {
-        id: "investment-2",
-        moduleId: "investment-fundamentals",
-        levelNumber: 2,
-        title: "Risk vs Return",
-        description: "Learn to balance risk and reward in investing",
-        xpReward: 20,
+        id: "emergency-fund-game-changer",
+        title: "🛡️ Emergency Fund Game-Changer",
+        description: "Build your financial force field that turns crises into minor inconveniences",
+        difficulty: "Beginner",
+        estimatedTime: "15 minutes",
+        xpReward: 125,
         learningObjectives: [
-          "Understand the risk-return relationship",
-          "Learn about diversification",
-          "Assess your risk tolerance"
+          "Calculate your personalized emergency fund target using life situation analysis",
+          "Choose optimal account strategies that maximize growth while maintaining instant access",
+          "Implement rapid building systems that create financial security in months, not years",
+          "Master the psychology of emergency preparedness without paranoia"
         ],
-        content: [
+        tabs: [
           {
-            id: "risk-return-relationship",
-            type: "text",
-            title: "Risk and Return Connection",
-            content: "Higher potential returns usually come with higher risk. Safe investments like savings accounts have low returns. Riskier investments like stocks have higher potential returns but can lose money."
-          },
-          {
-            id: "risk-spectrum",
-            type: "visual",
-            title: "Investment Risk Spectrum",
-            content: "Low Risk/Low Return: Savings accounts (1-2%), CDs (3-5%). Medium Risk/Medium Return: Bonds (4-6%), Balanced funds (5-8%). High Risk/High Return: Individual stocks (varies widely), Growth stocks (potentially 10%+ or losses)",
-            visual: {
-              type: "chart",
-              data: {
-                low: { risk: "Low", return: "1-2%", example: "Savings" },
-                medium: { risk: "Medium", return: "4-8%", example: "Bonds/Funds" },
-                high: { risk: "High", return: "10%+ or losses", example: "Individual stocks" }
+            id: "emergency-strategy",
+            title: "Emergency Strategy",
+            icon: "🎯",
+            content: [
+              {
+                id: "emergency-fund-power",
+                type: "text",
+                title: "🛡️ Your Financial Force Field",
+                content: "An emergency fund isn't just money in an account - it's your financial superpower! It's the difference between a crisis and a minor inconvenience, between panic and peace.\n\nWith an emergency fund, you're not just surviving - you're thriving with options:\n• Job loss becomes a career opportunity (time to find the RIGHT job)\n• Medical bills get handled calmly without debt\n• Car repairs don't derail your budget\n• Home emergencies get fixed immediately\n• You sleep peacefully knowing you're prepared\n\nWelcome to financial confidence!"
+              },
+              {
+                id: "without-vs-with-fund",
+                type: "example",
+                title: "💥 The Tale of Two Emergencies",
+                content: "**WITHOUT Emergency Fund:**\n\n*Sarah's car needs $800 repair*\n❌ Panics about finding the money\n❌ Puts repair on credit card (18% interest)\n❌ Minimum payments add $150 to total cost\n❌ Stress affects work and relationships\n❌ One emergency creates a debt spiral\n\n**WITH Emergency Fund:**\n\n*Maria's car needs $800 repair*\n✅ Calmly pays cash from emergency fund\n✅ No debt, no interest, no stress\n✅ Focuses on getting back to normal life\n✅ Rebuilds emergency fund over next 2 months\n✅ Emergency handled like a pro\n\nSame problem, completely different outcomes. Which story do you want to be yours?"
+              },
+              {
+                id: "fund-size-calculator",
+                type: "interactive",
+                title: "🧮 Your Personal Emergency Fund Formula",
+                content: "One size does NOT fit all! Calculate your ideal emergency fund:\n\n**STEP 1: Calculate Monthly Essentials**\n• Housing (rent/mortgage, utilities)\n• Food and groceries\n• Transportation (car payment, insurance, gas)\n• Insurance premiums\n• Debt minimums\n• Basic personal care\n\n**STEP 2: Choose Your Multiplier**\n• 3 months = Stable job, good support system\n• 6 months = Average stability, some concerns\n• 9 months = Variable income, single income household\n• 12 months = High-risk job, health concerns\n\n**STEP 3: Your Target**\nMonthly Essentials × Multiplier = Your Emergency Fund Goal\n\n**Example:**\n$2,500 monthly essentials × 6 months = $15,000 target\n\nWhat's your number? Write it down - this is your financial freedom target!"
+              },
+              {
+                id: "speed-building-system",
+                type: "tip",
+                title: "⚡ The Emergency Fund Speed-Building System",
+                content: "**PHASE 1: Starter Fund ($1,000) - Month 1-2**\n• Sell items you don't need (furniture, electronics, clothes)\n• Take temporary side gigs (delivery, freelance, odd jobs)\n• Use tax refund or bonuses\n• Temporarily pause non-essential spending\n\n**PHASE 2: Build to 3-Month Target - Month 3-8**\n• Automate 10-15% of income to emergency fund\n• Apply all money leak savings (from previous lesson)\n• Use birthday/holiday money\n• Consider temporary spending freeze challenges\n\n**PHASE 3: Full Fund Completion - Month 9-18**\n• Maintain automatic contributions\n• Add windfalls (raises, bonuses, gifts)\n• Review and adjust for life changes\n• Celebrate major milestones\n\n**Pro Tip:** The first $1,000 is the hardest. After that, momentum builds naturally!"
               }
-            }
+            ]
           },
           {
-            id: "diversification",
-            type: "tip",
-            title: "Don't Put All Eggs in One Basket",
-            content: "Diversification means spreading investments across different companies, industries, and asset types. If one investment fails, others can still succeed. Index funds automatically provide diversification."
+            id: "account-optimization",
+            title: "Account Optimization",
+            icon: "💰",
+            content: [
+              {
+                id: "account-strategy",
+                type: "text",
+                title: "🏦 The Ultimate Account Strategy",
+                content: "Your emergency fund needs to be accessible BUT not too accessible (prevent temptation). It needs to earn interest BUT remain stable (no market risk).\n\nThe perfect emergency fund account:\n• Earns 4-5% interest (beats inflation)\n• FDIC insured (government protected)\n• Available within 24-48 hours (true emergency access)\n• Separate from daily banking (reduces temptation)\n• No penalties for withdrawals (unlike CDs)\n\nLet's find your perfect emergency fund home!"
+              },
+              {
+                id: "account-showdown",
+                type: "scenario",
+                title: "📊 Emergency Fund Account Championship",
+                content: "**🏆 HIGH-YIELD SAVINGS (THE CHAMPION)**\n✅ 4-5% APY (as of 2024)\n✅ FDIC insured up to $250,000\n✅ Available 24-48 hours\n✅ No minimums at best banks\n✅ Perfect balance of growth + safety\n\n**🥈 MONEY MARKET (STRONG CONTENDER)**\n✅ 3-4% APY typical\n✅ Often includes check-writing\n✅ Same-day access options\n⚠️ Usually requires higher minimums\n\n**🥉 CERTIFICATES OF DEPOSIT (LADDER STRATEGY)**\n✅ 4-5% APY but locked up\n✅ Good for portion of large emergency funds\n⚠️ Penalties for early withdrawal\n💡 Use 3-month CDs for part of fund\n\n**❌ REGULAR SAVINGS (AVOID)**\n❌ 0.01% APY (terrible return)\n❌ Your money loses value to inflation\n❌ Banks profit while you lose purchasing power"
+              },
+              {
+                id: "account-setup-guide",
+                type: "interactive",
+                title: "🛠️ 24-Hour Account Setup Challenge",
+                content: "**Today's Mission:** Set up your emergency fund account\n\n**STEP 1: Research (30 minutes)**\n□ Compare rates: Marcus, Ally, Capital One 360, Discover\n□ Check minimum requirements\n□ Read reviews for customer service\n□ Confirm FDIC insurance\n\n**STEP 2: Open Account (30 minutes)**\n□ Choose bank DIFFERENT from your checking\n□ Name it clearly: 'Emergency Fund - Do Not Touch'\n□ Don't request debit card (prevent temptation)\n□ Set up low balance alerts\n\n**STEP 3: Automate Funding (15 minutes)**\n□ Link to your checking account\n□ Set up automatic transfer for payday\n□ Start with comfortable amount\n□ Schedule first transfer within 48 hours\n\n**STEP 4: Track Progress (5 minutes)**\n□ Create visual progress tracker\n□ Set milestone celebrations\n□ Share goal with accountability partner\n□ Plan your 'fully funded' celebration\n\n**Completion Reward:** You've just taken the biggest step toward financial security!"
+              },
+              {
+                id: "advanced-strategies",
+                type: "tip",
+                title: "🎯 Advanced Emergency Fund Strategies",
+                content: "**THE CD LADDER (For Large Funds)**\n• Keep 1-2 months in high-yield savings\n• Put remaining months in 3, 6, and 12-month CDs\n• Higher returns on most of your fund\n• Stagger maturity dates for regular access\n\n**THE TWO-TIER SYSTEM**\n• Tier 1: $2,500 in checking (instant access)\n• Tier 2: Remaining in high-yield savings\n• Ultimate convenience + growth optimization\n\n**THE CREDIT LINE BACKUP**\n• Establish unused credit line as backup\n• Only for true emergencies + immediate payoff\n• Buys time while accessing emergency fund\n• Not recommended as primary strategy\n\n**THE INVESTMENT HYBRID (Advanced)**\n• Emergency fund in savings\n• 'Extended emergency fund' in conservative investments\n• Only for those with stable incomes\n• Provides growth potential with acceptable risk"
+              }
+            ]
           },
           {
-            id: "risk-tolerance",
-            type: "step",
-            title: "Assessing Your Risk Tolerance",
-            content: "1. Consider your age (younger = more time to recover) 2. Think about your goals timeline 3. Evaluate your emotional comfort with losses 4. Assess your financial situation 5. Start conservative and learn"
+            id: "real-world-scenarios",
+            title: "Real-World Mastery",
+            icon: "🎭",
+            content: [
+              {
+                id: "emergency-scenarios",
+                type: "text",
+                title: "🎭 Emergency Fund Scenarios: Choose Your Adventure",
+                content: "Life will test your emergency fund. Here's how to handle real emergencies like a financial ninja, plus what counts as a true emergency (and what doesn't)."
+              },
+              {
+                id: "scenario-breakdown",
+                type: "example",
+                title: "🚨 Real Emergency Response Guide",
+                content: "**SCENARIO 1: Job Loss 💼**\n*Timeline: Could last 2-6 months*\n\n✅ **DO:**\n• Use emergency fund to maintain essential expenses only\n• File for unemployment benefits immediately\n• Take time to find quality job (not just any job)\n• Network strategically instead of panic-applying\n• Negotiate better package with time leverage\n\n❌ **DON'T:**\n• Maintain full lifestyle during search\n• Accept first offer out of desperation\n• Raid retirement accounts (penalties + taxes)\n\n**SCENARIO 2: Medical Emergency 🏥**\n*Cost: $500-$5,000+ after insurance*\n\n✅ **DO:**\n• Pay upfront to avoid payment plans/interest\n• Negotiate cash discounts (often 10-20% off)\n• Use fund to focus on healing, not finances\n• Research costs before non-emergency procedures\n\n**SCENARIO 3: Home Emergency 🏠**\n*Examples: Roof leak, heating failure, plumbing disaster*\n\n✅ **DO:**\n• Get multiple quotes for major repairs\n• Fix promptly to prevent bigger problems\n• Consider DIY for minor issues\n• Document for insurance claims\n\n**Key Principle:** Emergency funds buy you options and peace of mind!"
+              },
+              {
+                id: "real-vs-fake-emergencies",
+                type: "warning",
+                title: "⚠️ Emergency vs. Poor Planning",
+                content: "**REAL EMERGENCIES (Use Your Fund):**\n✅ Unexpected medical bills\n✅ Job loss or sudden income reduction\n✅ Essential car repairs needed for work\n✅ Critical home repairs (heating, plumbing, roof)\n✅ Family emergencies requiring travel\n✅ Pet medical emergencies\n\n**NOT EMERGENCIES (Use Other Budget Categories):**\n❌ Holiday gifts you forgot to plan for\n❌ Vacation opportunities (even 'amazing deals')\n❌ Sale items you don't want to miss\n❌ Wanting to upgrade phone/car/computer\n❌ Wedding, birthday, or graduation gifts\n❌ Home improvements and upgrades\n❌ Investment opportunities\n\n**The 48-Hour Rule:**\nIf you can wait 48 hours to decide, it's probably not an emergency. True emergencies demand immediate action.\n\n**Remember:** Emergency funds are for unexpected necessities, not unexpected opportunities."
+              },
+              {
+                id: "replenishment-strategy",
+                type: "interactive",
+                title: "🔄 The Rapid Replenishment Protocol",
+                content: "**What to do AFTER using your emergency fund:**\n\n**IMMEDIATE (Within 24 hours):**\n□ Calculate exactly how much you used\n□ Assess if emergency is ongoing\n□ Temporarily pause other financial goals\n□ Feel proud you handled crisis without debt!\n\n**SHORT-TERM (Within 1 week):**\n□ Double your emergency fund contribution temporarily\n□ Redirect money from entertainment/dining out\n□ Consider temporary side income if large withdrawal\n□ Create replenishment timeline\n\n**ONGOING (Until fully restored):**\n□ Maintain accelerated rebuilding schedule\n□ Pause other savings goals if necessary\n□ Look for lesson learned to prevent future occurrences\n□ Celebrate when fund is fully restored\n\n**Average Replenishment Time:**\n• $500 withdrawal: 1-2 months\n• $2,000 withdrawal: 3-6 months\n• $5,000+ withdrawal: 6-12 months\n\n**Remember:** Using your emergency fund for a real emergency is a SUCCESS, not a failure!"
+              }
+            ]
           }
         ],
         exercises: [
           {
-            id: "risk-return-exercise",
+            id: "emergency-fund-formula",
             type: "multiple-choice",
-            question: "What's the general relationship between risk and return?",
-            options: ["Higher risk = guaranteed higher returns", "Higher risk = potential for higher returns", "Risk doesn't affect returns", "Lower risk = higher returns"],
-            correctAnswer: "Higher risk = potential for higher returns",
-            explanation: "Higher risk investments offer the potential for higher returns, but they also have the potential for larger losses. Nothing is guaranteed.",
+            question: "Maria has $2,800 in monthly essential expenses. She's self-employed with variable income and no spouse. What's her ideal emergency fund target?",
+            options: [
+              "$8,400 (3 months)",
+              "$16,800 (6 months)",
+              "$25,200 (9 months)",
+              "$33,600 (12 months)"
+            ],
+            correctAnswer: "$25,200 (9 months)",
+            explanation: "Self-employed individuals with variable income need larger emergency funds due to income uncertainty. 9-12 months is recommended for this situation, making $25,200 the appropriate target.",
             feedback: {
-              correct: "Exactly! Higher risk offers potential, not guarantees.",
-              incorrect: "Remember: potential is not the same as guaranteed returns."
+              correct: "🛡️ Perfect calculation! Self-employed individuals need larger emergency funds for income stability.",
+              incorrect: "Consider Maria's self-employment status and variable income - this requires a larger safety net."
             },
-            points: 15
+            points: 30
           },
           {
-            id: "diversification-exercise",
+            id: "account-optimization-quiz",
             type: "multiple-choice",
-            question: "What is diversification?",
-            options: ["Buying only one stock", "Spreading investments across different assets", "Investing only in bonds", "Putting all money in savings"],
-            correctAnswer: "Spreading investments across different assets",
-            explanation: "Diversification reduces risk by spreading investments across different companies, industries, and types of assets.",
+            question: "You have $12,000 for emergency fund. Where should you keep it for best balance of growth and accessibility?",
+            options: [
+              "Regular savings account (0.1% APY)",
+              "High-yield savings account (4.5% APY)",
+              "Stock market index fund (historical 10% but volatile)",
+              "5-year CD (5% APY but locked up)"
+            ],
+            correctAnswer: "High-yield savings account (4.5% APY)",
+            explanation: "High-yield savings accounts provide the optimal balance of growth (4.5% APY) and accessibility (24-48 hour access) needed for emergency funds.",
             feedback: {
-              correct: "Right! Diversification reduces risk through spreading investments.",
-              incorrect: "Think about the saying 'don't put all your eggs in one basket.'"
+              correct: "💰 Excellent choice! High-yield savings balances growth with the accessibility emergency funds require.",
+              incorrect: "Emergency funds need to balance earning potential with quick access when crises hit."
             },
-            points: 10
+            points: 25
           },
           {
-            id: "risk-tolerance-exercise",
-            type: "multiple-choice",
-            question: "A 25-year-old saving for retirement should generally:",
-            options: ["Take no investment risk", "Take moderate to high risk", "Only invest in bonds", "Avoid investing entirely"],
-            correctAnswer: "Take moderate to high risk",
-            explanation: "Young investors have 40+ years until retirement, giving them time to recover from market downturns and benefit from long-term growth.",
+            id: "emergency-scenario-response",
+            type: "scenario",
+            question: "Your furnace breaks in winter, repair costs $1,800. You have a $10,000 emergency fund. What's the smartest approach?",
+            options: [
+              "Put it on credit card to preserve emergency fund",
+              "Use emergency fund and immediately start replenishing it",
+              "Finance half through repair company, pay half from fund",
+              "Delay repair and use space heaters to save money"
+            ],
+            correctAnswer: "Use emergency fund and immediately start replenishing it",
+            explanation: "This is exactly what emergency funds are for - unexpected essential expenses. Use the fund to avoid debt, then focus on rebuilding it quickly.",
             feedback: {
-              correct: "Smart! Time is on their side for weathering market volatility.",
-              incorrect: "Consider how much time they have until retirement and to recover from any losses."
+              correct: "🔥 Perfect emergency response! This is exactly why you built that fund.",
+              incorrect: "This is a textbook emergency - unexpected, necessary, and time-sensitive. Use the fund!"
             },
-            points: 15
+            points: 30
+          },
+          {
+            id: "emergency-vs-opportunity",
+            type: "true-false",
+            question: "True or False: Finding a great deal on vacation packages qualifies as an emergency fund use if it expires soon.",
+            correctAnswer: "False",
+            explanation: "Vacation deals, no matter how good or time-sensitive, are opportunities, not emergencies. Emergency funds are for unexpected necessities, not unexpected opportunities.",
+            feedback: {
+              correct: "🎯 Correct! Emergency funds are for necessities, not opportunities (even great ones).",
+              incorrect: "Remember the definition: emergencies are unexpected necessities. Vacations are wants, not needs."
+            },
+            points: 20
           }
         ]
       },
       {
-        id: "investment-3",
-        moduleId: "investment-fundamentals",
-        levelNumber: 3,
-        title: "Getting Started with Investing",
-        description: "Take your first steps into the investment world",
-        xpReward: 25,
+        id: "goal-crushing-system",
+        title: "🎯 Goal-Crushing Savings System",
+        description: "Transform impossible dreams into mathematical certainties with proven achievement engineering",
+        difficulty: "Intermediate",
+        estimatedTime: "18 minutes",
+        xpReward: 150,
         learningObjectives: [
-          "Choose the right investment accounts",
-          "Start with index funds and ETFs",
-          "Create a simple investment plan"
+          "Engineer SMART savings goals using psychological triggers that make success inevitable",
+          "Master compound growth strategies that turn small amounts into massive wealth",
+          "Build gamified milestone systems that make saving feel like winning a video game",
+          "Create unstoppable momentum with science-based motivation techniques"
         ],
-        content: [
+        tabs: [
           {
-            id: "investment-accounts",
-            type: "visual",
-            title: "Types of Investment Accounts",
-            content: "Taxable brokerage (access anytime, pay taxes on gains), 401(k) (employer retirement plan, tax benefits), Roth IRA (retirement account, tax-free growth), Traditional IRA (retirement, tax deduction now)",
-            visual: {
-              type: "comparison",
-              data: {
-                taxable: "Access anytime, pay taxes",
-                "401k": "Employer plan, tax benefits",
-                rothIRA: "Tax-free growth in retirement",
-                traditionalIRA: "Tax deduction now"
+            id: "smart-goals-engineering",
+            title: "SMART Goals Mastery",
+            icon: "🎯",
+            content: [
+              {
+                id: "smart-goals-power",
+                type: "text",
+                title: "🎯 Goal Engineering: From Dreams to Certainties",
+                content: "Harvard Business School research proves it: People with specific, written goals are 10X more likely to achieve them than those with vague intentions.\n\nBut we're going beyond basic goal setting. We're engineering success using:\n• Psychological trigger points that make goals irresistible\n• Mathematical certainty that removes doubt\n• Behavioral science that builds unstoppable momentum\n• Gamification that makes the journey addictive\n\nYou're about to transform from someone who 'hopes to save' to someone who 'engineers wealth.'"
+              },
+              {
+                id: "smart-formula-breakdown",
+                type: "example",
+                title: "🔬 The SMART Goals Success Formula",
+                content: "**SPECIFIC: Laser-Focused Clarity**\n❌ Vague: 'Save money for vacation'\n✅ SMART: 'Save $4,500 for 10-day Italy trip including flights, hotels, food, and activities'\n🔑 Test: Could a stranger understand your goal completely?\n\n**MEASURABLE: Track Progress Objectively**\n❌ Vague: 'Save more than last year'\n✅ SMART: 'Save $375 per month for 12 months = $4,500'\n🔑 Create weekly/monthly checkpoints you can measure\n\n**ACHIEVABLE: Challenging but Possible**\n❌ Unrealistic: 'Save $50,000 on $30,000 salary'\n✅ SMART: 'Save $4,500 (15% of $30,000 annual income)'\n🔑 Aim for 80% confidence level - challenging but doable\n\n**RELEVANT: Aligned with Life Values**\n❌ Random: Saving for things you don't actually want\n✅ SMART: Goals supporting your core values (family, freedom, security)\n🔑 Connect every goal to a deeper 'why'\n\n**TIME-BOUND: Clear Deadline Pressure**\n❌ Someday: 'Save for Italy eventually'\n✅ SMART: 'Complete Italy fund by September 15, 2025'\n🔑 Work backward from deadline to create monthly targets"
+              },
+              {
+                id: "goal-categories-system",
+                type: "interactive",
+                title: "🗂️ The 4-Category Goal System",
+                content: "**Successful savers balance 4 types of goals simultaneously:**\n\n**🛡️ SECURITY GOALS (Foundation)**\n• Emergency fund (3-6 months expenses)\n• Insurance optimization\n• Debt elimination milestones\n*Timeline: 6 months - 3 years*\n\n**🎉 LIFESTYLE GOALS (Joy)**\n• Dream vacations\n• Home improvements\n• Technology upgrades\n• Experience investments\n*Timeline: 3 months - 2 years*\n\n**📈 WEALTH GOALS (Growth)**\n• Investment accounts\n• Real estate down payments\n• Business capital\n• Retirement acceleration\n*Timeline: 1 year - 30 years*\n\n**🌟 LEGACY GOALS (Impact)**\n• Children's education\n• Charitable giving\n• Family financial security\n• Community investments\n*Timeline: 5 years - lifetime*\n\n**The Magic Balance:** Always have 1-2 active goals from each category. This keeps you motivated across all time horizons!"
+              },
+              {
+                id: "goal-psychology-hacks",
+                type: "tip",
+                title: "🧠 Advanced Goal Psychology Hacks",
+                content: "**HACK #1: The Visualization Immersion**\n• Create vivid mental movie of achieving your goal\n• Include all 5 senses and emotions\n• Watch your 'success movie' for 2 minutes daily\n• Studies show 35% higher achievement rates\n\n**HACK #2: Public Commitment Power**\n• Share specific goal with 3-5 important people\n• Social pressure increases completion by 65%\n• Ask them to check your progress monthly\n• Celebrate milestones together\n\n**HACK #3: Implementation Intentions**\n• Create 'if-then' statements that trigger automatic behavior\n• Example: 'If it's payday, then I immediately transfer $300 to Italy fund'\n• Removes decision fatigue and builds habits\n• Increases achievement by 200-300%\n\n**HACK #4: The Progress Celebration System**\n• Celebrate every 25% milestone with small reward\n• Document progress with photos/screenshots\n• Share wins on social media for reinforcement\n• Create 'achievement wall' of completed goals"
               }
-            }
+            ]
           },
           {
-            id: "index-funds-intro",
-            type: "text",
-            title: "Start with Index Funds",
-            content: "Index funds are perfect for beginners. They automatically diversify across hundreds of companies, have low fees, and track market performance. Popular options: S&P 500 index funds, Total Stock Market funds."
+            id: "compound-acceleration",
+            title: "Compound Acceleration",
+            icon: "🚀",
+            content: [
+              {
+                id: "compound-magic",
+                type: "text",
+                title: "🚀 The Compound Growth Secret",
+                content: "Here's where saving becomes truly exciting! Compound growth means your money makes money, which then makes more money. Understanding this concept will transform how you think about every dollar.\n\nCompound interest is called 'the eighth wonder of the world' for good reason:\n• Small amounts today become massive wealth tomorrow\n• Time is more powerful than amount\n• Starting early beats starting with more money\n• Patience creates millionaires\n\nYou're about to see why Einstein called compound interest 'the most powerful force in the universe.'"
+              },
+              {
+                id: "compound-showdown",
+                type: "example",
+                title: "⚡ The Compound Growth Showdown",
+                content: "**Three friends start saving at different times. Who ends up richest?**\n\n**👑 EARLY BIRD EMMA**\n• Saves $200/month from age 25-35 (10 years)\n• Total invested: $24,000\n• Stops saving at 35, lets it grow\n• Value at 65: $525,000\n\n**🐢 STEADY STEVEN**\n• Saves $200/month from age 35-65 (30 years)\n• Total invested: $72,000\n• Consistent saver for entire career\n• Value at 65: $490,000\n\n**😰 LATE LARRY**\n• Saves $400/month from age 45-65 (20 years)\n• Total invested: $96,000\n• Doubles the monthly amount\n• Value at 65: $385,000\n\n**The Shocking Result:**\nEmma invested the LEAST money but ended up RICHEST!\n\n**The Lesson:** Time beats timing. Time beats amount. Start NOW, even small."
+              },
+              {
+                id: "acceleration-strategies",
+                type: "interactive",
+                title: "⚡ Compound Acceleration Strategies",
+                content: "**STRATEGY 1: Front-Loading Power**\n□ Save aggressively in first 2-3 years of any goal\n□ Every early dollar has maximum time to compound\n□ Example: Save 40% in year 1, 35% in year 2, 25% in year 3\n\n**STRATEGY 2: Windfall Maximizer**\n□ Immediately invest any unexpected money\n□ Tax refunds, bonuses, gifts, raises\n□ These lump sums have outsized final impact\n□ Never let windfalls sit in checking accounts\n\n**STRATEGY 3: Rate Optimizer**\n□ Constantly seek higher-yielding safe investments\n□ 1% additional return = 20% more wealth over 30 years\n□ Review accounts every 6 months\n□ Switch banks for better rates\n\n**STRATEGY 4: Escalation Protocol**\n□ Increase savings rate by 1% annually\n□ Use raises/promotions to boost savings\n□ Small increases compound into massive differences\n□ Automate the increases to remove decisions\n\n**Pro Tip:** Combine all four strategies for maximum wealth acceleration!"
+              },
+              {
+                id: "interest-rate-impact",
+                type: "scenario",
+                title: "💰 The Interest Rate Game-Changer",
+                content: "**How much difference can interest rates really make?**\n\n*Saving $300/month for 25 years:*\n\n**💸 0.1% (Regular Savings)**\nTotal: $90,225\nInterest earned: $225\n\n**💰 3% (Conservative)**\nTotal: $128,289\nInterest earned: $38,289\n\n**🚀 5% (High-Yield)**\nTotal: $152,037\nInterest earned: $62,037\n\n**🏆 7% (Conservative Investing)**\nTotal: $189,129\nInterest earned: $99,129\n\n**📈 10% (Stock Market Historical)**\nTotal: $265,528\nInterest earned: $175,528\n\n**Mind-Blowing Insight:**\nThe difference between 0.1% and 7% is $98,904 - that's like getting an extra $329/month for free for 25 years!\n\n**Key Takeaway:** Small rate differences create massive wealth differences. Always optimize for the highest safe return."
+              }
+            ]
           },
           {
-            id: "getting-started-steps",
-            type: "step",
-            title: "Your First Investment Steps",
-            content: "1. Build emergency fund first 2. Contribute to 401(k) up to company match 3. Open Roth IRA 4. Start with broad index fund 5. Invest consistently every month 6. Don't check daily - think long-term"
-          },
-          {
-            id: "common-mistakes",
-            type: "warning",
-            title: "Avoid These Beginner Mistakes",
-            content: "Don't try to time the market, don't panic sell during downturns, don't pick individual stocks as a beginner, don't invest money you'll need soon, and don't forget about fees - they compound too!"
+            id: "milestone-gamification",
+            title: "Milestone Gamification",
+            icon: "🏆",
+            content: [
+              {
+                id: "gamification-psychology",
+                type: "text",
+                title: "🎮 The Gamification Advantage",
+                content: "Your brain is wired to love games, progress bars, achievements, and rewards. We're going to hijack these psychological triggers to make saving money feel like your favorite video game!\n\nGamefication works because it triggers:\n• Dopamine releases from progress\n• Social recognition from achievements\n• Competitive drive from leaderboards\n• Completion satisfaction from milestones\n\nWhen reaching financial goals feels like winning a game, you'll actually crave saving money!"
+              },
+              {
+                id: "milestone-achievement-system",
+                type: "example",
+                title: "🏆 The Achievement System",
+                content: "**Transform boring savings into exciting achievements:**\n\n**🥉 BRONZE MILESTONES (25% of goal)**\n🎉 Reward: Small celebration ($20-50)\n📸 Action: Progress photo for motivation\n🎯 Psychology: Proves you can do this\n💪 Example: $2,500 of $10,000 vacation fund\n\n**🥈 SILVER MILESTONES (50% of goal)**\n🎉 Reward: Medium celebration ($50-100)\n📊 Action: Reassess timeline and strategy\n🎯 Psychology: Momentum is building strong\n💪 Example: Halfway point - $5,000 saved\n\n**🥇 GOLD MILESTONES (75% of goal)**\n🎉 Reward: Significant celebration ($100-200)\n🚀 Action: Plan for goal completion\n🎯 Psychology: Victory is within reach\n💪 Example: $7,500 saved - almost there!\n\n**💎 PLATINUM ACHIEVEMENT (100% of goal)**\n🎉 Reward: Major celebration (5-10% of goal)\n🏆 Action: Set next bigger goal immediately\n🎯 Psychology: You're a proven achiever\n💪 Example: Full $10,000 goal achieved!"
+              },
+              {
+                id: "visual-tracking-methods",
+                type: "interactive",
+                title: "📊 Visual Progress Tracking Methods",
+                content: "**Choose your visual motivation method:**\n\n**📈 METHOD 1: The Savings Thermometer**\n□ Draw thermometer with goal at top\n□ Color in progress each week\n□ Display where you'll see it daily\n□ Psychological boost: Visual progress feels amazing\n\n**🔗 METHOD 2: The Progress Chain**\n□ Create paper chain with links = daily/weekly targets\n□ Remove one link each time you save\n□ Watch chain shrink as you approach goal\n□ Bonus: Kids love helping with this\n\n**📱 METHOD 3: Digital Progress Tracking**\n□ Monthly screenshots of account balances\n□ Create digital album showing growth\n□ Share major milestones on social media\n□ Use apps with achievement notifications\n\n**📋 METHOD 4: The Milestone Map**\n□ Create visual map with milestone markers\n□ Mark achievements with stickers/stamps\n□ Include photos of your goal destination\n□ Track both progress and excitement\n\n**🏆 METHOD 5: The Achievement Wall**\n□ Display completed goal certificates\n□ Before/after account balance photos\n□ Celebration pictures from milestones\n□ Build visual proof of your success pattern"
+              },
+              {
+                id: "momentum-builders",
+                type: "tip",
+                title: "⚡ Unstoppable Momentum Builders",
+                content: "**THE MOMENTUM KILLERS TO AVOID:**\n🚫 Perfectionism (missing one month ruins everything)\n🚫 Comparison (someone else's journey isn't yours)\n🚫 Impatience (wealth building takes time)\n🚫 Lifestyle inflation (spending grows with income)\n🚫 Analysis paralysis (waiting for 'perfect' plan)\n\n**THE MOMENTUM BUILDERS TO EMBRACE:**\n✅ Consistency over perfection (small regular beats big sporadic)\n✅ Progress celebration (acknowledge every milestone)\n✅ Flexibility (adjust goals as life changes)\n✅ Community support (surround yourself with goal-achievers)\n✅ Systems over motivation (automation beats willpower)\n\n**ULTIMATE MOMENTUM SECRET:**\nMomentum isn't about motivation - it's about systems. Build systems that work even when motivation disappears.\n\n**The Compound Effect of Momentum:**\nSuccess → Confidence → Bigger Goals → Greater Success → Stronger Confidence → Even Bigger Goals\n\nOnce you complete your first major savings goal, every future goal becomes easier!"
+              }
+            ]
           }
         ],
         exercises: [
           {
-            id: "investment-account-exercise",
+            id: "smart-goals-mastery",
             type: "multiple-choice",
-            question: "What's a major benefit of a Roth IRA?",
-            options: ["Immediate tax deduction", "Tax-free growth and withdrawals in retirement", "No contribution limits", "Guaranteed returns"],
-            correctAnswer: "Tax-free growth and withdrawals in retirement",
-            explanation: "Roth IRAs grow tax-free, and you can withdraw money in retirement without paying taxes on the gains.",
+            question: "Which goal follows ALL five SMART criteria most effectively?",
+            options: [
+              "Save money for retirement",
+              "Build emergency fund this year",
+              "Save $15,000 for house down payment by December 2026 through $625 monthly transfers",
+              "Save more than I spent last year"
+            ],
+            correctAnswer: "Save $15,000 for house down payment by December 2026 through $625 monthly transfers",
+            explanation: "This goal is Specific ($15,000 for house), Measurable ($625/month), Achievable (reasonable timeline), Relevant (major life goal), and Time-bound (December 2026).",
             feedback: {
-              correct: "Excellent! Tax-free growth is a huge long-term advantage.",
-              incorrect: "Think about when you'd pay taxes with a Roth IRA vs other accounts."
+              correct: "🎯 Perfect! This goal has crystal clear specificity, measurability, and timeline.",
+              incorrect: "Look for the goal with specific amount, clear timeline, and practical action steps."
             },
-            points: 15
+            points: 35
           },
           {
-            id: "index-fund-exercise",
-            type: "multiple-choice", 
-            question: "Why are index funds good for beginners?",
-            options: ["They guarantee profits", "They automatically provide diversification", "They never lose money", "They beat the market every year"],
-            correctAnswer: "They automatically provide diversification",
-            explanation: "Index funds spread your investment across hundreds of companies automatically, reducing risk through diversification.",
+            id: "compound-growth-mastery",
+            type: "scenario",
+            question: "Based on the Early Bird vs. Late Larry example, what's the most important factor in building wealth through saving?",
+            options: [
+              "Saving the highest monthly amount possible",
+              "Starting early to maximize compound time",
+              "Finding the perfect investment strategy",
+              "Waiting until you earn more money to start"
+            ],
+            correctAnswer: "Starting early to maximize compound time",
+            explanation: "Emma saved the least total money ($24,000) but ended richest because she started earliest. Time is the most powerful factor in compound growth.",
             feedback: {
-              correct: "Right! Instant diversification without picking individual stocks.",
-              incorrect: "Think about what index funds do automatically that would be hard for beginners to do themselves."
+              correct: "🚀 Brilliant! You understand that time beats timing and time beats amount in wealth building.",
+              incorrect: "Review the Early Bird Emma example - she invested the least but ended richest due to starting early."
             },
-            points: 15
+            points: 40
           },
           {
-            id: "investment-priority-exercise",
+            id: "interest-rate-optimization",
             type: "multiple-choice",
-            question: "What should you do before investing in the stock market?",
-            options: ["Buy individual stocks", "Build an emergency fund", "Take out a loan", "Quit your job"],
-            correctAnswer: "Build an emergency fund",
-            explanation: "Emergency funds ensure you won't need to sell investments during market downturns to cover unexpected expenses.",
+            question: "If you save $300/month for 25 years, approximately how much extra wealth do you build by earning 7% instead of 0.1%?",
+            options: [
+              "$38,000",
+              "$62,000",
+              "$99,000",
+              "$175,000"
+            ],
+            correctAnswer: "$99,000",
+            explanation: "At 7%, you'd have $189,129. At 0.1%, you'd have $90,225. The difference is $98,904, approximately $99,000 in extra wealth just from interest rate optimization.",
             feedback: {
-              correct: "Smart! Never invest money you might need for emergencies.",
-              incorrect: "Consider what financial foundation you need before taking investment risk."
+              correct: "💰 Amazing calculation! That's nearly $100,000 extra just from choosing better interest rates.",
+              incorrect: "Compare the 7% result ($189,129) with the 0.1% result ($90,225) from the interest rate example."
             },
-            points: 10
+            points: 35
+          },
+          {
+            id: "milestone-psychology",
+            type: "true-false",
+            question: "True or False: According to the Achievement System, you should only celebrate when you reach 100% of your savings goal.",
+            correctAnswer: "False",
+            explanation: "The Achievement System recommends celebrating at 25%, 50%, 75%, and 100% milestones to maintain motivation and momentum throughout the journey.",
+            feedback: {
+              correct: "🏆 Correct! Regular milestone celebrations maintain motivation and build momentum.",
+              incorrect: "The Achievement System uses Bronze, Silver, Gold, and Platinum milestones - celebrate progress, not just completion!"
+            },
+            points: 25
+          },
+          {
+            id: "goal-categories-balance",
+            type: "multiple-choice",
+            question: "According to the 4-Category Goal System, what's the recommended approach for balanced goal setting?",
+            options: [
+              "Focus on one category at a time until complete",
+              "Always prioritize Security goals over all others",
+              "Have 1-2 active goals from each category simultaneously",
+              "Only set Wealth goals since they create the most money"
+            ],
+            correctAnswer: "Have 1-2 active goals from each category simultaneously",
+            explanation: "Balanced goal setting across Security, Lifestyle, Wealth, and Legacy categories keeps you motivated across all time horizons and life priorities.",
+            feedback: {
+              correct: "🎯 Perfect balance! This approach maintains motivation across short-term and long-term priorities.",
+              incorrect: "The magic is in balance - having goals across different categories and timeframes keeps you motivated."
+            },
+            points: 30
           }
         ]
       }
@@ -1387,60 +855,4 @@ export const COURSE_CONTENT: CourseModule[] = [
   }
 ];
 
-export interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  requirement: string;
-  xpRequired: number;
-  badgeColor: string;
-}
-
-export const ACHIEVEMENT_BADGES: Achievement[] = [
-  {
-    id: "first-steps",
-    title: "First Steps",
-    description: "Complete your first lesson",
-    icon: "BookOpen",
-    requirement: "Complete 1 lesson",
-    xpRequired: 15,
-    badgeColor: "bg-blue-500"
-  },
-  {
-    id: "learning-streak",
-    title: "Learning Streak", 
-    description: "Maintain a 7-day learning streak",
-    icon: "Flame",
-    requirement: "7-day streak",
-    xpRequired: 50,
-    badgeColor: "bg-orange-500"
-  },
-  {
-    id: "xp-collector",
-    title: "XP Collector",
-    description: "Earn 100 XP points",
-    icon: "Zap",
-    requirement: "Earn 100 XP",
-    xpRequired: 100,
-    badgeColor: "bg-yellow-500"
-  },
-  {
-    id: "module-master",
-    title: "Module Master",
-    description: "Complete your first module",
-    icon: "Award",
-    requirement: "Complete any module",
-    xpRequired: 60,
-    badgeColor: "bg-green-500"
-  },
-  {
-    id: "dedicated-learner",
-    title: "Dedicated Learner",
-    description: "Complete all financial literacy modules",
-    icon: "Trophy",
-    requirement: "Complete all modules",
-    xpRequired: 240,
-    badgeColor: "bg-purple-500"
-  }
-];
+export default COURSE_CONTENT;

@@ -40,6 +40,17 @@ router.get("/progress", isAuthenticated, async (req: any, res) => {
     const stats = await storage.getUserLearningStats(userId);
     const achievements = await storage.getUserCourseAchievements(userId);
     
+    // Enrich achievements with proper titles and descriptions
+    const enrichedAchievements = achievements.map(achievement => {
+      const definition = ACHIEVEMENT_DEFINITIONS[achievement.badgeId as keyof typeof ACHIEVEMENT_DEFINITIONS];
+      return {
+        ...achievement,
+        title: definition?.title || achievement.badgeId,
+        description: definition?.description || 'Achievement unlocked!',
+        icon: definition?.icon || 'Trophy'
+      };
+    });
+    
     res.json({ 
       progress: progress || [],
       stats: stats || {
@@ -50,7 +61,7 @@ router.get("/progress", isAuthenticated, async (req: any, res) => {
         totalTimeSpent: 0,
         averageScore: 0
       },
-      achievements: achievements || []
+      achievements: enrichedAchievements || []
     });
   } catch (error) {
     console.error("Error fetching user progress:", error);
@@ -106,41 +117,120 @@ router.post("/submit-exercise", isAuthenticated, async (req: any, res) => {
   }
 });
 
+// Achievement definitions
+const ACHIEVEMENT_DEFINITIONS = {
+  'first-steps': {
+    title: 'First Steps',
+    description: 'Complete your first lesson',
+    icon: 'Award',
+    check: (stats: any) => (stats.totalLessonsCompleted || 0) >= 1
+  },
+  'learning-streak-7': {
+    title: 'Week Warrior',
+    description: 'Maintain a 7-day learning streak',
+    icon: 'Flame',
+    check: (stats: any) => (stats.currentStreak || 0) >= 7
+  },
+  'learning-streak-30': {
+    title: 'Monthly Master',
+    description: 'Maintain a 30-day learning streak',
+    icon: 'Flame',
+    check: (stats: any) => (stats.currentStreak || 0) >= 30
+  },
+  'xp-collector-100': {
+    title: 'XP Collector',
+    description: 'Earn 100 XP points',
+    icon: 'Star',
+    check: (stats: any) => (stats.totalXp || 0) >= 100
+  },
+  'xp-collector-500': {
+    title: 'XP Master',
+    description: 'Earn 500 XP points',
+    icon: 'Star',
+    check: (stats: any) => (stats.totalXp || 0) >= 500
+  },
+  'module-master': {
+    title: 'Module Master',
+    description: 'Complete your first module',
+    icon: 'Trophy',
+    check: (stats: any, progress: any[]) => {
+      const modules = ['budgeting-basics', 'smart-saving-strategies'];
+      return modules.some(moduleId => {
+        const moduleProgress = progress.filter(p => p.moduleId === moduleId);
+        const completedLevels = moduleProgress.filter(p => p.isCompleted).length;
+        // Assuming 3 levels per module on average
+        return completedLevels >= 3;
+      });
+    }
+  },
+  'dedicated-learner': {
+    title: 'Dedicated Learner',
+    description: 'Complete all financial literacy modules',
+    icon: 'Trophy',
+    check: (stats: any, progress: any[]) => {
+      const modules = ['budgeting-basics', 'smart-saving-strategies'];
+      return modules.every(moduleId => {
+        const moduleProgress = progress.filter(p => p.moduleId === moduleId);
+        const completedLevels = moduleProgress.filter(p => p.isCompleted).length;
+        return completedLevels >= 3; // All levels completed
+      });
+    }
+  },
+  'high-scorer': {
+    title: 'High Scorer',
+    description: 'Achieve 90%+ score on any lesson',
+    icon: 'Target',
+    check: (stats: any, progress: any[]) => {
+      return progress.some(p => (p.bestScore || 0) >= 90);
+    }
+  },
+  'perfectionist': {
+    title: 'Perfectionist',
+    description: 'Achieve 100% score on any lesson',
+    icon: 'Award',
+    check: (stats: any, progress: any[]) => {
+      return progress.some(p => (p.bestScore || 0) >= 100);
+    }
+  }
+};
+
 // Achievement checking logic
 async function checkForNewAchievements(userId: string) {
   try {
     const stats = await storage.getUserLearningStats(userId);
+    const progress = await storage.getUserCourseProgress(userId);
     const existingAchievements = await storage.getUserCourseAchievements(userId);
     const earnedBadgeIds = new Set(existingAchievements.map(a => a.badgeId));
     
-    const newBadges: string[] = [];
+    const newBadges: Array<{id: string, title: string, description: string}> = [];
     
     // Only proceed if stats exist
     if (!stats) {
       return newBadges;
     }
     
-    // Check for first lesson completion
-    if ((stats.totalLessonsCompleted || 0) >= 1 && !earnedBadgeIds.has('first-lesson')) {
-      await storage.awardAchievement(userId, 'first-lesson');
-      newBadges.push('first-lesson');
-    }
-    
-    // Check for streak achievements
-    if ((stats.currentStreak || 0) >= 7 && !earnedBadgeIds.has('week-streak')) {
-      await storage.awardAchievement(userId, 'week-streak');
-      newBadges.push('week-streak');
-    }
-    
-    if ((stats.currentStreak || 0) >= 30 && !earnedBadgeIds.has('month-streak')) {
-      await storage.awardAchievement(userId, 'month-streak');
-      newBadges.push('month-streak');
-    }
-    
-    // Check for completion achievements
-    if ((stats.totalLessonsCompleted || 0) >= 9 && !earnedBadgeIds.has('course-complete')) {
-      await storage.awardAchievement(userId, 'course-complete');
-      newBadges.push('course-complete');
+    // Check each achievement
+    for (const [badgeId, achievement] of Object.entries(ACHIEVEMENT_DEFINITIONS)) {
+      if (!earnedBadgeIds.has(badgeId)) {
+        let shouldAward = false;
+        
+        if (achievement.check.length === 1) {
+          // Stats-only check
+          shouldAward = achievement.check(stats);
+        } else {
+          // Stats + progress check
+          shouldAward = achievement.check(stats, progress || []);
+        }
+        
+        if (shouldAward) {
+          await storage.awardAchievement(userId, badgeId);
+          newBadges.push({
+            id: badgeId,
+            title: achievement.title,
+            description: achievement.description
+          });
+        }
+      }
     }
     
     return newBadges;

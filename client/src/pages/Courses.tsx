@@ -26,7 +26,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import { COURSE_CONTENT, ACHIEVEMENT_BADGES, type CourseModule, type Achievement, type Exercise, type CourseLevel } from "@/data/courseContent";
+import { COURSE_CONTENT, type CourseModule, type Exercise, type CourseLevel, type ContentBlock } from "@/data/courseContent";
 import { Calculator } from "@/components/Calculator";
 
 // Extended types for user progress
@@ -236,13 +236,19 @@ export default function Courses() {
 
     // Submit to backend
     try {
-      await submitExerciseMutation.mutateAsync({
+      const result = await submitExerciseMutation.mutateAsync({
         moduleId: selectedModule.id,
         levelId: currentLevel.id,
         score: scorePercentage,
         timeSpent,
         isCompleted
       });
+
+      // Show notifications for new achievements
+      if (result.newBadges && result.newBadges.length > 0) {
+        // You could add a toast notification system here
+        console.log('New achievements unlocked:', result.newBadges);
+      }
 
       setShowResults(true);
     } catch (error) {
@@ -693,8 +699,22 @@ export default function Courses() {
                     className="w-full"
                     disabled={isLocked}
                     onClick={() => {
-                      // For now, always start with the first level since we don't have progress tracking
-                      startLesson(module, module.levels[0]);
+                      // Find the first incomplete level or start from the beginning
+                      const userProgress = (progressData as any)?.progress || [];
+                      const moduleProgress = userProgress.filter((p: any) => p.moduleId === module.id);
+                      
+                      let levelToStart = module.levels[0]; // Default to first level
+                      
+                      // Find first incomplete level
+                      for (const level of module.levels) {
+                        const levelProgress = moduleProgress.find((p: any) => p.levelId === level.id);
+                        if (!levelProgress || !levelProgress.isCompleted) {
+                          levelToStart = level;
+                          break;
+                        }
+                      }
+                      
+                      startLesson(module, levelToStart);
                     }}
                   >
                     {isLocked ? 'Locked' : progress === 0 ? 'Start Course' : 'Continue'}
@@ -707,21 +727,26 @@ export default function Courses() {
       </div>
 
       {/* Achievements section */}
-      {achievements.length > 0 && (
+      {userAchievements.length > 0 && (
         <div className="mt-12">
           <Separator className="mb-6" />
-          <h2 className="text-2xl font-bold mb-6">Available Achievements</h2>
+          <h2 className="text-2xl font-bold mb-6">Your Achievements</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {achievements.map((achievement) => (
-              <Card key={achievement.id} className="text-center">
+            {userAchievements.map((achievement: any) => (
+              <Card key={achievement.id} className="text-center border-yellow-200 bg-yellow-50">
                 <CardContent className="p-4">
                   <div className="text-3xl mb-2 flex justify-center">
-                    {React.createElement(getIcon(achievement.icon), { className: "h-8 w-8" })}
+                    <Trophy className="h-8 w-8 text-yellow-600" />
                   </div>
-                  <CardTitle className="text-lg mb-1">{achievement.title}</CardTitle>
-                  <CardDescription className="text-sm mb-2">{achievement.description}</CardDescription>
-                  <Badge variant="outline" className="text-xs">
-                    {achievement.xpRequired} XP Required
+                  <CardTitle className="text-lg mb-1">
+                    {achievement.title || achievement.badgeId}
+                  </CardTitle>
+                  <CardDescription className="text-sm mb-2">
+                    {achievement.description || 'Achievement unlocked!'}<br/>
+                    Earned {new Date(achievement.earnedAt).toLocaleDateString()}
+                  </CardDescription>
+                  <Badge variant="default" className="text-xs bg-yellow-600">
+                    🏆 Achieved
                   </Badge>
                 </CardContent>
               </Card>
