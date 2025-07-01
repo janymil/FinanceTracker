@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -53,6 +53,20 @@ export default function Courses() {
 
   const queryClient = useQueryClient();
 
+  // Icon mapping for modules and achievements
+  const getIcon = (iconName: string) => {
+    const iconMap: Record<string, any> = {
+      Calculator: Calculator,
+      ShoppingCart: ShoppingCart,
+      TrendingUp: TrendingUp,
+      Star: Star,
+      Award: Award,
+      Trophy: Trophy,
+      Flame: Flame
+    };
+    return iconMap[iconName] || BookOpen;
+  };
+
   // Use static course content
   const modules: CourseModule[] = COURSE_CONTENT;
   const achievements: Achievement[] = ACHIEVEMENT_BADGES;
@@ -85,8 +99,9 @@ export default function Courses() {
   // Calculate completion percentage for a module
   const getModuleProgress = (module: CourseModule): number => {
     if (!module.levels.length) return 0;
-    const completedLevels = module.levels.filter(level => level.isCompleted).length;
-    return (completedLevels / module.levels.length) * 100;
+    // For now, return 0 since we're using static content
+    // This will be replaced with actual progress from backend
+    return 0;
   };
 
   // Start a lesson
@@ -165,7 +180,7 @@ export default function Courses() {
     setShowResults(false);
   };
 
-  if (courseLoading || progressLoading) {
+  if (progressLoading) {
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center min-h-96">
@@ -398,7 +413,9 @@ export default function Courses() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="text-2xl">{module.icon}</div>
+                    <div className="text-2xl flex items-center">
+                      {React.createElement(getIcon(module.icon), { className: "h-6 w-6" })}
+                    </div>
                     <div>
                       <CardTitle className="text-lg">{module.title}</CardTitle>
                       <CardDescription className="text-sm">{module.description}</CardDescription>
@@ -437,8 +454,7 @@ export default function Courses() {
                       <div key={level.id} className="flex items-center justify-between">
                         <span className="text-sm truncate">{level.title}</span>
                         <div className="flex items-center gap-1">
-                          {level.isCompleted && <CheckCircle2 className="w-4 h-4 text-green-500" />}
-                          {level.bestScore && <Badge variant="outline" className="text-xs">{level.bestScore}%</Badge>}
+                          <Badge variant="outline" className="text-xs">+{level.xpReward} XP</Badge>
                         </div>
                       </div>
                     ))}
@@ -476,11 +492,13 @@ export default function Courses() {
             {achievements.map((achievement) => (
               <Card key={achievement.id} className="text-center">
                 <CardContent className="p-4">
-                  <div className="text-3xl mb-2">{achievement.icon}</div>
+                  <div className="text-3xl mb-2 flex justify-center">
+                    {React.createElement(getIcon(achievement.icon), { className: "h-8 w-8" })}
+                  </div>
                   <CardTitle className="text-lg mb-1">{achievement.title}</CardTitle>
                   <CardDescription className="text-sm mb-2">{achievement.description}</CardDescription>
                   <Badge variant="outline" className="text-xs">
-                    +{achievement.xpReward} XP
+                    {achievement.xpRequired} XP Required
                   </Badge>
                 </CardContent>
               </Card>
