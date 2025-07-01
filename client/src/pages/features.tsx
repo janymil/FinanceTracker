@@ -110,110 +110,110 @@ export default function FeaturesPage() {
     {
       id: 'categorization',
       icon: Target,
-      title: 'Smart Transaction Categorization',
-      badge: 'All Plans',
-      description: 'Our AI automatically categorizes every transaction with 95% accuracy by analyzing merchant names, transaction patterns, and your spending history. No more manual sorting - just intelligent automation.',
+      title: t('features.categorization.title'),
+      badge: t('features.categorization.badge'),
+      description: t('features.categorization.description'),
       benefits: [
-        { title: 'Instant Categorization', desc: 'Every transaction is automatically sorted the moment it\'s imported' },
-        { title: 'Learning Algorithm', desc: 'Gets smarter with your spending patterns over time' },
-        { title: 'Custom Categories', desc: 'Adapts to your business-specific category structure' }
+        { title: t('features.categorization.benefits.instant.title'), desc: t('features.categorization.benefits.instant.desc') },
+        { title: t('features.categorization.benefits.learning.title'), desc: t('features.categorization.benefits.learning.desc') },
+        { title: t('features.categorization.benefits.custom.title'), desc: t('features.categorization.benefits.custom.desc') }
       ]
     },
     {
       id: 'tips',
       icon: Lightbulb,
-      title: 'AI Financial Analysis',
-      badge: 'Standard+',
-      description: 'Get detailed 4-section financial analysis covering spending patterns, saving recommendations, budget optimization, and advanced insights tailored to your business needs.',
+      title: t('features.tips.title'),
+      badge: t('features.tips.badge'),
+      description: t('features.tips.description'),
       benefits: [
-        { title: 'Spending Patterns', desc: 'Deep analysis of your spending behaviors and trends' },
-        { title: 'Saving Strategies', desc: 'Personalized recommendations to optimize your cash flow' },
-        { title: 'Budget Optimization', desc: 'Smart adjustments to maximize your budget efficiency' },
-        { title: 'Advanced Analysis', desc: 'Professional-grade financial insights and forecasting' }
+        { title: t('features.tips.benefits.patterns.title'), desc: t('features.tips.benefits.patterns.desc') },
+        { title: t('features.tips.benefits.strategies.title'), desc: t('features.tips.benefits.strategies.desc') },
+        { title: t('features.tips.benefits.optimization.title'), desc: t('features.tips.benefits.optimization.desc') },
+        { title: t('features.tips.benefits.analysis.title'), desc: t('features.tips.benefits.analysis.desc') }
       ]
     },
     {
       id: 'insights',
       icon: BarChart3,
-      title: 'Intelligent Spending Insights',
-      badge: 'Standard+',
-      description: 'Advanced analysis of your expense transactions to identify unusual patterns, optimization opportunities, and spending trends that matter to your business growth.',
+      title: t('features.insights.title'),
+      badge: t('features.insights.badge'),
+      description: t('features.insights.description'),
       benefits: [
-        { title: 'Anomaly Detection', desc: 'Automatically identifies unusual spending patterns' },
-        { title: 'Trend Analysis', desc: 'Spots emerging trends in your business expenses' },
-        { title: 'Optimization Tips', desc: 'Actionable recommendations to reduce costs' }
+        { title: t('features.insights.benefits.anomaly.title'), desc: t('features.insights.benefits.anomaly.desc') },
+        { title: t('features.insights.benefits.trend.title'), desc: t('features.insights.benefits.trend.desc') },
+        { title: t('features.insights.benefits.optimization.title'), desc: t('features.insights.benefits.optimization.desc') }
       ]
     },
     {
       id: 'health',
       icon: Heart,
-      title: 'Health Score',
-      badge: 'Premium',
-      description: 'Comprehensive financial health analysis with personalized scoring (0-100) that includes detailed factor breakdown, risk assessment, and AI-powered improvement recommendations.',
+      title: t('features.health.title'),
+      badge: t('features.health.badge'),
+      description: t('features.health.description'),
       benefits: [
-        { title: 'Real-time Scoring', desc: 'Live financial health score from 0-100' },
-        { title: 'Factor Analysis', desc: 'Detailed breakdown of what affects your score' },
-        { title: 'Improvement Plan', desc: 'Actionable steps to boost your financial health' }
+        { title: t('features.health.benefits.scoring.title'), desc: t('features.health.benefits.scoring.desc') },
+        { title: t('features.health.benefits.analysis.title'), desc: t('features.health.benefits.analysis.desc') },
+        { title: t('features.health.benefits.plan.title'), desc: t('features.health.benefits.plan.desc') }
       ]
     },
     {
       id: 'statements',
       icon: FileText,
-      title: 'AI Bank Statement Parser',
-      badge: 'All Plans',
-      description: 'Advanced OCR and AI-powered extraction of transactions from bank statement PDFs and images with multilingual support and 95%+ accuracy in transaction detection.',
+      title: t('features.statements.title'),
+      badge: t('features.statements.badge'),
+      description: t('features.statements.description'),
       benefits: [
-        { title: 'PDF Processing', desc: 'Extract transactions from any bank statement format' },
-        { title: 'OCR Technology', desc: 'Local processing with privacy-first approach' },
-        { title: 'Smart Categorization', desc: 'Automatically categorize extracted transactions' }
+        { title: t('features.statements.benefits.processing.title'), desc: t('features.statements.benefits.processing.desc') },
+        { title: t('features.statements.benefits.ocr.title'), desc: t('features.statements.benefits.ocr.desc') },
+        { title: t('features.statements.benefits.categorization.title'), desc: t('features.statements.benefits.categorization.desc') }
       ]
     },
     {
       id: 'predictions',
       icon: TrendingUp,
-      title: 'Expense Predictions',
-      badge: 'Premium',
-      description: 'Advanced predictive analytics that forecast future expense patterns based on your historical data, seasonal trends, and business growth indicators.',
+      title: t('features.predictions.title'),
+      badge: t('features.predictions.badge'),
+      description: t('features.predictions.description'),
       benefits: [
-        { title: 'Future Forecasting', desc: 'Predict expenses up to 6 months ahead' },
-        { title: 'Seasonal Analysis', desc: 'Account for seasonal business variations' },
-        { title: 'Budget Planning', desc: 'Data-driven budget creation for future periods' }
+        { title: t('features.predictions.benefits.forecasting.title'), desc: t('features.predictions.benefits.forecasting.desc') },
+        { title: t('features.predictions.benefits.seasonal.title'), desc: t('features.predictions.benefits.seasonal.desc') },
+        { title: t('features.predictions.benefits.planning.title'), desc: t('features.predictions.benefits.planning.desc') }
       ]
     },
     {
       id: 'trends',
       icon: BarChart3,
-      title: 'AI Trend Predictions',
-      badge: 'Premium',
-      description: 'Sophisticated trend analysis that provides AI-powered forecasting for category spending, identifies emerging patterns, and predicts financial trajectory changes.',
+      title: t('features.trends.title'),
+      badge: t('features.trends.badge'),
+      description: t('features.trends.description'),
       benefits: [
-        { title: 'Category Trends', desc: 'Track spending trends by expense category' },
-        { title: 'Growth Indicators', desc: 'Identify business growth or decline signals' },
-        { title: 'Market Adaptation', desc: 'Adjust strategies based on trend predictions' }
+        { title: t('features.trends.benefits.category.title'), desc: t('features.trends.benefits.category.desc') },
+        { title: t('features.trends.benefits.growth.title'), desc: t('features.trends.benefits.growth.desc') },
+        { title: t('features.trends.benefits.adaptation.title'), desc: t('features.trends.benefits.adaptation.desc') }
       ]
     },
     {
       id: 'recommendations',
       icon: Calendar,
-      title: 'Daily AI Recommendations',
-      badge: 'Standard+',
-      description: 'Start each day with personalized financial recommendations generated by AI analysis of your recent activity, upcoming obligations, and optimization opportunities.',
+      title: t('features.recommendations.title'),
+      badge: t('features.recommendations.badge'),
+      description: t('features.recommendations.description'),
       benefits: [
-        { title: 'Daily Fresh Insights', desc: 'New recommendations every 24 hours' },
-        { title: 'Action-Oriented', desc: 'Specific steps you can take today' },
-        { title: 'Priority-Based', desc: 'Most important recommendations first' }
+        { title: t('features.recommendations.benefits.daily.title'), desc: t('features.recommendations.benefits.daily.desc') },
+        { title: t('features.recommendations.benefits.action.title'), desc: t('features.recommendations.benefits.action.desc') },
+        { title: t('features.recommendations.benefits.priority.title'), desc: t('features.recommendations.benefits.priority.desc') }
       ]
     },
     {
       id: 'contextual',
       icon: Brain,
-      title: 'Smart Financial Advisor',
-      badge: 'Standard+',
-      description: 'Intelligent financial advice that adapts to your current month\'s spending, budget status, and goal progress to provide the most relevant guidance when you need it.',
+      title: t('features.contextual.title'),
+      badge: t('features.contextual.badge'),
+      description: t('features.contextual.description'),
       benefits: [
-        { title: 'Real-time Context', desc: 'Advice based on current financial situation' },
-        { title: 'Goal-Aligned', desc: 'Tips that help achieve your specific goals' },
-        { title: 'Budget-Aware', desc: 'Considers your budget constraints and targets' }
+        { title: t('features.contextual.benefits.realtime.title'), desc: t('features.contextual.benefits.realtime.desc') },
+        { title: t('features.contextual.benefits.goal.title'), desc: t('features.contextual.benefits.goal.desc') },
+        { title: t('features.contextual.benefits.budget.title'), desc: t('features.contextual.benefits.budget.desc') }
       ]
     }
   ];
