@@ -79,11 +79,20 @@ export default function Courses() {
   // Use static course content
   const modules: CourseModule[] = COURSE_CONTENT;
   
+  // Fetch user data to check for special access
+  const { data: userData } = useQuery({
+    queryKey: ['/api/auth/user'],
+    enabled: true
+  });
+
   // Fetch user progress from backend
   const { data: progressData, isLoading: progressLoading } = useQuery({
     queryKey: ['/api/courses/progress'],
     enabled: true
   });
+
+  // Check if current user is Jan Milata (special access)
+  const isJanMilata = (userData as any)?.id === 'user_2yYgmUlJG1EBLQqYEg7d64Ex2Zc';
 
   // Submit exercise completion
   const submitExerciseMutation = useMutation({
@@ -564,7 +573,8 @@ export default function Courses() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {modules.map((module, index) => {
           const progress = getModuleProgress(module);
-          const isLocked = index > 0 && getModuleProgress(modules[index - 1]) < 100;
+          // Jan Milata gets access to all courses, others follow normal progression
+          const isLocked = !isJanMilata && index > 0 && getModuleProgress(modules[index - 1]) < 100;
           
           return (
             <Card key={module.id} className={`relative ${isLocked ? 'opacity-60' : 'hover:shadow-lg transition-shadow'}`}>
