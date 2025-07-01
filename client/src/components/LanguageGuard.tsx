@@ -109,38 +109,16 @@ export default function LanguageGuard({ children }: LanguageGuardProps) {
     // Update Clerk localization based on current language
     const updateClerkLocalization = (langCode: string) => {
       try {
-        let clerkLocalization;
-        if (langCode === 'es') {
-          clerkLocalization = esES;
-        } else if (langCode === 'sk') {
-          // Use custom Slovak from main.tsx
-          clerkLocalization = {
-            ...skSK,
-            signUp: {
-              ...(skSK.signUp || {}),
-              legalConsent: {
-                ...(skSK.signUp?.legalConsent || {}),
-                checkbox: {
-                  label__onlyPrivacyPolicy: 'Súhlasím so {{ privacyPolicyLink || link("zásadami ochrany osobných údajov") }}',
-                  label__onlyTermsOfService: 'Súhlasím s {{ termsOfServiceLink || link("obchodnými podmienkami") }}',
-                  label__termsOfServiceAndPrivacyPolicy: 'Súhlasím s {{ termsOfServiceLink || link("obchodnými podmienkami") }} a {{ privacyPolicyLink || link("zásadami ochrany osobných údajov") }}'
-                },
-                continue: {
-                  subtitle: 'Pokračovaním súhlasíte s našimi zásadami.',
-                  title: 'Zákonné súhlasy'
-                }
-              }
-            }
-          };
-        } else {
-          clerkLocalization = undefined; // English default
-        }
+        console.log('LanguageGuard: Updating Clerk localization for', langCode);
         
-        // Update Clerk localization
-        if (clerk && clerk.__unstable__environment) {
-          console.log('LanguageGuard: Updating Clerk localization for', langCode);
-          clerk.__unstable__environment.setLocalization(clerkLocalization);
-        }
+        // Note: Clerk localization is primarily set in main.tsx at initialization
+        // Dynamic localization updates during runtime are not supported in the current Clerk version
+        // The localization is set based on browser language at app startup
+        
+        // Store the language preference for next app load
+        localStorage.setItem('preferredLanguage', langCode);
+        
+        console.log('LanguageGuard: Language preference saved to localStorage');
       } catch (error) {
         console.error('LanguageGuard: Error updating Clerk localization:', error);
       }

@@ -112,9 +112,21 @@ const customSlovak = {
   }
 };
 
-// Simple Clerk localization without hooks
-const userLang = navigator.language;
-const localization = userLang.startsWith('es') ? esES : userLang.startsWith('sk') ? customSlovak : undefined;
+// Dynamic Clerk localization based on saved preference or browser language
+const savedLanguage = localStorage.getItem('preferredLanguage') || '';
+const browserLanguage = navigator.language || 'en-US';
+
+// Determine localization based on saved preference or browser language
+let localization;
+if (savedLanguage.startsWith('es') || browserLanguage.startsWith('es')) {
+  localization = esES;
+} else if (savedLanguage.startsWith('sk') || browserLanguage.startsWith('sk')) {
+  localization = customSlovak;
+} else {
+  localization = undefined; // English default
+}
+
+console.log('Clerk localization set based on:', { savedLanguage, browserLanguage, localization: localization?.signIn?.start?.title || 'English' });
 
 const root = createRoot(container);
 root.render(
