@@ -19,6 +19,9 @@ import {
   importLogs,
   aiCache,
   paymentFailures,
+  courseProgress,
+  userAchievements, 
+  learningStats,
   // contextualFinancialTips, // Removed - using unified ai_cache
   type User,
   type InsertUser,
@@ -57,6 +60,12 @@ import {
   type InsertAiCache,
   type PaymentFailure,
   type InsertPaymentFailure,
+  type CourseProgress,
+  type InsertCourseProgress,
+  type UserAchievement,
+  type InsertUserAchievement,
+  type LearningStats,
+  type InsertLearningStats,
   // Removed: contextualFinancialTips types - using unified ai_cache
 } from "@shared/schema";
 import { db } from "./db";
@@ -198,6 +207,25 @@ export interface IStorage {
   clearUserGracePeriod(userId: string): Promise<User>;
   getUsersInGracePeriod(): Promise<User[]>;
   getUsersWithExpiredGrace(): Promise<User[]>;
+
+  // Course-related operations
+  getUserCourseProgress(userId: string): Promise<CourseProgress[]>;
+  updateCourseProgress(userId: string, progress: {
+    moduleId: string;
+    levelId: string;
+    score: number;
+    timeSpent: number;
+    isCompleted: boolean;
+    completedAt: Date | null;
+  }): Promise<void>;
+  getUserLearningStats(userId: string): Promise<LearningStats | null>;
+  updateLearningStats(userId: string, updates: {
+    xpGained: number;
+    timeSpent: number;
+    lessonCompleted: boolean;
+  }): Promise<void>;
+  getUserAchievements(userId: string): Promise<UserAchievement[]>;
+  awardAchievement(userId: string, badgeId: string): Promise<UserAchievement>;
 }
 
 export class DatabaseStorage implements IStorage {
