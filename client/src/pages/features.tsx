@@ -47,6 +47,16 @@ function DemoVideoCard({ title, description, demoType }: {
   const language = getCurrentLanguageForAPI();
   const videoPath = `/demo-videos/${demoType}-demo-${language}.mp4`;
 
+  const handleWatchDemo = () => {
+    const videoElement = document.querySelector(`#video-${demoType}`) as HTMLVideoElement;
+    if (videoElement) {
+      videoElement.currentTime = 0; // Reset to beginning
+      videoElement.play();
+      // Scroll to video if not visible
+      videoElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -59,6 +69,7 @@ function DemoVideoCard({ title, description, demoType }: {
       <CardContent>
         <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg flex items-center justify-center mb-4">
           <video 
+            id={`video-${demoType}`}
             controls 
             className="w-full h-full rounded-lg"
             poster={`/images/demo-${demoType}-thumbnail.jpg`}
@@ -67,7 +78,7 @@ function DemoVideoCard({ title, description, demoType }: {
             Your browser does not support the video tag.
           </video>
         </div>
-        <Button className="w-full" size="sm">
+        <Button onClick={handleWatchDemo} className="w-full" size="sm">
           <Sparkles className="mr-2 h-4 w-4" />
           Watch Demo
         </Button>
