@@ -21,7 +21,7 @@ async function createQuickDemo() {
   try {
     // Step 1: Generate ElevenLabs narration
     console.log('🎙️ Generating narration...');
-    const audioResponse = await fetch('http://localhost:3000/api/demo/generate-narration', {
+    const audioResponse = await fetch('http://localhost:5000/api/demo/generate-narration', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
