@@ -71,80 +71,170 @@ export const COURSE_CONTENT: CourseModule[] = [
         ],
         content: [
           {
-            id: "intro-income",
+            id: "welcome-intro",
             type: "text",
-            title: "What is Income?",
-            content: "Income is all the money you receive regularly. This includes your salary, freelance payments, investment returns, rental income, or any other money flowing into your accounts."
+            title: "Welcome to Financial Freedom!",
+            content: "You're about to learn the most important financial skill: budgeting. Think of budgeting as your money's GPS - it tells every dollar where to go so you reach your financial destination. By the end of this lesson, you'll know exactly how money flows in and out of your life."
           },
           {
-            id: "income-example",
-            type: "example",
-            title: "Real Income Examples",
-            content: "Sarah is a graphic designer. Her monthly income includes: $4,000 salary from her full-time job, $500 from freelance projects, $50 from stock dividends, and $200 from renting out her spare room. Total monthly income: $4,750."
-          },
-          {
-            id: "expenses-intro",
-            type: "text",
-            title: "Understanding Expenses",
-            content: "Expenses are all the money you spend. There are two main types: Fixed expenses (same amount each month like rent) and Variable expenses (amounts that change like groceries)."
-          },
-          {
-            id: "expense-categories",
+            id: "money-flow-visual",
             type: "visual",
-            title: "Expense Categories",
-            content: "Fixed Expenses: Rent ($1,200), Insurance ($150), Phone ($80). Variable Expenses: Groceries ($400-600), Entertainment ($100-300), Gas ($80-150)",
+            title: "The Money Flow Diagram",
+            content: "Picture your finances like a river system. Money flows IN (income) and flows OUT (expenses). The goal is to control these flows so more comes in than goes out.",
             visual: {
-              type: "comparison",
+              type: "illustration",
               data: {
-                fixed: ["Rent: $1,200", "Insurance: $150", "Phone: $80"],
-                variable: ["Groceries: $400-600", "Entertainment: $100-300", "Gas: $80-150"]
+                inflow: ["💼 Job Salary", "💻 Side Hustle", "📈 Investments", "🏠 Rental Income"],
+                outflow: ["🏠 Housing", "🍕 Food", "🚗 Transportation", "🎯 Savings"]
               }
             }
           },
           {
-            id: "cashflow-rule",
+            id: "income-deep-dive",
+            type: "text",
+            title: "Income: Your Financial Fuel",
+            content: "Income is ANY money that flows into your accounts. Most people think only about their main job, but successful budgeters track ALL income sources. This includes your salary, freelance work, investment returns, gifts, refunds, cashback rewards, and even that $20 you found in your old jacket!"
+          },
+          {
+            id: "income-calculator",
+            type: "example",
+            title: "💡 Interactive Income Calculator",
+            content: "Meet Alex, a marketing professional:\n\n📊 MONTHLY INCOME BREAKDOWN:\n• Full-time job: $4,200\n• Weekend consulting: $600\n• Investment dividends: $75\n• Cashback rewards: $25\n• Total Monthly Income: $4,900\n\n🎯 PRO TIP: Track everything for 30 days. You might be surprised how much 'extra' income you actually have!"
+          },
+          {
+            id: "expense-categories-deep",
+            type: "text",
+            title: "Expenses: Where Your Money Goes",
+            content: "Every expense falls into two categories: FIXED (same amount monthly) or VARIABLE (changes monthly). Knowing the difference is crucial because you can't easily change fixed expenses, but you have control over variable ones."
+          },
+          {
+            id: "expense-breakdown",
+            type: "visual",
+            title: "🏠 The Expense House",
+            content: "Think of your expenses like a house with different rooms. Fixed expenses are like the foundation - stable but hard to change. Variable expenses are like the furniture - you can rearrange them!",
+            visual: {
+              type: "comparison",
+              data: {
+                foundation_fixed: [
+                  "🏠 Rent/Mortgage: $1,400",
+                  "📱 Phone Plan: $85",
+                  "🚗 Car Payment: $320",
+                  "💊 Insurance: $180",
+                  "🎓 Student Loan: $250"
+                ],
+                flexible_variable: [
+                  "🛒 Groceries: $300-500",
+                  "⛽ Gas: $80-150",
+                  "🍿 Entertainment: $100-400",
+                  "👕 Clothing: $50-200",
+                  "🍕 Dining Out: $150-350"
+                ]
+              }
+            }
+          },
+          {
+            id: "cash-flow-game",
+            type: "example",
+            title: "🎮 The Cash Flow Game",
+            content: "Let's play with real numbers! Follow Sam's monthly journey:\n\n💰 INCOME: $3,800\n📊 FIXED EXPENSES: $2,100\n📈 VARIABLE EXPENSES: $1,200\n\n🧮 THE MATH:\n$3,800 (income) - $3,300 (total expenses) = +$500 (positive cash flow)\n\n🎉 RESULT: Sam saves $500 monthly! That's $6,000 per year toward goals!"
+          },
+          {
+            id: "danger-signs",
+            type: "warning",
+            title: "⚠️ Red Flag Warning Signs",
+            content: "DANGER ZONE: If your expenses exceed income, you're in negative cash flow. Warning signs: Using credit cards for basic needs, borrowing money monthly, avoiding bank statements, stress about money every week. If this sounds familiar, don't panic - this course will help you fix it!"
+          },
+          {
+            id: "quick-wins",
             type: "tip",
-            title: "The Golden Cash Flow Rule",
-            content: "Income - Expenses = Cash Flow. Positive cash flow means you're saving money and building wealth. Negative cash flow means you're spending more than you earn - a warning sign!"
+            title: "🚀 3 Quick Wins (Do These Today!)",
+            content: "1️⃣ INCOME AUDIT: Write down ALL money sources from last month\n2️⃣ EXPENSE SNAPSHOT: Check your bank statement - categorize last 10 transactions as fixed or variable\n3️⃣ CASH FLOW CHECK: Calculate your basic cash flow: Total Income - Total Expenses = ?"
+          },
+          {
+            id: "success-story",
+            type: "example",
+            title: "🌟 Real Success Story",
+            content: "Jessica, 28, felt overwhelmed by money. After learning income vs expenses, she discovered she was spending $200/month on forgotten subscriptions! By canceling unused services and tracking her variable expenses, she went from -$150 monthly cash flow to +$350. Six months later, she had her first $2,000 emergency fund!"
           }
         ],
         exercises: [
           {
-            id: "income-exercise-1",
+            id: "income-detective-exercise",
             type: "multiple-choice",
-            question: "Which of these is considered income?",
-            options: ["Rent payment", "Salary from job", "Grocery shopping", "Car loan payment"],
-            correctAnswer: "Salary from job",
-            explanation: "Salary is money coming IN to your account, making it income. The others are expenses (money going OUT).",
+            question: "Sarah discovers she has more income sources than she thought! Besides her $4,000 monthly salary, she found $25 in cashback rewards, $50 in dividends, and $200 from her spare room rental. What's her TOTAL monthly income?",
+            options: ["$4,000", "$4,075", "$4,275", "$4,325"],
+            correctAnswer: "$4,275",
+            explanation: "Total income = $4,000 (salary) + $25 (cashback) + $50 (dividends) + $200 (rental) = $4,275. Every dollar counts!",
             feedback: {
-              correct: "Exactly! Salary is money you receive, which makes it income.",
-              incorrect: "Not quite. Remember: income is money coming IN to your account."
+              correct: "Perfect! You tracked ALL income sources like a financial detective!",
+              incorrect: "Don't forget to include ALL income sources - salary, cashback, dividends, and rental income."
             },
-            points: 10
+            points: 15
           },
           {
-            id: "expense-type-exercise",
+            id: "expense-categorization-challenge",
             type: "multiple-choice",
-            question: "Your monthly rent of $800 is what type of expense?",
-            options: ["Variable expense", "Fixed expense", "Income", "Investment"],
-            correctAnswer: "Fixed expense",
-            explanation: "Rent stays the same amount each month, making it a fixed expense.",
+            question: "Which expense would give you the MOST control to reduce if you needed to save money quickly?",
+            options: ["Rent ($1,200/month)", "Student loan payment ($250/month)", "Dining out ($300/month)", "Car insurance ($120/month)"],
+            correctAnswer: "Dining out ($300/month)",
+            explanation: "Dining out is a variable expense you control daily. Fixed expenses like rent, loans, and insurance are harder to change quickly.",
             feedback: {
-              correct: "Perfect! Fixed expenses stay the same amount each month.",
-              incorrect: "Think about it: does your rent amount change each month?"
+              correct: "Smart thinking! Variable expenses give you immediate control over your spending.",
+              incorrect: "Look for the variable expense - something you can control day-to-day, not fixed contracts."
             },
-            points: 10
+            points: 15
           },
           {
-            id: "cashflow-calculation",
+            id: "cash-flow-scenario",
             type: "multiple-choice",
-            question: "If you earn $3,000 monthly and spend $2,700, what's your cash flow?",
-            options: ["+$300 (positive)", "-$300 (negative)", "$5,700 total", "$0 (breaking even)"],
-            correctAnswer: "+$300 (positive)",
-            explanation: "Cash Flow = Income - Expenses = $3,000 - $2,700 = +$300. Positive cash flow means you're saving!",
+            question: "Jordan has $3,800 income, $2,100 fixed expenses, and $1,200 variable expenses. They want to save $6,000 for a vacation in 12 months. What should they do?",
+            options: [
+              "Impossible - they're already at $0 cash flow",
+              "Cut variable expenses by $100/month to save $500/month",
+              "Get a second job - their current budget is maxed out",
+              "Use credit cards for the vacation"
+            ],
+            correctAnswer: "Cut variable expenses by $100/month to save $500/month",
+            explanation: "Current cash flow: $3,800 - $3,300 = $500/month. They need $6,000 ÷ 12 = $500/month. They're already there! Or cut $100 in variables for extra buffer.",
             feedback: {
-              correct: "Excellent! You're saving $300 each month with positive cash flow.",
-              incorrect: "Remember: Cash Flow = Income minus Expenses. Try the calculation again."
+              correct: "Excellent math! You calculated their current cash flow and vacation savings goal perfectly.",
+              incorrect: "Calculate their current cash flow first: Income - Total Expenses. Then compare to their savings goal."
+            },
+            points: 20
+          },
+          {
+            id: "money-flow-mastery",
+            type: "multiple-choice",
+            question: "Using the 'Money Flow' concept from the lesson, which strategy would have the BIGGEST impact on building wealth?",
+            options: [
+              "Focus only on increasing income (bigger inflow)",
+              "Focus only on cutting expenses (smaller outflow)",
+              "Increase income by $200 AND cut expenses by $200",
+              "Wait until you earn more to start managing money flow"
+            ],
+            correctAnswer: "Increase income by $200 AND cut expenses by $200",
+            explanation: "The combined approach gives you $400 more monthly cash flow ($4,800/year)! Managing both sides of the money flow equation maximizes wealth building.",
+            feedback: {
+              correct: "Brilliant! You understand that managing both inflow AND outflow creates the biggest wealth-building impact.",
+              incorrect: "Think about the total impact on cash flow. What happens when you improve BOTH sides of the money flow equation?"
+            },
+            points: 20
+          },
+          {
+            id: "financial-awareness-challenge",
+            type: "multiple-choice",
+            question: "Based on the lesson's 'surprise spending' examples, what's the MOST effective first step to take control of your finances?",
+            options: [
+              "Immediately cut all fun spending",
+              "Track every expense for 7 days to find surprise spending",
+              "Set up a complicated budget with 20 categories",
+              "Focus only on big expenses like rent"
+            ],
+            correctAnswer: "Track every expense for 7 days to find surprise spending",
+            explanation: "Awareness comes before control! Like Jordan's $539 in surprise spending, you can't manage what you don't measure. Track first, then optimize.",
+            feedback: {
+              correct: "Perfect! You understand that financial awareness is the foundation of financial control.",
+              incorrect: "Remember the lesson about becoming an 'expense detective' - you need to see where money goes before you can control it."
             },
             points: 15
           }
@@ -164,36 +254,81 @@ export const COURSE_CONTENT: CourseModule[] = [
         ],
         content: [
           {
-            id: "budget-definition",
+            id: "budget-revolution",
             type: "text",
-            title: "What is a Budget?",
-            content: "A budget is your spending plan. It tells your money where to go instead of wondering where it went. Think of it as a GPS for your finances - guiding you to your financial destination."
+            title: "🚀 The Budget Revolution Starts Here!",
+            content: "Forget everything you think you know about budgeting. We're not talking about restricting your life - we're talking about DESIGNING your life! A budget is your financial blueprint that transforms chaos into control, stress into confidence, and dreams into achievable goals."
           },
           {
-            id: "50-30-20-rule",
+            id: "budget-myths",
+            type: "warning",
+            title: "💥 Budget Myths That Keep People Broke",
+            content: "MYTH 1: 'Budgets are restrictive' → TRUTH: Budgets give you permission to spend guilt-free!\nMYTH 2: 'Budgets are complicated' → TRUTH: Start with 3 simple categories!\nMYTH 3: 'I don't make enough to budget' → TRUTH: The less you make, the MORE you need a budget!\nMYTH 4: 'Budgets are boring' → TRUTH: Budgets are your ticket to freedom!"
+          },
+          {
+            id: "50-30-20-masterclass",
             type: "visual",
-            title: "The 50/30/20 Rule",
-            content: "50% for Needs (rent, groceries, utilities), 30% for Wants (entertainment, dining out), 20% for Savings & Debt Payment",
+            title: "🎯 The 50/30/20 Rule: Your Financial Foundation",
+            content: "This isn't just a rule - it's a lifestyle framework used by millions of successful people worldwide. Here's how to make it work for YOU:",
             visual: {
               type: "chart",
               data: {
-                needs: 50,
-                wants: 30,
-                savings: 20
+                needs_50: {
+                  percentage: 50,
+                  description: "NEEDS (Survival)",
+                  examples: ["🏠 Housing", "🍎 Groceries", "⚡ Utilities", "🚗 Transportation", "📱 Phone"],
+                  rule: "If you can't live without it for 30 days, it's a need"
+                },
+                wants_30: {
+                  percentage: 30,
+                  description: "WANTS (Lifestyle)",
+                  examples: ["🍕 Dining Out", "🎬 Entertainment", "☕ Coffee Shops", "👕 Shopping", "🎮 Hobbies"],
+                  rule: "Everything that makes life enjoyable but isn't essential"
+                },
+                savings_20: {
+                  percentage: 20,
+                  description: "SAVINGS & DEBT (Future You)",
+                  examples: ["💰 Emergency Fund", "🏖️ Vacation Fund", "💳 Debt Payments", "📈 Investments", "🎯 Goals"],
+                  rule: "Pay your future self first - this is non-negotiable!"
+                }
               }
             }
           },
           {
-            id: "budget-example",
+            id: "budget-builder-interactive",
             type: "example",
-            title: "Real Budget Example",
-            content: "Alex earns $4,000/month. Using 50/30/20: Needs: $2,000 (rent $1,200, groceries $400, utilities $200, phone $80, insurance $120), Wants: $1,200 (entertainment $300, dining out $400, hobbies $500), Savings: $800 (emergency fund $400, retirement $400)"
+            title: "🛠️ Interactive Budget Builder",
+            content: "Let's build Maya's budget step-by-step!\n\n💼 MAYA'S SITUATION:\n• Monthly Income: $4,500\n• Age: 26, Marketing Manager\n• Goal: Save for apartment down payment\n\n📊 APPLYING 50/30/20:\n🏠 NEEDS (50% = $2,250):\n• Rent: $1,400\n• Groceries: $350\n• Utilities: $150\n• Phone: $75\n• Car Insurance: $125\n• Gas: $150\n\n🎯 WANTS (30% = $1,350):\n• Restaurants: $400\n• Entertainment: $300\n• Gym: $50\n• Coffee/Treats: $200\n• Shopping: $250\n• Miscellaneous: $150\n\n💰 SAVINGS (20% = $900):\n• Emergency Fund: $300\n• Down Payment: $400\n• Retirement: $200\n\n✨ RESULT: Balanced life + $4,800/year toward apartment!"
           },
           {
-            id: "budget-tips",
+            id: "customization-guide",
+            type: "step",
+            title: "🎨 Customize Your Budget Like a Pro",
+            content: "The 50/30/20 rule is your starting point, not your prison! Here's how to adapt it:\n\n📈 HIGH EARNERS: Try 50/20/30 (more savings)\n🏠 HIGH RENT AREAS: Try 60/25/15 (temporarily)\n💸 DEBT PAYOFF MODE: Try 50/20/30 (extra to debt)\n🎓 STUDENTS: Try 70/20/10 (survival mode)\n\n🔑 THE GOLDEN RULES:\n1. Needs should never exceed 60%\n2. Always save SOMETHING (even $25)\n3. Track for 3 months before major changes\n4. Adjust monthly based on reality"
+          },
+          {
+            id: "budgeting-tools",
             type: "tip",
-            title: "Budget Success Tips",
-            content: "Start with last month's spending to see your patterns. Be realistic - if you budget $100 for groceries but always spend $300, you're setting yourself up to fail. Adjust the budget to fit your real life."
+            title: "🔧 Modern Budgeting Tools (Choose Your Weapon!)",
+            content: "📱 SMARTPHONE APPS:\n• Mint (Free, automatic tracking)\n• YNAB (You Need A Budget - advanced)\n• EveryDollar (Dave Ramsey's app)\n\n📊 SPREADSHEETS:\n• Google Sheets (free templates)\n• Excel budget templates\n• Custom tracking sheets\n\n📝 OLD SCHOOL:\n• Pen and paper (surprisingly effective!)\n• Envelope method with cash\n• Bullet journal budgeting\n\n🎯 PRO TIP: The best budget is the one you'll actually use!"
+          },
+          {
+            id: "budget-psychology",
+            type: "text",
+            title: "🧠 The Psychology of Successful Budgeting",
+            content: "Your budget isn't just about math - it's about mindset! Successful budgeters think differently. They see a budget as permission to spend, not restriction. They automate what they can, and review what they must. They're not perfect, but they're consistent. Most importantly, they understand that budgeting is a skill that improves with practice."
+          },
+          {
+            id: "first-budget-challenge",
+            type: "example",
+            title: "🏁 Your First Budget Challenge",
+            content: "Ready to create your first budget? Here's your action plan:\n\n📋 WEEK 1: Track everything you spend (use your phone's notes app)\n📊 WEEK 2: Categorize last month's expenses into needs/wants\n🎯 WEEK 3: Apply 50/30/20 to your actual income\n🔄 WEEK 4: Adjust based on reality and set up tracking system\n\n🏆 REWARD: Once you complete this challenge, you'll have a working budget that fits YOUR life!"
+          },
+          {
+            id: "common-mistakes",
+            type: "warning",
+            title: "⚠️ Budget Killers (Avoid These Traps!)",
+            content: "🚫 PERFECTIONISM: Expecting to nail it immediately\n🚫 COMPLEXITY: Making 47 categories for everything\n🚫 INFLEXIBILITY: Never adjusting when life changes\n🚫 GUILT: Beating yourself up for overspending\n🚫 COMPARISON: Using someone else's budget percentages\n\n✅ INSTEAD: Start simple, be flexible, adjust monthly, celebrate progress!"
           }
         ],
         exercises: [
@@ -252,28 +387,90 @@ export const COURSE_CONTENT: CourseModule[] = [
         ],
         content: [
           {
-            id: "expense-audit",
+            id: "optimization-mindset",
             type: "text",
-            title: "The Expense Audit",
-            content: "Review your spending monthly. Look for patterns: Are you spending more on coffee than your phone bill? Small expenses add up quickly - that $5 daily coffee costs $150/month or $1,800/year!"
+            title: "🎯 Welcome to Budget Mastery Level!",
+            content: "You've mastered the basics, now it's time to become a budget optimization ninja! This isn't about cutting everything you enjoy - it's about getting MAXIMUM value from every dollar while still living the life you want. You're about to learn the advanced strategies that separate budget masters from budget beginners."
           },
           {
-            id: "cutting-expenses",
+            id: "expense-detective",
+            type: "example",
+            title: "🕵️ Become an Expense Detective",
+            content: "Time to investigate where your money REALLY goes! Meet Jordan's shocking discovery:\n\n📊 JORDAN'S MONTHLY INVESTIGATION:\n• Coffee shops: $127 (thought it was $50)\n• Subscription services: $89 (forgot half of them)\n• Impulse Amazon purchases: $156\n• Convenience store snacks: $73\n• Rideshare instead of walking: $94\n\n💰 TOTAL SURPRISE SPENDING: $539/month = $6,468/year!\n\nThat's a European vacation Jordan didn't know they were missing!"
+          },
+          {
+            id: "audit-framework",
             type: "step",
-            title: "Smart Ways to Cut Expenses",
-            content: "1. Cancel unused subscriptions 2. Cook more meals at home 3. Use the 24-hour rule for non-essential purchases 4. Negotiate bills (phone, insurance, internet) 5. Find free entertainment options"
+            title: "🔍 The 7-Day Money Audit Challenge",
+            content: "Transform into a financial detective with this systematic approach:\n\n📱 DAY 1-3: Track EVERYTHING\n• Use your phone to photograph every receipt\n• Note every digital transaction immediately\n• Include cash, cards, apps, subscriptions\n\n📊 DAY 4-5: Categorize & Analyze\n• Group expenses by type (coffee, subscriptions, etc.)\n• Calculate weekly totals for each category\n• Multiply by 4.3 to get monthly estimates\n\n🎯 DAY 6-7: Identify Patterns\n• When do you spend most? (stress, boredom, celebration?)\n• What triggers impulse purchases?\n• Which expenses surprised you most?\n\n🏆 RESULT: Complete money awareness in one week!"
           },
           {
-            id: "value-spending",
+            id: "cutting-strategies",
+            type: "visual",
+            title: "⚡ Smart Money-Saving Strategies",
+            content: "Choose your optimization weapons based on your lifestyle:",
+            visual: {
+              type: "comparison",
+              data: {
+                easy_wins: [
+                  "🔍 Subscription audit (save $50-200/month)",
+                  "📞 Negotiate bills (save $30-100/month)",
+                  "🍳 Cook 2 extra meals at home (save $80/month)",
+                  "☕ Make coffee at home 3 days/week (save $60/month)",
+                  "🚶 Walk/bike short trips (save $40/month)"
+                ],
+                lifestyle_changes: [
+                  "🏠 House-sit for free accommodation",
+                  "🚗 Car-share instead of owning",
+                  "📚 Library for books/movies/events",
+                  "🎯 Buy generic brands (save 20-40%)",
+                  "🛒 Shop with lists (avoid impulse buys)"
+                ],
+                advanced_moves: [
+                  "💳 Credit card rewards optimization",
+                  "🏦 High-yield savings accounts",
+                  "📱 Cashback apps and browser extensions",
+                  "🎟️ Employee discounts and perks",
+                  "💰 Side hustle for extra income"
+                ]
+              }
+            }
+          },
+          {
+            id: "value-based-spending",
             type: "tip",
-            title: "Spend on Your Values",
-            content: "Don't cut everything! Spend generously on what matters most to you. Love travel? Budget more for vacations and less for clothes. Value family time? Prioritize family activities over solo hobbies."
+            title: "💎 Value-Based Spending: The Secret Sauce",
+            content: "Stop cutting randomly! Align spending with your core values:\n\n🎯 THE VALUE FILTER:\n1. List your top 5 life values (family, travel, health, etc.)\n2. Review each expense: 'Does this support my values?'\n3. CUT expenses that don't align\n4. INCREASE spending on value-aligned items\n\n✨ EXAMPLE: Love travel but buying daily lattes?\n• Cut lattes ($150/month) → Travel fund ($1,800/year)\n• Result: European trip funded by coffee shop redirected spending!"
           },
           {
-            id: "budget-flexibility",
+            id: "negotiation-masterclass",
+            type: "example",
+            title: "💪 Bill Negotiation Masterclass",
+            content: "Transform from bill accepter to bill negotiator!\n\n📞 THE NEGOTIATION SCRIPT:\n1. Research competitor prices first\n2. Call during weekday business hours\n3. Be polite but persistent\n4. Ask: 'What's the best rate you can offer?'\n5. Mention you're considering switching\n6. Ask for supervisor if needed\n\n🏆 SUCCESS STORIES:\n• Phone bill: $85 → $45 (saved $480/year)\n• Internet: $70 → $45 (saved $300/year)\n• Insurance: $150 → $110 (saved $480/year)\n• Credit card rate: 18% → 12% (saved hundreds)\n\n💡 PRO TIP: Call annually - companies offer new customer rates to retain you!"
+          },
+          {
+            id: "automation-optimization",
+            type: "step",
+            title: "🤖 Automate Your Budget Optimization",
+            content: "Set up systems that save money while you sleep:\n\n💰 AUTOMATIC SAVINGS INCREASES:\n• Auto-transfer raises (save 50% of any pay increase)\n• Round-up apps (save spare change automatically)\n• Weekly micro-transfers ($25 every Friday)\n\n📱 MONEY-SAVING APPS:\n• Honey/Capital One Shopping (coupon automation)\n• Rakuten (cashback on purchases)\n• Trim (cancels forgotten subscriptions)\n• Mint/YNAB (spending alerts)\n\n🔄 MONTHLY OPTIMIZATION ROUTINE:\n• Review last month's spending (15 minutes)\n• Adjust next month's budget (10 minutes)\n• Check for new bills to negotiate (5 minutes)\n• Celebrate wins and plan improvements (5 minutes)"
+          },
+          {
+            id: "lifestyle-inflation",
             type: "warning",
-            title: "Keep Your Budget Flexible",
-            content: "Life changes, and your budget should too. Got a raise? Update your budget. Changed jobs? Adjust your categories. Emergency expense? That's what your emergency fund is for - don't abandon your whole budget over one unexpected cost."
+            title: "⚠️ Beware the Lifestyle Inflation Trap!",
+            content: "The #1 budget killer: spending more just because you earn more!\n\n🚨 WARNING SIGNS:\n• Got a raise? Immediately upgraded your lifestyle\n• Income increased but savings stayed the same\n• 'I deserve it' becomes your spending motto\n• Expenses magically match income every month\n\n✅ INFLATION DEFENSE STRATEGIES:\n• Save 50% of every raise before lifestyle changes\n• Wait 6 months before making major upgrades\n• Calculate hourly cost of purchases (that $200 dinner = 5 hours of work?)\n• Practice gratitude for what you already have"
+          },
+          {
+            id: "budget-mastery-challenge",
+            type: "example",
+            title: "🏆 30-Day Budget Mastery Challenge",
+            content: "Ready to become a budget optimization expert?\n\n📅 WEEK 1: Detective Work\n• Complete 7-day money audit\n• Identify top 3 spending surprises\n• Research one bill negotiation opportunity\n\n📅 WEEK 2: Quick Wins\n• Cancel one unused subscription\n• Cook 3 extra meals at home\n• Use cashback app for all purchases\n\n📅 WEEK 3: Value Alignment\n• Define your top 5 life values\n• Redirect one 'non-value' expense to savings\n• Automate one new savings transfer\n\n📅 WEEK 4: Optimization\n• Negotiate one monthly bill\n• Set up automatic budget review system\n• Plan next month's value-based spending\n\n🎁 REWARD: Average participants save $200-400/month!"
+          },
+          {
+            id: "advanced-tips",
+            type: "tip",
+            title: "🎭 Pro Budget Hacks (Insider Secrets)",
+            content: "Ready for the advanced course? Here are insider secrets:\n\n🎯 THE 24-HOUR RULE: Sleep on purchases over $50\n🛒 GROCERY GAME: Shop after meals, use lists, stick to perimeter\n💳 CREDIT CARD CYCLING: Use rewards cards, pay in full monthly\n📊 THE 1% RULE: Improve budget by 1% monthly (compound effect!)\n🎉 CELEBRATION FUND: Budget for fun so you don't feel deprived\n📱 PRICE COMPARISON: Check 3 sources before any purchase over $100\n\n🔮 MINDSET SHIFT: Think in annual costs ($5/day = $1,825/year!)"
           }
         ],
         exercises: [
