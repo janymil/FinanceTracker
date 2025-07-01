@@ -29,20 +29,20 @@ export function AnonymousHeader({ showHelpContact = true }: AnonymousHeaderProps
             <span className="text-xl font-bold text-gray-900 dark:text-white">FinanzerPro</span>
           </button>
           <div className="flex items-center space-x-4">
+            <button 
+              onClick={() => {
+                // Get current language from URL or localStorage
+                const currentPath = window.location.pathname;
+                const langMatch = currentPath.match(/^\/([a-z]{2})\//);
+                const currentLang = langMatch ? langMatch[1] : localStorage.getItem('preferredLanguage') || 'en';
+                setLocation(`/${currentLang}/features`);
+              }} 
+              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+            >
+              {t('nav.features')}
+            </button>
             {showHelpContact && (
               <>
-                <button 
-                  onClick={() => {
-                    // Get current language from URL or localStorage
-                    const currentPath = window.location.pathname;
-                    const langMatch = currentPath.match(/^\/([a-z]{2})\//);
-                    const currentLang = langMatch ? langMatch[1] : localStorage.getItem('preferredLanguage') || 'en';
-                    setLocation(`/${currentLang}/features`);
-                  }} 
-                  className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  {t('nav.features')}
-                </button>
                 <button 
                   onClick={() => setLocation('/help')} 
                   className="hidden sm:block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
