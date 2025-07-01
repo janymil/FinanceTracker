@@ -7,16 +7,31 @@ const router = Router();
 // Generate narration for demo steps
 router.post('/generate-narration', async (req, res) => {
   try {
-    const { text, language: rawLanguage } = req.body;
+    const { text, demoType, language: rawLanguage } = req.body;
     
-    if (!text) {
-      return res.status(400).json({ error: 'Text is required' });
+    let narrationText = text;
+    
+    // If no text provided but demoType is given, get script from demo data
+    if (!narrationText && demoType) {
+      const language = normalizeLanguageCode(rawLanguage || 'en-us');
+      const scripts = getDemoScripts();
+      const featureScript = scripts[demoType];
+      
+      if (featureScript && featureScript[language]) {
+        // Combine all script steps into one narration
+        const steps = featureScript[language];
+        narrationText = `${steps.intro} ${steps.upload} ${steps.analysis} ${steps.result}`;
+      }
+    }
+    
+    if (!narrationText) {
+      return res.status(400).json({ error: 'Text or demoType is required' });
     }
 
     const language = normalizeLanguageCode(rawLanguage || 'en-us') as 'en-us' | 'es-pe' | 'sk-sk';
     
     const audioBuffer = await elevenLabsService.generateAudio({
-      text,
+      text: narrationText,
       language,
       voice_options: {
         stability: 0.6,
