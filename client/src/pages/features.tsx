@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocation } from 'wouter';
 import { AppLayout } from '@/components/AppLayout';
+import { InteractiveDemoVideo } from '@/components/interactive-demo-video';
 import { 
   Brain, 
   Target, 
@@ -351,6 +352,36 @@ export default function FeaturesPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Interactive Video Demos */}
+        <div className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('features.video_demos.title', 'AI Feature Demonstrations')}</h2>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+              {t('features.video_demos.subtitle', 'Experience our AI features with interactive voice-guided demonstrations in your language.')}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <InteractiveDemoVideo
+              title={t('features.video_demos.categorization.title', 'Smart Categorization')}
+              description={t('features.video_demos.categorization.description', 'Watch how our AI intelligently categorizes your transactions based on merchant patterns and spending behavior.')}
+              demoType="categorization"
+            />
+            
+            <InteractiveDemoVideo
+              title={t('features.video_demos.tips.title', 'Financial Insights')}
+              description={t('features.video_demos.tips.description', 'Discover how AI analyzes your spending patterns to provide personalized financial recommendations.')}
+              demoType="tips"
+            />
+            
+            <InteractiveDemoVideo
+              title={t('features.video_demos.health.title', 'Health Analysis')}
+              description={t('features.video_demos.health.description', 'See how AI evaluates your financial health and provides actionable improvement strategies.')}
+              demoType="health"
+            />
+          </div>
+        </div>
 
         {/* Features Section */}
         <div className="mb-16">

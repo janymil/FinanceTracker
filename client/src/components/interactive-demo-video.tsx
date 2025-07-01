@@ -1,427 +1,294 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Play, Pause, VolumeX, Volume2, Repeat, Download, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Play, 
-  Pause, 
-  RotateCcw, 
-  Volume2, 
-  VolumeX,
-  Maximize,
-  ChevronLeft,
-  ChevronRight,
-  Target,
-  Lightbulb,
-  BarChart3,
-  Heart,
-  FileText,
-  TrendingUp,
-  Calendar,
-  Brain,
-  Sparkles
-} from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+// Helper function to get current language for API
+function getCurrentLanguageForAPI(): string {
+  if (typeof window !== 'undefined' && window.i18next) {
+    const lang = window.i18next.language;
+    return lang.startsWith('es') ? 'es-pe' : lang.startsWith('sk') ? 'sk-sk' : 'en-us';
+  }
+  return 'en-us';
+}
 
-interface DemoStep {
-  id: string;
+interface DemoVideoProps {
   title: string;
   description: string;
-  duration: number;
-  thumbnail: string;
-  voiceover: string;
-  actions: DemoAction[];
+  demoType: 'categorization' | 'tips' | 'health';
+  onComplete?: () => void;
 }
 
-interface DemoAction {
-  type: 'click' | 'type' | 'highlight' | 'result' | 'wait';
-  target?: string;
-  value?: string;
-  duration: number;
-  description: string;
-}
-
-interface VideoDemoProps {
-  featureId: string;
-  onClose?: () => void;
-}
-
-const InteractiveDemoVideo: React.FC<VideoDemoProps> = ({ featureId, onClose }) => {
-  const { t } = useTranslation();
+export function InteractiveDemoVideo({ title, description, demoType, onComplete }: DemoVideoProps) {
+  const { t, i18n } = useTranslation();
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [currentAction, setCurrentAction] = useState(0);
-  const [progress, setProgress] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [hasCompleted, setHasCompleted] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Demo data for each AI function
-  const demoScenarios = {
-    categorization: {
-      title: t('features.categorization.title'),
-      icon: Target,
-      color: 'from-blue-600 to-purple-700',
-      steps: [
-        {
-          id: 'upload',
-          title: 'Upload Receipt',
-          description: 'User uploads a Starbucks receipt',
-          duration: 3000,
-          thumbnail: '/demo-thumbnails/receipt-upload.jpg',
-          voiceover: 'Start by uploading any receipt or entering transaction details manually',
-          actions: [
-            { type: 'click', target: 'upload-button', duration: 500, description: 'Click upload button' },
-            { type: 'wait', duration: 1000, description: 'File picker opens' },
-            { type: 'click', target: 'receipt-file', duration: 500, description: 'Select receipt image' },
-            { type: 'wait', duration: 1000, description: 'Image processing begins' }
-          ]
+  const generateDemoNarration = async () => {
+    setIsGenerating(true);
+    setError(null);
+    
+    try {
+      const language = getCurrentLanguageForAPI();
+      const response = await fetch('/api/demo/generate-narration', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        {
-          id: 'ocr',
-          title: 'OCR Processing',
-          description: 'AI extracts text from the receipt',
-          duration: 4000,
-          thumbnail: '/demo-thumbnails/ocr-processing.jpg',
-          voiceover: 'Our advanced OCR technology instantly reads the receipt and extracts key information',
-          actions: [
-            { type: 'highlight', target: 'receipt-image', duration: 1000, description: 'Highlight receipt' },
-            { type: 'result', target: 'extracted-text', duration: 2000, description: 'Show extracted text' },
-            { type: 'wait', duration: 1000, description: 'Processing animation' }
-          ]
-        },
-        {
-          id: 'categorization',
-          title: 'AI Categorization',
-          description: 'AI analyzes merchant and suggests category',
-          duration: 5000,
-          thumbnail: '/demo-thumbnails/ai-analysis.jpg',
-          voiceover: 'AI analyzes the merchant name, amount, and your spending patterns to suggest the perfect category',
-          actions: [
-            { type: 'highlight', target: 'merchant-name', duration: 1500, description: 'Highlight Starbucks' },
-            { type: 'result', target: 'ai-thinking', duration: 2000, description: 'Show AI analysis' },
-            { type: 'result', target: 'suggested-category', duration: 1500, description: 'Food & Dining suggested' }
-          ]
-        },
-        {
-          id: 'save',
-          title: 'Save Transaction',
-          description: 'Transaction saved with 95% confidence',
-          duration: 2000,
-          thumbnail: '/demo-thumbnails/transaction-saved.jpg',
-          voiceover: 'The transaction is automatically categorized and saved to your financial records',
-          actions: [
-            { type: 'click', target: 'save-button', duration: 500, description: 'Click save' },
-            { type: 'result', target: 'success-message', duration: 1500, description: 'Transaction saved' }
-          ]
-        }
-      ]
-    },
-    tips: {
-      title: t('features.tips.title'),
-      icon: Lightbulb,
-      color: 'from-green-600 to-blue-700',
-      steps: [
-        {
-          id: 'dashboard',
-          title: 'Access AI Analysis',
-          description: 'Navigate to AI financial analysis',
-          duration: 3000,
-          thumbnail: '/demo-thumbnails/dashboard-nav.jpg',
-          voiceover: 'Access your personalized AI financial analysis from the dashboard',
-          actions: [
-            { type: 'click', target: 'ai-analysis-card', duration: 1000, description: 'Click AI Analysis' },
-            { type: 'wait', duration: 2000, description: 'Loading analysis' }
-          ]
-        },
-        {
-          id: 'analysis',
-          title: 'AI Generates Insights',
-          description: '4-section detailed financial analysis',
-          duration: 8000,
-          thumbnail: '/demo-thumbnails/ai-insights.jpg',
-          voiceover: 'AI analyzes your spending patterns, identifies optimization opportunities, and provides actionable recommendations',
-          actions: [
-            { type: 'result', target: 'spending-patterns', duration: 2000, description: 'Show spending analysis' },
-            { type: 'result', target: 'saving-strategies', duration: 2000, description: 'Show savings tips' },
-            { type: 'result', target: 'budget-optimization', duration: 2000, description: 'Show budget tips' },
-            { type: 'result', target: 'advanced-insights', duration: 2000, description: 'Show forecasts' }
-          ]
-        }
-      ]
-    },
-    health: {
-      title: t('features.health.title'),
-      icon: Heart,
-      color: 'from-pink-600 to-red-700',
-      steps: [
-        {
-          id: 'scoring',
-          title: 'Financial Health Calculation',
-          description: 'AI calculates comprehensive health score',
-          duration: 6000,
-          thumbnail: '/demo-thumbnails/health-score.jpg',
-          voiceover: 'AI analyzes multiple financial factors to calculate your comprehensive health score',
-          actions: [
-            { type: 'result', target: 'score-calculation', duration: 3000, description: 'Show score calculation' },
-            { type: 'result', target: 'final-score', duration: 2000, description: 'Display 78/100 score' },
-            { type: 'result', target: 'improvement-plan', duration: 1000, description: 'Show improvement tips' }
-          ]
-        }
-      ]
-    },
-    statements: {
-      title: t('features.statements.title'),
-      icon: FileText,
-      color: 'from-orange-600 to-yellow-700',
-      steps: [
-        {
-          id: 'upload-pdf',
-          title: 'Upload Bank Statement',
-          description: 'Upload PDF bank statement',
-          duration: 4000,
-          thumbnail: '/demo-thumbnails/pdf-upload.jpg',
-          voiceover: 'Upload your bank statement PDF and watch AI extract every transaction automatically',
-          actions: [
-            { type: 'click', target: 'pdf-upload', duration: 1000, description: 'Upload PDF' },
-            { type: 'wait', duration: 3000, description: 'PDF processing' }
-          ]
-        },
-        {
-          id: 'extraction',
-          title: 'AI Transaction Extraction',
-          description: 'Extract and categorize transactions',
-          duration: 7000,
-          thumbnail: '/demo-thumbnails/transaction-extraction.jpg',
-          voiceover: 'AI identifies transaction patterns, extracts amounts and dates, then categorizes each transaction',
-          actions: [
-            { type: 'result', target: 'transactions-found', duration: 3000, description: 'Show 47 transactions found' },
-            { type: 'result', target: 'categorization-progress', duration: 3000, description: 'Show auto-categorization' },
-            { type: 'result', target: 'completion', duration: 1000, description: 'Processing complete' }
-          ]
-        }
-      ]
+        body: JSON.stringify({
+          demoType,
+          language
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to generate narration: ${response.statusText}`);
+      }
+
+      const audioBlob = await response.blob();
+      const url = URL.createObjectURL(audioBlob);
+      setAudioUrl(url);
+      
+    } catch (err) {
+      console.error('Error generating narration:', err);
+      setError(err instanceof Error ? err.message : 'Failed to generate narration');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
-  const currentDemo = demoScenarios[featureId as keyof typeof demoScenarios];
-  const FeatureIcon = currentDemo?.icon || Target;
+  const togglePlay = () => {
+    if (audioRef.current && audioUrl) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const toggleMute = () => {
+    if (audioRef.current) {
+      audioRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const replay = () => {
+    if (audioRef.current && audioUrl) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+      setIsPlaying(true);
+      setHasCompleted(false);
+    }
+  };
+
+  const downloadAudio = () => {
+    if (audioUrl) {
+      const a = document.createElement('a');
+      a.href = audioUrl;
+      a.download = `finanzerpro-${demoType}-demo-${i18n.language}.mp3`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  };
+
+  const handleAudioEnd = () => {
+    setIsPlaying(false);
+    setHasCompleted(true);
+    onComplete?.();
+  };
 
   useEffect(() => {
-    if (isPlaying && currentDemo) {
-      const step = currentDemo.steps[currentStep];
-      const action = step.actions[currentAction];
+    const audio = audioRef.current;
+    if (audio) {
+      audio.addEventListener('ended', handleAudioEnd);
+      audio.addEventListener('play', () => setIsPlaying(true));
+      audio.addEventListener('pause', () => setIsPlaying(false));
       
-      intervalRef.current = setTimeout(() => {
-        if (currentAction < step.actions.length - 1) {
-          setCurrentAction(prev => prev + 1);
-        } else if (currentStep < currentDemo.steps.length - 1) {
-          setCurrentStep(prev => prev + 1);
-          setCurrentAction(0);
-        } else {
-          setIsPlaying(false);
-          setProgress(100);
-        }
-      }, action.duration);
+      return () => {
+        audio.removeEventListener('ended', handleAudioEnd);
+        audio.removeEventListener('play', () => setIsPlaying(true));
+        audio.removeEventListener('pause', () => setIsPlaying(false));
+      };
     }
+  }, [audioUrl]);
 
+  // Cleanup audio URL when component unmounts
+  useEffect(() => {
     return () => {
-      if (intervalRef.current) {
-        clearTimeout(intervalRef.current);
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
       }
     };
-  }, [isPlaying, currentStep, currentAction, currentDemo]);
-
-  const handlePlay = () => {
-    setIsPlaying(!isPlaying);
-  };
-
-  const handleRestart = () => {
-    setIsPlaying(false);
-    setCurrentStep(0);
-    setCurrentAction(0);
-    setProgress(0);
-  };
-
-  const handleStepChange = (direction: 'prev' | 'next') => {
-    setIsPlaying(false);
-    if (direction === 'prev' && currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
-    } else if (direction === 'next' && currentStep < currentDemo.steps.length - 1) {
-      setCurrentStep(prev => prev + 1);
-    }
-    setCurrentAction(0);
-  };
-
-  if (!currentDemo) {
-    return (
-      <Card className="w-full max-w-4xl mx-auto">
-        <CardContent className="p-8 text-center">
-          <p>Demo not available for this feature yet.</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const currentStepData = currentDemo.steps[currentStep];
-  const currentActionData = currentStepData.actions[currentAction];
+  }, [audioUrl]);
 
   return (
-    <Card className={`w-full max-w-6xl mx-auto ${isFullscreen ? 'fixed inset-4 z-50' : ''}`}>
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`p-3 bg-gradient-to-br ${currentDemo.color} text-white rounded-lg`}>
-              <FeatureIcon className="h-6 w-6" />
-            </div>
-            <div>
-              <CardTitle className="text-xl">{currentDemo.title}</CardTitle>
-              <p className="text-sm text-muted-foreground">Interactive Demo</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary">
-              {currentStep + 1} / {currentDemo.steps.length}
-            </Badge>
-            {onClose && (
-              <Button variant="ghost" size="sm" onClick={onClose}>
-                ×
-              </Button>
-            )}
-          </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        {/* Video Player Area */}
-        <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg overflow-hidden aspect-video">
-          {/* Demo Visualization */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center text-white p-8">
-              <div className="mb-4">
-                <FeatureIcon className="h-16 w-16 mx-auto mb-4 text-blue-400" />
-                <h3 className="text-2xl font-bold mb-2">{currentStepData.title}</h3>
-                <p className="text-gray-300 mb-4">{currentStepData.description}</p>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+      {/* Demo Visual Area */}
+      <div className="relative aspect-video bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
+        {/* Demo type specific visual */}
+        <div className="text-center p-8">
+          {demoType === 'categorization' && (
+            <div className="space-y-4">
+              <div className="w-32 h-32 mx-auto bg-blue-500 rounded-lg flex items-center justify-center">
+                <Sparkles className="h-16 w-16 text-white" />
               </div>
-              
-              {/* Current Action Indicator */}
-              <div className="bg-black/50 rounded-lg p-4 max-w-md mx-auto">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium">Now: {currentActionData.description}</span>
-                </div>
-                <div className="text-xs text-gray-400">{currentStepData.voiceover}</div>
-              </div>
+              <h4 className="text-xl font-semibold text-gray-800 dark:text-white">
+                {t('features.demo.categorization.title', 'AI Transaction Categorization')}
+              </h4>
             </div>
-          </div>
+          )}
           
-          {/* Play/Pause Overlay */}
-          {!isPlaying && (
-            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-              <Button 
-                variant="ghost" 
-                size="lg" 
-                onClick={handlePlay}
-                className="text-white hover:bg-white/20"
-              >
-                <Play className="h-12 w-12" />
-              </Button>
+          {demoType === 'tips' && (
+            <div className="space-y-4">
+              <div className="w-32 h-32 mx-auto bg-green-500 rounded-lg flex items-center justify-center">
+                <Sparkles className="h-16 w-16 text-white" />
+              </div>
+              <h4 className="text-xl font-semibold text-gray-800 dark:text-white">
+                {t('features.demo.tips.title', 'Financial Insights')}
+              </h4>
+            </div>
+          )}
+          
+          {demoType === 'health' && (
+            <div className="space-y-4">
+              <div className="w-32 h-32 mx-auto bg-purple-500 rounded-lg flex items-center justify-center">
+                <Sparkles className="h-16 w-16 text-white" />
+              </div>
+              <h4 className="text-xl font-semibold text-gray-800 dark:text-white">
+                {t('features.demo.health.title', 'Financial Health Analysis')}
+              </h4>
             </div>
           )}
         </div>
-
-        {/* Controls */}
-        <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={handlePlay}>
-              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleRestart}>
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setIsMuted(!isMuted)}>
-              {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-            </Button>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => handleStepChange('prev')}
-              disabled={currentStep === 0}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-sm px-2">{currentStepData.title}</span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => handleStepChange('next')}
-              disabled={currentStep === currentDemo.steps.length - 1}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setIsFullscreen(!isFullscreen)}
-            >
-              <Maximize className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-          <div 
-            className={`bg-gradient-to-r ${currentDemo.color} h-2 rounded-full transition-all duration-300`}
-            style={{ 
-              width: `${((currentStep * 100) + (currentAction * 100 / currentStepData.actions.length)) / currentDemo.steps.length}%` 
-            }}
-          ></div>
-        </div>
-
-        {/* Step Timeline */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {currentDemo.steps.map((step, index) => (
-            <div 
-              key={step.id}
-              className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                index === currentStep 
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
-              }`}
-              onClick={() => {
-                setCurrentStep(index);
-                setCurrentAction(0);
-                setIsPlaying(false);
-              }}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                  index === currentStep ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'
-                }`}>
-                  {index + 1}
-                </div>
-                <h4 className="font-medium text-sm">{step.title}</h4>
-              </div>
-              <p className="text-xs text-muted-foreground">{step.description}</p>
+        
+        {/* Audio Controls Overlay */}
+        {audioUrl && (
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black bg-opacity-30">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={togglePlay}
+                className="text-white hover:bg-white hover:bg-opacity-20"
+              >
+                {isPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8" />}
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleMute}
+                className="text-white hover:bg-white hover:bg-opacity-20"
+              >
+                {isMuted ? <VolumeX className="h-8 w-8" /> : <Volume2 className="h-8 w-8" />}
+              </Button>
+              
+              {hasCompleted && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={replay}
+                  className="text-white hover:bg-white hover:bg-opacity-20"
+                >
+                  <Repeat className="h-8 w-8" />
+                </Button>
+              )}
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={downloadAudio}
+                className="text-white hover:bg-white hover:bg-opacity-20"
+              >
+                <Download className="h-8 w-8" />
+              </Button>
             </div>
-          ))}
-        </div>
-
-        {/* CTA Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white rounded-lg p-6 text-center">
-          <h3 className="text-xl font-bold mb-2">{t('features.demo.signup_prompt')}</h3>
-          <p className="mb-4 opacity-90">Experience all 9 AI-powered features with your own financial data</p>
-          <Button variant="secondary" size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
-            {t('features.demo.signup_button')}
+          </div>
+        )}
+      </div>
+      
+      {/* Hidden audio element */}
+      {audioUrl && (
+        <audio
+          ref={audioRef}
+          src={audioUrl}
+          muted={isMuted}
+          preload="metadata"
+        />
+      )}
+      
+      <div className="p-6">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+          {title}
+        </h3>
+        <p className="text-gray-600 dark:text-gray-300 mb-4">
+          {description}
+        </p>
+        
+        {/* Generate Demo Button */}
+        {!audioUrl && !isGenerating && (
+          <Button
+            onClick={generateDemoNarration}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            {t('features.demo.generate', 'Generate AI Demo')}
           </Button>
-        </div>
-      </CardContent>
-    </Card>
+        )}
+        
+        {/* Loading State */}
+        {isGenerating && (
+          <div className="flex items-center justify-center p-4 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg">
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            <span className="text-blue-700 dark:text-blue-300 text-sm">
+              {t('features.demo.generating', 'Generating AI narration...')}
+            </span>
+          </div>
+        )}
+        
+        {/* Error State */}
+        {error && (
+          <div className="p-3 bg-red-50 dark:bg-red-900 dark:bg-opacity-20 rounded-lg">
+            <p className="text-red-700 dark:text-red-300 text-sm">
+              {t('features.demo.error', 'Error generating demo')}: {error}
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={generateDemoNarration}
+              className="mt-2"
+            >
+              {t('features.demo.retry', 'Try Again')}
+            </Button>
+          </div>
+        )}
+        
+        {/* Success State */}
+        {hasCompleted && (
+          <div className="mt-4 p-3 bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg">
+            <p className="text-green-700 dark:text-green-300 text-sm font-medium">
+              ✓ {t('features.demo.completed', 'Demo completed! This feature is available with your subscription.')}
+            </p>
+          </div>
+        )}
+        
+        {/* Audio Ready State */}
+        {audioUrl && !hasCompleted && (
+          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg">
+            <p className="text-blue-700 dark:text-blue-300 text-sm font-medium">
+              🎵 {t('features.demo.ready', 'Audio demo ready! Click play to start.')}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
   );
-};
-
-export default InteractiveDemoVideo;
+}
