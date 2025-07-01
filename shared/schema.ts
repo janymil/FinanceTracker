@@ -349,6 +349,46 @@ export const importLogs = pgTable("import_logs", {
   errorMessage: text("error_message"), // Store error details if import failed
 });
 
+// Financial literacy course progress tracking
+export const courseProgress = pgTable("course_progress", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  moduleId: varchar("module_id", { length: 50 }).notNull(),
+  levelId: varchar("level_id", { length: 50 }).notNull(),
+  completedAt: timestamp("completed_at"),
+  score: integer("score").default(0), // Points earned in this level
+  attempts: integer("attempts").default(0), // Number of attempts
+  bestScore: integer("best_score").default(0), // Highest score achieved
+  timeSpent: integer("time_spent").default(0), // Time in seconds
+  isCompleted: boolean("is_completed").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User achievements and badges
+export const userAchievements = pgTable("user_achievements", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  badgeId: varchar("badge_id", { length: 50 }).notNull(),
+  earnedAt: timestamp("earned_at").defaultNow(),
+  notified: boolean("notified").default(false), // Whether user has been notified
+});
+
+// User learning statistics
+export const learningStats = pgTable("learning_stats", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  totalXp: integer("total_xp").default(0),
+  currentStreak: integer("current_streak").default(0), // Days of consecutive learning
+  longestStreak: integer("longest_streak").default(0),
+  lastLearningDate: timestamp("last_learning_date"),
+  totalLessonsCompleted: integer("total_lessons_completed").default(0),
+  totalTimeSpent: integer("total_time_spent").default(0), // Total time in seconds
+  averageScore: decimal("average_score", { precision: 5, scale: 2 }).default("0.00"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Schema exports
 export type InsertUser = typeof users.$inferInsert;
 export type UpsertUser = typeof users.$inferInsert;
@@ -500,5 +540,33 @@ export const insertPaymentFailureSchema = createInsertSchema(paymentFailures).om
 // Type exports for payment failures
 export type PaymentFailure = typeof paymentFailures.$inferSelect;
 export type InsertPaymentFailure = z.infer<typeof insertPaymentFailureSchema>;
+
+// Course-related type exports
+export type CourseProgress = typeof courseProgress.$inferSelect;
+export type InsertCourseProgress = typeof courseProgress.$inferInsert;
+
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = typeof userAchievements.$inferInsert;
+
+export type LearningStats = typeof learningStats.$inferSelect;
+export type InsertLearningStats = typeof learningStats.$inferInsert;
+
+// Course insert schemas
+export const insertCourseProgressSchema = createInsertSchema(courseProgress).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
+  id: true,
+  earnedAt: true,
+});
+
+export const insertLearningStatsSchema = createInsertSchema(learningStats).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 // Removed: contextualFinancialTips schemas - using unified ai_cache system
