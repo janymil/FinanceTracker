@@ -57,6 +57,16 @@ export default function AdminAnalytics() {
   const [isUpdatingUser, setIsUpdatingUser] = useState(false);
   const [isDeletingUser, setIsDeletingUser] = useState(false);
   const [isSyncingUsers, setIsSyncingUsers] = useState(false);
+  
+  // Geo-blocking state
+  const [newBlockedCountry, setNewBlockedCountry] = useState({
+    countryCode: "",
+    countryName: "",
+    reason: ""
+  });
+  const [isBlockingCountry, setIsBlockingCountry] = useState(false);
+  const [editingMessage, setEditingMessage] = useState<{countryCode: string, message: string} | null>(null);
+  
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -105,6 +115,12 @@ export default function AdminAnalytics() {
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['admin-analytics-overview'],
     queryFn: () => adminFetch('/api/admin-analytics/overview'),
+    enabled: isAuthenticated,
+  });
+
+  const { data: geoConfig, isLoading: geoConfigLoading } = useQuery({
+    queryKey: ['admin-analytics-geo-config'],
+    queryFn: () => adminFetch('/api/admin-analytics/geo-blocking/config'),
     enabled: isAuthenticated,
   });
 
@@ -529,6 +545,141 @@ export default function AdminAnalytics() {
     );
   };
 
+  // Geo-blocking management functions
+  const blockCountry = async () => {
+    if (!newBlockedCountry.countryCode || !newBlockedCountry.countryName) {
+      toast({
+        title: "Error",
+        description: "Country code and name are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsBlockingCountry(true);
+    try {
+      const response = await fetch('/api/admin-analytics/geo-blocking/block', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newBlockedCountry),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to block country');
+      }
+
+      await queryClient.refetchQueries({ queryKey: ['admin-analytics-geo-config'] });
+      setNewBlockedCountry({ countryCode: "", countryName: "", reason: "" });
+      
+      toast({
+        title: "Success",
+        description: `Successfully blocked ${newBlockedCountry.countryName}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to block country",
+        variant: "destructive",
+      });
+    } finally {
+      setIsBlockingCountry(false);
+    }
+  };
+
+  const unblockCountry = async (countryCode: string) => {
+    try {
+      const response = await fetch(`/api/admin-analytics/geo-blocking/unblock/${countryCode}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to unblock country');
+      }
+
+      await queryClient.refetchQueries({ queryKey: ['admin-analytics-geo-config'] });
+      
+      toast({
+        title: "Success",
+        description: `Successfully unblocked ${countryCode}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to unblock country",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleGeoBlocking = async (enabled: boolean) => {
+    try {
+      const response = await fetch('/api/admin-analytics/geo-blocking/toggle', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ enabled }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to toggle geo-blocking');
+      }
+
+      await queryClient.refetchQueries({ queryKey: ['admin-analytics-geo-config'] });
+      
+      toast({
+        title: "Success",
+        description: `Geo-blocking ${enabled ? 'enabled' : 'disabled'}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to toggle geo-blocking",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateCustomMessage = async (countryCode: string, message: string) => {
+    try {
+      const response = await fetch(`/api/admin-analytics/geo-blocking/message/${countryCode}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update message');
+      }
+
+      await queryClient.refetchQueries({ queryKey: ['admin-analytics-geo-config'] });
+      setEditingMessage(null);
+      
+      toast({
+        title: "Success",
+        description: `Updated custom message for ${countryCode}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update message",
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredUsers = users.filter((user: User) => {
     const matchesSearch = !searchTerm || 
       user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -648,10 +799,11 @@ export default function AdminAnalytics() {
         </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 h-auto">
+        <TabsList className="grid w-full grid-cols-5 h-auto">
           <TabsTrigger value="overview" className="text-xs md:text-sm px-2 py-2">Overview</TabsTrigger>
           <TabsTrigger value="users" className="text-xs md:text-sm px-2 py-2">Users</TabsTrigger>
           <TabsTrigger value="ai-cache" className="text-xs md:text-sm px-2 py-2">AI Cache</TabsTrigger>
+          <TabsTrigger value="geo-blocking" className="text-xs md:text-sm px-2 py-2">Geo-Blocking</TabsTrigger>
           <TabsTrigger value="analytics" className="text-xs md:text-sm px-2 py-2">Analytics</TabsTrigger>
         </TabsList>
 
@@ -1303,6 +1455,189 @@ export default function AdminAnalytics() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="geo-blocking" className="space-y-6">
+          {/* Geo-blocking System Status */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-red-600" />
+                Geo-blocking System
+              </CardTitle>
+              <CardDescription>
+                Manage country-based access restrictions and security settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {geoConfigLoading ? (
+                <div className="text-center py-6">Loading geo-blocking configuration...</div>
+              ) : (
+                <div className="space-y-6">
+                  {/* System Toggle */}
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <h3 className="font-semibold">Geo-blocking Status</h3>
+                      <p className="text-sm text-gray-600">
+                        {geoConfig?.enabled ? 'System is actively blocking restricted countries' : 'System is disabled - all countries have access'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={geoConfig?.enabled ? "destructive" : "secondary"}>
+                        {geoConfig?.enabled ? 'ACTIVE' : 'DISABLED'}
+                      </Badge>
+                      <Button
+                        onClick={() => toggleGeoBlocking(!geoConfig?.enabled)}
+                        variant={geoConfig?.enabled ? "outline" : "default"}
+                        size="sm"
+                      >
+                        {geoConfig?.enabled ? 'Disable' : 'Enable'}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Add New Blocked Country */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Block New Country</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <Input
+                          placeholder="Country Code (e.g., IN)"
+                          value={newBlockedCountry.countryCode}
+                          onChange={(e) => setNewBlockedCountry(prev => ({ ...prev, countryCode: e.target.value.toUpperCase() }))}
+                          maxLength={2}
+                        />
+                        <Input
+                          placeholder="Country Name (e.g., India)"
+                          value={newBlockedCountry.countryName}
+                          onChange={(e) => setNewBlockedCountry(prev => ({ ...prev, countryName: e.target.value }))}
+                        />
+                        <Input
+                          placeholder="Reason (optional)"
+                          value={newBlockedCountry.reason}
+                          onChange={(e) => setNewBlockedCountry(prev => ({ ...prev, reason: e.target.value }))}
+                        />
+                        <Button 
+                          onClick={blockCountry}
+                          disabled={isBlockingCountry || !newBlockedCountry.countryCode || !newBlockedCountry.countryName}
+                          className="w-full"
+                        >
+                          {isBlockingCountry ? 'Blocking...' : 'Block Country'}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Currently Blocked Countries */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Blocked Countries</CardTitle>
+                      <CardDescription>
+                        {geoConfig?.blockedCountries?.length || 0} countries currently blocked
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {geoConfig?.blockedCountries?.length > 0 ? (
+                        <div className="space-y-3">
+                          {geoConfig.blockedCountries.map((country: any) => (
+                            <div key={country.code} className="flex items-center justify-between p-4 border rounded-lg">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <Badge variant="destructive">{country.code}</Badge>
+                                  <span className="font-semibold">{country.name}</span>
+                                  <span className="text-sm text-gray-500">
+                                    Blocked: {new Date(country.blockedAt).toLocaleDateString()}
+                                  </span>
+                                </div>
+                                {country.reason && (
+                                  <p className="text-sm text-gray-600">Reason: {country.reason}</p>
+                                )}
+                                <div className="mt-2">
+                                  <p className="text-xs text-gray-500">Custom Message:</p>
+                                  <p className="text-sm text-gray-700">
+                                    {geoConfig.customMessages?.[country.code] || 'This service is not available in your region.'}
+                                  </p>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setEditingMessage({
+                                      countryCode: country.code,
+                                      message: geoConfig.customMessages?.[country.code] || ''
+                                    })}
+                                    className="mt-1 h-6 px-2 text-xs"
+                                  >
+                                    Edit Message
+                                  </Button>
+                                </div>
+                              </div>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="destructive" size="sm">
+                                    Unblock
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Unblock {country.name}?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      This will allow access from {country.name} ({country.code}) immediately.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => unblockCountry(country.code)}>
+                                      Unblock Country
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          No countries are currently blocked
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Edit Custom Message Dialog */}
+          <Dialog open={!!editingMessage} onOpenChange={() => setEditingMessage(null)}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Edit Custom Message for {editingMessage?.countryCode}</DialogTitle>
+                <DialogDescription>
+                  This message will be shown to visitors from this country when they try to access the application.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <Label htmlFor="customMessage">Custom Message</Label>
+                <Input
+                  id="customMessage"
+                  value={editingMessage?.message || ''}
+                  onChange={(e) => setEditingMessage(prev => prev ? { ...prev, message: e.target.value } : null)}
+                  placeholder="This service is not available in your region."
+                />
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setEditingMessage(null)}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={() => editingMessage && updateCustomMessage(editingMessage.countryCode, editingMessage.message)}
+                  >
+                    Update Message
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
