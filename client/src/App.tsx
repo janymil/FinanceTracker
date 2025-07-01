@@ -89,6 +89,7 @@ function Router() {
         <Route path="/:lang/admin-analytics" component={AuthenticatedApp} />
         
         {/* Public pages with language prefix */}
+        <Route path="/:lang/features" component={FeaturesPage} />
         <Route path="/:lang/pricing" component={Pricing} />
         <Route path="/:lang/terms" component={TermsOfService} />
         <Route path="/:lang/terms-of-service" component={TermsOfService} />
@@ -211,6 +212,7 @@ export function AuthenticatedApp() {
               <Route path="/:lang/admin-analytics" component={AdminAnalytics} />
               
               {/* Public pages with language prefix for authenticated users */}
+              <Route path="/:lang/features" component={FeaturesPage} />
               <Route path="/:lang/pricing" component={Pricing} />
               <Route path="/:lang/terms-of-service" component={TermsOfService} />
               <Route path="/:lang/privacy-policy" component={PrivacyPolicy} />
