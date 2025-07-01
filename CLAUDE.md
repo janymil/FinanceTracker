@@ -54,7 +54,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### External Services Integration
 - **AI Processing**: External Fly.io service at `finanzerpro.fly.dev`
 - **File Storage**: Bunny.net CDN for receipts and exports
-- **OCR**: Local Tesseract.js (privacy-first, no external data transmission)
+- **OCR**: Dual system - Google Cloud Vision for receipt uploads, Local Tesseract.js for bank statements (privacy-first)
 - **Email**: SendGrid for notifications and alerts
 
 ## Language and Internationalization
