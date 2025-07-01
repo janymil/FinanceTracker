@@ -60,6 +60,7 @@ export default function Courses() {
   const [viewMode, setViewMode] = useState<'content' | 'exercises'>('content');
 
   const queryClient = useQueryClient();
+  const { t } = useTranslation('courses');
 
   // Icon mapping for modules
   const getIcon = (iconName: string) => {
@@ -509,9 +510,9 @@ export default function Courses() {
       {/* Header with stats */}
       <div className="flex flex-col lg:flex-row gap-6 mb-8">
         <div className="flex-1">
-          <h1 className="text-3xl font-bold mb-2">Financial Literacy Courses</h1>
+          <h1 className="text-3xl font-bold mb-2">{t('courses.title')}</h1>
           <p className="text-muted-foreground">
-            Build essential financial skills through interactive, bite-sized lessons powered by AI
+            {t('courses.subtitle')}
           </p>
         </div>
         
@@ -523,7 +524,7 @@ export default function Courses() {
                 <Zap className="w-5 h-5 text-yellow-500" />
               </div>
               <div className="text-2xl font-bold">{stats.totalXp}</div>
-              <div className="text-xs text-muted-foreground">Total XP</div>
+              <div className="text-xs text-muted-foreground">{t('courses.stats.totalXp')}</div>
             </CardContent>
           </Card>
           
@@ -533,7 +534,7 @@ export default function Courses() {
                 <Flame className="w-5 h-5 text-orange-500" />
               </div>
               <div className="text-2xl font-bold">{stats.currentStreak}</div>
-              <div className="text-xs text-muted-foreground">Day Streak</div>
+              <div className="text-xs text-muted-foreground">{t('courses.stats.dayStreak')}</div>
             </CardContent>
           </Card>
           
@@ -543,7 +544,7 @@ export default function Courses() {
                 <Trophy className="w-5 h-5 text-gold-500" />
               </div>
               <div className="text-2xl font-bold">{stats.longestStreak}</div>
-              <div className="text-xs text-muted-foreground">Best Streak</div>
+              <div className="text-xs text-muted-foreground">{t('courses.stats.bestStreak')}</div>
             </CardContent>
           </Card>
           
@@ -553,7 +554,7 @@ export default function Courses() {
                 <BookOpen className="w-5 h-5 text-blue-500" />
               </div>
               <div className="text-2xl font-bold">{stats.totalLessonsCompleted}</div>
-              <div className="text-xs text-muted-foreground">Lessons</div>
+              <div className="text-xs text-muted-foreground">{t('courses.stats.lessons')}</div>
             </CardContent>
           </Card>
         </div>
