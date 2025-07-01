@@ -24,7 +24,8 @@ import {
   Clock,
   DollarSign,
   Shield,
-  Zap
+  Zap,
+  FileText
 } from 'lucide-react';
 
 export default function FeaturesPage() {
@@ -47,6 +48,7 @@ export default function FeaturesPage() {
   const [budgetAdherence, setBudgetAdherence] = useState([80]);
   const [dataMonths, setDataMonths] = useState([12]);
   const [trendStrength, setTrendStrength] = useState([3]);
+  const [pagesInStatement, setPagesInStatement] = useState([5]);
   const [recsFollowed, setRecsFollowed] = useState([4]);
   const [contextFactors, setContextFactors] = useState([5]);
   const [primaryScore, setPrimaryScore] = useState([75]);
@@ -154,15 +156,15 @@ export default function FeaturesPage() {
       ]
     },
     {
-      id: 'predictions',
-      icon: TrendingUp,
-      title: 'Expense Predictions',
-      badge: 'Premium',
-      description: 'Advanced predictive analytics that forecast future expense patterns based on your historical data, seasonal trends, and business growth indicators.',
+      id: 'statements',
+      icon: FileText,
+      title: 'AI Bank Statement Parser',
+      badge: 'All Plans',
+      description: 'Advanced OCR and AI-powered extraction of transactions from bank statement PDFs and images with multilingual support and 95%+ accuracy in transaction detection.',
       benefits: [
-        { title: 'Future Forecasting', desc: 'Predict expenses up to 6 months ahead' },
-        { title: 'Seasonal Analysis', desc: 'Account for seasonal business variations' },
-        { title: 'Budget Planning', desc: 'Data-driven budget creation for future periods' }
+        { title: 'PDF Processing', desc: 'Extract transactions from any bank statement format' },
+        { title: 'OCR Technology', desc: 'Local processing with privacy-first approach' },
+        { title: 'Smart Categorization', desc: 'Automatically categorize extracted transactions' }
       ]
     },
     {
@@ -222,6 +224,10 @@ export default function FeaturesPage() {
 
   const calculatePredictionAccuracy = () => {
     return Math.min(95, Math.floor(60 + (dataMonths[0] * 1.2)));
+  };
+
+  const calculateExtractedTransactions = () => {
+    return Math.floor(pagesInStatement[0] * 8.5); // Average 8.5 transactions per page
   };
 
   return (
