@@ -6,7 +6,7 @@ declare global {
   }
 }
 
-// Initialize Google Analytics - Production Only
+// Initialize Google Analytics and Google Ads - Production Only
 export const initGA = () => {
   // Only initialize in production
   if (window.location.hostname !== 'finanzerpro.com') {
@@ -14,28 +14,22 @@ export const initGA = () => {
   }
 
   const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
-  const conversionId = 'AW-17290659470'; // Second Google Analytics tracking
+  const googleAdsId = 'AW-17290659470'; // Google Ads conversion tracking
 
-  // Add Google Analytics script to the head
+  // Add single gtag script (handles both GA and Google Ads)
   const script1 = document.createElement('script');
   script1.async = true;
-  script1.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+  script1.src = `https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`;
   document.head.appendChild(script1);
 
-  // Add Google Ads conversion script
-  const script1b = document.createElement('script');
-  script1b.async = true;
-  script1b.src = `https://www.googletagmanager.com/gtag/js?id=${conversionId}`;
-  document.head.appendChild(script1b);
-
-  // Initialize gtag with both tracking codes
+  // Initialize gtag with both GA and Google Ads
   const script2 = document.createElement('script');
   script2.textContent = `
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', '` + measurementId.replace(/['"\\]/g, '') + `');
-    gtag('config', '` + conversionId + `');
+    gtag('config', '` + googleAdsId + `');
   `;
   document.head.appendChild(script2);
 };
@@ -46,16 +40,34 @@ export const trackPageView = (url: string) => {
   if (typeof window === 'undefined' || !window.gtag || window.location.hostname !== 'finanzerpro.com') return;
   
   const measurementId = 'G-PRRBGDT20Q';
-  const conversionId = 'AW-17290659470';
   
-  // Track page view for both Analytics properties
+  // Track page view for Google Analytics
   window.gtag('config', measurementId, {
     page_path: url
   });
+};
+
+// Track Google Ads conversions
+export const trackConversion = (conversionLabel?: string, value?: number, currency?: string) => {
+  // Only track in production
+  if (typeof window === 'undefined' || !window.gtag || window.location.hostname !== 'finanzerpro.com') return;
   
-  window.gtag('config', conversionId, {
-    page_path: url
-  });
+  const googleAdsId = 'AW-17290659470';
+  
+  // Basic conversion tracking
+  const conversionData: any = {
+    send_to: conversionLabel ? `${googleAdsId}/${conversionLabel}` : googleAdsId
+  };
+  
+  // Add value and currency if provided
+  if (value !== undefined) {
+    conversionData.value = value;
+  }
+  if (currency) {
+    conversionData.currency = currency;
+  }
+  
+  window.gtag('event', 'conversion', conversionData);
 };
 
 // Track events
