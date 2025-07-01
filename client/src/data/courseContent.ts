@@ -61,7 +61,6 @@ export const COURSE_CONTENT: CourseModule[] = [
     estimatedTime: "15 minutes",
     difficulty: "Beginner",
     totalLevels: 1,
-    totalLevels: 1,
     levels: [
       {
         id: "level-1",

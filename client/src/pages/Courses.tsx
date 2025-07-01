@@ -27,7 +27,6 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { COURSE_CONTENT, type CourseModule, type Exercise, type CourseLevel, type ContentBlock } from "@/data/courseContent";
-import { Calculator } from "@/components/Calculator";
 
 // Extended types for user progress
 interface CourseLevelWithProgress extends CourseLevel {
@@ -60,10 +59,10 @@ export default function Courses() {
 
   const queryClient = useQueryClient();
 
-  // Icon mapping for modules and achievements
+  // Icon mapping for modules
   const getIcon = (iconName: string) => {
     const iconMap: Record<string, any> = {
-      Calculator: Calculator,
+      Calculator: BookOpen,
       ShoppingCart: ShoppingCart,
       TrendingUp: TrendingUp,
       Star: Star,
@@ -76,7 +75,6 @@ export default function Courses() {
 
   // Use static course content
   const modules: CourseModule[] = COURSE_CONTENT;
-  const achievements: Achievement[] = ACHIEVEMENT_BADGES;
   
   // Fetch user progress from backend
   const { data: progressData, isLoading: progressLoading } = useQuery({
@@ -244,11 +242,7 @@ export default function Courses() {
         isCompleted
       });
 
-      // Show notifications for new achievements
-      if (result.newBadges && result.newBadges.length > 0) {
-        // You could add a toast notification system here
-        console.log('New achievements unlocked:', result.newBadges);
-      }
+      // Exercise completed successfully
 
       setShowResults(true);
     } catch (error) {
@@ -392,20 +386,9 @@ export default function Courses() {
               ))}
             </div>
           ) : (
-            // Fallback to regular content if no tabs
-            <div className="space-y-6 mb-8">
-              {currentLevel.content.map((block, index) => (
-                <Card key={index}>
-                  <CardContent className="p-6">
-                    {block.type === 'text' && (
-                      <div>
-                        {block.title && <h3 className="text-lg font-semibold mb-3">{block.title}</h3>}
-                        <p className="text-base leading-relaxed">{block.content}</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+            // Show message if no tabs available
+            <div className="text-center py-8">
+              <p className="text-gray-600">Content is organized in tabs above. Please select a tab to view the lesson content.</p>
             </div>
           )}
 
