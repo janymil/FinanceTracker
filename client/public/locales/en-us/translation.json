@@ -3406,6 +3406,28 @@
         "sk": "Slovak"
       }
     },
+    "video_demos": {
+      "title": "AI Feature Demonstrations",
+      "subtitle": "Experience our AI features with interactive voice-guided demonstrations in your language.",
+      "categorization": {
+        "title": "Smart Categorization",
+        "description": "Watch how our AI intelligently categorizes your transactions based on merchant patterns and spending behavior."
+      },
+      "tips": {
+        "title": "Financial Insights", 
+        "description": "Discover how AI analyzes your spending patterns to provide personalized financial recommendations."
+      },
+      "health": {
+        "title": "Health Analysis",
+        "description": "See how AI evaluates your financial health and provides actionable improvement strategies."
+      },
+      "generate": "Generate AI Demo",
+      "generating": "Generating AI narration...",
+      "ready": "Audio demo ready! Click play to start.",
+      "completed": "Demo completed! This feature is available with your subscription.",
+      "error": "Error generating demo",
+      "retry": "Try Again"
+    },
     "section": {
       "title": "Complete AI Feature Suite",
       "subtitle": "Explore each of our 9 intelligent AI functions designed to revolutionize your financial management"

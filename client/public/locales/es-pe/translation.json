@@ -3468,6 +3468,28 @@
         "sk": "Eslovaco"
       }
     },
+    "video_demos": {
+      "title": "Demostraciones de Funciones de IA",
+      "subtitle": "Experimenta nuestras funciones de IA con demostraciones interactivas guiadas por voz en tu idioma.",
+      "categorization": {
+        "title": "Categorización Inteligente",
+        "description": "Observa cómo nuestra IA categoriza inteligentemente tus transacciones basándose en patrones de comerciantes y comportamiento de gastos."
+      },
+      "tips": {
+        "title": "Información Financiera", 
+        "description": "Descubre cómo la IA analiza tus patrones de gastos para proporcionar recomendaciones financieras personalizadas."
+      },
+      "health": {
+        "title": "Análisis de Salud",
+        "description": "Ve cómo la IA evalúa tu salud financiera y proporciona estrategias de mejora accionables."
+      },
+      "generate": "Generar Demo de IA",
+      "generating": "Generando narración de IA...",
+      "ready": "¡Demo de audio listo! Haz clic en reproducir para comenzar.",
+      "completed": "¡Demo completado! Esta función está disponible con tu suscripción.",
+      "error": "Error generando demo",
+      "retry": "Intentar de Nuevo"
+    },
     "section": {
       "title": "Suite Completa de Funciones IA",
       "subtitle": "Explora cada una de nuestras 9 funciones inteligentes de IA diseñadas para revolucionar tu gestión financiera"

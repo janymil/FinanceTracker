@@ -3587,6 +3587,28 @@
         "sk": "Slovenčina"
       }
     },
+    "video_demos": {
+      "title": "Demonštrácie AI funkcií",
+      "subtitle": "Zažite naše AI funkcie s interaktívnymi hlasovými demonštráciami vo vašom jazyku.",
+      "categorization": {
+        "title": "Inteligentná kategorizácia",
+        "description": "Sledujte ako naša AI inteligentne kategorizuje vaše transakcie na základe vzorcov obchodníkov a správania výdajov."
+      },
+      "tips": {
+        "title": "Finančné poznatky", 
+        "description": "Objavte ako AI analyzuje vaše vzorce výdajov na poskytnutie personalizovaných finančných odporúčaní."
+      },
+      "health": {
+        "title": "Analýza zdravia",
+        "description": "Pozrite sa ako AI hodnotí vaše finančné zdravie a poskytuje akčné stratégie na zlepšenie."
+      },
+      "generate": "Generovať AI demo",
+      "generating": "Generuje sa AI rozprávanie...",
+      "ready": "Audio demo pripravené! Kliknite na prehrávanie pre začiatok.",
+      "completed": "Demo dokončené! Táto funkcia je dostupná s vaším predplatným.",
+      "error": "Chyba pri generovaní dema",
+      "retry": "Skúsiť znovu"
+    },
     "section": {
       "title": "Kompletná AI funkčná sada",
       "subtitle": "Preskúmajte každú z našich 9 inteligentných AI funkcií navrhnutých na revolúciu vo vašom finančnom riadení"

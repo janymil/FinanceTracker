@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 // Helper function to get current language for API
 function getCurrentLanguageForAPI(): string {
-  if (typeof window !== 'undefined' && window.i18next) {
-    const lang = window.i18next.language;
+  if (typeof window !== 'undefined' && (window as any).i18next) {
+    const lang = (window as any).i18next.language;
     return lang.startsWith('es') ? 'es-pe' : lang.startsWith('sk') ? 'sk-sk' : 'en-us';
   }
   return 'en-us';
