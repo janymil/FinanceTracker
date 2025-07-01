@@ -141,3 +141,53 @@
 }
 
 /* Clerk forms use default styling for proper display of all form elements including terms text */
+
+/* Clerk UserProfile styling fixes for button visibility */
+.clerk-profile-mobile {
+  /* Ensure proper container sizing */
+  min-height: 600px;
+  overflow: visible !important;
+}
+
+/* Fix Clerk UserProfile component styling to ensure buttons are visible */
+.clerk-profile-mobile .cl-userProfile-root {
+  width: 100% !important;
+  max-width: none !important;
+  overflow: visible !important;
+}
+
+.clerk-profile-mobile .cl-profileSection {
+  overflow: visible !important;
+  min-height: auto !important;
+}
+
+/* Ensure Clerk form buttons and actions are visible */
+.clerk-profile-mobile .cl-formButtonPrimary,
+.clerk-profile-mobile .cl-button,
+.clerk-profile-mobile .cl-footerAction,
+.clerk-profile-mobile .cl-formFieldAction {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+
+/* Fix any clipped content in Clerk forms */
+.clerk-profile-mobile .cl-card,
+.clerk-profile-mobile .cl-main {
+  overflow: visible !important;
+  min-height: auto !important;
+}
+
+/* Ensure proper spacing for mobile */
+@media (max-width: 768px) {
+  .clerk-profile-mobile {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .clerk-profile-mobile .cl-userProfile-root {
+    padding: 1rem !important;
+  }
+}

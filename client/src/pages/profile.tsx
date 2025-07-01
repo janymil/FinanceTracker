@@ -127,10 +127,18 @@ export default function ProfilePage() {
                 </p>
               </div>
 
-              {/* Clerk UserProfile with improved mobile styling */}
-              <div className="clerk-profile-mobile w-full overflow-x-auto">
-                <div className="min-w-[600px] md:min-w-0">
-                  <UserProfile />
+              {/* Clerk UserProfile with improved styling for button visibility */}
+              <div className="clerk-profile-mobile w-full">
+                <div className="min-w-[600px] md:min-w-0 overflow-visible">
+                  <UserProfile 
+                    appearance={{
+                      elements: {
+                        card: "overflow-visible",
+                        rootBox: "overflow-visible",
+                        profileSection: "overflow-visible"
+                      }
+                    }}
+                  />
                 </div>
               </div>
             </CardContent>
