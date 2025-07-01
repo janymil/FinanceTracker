@@ -51,6 +51,12 @@ const multilingualContent: Record<string, Record<string, any>> = {
       description: 'Learn about how FinanzerPro uses cookies to enhance your experience and protect your privacy.',
       keywords: 'cookie policy, cookies, privacy, website functionality',
       lang: 'en'
+    },
+    '/features': {
+      title: 'AI-Powered Financial Features - FinanzerPro',
+      description: 'Discover 9 intelligent AI features that transform your business finances: smart categorization, predictive analytics, financial health scoring, and personalized recommendations.',
+      keywords: 'AI features, financial intelligence, smart categorization, predictive analytics, financial health, business finance, automated insights',
+      lang: 'en'
     }
   },
   'es': {
@@ -101,6 +107,12 @@ const multilingualContent: Record<string, Record<string, any>> = {
       description: 'Aprende sobre cómo FinanzerPro utiliza cookies para mejorar tu experiencia y proteger tu privacidad.',
       keywords: 'política de cookies, cookies, privacidad, funcionalidad del sitio web',
       lang: 'es'
+    },
+    '/features': {
+      title: 'Funciones Financieras Impulsadas por IA - FinanzerPro',
+      description: 'Descubre 9 funciones inteligentes de IA que transforman las finanzas de tu negocio: categorización inteligente, análisis predictivo, puntuación de salud financiera y recomendaciones personalizadas.',
+      keywords: 'funciones IA, inteligencia financiera, categorización inteligente, análisis predictivo, salud financiera, finanzas empresariales, insights automatizados',
+      lang: 'es'
     }
   },
   'sk': {
@@ -150,6 +162,12 @@ const multilingualContent: Record<string, Record<string, any>> = {
       title: 'Pravidlá Používania Cookies - FinanzerPro',
       description: 'Dozviete sa o tom, ako FinanzerPro používa cookies na zlepšenie vašej skúsenosti a ochranu vášho súkromia.',
       keywords: 'pravidlá cookies, cookies, súkromie, funkcionalita webovej stránky',
+      lang: 'sk'
+    },
+    '/features': {
+      title: 'Finančné Funkcie Poháňané AI - FinanzerPro',
+      description: 'Objavte 9 inteligentných AI funkcií, ktoré transformujú financie vášho podnikania: inteligentná kategorizácia, prediktívna analytika, hodnotenie finančného zdravia a personalizované odporúčania.',
+      keywords: 'AI funkcie, finančná inteligencia, inteligentná kategorizácia, prediktívna analytika, finančné zdravie, podnikové financie, automatizované poznatky',
       lang: 'sk'
     }
   }
@@ -260,9 +278,9 @@ export function renderPageForCrawler(route: string, language: string = 'en'): st
 // Helper functions for multilingual content
 function getNavContent(lang: string): string {
   const navItems = {
-    'en': { home: 'Home', pricing: 'Pricing', help: 'Help', contact: 'Contact' },
-    'es': { home: 'Inicio', pricing: 'Precios', help: 'Ayuda', contact: 'Contacto' },
-    'sk': { home: 'Domov', pricing: 'Ceny', help: 'Pomoc', contact: 'Kontakt' }
+    'en': { home: 'Home', features: 'Features', pricing: 'Pricing', help: 'Help', contact: 'Contact' },
+    'es': { home: 'Inicio', features: 'Funciones', pricing: 'Precios', help: 'Ayuda', contact: 'Contacto' },
+    'sk': { home: 'Domov', features: 'Funkcie', pricing: 'Ceny', help: 'Pomoc', contact: 'Kontakt' }
   };
   
   const items = navItems[lang as keyof typeof navItems] || navItems['en'];
@@ -270,6 +288,7 @@ function getNavContent(lang: string): string {
   
   return `
     <a href="${langPrefix}/">${items.home}</a>
+    <a href="${langPrefix}/features">${items.features}</a>
     <a href="${langPrefix}/pricing">${items.pricing}</a>
     <a href="${langPrefix}/help">${items.help}</a>
     <a href="${langPrefix}/contact">${items.contact}</a>
@@ -485,6 +504,44 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <li>Privacy control</li>
             </ul>
         </section>
+      `,
+      '/features': `
+        <section>
+            <h1>AI-Powered Financial Intelligence</h1>
+            <p>Transform your business finances with 9 intelligent AI features that learn, adapt, and optimize your financial decisions in real-time.</p>
+            
+            <h2>Core AI Features</h2>
+            <ul>
+                <li><strong>Smart Expense Categorization</strong> - Automatically categorizes transactions with machine learning</li>
+                <li><strong>Predictive Financial Analytics</strong> - Forecasts spending patterns and cash flow trends</li>
+                <li><strong>Financial Health Scoring</strong> - Real-time assessment of your financial wellness</li>
+                <li><strong>Intelligent Budget Recommendations</strong> - AI-driven budget optimization suggestions</li>
+                <li><strong>Expense Prediction Engine</strong> - Anticipates future expenses based on historical data</li>
+                <li><strong>Trend Analysis & Insights</strong> - Identifies spending patterns and optimization opportunities</li>
+                <li><strong>Daily Financial Recommendations</strong> - Personalized daily tips for financial improvement</li>
+                <li><strong>Contextual Financial Tips</strong> - Smart advice based on your current financial situation</li>
+                <li><strong>Advanced Spending Analytics</strong> - Deep insights into your financial behavior</li>
+            </ul>
+            
+            <h2>Key Benefits</h2>
+            <ul>
+                <li>Automate financial decision making</li>
+                <li>Reduce manual categorization by 95%</li>
+                <li>Improve financial health scores</li>
+                <li>Predict and prevent overspending</li>
+                <li>Get personalized financial guidance</li>
+                <li>Available in 3 languages</li>
+                <li>Real-time processing and insights</li>
+            </ul>
+            
+            <h2>Industry-Leading Security</h2>
+            <ul>
+                <li>AES-256 encryption for sensitive data</li>
+                <li>Local OCR processing - no external data transmission</li>
+                <li>Privacy-first AI analysis</li>
+                <li>GDPR and financial compliance standards</li>
+            </ul>
+        </section>
       `
     },
     'es': {
@@ -684,6 +741,44 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <li>Control de privacidad</li>
             </ul>
         </section>
+      `,
+      '/features': `
+        <section>
+            <h1>Inteligencia Financiera Impulsada por IA</h1>
+            <p>Transforma las finanzas de tu negocio con 9 funciones inteligentes de IA que aprenden, se adaptan y optimizan tus decisiones financieras en tiempo real.</p>
+            
+            <h2>Funciones Core de IA</h2>
+            <ul>
+                <li><strong>Categorización Inteligente de Gastos</strong> - Categoriza automáticamente transacciones con aprendizaje automático</li>
+                <li><strong>Análisis Financiero Predictivo</strong> - Pronostica patrones de gasto y tendencias de flujo de efectivo</li>
+                <li><strong>Puntuación de Salud Financiera</strong> - Evaluación en tiempo real de tu bienestar financiero</li>
+                <li><strong>Recomendaciones Inteligentes de Presupuesto</strong> - Sugerencias de optimización de presupuesto impulsadas por IA</li>
+                <li><strong>Motor de Predicción de Gastos</strong> - Anticipa gastos futuros basado en datos históricos</li>
+                <li><strong>Análisis de Tendencias e Insights</strong> - Identifica patrones de gasto y oportunidades de optimización</li>
+                <li><strong>Recomendaciones Financieras Diarias</strong> - Consejos personalizados diarios para mejora financiera</li>
+                <li><strong>Consejos Financieros Contextuales</strong> - Asesoramiento inteligente basado en tu situación financiera actual</li>
+                <li><strong>Análisis Avanzado de Gastos</strong> - Insights profundos sobre tu comportamiento financiero</li>
+            </ul>
+            
+            <h2>Beneficios Clave</h2>
+            <ul>
+                <li>Automatiza la toma de decisiones financieras</li>
+                <li>Reduce la categorización manual en un 95%</li>
+                <li>Mejora las puntuaciones de salud financiera</li>
+                <li>Predice y previene el gasto excesivo</li>
+                <li>Obtén orientación financiera personalizada</li>
+                <li>Disponible en 3 idiomas</li>
+                <li>Procesamiento e insights en tiempo real</li>
+            </ul>
+            
+            <h2>Seguridad Líder en la Industria</h2>
+            <ul>
+                <li>Cifrado AES-256 para datos sensibles</li>
+                <li>Procesamiento OCR local - sin transmisión externa de datos</li>
+                <li>Análisis de IA que prioriza la privacidad</li>
+                <li>Estándares de cumplimiento GDPR y financiero</li>
+            </ul>
+        </section>
       `
     },
     'sk': {
@@ -881,6 +976,44 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <li>Súhlas s cookies</li>
                 <li>Vymazanie cookies</li>
                 <li>Kontrola súkromia</li>
+            </ul>
+        </section>
+      `,
+      '/features': `
+        <section>
+            <h1>Finančná Inteligencia Poháňaná AI</h1>
+            <p>Transformujte financie vášho podnikania s 9 inteligentnými AI funkciami, ktoré sa učia, prispôsobujú a optimalizujú vaše finančné rozhodnutia v reálnom čase.</p>
+            
+            <h2>Základné AI Funkcie</h2>
+            <ul>
+                <li><strong>Inteligentná Kategorizácia Výdavkov</strong> - Automaticky kategorizuje transakcie pomocou strojového učenia</li>
+                <li><strong>Prediktívna Finančná Analytika</strong> - Predpovedá vzorce míňania a trendy peňažných tokov</li>
+                <li><strong>Hodnotenie Finančného Zdravia</strong> - Hodnotenie vášho finančného blahobytu v reálnom čase</li>
+                <li><strong>Inteligentné Rozpočtové Odporúčania</strong> - Návrhy optimalizácie rozpočtu poháňané AI</li>
+                <li><strong>Engine Predikcie Výdavkov</strong> - Predpovedá budúce výdavky na základe historických údajov</li>
+                <li><strong>Analýza Trendov a Poznatky</strong> - Identifikuje vzorce míňania a príležitosti na optimalizáciu</li>
+                <li><strong>Denné Finančné Odporúčania</strong> - Personalizované denné tipy na zlepšenie financií</li>
+                <li><strong>Kontextové Finančné Tipy</strong> - Inteligentné poradenstvo na základe vašej aktuálnej finančnej situácie</li>
+                <li><strong>Pokročilá Analytika Míňania</strong> - Hlboké poznatky o vašom finančnom správaní</li>
+            </ul>
+            
+            <h2>Kľúčové Výhody</h2>
+            <ul>
+                <li>Automatizácia finančného rozhodovania</li>
+                <li>Zníženie manuálnej kategorizácie o 95%</li>
+                <li>Zlepšenie skóre finančného zdravia</li>
+                <li>Predpovedanie a prevencia nadmerného míňania</li>
+                <li>Získanie personalizovaného finančného vedenia</li>
+                <li>Dostupné v 3 jazykoch</li>
+                <li>Spracovanie a poznatky v reálnom čase</li>
+            </ul>
+            
+            <h2>Bezpečnosť na Úrovni Priemyslu</h2>
+            <ul>
+                <li>AES-256 šifrovanie pre citlivé údaje</li>
+                <li>Lokálne OCR spracovanie - žiadny externý prenos údajov</li>
+                <li>AI analýza s prioritou súkromia</li>
+                <li>GDPR a finančné štandardy compliance</li>
             </ul>
         </section>
       `
