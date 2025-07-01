@@ -3387,6 +3387,76 @@
         "ai_availability": "AI Availability"
       }
     },
+    "tools": {
+      "title": "Free Financial Tools",
+      "subtitle": "Get instant financial insights without signing up. Try our affordability calculator to make smarter spending decisions."
+    },
+    "demo_result": {
+      "title": "AI Analysis Result",
+      "placeholder": "Enter transaction details to see AI categorization in action...",
+      "label_language": "Language"
+    },
+    "multilingual": {
+      "title": "Global Financial Intelligence",
+      "subtitle": "Our AI speaks your language and understands your cultural financial context",
+      "english": {
+        "title": "English",
+        "description": "Complete AI analysis in English with US business context and financial terminology"
+      },
+      "spanish": {
+        "title": "Español",
+        "description": "Análisis completo de IA en español con contexto empresarial latinoamericano"
+      },
+      "slovak": {
+        "title": "Slovenčina",
+        "description": "Kompletná AI analýza v slovenčine s kontextom európskeho podnikania"
+      }
+    },
+    "calculators": {
+      "categorization": {
+        "title": "Categorization Accuracy Calculator",
+        "transactions_label": "Transactions per month:",
+        "time_saved": "Time saved per month:",
+        "hours": "hours"
+      },
+      "savings": {
+        "title": "Potential Savings Calculator",
+        "expenses_label": "Monthly expenses:",
+        "potential_savings": "Potential monthly savings (5-15%):"
+      },
+      "health": {
+        "title": "Health Score Simulator",
+        "savings_rate": "Savings rate:",
+        "budget_adherence": "Budget adherence:",
+        "estimated_score": "Estimated Financial Health Score:"
+      },
+      "predictions": {
+        "title": "Prediction Range Calculator",
+        "historical_months": "Historical data months:",
+        "months": "months",
+        "prediction_range": "Prediction range available:",
+        "months_ahead": "months ahead",
+        "prediction_accuracy": "Prediction accuracy:"
+      },
+      "statements": {
+        "title": "Statement Processing Calculator",
+        "pages": "Pages in statement:",
+        "pages_unit": "pages",
+        "estimated_transactions": "Estimated transactions extracted:",
+        "transactions": "transactions",
+        "processing_time": "Processing time saved:",
+        "minutes": "minutes"
+      }
+    },
+    "cta": {
+      "title": "Ready to Transform Your Financial Management?",
+      "subtitle": "Join thousands of entrepreneurs who have revolutionized their business finances with AI-powered insights",
+      "start_free": "Start with Free Account",
+      "watch_demo": "Watch Demo",
+      "guarantee": "30-day money-back guarantee",
+      "no_card": "No credit card required",
+      "cancel_anytime": "Cancel anytime"
+    },
     "demo": {
       "title": "Try Our AI Categorization",
       "subtitle": "Experience how our AI automatically categorizes transactions",

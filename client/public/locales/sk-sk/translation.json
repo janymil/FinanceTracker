@@ -3568,6 +3568,76 @@
         "ai_availability": "Dostupnosť AI"
       }
     },
+    "tools": {
+      "title": "Bezplatné Finančné Nástroje",
+      "subtitle": "Získajte okamžité finančné poznatky bez registrácie. Vyskúšajte našu kalkulačku dostupnosti pre inteligentnejšie rozhodnutia o výdavkoch."
+    },
+    "demo_result": {
+      "title": "Výsledok AI Analýzy",
+      "placeholder": "Zadajte detaily transakcie pre ukážku AI kategorizácie v akcii...",
+      "label_language": "Jazyk"
+    },
+    "multilingual": {
+      "title": "Globálna Finančná Inteligencia",
+      "subtitle": "Naša AI hovorí vašim jazykom a rozumie vášmu kultúrnemu finančnému kontextu",
+      "english": {
+        "title": "English",
+        "description": "Kompletná AI analýza v angličtine s americkým obchodným kontextom a finančnou terminológiou"
+      },
+      "spanish": {
+        "title": "Español",
+        "description": "Kompletná AI analýza v španielčine s latinskoamerickým obchodným kontextom"
+      },
+      "slovak": {
+        "title": "Slovenčina",
+        "description": "Kompletná AI analýza v slovenčine s kontextom európskeho podnikania"
+      }
+    },
+    "calculators": {
+      "categorization": {
+        "title": "Kalkulačka Presnosti Kategorizácie",
+        "transactions_label": "Transakcie za mesiac:",
+        "time_saved": "Ušetrený čas za mesiac:",
+        "hours": "hodín"
+      },
+      "savings": {
+        "title": "Kalkulačka Potenciálnych Úspor",
+        "expenses_label": "Mesačné výdavky:",
+        "potential_savings": "Potenciálne mesačné úspory (5-15%):"
+      },
+      "health": {
+        "title": "Simulátor Skóre Zdravia",
+        "savings_rate": "Miera úspor:",
+        "budget_adherence": "Dodržiavanie rozpočtu:",
+        "estimated_score": "Odhadované Skóre Finančného Zdravia:"
+      },
+      "predictions": {
+        "title": "Kalkulačka Rozsahu Predpovedí",
+        "historical_months": "Mesiace historických údajov:",
+        "months": "mesiacov",
+        "prediction_range": "Dostupný rozsah predpovedí:",
+        "months_ahead": "mesiacov dopredu",
+        "prediction_accuracy": "Presnosť predpovedí:"
+      },
+      "statements": {
+        "title": "Kalkulačka Spracovania Výpisov",
+        "pages": "Stránky vo výpise:",
+        "pages_unit": "stránok",
+        "estimated_transactions": "Odhadované extrahované transakcie:",
+        "transactions": "transakcií",
+        "processing_time": "Ušetrený čas spracovania:",
+        "minutes": "minút"
+      }
+    },
+    "cta": {
+      "title": "Pripravení Transformovať Vašu Finančnú Správu?",
+      "subtitle": "Pridajte sa k tisícom podnikateľov, ktorí revolucionalizovali financie svojich podnikov s poznatkami poháňanými AI",
+      "start_free": "Začať s Bezplatným Účtom",
+      "watch_demo": "Pozrieť Demo",
+      "guarantee": "30-dňová záruka vrátenia peňazí",
+      "no_card": "Nie je potrebná kreditná karta",
+      "cancel_anytime": "Zrušiť kedykoľvek"
+    },
     "demo": {
       "title": "Vyskúšajte našu AI kategorizáciu",
       "subtitle": "Zažite ako naša AI automaticky kategorizuje transakcie",

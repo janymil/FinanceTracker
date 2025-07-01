@@ -3449,6 +3449,76 @@
         "ai_availability": "Disponibilidad de IA"
       }
     },
+    "tools": {
+      "title": "Herramientas Financieras Gratuitas",
+      "subtitle": "Obtén información financiera instantánea sin registrarte. Prueba nuestra calculadora de asequibilidad para tomar decisiones de gasto más inteligentes."
+    },
+    "demo_result": {
+      "title": "Resultado del Análisis de IA",
+      "placeholder": "Ingresa los detalles de la transacción para ver la categorización de IA en acción...",
+      "label_language": "Idioma"
+    },
+    "multilingual": {
+      "title": "Inteligencia Financiera Global",
+      "subtitle": "Nuestra IA habla tu idioma y entiende tu contexto financiero cultural",
+      "english": {
+        "title": "English",
+        "description": "Análisis completo de IA en inglés con contexto empresarial estadounidense y terminología financiera"
+      },
+      "spanish": {
+        "title": "Español",
+        "description": "Análisis completo de IA en español con contexto empresarial latinoamericano"
+      },
+      "slovak": {
+        "title": "Slovenčina",
+        "description": "Análisis completo de IA en eslovaco con contexto empresarial europeo"
+      }
+    },
+    "calculators": {
+      "categorization": {
+        "title": "Calculadora de Precisión de Categorización",
+        "transactions_label": "Transacciones por mes:",
+        "time_saved": "Tiempo ahorrado por mes:",
+        "hours": "horas"
+      },
+      "savings": {
+        "title": "Calculadora de Ahorros Potenciales",
+        "expenses_label": "Gastos mensuales:",
+        "potential_savings": "Ahorros mensuales potenciales (5-15%):"
+      },
+      "health": {
+        "title": "Simulador de Puntuación de Salud",
+        "savings_rate": "Tasa de ahorro:",
+        "budget_adherence": "Adherencia al presupuesto:",
+        "estimated_score": "Puntuación Estimada de Salud Financiera:"
+      },
+      "predictions": {
+        "title": "Calculadora de Rango de Predicción",
+        "historical_months": "Meses de datos históricos:",
+        "months": "meses",
+        "prediction_range": "Rango de predicción disponible:",
+        "months_ahead": "meses por delante",
+        "prediction_accuracy": "Precisión de predicción:"
+      },
+      "statements": {
+        "title": "Calculadora de Procesamiento de Estados",
+        "pages": "Páginas en el estado:",
+        "pages_unit": "páginas",
+        "estimated_transactions": "Transacciones extraídas estimadas:",
+        "transactions": "transacciones",
+        "processing_time": "Tiempo de procesamiento ahorrado:",
+        "minutes": "minutos"
+      }
+    },
+    "cta": {
+      "title": "¿Listo para Transformar tu Gestión Financiera?",
+      "subtitle": "Únete a miles de emprendedores que han revolucionado las finanzas de sus negocios con insights impulsados por IA",
+      "start_free": "Comenzar con Cuenta Gratuita",
+      "watch_demo": "Ver Demo",
+      "guarantee": "Garantía de devolución de 30 días",
+      "no_card": "No se requiere tarjeta de crédito",
+      "cancel_anytime": "Cancelar en cualquier momento"
+    },
     "demo": {
       "title": "Prueba Nuestra Categorización IA",
       "subtitle": "Experimenta cómo nuestra IA categoriza automáticamente las transacciones",

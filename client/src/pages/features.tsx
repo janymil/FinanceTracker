@@ -45,6 +45,7 @@ function DemoVideoCard({ title, description, demoType }: {
   description: string; 
   demoType: 'categorization' | 'tips' | 'health' 
 }) {
+  const { t } = useTranslation();
   const language = getCurrentLanguageForAPI();
   // Always use en-us for now since that's the only video we have
   const videoPath = `/demo-videos/categorization-demo-en-us.mp4`;
@@ -87,7 +88,7 @@ function DemoVideoCard({ title, description, demoType }: {
         </div>
         <Button onClick={handleWatchDemo} className="w-full" size="sm">
           <Sparkles className="mr-2 h-4 w-4" />
-          Watch Demo
+          {t('features.cta.watch_demo')}
         </Button>
       </CardContent>
     </Card>
@@ -353,9 +354,9 @@ export default function FeaturesPage() {
       {/* Free Expense Estimation Calculator */}
       <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Free Financial Tools</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('features.tools.title')}</h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Get instant financial insights without signing up. Try our affordability calculator to make smarter spending decisions.
+            {t('features.tools.subtitle')}
           </p>
         </div>
         
