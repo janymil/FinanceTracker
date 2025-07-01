@@ -26,7 +26,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import { COURSE_CONTENT, type CourseModule, type Exercise, type CourseLevel, type ContentBlock } from "@/data/courseContent";
+import { type CourseModule, type Exercise, type CourseLevel, type ContentBlock } from "@/data/courseContent";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 
@@ -76,8 +76,313 @@ export default function Courses() {
     return iconMap[iconName] || BookOpen;
   };
 
-  // Use static course content
-  const modules: CourseModule[] = COURSE_CONTENT;
+  // Create modules from translation data
+  const modules: CourseModule[] = [
+    {
+      id: 'cashflow-mastery',
+      title: t('courses.modules.cashflow-mastery.title'),
+      description: t('courses.modules.cashflow-mastery.description'),
+      icon: 'TrendingUp',
+      estimatedTime: '3-4 hours',
+      difficulty: 'Beginner' as const,
+      levels: [
+        {
+          id: 'cashflow-level-1',
+          title: t('courses.modules.cashflow-mastery.levels.cashflow-level-1.title'),
+          description: t('courses.modules.cashflow-mastery.levels.cashflow-level-1.description'),
+          difficulty: 'Beginner' as const,
+          estimatedTime: '30 minutes',
+          xpReward: 100,
+          learningObjectives: [
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-1.objectives.0'),
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-1.objectives.1'),
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-1.objectives.2')
+          ],
+          tabs: [
+            {
+              id: 'basics',
+              title: t('courses.modules.cashflow-mastery.tabs.basics'),
+              icon: '📊',
+              content: [
+                {
+                  id: 'pipeline-intro',
+                  type: 'text' as const,
+                  title: t('courses.modules.cashflow-mastery.levels.cashflow-level-1.content.level1.pipeline.title'),
+                  content: t('courses.modules.cashflow-mastery.levels.cashflow-level-1.content.level1.pipeline.content')
+                }
+              ]
+            }
+          ],
+          exercises: [
+            {
+              id: 'cashflow-ex-1',
+              type: 'multiple-choice' as const,
+              question: t('courses.exercises.cashFlowReflection.question'),
+              options: [
+                t('courses.exercises.cashFlowReflection.options.0'),
+                t('courses.exercises.cashFlowReflection.options.1'),
+                t('courses.exercises.cashFlowReflection.options.2'),
+                t('courses.exercises.cashFlowReflection.options.3')
+              ],
+              correctAnswer: t('courses.exercises.cashFlowReflection.options.1'),
+              feedback: {
+                correct: t('courses.exercises.cashFlowReflection.feedback.correct'),
+                incorrect: t('courses.exercises.cashFlowReflection.feedback.incorrect')
+              },
+              points: 10
+            }
+          ]
+        },
+        {
+          id: 'cashflow-level-2',
+          title: t('courses.modules.cashflow-mastery.levels.cashflow-level-2.title'),
+          description: t('courses.modules.cashflow-mastery.levels.cashflow-level-2.description'),
+          difficulty: 'Beginner' as const,
+          estimatedTime: '45 minutes',
+          xpReward: 150,
+          learningObjectives: [
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-2.objectives.0'),
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-2.objectives.1'),
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-2.objectives.2')
+          ],
+          tabs: [
+            {
+              id: 'income-mapping',
+              title: t('courses.modules.cashflow-mastery.tabs.income_mapping'),
+              icon: '🔍',
+              content: [
+                {
+                  id: 'income-categories',
+                  type: 'text' as const,
+                  title: t('courses.modules.cashflow-mastery.levels.cashflow-level-2.content.level2.incomeCategories.title'),
+                  content: t('courses.modules.cashflow-mastery.levels.cashflow-level-2.content.level2.incomeCategories.content')
+                },
+                {
+                  id: 'income-optimization',
+                  type: 'text' as const,
+                  title: t('courses.modules.cashflow-mastery.levels.cashflow-level-2.content.level2.incomeOptimization.title'),
+                  content: t('courses.modules.cashflow-mastery.levels.cashflow-level-2.content.level2.incomeOptimization.content')
+                }
+              ]
+            }
+          ],
+          exercises: [
+            {
+              id: 'income-ex-1',
+              type: 'multiple-choice' as const,
+              question: t('courses.exercises.incomeAudit.question'),
+              options: [
+                t('courses.exercises.incomeAudit.options.0'),
+                t('courses.exercises.incomeAudit.options.1'),
+                t('courses.exercises.incomeAudit.options.2'),
+                t('courses.exercises.incomeAudit.options.3')
+              ],
+              correctAnswer: t('courses.exercises.incomeAudit.options.2'),
+              feedback: {
+                correct: t('courses.exercises.incomeAudit.feedback.correct'),
+                incorrect: t('courses.exercises.incomeAudit.feedback.incorrect')
+              },
+              points: 15
+            }
+          ]
+        },
+        {
+          id: 'cashflow-level-3',
+          title: t('courses.modules.cashflow-mastery.levels.cashflow-level-3.title'),
+          description: t('courses.modules.cashflow-mastery.levels.cashflow-level-3.description'),
+          difficulty: 'Intermediate' as const,
+          estimatedTime: '45 minutes',
+          xpReward: 200,
+          learningObjectives: [
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-3.objectives.0'),
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-3.objectives.1'),
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-3.objectives.2')
+          ],
+          tabs: [
+            {
+              id: 'passive-income',
+              title: t('courses.modules.cashflow-mastery.tabs.passive_income'),
+              icon: '⚡',
+              content: [
+                {
+                  id: 'active-vs-passive',
+                  type: 'text' as const,
+                  title: t('courses.modules.cashflow-mastery.levels.cashflow-level-3.content.level3.activeVsPassive.title'),
+                  content: t('courses.modules.cashflow-mastery.levels.cashflow-level-3.content.level3.activeVsPassive.content')
+                }
+              ]
+            }
+          ],
+          exercises: [
+            {
+              id: 'passive-ex-1',
+              type: 'multiple-choice' as const,
+              question: t('courses.exercises.passiveIncome.question'),
+              options: [
+                t('courses.exercises.passiveIncome.options.0'),
+                t('courses.exercises.passiveIncome.options.1'),
+                t('courses.exercises.passiveIncome.options.2'),
+                t('courses.exercises.passiveIncome.options.3')
+              ],
+              correctAnswer: t('courses.exercises.passiveIncome.options.1'),
+              feedback: {
+                correct: t('courses.exercises.passiveIncome.feedback.correct'),
+                incorrect: t('courses.exercises.passiveIncome.feedback.incorrect')
+              },
+              points: 20
+            }
+          ]
+        },
+        {
+          id: 'cashflow-level-4',
+          title: t('courses.modules.cashflow-mastery.levels.cashflow-level-4.title'),
+          description: t('courses.modules.cashflow-mastery.levels.cashflow-level-4.description'),
+          difficulty: 'Intermediate' as const,
+          estimatedTime: '60 minutes',
+          xpReward: 250,
+          learningObjectives: [
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-4.objectives.0'),
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-4.objectives.1'),
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-4.objectives.2')
+          ],
+          tabs: [
+            {
+              id: 'automation',
+              title: t('courses.modules.cashflow-mastery.tabs.automation'),
+              icon: '🤖',
+              content: [
+                {
+                  id: 'automation-tools',
+                  type: 'text' as const,
+                  title: t('courses.modules.cashflow-mastery.levels.cashflow-level-4.content.level4.automationTools.title'),
+                  content: t('courses.modules.cashflow-mastery.levels.cashflow-level-4.content.level4.automationTools.content')
+                }
+              ]
+            }
+          ],
+          exercises: [
+            {
+              id: 'automation-ex-1',
+              type: 'multiple-choice' as const,
+              question: t('courses.exercises.automation.question'),
+              options: [
+                t('courses.exercises.automation.options.0'),
+                t('courses.exercises.automation.options.1'),
+                t('courses.exercises.automation.options.2'),
+                t('courses.exercises.automation.options.3')
+              ],
+              correctAnswer: t('courses.exercises.automation.options.2'),
+              feedback: {
+                correct: t('courses.exercises.automation.feedback.correct'),
+                incorrect: t('courses.exercises.automation.feedback.incorrect')
+              },
+              points: 25
+            }
+          ]
+        },
+        {
+          id: 'cashflow-level-5',
+          title: t('courses.modules.cashflow-mastery.levels.cashflow-level-5.title'),
+          description: t('courses.modules.cashflow-mastery.levels.cashflow-level-5.description'),
+          difficulty: 'Advanced' as const,
+          estimatedTime: '75 minutes',
+          xpReward: 300,
+          learningObjectives: [
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-5.objectives.0'),
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-5.objectives.1'),
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-5.objectives.2')
+          ],
+          tabs: [
+            {
+              id: 'income-growth',
+              title: t('courses.modules.cashflow-mastery.tabs.income_growth'),
+              icon: '💰',
+              content: [
+                {
+                  id: 'salary-negotiation',
+                  type: 'text' as const,
+                  title: t('courses.modules.cashflow-mastery.levels.cashflow-level-5.content.level5.salaryNegotiation.title'),
+                  content: t('courses.modules.cashflow-mastery.levels.cashflow-level-5.content.level5.salaryNegotiation.content')
+                },
+                {
+                  id: 'side-hustles',
+                  type: 'text' as const,
+                  title: t('courses.modules.cashflow-mastery.levels.cashflow-level-5.content.level5.sideHustles.title'),
+                  content: t('courses.modules.cashflow-mastery.levels.cashflow-level-5.content.level5.sideHustles.content')
+                }
+              ]
+            }
+          ],
+          exercises: [
+            {
+              id: 'salary-ex-1',
+              type: 'multiple-choice' as const,
+              question: t('courses.exercises.salaryNegotiation.question'),
+              options: [
+                t('courses.exercises.salaryNegotiation.options.0'),
+                t('courses.exercises.salaryNegotiation.options.1'),
+                t('courses.exercises.salaryNegotiation.options.2'),
+                t('courses.exercises.salaryNegotiation.options.3')
+              ],
+              correctAnswer: t('courses.exercises.salaryNegotiation.options.1'),
+              feedback: {
+                correct: t('courses.exercises.salaryNegotiation.feedback.correct'),
+                incorrect: t('courses.exercises.salaryNegotiation.feedback.incorrect')
+              },
+              points: 30
+            }
+          ]
+        },
+        {
+          id: 'cashflow-level-6',
+          title: t('courses.modules.cashflow-mastery.levels.cashflow-level-6.title'),
+          description: t('courses.modules.cashflow-mastery.levels.cashflow-level-6.description'),
+          difficulty: 'Advanced' as const,
+          estimatedTime: '90 minutes',
+          xpReward: 400,
+          learningObjectives: [
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-6.objectives.0'),
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-6.objectives.1'),
+            t('courses.modules.cashflow-mastery.levels.cashflow-level-6.objectives.2')
+          ],
+          tabs: [
+            {
+              id: 'action-plan',
+              title: t('courses.modules.cashflow-mastery.tabs.action_plan'),
+              icon: '📋',
+              content: [
+                {
+                  id: 'plan-creation',
+                  type: 'text' as const,
+                  title: t('courses.modules.cashflow-mastery.levels.cashflow-level-6.content.level6.planCreation.title'),
+                  content: t('courses.modules.cashflow-mastery.levels.cashflow-level-6.content.level6.planCreation.content')
+                }
+              ]
+            }
+          ],
+          exercises: [
+            {
+              id: 'plan-ex-1',
+              type: 'multiple-choice' as const,
+              question: t('courses.exercises.actionPlan.question'),
+              options: [
+                t('courses.exercises.actionPlan.options.0'),
+                t('courses.exercises.actionPlan.options.1'),
+                t('courses.exercises.actionPlan.options.2'),
+                t('courses.exercises.actionPlan.options.3')
+              ],
+              correctAnswer: t('courses.exercises.actionPlan.options.2'),
+              feedback: {
+                correct: t('courses.exercises.actionPlan.feedback.correct'),
+                incorrect: t('courses.exercises.actionPlan.feedback.incorrect')
+              },
+              points: 40
+            }
+          ]
+        }
+      ]
+    }
+  ];
   
   // Fetch user data to check for special access
   const { data: userData } = useQuery({
@@ -268,7 +573,7 @@ export default function Courses() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-xl">
                       <span>{tab.icon}</span>
-                      {t(`courses.modules.${selectedModule?.id}.tabs.${tab.id}`, tab.title)}
+                      {tab.title}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
