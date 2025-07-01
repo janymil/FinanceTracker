@@ -45,13 +45,19 @@ function DemoVideoCard({ title, description, demoType }: {
   demoType: 'categorization' | 'tips' | 'health' 
 }) {
   const language = getCurrentLanguageForAPI();
-  const videoPath = `/demo-videos/${demoType}-demo-${language}.mp4`;
+  // Always use en-us for now since that's the only video we have
+  const videoPath = `/demo-videos/categorization-demo-en-us.mp4`;
 
   const handleWatchDemo = () => {
     const videoElement = document.querySelector(`#video-${demoType}`) as HTMLVideoElement;
     if (videoElement) {
+      videoElement.load(); // Reload the video source
       videoElement.currentTime = 0; // Reset to beginning
-      videoElement.play();
+      videoElement.play().catch(error => {
+        console.error('Error playing video:', error);
+        // If autoplay fails, just show the video controls
+        videoElement.setAttribute('controls', 'true');
+      });
       // Scroll to video if not visible
       videoElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -71,8 +77,8 @@ function DemoVideoCard({ title, description, demoType }: {
           <video 
             id={`video-${demoType}`}
             controls 
+            preload="metadata"
             className="w-full h-full rounded-lg"
-            poster={`/images/demo-${demoType}-thumbnail.jpg`}
           >
             <source src={videoPath} type="video/mp4" />
             Your browser does not support the video tag.
