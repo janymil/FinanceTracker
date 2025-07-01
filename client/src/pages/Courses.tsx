@@ -21,7 +21,9 @@ import {
   Flame,
   ShoppingCart,
   TrendingUp,
-  Award
+  Award,
+  Users,
+  CheckCircle
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { COURSE_CONTENT, ACHIEVEMENT_BADGES, type CourseModule, type Achievement, type Exercise, type CourseLevel } from "@/data/courseContent";
@@ -305,7 +307,7 @@ export default function Courses() {
             </CardContent>
           </Card>
 
-          {/* Display all tabs content in a single view with calculators */}
+          {/* Display all tabs content in full width without calculators */}
           {currentLevel.tabs && currentLevel.tabs.length > 0 ? (
             <div className="space-y-8 mb-8">
               {currentLevel.tabs.map((tab, tabIndex) => (
@@ -317,55 +319,67 @@ export default function Courses() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                      {/* Left Side - Content (2 columns) */}
-                      <div className="lg:col-span-2 space-y-6">
-                        {tab.content.map((block, index) => (
-                          <div key={index}>
-                            {block.type === 'text' && (
-                              <div>
-                                {block.title && <h3 className="text-lg font-semibold mb-3">{block.title}</h3>}
-                                <p className="text-muted-foreground whitespace-pre-line">{block.content}</p>
+                    <div className="space-y-6">
+                      {tab.content.map((block, index) => (
+                        <div key={index}>
+                          {block.type === 'text' && (
+                            <div>
+                              {block.title && <h3 className="text-lg font-semibold mb-3">{block.title}</h3>}
+                              <div className="text-base leading-relaxed whitespace-pre-line">{block.content}</div>
+                            </div>
+                          )}
+                          
+                          {block.type === 'example' && (
+                            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Lightbulb className="w-5 h-5 text-blue-600" />
+                                <h3 className="text-lg font-semibold text-blue-800">{block.title}</h3>
                               </div>
-                            )}
-                            
-                            {block.type === 'example' && (
-                              <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <Lightbulb className="w-5 h-5 text-blue-600" />
-                                  <h3 className="text-lg font-semibold text-blue-800">{block.title}</h3>
-                                </div>
-                                <p className="text-blue-700 whitespace-pre-line">{block.content}</p>
+                              <div className="text-blue-700 whitespace-pre-line">{block.content}</div>
+                            </div>
+                          )}
+                          
+                          {block.type === 'tip' && (
+                            <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-r">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Zap className="w-5 h-5 text-green-600" />
+                                <h3 className="text-lg font-semibold text-green-800">{block.title}</h3>
                               </div>
-                            )}
-                            
-                            {block.type === 'tip' && (
-                              <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-r">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <Zap className="w-5 h-5 text-green-600" />
-                                  <h3 className="text-lg font-semibold text-green-800">{block.title}</h3>
-                                </div>
-                                <p className="text-green-700 whitespace-pre-line">{block.content}</p>
+                              <div className="text-green-700 whitespace-pre-line">{block.content}</div>
+                            </div>
+                          )}
+                          
+                          {block.type === 'warning' && (
+                            <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-r">
+                              <div className="flex items-center gap-2 mb-2">
+                                <AlertTriangle className="w-5 h-5 text-red-600" />
+                                <h3 className="text-lg font-semibold text-red-800">{block.title}</h3>
                               </div>
-                            )}
-                            
-                            {block.type === 'warning' && (
-                              <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-r">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <AlertTriangle className="w-5 h-5 text-red-600" />
-                                  <h3 className="text-lg font-semibold text-red-800">{block.title}</h3>
-                                </div>
-                                <p className="text-red-700 whitespace-pre-line">{block.content}</p>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                              <div className="text-red-700 whitespace-pre-line">{block.content}</div>
+                            </div>
+                          )}
 
-                      {/* Right Side - Calculator (1 column) */}
-                      <div className="lg:col-span-1">
-                        {tab.calculator && <Calculator calculator={tab.calculator} />}
-                      </div>
+                          {block.type === 'scenario' && (
+                            <div className="bg-purple-50 border-l-4 border-purple-400 p-4 rounded-r">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Users className="w-5 h-5 text-purple-600" />
+                                <h3 className="text-lg font-semibold text-purple-800">{block.title}</h3>
+                              </div>
+                              <div className="text-purple-700 whitespace-pre-line">{block.content}</div>
+                            </div>
+                          )}
+
+                          {block.type === 'interactive' && (
+                            <div className="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-r">
+                              <div className="flex items-center gap-2 mb-2">
+                                <CheckCircle className="w-5 h-5 text-orange-600" />
+                                <h3 className="text-lg font-semibold text-orange-800">{block.title}</h3>
+                              </div>
+                              <div className="text-orange-700 whitespace-pre-line">{block.content}</div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
