@@ -200,18 +200,6 @@ export default function FeaturesPage() {
         { title: 'Goal-Aligned', desc: 'Tips that help achieve your specific goals' },
         { title: 'Budget-Aware', desc: 'Considers your budget constraints and targets' }
       ]
-    },
-    {
-      id: 'alternative',
-      icon: Scale,
-      title: 'Alternative Health Scoring',
-      badge: 'Premium',
-      description: 'Secondary financial health scoring system that provides alternative perspectives on your financial wellness using different algorithms and weighting factors.',
-      benefits: [
-        { title: 'Dual Perspective', desc: 'Compare two different scoring methodologies' },
-        { title: 'Comprehensive View', desc: 'Get a complete picture of financial health' },
-        { title: 'Validation', desc: 'Cross-validate your financial assessment' }
-      ]
     }
   ];
 
@@ -248,12 +236,12 @@ export default function FeaturesPage() {
               AI-Powered Financial Intelligence
             </h1>
             <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-4xl mx-auto">
-              Transform your business finances with 9 intelligent AI features that learn, adapt, and optimize your financial decisions in real-time.
+              Transform your business finances with 8 intelligent AI features that learn, adapt, and optimize your financial decisions in real-time.
             </p>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold">9</div>
+                <div className="text-3xl md:text-4xl font-bold">8</div>
                 <div className="text-sm opacity-80">AI Functions</div>
               </div>
               <div className="text-center">

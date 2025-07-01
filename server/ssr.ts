@@ -508,7 +508,7 @@ function getPageContent(route: string, lang: string = 'en'): string {
       '/features': `
         <section>
             <h1>AI-Powered Financial Intelligence</h1>
-            <p>Transform your business finances with 9 intelligent AI features that learn, adapt, and optimize your financial decisions in real-time.</p>
+            <p>Transform your business finances with 8 intelligent AI features that learn, adapt, and optimize your financial decisions in real-time.</p>
             
             <h2>Core AI Features</h2>
             <ul>
