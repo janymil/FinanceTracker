@@ -518,8 +518,8 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <li><strong>Intelligent Budget Recommendations</strong> - AI-driven budget optimization suggestions</li>
                 <li><strong>Expense Prediction Engine</strong> - Anticipates future expenses based on historical data</li>
                 <li><strong>Trend Analysis & Insights</strong> - Identifies spending patterns and optimization opportunities</li>
-                <li><strong>Daily Financial Recommendations</strong> - Personalized daily tips for financial improvement</li>
-                <li><strong>Contextual Financial Tips</strong> - Smart advice based on your current financial situation</li>
+                <li><strong>Daily Financial Recommendations</strong> - Automated daily tips based on your spending patterns</li>
+                <li><strong>Interactive Financial Advisor</strong> - On-demand AI guidance for specific financial decisions</li>
                 <li><strong>Advanced Spending Analytics</strong> - Deep insights into your financial behavior</li>
             </ul>
             
@@ -755,8 +755,8 @@ function getPageContent(route: string, lang: string = 'en'): string {
                 <li><strong>Recomendaciones Inteligentes de Presupuesto</strong> - Sugerencias de optimización de presupuesto impulsadas por IA</li>
                 <li><strong>Motor de Predicción de Gastos</strong> - Anticipa gastos futuros basado en datos históricos</li>
                 <li><strong>Análisis de Tendencias e Insights</strong> - Identifica patrones de gasto y oportunidades de optimización</li>
-                <li><strong>Recomendaciones Financieras Diarias</strong> - Consejos personalizados diarios para mejora financiera</li>
-                <li><strong>Consejos Financieros Contextuales</strong> - Asesoramiento inteligente basado en tu situación financiera actual</li>
+                <li><strong>Recomendaciones Financieras Diarias</strong> - Consejos automáticos diarios basados en tus patrones de gasto</li>
+                <li><strong>Asesor Financiero Interactivo</strong> - Orientación de IA bajo demanda para decisiones financieras específicas</li>
                 <li><strong>Análisis Avanzado de Gastos</strong> - Insights profundos sobre tu comportamiento financiero</li>
             </ul>
             
