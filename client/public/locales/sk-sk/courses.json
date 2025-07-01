@@ -1,294 +1,78 @@
 {
   "courses": {
-    "title": "Kurzy Finančnej Gramotnosti",
-    "subtitle": "Vybudujte základné finančné zručnosti prostredníctvom interaktívnych, krátkych lekcií poháňaných AI",
+    "title": "Kurzy finančnej gramotnosti",
+    "subtitle": "Rozvíjajte základné finančné zručnosti prostredníctvom interaktívnych, krátkych lekcií poháňaných AI",
     "stats": {
       "totalXp": "Celkové XP",
-      "dayStreak": "Denná Séria",
-      "bestStreak": "Najlepšia Séria",
+      "dayStreak": "Denná séria",
+      "bestStreak": "Najlepšia séria",
       "lessons": "Lekcie"
     },
     "actions": {
-      "startCourse": "Začať Kurz",
+      "startCourse": "Začať kurz",
       "continue": "Pokračovať",
       "locked": "Zamknuté",
-      "exitLesson": "Ukončiť Lekciu",
-      "startExercises": "Začať Cvičenia",
-      "nextQuestion": "Ďalšia Otázka",
-      "finishLesson": "Dokončiť Lekciu",
+      "exitLesson": "Ukončiť lekciu",
+      "startExercises": "Začať cvičenia",
+      "nextQuestion": "Ďalšia otázka",
+      "finishLesson": "Dokončiť lekciu",
       "previous": "Predchádzajúce",
-      "backToCourses": "Späť na Kurzy",
-      "tryAgain": "Skúsiť Znovu"
+      "backToCourses": "Späť na kurzy",
+      "tryAgain": "Skúsiť znovu"
     },
     "progress": {
       "progress": "Pokrok",
       "question": "Otázka",
       "of": "z",
       "complete": "Dokončené",
-      "questions": "otázok"
+      "questions": "otázky"
     },
     "results": {
-      "lessonComplete": "Lekcia Dokončená!",
-      "keepLearning": "Pokračuj v Učení!",
+      "lessonComplete": "Lekcia dokončená!",
+      "keepLearning": "Pokračuj v učení!",
       "youScored": "Dosiahol si",
       "outOf": "z",
-      "questionsCorrectly": "otázok správne",
+      "questionsCorrectly": "správnych odpovedí",
       "xpEarned": "XP získané!"
     },
     "achievements": {
-      "title": "Tvoje Úspechy",
+      "title": "Tvoje úspechy",
       "earned": "Získané",
       "achieved": "🏆 Dosiahnuté"
     },
-    "loading": "Načítavajú sa Kurzy Finančnej Gramotnosti...",
-    "noTabsMessage": "Obsah je organizovaný v kartách hore. Prosím vyber kartu na zobrazenie obsahu lekcie.",
+    "loading": "Načítavam kurzy finančnej gramotnosti...",
+    "noTabsMessage": "Obsah je usporiadaný v kartách vyššie. Prosím vyberte kartu pre zobrazenie obsahu lekcie.",
     "modules": {
       "cashflow-mastery": {
-        "title": "Majstrovstvo v Peňažnom Toku",
-        "description": "Ovládnite umenie správy peňazí s pokročilými systémami rozpočtovania a peňažného toku",
+        "title": "Majstrovstvo v Cash Flow",
+        "description": "Ovládnite umenie správy peňazí s pokročilými systémami rozpočtovania a cash flow",
         "levels": {
           "cashflow-level-1": {
-            "title": "💡 Víta a Sila Povedomia o Peňažnom Toku",
-            "description": "Objavte, ako vám povedomie o peňažnom toku dá kontrolu nad vaším finančným životom"
+            "title": "💡 Vitajte a Sila vedomia o Cash Flow",
+            "description": "Objavte, ako vám vedomie o cash flow dáva kontrolu nad vaším finančným životom"
           },
           "cashflow-level-2": {
-            "title": "🔍 Identifikácia a Mapovanie Zdrojov Príjmov",
+            "title": "🔍 Identifikácia a mapovanie zdrojov príjmov",
             "description": "Naučte sa identifikovať každý zdroj príjmov, vrátane skrytých zárobkov"
           },
           "cashflow-level-3": {
-            "title": "⚖️ Aktívne vs. Pasívne Príjmy",
-            "description": "Pochopte kľúčové rozdiely medzi aktívnymi a pasívnymi príjmami"
+            "title": "⚖️ Aktívny vs. Pasívny príjem",
+            "description": "Pochopte kľúčové rozdiely medzi aktívnym a pasívnym príjmom"
           },
           "cashflow-level-4": {
-            "title": "🤖 Automatizácia Sledovania Príjmov",
-            "description": "Nastavte automatizované systémy na efektívne sledovanie príjmov a výdavkov"
-          },
-          "cashflow-level-5": {
-            "title": "🚀 Stratégie na Zvýšenie Príjmov o 20-50%",
-            "description": "Naučte sa akčné stratégie na výrazné zvýšenie príjmov do 12 mesiacov"
-          },
-          "cashflow-level-6": {
-            "title": "📋 Vytvorte Svoj Personalizovaný Plán Peňažného Toku",
-            "description": "Spojte všetko do komplexného 12-mesačného plánu peňažného toku"
-          }
-        },
-        "tabs": {
-          "cashFlowBasics": "Základy Peňažného Toku",
-          "incomeMapping": "Mapovanie Príjmov",
-          "activeVsPassive": "Aktívne vs Pasívne",
-          "automationTools": "Nástroje Automatizácie",
-          "salaryNegotiation": "Vyjednávanie Platu",
-          "sideHustles": "Vedľajšie Zárobky",
-          "investmentBasics": "Základy Investovania",
-          "planCreation": "Váš Plán"
-        },
-        "content": {
-          "level1": {
-            "whatIsCashFlow": {
-              "title": "💰 Čo je Peňažný Tok?",
-              "content": "Peňažný tok je životnou silou vašich financií. Jednoducho povedané, sú to peniaze prichádzajúce (príjmy) a peniaze odchádzajúce (výdavky) počas určitého obdobia.\n\nPredstavte si to ako rieku:\n• **Peniaze PRÚDIACE DOVNÚTRA** = prítoky napájajúce rieku (plat, vedľajšie zárobky, investície)\n• **Peniaze PRÚDIACE VEN** = voda tečúca po prúde (nájom, potraviny, zábava)\n• **Peňažný Tok** = čistý výsledok tohto toku\n\nKeď viac peňazí prúdi dovnútra ako von, máte pozitívny peňažný tok. Keď viac prúdi von ako dovnútra, máte negatívny peňažný tok - a tam začína finančný stres."
-            },
-            "alexCaseStudy": {
-              "title": "🎯 Prípadová Štúdia: Alexovo Objavenie $200 Mesačne",
-              "content": "Spoznajte Alexa, 28-ročného marketingového profesionála, ktorý zarába $4,500 mesačne. Alex sa vždy cítil bez peňazí napriek tomu, že mal slušný plat.\n\n**Problém:** Alex nemal tušenia, kam peniaze odchádzajú.\n\n**Riešenie:** Alex strávil 30 minút prezeraním bankových výpisov a objavil:\n• Netflix: $15/mesiac ✓ (stále to používa)\n• Spotify: $10/mesiac ✓ (stále to používa)\n• Adobe Creative: $53/mesiac ❌ (nepoužíval to 8 mesiacov)\n• Členstvo v posilňovni: $89/mesiac ❌ (išiel raz za mesiac)\n• Aplikácie na donášku jedla: $312/mesiac ❌ (objednával 4-5 krát za týždeň)\n\n**Výsledok:** Zrušením nevyužívaných predplatných a varením 3 ďalších jedál za týždeň Alex uvoľnil $200 mesačne - to je $2,400 ročne!\n\n**Alexove slová:** \"Nemohol som uveriť, že každý mesiac vyhadzujem $200. Teraz tie peniaze idú priamo do môjho núdzového fondu.\""
-            },
-            "cashFlowDiagram": {
-              "title": "📊 Váš Potrubný Systém Peňažného Toku",
-              "content": "**VIZUÁL: Potrubný Systém Peňažného Toku**\n\n```\nZDROJE PRÍJMOV        POTRUBNÝ SYSTÉM      KATEGÓRIE VÝDAVKOV\n                     PEŇAŽNÉHO TOKU\n💼 Plat           ──┐                    ┌── 🏠 Bývanie\n💰 Vedľajšia Práca ──┤                    ├── 🚗 Doprava\n📈 Investície     ──┤       💰💰💰       ├── 🍕 Jedlo\n🎁 Iné Príjmy     ──┘                    ├── 💊 Zdravie\n                                         ├── 🎮 Zábava\n                                         └── 💳 Splátky Dlhov\n```\n\n**Potrubný Systém Ukazuje:**\n• **Šírka** = Množstvo peňazí\n• **Farba** = Typ kategórie\n• **Smer Toku** = Kam vaše peniaze idú\n\n**Kľúčové Pozorovaniet:** Väčšina ľudí sa zameriava na stranu príjmov, ale ignoruje stranu výdavkov. Skutočné ovládanie peňažného toku vyžaduje optimalizáciu OBOCH strán potrubného systému."
-            }
-          },
-          "level2": {
-            "incomeCategories": {
-              "title": "🔍 Kompletná Mapa Príjmov",
-              "content": "**PRIMÁRNE ZDROJE PRÍJMOV (Zrejmé):**\n• 💼 Plat alebo mzda z vašej práce\n• 🏢 Príjmy z podnikania alebo freelancingu\n• 📈 Výnosy z investícií (dividendy, úroky)\n• 🏠 Príjmy z prenájmu nehnuteľností\n• 💰 Dôchodok alebo príjmy z dôchodku\n\n**SKRYTÉ ZDROJE PRÍJMOV (Často zabudnuté):**\n• 💳 Cashback a odmeny z kreditných kariet\n• 🎁 Daňové vrátky (priemerne $2,800 ročne)\n• 👨‍👩‍👧‍👦 Darčeky od rodiny alebo priateľov\n• 📦 Peniaze z predaja nepoužívaných predmetov\n• 🚗 Zárobky z gig ekonomiky (Uber, DoorDash)\n• 📱 Príjmy z aplikácií (prieskumy, cashback aplikácie)\n• 🔄 Vrátky z zrušených predplatných\n• 🛡️ Výplaty z poistných nárokov\n• 🎓 Štipendijné alebo grantové peniaze\n• 💼 Vedľajšie poradenstvo alebo doučovanie\n\n**KONTROLNÝ ZOZNAM AUDITU PRÍJMOV:**\n□ Prekontrolovať posledné 3 mesiace bankových výpisov\n□ Skontrolovať všetky zdroje vkladov\n□ Zahrnúť jednorazové platby\n□ Počítať nepravidelné príjmy\n□ Nezabudnúť na hotovostné platby\n□ Zahrnúť hodnotu výmeny alebo barteru"
-            },
-            "incomeOptimization": {
-              "title": "🚀 Stratégie Optimalizácie Príjmov",
-              "content": "**MAXIMALIZUJTE SVOJE PRIMÁRNE PRÍJMY:**\n\n1. **Ročný Prehľad Platu:**\n   • Preskúmajte trhové sadzby pre vašu pozíciu\n   • Zdokumentujte svoje úspechy a kvantifikujte výsledky\n   • Naplánujte pravidelné stretnutia s vaším manažérom\n   • Predložte jasný prípad s konkrétnymi číslami\n\n2. **ROI Rozvoja Zručností:**\n   • Identifikujte vysoko hodnotné zručnosti vo vašom odvetví\n   • Vypočítajte potenciálny nárast príjmov na zručnosť\n   • Investujte do certifikácií, ktoré zamestnávatelia oceňujú\n   • Sledujte mieru dokončenia a aplikujte okamžite\n\n3. **Metriky Výkonnosti:**\n   • Prekročte ciele o 10-20% konzistentne\n   • Prevezmi dodatočné zodpovednosti\n   • Mentorujte mladších členov tímu\n   • Veďte medzifunkčné projekty\n\n**AKTIVUJTE SKRYTÉ ZDROJE PRÍJMOV:**\n\n• **Optimalizácia Kreditných Kariet:** Prejdite na karty s 2-5% cashbackom vo vašich hlavných kategóriách výdavkov\n• **Daňová Stratégia:** Prispievajte do 401k/IRA na zvýšenie potenciálu vrátenia\n• **Cashback Aplikácie:** Používajte Rakuten, Honey, Capital One Shopping pre všetky online nákupy\n• **Predajná Stratégia:** Uverejnite nepoužívané predmety na Facebook Marketplace, eBay alebo Poshmark\n• **Referenčné Programy:** Využite bonusy z odporúčaní zamestnávateľa, banky a služieb"
-            }
-          },
-          "level3": {
-            "activeVsPassive": {
-              "title": "⚡ Majstrovstvo v Aktívnych vs Pasívnych Príjmoch",
-              "content": "**AKTÍVNE PRÍJMY (Výmena Času za Peniaze):**\n• Plat zo zamestnania\n• Platby za freelance projekty\n• Poradenské poplatky\n• Príjmy z obchodov založených na službách\n• Predaj založený na províziách\n\n**Charakteristiky:**\n✓ Okamžité a predvídateľné\n✓ Vyššia kontrola nad časovaním príjmov\n✗ Obmedzené dostupnými hodinami\n✗ Príjmy sa zastavia, keď prestanete pracovať\n\n**PASÍVNE PRÍJMY (Peniaze Pracujú pre Vás):**\n• Akcie vyplácajúce dividendy\n• Príjmy z prenájmu nehnuteľností\n• Autorské poplatky z duševného vlastníctva\n• Úroky z vysoko výnosných úspor\n• Výnosy z peer-to-peer pôžičiek\n\n**Charakteristiky:**\n✓ Generuje príjmy, kým spíte\n✓ Škálovateľné bez výmeny viac času\n✗ Vyžaduje počiatočnú investíciu alebo prácu\n✗ Môže trvať čas, kým vygeneruje významné príjmy\n\n**STRATÉGIA PRECHODU:**\n\n**Fáza 1 (Mesiace 1-6):** Optimalizovať Aktívne Príjmy\n• Vyjednať zvýšenie platu\n• Rozvíjať vysoko hodnotné zručnosti\n• Prevziať ziskové vedľajšie projekty\n• Ušetriť 20-30% zo zvýšených príjmov\n\n**Fáza 2 (Mesiace 7-18):** Vybudovať Pasívny Základ\n• Investovať ušetrené peniaze do dividendových ETF\n• Preskúmať možnosti investovania do nehnuteľností\n• Vytvoriť digitálne produkty alebo kurzy\n• Preskúmať peer-to-peer pôžičky\n\n**Fáza 3 (18+ Mesiacov):** Škálovať Pasívne Toky\n• Reinvestovať výnosy z pasívnych príjmov\n• Pridávať nové príjmové toky štvrťročne\n• Automatizovať procesy zberu príjmov\n• Sledovať rast pasívnych príjmov vs aktívnych príjmov"
-            }
-          },
-          "level4": {
-            "automationTools": {
-              "title": "🤖 Majstrovstvo v Automatizácii Peňažného Toku",
-              "content": "**AUTOMATIZOVANÝ ZBER PRÍJMOV:**\n\n1. **Optimalizácia Priameho Vkladu:**\n   • Nastavte automatické rozdelenie platu: 70% bežný účet, 20% úspory, 10% investície\n   • Konfigurovať automatické dôchodkové príspevky (zvýšiť o 1% ročne)\n   • Povoliť automatický priamy vklad daňového vrátenia do vysoko výnosných úspor\n\n2. **Automatizácia Investícií:**\n   • Dolárové priemerné náklady do indexových fondov ($500/mesiac)\n   • Automatická reinvestícia dividend (DRIP)\n   • Aplikácie na investovanie drobných (Acorns, Stash) pre drobné\n   • Automatické prebalancovanie štvrťročne\n\n3. **Automatizácia Pasívnych Príjmov:**\n   • Vysoko výnosný sporiteľný účet s automatickými prevodmi\n   • CD rebrík s automatickými obnoveniami\n   • Automatický zber nájomného cez software na správu nehnuteľností\n   • Zber autorských poplatkov cez automatizované licenčné platformy\n\n**AUTOMATIZOVANÁ SPRÁVA VÝDAVKOV:**\n\n1. **Automatizácia Účtov:**\n   • Všetky fixné výdavky na automatickú platbu (nájom, služby, poistenie)\n   • Kreditné karty na automatickú platbu (plný zostatok na vyhnutie úrokom)\n   • Nástroje na správu predplatného (Truebill, Honey) na zrušenie nepoužívaných služieb\n   • Ročné preskúmania poistenia s automatickými upozorneniami na obnovenie\n\n2. **Inteligentné Kontroly Výdavkov:**\n   • Bankové upozornenia pre výdavky nad $100\n   • Denné upozornenia na limit výdavkov\n   • Automatické úspory pri splnení cieľov výdavkov\n   • Zmrazenie kariet pre špecifické kategórie obchodníkov\n\n**SYSTÉM PEŇAŽNÉHO TOKU 'NASTAVIŤ A ZABUDNÚŤ':**\n\n**Týždeň 1:** Nastaviť automatizáciu príjmov\n**Týždeň 2:** Automatizovať fixné výdavky\n**Týždeň 3:** Konfigurovať automatizáciu investícií\n**Týždeň 4:** Implementovať kontroly výdavkov\n\n**Mesačný Prehľad (15 minút):**\n• Skontrolovať pokrok automatizovaných úspor\n• Preskúmať kategórie výdavkov pre optimalizáciu\n• Upraviť sumy automatických prevodov\n• Overiť, že všetky automatizácie fungujú správne"
-            }
-          },
-          "level5": {
-            "salaryNegotiation": {
-              "title": "💰 Majstrovstvo v Vyjednávaní Platu",
-              "content": "**FÁZA PRÍPRAVY (4-6 týždňov pred vyjednávaním):**\n\n1. **Prieskum Trhu:**\n   • Použite Glassdoor, PayScale, Salary.com pre rozpätia platov\n   • Spojte sa s kontaktmi v odvetví pre vnútorné informácie\n   • Zohľadnite úpravy nákladov na život podľa lokality\n   • Preskúmajte celkovú kompenzáciu (benefity, bonusy, akcie)\n\n2. **Dokumentácia Hodnoty:**\n   • Kvantifikujte úspechy s konkrétnymi číslami a percentami\n   • Zoznam nových získaných zručností a certifikácií\n   • Zdokumentujte dodatočné prevzaté zodpovednosti\n   • Zhromažďte pozitívnu spätnú väzbu od klientov/kolegov\n\n3. **Stratégia Časovania:**\n   • Naplánujte po úspešnom dokončení projektu\n   • Vyhýbajte sa zaneprázdneným obdobiam alebo finančnému stresu spoločnosti\n   • Povoľte 2-3 týždne po ročných hodnoteniach\n   • Zvážte cykly plánovania rozpočtu fiškálneho roku\n\n**VYKONANIE VYJEDNÁVANIA:**\n\n**Úvodné Vyhlásenie:**\n'Na základe môjho výskumu a výkonu počas minulého roku by som rád prediskutoval úpravu mojej kompenzácie, aby lepšie odrážala moje súčasné príspevky a trhovú hodnotu.'\n\n**Kľúčové Body Rozhovoru:**\n• Konkrétne úspechy s merateľnými výsledkami\n• Dodatočná hodnota, ktorú prinášate nad rámec popisu práce\n• Prieskum trhu podporujúci vašu žiadosť\n• Budúci záväzok a plány rastu\n\n**Taktiky Vyjednávania:**\n• Začnite 10-20% nad vaším cieľom na umožnenie priestoru pre vyjednávanie\n• Zvážte celý balík, nielen základný plat\n• Buďte pripravení vyjednávať dátum začiatku pre zvýšenia\n• Majte záložné možnosti (dodatočné PTO, rozpočet na profesionálny rozvoj)\n\n**ALTERNATÍVNE STRATÉGIE ZVÝŠENIA PRÍJMOV:**\n\n1. **Škálovanie Vedľajšej Práce:**\n   • Freelance vo vašej oblasti odbornosti (2-5 hodín/týždeň = $500-2000/mesiac)\n   • Online doučovanie alebo coaching ($30-100/hodina)\n   • Vytváranie digitálnych produktov (kurzy, šablóny)\n   • Affiliate marketing vo vašej sieti\n\n2. **Príjmy Založené na Zručnostiach:**\n   • Vysoko žiadané certifikácie (Google Ads, Salesforce, AWS)\n   • Jazykové zručnosti pre prekladateľskú prácu\n   • Technické písanie pre podniky\n   • Správa sociálnych médií pre malé podniky"
-            },
-            "sideHustles": {
-              "title": "🚀 Optimalizácia Príjmov z Vedľajších Prác",
-              "content": "**VEDĽAJŠIE PRÁCE S VYSOKÝM ROI PODĽA ČASOVEJ INVESTÍCIE:**\n\n**1-3 Hodín/Týždeň ($200-800/mesiac):**\n• Šoférovanie rozvozu jedla počas špičkových hodín\n• Online doučovanie vo vašej odbornosti\n• Správa sociálnych médií pre 2-3 malé podniky\n• Služby virtuálneho asistenta\n• Odosielanie stock fotografie\n\n**5-10 Hodín/Týždeň ($800-2500/mesiac):**\n• Freelance písanie alebo grafický dizajn\n• Vytváranie online kurzov\n• Drop-shipping alebo elektronický obchod\n• Starostlivosť o domáce zvieratá/venčenie psov v prosperujúcich štvrtiach\n• Účtovníctvo pre malé podniky\n\n**10+ Hodín/Týždeň ($2500+/mesiac):**\n• Poradenstvo vo vašej profesionálnej oblasti\n• Investovanie do nehnuteľností (renovácia alebo prenájom)\n• Monetizácia YouTube kanála alebo podcastu\n• Vývoj SaaS produktu\n• Lokálny servisný biznis (upratovanie, údržba)\n\n**RÁMEC ÚSPECHU PRE VEDĽAJŠIE PRÁCE:**\n\n**Fáza 1: MVP (Minimálny Životaschopný Produkt)**\n• Začnite so zručnosťami, ktoré už máte\n• Otestujte dopyt trhu s 5-10 potenciálnymi zákazníkmi\n• Cenovo nastavte nízko spočiatku na získanie referencií\n• Zdokonalte svoj proces dodania služby\n\n**Fáza 2: Škálovať a Systematizovať**\n• Zvýšte ceny na základe dopytu\n• Vytvorte šablóny a procesy\n• Outsourcujte opakujúce sa úlohy\n• Vybudujte opakujúce sa príjmové toky\n\n**Fáza 3: Automatizovať alebo Odísť**\n• Vybudujte systémy, ktoré fungujú bez vás\n• Zamestnajte členov tímu alebo virtuálnych asistentov\n• Zvážte predaj bizinsu\n• Reinvestujte zisky do pasívnych príjmových tokov\n\n**MESAČNÝ KONTROLNÝ ZOZNAM OPTIMALIZÁCIE:**\n□ Sledujte strávený čas vs generované príjmy\n□ Analyzujte, ktoré aktivity generujú najvyšší ROI\n□ Eliminujte úlohy s nízkou hodnotou\n□ Reinvestujte zisky strategicky\n□ Otestujte jeden nový príjmový tok štvrťročne"
-            }
-          },
-          "level6": {
-            "planCreation": {
-              "title": "📋 Váš 12-Mesačný Akčný Plán Peňažného Toku",
-              "content": "**MESIAC 1-3: BUDOVANIE ZÁKLADOV**\n\n**Príjmové Základy:**\n• Dokončite komplexný audit príjmov\n• Nastavte automatické prevody úspor\n• Preskúmajte čas vyjednávania platu\n• Identifikujte 3 potenciálne príležitosti vedľajšej práce\n\n**Výdavkové Základy:**\n• Sledujte všetky výdavky po dobu 30 dní\n• Zrušte nepoužívané predplatné a služby\n• Automatizujte všetky fixné výdavky\n• Nastavte upozornenia a limity výdavkov\n\n**Kľúčové Metriky:**\n• Mesačná miera úspor: 20%\n• Núdzový fond: $1,000\n• Úspory z auditu predplatného: $100+/mesiac\n\n**MESIAC 4-6: FÁZA OPTIMALIZÁCIE**\n\n**Rast Príjmov:**\n• Spustite prvú vedľajšiu prácu\n• Naplánujte stretnutie vyjednávania platu\n• Začnite rozvoj zručností pre zvýšenie príjmov\n• Optimalizujte stratégiu odmien kreditných kariet\n\n**Automatizácia Peňažného Toku:**\n• Implementujte kompletný automatizačný systém\n• Nastavte investičný účet s auto-prevodmi\n• Vytvorte rozpočty kategórií výdavkov\n• Zaveďte mesačnú rutinu finančného prehľadu\n\n**Kľúčové Metriky:**\n• Príjmy z vedľajšej práce: $500+/mesiac\n• Automatizované investície: $300+/mesiac\n• Núdzový fond: $3,000\n• Pozitívny peňažný tok: $800+/mesiac\n\n**MESIAC 7-9: FÁZA AKCELERÁCIE**\n\n**Viacnásobné Príjmové Toky:**\n• Škálujte úspešnú vedľajšiu prácu\n• Spustite druhý príjmový tok\n• Investujte do kurzov rozvoja zručností\n• Networkujte pre príležitosti\n\n**Budovanie Investícií:**\n• Zvýšte investičné príspevky o 25%\n• Preskúmajte príležitosti nehnuteľností\n• Zvážte peer-to-peer pôžičky\n• Vybudujte portfólio zamerané na dividendy\n\n**Kľúčové Metriky:**\n• Celkové mesačné zvýšenie príjmov: 30%\n• Investičné portfólio: $5,000+\n• Núdzový fond: 6 mesiacov výdavkov\n• Rast čistého majetku: $10,000+\n\n**MESIAC 10-12: FÁZA MAJSTROVSTVA**\n\n**Pokročilé Stratégie:**\n• Implementujte stratégie daňovej optimalizácie\n• Zvážte investovanie do nehnuteľností\n• Vybudujte pasívny príjem na $500+/mesiac\n• Vytvorte systémy pre dlhodobé budovanie bohatstva\n\n**Budovanie Bohatstva:**\n• Diverzifikujte investičné portfólio\n• Preskúmajte príležitosti akvizície podnikov\n• Nastavte základy plánovania majetku\n• Naplánujte finančné ciele budúceho roku\n\n**Kľúčové Metriky:**\n• Celkové zvýšenie príjmov: 50%+\n• Pasívny príjem: $500+/mesiac\n• Čistý majetok: nárast o $25,000+\n• Časový plán finančnej nezávislosti: Jasná cesta\n\n**KONTROLNÉ BODY ŠTVRŤROČNÉHO PREHĽADU:**\n\n**Prehľad Š1:**\n□ Núdzový fond plne financovaný?\n□ Automatizačné systémy fungujú?\n□ Vedľajšia práca generuje príjmy?\n□ Optimalizácia výdavkov dokončená?\n\n**Prehľad Š2:**\n□ Vyjednávanie platu dokončené?\n□ Investičná stratégia implementovaná?\n□ Druhý príjmový tok spustený?\n□ Finančné ciele na správnej ceste?\n\n**Prehľad Š3:**\n□ Ciele rastu príjmov splnené?\n□ Pasívny príjem sa rozvíja?\n□ Investičné portfólio diverzifikované?\n□ Daňová optimalizácia implementovaná?\n\n**Prehľad Š4:**\n□ Ročné finančné ciele dosiahnuté?\n□ Plán budúceho roku vypracovaný?\n□ Budovanie bohatstva zrýchlené?\n□ Časový plán finančnej nezávislosti aktualizovaný?"
-            }
-          },
-          "exercises": {
-            "cashFlowReflection": {
-              "question": "Peňažný tok sa týka len sledovania príjmov, nie výdavkov.",
-              "explanation": "Peňažný tok sleduje ako peniaze prichádzajúce (príjmy) AJ peniaze odchádzajúce (výdavky). Potrebujete monitorovať obe strany, aby ste pochopili svoj kompletný finančný obraz.",
-              "feedback": {
-                "correct": "🎯 Správne! Peňažný tok sa týka ako príjmov AJ výdavkov - kompletný obraz pohybu vašich peňazí.",
-                "incorrect": "Peňažný tok zahŕňa ako príjmy tak výdavky. Je to kompletný obraz peňazí tečúcich do a z vášho života."
-              }
-            }
-          }
-        }
-      },
-      "debt-elimination": {
-        "title": "Eliminácia Dlhov",
-        "description": "Systematicky zničte dlhy a vybudujte neotrasiteľnú finančnú slobodu"
-      },
-      "investment-fundamentals": {
-        "title": "Základy Investovania",
-        "description": "Ovládnite základy investovania na budovanie dlhodobého bohatstva a finančnej slobody"
-      },
-      "solo-entrepreneur-finance": {
-        "title": "Financie pre Samostatných Podnikateľov",
-        "description": "Ovládnite finančné zručnosti, ktoré každý samostatný podnikateľ potrebuje na budovanie a rozširovanie svojho podnikania"
-      },
-      "financialMindset": {
-        "title": "Finančné Myslenie a Psychológia",
-        "description": "Ovládni psychológiu peňazí a vybuduj si bohaté myslenie, ktoré povedie k úspechu",
-        "levels": {
-          "mindsetLevel1": {
-            "title": "🧠 Prielom v Psychológii Peňazí",
-            "description": "Objavte a preprogramujte svoje presvedčenia o peniazoch pre finančný úspech",
-            "objectives": [
-              "Identifikujte svoje základné presvedčenia o peniazoch a ako ovplyvňujú vaše finančné rozhodnutia",
-              "Pochopte psychológiu za správaním týkajúcim sa míňania, sporenia a investovania",
-              "Transformujte obmedzujúce presvedčenia na myslenie budujúce bohatstvo",
-              "Vyviňte emocionálnu inteligenciu okolo finančných rozhodnutí"
-            ],
-            "content": {
-              "psychologyIntro": {
-                "title": "Váš Príbeh s Peniazmi: Skrytá Sila Za Každým Finančným Rozhodnutím",
-                "content": "Každé finančné rozhodnutie, ktoré urobíte, je riadené presvedčeniami vytvorenými v detstve. Väčšina ľudí nevedome sabotuje svoje bohatstvo kvôli neviditeľným peňažným skriptom bežiacim na pozadí.\n\nVýskum ukazuje, že vaše finančné myslenie je zodpovedné za 80% vašich finančných výsledkov - viac ako váš príjem, vzdelanie alebo dokonca trhové podmienky.\n\nDnes odhalíme a preprogramujeme tieto skryté presvedčenia tak, aby peniaze pracovali PRE vás namiesto proti vám."
-              },
-              "moneyScripts": {
-                "title": "💭 Objavte Svoje Peňažné Skripty",
-                "content": "**Absolvujte Hodnotenie Peňažných Skriptov:**\n\nPrečítajte si každé vyhlásenie a zaznamenajte svoju okamžitú emocionálnu reakciu:\n\n1. \"Peniaze sú korením všetkého zla\"\n2. \"Bohatí ľudia sú chamtiví a sebeckí\"\n3. \"Nezaslúžim si byť bohatý\"\n4. \"Peniaze nekupujú šťastie\"\n5. \"Nikdy nie je dosť peňazí\"\n6. \"Nie som dobrý s peniazmi\"\n\n**Váš Sprievodca Reakciami:**\n✅ **Súhlasíte/Cítite sa stresovane**: Toto je obmedzujúce presvedčenie blokujúce vaše bohatstvo\n⚠️ **Neutrálne**: Ste čiastočne naprogramovaní týmto presvedčením\n❌ **Nesúhlasíte/Cítite sa sebavedomí**: Prekonali ste toto obmedzenie\n\n**Akčný Krok**: Zapíšte si presvedčenia, ktoré vás vyprovokovaly - toto jsou vaše blokátory bohatstva na preprogramovanie."
-              },
-              "wealthMindset": {
-                "title": "🏆 Porovnanie Myslenia: Milionár vs. Priemerný",
-                "content": "**MYSLENIE NEDOSTATKU (Priemerný Človek):**\n❌ \"Nemôžem si to dovoliť\"\n❌ \"Peniaze nerastú na stromoch\"\n❌ \"Bohatí ľudia majú šťastie\"\n❌ \"Nikdy nebudem bohatý\"\n❌ \"Peniaze sa ťažko zarábajú\"\n\n**MYSLENIE HOJNOSTI (Milionári):**\n✅ \"Ako si to môžem dovoliť?\"\n✅ \"Peniaze ku mne tečú ľahko\"\n✅ \"Bohatí ľudia vytvárajú hodnotu\"\n✅ \"Bohatstvo je môj prirodzený stav\"\n✅ \"Peniaze sú nástrojom na dobro\"\n\n**Transformácia:**\nMilionári nemyslia o peniazoch inak, pretože majú peniaze - majú peniaze, pretože o nich myslia inak."
-              },
-              "reprogrammingTechnique": {
-                "title": "🔄 5-Minútová Technika Preprogramovania Finančného Myslenia",
-                "content": "**Denný Protokol Afirmácií Bohatstva:**\n\n**Ráno (2 minúty):**\n1. Postavte sa pred zrkadlo\n2. Pozrite sa do očí\n3. Povedzte s presvedčením: \"Som hodný bohatstva a hojnosti\"\n4. Vizualizujte peniaze tečúce k vám bez námahy\n5. Pocíťte emóciu už bytia finančne slobodným\n\n**Večer (3 minúty):**\n1. Zapíšte si 3 peňažné víťazstvá z dnešného dňa (akejkoľvek veľkosti)\n2. Vyjadrite vďačnosť za peniaze, ktoré k vám prišli\n3. Nastavte úmysel na zajtrajšie finančné príležitosti\n\n**Veda**: Výskum neuroplasticity ukazuje, že toto preprogramuje vaše mozgové obvody peňazí za 21-30 dní."
-              },
-              "moneyDate": {
-                "title": "💕 Výzva Týždenného Rande s Peniazmi",
-                "content": "**Vaša Misia**: Naplánujte si týždenné 30-minútové 'Rande s Peniazmi' so sebou\n\n**Čo robiť:**\n1. Skontrolujte svoje financie bez posudzovania\n2. Oslávte každé finančné víťazstvo (aj 1€ ušetrené)\n3. Naplánujte jednu akciu generujúcu peniaze na budúci týždeň\n4. Vizualizujte svoje finančné ciele ako už dosiahnuté\n\n**Prečo to funguje**: Toto buduje pozitívny vzťah s peniazmi namiesto strachu a vyhýbania sa\n\n**Sledujte svoj pokrok**: Použite kalendár vo vašom telefóne na naplánovanie tohto opakujúceho sa stretnutia s bohatstvom"
-              }
-            },
-            "exercises": {
-              "psychologyQuiz1": {
-                "question": "Podľa výskumu, aké percento vašich finančných výsledkov je určené vaším finančným myslením?",
-                "explanation": "Štúdie ukazujú, že finančné myslenie predstavuje približne 80% finančných výsledkov, ďaleko prevyšujúc faktory ako príjem alebo úroveň vzdelania.",
-                "feedback": {
-                  "correct": "💡 Presne! Vaše myslenie je najsilnejším faktorom vo vašom finančnom úspechu.",
-                  "incorrect": "Výskum konzistentne ukazuje, že myslenie predstavuje približne 80% finančných výsledkov - je to najdôležitejší faktor!"
-                }
-              },
-              "limitingBeliefs": {
-                "question": "Pravda alebo Nepravda: Obmedzujúce presvedčenia o peniazoch vytvorené v detstve môžu byť úplne preprogramované v dospelosti.",
-                "explanation": "Vďaka neuroplasticite môže mozog vytvoriť nové neurálne dráhy v akomkoľvek veku. S konzistentným cvičením môžu byť obmedzujúce presvedčenia úplne transformované.",
-                "feedback": {
-                  "correct": "🧠 Správne! Váš mozog sa môže preprogramovať v akomkoľvek veku - myslenie bohatstva sa dá naučiť.",
-                  "incorrect": "V skutočnosti nám neuroplasticita umožňuje úplne preprogramovať obmedzujúce presvedčenia. Nikdy nie je neskoro vyvinúť si myslenie bohatstva!"
-                }
-              }
-            }
-          },
-          "mindsetLevel2": {
-            "title": "🎯 Stanovenie Cieľov a Finančná Vízia",
-            "description": "Vytvorte presvedčivú finančnú víziu a realizovateľné ciele, ktoré povedú k úspechu",
-            "objectives": [
-              "Navrhnite presvedčivú 10-ročnú finančnú víziu, ktorá motivuje každodenné konanie",
-              "Použite overené rámce stanovenia cieľov pre finančný úspech",
-              "Rozdeľte veľké finančné ciele na dosiahnuteľné míľniky",
-              "Vytvorte systémy zodpovednosti, ktoré zabezpečia sledovanie"
-            ]
-          },
-          "mindsetLevel3": {
-            "title": "💪 Sebavedomie s Peniazmi a Rozhodovanie",
-            "description": "Vybudujte si neotrasiteľné sebavedomie vo finančných rozhodnutiach a správe peňazí",
-            "objectives": [
-              "Vyviňte sebavedomie pri rozhodovaní o financiách v neistote",
-              "Naučte sa rámce na hodnotenie finančných príležitostí a rizík",
-              "Vybudujte si odolnosť na zvládanie finančných neúspechov a tržnej volatility",
-              "Vytvorte systémy pre kontinuálne finančné vzdelávanie a rast"
-            ]
-          }
-        }
-      },
-      "cashFlowMastery": {
-        "title": "Majstrovstvo Cash Flow",
-        "description": "Ovládnite umenie správy peňazí s pokročilými systémami rozpočtovania a cash flow",
-        "levels": {
-          "cashflowLevel1": {
-            "title": "💡 Vitajte a Sila Povedomia o Cash Flow",
-            "description": "Objavte, ako vám povedomie o cash flow dáva kontrolu nad vaším finančným životom"
-          },
-          "cashflowLevel2": {
-            "title": "🔍 Identifikácia a Mapovanie Zdrojov Príjmov",
-            "description": "Naučte sa identifikovať každý zdroj príjmov, vrátane skrytých ziskov"
-          },
-          "cashflowLevel3": {
-            "title": "⚖️ Aktívne vs. Pasívne Príjmy",
-            "description": "Pochopte kľúčové rozdiely medzi aktívnymi a pasívnymi príjmami"
-          },
-          "cashflowLevel4": {
-            "title": "🤖 Automatizácia Sledovania Príjmov",
+            "title": "🤖 Automatizácia sledovania príjmov",
             "description": "Nastavte automatizované systémy na efektívne sledovanie príjmov a výdajov"
           },
-          "cashflowLevel5": {
-            "title": "🚀 Stratégie na Zvýšenie Príjmov o 20-50%",
-            "description": "Naučte sa realizovateľné stratégie na výrazné zvýšenie príjmov do 12 mesiacov"
+          "cashflow-level-5": {
+            "title": "🚀 Stratégie na zvýšenie príjmov o 20-50%",
+            "description": "Naučte sa realizovateľné stratégie na významné zvýšenie príjmov do 12 mesiacov"
           },
-          "cashflowLevel6": {
-            "title": "📋 Vytvorte Svoj Personalizovaný Plán Cash Flow",
+          "cashflow-level-6": {
+            "title": "📋 Vytvorte svoj personalizovaný plán Cash Flow",
             "description": "Spojte všetko do komplexného 12-mesačného plánu cash flow"
           }
         }
-      },
-      "debtElimination": {
-        "title": "Majstrovstvo Eliminácie Dlhov",
-        "description": "Systematicky zničte dlhy a vybudujte si neotrasiteľnú finančnú slobodu"
-      },
-      "emergencyFundInsurance": {
-        "title": "Núdzový Fond a Ochrana",
-        "description": "Vybudujte si nepriestrelne finančnú bezpečnosť s núdzovými fondmi a strategickým poistením"
-      },
-      "investmentFundamentals": {
-        "title": "Základy Investovania",
-        "description": "Ovládnite základy investovania na budovanie dlhodobého bohatstva a finančnej slobody"
-      },
-      "soloEntrepreneurFinance": {
-        "title": "Financie Solo Podnikateľa",
-        "description": "Ovládnite finančné zručnosti, ktoré každý solo podnikateľ potrebuje na vybudovanie a rozšírenie svojho podnikania"
       }
-    },
-    "tabs": {
-      "moneyPsychology": "Psychológia Peňazí",
-      "mindsetTools": "Nástroje Myslenia",
-      "visionCreation": "Tvorba Vízie",
-      "smartGoalsFramework": "Rámec SMART Cieľov",
-      "decisionFrameworks": "Rámce Rozhodnutí"
-    },
-    "learningObjectives": "Vzdelávacie Ciele:"
+    }
   }
 }
