@@ -19,25 +19,9 @@ export function Calculator({ calculator }: CalculatorProps) {
     message?: string;
   }>({});
 
-  // If no calculator provided, render a placeholder
+  // If no calculator provided, don't render anything
   if (!calculator) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <CalculatorIcon className="h-5 w-5 text-blue-600" />
-            <CardTitle className="text-lg">Calculator</CardTitle>
-          </div>
-          <CardDescription>Interactive tools will appear here as you progress through the lesson.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center p-8 text-center">
-            <CalculatorIcon className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-sm text-muted-foreground">Complete the lesson content to unlock interactive calculators!</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
 
   const handleInputChange = (fieldId: string, value: string) => {
