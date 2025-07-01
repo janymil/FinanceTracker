@@ -1,0 +1,152 @@
+{
+  "courses": {
+    "title": "Cursos de Educación Financiera",
+    "subtitle": "Desarrolla habilidades financieras esenciales a través de lecciones interactivas y breves impulsadas por IA",
+    "stats": {
+      "totalXp": "XP Total",
+      "dayStreak": "Racha de Días",
+      "bestStreak": "Mejor Racha",
+      "lessons": "Lecciones"
+    },
+    "actions": {
+      "startCourse": "Comenzar Curso",
+      "continue": "Continuar",
+      "locked": "Bloqueado",
+      "exitLesson": "Salir de la Lección",
+      "startExercises": "Comenzar Ejercicios",
+      "nextQuestion": "Siguiente Pregunta",
+      "finishLesson": "Terminar Lección",
+      "previous": "Anterior",
+      "backToCourses": "Volver a Cursos",
+      "tryAgain": "Intentar de Nuevo"
+    },
+    "progress": {
+      "progress": "Progreso",
+      "question": "Pregunta",
+      "of": "de",
+      "complete": "Completo",
+      "questions": "preguntas"
+    },
+    "results": {
+      "lessonComplete": "¡Lección Completada!",
+      "keepLearning": "¡Sigue Aprendiendo!",
+      "youScored": "Obtuviste",
+      "outOf": "de",
+      "questionsCorrectly": "preguntas correctamente",
+      "xpEarned": "¡XP ganados!"
+    },
+    "achievements": {
+      "title": "Tus Logros",
+      "earned": "Obtenido",
+      "achieved": "🏆 Logrado"
+    },
+    "loading": "Cargando Cursos de Educación Financiera...",
+    "noTabsMessage": "El contenido está organizado en pestañas arriba. Por favor selecciona una pestaña para ver el contenido de la lección.",
+    "modules": {
+      "financialMindset": {
+        "title": "Mentalidad y Psicología Financiera",
+        "description": "Domina la psicología del dinero y construye una mentalidad próspera que impulse el éxito",
+        "levels": {
+          "mindsetLevel1": {
+            "title": "🧠 Avance en Psicología del Dinero",
+            "description": "Descubre y reprograma tus creencias sobre el dinero para el éxito financiero",
+            "objectives": [
+              "Identifica tus creencias fundamentales sobre el dinero y cómo impactan tus decisiones financieras",
+              "Comprende la psicología detrás de los comportamientos de gasto, ahorro e inversión",
+              "Transforma creencias limitantes en mentalidades constructoras de riqueza",
+              "Desarrolla inteligencia emocional en torno a las decisiones financieras"
+            ],
+            "content": {
+              "psychologyIntro": {
+                "title": "Tu Historia con el Dinero: La Fuerza Oculta Detrás de Cada Decisión Financiera",
+                "content": "Cada decisión financiera que tomas está impulsada por creencias formadas en la infancia. La mayoría de las personas sabotean inconscientemente su riqueza debido a guiones invisibles sobre el dinero que corren en segundo plano.\n\nLa investigación muestra que tu mentalidad financiera es responsable del 80% de tus resultados financieros - más que tus ingresos, educación, o incluso las condiciones del mercado.\n\nHoy, vamos a descubrir y reprogramar estas creencias ocultas para que el dinero trabaje A FAVOR tuyo en lugar de en tu contra."
+              },
+              "moneyScripts": {
+                "title": "💭 Descubre tus Guiones del Dinero",
+                "content": "**Toma la Evaluación de Guiones del Dinero:**\n\nLee cada declaración y nota tu reacción emocional inmediata:\n\n1. \"El dinero es la raíz de todos los males\"\n2. \"Las personas ricas son codiciosas y egoístas\"\n3. \"No merezco ser rico\"\n4. \"El dinero no compra la felicidad\"\n5. \"Nunca hay suficiente dinero\"\n6. \"No soy bueno con el dinero\"\n\n**Tu Guía de Reacciones:**\n✅ **De acuerdo/Te sientes estresado**: Esta es una creencia limitante que bloquea tu riqueza\n⚠️ **Neutral**: Estás parcialmente programado por esta creencia\n❌ **En desacuerdo/Te sientes confiado**: Has superado esta limitación\n\n**Paso de Acción**: Escribe las creencias que te provocaron - estos son tus bloqueadores de riqueza para reprogramar."
+              },
+              "wealthMindset": {
+                "title": "🏆 Comparación de Mentalidad: Millonario vs. Promedio",
+                "content": "**MENTALIDAD DE ESCASEZ (Persona Promedio):**\n❌ \"No puedo permitírmelo\"\n❌ \"El dinero no crece en los árboles\"\n❌ \"Las personas ricas tienen suerte\"\n❌ \"Nunca seré rico\"\n❌ \"El dinero es difícil de ganar\"\n\n**MENTALIDAD DE ABUNDANCIA (Millonarios):**\n✅ \"¿Cómo puedo permitírmelo?\"\n✅ \"El dinero fluye hacia mí fácilmente\"\n✅ \"Las personas ricas crean valor\"\n✅ \"La riqueza es mi estado natural\"\n✅ \"El dinero es una herramienta para el bien\"\n\n**La Transformación:**\nLos millonarios no piensan diferente sobre el dinero porque tienen dinero - tienen dinero porque piensan diferente sobre él."
+              },
+              "reprogrammingTechnique": {
+                "title": "🔄 La Técnica de Reprogramación de Mentalidad Financiera de 5 Minutos",
+                "content": "**Protocolo Diario de Afirmaciones de Riqueza:**\n\n**Mañana (2 minutos):**\n1. Párate frente a un espejo\n2. Mírate a los ojos\n3. Di con convicción: \"Soy digno de riqueza y abundancia\"\n4. Visualiza dinero fluyendo hacia ti sin esfuerzo\n5. Siente la emoción de ya ser financieramente libre\n\n**Noche (3 minutos):**\n1. Escribe 3 victorias financieras del día (de cualquier tamaño)\n2. Expresa gratitud por el dinero que fluyó hacia ti\n3. Establece intención para las oportunidades financieras de mañana\n\n**Ciencia**: La investigación en neuroplasticidad muestra que esto reconecta los circuitos cerebrales del dinero en 21-30 días."
+              },
+              "moneyDate": {
+                "title": "💕 El Desafío de la Cita Semanal con el Dinero",
+                "content": "**Tu Misión**: Programa una 'Cita con el Dinero' semanal de 30 minutos contigo mismo\n\n**Qué hacer:**\n1. Revisa tus finanzas sin juicio\n2. Celebra cada victoria financiera (incluso $1 ahorrado)\n3. Planifica una acción generadora de dinero para la próxima semana\n4. Visualiza tus metas financieras como ya logradas\n\n**Por qué funciona**: Esto construye una relación positiva con el dinero en lugar de miedo y evitación\n\n**Rastrea tu progreso**: Usa el calendario de tu teléfono para programar esta cita recurrente con la riqueza"
+              }
+            },
+            "exercises": {
+              "psychologyQuiz1": {
+                "question": "Según la investigación, ¿qué porcentaje de tus resultados financieros están determinados por tu mentalidad financiera?",
+                "explanation": "Los estudios muestran que la mentalidad financiera representa aproximadamente el 80% de los resultados financieros, superando por mucho factores como ingresos o nivel educativo.",
+                "feedback": {
+                  "correct": "💡 ¡Exacto! Tu mentalidad es el factor más poderoso en tu éxito financiero.",
+                  "incorrect": "La investigación muestra consistentemente que la mentalidad representa aproximadamente el 80% de los resultados financieros - ¡es el factor más importante!"
+                }
+              },
+              "limitingBeliefs": {
+                "question": "Verdadero o Falso: Las creencias limitantes sobre el dinero formadas en la infancia pueden ser completamente reprogramadas en la edad adulta.",
+                "explanation": "Gracias a la neuroplasticidad, el cerebro puede formar nuevas vías neurales a cualquier edad. Con práctica consistente, las creencias limitantes pueden ser completamente transformadas.",
+                "feedback": {
+                  "correct": "🧠 ¡Correcto! Tu cerebro puede reconectarse a cualquier edad - la mentalidad de riqueza se puede aprender.",
+                  "incorrect": "En realidad, la neuroplasticidad nos permite reconectar completamente las creencias limitantes. ¡Nunca es demasiado tarde para desarrollar una mentalidad de riqueza!"
+                }
+              }
+            }
+          },
+          "mindsetLevel2": {
+            "title": "🎯 Establecimiento de Metas y Visión Financiera",
+            "description": "Crea una visión financiera convincente y metas accionables que impulsen el éxito",
+            "objectives": [
+              "Diseña una visión financiera convincente de 10 años que motive la acción diaria",
+              "Usa marcos probados de establecimiento de metas para el éxito financiero",
+              "Divide grandes metas financieras en hitos alcanzables",
+              "Crea sistemas de responsabilidad que aseguren el seguimiento"
+            ]
+          },
+          "mindsetLevel3": {
+            "title": "💪 Confianza en el Dinero y Toma de Decisiones",
+            "description": "Construye confianza inquebrantable en las decisiones financieras y gestión del dinero",
+            "objectives": [
+              "Desarrolla confianza para tomar decisiones financieras bajo incertidumbre",
+              "Aprende marcos para evaluar oportunidades y riesgos financieros",
+              "Construye resistencia para manejar reveses financieros y volatilidad del mercado",
+              "Crea sistemas para educación financiera continua y crecimiento"
+            ]
+          }
+        }
+      },
+      "cashFlowMastery": {
+        "title": "Dominio del Flujo de Efectivo",
+        "description": "Domina el arte de la gestión del dinero con sistemas avanzados de presupuesto y flujo de efectivo"
+      },
+      "debtElimination": {
+        "title": "Dominio de Eliminación de Deudas",
+        "description": "Destruye las deudas sistemáticamente y construye libertad financiera inquebrantable"
+      },
+      "emergencyFundInsurance": {
+        "title": "Fondo de Emergencia y Protección",
+        "description": "Construye seguridad financiera a prueba de balas con fondos de emergencia y seguros estratégicos"
+      },
+      "investmentFundamentals": {
+        "title": "Fundamentos de Inversión",
+        "description": "Domina los conceptos básicos de inversión para construir riqueza a largo plazo y libertad financiera"
+      },
+      "soloEntrepreneurFinance": {
+        "title": "Finanzas de Emprendedor Solo",
+        "description": "Domina las habilidades financieras que todo emprendedor solo necesita para construir y escalar su negocio"
+      }
+    },
+    "tabs": {
+      "moneyPsychology": "Psicología del Dinero",
+      "mindsetTools": "Herramientas de Mentalidad",
+      "visionCreation": "Creación de Visión",
+      "smartGoalsFramework": "Marco de Metas SMART",
+      "decisionFrameworks": "Marcos de Decisión"
+    },
+    "learningObjectives": "Objetivos de Aprendizaje:"
+  }
+}

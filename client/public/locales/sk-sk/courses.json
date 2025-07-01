@@ -1,0 +1,152 @@
+{
+  "courses": {
+    "title": "Kurzy Finančnej Gramotnosti",
+    "subtitle": "Vybudujte základné finančné zručnosti prostredníctvom interaktívnych, krátkych lekcií poháňaných AI",
+    "stats": {
+      "totalXp": "Celkové XP",
+      "dayStreak": "Denná Séria",
+      "bestStreak": "Najlepšia Séria",
+      "lessons": "Lekcie"
+    },
+    "actions": {
+      "startCourse": "Začať Kurz",
+      "continue": "Pokračovať",
+      "locked": "Zamknuté",
+      "exitLesson": "Ukončiť Lekciu",
+      "startExercises": "Začať Cvičenia",
+      "nextQuestion": "Ďalšia Otázka",
+      "finishLesson": "Dokončiť Lekciu",
+      "previous": "Predchádzajúce",
+      "backToCourses": "Späť na Kurzy",
+      "tryAgain": "Skúsiť Znovu"
+    },
+    "progress": {
+      "progress": "Pokrok",
+      "question": "Otázka",
+      "of": "z",
+      "complete": "Dokončené",
+      "questions": "otázok"
+    },
+    "results": {
+      "lessonComplete": "Lekcia Dokončená!",
+      "keepLearning": "Pokračuj v Učení!",
+      "youScored": "Dosiahol si",
+      "outOf": "z",
+      "questionsCorrectly": "otázok správne",
+      "xpEarned": "XP získané!"
+    },
+    "achievements": {
+      "title": "Tvoje Úspechy",
+      "earned": "Získané",
+      "achieved": "🏆 Dosiahnuté"
+    },
+    "loading": "Načítavajú sa Kurzy Finančnej Gramotnosti...",
+    "noTabsMessage": "Obsah je organizovaný v kartách hore. Prosím vyber kartu na zobrazenie obsahu lekcie.",
+    "modules": {
+      "financialMindset": {
+        "title": "Finančné Myslenie a Psychológia",
+        "description": "Ovládni psychológiu peňazí a vybuduj si bohaté myslenie, ktoré povedie k úspechu",
+        "levels": {
+          "mindsetLevel1": {
+            "title": "🧠 Prielom v Psychológii Peňazí",
+            "description": "Objavte a preprogramujte svoje presvedčenia o peniazoch pre finančný úspech",
+            "objectives": [
+              "Identifikujte svoje základné presvedčenia o peniazoch a ako ovplyvňujú vaše finančné rozhodnutia",
+              "Pochopte psychológiu za správaním týkajúcim sa míňania, sporenia a investovania",
+              "Transformujte obmedzujúce presvedčenia na myslenie budujúce bohatstvo",
+              "Vyviňte emocionálnu inteligenciu okolo finančných rozhodnutí"
+            ],
+            "content": {
+              "psychologyIntro": {
+                "title": "Váš Príbeh s Peniazmi: Skrytá Sila Za Každým Finančným Rozhodnutím",
+                "content": "Každé finančné rozhodnutie, ktoré urobíte, je riadené presvedčeniami vytvorenými v detstve. Väčšina ľudí nevedome sabotuje svoje bohatstvo kvôli neviditeľným peňažným skriptom bežiacim na pozadí.\n\nVýskum ukazuje, že vaše finančné myslenie je zodpovedné za 80% vašich finančných výsledkov - viac ako váš príjem, vzdelanie alebo dokonca trhové podmienky.\n\nDnes odhalíme a preprogramujeme tieto skryté presvedčenia tak, aby peniaze pracovali PRE vás namiesto proti vám."
+              },
+              "moneyScripts": {
+                "title": "💭 Objavte Svoje Peňažné Skripty",
+                "content": "**Absolvujte Hodnotenie Peňažných Skriptov:**\n\nPrečítajte si každé vyhlásenie a zaznamenajte svoju okamžitú emocionálnu reakciu:\n\n1. \"Peniaze sú korením všetkého zla\"\n2. \"Bohatí ľudia sú chamtiví a sebeckí\"\n3. \"Nezaslúžim si byť bohatý\"\n4. \"Peniaze nekupujú šťastie\"\n5. \"Nikdy nie je dosť peňazí\"\n6. \"Nie som dobrý s peniazmi\"\n\n**Váš Sprievodca Reakciami:**\n✅ **Súhlasíte/Cítite sa stresovane**: Toto je obmedzujúce presvedčenie blokujúce vaše bohatstvo\n⚠️ **Neutrálne**: Ste čiastočne naprogramovaní týmto presvedčením\n❌ **Nesúhlasíte/Cítite sa sebavedomí**: Prekonali ste toto obmedzenie\n\n**Akčný Krok**: Zapíšte si presvedčenia, ktoré vás vyprovokovaly - toto jsou vaše blokátory bohatstva na preprogramovanie."
+              },
+              "wealthMindset": {
+                "title": "🏆 Porovnanie Myslenia: Milionár vs. Priemerný",
+                "content": "**MYSLENIE NEDOSTATKU (Priemerný Človek):**\n❌ \"Nemôžem si to dovoliť\"\n❌ \"Peniaze nerastú na stromoch\"\n❌ \"Bohatí ľudia majú šťastie\"\n❌ \"Nikdy nebudem bohatý\"\n❌ \"Peniaze sa ťažko zarábajú\"\n\n**MYSLENIE HOJNOSTI (Milionári):**\n✅ \"Ako si to môžem dovoliť?\"\n✅ \"Peniaze ku mne tečú ľahko\"\n✅ \"Bohatí ľudia vytvárajú hodnotu\"\n✅ \"Bohatstvo je môj prirodzený stav\"\n✅ \"Peniaze sú nástrojom na dobro\"\n\n**Transformácia:**\nMilionári nemyslia o peniazoch inak, pretože majú peniaze - majú peniaze, pretože o nich myslia inak."
+              },
+              "reprogrammingTechnique": {
+                "title": "🔄 5-Minútová Technika Preprogramovania Finančného Myslenia",
+                "content": "**Denný Protokol Afirmácií Bohatstva:**\n\n**Ráno (2 minúty):**\n1. Postavte sa pred zrkadlo\n2. Pozrite sa do očí\n3. Povedzte s presvedčením: \"Som hodný bohatstva a hojnosti\"\n4. Vizualizujte peniaze tečúce k vám bez námahy\n5. Pocíťte emóciu už bytia finančne slobodným\n\n**Večer (3 minúty):**\n1. Zapíšte si 3 peňažné víťazstvá z dnešného dňa (akejkoľvek veľkosti)\n2. Vyjadrite vďačnosť za peniaze, ktoré k vám prišli\n3. Nastavte úmysel na zajtrajšie finančné príležitosti\n\n**Veda**: Výskum neuroplasticity ukazuje, že toto preprogramuje vaše mozgové obvody peňazí za 21-30 dní."
+              },
+              "moneyDate": {
+                "title": "💕 Výzva Týždenného Rande s Peniazmi",
+                "content": "**Vaša Misia**: Naplánujte si týždenné 30-minútové 'Rande s Peniazmi' so sebou\n\n**Čo robiť:**\n1. Skontrolujte svoje financie bez posudzovania\n2. Oslávte každé finančné víťazstvo (aj 1€ ušetrené)\n3. Naplánujte jednu akciu generujúcu peniaze na budúci týždeň\n4. Vizualizujte svoje finančné ciele ako už dosiahnuté\n\n**Prečo to funguje**: Toto buduje pozitívny vzťah s peniazmi namiesto strachu a vyhýbania sa\n\n**Sledujte svoj pokrok**: Použite kalendár vo vašom telefóne na naplánovanie tohto opakujúceho sa stretnutia s bohatstvom"
+              }
+            },
+            "exercises": {
+              "psychologyQuiz1": {
+                "question": "Podľa výskumu, aké percento vašich finančných výsledkov je určené vaším finančným myslením?",
+                "explanation": "Štúdie ukazujú, že finančné myslenie predstavuje približne 80% finančných výsledkov, ďaleko prevyšujúc faktory ako príjem alebo úroveň vzdelania.",
+                "feedback": {
+                  "correct": "💡 Presne! Vaše myslenie je najsilnejším faktorom vo vašom finančnom úspechu.",
+                  "incorrect": "Výskum konzistentne ukazuje, že myslenie predstavuje približne 80% finančných výsledkov - je to najdôležitejší faktor!"
+                }
+              },
+              "limitingBeliefs": {
+                "question": "Pravda alebo Nepravda: Obmedzujúce presvedčenia o peniazoch vytvorené v detstve môžu byť úplne preprogramované v dospelosti.",
+                "explanation": "Vďaka neuroplasticite môže mozog vytvoriť nové neurálne dráhy v akomkoľvek veku. S konzistentným cvičením môžu byť obmedzujúce presvedčenia úplne transformované.",
+                "feedback": {
+                  "correct": "🧠 Správne! Váš mozog sa môže preprogramovať v akomkoľvek veku - myslenie bohatstva sa dá naučiť.",
+                  "incorrect": "V skutočnosti nám neuroplasticita umožňuje úplne preprogramovať obmedzujúce presvedčenia. Nikdy nie je neskoro vyvinúť si myslenie bohatstva!"
+                }
+              }
+            }
+          },
+          "mindsetLevel2": {
+            "title": "🎯 Stanovenie Cieľov a Finančná Vízia",
+            "description": "Vytvorte presvedčivú finančnú víziu a realizovateľné ciele, ktoré povedú k úspechu",
+            "objectives": [
+              "Navrhnite presvedčivú 10-ročnú finančnú víziu, ktorá motivuje každodenné konanie",
+              "Použite overené rámce stanovenia cieľov pre finančný úspech",
+              "Rozdeľte veľké finančné ciele na dosiahnuteľné míľniky",
+              "Vytvorte systémy zodpovednosti, ktoré zabezpečia sledovanie"
+            ]
+          },
+          "mindsetLevel3": {
+            "title": "💪 Sebavedomie s Peniazmi a Rozhodovanie",
+            "description": "Vybudujte si neotrasiteľné sebavedomie vo finančných rozhodnutiach a správe peňazí",
+            "objectives": [
+              "Vyviňte sebavedomie pri rozhodovaní o financiách v neistote",
+              "Naučte sa rámce na hodnotenie finančných príležitostí a rizík",
+              "Vybudujte si odolnosť na zvládanie finančných neúspechov a tržnej volatility",
+              "Vytvorte systémy pre kontinuálne finančné vzdelávanie a rast"
+            ]
+          }
+        }
+      },
+      "cashFlowMastery": {
+        "title": "Majstrovstvo Cash Flow",
+        "description": "Ovládnite umenie správy peňazí s pokročilými systémami rozpočtovania a cash flow"
+      },
+      "debtElimination": {
+        "title": "Majstrovstvo Eliminácie Dlhov",
+        "description": "Systematicky zničte dlhy a vybudujte si neotrasiteľnú finančnú slobodu"
+      },
+      "emergencyFundInsurance": {
+        "title": "Núdzový Fond a Ochrana",
+        "description": "Vybudujte si nepriestrelne finančnú bezpečnosť s núdzovými fondmi a strategickým poistením"
+      },
+      "investmentFundamentals": {
+        "title": "Základy Investovania",
+        "description": "Ovládnite základy investovania na budovanie dlhodobého bohatstva a finančnej slobody"
+      },
+      "soloEntrepreneurFinance": {
+        "title": "Financie Solo Podnikateľa",
+        "description": "Ovládnite finančné zručnosti, ktoré každý solo podnikateľ potrebuje na vybudovanie a rozšírenie svojho podnikania"
+      }
+    },
+    "tabs": {
+      "moneyPsychology": "Psychológia Peňazí",
+      "mindsetTools": "Nástroje Myslenia",
+      "visionCreation": "Tvorba Vízie",
+      "smartGoalsFramework": "Rámec SMART Cieľov",
+      "decisionFrameworks": "Rámce Rozhodnutí"
+    },
+    "learningObjectives": "Vzdelávacie Ciele:"
+  }
+}

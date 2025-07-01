@@ -27,6 +27,8 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { COURSE_CONTENT, type CourseModule, type Exercise, type CourseLevel, type ContentBlock } from "@/data/courseContent";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n/i18n";
 
 // Extended types for user progress
 interface CourseLevelWithProgress extends CourseLevel {
@@ -92,92 +94,29 @@ export default function Courses() {
     }
   });
 
-  // User learning stats (fallback to demo data for now)
+  // User learning stats from backend
   const stats: LearningStats = (progressData as any)?.stats || {
-    totalXp: 125, // Demo value to show progress
-    currentStreak: 3,
-    longestStreak: 5,
-    totalLessonsCompleted: 4,
-    averageScore: "87.5"
+    totalXp: 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    totalLessonsCompleted: 0,
+    averageScore: "0"
   };
 
-  // Calculate dynamic achievements based on user progress
-  const calculateAchievements = () => {
-    const userAchievements = [];
-    
-    // Achievement: First Steps (Complete first lesson)
-    if (stats.totalLessonsCompleted >= 1) {
-      userAchievements.push({
-        id: "first-steps",
-        title: "First Steps",
-        description: "Complete your first lesson",
-        icon: "BookOpen",
-        unlocked: true,
-        earnedAt: new Date().toLocaleDateString()
-      });
-    }
-    
-    // Achievement: Learning Streak (7 day streak)
-    if (stats.currentStreak >= 7) {
-      userAchievements.push({
-        id: "learning-streak",
-        title: "Learning Streak",
-        description: "Maintain a 7-day learning streak",
-        icon: "Flame",
-        unlocked: true,
-        earnedAt: new Date().toLocaleDateString()
-      });
-    }
-    
-    // Achievement: XP Collector (100+ XP)
-    if (stats.totalXp >= 100) {
-      userAchievements.push({
-        id: "xp-collector",
-        title: "XP Collector",
-        description: "Earn 100 XP points",
-        icon: "Zap",
-        unlocked: true,
-        earnedAt: new Date().toLocaleDateString()
-      });
-    }
-    
-    // Achievement: Module Master (Complete any module) 
-    // For now, no modules are completed since we're using static content
-    const completedModules = 0;
-    if (completedModules >= 1) {
-      userAchievements.push({
-        id: "module-master",
-        title: "Module Master",
-        description: "Complete your first module",
-        icon: "Award",
-        unlocked: true,
-        earnedAt: new Date().toLocaleDateString()
-      });
-    }
-    
-    // Achievement: Dedicated Learner (Complete all modules)
-    if (completedModules === COURSE_CONTENT.length) {
-      userAchievements.push({
-        id: "dedicated-learner",
-        title: "Dedicated Learner",
-        description: "Complete all financial literacy modules",
-        icon: "Trophy",
-        unlocked: true,
-        earnedAt: new Date().toLocaleDateString()
-      });
-    }
-    
-    return userAchievements;
-  };
-  
-  const unlockedAchievements = calculateAchievements();
+  // Get user achievements from backend data
+  const userAchievements = (progressData as any)?.achievements || [];
 
   // Calculate completion percentage for a module
   const getModuleProgress = (module: CourseModule): number => {
     if (!module.levels.length) return 0;
-    // For now, return 0 since we're using static content
-    // This will be replaced with actual progress from backend
-    return 0;
+    
+    const userProgress = (progressData as any)?.progress || [];
+    const moduleProgress = userProgress.filter((p: any) => p.moduleId === module.id);
+    
+    if (moduleProgress.length === 0) return 0;
+    
+    const completedLevels = moduleProgress.filter((p: any) => p.isCompleted).length;
+    return Math.round((completedLevels / module.levels.length) * 100);
   };
 
   // Start a lesson
@@ -201,7 +140,7 @@ export default function Courses() {
 
   // Complete current exercise and move to next
   const completeExercise = () => {
-    if (!currentLevel || currentExerciseIndex >= currentLevel.exercises.length - 1) {
+    if (!currentLevel || !currentLevel.exercises || currentExerciseIndex >= currentLevel.exercises.length - 1) {
       finishLevel();
       return;
     }
@@ -217,7 +156,7 @@ export default function Courses() {
     let correctAnswers = 0;
 
     // Calculate score based on correct answers
-    currentLevel.exercises.forEach(exercise => {
+    (currentLevel.exercises || []).forEach(exercise => {
       const userAnswer = userAnswers[exercise.id];
       const isCorrect = Array.isArray(exercise.correctAnswer) 
         ? JSON.stringify(exercise.correctAnswer.sort()) === JSON.stringify(userAnswer?.sort())
@@ -229,7 +168,7 @@ export default function Courses() {
       }
     });
 
-    const scorePercentage = (correctAnswers / currentLevel.exercises.length) * 100;
+    const scorePercentage = currentLevel.exercises?.length ? (correctAnswers / currentLevel.exercises.length) * 100 : 0;
     const isCompleted = scorePercentage >= 70; // 70% threshold to pass
 
     // Submit to backend
@@ -399,7 +338,7 @@ export default function Courses() {
               onClick={() => setViewMode('exercises')}
               className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
             >
-              Start Exercises ({currentLevel.exercises.length} questions)
+              Start Exercises ({currentLevel?.exercises?.length || 0} questions)
             </Button>
           </div>
         </div>
@@ -407,8 +346,14 @@ export default function Courses() {
     }
 
     // Exercise view
-    const currentExercise = currentLevel.exercises[currentExerciseIndex];
-    const progress = ((currentExerciseIndex + 1) / currentLevel.exercises.length) * 100;
+    const currentExercise = currentLevel?.exercises?.[currentExerciseIndex];
+    const progress = currentLevel?.exercises ? ((currentExerciseIndex + 1) / currentLevel.exercises.length) * 100 : 0;
+
+    // Guard clause: if no current exercise, return to content view
+    if (!currentExercise) {
+      setViewMode('content');
+      return null;
+    }
 
     return (
       <div className="container mx-auto p-6 max-w-4xl">
@@ -426,7 +371,7 @@ export default function Courses() {
         {/* Progress bar */}
         <div className="mb-8">
           <div className="flex justify-between text-sm mb-2">
-            <span>Question {currentExerciseIndex + 1} of {currentLevel.exercises.length}</span>
+            <span>Question {currentExerciseIndex + 1} of {currentLevel?.exercises?.length || 0}</span>
             <span>{Math.round(progress)}% Complete</span>
           </div>
           <Progress value={progress} className="h-2" />
@@ -488,7 +433,7 @@ export default function Courses() {
             disabled={!userAnswers[currentExercise.id]}
             className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
           >
-            {currentExerciseIndex === currentLevel.exercises.length - 1 ? 'Finish Lesson' : 'Next Question'}
+            {currentExerciseIndex === (currentLevel?.exercises?.length || 1) - 1 ? 'Finish Lesson' : 'Next Question'}
           </Button>
         </div>
       </div>
@@ -497,14 +442,14 @@ export default function Courses() {
 
   // Results view
   if (showResults && currentLevel) {
-    const correctAnswers = currentLevel.exercises.filter(exercise => {
+    const correctAnswers = (currentLevel?.exercises || []).filter(exercise => {
       const userAnswer = userAnswers[exercise.id];
       return Array.isArray(exercise.correctAnswer) 
         ? JSON.stringify(exercise.correctAnswer.sort()) === JSON.stringify(userAnswer?.sort())
         : exercise.correctAnswer === userAnswer;
     }).length;
 
-    const scorePercentage = (correctAnswers / currentLevel.exercises.length) * 100;
+    const scorePercentage = currentLevel?.exercises?.length ? (correctAnswers / currentLevel.exercises.length) * 100 : 0;
     const passed = scorePercentage >= 70;
 
     return (
@@ -522,7 +467,7 @@ export default function Courses() {
               {passed ? 'Lesson Complete!' : 'Keep Learning!'}
             </CardTitle>
             <CardDescription>
-              You scored {correctAnswers} out of {currentLevel.exercises.length} questions correctly
+              You scored {correctAnswers} out of {currentLevel?.exercises?.length || 0} questions correctly
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

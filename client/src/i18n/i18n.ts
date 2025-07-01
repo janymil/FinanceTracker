@@ -15,25 +15,36 @@ async function loadTranslations() {
   
   for (const lang of languages) {
     try {
+      // Load main translation file
       const response = await fetch(`/locales/${lang}/translation.json`);
+      // Load course translation file
+      const coursesResponse = await fetch(`/locales/${lang}/courses.json`);
+      
       if (response.ok) {
         const translations = await response.json();
+        let coursesTranslations = {};
         
-        // Store under primary language key
+        // Load courses translations if available
+        if (coursesResponse.ok) {
+          coursesTranslations = await coursesResponse.json();
+        }
+        
+        // Store under primary language key with both translation namespaces
         resources[lang] = {
-          translation: translations
+          translation: translations,
+          courses: coursesTranslations
         };
         
         // Create simplified language mappings
         if (lang === 'en-us') {
-          resources['en-US'] = { translation: translations };
-          resources['en'] = { translation: translations };
+          resources['en-US'] = { translation: translations, courses: coursesTranslations };
+          resources['en'] = { translation: translations, courses: coursesTranslations };
         } else if (lang === 'es-pe') {
-          resources['es-PE'] = { translation: translations };
-          resources['es'] = { translation: translations };
+          resources['es-PE'] = { translation: translations, courses: coursesTranslations };
+          resources['es'] = { translation: translations, courses: coursesTranslations };
         } else if (lang === 'sk-sk') {
-          resources['sk-SK'] = { translation: translations };
-          resources['sk'] = { translation: translations };
+          resources['sk-SK'] = { translation: translations, courses: coursesTranslations };
+          resources['sk'] = { translation: translations, courses: coursesTranslations };
         }
         
         console.log(`Loaded translations for ${lang}:`, Object.keys(translations).length, 'keys');

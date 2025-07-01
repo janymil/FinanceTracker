@@ -1,0 +1,213 @@
+{
+  "courses": {
+    "title": "Financial Literacy Courses",
+    "subtitle": "Build essential financial skills through interactive, bite-sized lessons powered by AI",
+    "stats": {
+      "totalXp": "Total XP",
+      "dayStreak": "Day Streak",
+      "bestStreak": "Best Streak",
+      "lessons": "Lessons"
+    },
+    "actions": {
+      "startCourse": "Start Course",
+      "continue": "Continue",
+      "locked": "Locked",
+      "exitLesson": "Exit Lesson",
+      "startExercises": "Start Exercises",
+      "nextQuestion": "Next Question",
+      "finishLesson": "Finish Lesson",
+      "previous": "Previous",
+      "backToCourses": "Back to Courses",
+      "tryAgain": "Try Again"
+    },
+    "progress": {
+      "progress": "Progress",
+      "question": "Question",
+      "of": "of",
+      "complete": "Complete",
+      "questions": "questions"
+    },
+    "results": {
+      "lessonComplete": "Lesson Complete!",
+      "keepLearning": "Keep Learning!",
+      "youScored": "You scored",
+      "outOf": "out of",
+      "questionsCorrectly": "questions correctly",
+      "xpEarned": "XP earned!"
+    },
+    "achievements": {
+      "title": "Your Achievements",
+      "earned": "Earned",
+      "achieved": "🏆 Achieved"
+    },
+    "loading": "Loading Financial Literacy Courses...",
+    "noTabsMessage": "Content is organized in tabs above. Please select a tab to view the lesson content.",
+    "modules": {
+      "financialMindset": {
+        "title": "Financial Mindset & Psychology",
+        "description": "Master the psychology of money and build a wealthy mindset that drives success",
+        "levels": {
+          "mindsetLevel1": {
+            "title": "🧠 Money Psychology Breakthrough",
+            "description": "Discover and rewire your money beliefs for financial success",
+            "objectives": [
+              "Identify your core money beliefs and how they impact your financial decisions",
+              "Understand the psychology behind spending, saving, and investing behaviors",
+              "Transform limiting beliefs into wealth-building mindsets",
+              "Develop emotional intelligence around money decisions"
+            ],
+            "content": {
+              "psychologyIntro": {
+                "title": "Your Money Story: The Hidden Force Behind Every Financial Decision",
+                "content": "Every financial decision you make is driven by beliefs formed in childhood. Most people are unconsciously sabotaging their wealth because of invisible money scripts running in the background.\n\nResearch shows that your money mindset is responsible for 80% of your financial outcomes - more than your income, education, or even market conditions.\n\nToday, we're going to uncover and reprogram these hidden beliefs so money works FOR you instead of against you."
+              },
+              "moneyScripts": {
+                "title": "💭 Discover Your Money Scripts",
+                "content": "**Take the Money Script Assessment:**\n\nRead each statement and note your immediate emotional reaction:\n\n1. \"Money is the root of all evil\"\n2. \"Rich people are greedy and selfish\"\n3. \"I don't deserve to be wealthy\"\n4. \"Money doesn't buy happiness\"\n5. \"There's never enough money\"\n6. \"I'm not good with money\"\n\n**Your Reaction Guide:**\n✅ **Agree/Feel stressed**: This is a limiting belief blocking your wealth\n⚠️ **Neutral**: You're partially programmed by this belief\n❌ **Disagree/Feel confident**: You've overcome this limitation\n\n**Action Step**: Write down the beliefs that triggered you - these are your wealth blockers to reprogram."
+              },
+              "wealthMindset": {
+                "title": "🏆 Millionaire vs. Average Mindset Comparison",
+                "content": "**SCARCITY MINDSET (Average Person):**\n❌ \"I can't afford it\"\n❌ \"Money doesn't grow on trees\"\n❌ \"Rich people are lucky\"\n❌ \"I'll never be wealthy\"\n❌ \"Money is hard to make\"\n\n**ABUNDANCE MINDSET (Millionaires):**\n✅ \"How can I afford it?\"\n✅ \"Money flows to me easily\"\n✅ \"Rich people create value\"\n✅ \"Wealth is my natural state\"\n✅ \"Money is a tool for good\"\n\n**The Transformation:**\nMillionaires don't think about money differently because they have money - they have money because they think differently about it."
+              },
+              "reprogrammingTechnique": {
+                "title": "🔄 The 5-Minute Money Mindset Reprogramming Technique",
+                "content": "**Daily Wealth Affirmation Protocol:**\n\n**Morning (2 minutes):**\n1. Stand in front of a mirror\n2. Look yourself in the eyes\n3. Say with conviction: \"I am worthy of wealth and abundance\"\n4. Visualize money flowing to you effortlessly\n5. Feel the emotion of already being financially free\n\n**Evening (3 minutes):**\n1. Write down 3 money wins from today (any size)\n2. Express gratitude for money that flowed to you\n3. Set intention for tomorrow's financial opportunities\n\n**Science**: Neuroplasticity research shows this rewires your brain's money circuits in 21-30 days."
+              },
+              "moneyDate": {
+                "title": "💕 The Weekly Money Date Challenge",
+                "content": "**Your Mission**: Schedule a weekly 30-minute 'Money Date' with yourself\n\n**What to do:**\n1. Review your finances without judgment\n2. Celebrate every financial win (even $1 saved)\n3. Plan one money-growing action for next week\n4. Visualize your financial goals as already achieved\n\n**Why it works**: This builds a positive relationship with money instead of fear and avoidance\n\n**Track your progress**: Use your phone's calendar to schedule this recurring appointment with wealth"
+              }
+            },
+            "exercises": {
+              "psychologyQuiz1": {
+                "question": "According to research, what percentage of your financial outcomes are determined by your money mindset?",
+                "explanation": "Studies show that money mindset accounts for about 80% of financial outcomes, far outweighing factors like income or education level.",
+                "feedback": {
+                  "correct": "💡 Exactly! Your mindset is the most powerful factor in your financial success.",
+                  "incorrect": "Research consistently shows that mindset accounts for about 80% of financial outcomes - it's the most important factor!"
+                }
+              },
+              "limitingBeliefs": {
+                "question": "True or False: Limiting money beliefs formed in childhood can be completely reprogrammed in adulthood.",
+                "explanation": "Thanks to neuroplasticity, the brain can form new neural pathways at any age. With consistent practice, limiting beliefs can be completely transformed.",
+                "feedback": {
+                  "correct": "🧠 Correct! Your brain can rewire itself at any age - wealth mindset is learnable.",
+                  "incorrect": "Actually, neuroplasticity allows us to rewire limiting beliefs completely. It's never too late to develop a wealth mindset!"
+                }
+              }
+            }
+          },
+          "mindsetLevel2": {
+            "title": "🎯 Goal Setting & Financial Vision",
+            "description": "Create a compelling financial vision and actionable goals that drive success",
+            "objectives": [
+              "Design a compelling 10-year financial vision that motivates daily action",
+              "Use proven goal-setting frameworks for financial success",
+              "Break down big financial goals into achievable milestones",
+              "Create accountability systems that ensure follow-through"
+            ],
+            "content": {
+              "financialVision": {
+                "title": "🌟 Your Financial Vision: The North Star of Wealth",
+                "content": "Harvard Business School tracked MBA graduates for 10 years. The 3% who had written, specific goals earned 10X more than the 97% who didn't.\n\nYour financial vision isn't just about money - it's about the life money enables. When your vision is emotionally compelling, your brain automatically finds ways to achieve it.\n\nToday, you'll create a crystal-clear financial vision that pulls you toward wealth like a magnet."
+              },
+              "visionExercise": {
+                "title": "✨ The 10-Year Financial Vision Exercise",
+                "content": "**Step 1: Time Travel to Your Wealthy Future**\nClose your eyes and imagine it's 10 years from now. You've achieved financial freedom.\n\n**Answer these questions in vivid detail:**\n• Where do you live? (Describe your home, neighborhood, view)\n• How do you spend your typical day?\n• What experiences do you enjoy regularly?\n• How do you feel when you check your bank account?\n• What impact are you making with your wealth?\n• Who are you helping with your financial success?\n\n**Step 2: Write Your Vision Statement**\nCombine your answers into a 2-paragraph vision statement that gives you goosebumps when you read it.\n\n**Step 3: Make it Visual**\nCreate a vision board or save images that represent your financial future."
+              },
+              "smartGoals": {
+                "title": "🎯 The WEALTHY Goals Framework",
+                "content": "**W** - **Written & Worthy**: Write down goals that align with your values\n**E** - **Exciting & Emotional**: Goals must excite and motivate you\n**A** - **Achievable & Aggressive**: Challenging but possible with effort\n**L** - **Large & Lifestyle-focused**: Big enough to change your life\n**T** - **Time-bound & Tracked**: Specific deadlines with progress tracking\n**H** - **Habits-based**: Supported by daily/weekly habits\n**Y** - **Yearly & Yielding**: Annual goals that compound over time\n\n**Example WEALTHY Goal:**\n\"By December 31, 2025, I will have $25,000 in my emergency fund by automatically saving $500 per month, which will give me complete peace of mind and financial security for my family.\""
+              },
+              "goalCategories": {
+                "title": "🗂️ The 4 Categories of Financial Goals",
+                "content": "**💰 INCOME GOALS (Increase earning power)**\n• Salary increases, side hustles, business income\n• Timeline: 6 months - 2 years\n• Example: \"Increase income by 25% within 12 months\"\n\n**🛡️ SECURITY GOALS (Build safety nets)**\n• Emergency funds, insurance, debt elimination\n• Timeline: 1-3 years\n• Example: \"Build 6-month emergency fund by December 2024\"\n\n**📈 GROWTH GOALS (Build wealth)**\n• Investments, retirement, real estate\n• Timeline: 3-10 years\n• Example: \"Accumulate $100,000 in investments by age 35\"\n\n**🎉 LIFESTYLE GOALS (Enjoy the journey)**\n• Vacations, purchases, experiences\n• Timeline: 3 months - 2 years\n• Example: \"Save $5,000 for European vacation by summer 2024\""
+              }
+            },
+            "exercises": {
+              "goalSettingQuiz": {
+                "question": "According to Harvard Business School research, people with written goals earn how much more than those without?",
+                "explanation": "The famous Harvard MBA study found that the 3% with written goals earned 10 times more than the 97% without written goals after 10 years.",
+                "feedback": {
+                  "correct": "📈 Amazing! The power of written goals is scientifically proven.",
+                  "incorrect": "The Harvard study showed a dramatic 10X difference - written goals are incredibly powerful!"
+                }
+              }
+            }
+          },
+          "mindsetLevel3": {
+            "title": "💪 Money Confidence & Decision Making",
+            "description": "Build unshakeable confidence in financial decisions and money management",
+            "objectives": [
+              "Develop confidence in making financial decisions under uncertainty",
+              "Learn frameworks for evaluating financial opportunities and risks",
+              "Build resilience to handle financial setbacks and market volatility",
+              "Create systems for continuous financial education and growth"
+            ],
+            "content": {
+              "decisionMatrix": {
+                "title": "💭 The Financial Decision Matrix",
+                "content": "**Before any financial decision, evaluate these 4 factors:**\n\n**1. ALIGNMENT (Does this align with my goals?)**\n• High alignment = Move forward\n• Low alignment = Reconsider\n\n**2. RISK (What's the downside?)**\n• Can I afford to lose this amount?\n• What's the worst-case scenario?\n\n**3. OPPORTUNITY COST (What am I giving up?)**\n• What else could I do with this money?\n• Which option has higher potential return?\n\n**4. TIMING (Is now the right time?)**\n• Do I have sufficient emergency fund?\n• Are there better opportunities coming?\n\n**Decision Framework:**\n✅ 3-4 positive factors = Strong yes\n⚠️ 2 positive factors = Proceed with caution\n❌ 0-1 positive factors = Pass on this opportunity"
+              }
+            },
+            "exercises": {
+              "confidenceScenario": {
+                "question": "You're offered an investment opportunity that could return 15% annually, but you'd need to invest your entire emergency fund. Using the Financial Decision Matrix, what should you do?",
+                "explanation": "While 15% returns are attractive, investing your emergency fund fails the RISK and TIMING factors of the decision matrix. Emergency funds should remain liquid and accessible.",
+                "feedback": {
+                  "correct": "🛡️ Excellent judgment! Protecting your foundation is always the first priority.",
+                  "incorrect": "Remember: emergency funds should never be invested, no matter how good the opportunity looks. Build wealth on top of your safety net, not instead of it."
+                }
+              }
+            }
+          }
+        }
+      },
+      "cashFlowMastery": {
+        "title": "Cash Flow Mastery",
+        "description": "Master the art of money management with advanced budgeting and cash flow systems",
+        "levels": {
+          "cashflowLevel1": {
+            "title": "💰 Income Optimization & Tracking",
+            "description": "Maximize and track all income sources for complete financial visibility"
+          }
+        }
+      },
+      "debtElimination": {
+        "title": "Debt Elimination Mastery",
+        "description": "Destroy debt systematically and build unshakeable financial freedom"
+      },
+      "emergencyFundInsurance": {
+        "title": "Emergency Fund & Protection",
+        "description": "Build bulletproof financial security with emergency funds and strategic insurance"
+      },
+      "investmentFundamentals": {
+        "title": "Investment Fundamentals",
+        "description": "Master the basics of investing to build long-term wealth and financial freedom"
+      },
+      "soloEntrepreneurFinance": {
+        "title": "Solo Entrepreneur Finance",
+        "description": "Master the financial skills every solo entrepreneur needs to build and scale their business"
+      }
+    },
+    "tabs": {
+      "moneyPsychology": "Money Psychology",
+      "mindsetTools": "Mindset Tools",
+      "visionCreation": "Vision Creation",
+      "smartGoalsFramework": "SMART Goals Framework",
+      "decisionFrameworks": "Decision Frameworks",
+      "incomeStreams": "Income Streams",
+      "budgetingSystems": "Budgeting Systems",
+      "expenseAnalysis": "Expense Analysis",
+      "cashFlowForecasting": "Cash Flow Forecasting",
+      "debtAudit": "Debt Audit",
+      "consolidationOptions": "Consolidation Options",
+      "debtPrevention": "Debt Prevention",
+      "accelerationStrategies": "Acceleration Strategies",
+      "fundSizing": "Fund Sizing",
+      "investmentPsychology": "Investment Psychology",
+      "businessStructure": "Business Structure"
+    },
+    "learningObjectives": "Learning Objectives:"
+  }
+}
