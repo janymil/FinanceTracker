@@ -1,6 +1,13 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { storage } from "../storage";
 import { adminAuth, adminLogin, adminLogout } from "../adminAuth";
+import { 
+  getBlockedCountriesInfo, 
+  addBlockedCountry, 
+  removeBlockedCountry, 
+  isCountryBlocked,
+  GEO_BLOCKING_CONFIG 
+} from "../geoConfig";
 
 export function registerAdminRoutes(app: Express) {
   // Admin login
@@ -457,6 +464,121 @@ export function registerAdminRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching TTL config:", error);
       return res.status(500).json({ message: "Failed to fetch TTL configuration" });
+    }
+  });
+
+  // === GEO-BLOCKING MANAGEMENT ROUTES ===
+
+  // Get geo-blocking configuration and blocked countries
+  app.get('/api/admin-analytics/geo-blocking/config', adminAuth, async (req: any, res: Response) => {
+    try {
+      const config = {
+        enabled: GEO_BLOCKING_CONFIG.enabled,
+        blockedCountries: getBlockedCountriesInfo(),
+        failOpen: GEO_BLOCKING_CONFIG.failOpen,
+        customMessages: GEO_BLOCKING_CONFIG.customMessages
+      };
+      
+      return res.json(config);
+    } catch (error) {
+      console.error("Error fetching geo-blocking config:", error);
+      return res.status(500).json({ message: "Failed to fetch geo-blocking configuration" });
+    }
+  });
+
+  // Add a country to the blocked list
+  app.post('/api/admin-analytics/geo-blocking/block', adminAuth, async (req: any, res: Response) => {
+    try {
+      const { countryCode, countryName, reason } = req.body;
+      
+      if (!countryCode || !countryName) {
+        return res.status(400).json({ message: "Country code and name are required" });
+      }
+
+      if (isCountryBlocked(countryCode.toUpperCase())) {
+        return res.status(400).json({ message: "Country is already blocked" });
+      }
+
+      addBlockedCountry(countryCode.toUpperCase(), countryName, reason);
+      
+      console.log(`Admin blocked country: ${countryName} (${countryCode.toUpperCase()})`);
+      return res.json({ 
+        success: true, 
+        message: `Successfully blocked ${countryName}`,
+        blockedCountries: getBlockedCountriesInfo()
+      });
+    } catch (error) {
+      console.error("Error blocking country:", error);
+      return res.status(500).json({ message: "Failed to block country" });
+    }
+  });
+
+  // Remove a country from the blocked list
+  app.delete('/api/admin-analytics/geo-blocking/unblock/:countryCode', adminAuth, async (req: any, res: Response) => {
+    try {
+      const { countryCode } = req.params;
+      
+      const success = removeBlockedCountry(countryCode.toUpperCase());
+      
+      if (!success) {
+        return res.status(404).json({ message: "Country not found in blocked list" });
+      }
+
+      console.log(`Admin unblocked country: ${countryCode.toUpperCase()}`);
+      return res.json({ 
+        success: true, 
+        message: `Successfully unblocked ${countryCode.toUpperCase()}`,
+        blockedCountries: getBlockedCountriesInfo()
+      });
+    } catch (error) {
+      console.error("Error unblocking country:", error);
+      return res.status(500).json({ message: "Failed to unblock country" });
+    }
+  });
+
+  // Toggle geo-blocking system on/off
+  app.post('/api/admin-analytics/geo-blocking/toggle', adminAuth, async (req: any, res: Response) => {
+    try {
+      const { enabled } = req.body;
+      
+      GEO_BLOCKING_CONFIG.enabled = Boolean(enabled);
+      
+      console.log(`Admin ${enabled ? 'enabled' : 'disabled'} geo-blocking system`);
+      return res.json({ 
+        success: true, 
+        enabled: GEO_BLOCKING_CONFIG.enabled,
+        message: `Geo-blocking ${enabled ? 'enabled' : 'disabled'}` 
+      });
+    } catch (error) {
+      console.error("Error toggling geo-blocking:", error);
+      return res.status(500).json({ message: "Failed to toggle geo-blocking" });
+    }
+  });
+
+  // Update custom message for a blocked country
+  app.put('/api/admin-analytics/geo-blocking/message/:countryCode', adminAuth, async (req: any, res: Response) => {
+    try {
+      const { countryCode } = req.params;
+      const { message } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ message: "Custom message is required" });
+      }
+
+      if (!isCountryBlocked(countryCode.toUpperCase())) {
+        return res.status(404).json({ message: "Country is not blocked" });
+      }
+
+      GEO_BLOCKING_CONFIG.customMessages[countryCode.toUpperCase()] = message;
+      
+      console.log(`Admin updated custom message for ${countryCode.toUpperCase()}`);
+      return res.json({ 
+        success: true, 
+        message: `Updated custom message for ${countryCode.toUpperCase()}` 
+      });
+    } catch (error) {
+      console.error("Error updating custom message:", error);
+      return res.status(500).json({ message: "Failed to update custom message" });
     }
   });
 }

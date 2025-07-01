@@ -36,6 +36,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { cookieConsentMiddleware } from "./cookieMiddleware";
 import { renderPageForCrawler } from './ssr';
+import { geoBlockingMiddleware } from './geoBlockingMiddleware';
 import "./batch-processor"; // Initialize batch processing system
 
 const app = express();
@@ -254,6 +255,9 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// Geo-blocking middleware - block access from specific countries
+app.use(geoBlockingMiddleware);
 
 // Security headers middleware - only for frontend user routes
 app.use((req, res, next) => {
