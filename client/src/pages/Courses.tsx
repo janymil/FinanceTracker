@@ -85,6 +85,7 @@ export default function Courses() {
       icon: 'TrendingUp',
       estimatedTime: '3-4 hours',
       difficulty: 'Beginner' as const,
+      totalLevels: 6,
       levels: [
         {
           id: 'cashflow-level-1',
