@@ -46,6 +46,93 @@ async function generateDemoVideo(demoType, language) {
   await cleanupTempFiles([audioPath, ...stockFootage.map(f => f.path)]);
 }
 
+async function downloadStockFootage(demoType) {
+  console.log(`📥 Downloading stock footage for ${demoType}...`);
+  
+  const searchTerms = {
+    categorization: ['artificial intelligence', 'receipt scanning', 'mobile payment'],
+    tips: ['financial planning', 'data analysis', 'business growth'],
+    health: ['financial health', 'investment planning', 'money management']
+  };
+
+  const terms = searchTerms[demoType] || searchTerms.categorization;
+  const footage = [];
+
+  for (let i = 0; i < terms.length; i++) {
+    try {
+      const term = terms[i];
+      const apiUrl = `https://pixabay.com/api/videos/?key=${process.env.PIXABAY_API_KEY}&q=${encodeURIComponent(term)}&category=business&video_type=film&min_duration=5&per_page=3`;
+      
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      
+      if (data.hits && data.hits.length > 0) {
+        const video = data.hits[0];
+        const videoUrl = video.videos.medium.url;
+        const localPath = path.join(__dirname, `temp-footage-${demoType}-${i}.mp4`);
+        
+        await downloadFile(videoUrl, localPath);
+        footage.push({
+          path: localPath,
+          duration: video.duration,
+          tags: video.tags
+        });
+        
+        console.log(`✅ Downloaded: ${term} footage`);
+        break; // Use first successful download for this scene
+      }
+    } catch (error) {
+      console.warn(`⚠️ Failed to download footage for ${terms[i]}:`, error.message);
+    }
+  }
+
+  // If no videos found, create a simple background
+  if (footage.length === 0) {
+    console.log('📹 Creating fallback background...');
+    const fallbackPath = await createFallbackBackground(demoType);
+    footage.push({ path: fallbackPath, duration: 10, tags: 'generated' });
+  }
+
+  return footage;
+}
+
+async function downloadFile(url, filepath) {
+  const response = await fetch(url);
+  const buffer = await response.buffer();
+  await fs.writeFile(filepath, buffer);
+}
+
+async function createFallbackBackground(demoType) {
+  const fallbackPath = path.join(__dirname, `temp-background-${demoType}.mp4`);
+  
+  // Create animated gradient background with FFmpeg
+  return new Promise((resolve, reject) => {
+    const colors = {
+      categorization: '#3B82F6:#8B5CF6',
+      tips: '#10B981:#3B82F6', 
+      health: '#8B5CF6:#EC4899'
+    };
+
+    const colorGradient = colors[demoType] || colors.categorization;
+    
+    const ffmpegArgs = [
+      '-f', 'lavfi',
+      '-i', `color=c=${colorGradient.split(':')[0]}:size=1280x720:duration=10`,
+      '-vf', `fade=in:0:30,fade=out:270:30`,
+      '-c:v', 'libx264',
+      '-pix_fmt', 'yuv420p',
+      '-y',
+      fallbackPath
+    ];
+
+    const ffmpeg = spawn('ffmpeg', ffmpegArgs);
+    ffmpeg.on('close', (code) => {
+      if (code === 0) resolve(fallbackPath);
+      else reject(new Error(`Fallback creation failed: ${code}`));
+    });
+  });
+}
+
 async function generateNarration(text, language, demoType) {
   console.log('Generating narration with ElevenLabs...');
   
@@ -74,23 +161,45 @@ async function generateNarration(text, language, demoType) {
   return audioPath;
 }
 
-async function createVideoWithNarration(audioPath, outputPath, demoType, language) {
-  console.log('Creating video with narration...');
+async function createProfessionalVideo(stockFootage, audioPath, outputPath, demoType, language) {
+  console.log('🎬 Creating professional video with stock footage and narration...');
 
-  // Get audio duration first
   const duration = await getAudioDuration(audioPath);
+  const backgroundMusicPath = await downloadBackgroundMusic();
   
-  // Create video with text overlays and smooth animations
+  // Create complex video with multiple layers
   return new Promise((resolve, reject) => {
+    const inputs = [
+      '-i', stockFootage[0].path,  // Background video
+      '-i', audioPath,             // Narration
+      '-i', backgroundMusicPath    // Background music
+    ];
+
+    const videoFilters = [
+      // Scale and loop stock footage to match duration
+      `[0:v]scale=1280:720,loop=loop=-1:size=1:start=0,trim=duration=${duration}[bg]`,
+      // Add overlay with FinanzerPro branding and text
+      `[bg]${getProfessionalOverlays(demoType, language, duration)}[final]`
+    ].join(',');
+
+    const audioFilters = [
+      // Mix narration with background music
+      `[1:a]volume=1.0[narration]`,
+      `[2:a]volume=0.3,afade=in:st=0:d=2,afade=out:st=${duration-2}:d=2[music]`,
+      `[narration][music]amix=inputs=2:duration=shortest[audio]`
+    ].join(',');
+
     const ffmpegArgs = [
-      '-f', 'lavfi',
-      '-i', `color=c=#1e40af:size=1280x720:duration=${duration}`,
-      '-i', audioPath,
-      '-vf', getVideoFilters(demoType, language, duration),
+      ...inputs,
+      '-filter_complex', `${videoFilters};${audioFilters}`,
+      '-map', '[final]',
+      '-map', '[audio]',
       '-c:v', 'libx264',
       '-c:a', 'aac',
       '-pix_fmt', 'yuv420p',
-      '-shortest',
+      '-preset', 'medium',
+      '-crf', '23',
+      '-t', duration.toString(),
       '-y',
       outputPath
     ];
@@ -98,6 +207,7 @@ async function createVideoWithNarration(audioPath, outputPath, demoType, languag
     const ffmpeg = spawn('ffmpeg', ffmpegArgs);
 
     ffmpeg.stderr.on('data', (data) => {
+      // Log progress for debugging
       // console.log(`FFmpeg: ${data}`);
     });
 
@@ -105,13 +215,125 @@ async function createVideoWithNarration(audioPath, outputPath, demoType, languag
       if (code === 0) {
         resolve();
       } else {
-        reject(new Error(`FFmpeg exited with code ${code}`));
+        reject(new Error(`Professional video creation failed: ${code}`));
       }
     });
 
     ffmpeg.on('error', (error) => {
       reject(error);
     });
+  });
+}
+
+async function downloadBackgroundMusic() {
+  console.log('🎵 Downloading background music...');
+  
+  try {
+    // Search for royalty-free background music on Pixabay
+    const musicUrl = `https://pixabay.com/api/?key=${process.env.PIXABAY_API_KEY}&q=background+music+corporate&category=music&audio_type=music&per_page=3`;
+    const response = await fetch(musicUrl);
+    const data = await response.json();
+    
+    if (data.hits && data.hits.length > 0) {
+      const music = data.hits[0];
+      const audioUrl = music.webformatURL; // Use preview for demo
+      const musicPath = path.join(__dirname, 'temp-background-music.mp3');
+      
+      await downloadFile(audioUrl, musicPath);
+      console.log('✅ Background music downloaded');
+      return musicPath;
+    }
+  } catch (error) {
+    console.warn('⚠️ Failed to download background music, using silence');
+  }
+  
+  // Create silent background as fallback
+  const silentPath = path.join(__dirname, 'temp-silent-bg.mp3');
+  await createSilentAudio(silentPath, 10);
+  return silentPath;
+}
+
+async function createSilentAudio(outputPath, duration) {
+  return new Promise((resolve, reject) => {
+    const ffmpeg = spawn('ffmpeg', [
+      '-f', 'lavfi',
+      '-i', `anullsrc=channel_layout=stereo:sample_rate=44100`,
+      '-t', duration.toString(),
+      '-c:a', 'mp3',
+      '-y',
+      outputPath
+    ]);
+
+    ffmpeg.on('close', (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`Silent audio creation failed: ${code}`));
+    });
+  });
+}
+
+function getProfessionalOverlays(demoType, language, duration) {
+  const titles = {
+    'en-us': {
+      categorization: 'Smart AI Categorization',
+      tips: 'AI Financial Insights', 
+      health: 'Financial Health Analysis'
+    },
+    'es-pe': {
+      categorization: 'Categorización IA Inteligente',
+      tips: 'Insights Financieros IA',
+      health: 'Análisis de Salud Financiera'
+    },
+    'sk-sk': {
+      categorization: 'Inteligentná AI Kategorizácia', 
+      tips: 'AI Finančné Poznatky',
+      health: 'Analýza Finančného Zdravia'
+    }
+  };
+
+  const title = titles[language]?.[demoType] || titles['en-us'][demoType];
+  
+  // Professional overlay with branding, title, and feature highlights
+  return [
+    // Semi-transparent overlay
+    `drawbox=x=0:y=0:w=1280:h=720:color=black@0.3:t=fill`,
+    // FinanzerPro logo/brand
+    `drawtext=text='FinanzerPro':fontsize=48:fontcolor=white:x=50:y=50:enable='between(t,0,${duration})'`,
+    // Feature title with fade in
+    `drawtext=text='${title}':fontsize=36:fontcolor=white:x=50:y=120:enable='between(t,1,${duration})'`,
+    // Feature highlights that appear sequentially  
+    ...getFeatureHighlights(demoType, language, duration),
+    // Call to action at the end
+    `drawtext=text='Try FinanzerPro Today':fontsize=32:fontcolor=#3B82F6:x=(w-text_w)/2:y=600:enable='between(t,${duration-3},${duration})'`
+  ].join(':');
+}
+
+function getFeatureHighlights(demoType, language, duration) {
+  const highlights = {
+    'en-us': {
+      categorization: ['✓ 95% Accuracy', '✓ Instant Results', '✓ Smart Learning'],
+      tips: ['✓ Personalized Advice', '✓ Pattern Analysis', '✓ Goal Optimization'],
+      health: ['✓ Complete Health Scan', '✓ Improvement Strategies', '✓ Progress Tracking']
+    },
+    'es-pe': {
+      categorization: ['✓ 95% Precisión', '✓ Resultados Instantáneos', '✓ Aprendizaje Inteligente'],
+      tips: ['✓ Consejos Personalizados', '✓ Análisis de Patrones', '✓ Optimización de Metas'],
+      health: ['✓ Escaneo Completo', '✓ Estrategias de Mejora', '✓ Seguimiento de Progreso']
+    },
+    'sk-sk': {
+      categorization: ['✓ 95% Presnosť', '✓ Okamžité Výsledky', '✓ Inteligentné Učenie'],
+      tips: ['✓ Personalizované Rady', '✓ Analýza Vzorov', '✓ Optimalizácia Cieľov'],
+      health: ['✓ Kompletný Sken', '✓ Stratégie Zlepšenia', '✓ Sledovanie Pokroku']
+    }
+  };
+
+  const features = highlights[language]?.[demoType] || highlights['en-us'][demoType];
+  
+  return features.map((feature, index) => {
+    const startTime = 2 + (index * 1.5);
+    const endTime = Math.min(startTime + 2, duration);
+    const yPos = 250 + (index * 50);
+    
+    return `drawtext=text='${feature}':fontsize=28:fontcolor=white:x=50:y=${yPos}:enable='between(t,${startTime},${endTime})'`;
   });
 }
 
@@ -207,12 +429,23 @@ async function getAudioDuration(audioPath) {
   });
 }
 
+async function cleanupTempFiles(files) {
+  for (const file of files) {
+    try {
+      await fs.unlink(file);
+    } catch (error) {
+      // Ignore cleanup errors
+    }
+  }
+}
+
 // Generate all demo videos
 async function generateAllVideos() {
   const demoTypes = ['categorization', 'tips', 'health'];
   const languages = ['en-us', 'es-pe', 'sk-sk'];
 
-  console.log('🎬 Starting demo video generation...');
+  console.log('🎬 Starting professional demo video generation with ElevenLabs + Pixabay...');
+  console.log('Features: ✅ Stock footage ✅ Professional narration ✅ Background music ✅ Multilingual');
 
   for (const demoType of demoTypes) {
     for (const language of languages) {
@@ -224,8 +457,12 @@ async function generateAllVideos() {
     }
   }
 
-  console.log('🎉 All demo videos completed!');
+  console.log('🎉 All professional demo videos completed!');
+  console.log('📁 Videos saved to: public/demo-videos/');
+  console.log('🔗 Available formats: categorization-demo-{lang}.mp4, tips-demo-{lang}.mp4, health-demo-{lang}.mp4');
 }
 
 // Run the generator
-generateAllVideos().catch(console.error);
+if (require.main === module) {
+  generateAllVideos().catch(console.error);
+}
