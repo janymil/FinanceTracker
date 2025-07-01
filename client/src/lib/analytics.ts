@@ -14,6 +14,7 @@ export const initGA = () => {
   }
 
   const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+  const conversionId = 'AW-17290659470'; // Second Google Analytics tracking
 
   // Add Google Analytics script to the head
   const script1 = document.createElement('script');
@@ -21,13 +22,20 @@ export const initGA = () => {
   script1.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
   document.head.appendChild(script1);
 
-  // Initialize gtag
+  // Add Google Ads conversion script
+  const script1b = document.createElement('script');
+  script1b.async = true;
+  script1b.src = `https://www.googletagmanager.com/gtag/js?id=${conversionId}`;
+  document.head.appendChild(script1b);
+
+  // Initialize gtag with both tracking codes
   const script2 = document.createElement('script');
   script2.textContent = `
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', '` + measurementId.replace(/['"\\]/g, '') + `');
+    gtag('config', '` + conversionId + `');
   `;
   document.head.appendChild(script2);
 };
@@ -38,8 +46,14 @@ export const trackPageView = (url: string) => {
   if (typeof window === 'undefined' || !window.gtag || window.location.hostname !== 'finanzerpro.com') return;
   
   const measurementId = 'G-PRRBGDT20Q';
+  const conversionId = 'AW-17290659470';
   
+  // Track page view for both Analytics properties
   window.gtag('config', measurementId, {
+    page_path: url
+  });
+  
+  window.gtag('config', conversionId, {
     page_path: url
   });
 };
