@@ -1,5 +1,5 @@
 // Financial Literacy Course Content
-// Generated for Duolingo-style gamified learning experience
+// Comprehensive educational material with interactive exercises
 
 export interface ContentBlock {
   id: string;
@@ -50,797 +50,1071 @@ export interface CourseModule {
 
 export const COURSE_CONTENT: CourseModule[] = [
   {
-    "id": "budgeting-basics",
-    "title": "Budgeting Basics",
-    "description": "Master the fundamentals of managing your money effectively",
-    "icon": "Calculator",
-    "totalLevels": 3,
-    "estimatedTime": "25 minutes",
-    "levels": [
+    id: "budgeting-basics",
+    title: "Budgeting Basics",
+    description: "Master the fundamentals of managing your money effectively",
+    icon: "Calculator",
+    totalLevels: 3,
+    estimatedTime: "25 minutes",
+    levels: [
       {
-        "id": "budgeting-level-1",
-        "moduleId": "budgeting-basics",
-        "levelNumber": 1,
-        "title": "Understanding Income vs Expenses",
-        "description": "Learn the difference between money coming in and going out",
-        "xpReward": 30,
-        "exercises": [
+        id: "budgeting-1",
+        moduleId: "budgeting-basics",
+        levelNumber: 1,
+        title: "Understanding Income vs Expenses",
+        description: "Learn to identify and categorize your money flow",
+        xpReward: 15,
+        learningObjectives: [
+          "Distinguish between income and expenses",
+          "Categorize different types of expenses",
+          "Calculate basic cash flow"
+        ],
+        content: [
           {
-            "id": "income-types",
-            "type": "multiple-choice",
-            "question": "Which of these is considered 'gross income'?",
-            "options": [
-              "Your salary after taxes are deducted",
-              "Your salary before any deductions",
-              "Only your side hustle earnings",
-              "Money you receive as gifts"
-            ],
-            "correctAnswer": "Your salary before any deductions",
-            "feedback": {
-              "correct": "Exactly! Gross income is your total earnings before taxes, insurance, and other deductions.",
-              "incorrect": "Not quite. Gross income is your total salary/wages before any taxes or deductions are taken out."
-            },
-            "points": 8
+            id: "intro-income",
+            type: "text",
+            title: "What is Income?",
+            content: "Income is all the money you receive regularly. This includes your salary, freelance payments, investment returns, rental income, or any other money flowing into your accounts."
           },
           {
-            "id": "fixed-vs-variable",
-            "type": "multiple-choice",
-            "question": "Your monthly rent payment is an example of what type of expense?",
-            "options": [
-              "Variable expense",
-              "Fixed expense", 
-              "Discretionary expense",
-              "Emergency expense"
-            ],
-            "correctAnswer": "Fixed expense",
-            "feedback": {
-              "correct": "Perfect! Rent is a fixed expense because it's the same amount every month.",
-              "incorrect": "Think again. Rent stays the same each month, making it a fixed expense that you can predict and plan for."
-            },
-            "points": 8
+            id: "income-example",
+            type: "example",
+            title: "Real Income Examples",
+            content: "Sarah is a graphic designer. Her monthly income includes: $4,000 salary from her full-time job, $500 from freelance projects, $50 from stock dividends, and $200 from renting out her spare room. Total monthly income: $4,750."
           },
           {
-            "id": "expense-tracking",
-            "type": "true-false",
-            "question": "You should track every single expense, no matter how small.",
-            "correctAnswer": "true",
-            "feedback": {
-              "correct": "Absolutely! Small expenses add up quickly. That daily $5 coffee becomes $150/month.",
-              "incorrect": "Actually, small expenses can add up to significant amounts. It's important to track everything to see where your money really goes."
-            },
-            "points": 7
+            id: "expenses-intro",
+            type: "text",
+            title: "Understanding Expenses",
+            content: "Expenses are all the money you spend. There are two main types: Fixed expenses (same amount each month like rent) and Variable expenses (amounts that change like groceries)."
           },
           {
-            "id": "income-scenario",
-            "type": "scenario",
-            "question": "Sarah earns $4,000/month gross salary. After taxes ($800), health insurance ($200), and retirement savings ($300), what's her net income?",
-            "options": [
-              "$2,700",
-              "$3,200", 
-              "$3,500",
-              "$4,000"
-            ],
-            "correctAnswer": "$2,700",
-            "feedback": {
-              "correct": "Great math! $4,000 - $800 - $200 - $300 = $2,700 net income.",
-              "incorrect": "Let's calculate: $4,000 gross - $800 taxes - $200 insurance - $300 retirement = $2,700 net income."
+            id: "expense-categories",
+            type: "visual",
+            title: "Expense Categories",
+            content: "Fixed Expenses: Rent ($1,200), Insurance ($150), Phone ($80). Variable Expenses: Groceries ($400-600), Entertainment ($100-300), Gas ($80-150)",
+            visual: {
+              type: "comparison",
+              data: {
+                fixed: ["Rent: $1,200", "Insurance: $150", "Phone: $80"],
+                variable: ["Groceries: $400-600", "Entertainment: $100-300", "Gas: $80-150"]
+              }
+            }
+          },
+          {
+            id: "cashflow-rule",
+            type: "tip",
+            title: "The Golden Cash Flow Rule",
+            content: "Income - Expenses = Cash Flow. Positive cash flow means you're saving money and building wealth. Negative cash flow means you're spending more than you earn - a warning sign!"
+          }
+        ],
+        exercises: [
+          {
+            id: "income-exercise-1",
+            type: "multiple-choice",
+            question: "Which of these is considered income?",
+            options: ["Rent payment", "Salary from job", "Grocery shopping", "Car loan payment"],
+            correctAnswer: "Salary from job",
+            explanation: "Salary is money coming IN to your account, making it income. The others are expenses (money going OUT).",
+            feedback: {
+              correct: "Exactly! Salary is money you receive, which makes it income.",
+              incorrect: "Not quite. Remember: income is money coming IN to your account."
             },
-            "points": 10
+            points: 10
+          },
+          {
+            id: "expense-type-exercise",
+            type: "multiple-choice",
+            question: "Your monthly rent of $800 is what type of expense?",
+            options: ["Variable expense", "Fixed expense", "Income", "Investment"],
+            correctAnswer: "Fixed expense",
+            explanation: "Rent stays the same amount each month, making it a fixed expense.",
+            feedback: {
+              correct: "Perfect! Fixed expenses stay the same amount each month.",
+              incorrect: "Think about it: does your rent amount change each month?"
+            },
+            points: 10
+          },
+          {
+            id: "cashflow-calculation",
+            type: "multiple-choice",
+            question: "If you earn $3,000 monthly and spend $2,700, what's your cash flow?",
+            options: ["+$300 (positive)", "-$300 (negative)", "$5,700 total", "$0 (breaking even)"],
+            correctAnswer: "+$300 (positive)",
+            explanation: "Cash Flow = Income - Expenses = $3,000 - $2,700 = +$300. Positive cash flow means you're saving!",
+            feedback: {
+              correct: "Excellent! You're saving $300 each month with positive cash flow.",
+              incorrect: "Remember: Cash Flow = Income minus Expenses. Try the calculation again."
+            },
+            points: 15
           }
         ]
       },
       {
-        "id": "budgeting-level-2",
-        "moduleId": "budgeting-basics",
-        "levelNumber": 2,
-        "title": "Creating Your First Budget",
-        "description": "Build a practical budget using the 50/30/20 rule",
-        "xpReward": 35,
-        "exercises": [
+        id: "budgeting-2",
+        moduleId: "budgeting-basics",
+        levelNumber: 2,
+        title: "Creating Your First Budget",
+        description: "Build a practical budget that actually works",
+        xpReward: 20,
+        learningObjectives: [
+          "Learn the 50/30/20 budgeting rule",
+          "Create budget categories that work for you",
+          "Set realistic spending limits"
+        ],
+        content: [
           {
-            "id": "budget-rule",
-            "type": "multiple-choice",
-            "question": "In the 50/30/20 budgeting rule, what does the 50% represent?",
-            "options": [
-              "Savings and debt payments",
-              "Entertainment and dining out",
-              "Needs like rent, groceries, utilities",
-              "Investment contributions"
-            ],
-            "correctAnswer": "Needs like rent, groceries, utilities",
-            "feedback": {
-              "correct": "Exactly! 50% goes to needs (essentials), 30% to wants, and 20% to savings/debt.",
-              "incorrect": "The 50% in 50/30/20 covers your essential needs like housing, food, and utilities."
-            },
-            "points": 9
+            id: "budget-definition",
+            type: "text",
+            title: "What is a Budget?",
+            content: "A budget is your spending plan. It tells your money where to go instead of wondering where it went. Think of it as a GPS for your finances - guiding you to your financial destination."
           },
           {
-            "id": "wants-vs-needs",
-            "type": "multiple-choice",
-            "question": "Which item would fall under 'wants' in your budget?",
-            "options": [
-              "Grocery shopping",
-              "Rent payment",
-              "Netflix subscription",
-              "Car insurance"
-            ],
-            "correctAnswer": "Netflix subscription",
-            "feedback": {
-              "correct": "Right! Netflix is entertainment - a want, not a necessity for survival.",
-              "incorrect": "Netflix is entertainment, which falls under 'wants.' The others are essential needs."
-            },
-            "points": 8
+            id: "50-30-20-rule",
+            type: "visual",
+            title: "The 50/30/20 Rule",
+            content: "50% for Needs (rent, groceries, utilities), 30% for Wants (entertainment, dining out), 20% for Savings & Debt Payment",
+            visual: {
+              type: "chart",
+              data: {
+                needs: 50,
+                wants: 30,
+                savings: 20
+              }
+            }
           },
           {
-            "id": "budget-scenario",
-            "type": "scenario",
-            "question": "Mike has $3,000 net income. Using 50/30/20, how much should he allocate to savings?",
-            "options": [
-              "$450",
-              "$600",
-              "$900", 
-              "$1,500"
-            ],
-            "correctAnswer": "$600",
-            "feedback": {
-              "correct": "Perfect! 20% of $3,000 = $600 for savings and debt repayment.",
-              "incorrect": "Remember: 20% for savings. So $3,000 × 0.20 = $600."
-            },
-            "points": 10
+            id: "budget-example",
+            type: "example",
+            title: "Real Budget Example",
+            content: "Alex earns $4,000/month. Using 50/30/20: Needs: $2,000 (rent $1,200, groceries $400, utilities $200, phone $80, insurance $120), Wants: $1,200 (entertainment $300, dining out $400, hobbies $500), Savings: $800 (emergency fund $400, retirement $400)"
           },
           {
-            "id": "budget-adjustment",
-            "type": "true-false",
-            "question": "You should never adjust your budget once you've created it.",
-            "correctAnswer": "false",
-            "feedback": {
-              "correct": "Exactly! Budgets should be flexible and adjusted as your life changes.",
-              "incorrect": "Budgets need regular adjustments for life changes, income changes, and new goals."
+            id: "budget-tips",
+            type: "tip",
+            title: "Budget Success Tips",
+            content: "Start with last month's spending to see your patterns. Be realistic - if you budget $100 for groceries but always spend $300, you're setting yourself up to fail. Adjust the budget to fit your real life."
+          }
+        ],
+        exercises: [
+          {
+            id: "budget-rule-exercise",
+            type: "multiple-choice",
+            question: "In the 50/30/20 rule, what percentage goes to wants?",
+            options: ["50%", "30%", "20%", "70%"],
+            correctAnswer: "30%",
+            explanation: "The 50/30/20 rule allocates 30% of your income to wants (entertainment, dining out, hobbies).",
+            feedback: {
+              correct: "Right! 30% goes to wants - the fun stuff that makes life enjoyable.",
+              incorrect: "Remember: 50% needs, 30% wants, 20% savings and debt payment."
             },
-            "points": 7
+            points: 10
           },
           {
-            "id": "emergency-fund",
-            "type": "multiple-choice",
-            "question": "How many months of expenses should you aim for in an emergency fund?",
-            "options": [
-              "1-2 months",
-              "3-6 months",
-              "12 months",
-              "24 months"
-            ],
-            "correctAnswer": "3-6 months",
-            "feedback": {
-              "correct": "Perfect! 3-6 months covers most emergencies like job loss or major repairs.",
-              "incorrect": "Financial experts recommend 3-6 months of expenses for emergencies."
+            id: "budget-category-exercise",
+            type: "multiple-choice",
+            question: "Which category does 'rent' belong to in the 50/30/20 rule?",
+            options: ["Wants (30%)", "Needs (50%)", "Savings (20%)", "None of these"],
+            correctAnswer: "Needs (50%)",
+            explanation: "Rent is a necessity for shelter, so it goes in the Needs category (50%).",
+            feedback: {
+              correct: "Exactly! Rent is a basic need for housing.",
+              incorrect: "Think about it: is rent something you need or want?"
             },
-            "points": 9
+            points: 10
+          },
+          {
+            id: "budget-calculation-exercise",
+            type: "multiple-choice",
+            question: "If you earn $5,000/month, how much should you save using the 50/30/20 rule?",
+            options: ["$500", "$750", "$1,000", "$1,500"],
+            correctAnswer: "$1,000",
+            explanation: "20% of $5,000 = $1,000 should go to savings and debt payment.",
+            feedback: {
+              correct: "Perfect! $1,000 is 20% of $5,000 for savings.",
+              incorrect: "Calculate 20% of $5,000. What's $5,000 × 0.20?"
+            },
+            points: 15
           }
         ]
       },
       {
-        "id": "budgeting-level-3",
-        "moduleId": "budgeting-basics", 
-        "levelNumber": 3,
-        "title": "Budget Optimization Strategies",
-        "description": "Advanced techniques to maximize your budget's effectiveness",
-        "xpReward": 40,
-        "exercises": [
+        id: "budgeting-3",
+        moduleId: "budgeting-basics",
+        levelNumber: 3,
+        title: "Budget Optimization Strategies",
+        description: "Fine-tune your budget for maximum effectiveness",
+        xpReward: 25,
+        learningObjectives: [
+          "Identify areas to cut expenses",
+          "Prioritize spending based on values",
+          "Adjust budget when life changes"
+        ],
+        content: [
           {
-            "id": "zero-based-budget",
-            "type": "multiple-choice",
-            "question": "What is zero-based budgeting?",
-            "options": [
-              "Having zero money left over",
-              "Starting from zero every month",
-              "Assigning every dollar a purpose",
-              "Spending nothing on wants"
-            ],
-            "correctAnswer": "Assigning every dollar a purpose",
-            "feedback": {
-              "correct": "Exactly! Every dollar gets assigned to a category, leaving no money unaccounted for.",
-              "incorrect": "Zero-based budgeting means giving every dollar a job - whether it's expenses, savings, or debt payments."
-            },
-            "points": 10
+            id: "expense-audit",
+            type: "text",
+            title: "The Expense Audit",
+            content: "Review your spending monthly. Look for patterns: Are you spending more on coffee than your phone bill? Small expenses add up quickly - that $5 daily coffee costs $150/month or $1,800/year!"
           },
           {
-            "id": "budget-variance",
-            "type": "scenario",
-            "question": "You budgeted $300 for groceries but spent $380. What should you do?",
-            "options": [
-              "Ignore it and move on",
-              "Adjust next month's budget",
-              "Analyze why you overspent",
-              "Both B and C"
-            ],
-            "correctAnswer": "Both B and C",
-            "feedback": {
-              "correct": "Smart approach! Understanding why helps prevent it, and adjusting keeps you realistic.",
-              "incorrect": "You should both analyze the overspending and adjust your budget based on what you learned."
-            },
-            "points": 12
+            id: "cutting-expenses",
+            type: "step",
+            title: "Smart Ways to Cut Expenses",
+            content: "1. Cancel unused subscriptions 2. Cook more meals at home 3. Use the 24-hour rule for non-essential purchases 4. Negotiate bills (phone, insurance, internet) 5. Find free entertainment options"
           },
           {
-            "id": "sinking-funds",
-            "type": "multiple-choice",
-            "question": "What is a 'sinking fund'?",
-            "options": [
-              "Money for emergencies only",
-              "Saving small amounts for predictable expenses",
-              "Money that's losing value",
-              "A bad investment"
-            ],
-            "correctAnswer": "Saving small amounts for predictable expenses",
-            "feedback": {
-              "correct": "Perfect! Sinking funds help you save gradually for things like car maintenance or holidays.",
-              "incorrect": "A sinking fund is money you save bit by bit for predictable future expenses like car repairs or vacation."
-            },
-            "points": 10
+            id: "value-spending",
+            type: "tip",
+            title: "Spend on Your Values",
+            content: "Don't cut everything! Spend generously on what matters most to you. Love travel? Budget more for vacations and less for clothes. Value family time? Prioritize family activities over solo hobbies."
           },
           {
-            "id": "budget-frequency",
-            "type": "true-false",
-            "question": "You should review and update your budget monthly.",
-            "correctAnswer": "true",
-            "feedback": {
-              "correct": "Absolutely! Monthly reviews help you stay on track and make necessary adjustments.",
-              "incorrect": "Regular monthly reviews are essential for keeping your budget relevant and effective."
+            id: "budget-flexibility",
+            type: "warning",
+            title: "Keep Your Budget Flexible",
+            content: "Life changes, and your budget should too. Got a raise? Update your budget. Changed jobs? Adjust your categories. Emergency expense? That's what your emergency fund is for - don't abandon your whole budget over one unexpected cost."
+          }
+        ],
+        exercises: [
+          {
+            id: "expense-cutting-exercise",
+            type: "multiple-choice",
+            question: "What's the best first step to reduce expenses?",
+            options: ["Cut all entertainment", "Cancel unused subscriptions", "Stop eating out completely", "Quit your gym membership"],
+            correctAnswer: "Cancel unused subscriptions",
+            explanation: "Canceling unused subscriptions is low-impact but saves money immediately. You won't miss services you're not using!",
+            feedback: {
+              correct: "Smart choice! Easy wins first - cancel what you don't use.",
+              incorrect: "Start with easy cuts that don't affect your quality of life."
             },
-            "points": 8
+            points: 10
+          },
+          {
+            id: "coffee-calculation",
+            type: "multiple-choice",
+            question: "If you buy a $5 coffee every workday, how much do you spend yearly?",
+            options: ["$600", "$1,200", "$1,300", "$1,800"],
+            correctAnswer: "$1,300",
+            explanation: "$5 × 5 days × 52 weeks = $1,300 per year. That's a significant amount that could go toward savings!",
+            feedback: {
+              correct: "Exactly! Small daily expenses add up to big yearly costs.",
+              incorrect: "Calculate: $5 per day × 5 days per week × 52 weeks per year."
+            },
+            points: 15
+          },
+          {
+            id: "budget-adjustment-exercise",
+            type: "multiple-choice",
+            question: "When should you update your budget?",
+            options: ["Never, once it's set", "Only when you get a new job", "Monthly or when major life changes occur", "Only at the end of the year"],
+            correctAnswer: "Monthly or when major life changes occur",
+            explanation: "Regular budget reviews help you stay on track. Update when your income, expenses, or priorities change.",
+            feedback: {
+              correct: "Perfect! Regular updates keep your budget realistic and effective.",
+              incorrect: "Budgets need regular attention to stay relevant to your current situation."
+            },
+            points: 15
           }
         ]
       }
     ]
   },
   {
-    "id": "smart-spending",
-    "title": "Smart Spending",
-    "description": "Learn to make informed purchasing decisions and avoid common spending traps",
-    "icon": "ShoppingCart",
-    "totalLevels": 3,
-    "estimatedTime": "20 minutes",
-    "levels": [
+    id: "smart-saving",
+    title: "Smart Saving Strategies",
+    description: "Build wealth through strategic saving techniques",
+    icon: "PiggyBank",
+    totalLevels: 3,
+    estimatedTime: "30 minutes",
+    levels: [
       {
-        "id": "spending-level-1",
-        "moduleId": "smart-spending",
-        "levelNumber": 1,
-        "title": "Needs vs Wants",
-        "description": "Master the art of distinguishing between essential and optional purchases",
-        "xpReward": 30,
-        "exercises": [
+        id: "saving-1",
+        moduleId: "smart-saving",
+        levelNumber: 1,
+        title: "Emergency Fund Basics",
+        description: "Create your financial safety net",
+        xpReward: 15,
+        learningObjectives: [
+          "Understand why emergency funds are crucial",
+          "Calculate your emergency fund target",
+          "Learn where to keep emergency savings"
+        ],
+        content: [
           {
-            "id": "basic-needs",
-            "type": "multiple-choice",
-            "question": "Which of these is a basic human need?",
-            "options": [
-              "Cable TV subscription",
-              "Designer clothes",
-              "Shelter/Housing",
-              "Newest smartphone"
-            ],
-            "correctAnswer": "Shelter/Housing",
-            "feedback": {
-              "correct": "Right! Housing is a fundamental need for survival and security.",
-              "incorrect": "Housing is a basic need for survival. The others are wants that make life more enjoyable."
-            },
-            "points": 8
+            id: "emergency-fund-definition",
+            type: "text",
+            title: "What is an Emergency Fund?",
+            content: "An emergency fund is money set aside for unexpected expenses: job loss, medical bills, car repairs, or home maintenance. It's your financial cushion that prevents you from going into debt when life happens."
           },
           {
-            "id": "want-identification",
-            "type": "multiple-choice",
-            "question": "You're craving ice cream. This is an example of a:",
-            "options": [
-              "Need",
-              "Want",
-              "Emergency",
-              "Investment"
-            ],
-            "correctAnswer": "Want",
-            "feedback": {
-              "correct": "Exactly! Ice cream is a want - it's nice to have but not necessary for survival.",
-              "incorrect": "Ice cream is definitely a want. While tasty, it's not essential for your health or survival."
-            },
-            "points": 7
+            id: "emergency-fund-size",
+            type: "visual",
+            title: "How Much Do You Need?",
+            content: "Start with $1,000 for beginners. Build to 3-6 months of expenses. High earners or single-income families should aim for 6-12 months.",
+            visual: {
+              type: "chart",
+              data: {
+                beginner: 1000,
+                stable: 15000,
+                conservative: 30000
+              }
+            }
           },
           {
-            "id": "spending-decision",
-            "type": "scenario",
-            "question": "Your winter coat is worn out and you live in a cold climate. Buying a new coat is a:",
-            "options": [
-              "Want - coats are fashion",
-              "Need - protection from cold",
-              "Luxury - use sweaters instead",
-              "Emergency - buy any coat"
-            ],
-            "correctAnswer": "Need - protection from cold",
-            "feedback": {
-              "correct": "Absolutely! A coat for cold weather protection is a genuine need for health and safety.",
-              "incorrect": "In cold climates, a good coat is essential for health and safety - that makes it a need, not a want."
-            },
-            "points": 10
+            id: "emergency-example",
+            type: "example",
+            title: "Emergency Fund in Action",
+            content: "Maria's car needs $800 in repairs. Without an emergency fund, she'd put it on a credit card at 18% interest. With her emergency fund, she pays cash and avoids debt. That's financial peace of mind!"
           },
           {
-            "id": "impulse-recognition",
-            "type": "true-false",
-            "question": "If you want something immediately, it's probably a need.",
-            "correctAnswer": "false",
-            "feedback": {
-              "correct": "Correct! Immediate wants are usually impulses. True needs can usually wait for planning.",
-              "incorrect": "Actually, immediate wants are often impulses. Real needs can typically wait for proper planning and budgeting."
+            id: "where-to-save",
+            type: "tip",
+            title: "Where to Keep Emergency Money",
+            content: "Keep emergency funds in a high-yield savings account. It should be easily accessible but separate from your checking account. Don't invest emergency funds - you need stability, not growth."
+          }
+        ],
+        exercises: [
+          {
+            id: "emergency-fund-purpose",
+            type: "multiple-choice",
+            question: "What is the main purpose of an emergency fund?",
+            options: ["To invest in stocks", "To cover unexpected expenses", "To buy luxury items", "To pay monthly bills"],
+            correctAnswer: "To cover unexpected expenses",
+            explanation: "Emergency funds are specifically for unexpected costs like medical bills, car repairs, or job loss.",
+            feedback: {
+              correct: "Exactly! Emergency funds are your safety net for life's surprises.",
+              incorrect: "Think about the word 'emergency' - what kind of expenses would that cover?"
             },
-            "points": 8
+            points: 10
+          },
+          {
+            id: "emergency-fund-size-exercise",
+            type: "multiple-choice",
+            question: "If your monthly expenses are $3,000, what's a good emergency fund target?",
+            options: ["$3,000", "$6,000", "$9,000-$18,000", "$50,000"],
+            correctAnswer: "$9,000-$18,000",
+            explanation: "3-6 months of expenses means $9,000-$18,000 for someone with $3,000 monthly expenses.",
+            feedback: {
+              correct: "Perfect! 3-6 months of expenses provides good security.",
+              incorrect: "Calculate 3-6 months worth of your monthly expenses."
+            },
+            points: 15
+          },
+          {
+            id: "emergency-fund-location",
+            type: "multiple-choice",
+            question: "Where should you keep your emergency fund?",
+            options: ["Stock market", "High-yield savings account", "Under your mattress", "Cryptocurrency"],
+            correctAnswer: "High-yield savings account",
+            explanation: "High-yield savings accounts offer easy access, FDIC protection, and some interest growth - perfect for emergency funds.",
+            feedback: {
+              correct: "Great choice! Safe, accessible, and earns some interest.",
+              incorrect: "Emergency funds need to be safe and easily accessible when needed."
+            },
+            points: 10
           }
         ]
       },
       {
-        "id": "spending-level-2",
-        "moduleId": "smart-spending",
-        "levelNumber": 2,
-        "title": "Comparison Shopping",
-        "description": "Learn strategies to get the best value for your money",
-        "xpReward": 35,
-        "exercises": [
+        id: "saving-2",
+        moduleId: "smart-saving",
+        levelNumber: 2,
+        title: "Setting and Achieving Savings Goals",
+        description: "Turn dreams into achievable financial targets",
+        xpReward: 20,
+        learningObjectives: [
+          "Set SMART savings goals",
+          "Calculate how much to save monthly",
+          "Choose the right savings account type"
+        ],
+        content: [
           {
-            "id": "price-comparison",
-            "type": "scenario",
-            "question": "You need a laptop. Store A: $800, Store B: $750 + $50 shipping, Store C: $780. Which is cheapest?",
-            "options": [
-              "Store A ($800)",
-              "Store B ($750 + $50)",
-              "Store C ($780)",
-              "They're all the same"
-            ],
-            "correctAnswer": "Store C ($780)",
-            "feedback": {
-              "correct": "Right! Store C at $780 beats Store A ($800) and Store B ($800 total with shipping).",
-              "incorrect": "Don't forget shipping costs! Store B is $750 + $50 = $800, making Store C at $780 the cheapest."
-            },
-            "points": 10
+            id: "smart-goals",
+            type: "text",
+            title: "SMART Savings Goals",
+            content: "Make goals Specific, Measurable, Achievable, Relevant, and Time-bound. Instead of 'save money,' try 'save $5,000 for a vacation to Japan by December 2025.'"
           },
           {
-            "id": "unit-pricing",
-            "type": "multiple-choice",
-            "question": "What's the best way to compare prices on groceries?",
-            "options": [
-              "Look at total price only",
-              "Compare price per unit/ounce",
-              "Buy the biggest package",
-              "Choose based on brand"
-            ],
-            "correctAnswer": "Compare price per unit/ounce",
-            "feedback": {
-              "correct": "Perfect! Unit pricing shows true value regardless of package size.",
-              "incorrect": "Unit pricing (price per ounce, pound, etc.) gives you the real comparison between different sizes and brands."
-            },
-            "points": 9
+            id: "goal-examples",
+            type: "example",
+            title: "Real Savings Goals",
+            content: "Short-term (1 year): $2,400 for new laptop, $3,000 for vacation. Medium-term (2-5 years): $20,000 for car down payment, $15,000 for wedding. Long-term (5+ years): $50,000 for house down payment, $500,000 for retirement."
           },
           {
-            "id": "timing-purchases",
-            "type": "multiple-choice",
-            "question": "When is the best time to buy winter clothes?",
-            "options": [
-              "Right before winter starts",
-              "During peak winter",
-              "End of winter/early spring",
-              "Middle of summer"
-            ],
-            "correctAnswer": "End of winter/early spring",
-            "feedback": {
-              "correct": "Smart! End-of-season sales offer the best prices when stores clear inventory.",
-              "incorrect": "End-of-season sales (late winter/early spring) offer the deepest discounts on winter clothing."
-            },
-            "points": 9
+            id: "savings-calculation",
+            type: "step",
+            title: "How Much to Save Monthly",
+            content: "1. Set your goal amount 2. Decide your timeline 3. Divide goal by months 4. Example: $6,000 vacation in 12 months = $500/month 5. Add 10% buffer for unexpected delays"
           },
           {
-            "id": "research-time",
-            "type": "true-false",
-            "question": "You should spend the same amount of time researching a $20 purchase as a $2,000 purchase.",
-            "correctAnswer": "false",
-            "feedback": {
-              "correct": "Exactly! Spend more time researching expensive purchases - the potential savings are greater.",
-              "incorrect": "Spend more research time on expensive purchases. The potential savings make the extra time worthwhile."
+            id: "account-types",
+            type: "visual",
+            title: "Savings Account Types",
+            content: "Regular savings (0.01% APY), High-yield savings (4-5% APY), Money market (3-4% APY), CDs (4-5% APY, locked up)",
+            visual: {
+              type: "comparison",
+              data: {
+                regular: "0.01% APY",
+                highYield: "4-5% APY", 
+                moneyMarket: "3-4% APY",
+                cd: "4-5% APY (locked)"
+              }
+            }
+          }
+        ],
+        exercises: [
+          {
+            id: "smart-goal-exercise",
+            type: "multiple-choice",
+            question: "Which is a SMART savings goal?",
+            options: ["Save money", "Save more this year", "Save $10,000 for emergency fund by December 2025", "Save a lot for retirement"],
+            correctAnswer: "Save $10,000 for emergency fund by December 2025",
+            explanation: "This goal is Specific ($10,000), Measurable (can track progress), Achievable (reasonable amount), Relevant (emergency fund), and Time-bound (by December 2025).",
+            feedback: {
+              correct: "Excellent! This goal has all the SMART criteria.",
+              incorrect: "Look for the goal that's specific, measurable, and has a deadline."
             },
-            "points": 7
+            points: 15
           },
           {
-            "id": "online-vs-store",
-            "type": "multiple-choice",
-            "question": "What's an advantage of shopping in physical stores?",
-            "options": [
-              "Always cheaper prices",
-              "Can touch/try products",
-              "No sales tax",
-              "Faster delivery"
-            ],
-            "correctAnswer": "Can touch/try products",
-            "feedback": {
-              "correct": "Right! Physical stores let you examine quality and fit before buying.",
-              "incorrect": "The main advantage of physical stores is being able to touch, try on, and examine products firsthand."
+            id: "monthly-savings-calculation",
+            type: "multiple-choice",
+            question: "To save $6,000 in 18 months, how much should you save monthly?",
+            options: ["$300", "$333", "$350", "$400"],
+            correctAnswer: "$333",
+            explanation: "$6,000 ÷ 18 months = $333 per month. Always round up to ensure you meet your goal!",
+            feedback: {
+              correct: "Perfect calculation! $333 per month gets you to your goal.",
+              incorrect: "Divide your total goal by the number of months: $6,000 ÷ 18."
             },
-            "points": 8
+            points: 15
+          },
+          {
+            id: "account-type-exercise", 
+            type: "multiple-choice",
+            question: "For a vacation fund you'll use in 2 years, what's the best account type?",
+            options: ["Regular savings", "High-yield savings", "Stock market", "Checking account"],
+            correctAnswer: "High-yield savings",
+            explanation: "High-yield savings accounts offer better interest than regular savings while keeping your money safe and accessible for your 2-year timeline.",
+            feedback: {
+              correct: "Smart choice! High-yield savings balances growth with safety.",
+              incorrect: "Consider what offers good interest while keeping your money safe and accessible."
+            },
+            points: 10
           }
         ]
       },
       {
-        "id": "spending-level-3",
-        "moduleId": "smart-spending",
-        "levelNumber": 3,
-        "title": "Avoiding Impulse Purchases",
-        "description": "Master techniques to resist unnecessary spending and stick to your budget",
-        "xpReward": 40,
-        "exercises": [
+        id: "saving-3",
+        moduleId: "smart-saving",
+        levelNumber: 3,
+        title: "Automating Your Savings",
+        description: "Make saving effortless with automation",
+        xpReward: 25,
+        learningObjectives: [
+          "Set up automatic transfers",
+          "Use the pay yourself first strategy",
+          "Optimize savings with high-yield accounts"
+        ],
+        content: [
           {
-            "id": "waiting-period",
-            "type": "multiple-choice",
-            "question": "What's the '24-hour rule' for purchases?",
-            "options": [
-              "Shop only during 24-hour stores",
-              "Wait 24 hours before buying non-essentials",
-              "Spend only 24 hours shopping",
-              "Return items within 24 hours"
-            ],
-            "correctAnswer": "Wait 24 hours before buying non-essentials",
-            "feedback": {
-              "correct": "Perfect! Waiting 24 hours helps you determine if you really need something.",
-              "incorrect": "The 24-hour rule means waiting a day before buying non-essential items to avoid impulse purchases."
-            },
-            "points": 10
+            id: "automation-benefits",
+            type: "text",
+            title: "Why Automate Savings?",
+            content: "Automation removes the decision and temptation. When savings happen automatically, you can't forget or spend the money elsewhere. It's the #1 strategy successful savers use."
           },
           {
-            "id": "shopping-list",
-            "type": "true-false",
-            "question": "Making a shopping list and sticking to it can prevent impulse purchases.",
-            "correctAnswer": "true",
-            "feedback": {
-              "correct": "Absolutely! Lists keep you focused and help resist unplanned purchases.",
-              "incorrect": "Shopping lists are one of the best tools for avoiding impulse buys and staying on budget."
-            },
-            "points": 8
+            id: "pay-yourself-first",
+            type: "tip",
+            title: "Pay Yourself First",
+            content: "Set up automatic transfers right after payday, before you have a chance to spend the money. Treat savings like a non-negotiable bill you must pay to yourself."
           },
           {
-            "id": "emotional-spending",
-            "type": "scenario",
-            "question": "You had a bad day and want to buy expensive shoes to feel better. What should you do?",
-            "options": [
-              "Buy them immediately",
-              "Buy cheaper shoes instead",
-              "Wait and find free mood boosters",
-              "Use a credit card"
-            ],
-            "correctAnswer": "Wait and find free mood boosters",
-            "feedback": {
-              "correct": "Smart choice! Exercise, calling friends, or hobbies can boost mood without breaking your budget.",
-              "incorrect": "Emotional spending leads to regret. Try free alternatives like exercise, music, or talking to friends first."
-            },
-            "points": 12
+            id: "automation-setup",
+            type: "step",
+            title: "Setting Up Automatic Savings",
+            content: "1. Open a separate high-yield savings account 2. Calculate your monthly savings amount 3. Set up automatic transfer for payday 4. Start small if needed - even $25/month builds the habit 5. Increase the amount whenever you get a raise"
           },
           {
-            "id": "marketing-tricks",
-            "type": "multiple-choice",
-            "question": "Which is a common marketing trick to encourage impulse buying?",
-            "options": [
-              "Detailed product information",
-              "Limited time offers",
-              "Price comparisons",
-              "Customer reviews"
-            ],
-            "correctAnswer": "Limited time offers",
-            "feedback": {
-              "correct": "Exactly! 'Limited time' creates urgency to buy without thinking it through.",
-              "incorrect": "'Limited time offers' create artificial urgency to make you buy without proper consideration."
+            id: "round-up-apps",
+            type: "example",
+            title: "Round-Up Savings Apps",
+            content: "Apps like Acorns or Qapital round up your purchases and save the spare change. Buy coffee for $4.35? They save $0.65. Small amounts add up - many people save $50-200/month this way!"
+          }
+        ],
+        exercises: [
+          {
+            id: "automation-timing",
+            type: "multiple-choice",
+            question: "When is the best time to set up automatic savings transfers?",
+            options: ["End of the month", "Right after payday", "Middle of the month", "Whenever you remember"],
+            correctAnswer: "Right after payday",
+            explanation: "Right after payday ensures the money is saved before you have a chance to spend it elsewhere. Pay yourself first!",
+            feedback: {
+              correct: "Exactly! Pay yourself first, right when the money comes in.",
+              incorrect: "Think about when you're most likely to have money available to save."
             },
-            "points": 9
+            points: 10
           },
           {
-            "id": "budget-integration",
-            "type": "multiple-choice",
-            "question": "Before making any purchase, you should:",
-            "options": [
-              "Check if it fits your budget",
-              "Ask friends for opinions",
-              "Look for coupons",
-              "Buy the most expensive version"
-            ],
-            "correctAnswer": "Check if it fits your budget",
-            "feedback": {
-              "correct": "Perfect! Every purchase should align with your budget and financial goals.",
-              "incorrect": "Always check your budget first. If it doesn't fit, you shouldn't buy it, regardless of the deal."
+            id: "round-up-calculation",
+            type: "multiple-choice",
+            question: "If you make 20 purchases per week averaging $0.50 round-ups, how much would you save monthly?",
+            options: ["$20", "$30", "$40", "$50"],
+            correctAnswer: "$40",
+            explanation: "20 purchases × $0.50 round-up × 4 weeks = $40 per month. Round-up savings can really add up!",
+            feedback: {
+              correct: "Great math! Round-up apps can save significant amounts painlessly.",
+              incorrect: "Calculate: 20 purchases × $0.50 × 4 weeks per month."
             },
-            "points": 10
+            points: 15
+          },
+          {
+            id: "savings-increase-strategy",
+            type: "multiple-choice",
+            question: "What's the best strategy when you get a raise?",
+            options: ["Spend it all on lifestyle upgrades", "Save 100% of the raise", "Increase savings by 50% of the raise", "Don't change anything"],
+            correctAnswer: "Increase savings by 50% of the raise",
+            explanation: "Saving 50% of raises helps you build wealth while still enjoying some lifestyle improvements. It's a balanced approach to wealth building.",
+            feedback: {
+              correct: "Perfect balance! Build wealth while enjoying some lifestyle improvement.",
+              incorrect: "Consider a strategy that builds wealth while still allowing some enjoyment of increased income."
+            },
+            points: 15
           }
         ]
       }
     ]
   },
   {
-    "id": "saving-investing",
-    "title": "Saving & Investing",
-    "description": "Build wealth through smart saving strategies and basic investment principles",
-    "icon": "TrendingUp",
-    "totalLevels": 3,
-    "estimatedTime": "30 minutes",
-    "levels": [
+    id: "debt-management",
+    title: "Debt Management",
+    description: "Take control of debt and build a debt-free future",
+    icon: "CreditCard",
+    totalLevels: 3,
+    estimatedTime: "35 minutes",
+    levels: [
       {
-        "id": "saving-level-1",
-        "moduleId": "saving-investing",
-        "levelNumber": 1,
-        "title": "Emergency Fund Basics",
-        "description": "Learn why and how to build your financial safety net",
-        "xpReward": 35,
-        "exercises": [
+        id: "debt-1",
+        moduleId: "debt-management",
+        levelNumber: 1,
+        title: "Understanding Different Types of Debt",
+        description: "Learn about good debt vs bad debt",
+        xpReward: 15,
+        learningObjectives: [
+          "Distinguish between good and bad debt",
+          "Understand interest rates and their impact",
+          "Recognize debt warning signs"
+        ],
+        content: [
           {
-            "id": "emergency-purpose",
-            "type": "multiple-choice",
-            "question": "What is the main purpose of an emergency fund?",
-            "options": [
-              "To buy things you want",
-              "To cover unexpected expenses",
-              "To invest in stocks",
-              "To pay regular bills"
-            ],
-            "correctAnswer": "To cover unexpected expenses",
-            "feedback": {
-              "correct": "Exactly! Emergency funds protect you from job loss, medical bills, car repairs, and other surprises.",
-              "incorrect": "Emergency funds are specifically for unexpected expenses like job loss, medical emergencies, or major repairs."
-            },
-            "points": 9
+            id: "debt-definition",
+            type: "text",
+            title: "What is Debt?",
+            content: "Debt is money you owe to someone else. It includes credit cards, loans, mortgages, and even money borrowed from family. All debt costs money through interest or opportunity cost."
           },
           {
-            "id": "emergency-amount",
-            "type": "scenario",
-            "question": "Lisa's monthly expenses are $2,500. How much should her emergency fund be?",
-            "options": [
-              "$2,500 (1 month)",
-              "$5,000 (2 months)", 
-              "$7,500 - $15,000 (3-6 months)",
-              "$30,000 (12 months)"
-            ],
-            "correctAnswer": "$7,500 - $15,000 (3-6 months)",
-            "feedback": {
-              "correct": "Perfect! 3-6 months of expenses ($7,500-$15,000) is the recommended emergency fund size.",
-              "incorrect": "Emergency funds should cover 3-6 months of expenses. For Lisa: $2,500 × 3-6 = $7,500-$15,000."
-            },
-            "points": 10
+            id: "good-vs-bad-debt",
+            type: "visual",
+            title: "Good Debt vs Bad Debt",
+            content: "Good debt helps you build wealth or generate income: mortgages, student loans, business loans. Bad debt purchases depreciating assets: credit cards, auto loans, personal loans.",
+            visual: {
+              type: "comparison",
+              data: {
+                good: ["Mortgage (builds equity)", "Student loans (increases earning potential)", "Business loans (generate income)"],
+                bad: ["Credit cards (high interest)", "Auto loans (depreciating asset)", "Personal loans (consumption)"]
+              }
+            }
           },
           {
-            "id": "emergency-access",
-            "type": "multiple-choice",
-            "question": "Where should you keep your emergency fund?",
-            "options": [
-              "High-risk stocks",
-              "Under your mattress",
-              "High-yield savings account",
-              "Expensive jewelry"
-            ],
-            "correctAnswer": "High-yield savings account",
-            "feedback": {
-              "correct": "Right! High-yield savings accounts are safe, accessible, and earn some interest.",
-              "incorrect": "Emergency funds need to be safe and accessible. High-yield savings accounts offer both safety and some growth."
-            },
-            "points": 9
+            id: "interest-impact",
+            type: "example",
+            title: "The Power of Interest Rates",
+            content: "A $5,000 credit card debt at 18% interest takes 47 years to pay off with minimum payments, costing $13,931 total. The same debt at 6% takes 25 years and costs $7,177. Interest rates matter!"
           },
           {
-            "id": "emergency-priority",
-            "type": "true-false",
-            "question": "You should build your emergency fund before focusing on other savings goals.",
-            "correctAnswer": "true",
-            "feedback": {
-              "correct": "Absolutely! Emergency funds are your financial foundation - build them first.",
-              "incorrect": "Emergency funds should be your first priority. They protect all your other financial progress."
+            id: "debt-warning-signs",
+            type: "warning",
+            title: "Debt Warning Signs",
+            content: "Red flags: Only making minimum payments, using credit for basic needs, borrowing to pay other debts, maxed out credit cards, avoiding looking at statements. If any apply, take action now!"
+          }
+        ],
+        exercises: [
+          {
+            id: "good-bad-debt-exercise",
+            type: "multiple-choice",
+            question: "Which of these is typically considered 'good debt'?",
+            options: ["Credit card debt", "Auto loan", "Mortgage", "Personal loan"],
+            correctAnswer: "Mortgage",
+            explanation: "Mortgages are good debt because they help you build equity and wealth through homeownership.",
+            feedback: {
+              correct: "Right! Mortgages help you build equity and wealth over time.",
+              incorrect: "Think about which debt helps you build wealth or assets that appreciate."
             },
-            "points": 8
+            points: 10
           },
           {
-            "id": "emergency-examples",
-            "type": "multiple-choice",
-            "question": "Which is NOT a good reason to use emergency funds?",
-            "options": [
-              "Job loss",
-              "Major car repair",
-              "Vacation to Hawaii",
-              "Medical emergency"
-            ],
-            "correctAnswer": "Vacation to Hawaii",
-            "feedback": {
-              "correct": "Correct! Vacations are planned expenses, not emergencies. Save separately for fun!",
-              "incorrect": "Vacations should be planned and saved for separately. Emergency funds are only for unexpected situations."
+            id: "interest-rate-exercise",
+            type: "multiple-choice",
+            question: "Why do interest rates matter so much with debt?",
+            options: ["They don't really matter", "Higher rates mean you pay much more over time", "They only affect monthly payments", "Banks set them randomly"],
+            correctAnswer: "Higher rates mean you pay much more over time",
+            explanation: "Higher interest rates dramatically increase the total amount you'll pay over the life of the debt.",
+            feedback: {
+              correct: "Exactly! Interest rates have a huge compound effect over time.",
+              incorrect: "Consider how interest accumulates over months and years of payments."
             },
-            "points": 8
+            points: 15
+          },
+          {
+            id: "debt-warning-exercise",
+            type: "multiple-choice",
+            question: "Which is a major debt warning sign?",
+            options: ["Paying off cards monthly", "Having a mortgage", "Only making minimum payments", "Using cash for purchases"],
+            correctAnswer: "Only making minimum payments",
+            explanation: "Only making minimum payments means you're barely covering interest, and the debt will take decades to pay off.",
+            feedback: {
+              correct: "Red flag! Minimum payments keep you in debt for years.",
+              incorrect: "Look for the behavior that keeps you trapped in debt longer."
+            },
+            points: 10
           }
         ]
       },
       {
-        "id": "saving-level-2",
-        "moduleId": "saving-investing",
-        "levelNumber": 2,
-        "title": "Savings Goals & Strategies",
-        "description": "Set and achieve specific financial goals with proven strategies",
-        "xpReward": 40,
-        "exercises": [
+        id: "debt-2",
+        moduleId: "debt-management",
+        levelNumber: 2,
+        title: "Debt Payoff Strategies",
+        description: "Learn proven methods to eliminate debt faster",
+        xpReward: 20,
+        learningObjectives: [
+          "Compare debt snowball vs avalanche methods",
+          "Calculate debt payoff timelines",
+          "Create a debt elimination plan"
+        ],
+        content: [
           {
-            "id": "smart-goals",
-            "type": "multiple-choice",
-            "question": "What makes a savings goal 'SMART'?",
-            "options": [
-              "Specific, Measurable, Achievable, Relevant, Time-bound",
-              "Simple, Money-focused, Automatic, Realistic, Timely",
-              "Safe, Modern, Advanced, Reliable, Tested",
-              "Strategic, Monthly, Annual, Regular, Targeted"
-            ],
-            "correctAnswer": "Specific, Measurable, Achievable, Relevant, Time-bound",
-            "feedback": {
-              "correct": "Perfect! SMART goals are clear, trackable, realistic, meaningful, and have deadlines.",
-              "incorrect": "SMART stands for Specific, Measurable, Achievable, Relevant, and Time-bound goals."
-            },
-            "points": 10
+            id: "debt-strategies-intro",
+            type: "text",
+            title: "Two Proven Debt Strategies",
+            content: "The Debt Snowball and Debt Avalanche are both effective. Snowball pays smallest debts first for motivation. Avalanche pays highest interest rates first for maximum savings."
           },
           {
-            "id": "savings-calculation",
-            "type": "scenario",
-            "question": "You want to save $3,600 for vacation in 12 months. How much should you save monthly?",
-            "options": [
-              "$200",
-              "$250",
-              "$300",
-              "$350"
-            ],
-            "correctAnswer": "$300",
-            "feedback": {
-              "correct": "Excellent math! $3,600 ÷ 12 months = $300 per month.",
-              "incorrect": "Let's calculate: $3,600 goal ÷ 12 months = $300 per month needed."
-            },
-            "points": 10
+            id: "debt-snowball",
+            type: "step",
+            title: "Debt Snowball Method",
+            content: "1. List all debts smallest to largest 2. Pay minimums on all debts 3. Put extra money toward smallest debt 4. When smallest is paid off, roll that payment to next smallest 5. Repeat until debt-free"
           },
           {
-            "id": "automatic-savings",
-            "type": "true-false",
-            "question": "Setting up automatic transfers to savings helps you save consistently.",
-            "correctAnswer": "true",
-            "feedback": {
-              "correct": "Absolutely! Automation removes the temptation to skip saving and builds consistency.",
-              "incorrect": "Automatic savings transfers are one of the most effective ways to save consistently without thinking about it."
-            },
-            "points": 8
+            id: "debt-avalanche",
+            type: "step",
+            title: "Debt Avalanche Method",
+            content: "1. List all debts by interest rate (highest first) 2. Pay minimums on all debts 3. Put extra money toward highest interest debt 4. When paid off, roll payment to next highest rate 5. Saves more money mathematically"
           },
           {
-            "id": "pay-yourself-first",
-            "type": "multiple-choice",
-            "question": "What does 'pay yourself first' mean?",
-            "options": [
-              "Give yourself a salary raise",
-              "Save money before paying any bills",
-              "Save money before spending on wants",
-              "Pay off debt before saving"
-            ],
-            "correctAnswer": "Save money before spending on wants",
-            "feedback": {
-              "correct": "Right! Save for your goals before spending on non-essential items.",
-              "incorrect": "'Pay yourself first' means prioritizing savings over discretionary spending, not skipping bills."
+            id: "debt-comparison",
+            type: "example",
+            title: "Snowball vs Avalanche Example",
+            content: "Sarah has: Card A: $500 at 15%, Card B: $2,000 at 22%, Card C: $8,000 at 18%. Snowball: Pay Card A first (motivation). Avalanche: Pay Card B first (saves $140/year in interest). Choose based on your personality!"
+          }
+        ],
+        exercises: [
+          {
+            id: "snowball-method-exercise",
+            type: "multiple-choice",
+            question: "In the debt snowball method, which debt do you pay off first?",
+            options: ["Highest interest rate", "Largest balance", "Smallest balance", "Newest debt"],
+            correctAnswer: "Smallest balance",
+            explanation: "Debt snowball focuses on smallest balance first to build motivation and momentum through quick wins.",
+            feedback: {
+              correct: "Right! Snowball is about motivation through quick wins.",
+              incorrect: "Remember: snowball method prioritizes psychological wins over math."
             },
-            "points": 9
+            points: 10
           },
           {
-            "id": "savings-motivation",
-            "type": "multiple-choice",
-            "question": "What's a good way to stay motivated to save?",
-            "options": [
-              "Ignore your progress",
-              "Visualize your goal and track progress",
-              "Only save when you feel like it",
-              "Save the same amount forever"
-            ],
-            "correctAnswer": "Visualize your goal and track progress",
-            "feedback": {
-              "correct": "Perfect! Visualization and progress tracking keep you motivated and on track.",
-              "incorrect": "Visualizing your goal and tracking progress helps maintain motivation during the saving journey."
+            id: "avalanche-method-exercise",
+            type: "multiple-choice",
+            question: "What's the main advantage of the debt avalanche method?",
+            options: ["Faster psychological wins", "Saves the most money in interest", "Easiest to understand", "Works for everyone"],
+            correctAnswer: "Saves the most money in interest",
+            explanation: "Avalanche method mathematically saves the most money by targeting highest interest rates first.",
+            feedback: {
+              correct: "Exactly! Avalanche is the mathematically optimal approach.",
+              incorrect: "Think about what happens when you eliminate high-interest debt first."
             },
-            "points": 9
+            points: 15
+          },
+          {
+            id: "debt-strategy-choice",
+            type: "multiple-choice",
+            question: "Which debt strategy should you choose?",
+            options: ["Always use snowball", "Always use avalanche", "Choose based on your personality and motivation style", "It doesn't matter"],
+            correctAnswer: "Choose based on your personality and motivation style",
+            explanation: "The best strategy is the one you'll stick with. If you need motivation, use snowball. If you're motivated by saving money, use avalanche.",
+            feedback: {
+              correct: "Perfect! The best plan is the one you'll actually follow.",
+              incorrect: "Consider that personal psychology matters as much as math in debt payoff."
+            },
+            points: 15
           }
         ]
       },
       {
-        "id": "saving-level-3",
-        "moduleId": "saving-investing",
-        "levelNumber": 3,
-        "title": "Investment Fundamentals",
-        "description": "Learn the basics of growing your money through smart investments",
-        "xpReward": 45,
-        "exercises": [
+        id: "debt-3", 
+        moduleId: "debt-management",
+        levelNumber: 3,
+        title: "Avoiding Future Debt Traps",
+        description: "Build habits to stay debt-free long-term",
+        xpReward: 25,
+        learningObjectives: [
+          "Recognize predatory lending practices",
+          "Build emergency funds to avoid debt",
+          "Use credit cards responsibly"
+        ],
+        content: [
           {
-            "id": "compound-interest",
-            "type": "multiple-choice",
-            "question": "What is compound interest?",
-            "options": [
-              "Interest on borrowed money",
-              "Interest earned on interest",
-              "Interest that compounds problems",
-              "Interest paid monthly"
-            ],
-            "correctAnswer": "Interest earned on interest",
-            "feedback": {
-              "correct": "Exactly! Compound interest is earning interest on your original money plus previous interest earned.",
-              "incorrect": "Compound interest means earning interest on both your original investment and previously earned interest."
-            },
-            "points": 10
+            id: "predatory-lending",
+            type: "warning",
+            title: "Avoid Predatory Lending",
+            content: "Watch out for: Payday loans (400%+ APR), title loans, rent-to-own stores, and cash advance apps. These trap you in cycles of debt with extremely high costs."
           },
           {
-            "id": "risk-return",
-            "type": "multiple-choice",
-            "question": "What's the general relationship between risk and return in investing?",
-            "options": [
-              "Higher risk, lower return",
-              "Higher risk, higher potential return",
-              "Risk and return are unrelated",
-              "Lower risk, higher return"
-            ],
-            "correctAnswer": "Higher risk, higher potential return",
-            "feedback": {
-              "correct": "Right! Generally, investments with higher risk offer higher potential returns (but also higher potential losses).",
-              "incorrect": "In investing, higher risk typically comes with higher potential returns, but also higher potential losses."
-            },
-            "points": 10
+            id: "emergency-fund-debt-prevention",
+            type: "tip",
+            title: "Emergency Funds Prevent Debt",
+            content: "Most debt comes from emergencies without savings. A $1,000 emergency fund prevents most credit card debt. Build it before aggressively paying off debt."
           },
           {
-            "id": "diversification",
-            "type": "scenario",
-            "question": "You have $1,000 to invest. What's the best approach?",
-            "options": [
-              "Put it all in one stock",
-              "Spread it across different investments",
-              "Keep it all in cash",
-              "Buy only cryptocurrency"
-            ],
-            "correctAnswer": "Spread it across different investments",
-            "feedback": {
-              "correct": "Smart! Diversification reduces risk by not putting all your eggs in one basket.",
-              "incorrect": "Diversification (spreading investments) reduces risk. Don't put all your money in one investment type."
-            },
-            "points": 12
+            id: "credit-card-rules",
+            type: "step",
+            title: "Credit Card Best Practices",
+            content: "1. Pay full balance monthly 2. Never spend more than you have in cash 3. Use for rewards/protection, not borrowing 4. Keep utilization under 30% 5. Don't close old cards (hurts credit score)"
           },
           {
-            "id": "time-advantage",
-            "type": "true-false",
-            "question": "Starting to invest early gives you a significant advantage due to compound interest.",
-            "correctAnswer": "true",
-            "feedback": {
-              "correct": "Absolutely! Time is your biggest advantage - the earlier you start, the more compound interest works for you.",
-              "incorrect": "Time is crucial in investing. Starting early gives compound interest more time to work its magic."
+            id: "debt-free-mindset",
+            type: "text",
+            title: "Building a Debt-Free Mindset",
+            content: "Think of debt as an emergency, not a tool. Live below your means. If you can't afford it with cash, you can't afford it. Build wealth through saving and investing, not borrowing."
+          }
+        ],
+        exercises: [
+          {
+            id: "predatory-lending-exercise",
+            type: "multiple-choice",
+            question: "Which is a sign of predatory lending?",
+            options: ["Low interest rates", "400%+ annual interest rates", "Long repayment terms", "Credit checks required"],
+            correctAnswer: "400%+ annual interest rates",
+            explanation: "Extremely high interest rates (like 400% APR) are a hallmark of predatory lending designed to trap borrowers.",
+            feedback: {
+              correct: "Red flag! Those rates are designed to trap you in debt.",
+              incorrect: "Look for the practice that's clearly designed to exploit borrowers."
             },
-            "points": 9
+            points: 10
           },
           {
-            "id": "investment-types",
-            "type": "multiple-choice",
-            "question": "Which is generally considered the safest investment?",
-            "options": [
-              "Individual stocks",
-              "Cryptocurrency",
-              "Government bonds",
-              "Commodities"
-            ],
-            "correctAnswer": "Government bonds",
-            "feedback": {
-              "correct": "Correct! Government bonds are backed by the government and considered very safe investments.",
-              "incorrect": "Government bonds are considered among the safest investments because they're backed by government stability."
+            id: "emergency-fund-debt-exercise",
+            type: "multiple-choice",
+            question: "How does an emergency fund help you avoid debt?",
+            options: ["It earns high interest", "It prevents using credit cards for unexpected expenses", "It's required by law", "It increases your credit score"],
+            correctAnswer: "It prevents using credit cards for unexpected expenses",
+            explanation: "Emergency funds give you cash for unexpected expenses, so you don't need to borrow money or use credit cards.",
+            feedback: {
+              correct: "Exactly! Cash reserves prevent borrowing in emergencies.",
+              incorrect: "Think about what happens when emergencies arise without savings."
             },
-            "points": 9
+            points: 15
           },
           {
-            "id": "investment-timeline",
-            "type": "multiple-choice",
-            "question": "For long-term goals (10+ years), which investment type typically performs best?",
-            "options": [
-              "Savings accounts",
-              "Stock market investments",
-              "Cash under mattress",
-              "Certificate of deposits"
-            ],
-            "correctAnswer": "Stock market investments",
-            "feedback": {
-              "correct": "Right! Over long periods, stocks historically outperform other investment types despite short-term volatility.",
-              "incorrect": "Historically, stock market investments have provided the best long-term returns, despite short-term ups and downs."
+            id: "credit-card-usage-exercise",
+            type: "multiple-choice",
+            question: "What's the best way to use credit cards?",
+            options: ["Carry a small balance to build credit", "Pay only the minimum each month", "Pay the full balance monthly", "Use them for emergency loans"],
+            correctAnswer: "Pay the full balance monthly",
+            explanation: "Paying the full balance monthly gives you the benefits of credit cards (rewards, protection) without interest charges.",
+            feedback: {
+              correct: "Perfect! Get the benefits without the interest costs.",
+              incorrect: "Think about how to get credit card benefits while avoiding interest charges."
             },
-            "points": 10
+            points: 15
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "investment-fundamentals",
+    title: "Investment Fundamentals",
+    description: "Start building wealth through smart investing",
+    icon: "TrendingUp",
+    totalLevels: 3,
+    estimatedTime: "40 minutes",
+    levels: [
+      {
+        id: "investment-1",
+        moduleId: "investment-fundamentals",
+        levelNumber: 1,
+        title: "Investment Basics",
+        description: "Understand the fundamentals of investing",
+        xpReward: 15,
+        learningObjectives: [
+          "Learn what investing really means",
+          "Understand different investment types",
+          "Grasp the power of compound interest"
+        ],
+        content: [
+          {
+            id: "investing-definition",
+            type: "text",
+            title: "What is Investing?",
+            content: "Investing is putting your money to work to generate more money over time. Instead of just saving, you're buying assets that can grow in value or produce income."
+          },
+          {
+            id: "investment-types",
+            type: "visual",
+            title: "Types of Investments",
+            content: "Stocks (own pieces of companies), Bonds (loan money to companies/governments), Real Estate (physical property), Index Funds (baskets of many stocks)",
+            visual: {
+              type: "illustration",
+              data: {
+                stocks: "Ownership in companies",
+                bonds: "Loans you make",
+                realEstate: "Physical property",
+                indexFunds: "Diversified baskets"
+              }
+            }
+          },
+          {
+            id: "compound-interest",
+            type: "example",
+            title: "The Magic of Compound Interest",
+            content: "Start with $1,000 earning 7% annually. After 10 years: $1,967. After 20 years: $3,870. After 30 years: $7,612. Time is your biggest advantage in investing!"
+          },
+          {
+            id: "investing-vs-saving",
+            type: "tip",
+            title: "Investing vs Saving",
+            content: "Savings accounts protect your money but don't beat inflation. Investing carries risk but historically grows wealth over time. Use both: save for emergencies, invest for long-term goals."
+          }
+        ],
+        exercises: [
+          {
+            id: "investing-definition-exercise",
+            type: "multiple-choice",
+            question: "What is the main goal of investing?",
+            options: ["Keep money safe", "Generate more money over time", "Avoid paying taxes", "Get rich quick"],
+            correctAnswer: "Generate more money over time",
+            explanation: "Investing aims to grow your money over time through asset appreciation and income generation.",
+            feedback: {
+              correct: "Exactly! Investing is about long-term wealth building.",
+              incorrect: "Think about why people choose investing over just saving money."
+            },
+            points: 10
+          },
+          {
+            id: "investment-types-exercise",
+            type: "multiple-choice",
+            question: "When you buy stock, you are:",
+            options: ["Lending money to a company", "Buying physical property", "Becoming a partial owner of a company", "Storing money safely"],
+            correctAnswer: "Becoming a partial owner of a company",
+            explanation: "Stocks represent ownership shares in companies. When you buy stock, you own a tiny piece of that business.",
+            feedback: {
+              correct: "Right! Stock ownership makes you a shareholder in the company.",
+              incorrect: "Think about what 'stock' or 'shares' represent in relation to companies."
+            },
+            points: 15
+          },
+          {
+            id: "compound-interest-exercise",
+            type: "multiple-choice",
+            question: "What makes compound interest so powerful?",
+            options: ["High interest rates", "Earning interest on your interest", "Government guarantees", "No risk involved"],
+            correctAnswer: "Earning interest on your interest",
+            explanation: "Compound interest means you earn returns not just on your original money, but also on all the gains from previous years.",
+            feedback: {
+              correct: "Perfect! Your money makes money, then that money makes money too.",
+              incorrect: "Think about what happens to the interest you earn each year."
+            },
+            points: 15
+          }
+        ]
+      },
+      {
+        id: "investment-2",
+        moduleId: "investment-fundamentals",
+        levelNumber: 2,
+        title: "Risk vs Return",
+        description: "Learn to balance risk and reward in investing",
+        xpReward: 20,
+        learningObjectives: [
+          "Understand the risk-return relationship",
+          "Learn about diversification",
+          "Assess your risk tolerance"
+        ],
+        content: [
+          {
+            id: "risk-return-relationship",
+            type: "text",
+            title: "Risk and Return Connection",
+            content: "Higher potential returns usually come with higher risk. Safe investments like savings accounts have low returns. Riskier investments like stocks have higher potential returns but can lose money."
+          },
+          {
+            id: "risk-spectrum",
+            type: "visual",
+            title: "Investment Risk Spectrum",
+            content: "Low Risk/Low Return: Savings accounts (1-2%), CDs (3-5%). Medium Risk/Medium Return: Bonds (4-6%), Balanced funds (5-8%). High Risk/High Return: Individual stocks (varies widely), Growth stocks (potentially 10%+ or losses)",
+            visual: {
+              type: "chart",
+              data: {
+                low: { risk: "Low", return: "1-2%", example: "Savings" },
+                medium: { risk: "Medium", return: "4-8%", example: "Bonds/Funds" },
+                high: { risk: "High", return: "10%+ or losses", example: "Individual stocks" }
+              }
+            }
+          },
+          {
+            id: "diversification",
+            type: "tip",
+            title: "Don't Put All Eggs in One Basket",
+            content: "Diversification means spreading investments across different companies, industries, and asset types. If one investment fails, others can still succeed. Index funds automatically provide diversification."
+          },
+          {
+            id: "risk-tolerance",
+            type: "step",
+            title: "Assessing Your Risk Tolerance",
+            content: "1. Consider your age (younger = more time to recover) 2. Think about your goals timeline 3. Evaluate your emotional comfort with losses 4. Assess your financial situation 5. Start conservative and learn"
+          }
+        ],
+        exercises: [
+          {
+            id: "risk-return-exercise",
+            type: "multiple-choice",
+            question: "What's the general relationship between risk and return?",
+            options: ["Higher risk = guaranteed higher returns", "Higher risk = potential for higher returns", "Risk doesn't affect returns", "Lower risk = higher returns"],
+            correctAnswer: "Higher risk = potential for higher returns",
+            explanation: "Higher risk investments offer the potential for higher returns, but they also have the potential for larger losses. Nothing is guaranteed.",
+            feedback: {
+              correct: "Exactly! Higher risk offers potential, not guarantees.",
+              incorrect: "Remember: potential is not the same as guaranteed returns."
+            },
+            points: 15
+          },
+          {
+            id: "diversification-exercise",
+            type: "multiple-choice",
+            question: "What is diversification?",
+            options: ["Buying only one stock", "Spreading investments across different assets", "Investing only in bonds", "Putting all money in savings"],
+            correctAnswer: "Spreading investments across different assets",
+            explanation: "Diversification reduces risk by spreading investments across different companies, industries, and types of assets.",
+            feedback: {
+              correct: "Right! Diversification reduces risk through spreading investments.",
+              incorrect: "Think about the saying 'don't put all your eggs in one basket.'"
+            },
+            points: 10
+          },
+          {
+            id: "risk-tolerance-exercise",
+            type: "multiple-choice",
+            question: "A 25-year-old saving for retirement should generally:",
+            options: ["Take no investment risk", "Take moderate to high risk", "Only invest in bonds", "Avoid investing entirely"],
+            correctAnswer: "Take moderate to high risk",
+            explanation: "Young investors have 40+ years until retirement, giving them time to recover from market downturns and benefit from long-term growth.",
+            feedback: {
+              correct: "Smart! Time is on their side for weathering market volatility.",
+              incorrect: "Consider how much time they have until retirement and to recover from any losses."
+            },
+            points: 15
+          }
+        ]
+      },
+      {
+        id: "investment-3",
+        moduleId: "investment-fundamentals",
+        levelNumber: 3,
+        title: "Getting Started with Investing",
+        description: "Take your first steps into the investment world",
+        xpReward: 25,
+        learningObjectives: [
+          "Choose the right investment accounts",
+          "Start with index funds and ETFs",
+          "Create a simple investment plan"
+        ],
+        content: [
+          {
+            id: "investment-accounts",
+            type: "visual",
+            title: "Types of Investment Accounts",
+            content: "Taxable brokerage (access anytime, pay taxes on gains), 401(k) (employer retirement plan, tax benefits), Roth IRA (retirement account, tax-free growth), Traditional IRA (retirement, tax deduction now)",
+            visual: {
+              type: "comparison",
+              data: {
+                taxable: "Access anytime, pay taxes",
+                "401k": "Employer plan, tax benefits",
+                rothIRA: "Tax-free growth in retirement",
+                traditionalIRA: "Tax deduction now"
+              }
+            }
+          },
+          {
+            id: "index-funds-intro",
+            type: "text",
+            title: "Start with Index Funds",
+            content: "Index funds are perfect for beginners. They automatically diversify across hundreds of companies, have low fees, and track market performance. Popular options: S&P 500 index funds, Total Stock Market funds."
+          },
+          {
+            id: "getting-started-steps",
+            type: "step",
+            title: "Your First Investment Steps",
+            content: "1. Build emergency fund first 2. Contribute to 401(k) up to company match 3. Open Roth IRA 4. Start with broad index fund 5. Invest consistently every month 6. Don't check daily - think long-term"
+          },
+          {
+            id: "common-mistakes",
+            type: "warning",
+            title: "Avoid These Beginner Mistakes",
+            content: "Don't try to time the market, don't panic sell during downturns, don't pick individual stocks as a beginner, don't invest money you'll need soon, and don't forget about fees - they compound too!"
+          }
+        ],
+        exercises: [
+          {
+            id: "investment-account-exercise",
+            type: "multiple-choice",
+            question: "What's a major benefit of a Roth IRA?",
+            options: ["Immediate tax deduction", "Tax-free growth and withdrawals in retirement", "No contribution limits", "Guaranteed returns"],
+            correctAnswer: "Tax-free growth and withdrawals in retirement",
+            explanation: "Roth IRAs grow tax-free, and you can withdraw money in retirement without paying taxes on the gains.",
+            feedback: {
+              correct: "Excellent! Tax-free growth is a huge long-term advantage.",
+              incorrect: "Think about when you'd pay taxes with a Roth IRA vs other accounts."
+            },
+            points: 15
+          },
+          {
+            id: "index-fund-exercise",
+            type: "multiple-choice", 
+            question: "Why are index funds good for beginners?",
+            options: ["They guarantee profits", "They automatically provide diversification", "They never lose money", "They beat the market every year"],
+            correctAnswer: "They automatically provide diversification",
+            explanation: "Index funds spread your investment across hundreds of companies automatically, reducing risk through diversification.",
+            feedback: {
+              correct: "Right! Instant diversification without picking individual stocks.",
+              incorrect: "Think about what index funds do automatically that would be hard for beginners to do themselves."
+            },
+            points: 15
+          },
+          {
+            id: "investment-priority-exercise",
+            type: "multiple-choice",
+            question: "What should you do before investing in the stock market?",
+            options: ["Buy individual stocks", "Build an emergency fund", "Take out a loan", "Quit your job"],
+            correctAnswer: "Build an emergency fund",
+            explanation: "Emergency funds ensure you won't need to sell investments during market downturns to cover unexpected expenses.",
+            feedback: {
+              correct: "Smart! Never invest money you might need for emergencies.",
+              incorrect: "Consider what financial foundation you need before taking investment risk."
+            },
+            points: 10
           }
         ]
       }
@@ -848,7 +1122,6 @@ export const COURSE_CONTENT: CourseModule[] = [
   }
 ];
 
-// Achievement badges
 export interface Achievement {
   id: string;
   title: string;
@@ -861,66 +1134,48 @@ export interface Achievement {
 
 export const ACHIEVEMENT_BADGES: Achievement[] = [
   {
-    id: "first-lesson",
-    title: "Getting Started",
+    id: "first-steps",
+    title: "First Steps",
     description: "Complete your first lesson",
-    icon: "Star",
+    icon: "BookOpen",
     requirement: "Complete 1 lesson",
-    xpRequired: 25,
+    xpRequired: 15,
     badgeColor: "bg-blue-500"
   },
   {
-    id: "budget-master",
-    title: "Budget Master",
-    description: "Complete the Budgeting Basics module",
-    icon: "Calculator",
-    requirement: "Complete Budgeting Basics module",
-    xpRequired: 105,
-    badgeColor: "bg-green-500"
-  },
-  {
-    id: "smart-spender",
-    title: "Smart Spender", 
-    description: "Complete the Smart Spending module",
-    icon: "ShoppingCart",
-    requirement: "Complete Smart Spending module",
-    xpRequired: 210,
-    badgeColor: "bg-purple-500"
-  },
-  {
-    id: "future-planner",
-    title: "Future Planner",
-    description: "Complete the Saving & Investing module", 
-    icon: "TrendingUp",
-    requirement: "Complete Saving & Investing module",
-    xpRequired: 330,
+    id: "learning-streak",
+    title: "Learning Streak", 
+    description: "Maintain a 7-day learning streak",
+    icon: "Flame",
+    requirement: "7-day streak",
+    xpRequired: 50,
     badgeColor: "bg-orange-500"
   },
   {
-    id: "streak-3",
-    title: "Consistent Learner",
-    description: "Maintain a 3-day learning streak",
-    icon: "Flame",
-    requirement: "3-day streak",
+    id: "xp-collector",
+    title: "XP Collector",
+    description: "Earn 100 XP points",
+    icon: "Zap",
+    requirement: "Earn 100 XP",
     xpRequired: 100,
-    badgeColor: "bg-red-500"
+    badgeColor: "bg-yellow-500"
   },
   {
-    id: "perfectionist",
-    title: "Perfectionist",
-    description: "Score 100% on 5 lessons",
+    id: "module-master",
+    title: "Module Master",
+    description: "Complete your first module",
     icon: "Award",
-    requirement: "Perfect scores on 5 lessons",
-    xpRequired: 200,
-    badgeColor: "bg-yellow-500"
+    requirement: "Complete any module",
+    xpRequired: 60,
+    badgeColor: "bg-green-500"
   },
   {
     id: "dedicated-learner",
     title: "Dedicated Learner",
-    description: "Complete all 9 lessons",
+    description: "Complete all financial literacy modules",
     icon: "Trophy",
     requirement: "Complete all modules",
-    xpRequired: 330,
-    badgeColor: "bg-gold-500"
+    xpRequired: 240,
+    badgeColor: "bg-purple-500"
   }
 ];
