@@ -1,7 +1,11 @@
-const fs = require('fs').promises;
-const path = require('path');
-const { spawn } = require('child_process');
-const fetch = require('node-fetch');
+import fs from 'fs/promises';
+import path from 'path';
+import { spawn } from 'child_process';
+import fetch from 'node-fetch';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Demo video scripts for marketing
 const videoScripts = {
@@ -165,64 +169,102 @@ async function createProfessionalVideo(stockFootage, audioPath, outputPath, demo
   console.log('🎬 Creating professional video with stock footage and narration...');
 
   const duration = await getAudioDuration(audioPath);
-  const backgroundMusicPath = await downloadBackgroundMusic();
   
-  // Create complex video with multiple layers
-  return new Promise((resolve, reject) => {
-    const inputs = [
-      '-i', stockFootage[0].path,  // Background video
-      '-i', audioPath,             // Narration
-      '-i', backgroundMusicPath    // Background music
+  // Step 1: Create background video first
+  const tempVideoPath = path.join(__dirname, `temp-video-${demoType}-${language}.mp4`);
+  
+  // Scale and loop stock footage, add text overlays
+  const videoResult = await new Promise((resolve, reject) => {
+    const textOverlay = getSimplifiedOverlays(demoType, language, duration);
+    
+    const ffmpegArgs = [
+      '-i', stockFootage[0].path,
+      '-vf', `scale=1280:720,${textOverlay}`,
+      '-t', duration.toString(),
+      '-c:v', 'libx264',
+      '-pix_fmt', 'yuv420p',
+      '-y',
+      tempVideoPath
     ];
 
-    const videoFilters = [
-      // Scale and loop stock footage to match duration
-      `[0:v]scale=1280:720,loop=loop=-1:size=1:start=0,trim=duration=${duration}[bg]`,
-      // Add overlay with FinanzerPro branding and text
-      `[bg]${getProfessionalOverlays(demoType, language, duration)}[final]`
-    ].join(',');
+    const ffmpeg = spawn('ffmpeg', ffmpegArgs);
+    
+    ffmpeg.stderr.on('data', (data) => {
+      console.log(`Video creation: ${data}`);
+    });
 
-    const audioFilters = [
-      // Mix narration with background music
-      `[1:a]volume=1.0[narration]`,
-      `[2:a]volume=0.3,afade=in:st=0:d=2,afade=out:st=${duration-2}:d=2[music]`,
-      `[narration][music]amix=inputs=2:duration=shortest[audio]`
-    ].join(',');
+    ffmpeg.on('close', (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`Video creation failed: ${code}`));
+    });
+  });
 
+  // Step 2: Add audio to video
+  return new Promise((resolve, reject) => {
     const ffmpegArgs = [
-      ...inputs,
-      '-filter_complex', `${videoFilters};${audioFilters}`,
-      '-map', '[final]',
-      '-map', '[audio]',
-      '-c:v', 'libx264',
+      '-i', tempVideoPath,
+      '-i', audioPath,
+      '-c:v', 'copy',
       '-c:a', 'aac',
-      '-pix_fmt', 'yuv420p',
-      '-preset', 'medium',
-      '-crf', '23',
-      '-t', duration.toString(),
+      '-shortest',
       '-y',
       outputPath
     ];
 
     const ffmpeg = spawn('ffmpeg', ffmpegArgs);
-
+    
     ffmpeg.stderr.on('data', (data) => {
-      // Log progress for debugging
-      // console.log(`FFmpeg: ${data}`);
+      console.log(`Audio mixing: ${data}`);
     });
 
-    ffmpeg.on('close', (code) => {
+    ffmpeg.on('close', async (code) => {
+      // Cleanup temp file
+      try {
+        await fs.unlink(tempVideoPath);
+      } catch (error) {
+        // Ignore cleanup errors
+      }
+      
       if (code === 0) {
         resolve();
       } else {
-        reject(new Error(`Professional video creation failed: ${code}`));
+        reject(new Error(`Audio mixing failed: ${code}`));
       }
     });
-
-    ffmpeg.on('error', (error) => {
-      reject(error);
-    });
   });
+}
+
+function getSimplifiedOverlays(demoType, language, duration) {
+  const titles = {
+    'en-us': {
+      categorization: 'Smart AI Categorization',
+      tips: 'AI Financial Insights', 
+      health: 'Financial Health Analysis'
+    },
+    'es-pe': {
+      categorization: 'Categorización IA Inteligente',
+      tips: 'Insights Financieros IA',
+      health: 'Análisis de Salud Financiera'
+    },
+    'sk-sk': {
+      categorization: 'Inteligentná AI Kategorizácia', 
+      tips: 'AI Finančné Poznatky',
+      health: 'Analýza Finančného Zdravia'
+    }
+  };
+
+  const title = titles[language]?.[demoType] || titles['en-us'][demoType];
+  
+  return [
+    // Semi-transparent overlay
+    `drawbox=x=0:y=0:w=1280:h=720:color=black@0.4:t=fill`,
+    // FinanzerPro brand
+    `drawtext=text='FinanzerPro':fontsize=48:fontcolor=white:x=50:y=50`,
+    // Feature title
+    `drawtext=text='${title}':fontsize=36:fontcolor=white:x=50:y=120`,
+    // Call to action
+    `drawtext=text='Try FinanzerPro Today':fontsize=28:fontcolor=#3B82F6:x=(w-text_w)/2:y=600`
+  ].join(',');
 }
 
 async function downloadBackgroundMusic() {
@@ -463,6 +505,4 @@ async function generateAllVideos() {
 }
 
 // Run the generator
-if (require.main === module) {
-  generateAllVideos().catch(console.error);
-}
+generateAllVideos().catch(console.error);
