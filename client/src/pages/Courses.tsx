@@ -142,7 +142,8 @@ export default function Courses() {
     }
     
     // Achievement: Module Master (Complete any module) 
-    const completedModules = COURSE_CONTENT.filter(module => getModuleProgress(module) === 100).length;
+    // For now, no modules are completed since we're using static content
+    const completedModules = 0;
     if (completedModules >= 1) {
       userAchievements.push({
         id: "module-master",
