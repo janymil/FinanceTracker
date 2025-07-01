@@ -26,7 +26,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import { type CourseModule, type Exercise, type CourseLevel, type ContentBlock } from "@/data/courseContent";
+import { type CourseModule, type Exercise, type CourseLevel, type ContentBlock, COURSE_CONTENT } from "@/data/courseContent";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 
