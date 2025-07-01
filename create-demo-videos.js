@@ -1,7 +1,8 @@
-const { createCanvas } = require('canvas');
+const { createCanvas, loadImage, registerFont } = require('canvas');
 const { spawn } = require('child_process');
 const fs = require('fs').promises;
 const path = require('path');
+const fetch = require('node-fetch');
 
 class DemoVideoCreator {
   constructor() {
@@ -9,6 +10,8 @@ class DemoVideoCreator {
     this.height = 720;
     this.fps = 30;
     this.outputDir = path.join(__dirname, 'public', 'demo-videos');
+    this.tempDir = path.join(__dirname, 'temp-video-assets');
+    this.elevenLabsApiKey = process.env.ELEVENLABS_API_KEY;
   }
 
   async createAllDemoVideos() {
@@ -65,23 +68,32 @@ class DemoVideoCreator {
   }
 
   getDemoScenes(demoType, language) {
-    const translations = {
+    const narrationScripts = {
       'en-us': {
-        categorization: [
-          { title: 'Smart Transaction Categorization', subtitle: '1. Upload Receipt', duration: 2.5 },
-          { title: 'AI Analysis in Progress', subtitle: 'Analyzing merchant patterns...', duration: 3.0 },
-          { title: 'Categorization Complete', subtitle: '✓ Food & Beverages - 95% confidence', duration: 2.5 }
-        ],
-        tips: [
-          { title: 'Financial Insights Generation', subtitle: '1. Analyzing spending patterns', duration: 2.5 },
-          { title: 'AI Processing', subtitle: 'Generating personalized tips...', duration: 3.0 },
-          { title: 'Recommendations Ready', subtitle: '• Reduce coffee spending\n• Increase savings rate', duration: 2.5 }
-        ],
-        health: [
-          { title: 'Financial Health Analysis', subtitle: '1. Comprehensive financial scan', duration: 2.5 },
-          { title: 'Calculating Health Score', subtitle: 'Analyzing income, expenses, debts...', duration: 3.0 },
-          { title: 'Health Score: 78/100', subtitle: 'Good financial health with improvement areas', duration: 2.5 }
-        ]
+        categorization: {
+          fullScript: "Welcome to FinanzerPro's intelligent transaction categorization. Watch as our AI instantly recognizes a Starbucks receipt and automatically categorizes it as Food and Beverages with 95% accuracy. No manual tagging required - our AI learns your spending patterns and gets smarter over time. Transform your financial tracking from tedious to effortless with FinanzerPro.",
+          scenes: [
+            { title: 'Smart Transaction Categorization', subtitle: 'Upload any receipt', duration: 3.0, type: 'upload' },
+            { title: 'AI Analysis in Progress', subtitle: 'Analyzing merchant patterns...', duration: 2.5, type: 'processing' },
+            { title: 'Categorization Complete', subtitle: '✓ Food & Beverages - 95% confidence', duration: 2.5, type: 'result' }
+          ]
+        },
+        tips: {
+          fullScript: "Discover FinanzerPro's AI financial advisor that analyzes your spending patterns to provide personalized recommendations. See how it identifies opportunities to reduce coffee expenses by 20% and suggests optimized saving strategies. Get insights that adapt to your lifestyle and help you reach your financial goals faster.",
+          scenes: [
+            { title: 'AI Financial Insights', subtitle: 'Analyzing your spending patterns', duration: 3.0, type: 'analysis' },
+            { title: 'Generating Recommendations', subtitle: 'AI processing your financial data...', duration: 2.5, type: 'processing' },
+            { title: 'Personalized Tips Ready', subtitle: '4 actionable recommendations generated', duration: 2.5, type: 'tips' }
+          ]
+        },
+        health: {
+          fullScript: "Experience FinanzerPro's comprehensive financial health analysis. Our AI examines your income, expenses, debts, and savings to calculate a detailed health score. Get specific improvement strategies to boost your score from 78 to 90+. Turn complex financial data into clear, actionable insights.",
+          scenes: [
+            { title: 'Financial Health Scanner', subtitle: 'Comprehensive financial analysis', duration: 3.0, type: 'scan' },
+            { title: 'Calculating Health Score', subtitle: 'AI analyzing all financial factors...', duration: 2.5, type: 'processing' },
+            { title: 'Health Score: 78/100', subtitle: 'Good health with improvement plan', duration: 2.5, type: 'score' }
+          ]
+        }
       },
       'es-pe': {
         categorization: [
