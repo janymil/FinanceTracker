@@ -21,6 +21,7 @@ import { registerRedeemRoutes } from "./redeemRoutes";
 import { registerClerkWebhookRoutes } from "./clerkWebhooks";
 import { registerPDFRoutes } from "./pdfRoutes";
 import demoRoutes from "../demoRoutes";
+import courseRoutes from "../courseRoutes";
 // Contextual financial tips routes moved to aiRoutes.ts
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -59,6 +60,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Demo routes for interactive video features
   app.use('/api/demo', demoRoutes);
+  
+  // Course routes for financial literacy mini-courses
+  app.use('/api/courses', courseRoutes);
   
   // Contextual financial tips routes moved to aiRoutes.ts
 
