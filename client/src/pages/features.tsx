@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocation } from 'wouter';
 import { AppLayout } from '@/components/AppLayout';
+import { ExpenseEstimationCalculator } from '@/components/Calculator';
 
 import { 
   Brain, 
@@ -346,6 +347,20 @@ export default function FeaturesPage() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Free Expense Estimation Calculator */}
+      <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Free Financial Tools</h2>
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            Get instant financial insights without signing up. Try our affordability calculator to make smarter spending decisions.
+          </p>
+        </div>
+        
+        <div className="max-w-4xl mx-auto mb-16">
+          <ExpenseEstimationCalculator isStandalone={true} />
         </div>
       </div>
 

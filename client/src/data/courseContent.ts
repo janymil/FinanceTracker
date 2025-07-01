@@ -85,8 +85,55 @@ export const COURSE_CONTENT: Course[] = [
           "Recognize how tracking cash flow helps you spot financial leaks",
           "Develop awareness of your current financial situation"
         ],
-        tabs: [],
-        exercises: []
+        tabs: [
+          {
+            id: "introduction",
+            title: "Introduction",
+            icon: "💡",
+            content: [
+              {
+                id: "welcome",
+                type: "text",
+                title: "Welcome to Cash Flow Mastery",
+                content: "Welcome to your journey toward financial freedom through cash flow mastery. This course will teach you how to track, understand, and optimize your money flow."
+              }
+            ]
+          },
+          {
+            id: "basics",
+            title: "Cash Flow Basics",
+            icon: "💰",
+            content: [
+              {
+                id: "understanding",
+                type: "text",
+                title: "Understanding Cash Flow",
+                content: "Cash flow is the movement of money in and out of your accounts. It's the foundation of financial health and wealth building."
+              }
+            ]
+          }
+        ],
+        exercises: [
+          {
+            id: "cash-flow-quiz",
+            type: "multiple-choice",
+            title: "Cash Flow Knowledge Check",
+            description: "Test your understanding of cash flow basics",
+            question: "What is cash flow?",
+            options: [
+              "Only money coming into your accounts",
+              "Only money going out of your accounts", 
+              "The movement of money in and out of your accounts",
+              "Your total savings amount"
+            ],
+            correctAnswer: 2,
+            explanation: "Cash flow is the movement of money both in and out of your accounts over time.",
+            feedback: {
+              correct: "Correct! Cash flow tracks both incoming and outgoing money.",
+              incorrect: "Cash flow includes both money coming in and going out of your accounts."
+            }
+          }
+        ]
       },
       {
         id: "cashflow-level-2",
@@ -100,7 +147,34 @@ export const COURSE_CONTENT: Course[] = [
           "Discover hidden income streams you may have overlooked",
           "Learn strategies to optimize existing income sources"
         ],
-        tabs: [],
+        tabs: [
+          {
+            id: "mapping",
+            title: "Income Mapping",
+            icon: "📊",
+            content: [
+              {
+                id: "sources",
+                type: "text",
+                title: "Identifying Income Sources",
+                content: "Learn to identify and categorize all your income sources, including primary salary, side hustles, investments, and passive income."
+              }
+            ]
+          },
+          {
+            id: "optimization",
+            title: "Optimization",
+            icon: "🚀",
+            content: [
+              {
+                id: "strategies",
+                type: "tip",
+                title: "Income Optimization Strategies",
+                content: "Discover practical strategies to maximize your existing income sources and identify new opportunities."
+              }
+            ]
+          }
+        ],
         exercises: []
       },
       {
@@ -115,7 +189,21 @@ export const COURSE_CONTENT: Course[] = [
           "Evaluate your current income mix",
           "Plan strategies to build passive income"
         ],
-        tabs: [],
+        tabs: [
+          {
+            id: "active-passive",
+            title: "Active vs Passive",
+            icon: "⚡",
+            content: [
+              {
+                id: "comparison",
+                type: "text",
+                title: "Understanding the Difference",
+                content: "Active income requires your time and effort, while passive income generates money with minimal ongoing work."
+              }
+            ]
+          }
+        ],
         exercises: []
       },
       {
@@ -130,7 +218,21 @@ export const COURSE_CONTENT: Course[] = [
           "Connect bank accounts and financial tools",
           "Create automated expense categorization"
         ],
-        tabs: [],
+        tabs: [
+          {
+            id: "automation",
+            title: "Automation Setup",
+            icon: "🤖",
+            content: [
+              {
+                id: "systems",
+                type: "text",
+                title: "Setting Up Tracking Systems",
+                content: "Learn to automate your financial tracking with modern tools and bank connections."
+              }
+            ]
+          }
+        ],
         exercises: []
       },
       {
@@ -145,7 +247,21 @@ export const COURSE_CONTENT: Course[] = [
           "Develop side income streams",
           "Master negotiation techniques for salary increases"
         ],
-        tabs: [],
+        tabs: [
+          {
+            id: "boost-strategies",
+            title: "Income Boosting",
+            icon: "📈",
+            content: [
+              {
+                id: "techniques",
+                type: "text",
+                title: "Proven Income Strategies",
+                content: "Discover actionable strategies to significantly increase your income within 12 months."
+              }
+            ]
+          }
+        ],
         exercises: []
       },
       {
@@ -160,7 +276,21 @@ export const COURSE_CONTENT: Course[] = [
           "Set realistic income and savings targets",
           "Build contingency plans for financial emergencies"
         ],
-        tabs: [],
+        tabs: [
+          {
+            id: "planning",
+            title: "Cash Flow Planning",
+            icon: "📋",
+            content: [
+              {
+                id: "plan-creation",
+                type: "text",
+                title: "Creating Your Personal Plan",
+                content: "Bring everything together into a comprehensive 12-month cash flow plan that works for your situation."
+              }
+            ]
+          }
+        ],
         exercises: []
       }
     ]
