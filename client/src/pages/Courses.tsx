@@ -96,6 +96,76 @@ export default function Courses() {
     averageScore: "87.5"
   };
 
+  // Calculate dynamic achievements based on user progress
+  const calculateAchievements = () => {
+    const userAchievements = [];
+    
+    // Achievement: First Steps (Complete first lesson)
+    if (stats.totalLessonsCompleted >= 1) {
+      userAchievements.push({
+        id: "first-steps",
+        title: "First Steps",
+        description: "Complete your first lesson",
+        icon: "BookOpen",
+        unlocked: true,
+        earnedAt: new Date().toLocaleDateString()
+      });
+    }
+    
+    // Achievement: Learning Streak (7 day streak)
+    if (stats.currentStreak >= 7) {
+      userAchievements.push({
+        id: "learning-streak",
+        title: "Learning Streak",
+        description: "Maintain a 7-day learning streak",
+        icon: "Flame",
+        unlocked: true,
+        earnedAt: new Date().toLocaleDateString()
+      });
+    }
+    
+    // Achievement: XP Collector (100+ XP)
+    if (stats.totalXp >= 100) {
+      userAchievements.push({
+        id: "xp-collector",
+        title: "XP Collector",
+        description: "Earn 100 XP points",
+        icon: "Zap",
+        unlocked: true,
+        earnedAt: new Date().toLocaleDateString()
+      });
+    }
+    
+    // Achievement: Module Master (Complete any module) 
+    const completedModules = COURSE_CONTENT.filter(module => getModuleProgress(module) === 100).length;
+    if (completedModules >= 1) {
+      userAchievements.push({
+        id: "module-master",
+        title: "Module Master",
+        description: "Complete your first module",
+        icon: "Award",
+        unlocked: true,
+        earnedAt: new Date().toLocaleDateString()
+      });
+    }
+    
+    // Achievement: Dedicated Learner (Complete all modules)
+    if (completedModules === COURSE_CONTENT.length) {
+      userAchievements.push({
+        id: "dedicated-learner",
+        title: "Dedicated Learner",
+        description: "Complete all financial literacy modules",
+        icon: "Trophy",
+        unlocked: true,
+        earnedAt: new Date().toLocaleDateString()
+      });
+    }
+    
+    return userAchievements;
+  };
+  
+  const unlockedAchievements = calculateAchievements();
+
   // Calculate completion percentage for a module
   const getModuleProgress = (module: CourseModule): number => {
     if (!module.levels.length) return 0;

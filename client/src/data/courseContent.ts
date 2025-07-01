@@ -1,6 +1,17 @@
 // Financial Literacy Course Content
 // Generated for Duolingo-style gamified learning experience
 
+export interface ContentBlock {
+  id: string;
+  type: 'text' | 'example' | 'tip' | 'warning' | 'visual' | 'step';
+  title?: string;
+  content: string;
+  visual?: {
+    type: 'chart' | 'illustration' | 'comparison';
+    data: any;
+  };
+}
+
 export interface Exercise {
   id: string;
   type: 'multiple-choice' | 'drag-drop' | 'true-false' | 'matching' | 'scenario';
@@ -22,6 +33,8 @@ export interface CourseLevel {
   title: string;
   description: string;
   xpReward: number;
+  learningObjectives: string[];
+  content: ContentBlock[];
   exercises: Exercise[];
 }
 
