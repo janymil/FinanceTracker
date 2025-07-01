@@ -37,6 +37,7 @@ import TrendsPage from "@/pages/trends";
 import CalendarPage from "@/pages/calendar";
 import ReportsPage from "@/pages/reports";
 import ExportPage from "@/pages/export";
+import CoursesPage from "@/pages/Courses";
 import SubscribePage from "@/pages/subscribe";
 import Pricing from "@/pages/pricing";
 import TermsOfService from "@/pages/terms-of-service";
@@ -83,6 +84,7 @@ function Router() {
         <Route path="/:lang/calendar" component={AuthenticatedApp} />
         <Route path="/:lang/reports" component={AuthenticatedApp} />
         <Route path="/:lang/export" component={AuthenticatedApp} />
+        <Route path="/:lang/courses" component={AuthenticatedApp} />
         <Route path="/:lang/profile" component={AuthenticatedApp} />
         <Route path="/:lang/subscribe" component={AuthenticatedApp} />
         <Route path="/:lang/redeem" component={AuthenticatedApp} />
@@ -206,6 +208,7 @@ export function AuthenticatedApp() {
               <Route path="/:lang/trends" component={TrendsPage} />
               <Route path="/:lang/reports" component={ReportsPage} />
               <Route path="/:lang/export" component={ExportPage} />
+              <Route path="/:lang/courses" component={CoursesPage} />
               <Route path="/:lang/subscribe" component={SubscribePage} />
               <Route path="/:lang/redeem" component={RedeemPage} />
               <Route path="/:lang/profile" component={ProfilePage} />

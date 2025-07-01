@@ -113,7 +113,7 @@ async function checkForNewAchievements(userId: string) {
     const existingAchievements = await storage.getUserCourseAchievements(userId);
     const earnedBadgeIds = new Set(existingAchievements.map(a => a.badgeId));
     
-    const newBadges = [];
+    const newBadges: string[] = [];
     
     // Only proceed if stats exist
     if (!stats) {
