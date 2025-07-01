@@ -1,0 +1,5 @@
+# Claude CLI configuration
+export ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY"
+
+# Alias for convenience
+alias claude="npx claude"
