@@ -3709,6 +3709,282 @@
       "minutes": "minutes",
       "per_week": "per week"
     }
+  },
+
+  "features": {
+    "hero": {
+      "title": "AI-Powered Financial Intelligence",
+      "subtitle": "Advanced artificial intelligence meets personal finance management",
+      "stats": {
+        "ai_functions": "AI Functions",
+        "languages": "Languages",
+        "accuracy_rate": "Accuracy Rate",
+        "ai_availability": "AI Availability"
+      }
+    },
+    "tools": {
+      "title": "Free Financial Tools",
+      "subtitle": "Essential tools to manage your finances effectively"
+    },
+    "section": {
+      "title": "AI-Powered Financial Features",
+      "subtitle": "Experience the future of personal finance with our intelligent automation suite"
+    },
+    "categorization": {
+      "title": "Intelligent Expense Categorization",
+      "description": "AI-powered automatic categorization of all your transactions with continuous learning and improvement",
+      "badge": "Standard+",
+      "benefits": {
+        "instant": {
+          "title": "Instant Recognition",
+          "desc": "Immediately categorizes transactions as they're added"
+        },
+        "learning": {
+          "title": "Continuous Learning",
+          "desc": "Gets smarter with each transaction you process"
+        },
+        "custom": {
+          "title": "Custom Categories",
+          "desc": "Adapts to your unique spending patterns and categories"
+        }
+      }
+    },
+    "contextual": {
+      "title": "Contextual Financial Tips",
+      "description": "Receive personalized financial advice based on your specific transaction patterns and spending behavior",
+      "badge": "Standard+",
+      "benefits": {
+        "realtime": {
+          "title": "Real-time Analysis",
+          "desc": "Instant insights based on your current financial activity"
+        },
+        "budget": {
+          "title": "Budget Awareness",
+          "desc": "Tips that consider your budget limits and goals"
+        },
+        "goal": {
+          "title": "Goal-oriented",
+          "desc": "Advice tailored to help you achieve your financial objectives"
+        }
+      }
+    },
+    "tips": {
+      "title": "AI Financial Tips",
+      "description": "Daily personalized recommendations to optimize your financial health and achieve your money goals faster",
+      "badge": "Premium",
+      "benefits": {
+        "patterns": {
+          "title": "Spending Patterns",
+          "desc": "Deep analysis of your spending behaviors and trends"
+        },
+        "strategies": {
+          "title": "Saving Strategies",
+          "desc": "Personalized recommendations to optimize your cash flow"
+        },
+        "optimization": {
+          "title": "Budget Optimization",
+          "desc": "Smart adjustments to maximize your budget efficiency"
+        },
+        "analysis": {
+          "title": "Advanced Analysis",
+          "desc": "Professional-grade financial insights and forecasting"
+        }
+      }
+    },
+    "insights": {
+      "title": "Intelligent Spending Insights",
+      "description": "Advanced analysis of your expense transactions to identify patterns, anomalies, and optimization opportunities",
+      "badge": "Standard+",
+      "benefits": {
+        "anomaly": {
+          "title": "Anomaly Detection",
+          "desc": "Automatically identifies unusual spending patterns"
+        },
+        "trend": {
+          "title": "Trend Analysis",
+          "desc": "Spots emerging trends in your business expenses"
+        },
+        "optimization": {
+          "title": "Optimization Tips",
+          "desc": "Actionable recommendations to reduce costs"
+        }
+      }
+    },
+    "health": {
+      "title": "Financial Health Score",
+      "description": "Comprehensive AI-powered financial health analysis with personalized scoring and improvement recommendations",
+      "badge": "Premium",
+      "benefits": {
+        "scoring": {
+          "title": "Real-time Scoring",
+          "desc": "Live financial health score from 0-100"
+        },
+        "analysis": {
+          "title": "Factor Analysis",
+          "desc": "Detailed breakdown of what affects your score"
+        },
+        "plan": {
+          "title": "Improvement Plan",
+          "desc": "Personalized action plan to boost your financial health"
+        }
+      }
+    },
+    "trends": {
+      "title": "Trend Predictions",
+      "description": "AI-powered forecasting of your financial trends with predictive analytics and future spending patterns",
+      "badge": "Premium",
+      "benefits": {
+        "growth": {
+          "title": "Growth Forecasting",
+          "desc": "Predict future income and expense trends"
+        },
+        "category": {
+          "title": "Category Analysis",
+          "desc": "Detailed predictions by spending category"
+        },
+        "adaptation": {
+          "title": "Adaptive Learning",
+          "desc": "Improves accuracy with your spending patterns"
+        }
+      }
+    },
+    "predictions": {
+      "title": "Expense Predictions",
+      "description": "Advanced AI algorithms predict your future expenses to help you plan and budget more effectively",
+      "badge": "Premium",
+      "benefits": {
+        "forecasting": {
+          "title": "Smart Forecasting",
+          "desc": "Predict expenses up to 12 months ahead"
+        },
+        "seasonal": {
+          "title": "Seasonal Patterns",
+          "desc": "Recognizes seasonal spending variations"
+        },
+        "planning": {
+          "title": "Planning Support",
+          "desc": "Better budget planning with future insights"
+        }
+      }
+    },
+    "recommendations": {
+      "title": "Daily Recommendations",
+      "description": "Personalized daily financial recommendations powered by AI to optimize your spending and savings",
+      "badge": "Premium",
+      "benefits": {
+        "daily": {
+          "title": "Daily Updates",
+          "desc": "Fresh recommendations delivered every day"
+        },
+        "action": {
+          "title": "Actionable Advice",
+          "desc": "Practical steps you can take immediately"
+        },
+        "priority": {
+          "title": "Priority-based",
+          "desc": "Focus on what matters most for your finances"
+        }
+      }
+    },
+    "statements": {
+      "title": "Bank Statement Processing",
+      "description": "Upload PDF bank statements and let AI extract and categorize all transactions automatically",
+      "badge": "Standard+",
+      "benefits": {
+        "ocr": {
+          "title": "OCR Technology",
+          "desc": "Advanced text recognition from PDF statements"
+        },
+        "processing": {
+          "title": "Bulk Processing",
+          "desc": "Process hundreds of transactions at once"
+        },
+        "categorization": {
+          "title": "Auto-categorization",
+          "desc": "AI categorizes all extracted transactions"
+        }
+      }
+    },
+    "demo": {
+      "title": "Try AI Categorization",
+      "subtitle": "Test our intelligent transaction categorization with real examples",
+      "merchant_label": "Merchant",
+      "merchant_placeholder": "Enter merchant name (e.g., Starbucks, Amazon, Shell)",
+      "amount_placeholder": "Enter amount",
+      "demo_button": "Categorize with AI",
+      "demo_loading": "AI is analyzing...",
+      "fill_fields": "Please fill in both merchant and amount fields",
+      "languages": {
+        "en": "English",
+        "es": "Spanish",
+        "sk": "Slovak"
+      }
+    },
+    "demo_result": {
+      "title": "AI Analysis Result",
+      "placeholder": "Enter transaction details to see AI categorization in action..."
+    },
+    "calculators": {
+      "categorization": {
+        "title": "Categorization Accuracy Calculator",
+        "transactions_label": "Transactions per month:",
+        "time_saved": "Time saved per month:",
+        "hours": "hours"
+      },
+      "savings": {
+        "title": "Potential Savings Calculator",
+        "expenses_label": "Monthly expenses:",
+        "potential_savings": "Potential monthly savings (5-15%):"
+      },
+      "health": {
+        "title": "Health Score Simulator",
+        "savings_rate": "Savings rate:",
+        "budget_adherence": "Budget adherence:",
+        "estimated_score": "Estimated Financial Health Score:"
+      },
+      "predictions": {
+        "title": "Prediction Range Calculator",
+        "historical_months": "Historical data months:",
+        "months": "months",
+        "prediction_range": "Prediction range available:",
+        "months_ahead": "months ahead",
+        "prediction_accuracy": "Prediction accuracy:"
+      },
+      "statements": {
+        "title": "Statement Processing Calculator",
+        "pages": "Pages in statement:",
+        "pages_unit": "pages",
+        "estimated_transactions": "Estimated transactions extracted:",
+        "transactions": "transactions",
+        "processing_time": "Processing time saved:",
+        "minutes": "minutes"
+      }
+    },
+    "multilingual": {
+      "title": "Global Financial Intelligence",
+      "subtitle": "Our AI speaks your language and understands your cultural financial context",
+      "english": {
+        "title": "English",
+        "description": "Complete AI analysis in English with US business context and financial terminology"
+      },
+      "spanish": {
+        "title": "Español",
+        "description": "Análisis completo de IA en español con contexto empresarial latinoamericano"
+      },
+      "slovak": {
+        "title": "Slovenčina",
+        "description": "Kompletná AI analýza v slovenčine s kontextom európskeho podnikania"
+      }
+    },
+    "cta": {
+      "title": "Ready to Transform Your Financial Management?",
+      "subtitle": "Join thousands of entrepreneurs who have revolutionized their business finances with AI-powered insights",
+      "start_free": "Start with Free Account",
+      "watch_demo": "Watch Demo",
+      "guarantee": "30-day money-back guarantee",
+      "no_card": "No credit card required",
+      "cancel_anytime": "Cancel anytime"
+    }
   }
 
 }
