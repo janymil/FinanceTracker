@@ -60,7 +60,7 @@ export default function FeaturesPage() {
 
   const runAIDemo = async () => {
     if (!merchantName || !amount) {
-      alert('Please fill in all fields');
+      alert(t('features.demo.fill_fields'));
       return;
     }
     
@@ -288,23 +288,23 @@ export default function FeaturesPage() {
       <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <Card className="mb-16 border-0 shadow-xl">
           <CardHeader className="text-center pb-8">
-            <CardTitle className="text-3xl mb-4">Try Our AI Categorization</CardTitle>
+            <CardTitle className="text-3xl mb-4">{t('features.demo.title')}</CardTitle>
             <CardDescription className="text-lg">
-              See how our AI instantly categorizes your expenses with intelligent analysis
+              {t('features.demo.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-2 gap-8">
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Enter Transaction Details</h3>
+                <h3 className="text-lg font-semibold">{t('features.demo.merchant_label')}</h3>
                 <Input
-                  placeholder="Merchant name (e.g., Starbucks)"
+                  placeholder={t('features.demo.merchant_placeholder')}
                   value={merchantName}
                   onChange={(e) => setMerchantName(e.target.value)}
                 />
                 <Input
                   type="number"
-                  placeholder="Amount (e.g., 15.50)"
+                  placeholder={t('features.demo.amount_placeholder')}
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                 />
@@ -313,9 +313,9 @@ export default function FeaturesPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="es">Spanish</SelectItem>
-                    <SelectItem value="sk">Slovak</SelectItem>
+                    <SelectItem value="en">{t('features.demo.languages.en')}</SelectItem>
+                    <SelectItem value="es">{t('features.demo.languages.es')}</SelectItem>
+                    <SelectItem value="sk">{t('features.demo.languages.sk')}</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button 
@@ -327,12 +327,12 @@ export default function FeaturesPage() {
                   {demoLoading ? (
                     <>
                       <Sparkles className="mr-2 h-4 w-4 animate-spin" />
-                      Analyzing...
+                      {t('features.demo.demo_loading')}
                     </>
                   ) : (
                     <>
                       <Brain className="mr-2 h-4 w-4" />
-                      Analyze with AI
+                      {t('features.demo.demo_button')}
                     </>
                   )}
                 </Button>
@@ -355,9 +355,9 @@ export default function FeaturesPage() {
         {/* Features Section */}
         <div className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Complete AI Feature Suite</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('features.section.title')}</h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              Explore each of our 9 intelligent AI functions designed to revolutionize your financial management
+              {t('features.section.subtitle')}
             </p>
           </div>
 
