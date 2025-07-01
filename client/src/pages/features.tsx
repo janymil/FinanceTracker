@@ -421,11 +421,11 @@ export default function FeaturesPage() {
               
               <div className="bg-gradient-to-br from-blue-600 to-purple-700 text-white p-6 rounded-lg min-h-[300px] flex items-center">
                 <div className="w-full">
-                  <h3 className="text-lg font-semibold mb-4">AI Analysis Result</h3>
+                  <h3 className="text-lg font-semibold mb-4">{t('features.demo_result.title')}</h3>
                   {demoResult ? (
                     <pre className="whitespace-pre-wrap text-sm leading-relaxed">{demoResult}</pre>
                   ) : (
-                    <p className="opacity-80">Enter transaction details to see AI categorization in action...</p>
+                    <p className="opacity-80">{t('features.demo_result.placeholder')}</p>
                   )}
                 </div>
               </div>
@@ -522,13 +522,13 @@ export default function FeaturesPage() {
               {activeTab === 'categorization' && (
                 <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700">
                   <CardHeader>
-                    <CardTitle className="text-lg">Categorization Accuracy Calculator</CardTitle>
+                    <CardTitle className="text-lg">{t('features.calculators.categorization.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div>
                         <div className="flex justify-between mb-2">
-                          <span>Transactions per month:</span>
+                          <span>{t('features.calculators.categorization.transactions_label')}</span>
                           <span className="font-semibold">{transactions[0]}</span>
                         </div>
                         <Slider
@@ -540,8 +540,8 @@ export default function FeaturesPage() {
                         />
                       </div>
                       <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-blue-600">
-                        <div className="text-sm text-muted-foreground">Time saved per month:</div>
-                        <div className="text-xl font-bold text-blue-600">{calculateTimeSaved()} hours</div>
+                        <div className="text-sm text-muted-foreground">{t('features.calculators.categorization.time_saved')}</div>
+                        <div className="text-xl font-bold text-blue-600">{calculateTimeSaved()} {t('features.calculators.categorization.hours')}</div>
                       </div>
                     </div>
                   </CardContent>
@@ -551,13 +551,13 @@ export default function FeaturesPage() {
               {activeTab === 'tips' && (
                 <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700">
                   <CardHeader>
-                    <CardTitle className="text-lg">Potential Savings Calculator</CardTitle>
+                    <CardTitle className="text-lg">{t('features.calculators.savings.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div>
                         <div className="flex justify-between mb-2">
-                          <span>Monthly expenses:</span>
+                          <span>{t('features.calculators.savings.expenses_label')}</span>
                           <span className="font-semibold">${expenses[0]}</span>
                         </div>
                         <Slider
@@ -569,7 +569,7 @@ export default function FeaturesPage() {
                         />
                       </div>
                       <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-blue-600">
-                        <div className="text-sm text-muted-foreground">Potential monthly savings (5-15%):</div>
+                        <div className="text-sm text-muted-foreground">{t('features.calculators.savings.potential_savings')}</div>
                         <div className="text-xl font-bold text-blue-600">{calculateSavings()}</div>
                       </div>
                     </div>
@@ -580,13 +580,13 @@ export default function FeaturesPage() {
               {activeTab === 'health' && (
                 <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700">
                   <CardHeader>
-                    <CardTitle className="text-lg">Health Score Simulator</CardTitle>
+                    <CardTitle className="text-lg">{t('features.calculators.health.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div>
                         <div className="flex justify-between mb-2">
-                          <span>Savings rate:</span>
+                          <span>{t('features.calculators.health.savings_rate')}</span>
                           <span className="font-semibold">{savingsRate[0]}%</span>
                         </div>
                         <Slider
@@ -599,7 +599,7 @@ export default function FeaturesPage() {
                       </div>
                       <div>
                         <div className="flex justify-between mb-2">
-                          <span>Budget adherence:</span>
+                          <span>{t('features.calculators.health.budget_adherence')}</span>
                           <span className="font-semibold">{budgetAdherence[0]}%</span>
                         </div>
                         <Slider
@@ -611,7 +611,7 @@ export default function FeaturesPage() {
                         />
                       </div>
                       <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-blue-600">
-                        <div className="text-sm text-muted-foreground">Estimated Financial Health Score:</div>
+                        <div className="text-sm text-muted-foreground">{t('features.calculators.health.estimated_score')}</div>
                         <div className="text-xl font-bold text-blue-600">{calculateHealthScore()}/100</div>
                       </div>
                     </div>
@@ -622,14 +622,14 @@ export default function FeaturesPage() {
               {activeTab === 'predictions' && (
                 <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700">
                   <CardHeader>
-                    <CardTitle className="text-lg">Prediction Range Calculator</CardTitle>
+                    <CardTitle className="text-lg">{t('features.calculators.predictions.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div>
                         <div className="flex justify-between mb-2">
-                          <span>Historical data months:</span>
-                          <span className="font-semibold">{historicalMonths[0]} months</span>
+                          <span>{t('features.calculators.predictions.historical_months')}</span>
+                          <span className="font-semibold">{historicalMonths[0]} {t('features.calculators.predictions.months')}</span>
                         </div>
                         <Slider
                           value={historicalMonths}
@@ -640,11 +640,11 @@ export default function FeaturesPage() {
                         />
                       </div>
                       <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-blue-600">
-                        <div className="text-sm text-muted-foreground">Prediction range available:</div>
-                        <div className="text-xl font-bold text-blue-600">{calculatePredictionRange()} months ahead</div>
+                        <div className="text-sm text-muted-foreground">{t('features.calculators.predictions.prediction_range')}</div>
+                        <div className="text-xl font-bold text-blue-600">{calculatePredictionRange()} {t('features.calculators.predictions.months_ahead')}</div>
                       </div>
                       <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-green-600">
-                        <div className="text-sm text-muted-foreground">Prediction accuracy:</div>
+                        <div className="text-sm text-muted-foreground">{t('features.calculators.predictions.prediction_accuracy')}</div>
                         <div className="text-xl font-bold text-green-600">{Math.min(95, Math.floor(65 + (historicalMonths[0] * 1.1)))}%</div>
                       </div>
                     </div>
@@ -655,14 +655,14 @@ export default function FeaturesPage() {
               {activeTab === 'statements' && (
                 <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700">
                   <CardHeader>
-                    <CardTitle className="text-lg">Statement Processing Calculator</CardTitle>
+                    <CardTitle className="text-lg">{t('features.calculators.statements.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div>
                         <div className="flex justify-between mb-2">
-                          <span>Pages in statement:</span>
-                          <span className="font-semibold">{pagesInStatement[0]} pages</span>
+                          <span>{t('features.calculators.statements.pages')}</span>
+                          <span className="font-semibold">{pagesInStatement[0]} {t('features.calculators.statements.pages_unit')}</span>
                         </div>
                         <Slider
                           value={pagesInStatement}
@@ -673,12 +673,12 @@ export default function FeaturesPage() {
                         />
                       </div>
                       <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-blue-600">
-                        <div className="text-sm text-muted-foreground">Estimated transactions extracted:</div>
-                        <div className="text-xl font-bold text-blue-600">{calculateExtractedTransactions()} transactions</div>
+                        <div className="text-sm text-muted-foreground">{t('features.calculators.statements.estimated_transactions')}</div>
+                        <div className="text-xl font-bold text-blue-600">{calculateExtractedTransactions()} {t('features.calculators.statements.transactions')}</div>
                       </div>
                       <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border-l-4 border-green-600">
-                        <div className="text-sm text-muted-foreground">Processing time saved:</div>
-                        <div className="text-xl font-bold text-green-600">{Math.floor(calculateExtractedTransactions() * 1.5)} minutes</div>
+                        <div className="text-sm text-muted-foreground">{t('features.calculators.statements.processing_time')}</div>
+                        <div className="text-xl font-bold text-green-600">{Math.floor(calculateExtractedTransactions() * 1.5)} {t('features.calculators.statements.minutes')}</div>
                       </div>
                     </div>
                   </CardContent>
@@ -691,32 +691,32 @@ export default function FeaturesPage() {
         {/* Multilingual Support */}
         <Card className="mb-16 border-0 shadow-xl bg-gradient-to-r from-blue-600 to-purple-700 text-white">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl mb-4 text-white">Global Financial Intelligence</CardTitle>
+            <CardTitle className="text-3xl mb-4 text-white">{t('features.multilingual.title')}</CardTitle>
             <CardDescription className="text-blue-100 text-lg">
-              Our AI speaks your language and understands your cultural financial context
+              {t('features.multilingual.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center p-6 bg-white/10 backdrop-blur rounded-lg">
                 <Globe className="h-12 w-12 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">English</h3>
+                <h3 className="text-xl font-semibold mb-2">{t('features.multilingual.english.title')}</h3>
                 <p className="text-blue-100 text-sm">
-                  Complete AI analysis in English with US business context and financial terminology
+                  {t('features.multilingual.english.description')}
                 </p>
               </div>
               <div className="text-center p-6 bg-white/10 backdrop-blur rounded-lg">
                 <Globe className="h-12 w-12 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Español</h3>
+                <h3 className="text-xl font-semibold mb-2">{t('features.multilingual.spanish.title')}</h3>
                 <p className="text-blue-100 text-sm">
-                  Análisis completo de IA en español con contexto empresarial latinoamericano
+                  {t('features.multilingual.spanish.description')}
                 </p>
               </div>
               <div className="text-center p-6 bg-white/10 backdrop-blur rounded-lg">
                 <Globe className="h-12 w-12 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Slovenčina</h3>
+                <h3 className="text-xl font-semibold mb-2">{t('features.multilingual.slovak.title')}</h3>
                 <p className="text-blue-100 text-sm">
-                  Kompletná AI analýza v slovenčine s kontextom európskeho podnikania
+                  {t('features.multilingual.slovak.description')}
                 </p>
               </div>
             </div>
@@ -726,35 +726,35 @@ export default function FeaturesPage() {
         {/* Call to Action */}
         <Card className="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl mb-4">Ready to Transform Your Financial Management?</CardTitle>
+            <CardTitle className="text-3xl mb-4">{t('features.cta.title')}</CardTitle>
             <CardDescription className="text-lg max-w-2xl mx-auto">
-              Join thousands of entrepreneurs who have revolutionized their business finances with AI-powered insights
+              {t('features.cta.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <Button size="lg" onClick={handleSignUp} className="bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800">
                 <Zap className="mr-2 h-4 w-4" />
-                Start with Free Account
+                {t('features.cta.start_free')}
               </Button>
               <Button size="lg" variant="outline" onClick={() => setLocation('/contact')}>
                 <Clock className="mr-2 h-4 w-4" />
-                Watch Demo
+                {t('features.cta.watch_demo')}
               </Button>
             </div>
             
             <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
               <div className="flex items-center">
                 <Shield className="mr-1 h-4 w-4 text-green-600" />
-                30-day money-back guarantee
+                {t('features.cta.guarantee')}
               </div>
               <div className="flex items-center">
                 <DollarSign className="mr-1 h-4 w-4 text-green-600" />
-                No credit card required
+                {t('features.cta.no_card')}
               </div>
               <div className="flex items-center">
                 <Clock className="mr-1 h-4 w-4 text-green-600" />
-                Cancel anytime
+                {t('features.cta.cancel_anytime')}
               </div>
             </div>
           </CardContent>
