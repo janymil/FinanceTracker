@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocation } from 'wouter';
 import { AppLayout } from '@/components/AppLayout';
-import { VideoDemoGenerator } from '@/components/video-demo-generator';
+import { InteractiveDemoVideo } from '@/components/interactive-demo-video';
 import { 
   Brain, 
   Target, 
@@ -363,19 +363,19 @@ export default function FeaturesPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <VideoDemoGenerator
+            <InteractiveDemoVideo
               title={t('features.video_demos.categorization.title', 'Smart Categorization')}
               description={t('features.video_demos.categorization.description', 'Watch how our AI intelligently categorizes your transactions based on merchant patterns and spending behavior.')}
               demoType="categorization"
             />
             
-            <VideoDemoGenerator
+            <InteractiveDemoVideo
               title={t('features.video_demos.tips.title', 'Financial Insights')}
               description={t('features.video_demos.tips.description', 'Discover how AI analyzes your spending patterns to provide personalized financial recommendations.')}
               demoType="tips"
             />
             
-            <VideoDemoGenerator
+            <InteractiveDemoVideo
               title={t('features.video_demos.health.title', 'Health Analysis')}
               description={t('features.video_demos.health.description', 'See how AI evaluates your financial health and provides actionable improvement strategies.')}
               demoType="health"

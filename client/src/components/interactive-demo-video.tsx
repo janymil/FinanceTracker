@@ -28,37 +28,11 @@ export function InteractiveDemoVideo({ title, description, demoType, onComplete 
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  const generateDemoNarration = async () => {
-    setIsGenerating(true);
-    setError(null);
-    
-    try {
-      const language = getCurrentLanguageForAPI();
-      const response = await fetch('/api/demo/generate-narration', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          demoType,
-          language
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to generate narration: ${response.statusText}`);
-      }
-
-      const audioBlob = await response.blob();
-      const url = URL.createObjectURL(audioBlob);
-      setAudioUrl(url);
-      
-    } catch (err) {
-      console.error('Error generating narration:', err);
-      setError(err instanceof Error ? err.message : 'Failed to generate narration');
-    } finally {
-      setIsGenerating(false);
-    }
+  const playDemoVideo = () => {
+    // Set the video URL based on demo type and language
+    const language = getCurrentLanguageForAPI();
+    const videoPath = `/demo-videos/${demoType}-demo-${language}.mp4`;
+    setAudioUrl(videoPath);
   };
 
   const togglePlay = () => {
@@ -233,14 +207,14 @@ export function InteractiveDemoVideo({ title, description, demoType, onComplete 
           {description}
         </p>
         
-        {/* Generate Demo Button */}
-        {!audioUrl && !isGenerating && (
+        {/* Play Demo Button */}
+        {!audioUrl && (
           <Button
-            onClick={generateDemoNarration}
+            onClick={playDemoVideo}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
           >
-            <Sparkles className="h-4 w-4 mr-2" />
-            {t('features.demo.generate', 'Generate AI Demo')}
+            <Play className="h-4 w-4 mr-2" />
+            {t('features.demo.play_video', 'Play Demo Video')}
           </Button>
         )}
         
