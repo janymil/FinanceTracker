@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SEO } from "@/components/SEO";
 import { useTranslation } from "react-i18next";
+import { AppLayout } from "@/components/AppLayout";
 
 export default function AuthPage() {
   const [location, setLocation] = useLocation();
@@ -74,7 +75,7 @@ export default function AuthPage() {
   }
 
   return (
-    <>
+    <AppLayout isPublicPage={true}>
       <SEO 
         title={t("seo.authTitle")}
         description={t("seo.authDescription")}
@@ -259,6 +260,6 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
-    </>
+    </AppLayout>
   );
 }
