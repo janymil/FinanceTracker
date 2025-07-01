@@ -321,7 +321,7 @@ export const COURSE_CONTENT: CourseModule[] = [
                 id: "what-is-cash-flow",
                 type: "text",
                 title: "💰 What is Cash Flow?",
-                content: "Cash flow is the lifeblood of your finances. Simply put, it's money coming in (income) and money going out (expenses) over a specific period.\n\nThink of it like a river:\n• **Money FLOWING IN** = tributaries feeding the river (salary, side gigs, investments)\n• **Money FLOWING OUT** = water flowing downstream (rent, groceries, entertainment)\n• **Cash Flow** = the net result of this flow\n\nWhen more money flows in than out, you have positive cash flow. When more flows out than in, you have negative cash flow - and that's when financial stress begins."
+                content: "**NEW COMPREHENSIVE CONTENT** - Cash flow is the lifeblood of your finances. Simply put, it's money coming in (income) and money going out (expenses) over a specific period.\n\n**THINK OF IT LIKE A RIVER:**\n• **Money FLOWING IN** = tributaries feeding the river (salary, side gigs, investments)\n• **Money FLOWING OUT** = water flowing downstream (rent, groceries, entertainment)\n• **Cash Flow** = the net result of this flow\n\n**THE FINANCIAL REALITY:**\nWhen more money flows in than out, you have positive cash flow. When more flows out than in, you have negative cash flow - and that's when financial stress begins.\n\n**WHY CASH FLOW AWARENESS MATTERS:**\n• 78% of Americans live paycheck to paycheck\n• Average person has $1,000 in savings but could save $2,400+ annually\n• Cash flow tracking is the #1 predictor of financial success\n• People who track cash flow are 42% more likely to achieve financial goals"
               },
               {
                 id: "alex-case-study",
