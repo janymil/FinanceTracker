@@ -32,11 +32,12 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import ConnectPgSimple from "connect-pg-simple";
 import * as pathModule from "path";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
-import { cookieConsentMiddleware } from "./cookieMiddleware";
-import { renderPageForCrawler } from './ssr';
-import "./batch-processor"; // Initialize batch processing system
+import { registerRoutes } from "./routes.js";
+import { setupVite, serveStatic, log } from "./vite.js";
+import { cookieConsentMiddleware } from "./cookieMiddleware.js";
+import { renderPageForCrawler } from './ssr.js';
+import { countryBlockingMiddleware } from "./middleware/countryBlocking.js";
+import "./batch-processor.js"; // Initialize batch processing system
 
 const app = express();
 
@@ -245,6 +246,27 @@ app.use(session({
 }));
 
 app.use(cookieConsentMiddleware);
+
+// Country blocking middleware - must be after session but before routes
+// Delay initialization to ensure database is ready
+let countryBlockingInitialized = false;
+app.use(async (req, res, next) => {
+  if (!countryBlockingInitialized) {
+    // Skip middleware until server is fully initialized
+    const uptime = process.uptime();
+    if (uptime < 5) { // Wait 5 seconds for server startup
+      return next();
+    }
+    countryBlockingInitialized = true;
+  }
+  
+  try {
+    await countryBlockingMiddleware(req, res, next);
+  } catch (error) {
+    console.error('Country blocking middleware error:', error);
+    next();
+  }
+});
 
 // HTTPS redirect middleware for production
 app.use((req, res, next) => {

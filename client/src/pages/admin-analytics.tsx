@@ -15,6 +15,7 @@ import { Users, UserPlus, Edit, Trash2, Crown, Shield, TrendingUp, Search, Filte
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { CountryBlockingPanel } from "@/components/admin/CountryBlockingPanel";
 
 interface User {
   id: string;
@@ -820,13 +821,14 @@ export default function AdminAnalytics() {
         </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6 h-auto">
+        <TabsList className="grid w-full grid-cols-7 h-auto">
           <TabsTrigger value="overview" className="text-xs md:text-sm px-2 py-2">Overview</TabsTrigger>
           <TabsTrigger value="users" className="text-xs md:text-sm px-2 py-2">Users</TabsTrigger>
           <TabsTrigger value="ai-cache" className="text-xs md:text-sm px-2 py-2">AI Cache</TabsTrigger>
           <TabsTrigger value="ai-management" className="text-xs md:text-sm px-2 py-2">AI Mgmt</TabsTrigger>
           <TabsTrigger value="ai-functions" className="text-xs md:text-sm px-2 py-2">AI Functions</TabsTrigger>
           <TabsTrigger value="analytics" className="text-xs md:text-sm px-2 py-2">Analytics</TabsTrigger>
+          <TabsTrigger value="country-blocking" className="text-xs md:text-sm px-2 py-2">Countries</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -2425,6 +2427,10 @@ export default function AdminAnalytics() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="country-blocking" className="space-y-4">
+          <CountryBlockingPanel />
         </TabsContent>
       </Tabs>
       </div>

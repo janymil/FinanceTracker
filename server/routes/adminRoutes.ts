@@ -1,6 +1,9 @@
 import type { Express, Request, Response, NextFunction } from "express";
-import { storage } from "../storage";
-import { adminAuth, adminLogin, adminLogout } from "../adminAuth";
+import { storage } from "../storage.js";
+import { adminAuth, adminLogin, adminLogout } from "../adminAuth.js";
+import { db } from "../db.js";
+import { blockedCountries } from "../../shared/schema.js";
+import { eq } from "drizzle-orm";
 
 export function registerAdminRoutes(app: Express) {
   // Admin login
@@ -626,5 +629,159 @@ export function registerAdminRoutes(app: Express) {
       console.error("Error deleting AI user override:", error);
       return res.status(500).json({ message: "Failed to delete AI user override" });
     }
+  });
+
+  // Country Blocking Routes
+  
+  // Get all blocked countries
+  app.get("/api/admin-analytics/blocked-countries", adminAuth, async (req: any, res: Response) => {
+    try {
+      const countries = await db.select()
+        .from(blockedCountries)
+        .orderBy(blockedCountries.countryName);
+
+      res.json({ countries });
+    } catch (error) {
+      console.error("Error fetching blocked countries:", error);
+      res.status(500).json({ error: "Failed to fetch blocked countries" });
+    }
+  });
+
+  // Add a blocked country
+  app.post("/api/admin-analytics/blocked-countries", adminAuth, async (req: any, res: Response) => {
+    try {
+      const { countryCode, countryName, reason } = req.body;
+
+      if (!countryCode || !countryName) {
+        return res.status(400).json({ error: "Country code and name are required" });
+      }
+
+      // Check if already blocked
+      const existing = await db.select()
+        .from(blockedCountries)
+        .where(eq(blockedCountries.countryCode, countryCode.toUpperCase()))
+        .limit(1);
+
+      if (existing.length > 0) {
+        return res.status(400).json({ error: "Country is already blocked" });
+      }
+
+      const [newCountry] = await db.insert(blockedCountries)
+        .values({
+          countryCode: countryCode.toUpperCase(),
+          countryName,
+          reason,
+          blockedBy: req.session.adminUserId || 'admin'
+        })
+        .returning();
+
+      // Cache invalidation removed for now
+
+      res.json({ country: newCountry });
+    } catch (error) {
+      console.error("Error adding blocked country:", error);
+      res.status(500).json({ error: "Failed to add blocked country" });
+    }
+  });
+
+  // Remove a blocked country
+  app.delete("/api/admin-analytics/blocked-countries/:countryCode", adminAuth, async (req: any, res: Response) => {
+    try {
+      const { countryCode } = req.params;
+
+      const deleted = await db.delete(blockedCountries)
+        .where(eq(blockedCountries.countryCode, countryCode.toUpperCase()))
+        .returning();
+
+      if (deleted.length === 0) {
+        return res.status(404).json({ error: "Country not found" });
+      }
+
+      // Cache invalidation removed for now
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing blocked country:", error);
+      res.status(500).json({ error: "Failed to remove blocked country" });
+    }
+  });
+
+  // Simple test route without auth
+  app.get("/api/test-simple", (req: any, res: Response) => {
+    res.json({ working: true });
+  });
+
+  // Get common country codes for UI
+  app.get("/api/admin-analytics/country-codes", adminAuth, async (req: any, res: Response) => {
+    // Common countries with their ISO codes
+    const countries = [
+      { code: "AF", name: "Afghanistan" },
+      { code: "AL", name: "Albania" },
+      { code: "DZ", name: "Algeria" },
+      { code: "AR", name: "Argentina" },
+      { code: "AU", name: "Australia" },
+      { code: "AT", name: "Austria" },
+      { code: "BD", name: "Bangladesh" },
+      { code: "BE", name: "Belgium" },
+      { code: "BR", name: "Brazil" },
+      { code: "BG", name: "Bulgaria" },
+      { code: "CA", name: "Canada" },
+      { code: "CL", name: "Chile" },
+      { code: "CN", name: "China" },
+      { code: "CO", name: "Colombia" },
+      { code: "HR", name: "Croatia" },
+      { code: "CZ", name: "Czech Republic" },
+      { code: "DK", name: "Denmark" },
+      { code: "EG", name: "Egypt" },
+      { code: "FI", name: "Finland" },
+      { code: "FR", name: "France" },
+      { code: "DE", name: "Germany" },
+      { code: "GR", name: "Greece" },
+      { code: "HK", name: "Hong Kong" },
+      { code: "HU", name: "Hungary" },
+      { code: "IN", name: "India" },
+      { code: "ID", name: "Indonesia" },
+      { code: "IR", name: "Iran" },
+      { code: "IQ", name: "Iraq" },
+      { code: "IE", name: "Ireland" },
+      { code: "IL", name: "Israel" },
+      { code: "IT", name: "Italy" },
+      { code: "JP", name: "Japan" },
+      { code: "KE", name: "Kenya" },
+      { code: "KP", name: "North Korea" },
+      { code: "KR", name: "South Korea" },
+      { code: "MY", name: "Malaysia" },
+      { code: "MX", name: "Mexico" },
+      { code: "NL", name: "Netherlands" },
+      { code: "NZ", name: "New Zealand" },
+      { code: "NG", name: "Nigeria" },
+      { code: "NO", name: "Norway" },
+      { code: "PK", name: "Pakistan" },
+      { code: "PE", name: "Peru" },
+      { code: "PH", name: "Philippines" },
+      { code: "PL", name: "Poland" },
+      { code: "PT", name: "Portugal" },
+      { code: "RO", name: "Romania" },
+      { code: "RU", name: "Russia" },
+      { code: "SA", name: "Saudi Arabia" },
+      { code: "RS", name: "Serbia" },
+      { code: "SG", name: "Singapore" },
+      { code: "SK", name: "Slovakia" },
+      { code: "ZA", name: "South Africa" },
+      { code: "ES", name: "Spain" },
+      { code: "SE", name: "Sweden" },
+      { code: "CH", name: "Switzerland" },
+      { code: "TW", name: "Taiwan" },
+      { code: "TH", name: "Thailand" },
+      { code: "TR", name: "Turkey" },
+      { code: "UA", name: "Ukraine" },
+      { code: "AE", name: "United Arab Emirates" },
+      { code: "GB", name: "United Kingdom" },
+      { code: "US", name: "United States" },
+      { code: "VN", name: "Vietnam" },
+      { code: "ZW", name: "Zimbabwe" }
+    ];
+
+    res.json({ countries });
   });
 }

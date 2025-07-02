@@ -18,10 +18,10 @@ import { registerMobileUploadRoutes } from "./mobileUploadRoutes";
 import { registerImportRoutes } from "./importRoutes";
 import { handleContactForm } from "../contact";
 import { registerRedeemRoutes } from "./redeemRoutes";
-import { registerClerkWebhookRoutes } from "./clerkWebhooks";
-import { registerPDFRoutes } from "./pdfRoutes";
-import demoRoutes from "../demoRoutes";
-import courseRoutes from "../courseRoutes";
+import { registerClerkWebhookRoutes } from "./clerkWebhooks.js";
+import { registerPDFRoutes } from "./pdfRoutes.js";
+import demoRoutes from "../demoRoutes.js";
+import courseRoutes from "../courseRoutes.js";
 // Contextual financial tips routes moved to aiRoutes.ts
 
 export async function registerRoutes(app: Express): Promise<Server> {

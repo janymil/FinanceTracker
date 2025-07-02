@@ -661,4 +661,19 @@ export const insertLearningStatsSchema = createInsertSchema(learningStats).omit(
   updatedAt: true,
 });
 
+// Country blocking table for admin control
+export const blockedCountries = pgTable("blocked_countries", {
+  id: serial("id").primaryKey(),
+  countryCode: varchar("country_code", { length: 2 }).notNull().unique(), // ISO 3166-1 alpha-2 code
+  countryName: varchar("country_name", { length: 100 }).notNull(),
+  reason: text("reason"), // Optional reason for blocking
+  blockedAt: timestamp("blocked_at").defaultNow(),
+  blockedBy: varchar("blocked_by"), // Admin user ID who blocked it
+});
+
+export const insertBlockedCountrySchema = createInsertSchema(blockedCountries).omit({
+  id: true,
+  blockedAt: true,
+});
+
 // Removed: contextualFinancialTips schemas - using unified ai_cache system
