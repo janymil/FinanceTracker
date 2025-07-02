@@ -338,6 +338,89 @@ export const aiCache = pgTable("ai_cache", {
   index("ai_cache_expires_at_idx").on(table.expiresAt),
 ]);
 
+// AI Usage Tracking - Track actual OpenAI API calls and costs
+export const aiUsage = pgTable("ai_usage", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id), // Clerk user ID
+  functionName: varchar("function_name", { length: 50 }).notNull(), // e.g. 'categorizeExpense', 'generateFinancialTips'
+  tokensUsed: integer("tokens_used").notNull().default(0), // Total tokens consumed
+  promptTokens: integer("prompt_tokens").default(0), // Input tokens
+  completionTokens: integer("completion_tokens").default(0), // Output tokens
+  cost: decimal("cost", { precision: 10, scale: 6 }).notNull().default("0.000000"), // Cost in USD
+  model: varchar("model", { length: 50 }).notNull(), // 'gpt-4o', 'gpt-4o-mini', 'dall-e-3'
+  requestSize: integer("request_size").default(0), // Input size in characters
+  responseSize: integer("response_size").default(0), // Output size in characters
+  executionTime: integer("execution_time").default(0), // Execution time in milliseconds
+  cached: boolean("cached").default(false), // Whether result was served from cache
+  language: varchar("language", { length: 10 }).default("en-us"), // User's language preference
+  plan: varchar("plan", { length: 20 }).notNull(), // User's plan at time of request
+  status: varchar("status", { length: 20 }).default("success"), // 'success', 'error', 'limited'
+  errorMessage: text("error_message"), // Error details if status = 'error'
+  ipAddress: varchar("ip_address", { length: 45 }), // User's IP for abuse detection
+  userAgent: text("user_agent"), // Browser/app info
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  // Index for user-specific usage queries
+  index("ai_usage_user_date_idx").on(table.userId, table.createdAt),
+  // Index for function-specific analytics
+  index("ai_usage_function_idx").on(table.functionName),
+  // Index for plan-based analytics
+  index("ai_usage_plan_idx").on(table.plan),
+  // Index for monthly usage calculations
+  index("ai_usage_month_idx").on(table.userId, table.functionName, table.createdAt),
+  // Index for cost analysis
+  index("ai_usage_cost_idx").on(table.cost, table.createdAt),
+]);
+
+// AI Usage Limits - Define usage limits per plan and function
+export const aiUsageLimits = pgTable("ai_usage_limits", {
+  id: serial("id").primaryKey(),
+  plan: varchar("plan", { length: 20 }).notNull(), // 'free', 'standard', 'premium'
+  functionName: varchar("function_name", { length: 50 }).notNull(), // AI function name
+  monthlyRequestLimit: integer("monthly_request_limit").notNull().default(0), // Max requests per month
+  monthlyCostLimit: decimal("monthly_cost_limit", { precision: 10, scale: 2 }).default("0.00"), // Max cost per month in USD
+  dailyRequestLimit: integer("daily_request_limit").default(0), // Max requests per day
+  dailyCostLimit: decimal("daily_cost_limit", { precision: 10, scale: 2 }).default("0.00"), // Max cost per day
+  maxTokensPerRequest: integer("max_tokens_per_request").default(0), // Max tokens per single request
+  cooldownSeconds: integer("cooldown_seconds").default(0), // Minimum seconds between requests
+  isActive: boolean("is_active").default(true), // Whether limit is currently enforced
+  resetDay: integer("reset_day").default(1), // Day of month to reset monthly limits (1-28)
+  description: text("description"), // Human-readable description of the limit
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  // Unique constraint on plan + function combination
+  index("ai_usage_limits_plan_function_idx").on(table.plan, table.functionName),
+  // Index for active limits lookup
+  index("ai_usage_limits_active_idx").on(table.isActive),
+]);
+
+// AI User Overrides - Per-user custom limits (overrides plan defaults)
+export const aiUserOverrides = pgTable("ai_user_overrides", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id), // Clerk user ID
+  functionName: varchar("function_name", { length: 50 }).notNull(), // AI function name
+  monthlyRequestLimit: integer("monthly_request_limit"), // Override monthly requests (null = use plan default)
+  monthlyCostLimit: decimal("monthly_cost_limit", { precision: 10, scale: 2 }), // Override monthly cost
+  dailyRequestLimit: integer("daily_request_limit"), // Override daily requests
+  dailyCostLimit: decimal("daily_cost_limit", { precision: 10, scale: 2 }), // Override daily cost
+  maxTokensPerRequest: integer("max_tokens_per_request"), // Override max tokens per request
+  cooldownSeconds: integer("cooldown_seconds"), // Override cooldown period
+  isBlocked: boolean("is_blocked").default(false), // Completely block user from this function
+  reason: text("reason"), // Reason for override/block
+  expiresAt: timestamp("expires_at"), // When override expires (null = permanent)
+  createdBy: varchar("created_by"), // Admin user who created the override
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  // Unique constraint on user + function combination
+  index("ai_user_overrides_user_function_idx").on(table.userId, table.functionName),
+  // Index for blocked users
+  index("ai_user_overrides_blocked_idx").on(table.isBlocked),
+  // Index for expiring overrides
+  index("ai_user_overrides_expires_idx").on(table.expiresAt),
+]);
+
 export const importLogs = pgTable("import_logs", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
@@ -447,6 +530,15 @@ export type InsertImportLog = typeof importLogs.$inferInsert;
 
 export type AiCache = typeof aiCache.$inferSelect;
 export type InsertAiCache = typeof aiCache.$inferInsert;
+
+export type AiUsage = typeof aiUsage.$inferSelect;
+export type InsertAiUsage = typeof aiUsage.$inferInsert;
+
+export type AiUsageLimit = typeof aiUsageLimits.$inferSelect;
+export type InsertAiUsageLimit = typeof aiUsageLimits.$inferInsert;
+
+export type AiUserOverride = typeof aiUserOverrides.$inferSelect;
+export type InsertAiUserOverride = typeof aiUserOverrides.$inferInsert;
 
 // Insert schemas
 export const insertTransactionSchema = createInsertSchema(transactions).omit({

@@ -17,48 +17,39 @@ async function loadTranslations() {
     try {
       // Load main translation file
       const response = await fetch(`/locales/${lang}/translation.json`);
-      // Load course translation file
-      const coursesResponse = await fetch(`/locales/${lang}/courses.json`);
       // Load features translation file
       const featuresResponse = await fetch(`/locales/${lang}/features.json`);
       
       if (response.ok) {
         const translations = await response.json();
-        let coursesTranslations = {};
         let featuresTranslations = {};
-        
-        // Load courses translations if available
-        if (coursesResponse.ok) {
-          coursesTranslations = await coursesResponse.json();
-        }
         
         // Load features translations if available
         if (featuresResponse.ok) {
           featuresTranslations = await featuresResponse.json();
           console.log(`Loaded features translations for ${lang}:`, Object.keys(featuresTranslations).length, 'keys');
-          // Merge features translations directly into main translations (flat structure)
+          // Merge features translations into main translations to maintain structure
           Object.assign(translations, featuresTranslations);
           console.log(`Total translations after merging features for ${lang}:`, Object.keys(translations).length, 'keys');
         } else {
           console.error(`Failed to load features translations for ${lang}:`, featuresResponse.status);
         }
         
-        // Store under primary language key with both translation namespaces
+        // Store under primary language key 
         resources[lang] = {
-          translation: translations,
-          courses: coursesTranslations
+          translation: translations
         };
         
         // Create simplified language mappings
         if (lang === 'en-us') {
-          resources['en-US'] = { translation: translations, courses: coursesTranslations };
-          resources['en'] = { translation: translations, courses: coursesTranslations };
+          resources['en-US'] = { translation: translations };
+          resources['en'] = { translation: translations };
         } else if (lang === 'es-pe') {
-          resources['es-PE'] = { translation: translations, courses: coursesTranslations };
-          resources['es'] = { translation: translations, courses: coursesTranslations };
+          resources['es-PE'] = { translation: translations };
+          resources['es'] = { translation: translations };
         } else if (lang === 'sk-sk') {
-          resources['sk-SK'] = { translation: translations, courses: coursesTranslations };
-          resources['sk'] = { translation: translations, courses: coursesTranslations };
+          resources['sk-SK'] = { translation: translations };
+          resources['sk'] = { translation: translations };
         }
         
         console.log(`Loaded translations for ${lang}:`, Object.keys(translations).length, 'keys');

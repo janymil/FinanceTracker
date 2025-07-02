@@ -18,6 +18,9 @@ import {
   redeemCodes,
   importLogs,
   aiCache,
+  aiUsage,
+  aiUsageLimits,
+  aiUserOverrides,
   paymentFailures,
   courseProgress,
   userAchievements, 
@@ -58,6 +61,12 @@ import {
   type InsertImportLog,
   type AiCache,
   type InsertAiCache,
+  type AiUsage,
+  type InsertAiUsage,
+  type AiUsageLimit,
+  type InsertAiUsageLimit,
+  type AiUserOverride,
+  type InsertAiUserOverride,
   type PaymentFailure,
   type InsertPaymentFailure,
   type CourseProgress,
@@ -2711,6 +2720,457 @@ export class DatabaseStorage implements IStorage {
       .returning();
 
     return achievement;
+  }
+
+  // =================== AI Usage Tracking Methods ===================
+
+  /**
+   * Record an AI API usage event
+   */
+  async recordAIUsage(usage: InsertAiUsage): Promise<AiUsage> {
+    const [record] = await db
+      .insert(aiUsage)
+      .values(usage)
+      .returning();
+    return record;
+  }
+
+  /**
+   * Get monthly AI usage for a user and function
+   */
+  async getMonthlyAIUsage(userId: string, functionName: string): Promise<{ requests: number; cost: number }> {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const result = await db
+      .select({
+        requests: sql<number>`CAST(COUNT(*) AS INTEGER)`,
+        cost: sql<number>`CAST(COALESCE(SUM(CAST(${aiUsage.cost} AS DECIMAL)), 0) AS DECIMAL)`
+      })
+      .from(aiUsage)
+      .where(
+        and(
+          eq(aiUsage.userId, userId),
+          eq(aiUsage.functionName, functionName),
+          gte(aiUsage.createdAt, startOfMonth),
+          eq(aiUsage.status, 'success')
+        )
+      );
+
+    return {
+      requests: result[0]?.requests || 0,
+      cost: parseFloat(result[0]?.cost?.toString() || '0')
+    };
+  }
+
+  /**
+   * Get daily AI usage for a user and function
+   */
+  async getDailyAIUsage(userId: string, functionName: string): Promise<{ requests: number; cost: number }> {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const result = await db
+      .select({
+        requests: sql<number>`CAST(COUNT(*) AS INTEGER)`,
+        cost: sql<number>`CAST(COALESCE(SUM(CAST(${aiUsage.cost} AS DECIMAL)), 0) AS DECIMAL)`
+      })
+      .from(aiUsage)
+      .where(
+        and(
+          eq(aiUsage.userId, userId),
+          eq(aiUsage.functionName, functionName),
+          gte(aiUsage.createdAt, startOfDay),
+          eq(aiUsage.status, 'success')
+        )
+      );
+
+    return {
+      requests: result[0]?.requests || 0,
+      cost: parseFloat(result[0]?.cost?.toString() || '0')
+    };
+  }
+
+  /**
+   * Get AI usage limits for a plan and function
+   */
+  async getAIUsageLimit(plan: string, functionName: string): Promise<AiUsageLimit> {
+    const result = await db
+      .select()
+      .from(aiUsageLimits)
+      .where(
+        and(
+          eq(aiUsageLimits.plan, plan),
+          eq(aiUsageLimits.functionName, functionName),
+          eq(aiUsageLimits.isActive, true)
+        )
+      )
+      .limit(1);
+
+    return result[0] || {
+      id: 0,
+      plan,
+      functionName,
+      monthlyRequestLimit: 0,
+      monthlyCostLimit: '0.00',
+      dailyRequestLimit: 0,
+      dailyCostLimit: '0.00',
+      maxTokensPerRequest: 0,
+      cooldownSeconds: 0,
+      isActive: true,
+      resetDay: 1,
+      description: null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  /**
+   * Get user-specific AI usage override
+   */
+  async getAIUserOverride(userId: string, functionName: string): Promise<AiUserOverride | null> {
+    const result = await db
+      .select()
+      .from(aiUserOverrides)
+      .where(
+        and(
+          eq(aiUserOverrides.userId, userId),
+          eq(aiUserOverrides.functionName, functionName),
+          or(
+            isNull(aiUserOverrides.expiresAt),
+            gt(aiUserOverrides.expiresAt, new Date())
+          )
+        )
+      )
+      .limit(1);
+
+    return result[0] || null;
+  }
+
+  /**
+   * Get last AI request timestamp for cooldown checking
+   */
+  async getLastAIRequest(userId: string, functionName: string): Promise<Date | null> {
+    const result = await db
+      .select({ createdAt: aiUsage.createdAt })
+      .from(aiUsage)
+      .where(
+        and(
+          eq(aiUsage.userId, userId),
+          eq(aiUsage.functionName, functionName)
+        )
+      )
+      .orderBy(desc(aiUsage.createdAt))
+      .limit(1);
+
+    return result[0]?.createdAt || null;
+  }
+
+  /**
+   * Get AI usage summary for admin analytics
+   */
+  async getAIUsageSummary(userId: string, timeframe: 'today' | 'month' | 'all' = 'month') {
+    let timeCondition;
+    
+    if (timeframe === 'today') {
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      timeCondition = gte(aiUsage.createdAt, startOfDay);
+    } else if (timeframe === 'month') {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      timeCondition = gte(aiUsage.createdAt, startOfMonth);
+    }
+
+    const whereCondition = timeCondition 
+      ? and(eq(aiUsage.userId, userId), timeCondition)
+      : eq(aiUsage.userId, userId);
+
+    // Get overall stats
+    const totalStats = await db
+      .select({
+        totalRequests: sql<number>`CAST(COUNT(*) AS INTEGER)`,
+        totalCost: sql<number>`CAST(COALESCE(SUM(CAST(${aiUsage.cost} AS DECIMAL)), 0) AS DECIMAL)`,
+        successfulRequests: sql<number>`CAST(COUNT(CASE WHEN ${aiUsage.status} = 'success' THEN 1 END) AS INTEGER)`,
+        totalTokens: sql<number>`CAST(COALESCE(SUM(${aiUsage.tokensUsed}), 0) AS INTEGER)`
+      })
+      .from(aiUsage)
+      .where(whereCondition);
+
+    // Get function breakdown
+    const functionStats = await db
+      .select({
+        functionName: aiUsage.functionName,
+        requests: sql<number>`CAST(COUNT(*) AS INTEGER)`,
+        cost: sql<number>`CAST(COALESCE(SUM(CAST(${aiUsage.cost} AS DECIMAL)), 0) AS DECIMAL)`,
+        avgExecutionTime: sql<number>`CAST(AVG(${aiUsage.executionTime}) AS INTEGER)`
+      })
+      .from(aiUsage)
+      .where(whereCondition)
+      .groupBy(aiUsage.functionName)
+      .orderBy(desc(sql`COUNT(*)`));
+
+    // Get model breakdown
+    const modelStats = await db
+      .select({
+        model: aiUsage.model,
+        requests: sql<number>`CAST(COUNT(*) AS INTEGER)`,
+        cost: sql<number>`CAST(COALESCE(SUM(CAST(${aiUsage.cost} AS DECIMAL)), 0) AS DECIMAL)`,
+        totalTokens: sql<number>`CAST(COALESCE(SUM(${aiUsage.tokensUsed}), 0) AS INTEGER)`
+      })
+      .from(aiUsage)
+      .where(whereCondition)
+      .groupBy(aiUsage.model)
+      .orderBy(desc(sql`COUNT(*)`));
+
+    return {
+      totalRequests: totalStats[0]?.totalRequests || 0,
+      totalCost: parseFloat(totalStats[0]?.totalCost?.toString() || '0'),
+      successfulRequests: totalStats[0]?.successfulRequests || 0,
+      totalTokens: totalStats[0]?.totalTokens || 0,
+      functionBreakdown: functionStats.map(stat => ({
+        ...stat,
+        cost: parseFloat(stat.cost?.toString() || '0')
+      })),
+      modelBreakdown: modelStats.map(stat => ({
+        ...stat,
+        cost: parseFloat(stat.cost?.toString() || '0')
+      }))
+    };
+  }
+
+  /**
+   * Get global AI usage summary for admin analytics
+   */
+  async getGlobalAIUsageSummary(timeframe: 'today' | 'month' | 'all' = 'month') {
+    let timeCondition;
+    
+    if (timeframe === 'today') {
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      timeCondition = gte(aiUsage.createdAt, startOfDay);
+    } else if (timeframe === 'month') {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      timeCondition = gte(aiUsage.createdAt, startOfMonth);
+    }
+
+    const whereCondition = timeCondition ? timeCondition : undefined;
+
+    // Get overall stats
+    const totalStats = await db
+      .select({
+        totalRequests: sql<number>`CAST(COUNT(*) AS INTEGER)`,
+        totalCost: sql<number>`CAST(COALESCE(SUM(CAST(${aiUsage.cost} AS DECIMAL)), 0) AS DECIMAL)`,
+        successfulRequests: sql<number>`CAST(COUNT(CASE WHEN ${aiUsage.status} = 'success' THEN 1 END) AS INTEGER)`,
+        totalTokens: sql<number>`CAST(COALESCE(SUM(${aiUsage.tokensUsed}), 0) AS INTEGER)`
+      })
+      .from(aiUsage)
+      .where(whereCondition);
+
+    return {
+      totalRequests: totalStats[0]?.totalRequests || 0,
+      totalCost: parseFloat(totalStats[0]?.totalCost?.toString() || '0'),
+      successfulRequests: totalStats[0]?.successfulRequests || 0,
+      totalTokens: totalStats[0]?.totalTokens || 0,
+    };
+  }
+
+  /**
+   * Get all AI usage records for admin analytics
+   */
+  async getAllAIUsage(limit: number = 1000, offset: number = 0): Promise<AiUsage[]> {
+    return await db
+      .select()
+      .from(aiUsage)
+      .orderBy(desc(aiUsage.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  /**
+   * Get AI usage statistics by function for admin
+   */
+  async getAIUsageByFunction(): Promise<Array<{
+    functionName: string;
+    totalRequests: number;
+    totalCost: number;
+    uniqueUsers: number;
+    avgCostPerRequest: number;
+    errorRate: number;
+  }>> {
+    const stats = await db
+      .select({
+        functionName: aiUsage.functionName,
+        totalRequests: sql<number>`CAST(COUNT(*) AS INTEGER)`,
+        totalCost: sql<number>`CAST(COALESCE(SUM(CAST(${aiUsage.cost} AS DECIMAL)), 0) AS DECIMAL)`,
+        uniqueUsers: sql<number>`CAST(COUNT(DISTINCT ${aiUsage.userId}) AS INTEGER)`,
+        successRequests: sql<number>`CAST(COUNT(CASE WHEN ${aiUsage.status} = 'success' THEN 1 END) AS INTEGER)`,
+        errorRequests: sql<number>`CAST(COUNT(CASE WHEN ${aiUsage.status} = 'error' THEN 1 END) AS INTEGER)`
+      })
+      .from(aiUsage)
+      .groupBy(aiUsage.functionName)
+      .orderBy(desc(sql`COUNT(*)`));
+
+    return stats.map(stat => ({
+      functionName: stat.functionName,
+      totalRequests: stat.totalRequests,
+      totalCost: parseFloat(stat.totalCost?.toString() || '0'),
+      uniqueUsers: stat.uniqueUsers,
+      avgCostPerRequest: stat.totalRequests > 0 
+        ? parseFloat(stat.totalCost?.toString() || '0') / stat.totalRequests 
+        : 0,
+      errorRate: stat.totalRequests > 0 
+        ? (stat.errorRequests / stat.totalRequests) * 100 
+        : 0
+    }));
+  }
+
+  /**
+   * Get AI usage statistics by user for admin
+   */
+  async getAIUsageByUser(): Promise<Array<{
+    userId: string;
+    userEmail: string;
+    userPlan: string;
+    totalRequests: number;
+    totalCost: number;
+    uniqueFunctions: number;
+    lastUsed: Date | null;
+  }>> {
+    const stats = await db
+      .select({
+        userId: aiUsage.userId,
+        userEmail: users.email,
+        userPlan: users.plan,
+        totalRequests: sql<number>`CAST(COUNT(*) AS INTEGER)`,
+        totalCost: sql<number>`CAST(COALESCE(SUM(CAST(${aiUsage.cost} AS DECIMAL)), 0) AS DECIMAL)`,
+        uniqueFunctions: sql<number>`CAST(COUNT(DISTINCT ${aiUsage.functionName}) AS INTEGER)`,
+        lastUsed: sql<Date>`MAX(${aiUsage.createdAt})`
+      })
+      .from(aiUsage)
+      .leftJoin(users, eq(aiUsage.userId, users.id))
+      .groupBy(aiUsage.userId, users.email, users.plan)
+      .orderBy(desc(sql`COUNT(*)`));
+
+    return stats.map(stat => ({
+      userId: stat.userId,
+      userEmail: stat.userEmail || 'Unknown',
+      userPlan: stat.userPlan || 'free',
+      totalRequests: stat.totalRequests,
+      totalCost: parseFloat(stat.totalCost?.toString() || '0'),
+      uniqueFunctions: stat.uniqueFunctions,
+      lastUsed: stat.lastUsed
+    }));
+  }
+
+  /**
+   * Create or update AI usage limit
+   */
+  async setAIUsageLimit(limit: InsertAiUsageLimit): Promise<AiUsageLimit> {
+    const existing = await db
+      .select()
+      .from(aiUsageLimits)
+      .where(
+        and(
+          eq(aiUsageLimits.plan, limit.plan),
+          eq(aiUsageLimits.functionName, limit.functionName)
+        )
+      )
+      .limit(1);
+
+    if (existing.length > 0) {
+      const [updated] = await db
+        .update(aiUsageLimits)
+        .set({ ...limit, updatedAt: new Date() })
+        .where(
+          and(
+            eq(aiUsageLimits.plan, limit.plan),
+            eq(aiUsageLimits.functionName, limit.functionName)
+          )
+        )
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(aiUsageLimits)
+        .values(limit)
+        .returning();
+      return created;
+    }
+  }
+
+  /**
+   * Create or update user AI override
+   */
+  async setAIUserOverride(override: InsertAiUserOverride): Promise<AiUserOverride> {
+    const existing = await db
+      .select()
+      .from(aiUserOverrides)
+      .where(
+        and(
+          eq(aiUserOverrides.userId, override.userId),
+          eq(aiUserOverrides.functionName, override.functionName)
+        )
+      )
+      .limit(1);
+
+    if (existing.length > 0) {
+      const [updated] = await db
+        .update(aiUserOverrides)
+        .set({ ...override, updatedAt: new Date() })
+        .where(
+          and(
+            eq(aiUserOverrides.userId, override.userId),
+            eq(aiUserOverrides.functionName, override.functionName)
+          )
+        )
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(aiUserOverrides)
+        .values(override)
+        .returning();
+      return created;
+    }
+  }
+
+  /**
+   * Delete user AI override
+   */
+  async deleteAIUserOverride(userId: string, functionName: string): Promise<void> {
+    await db
+      .delete(aiUserOverrides)
+      .where(
+        and(
+          eq(aiUserOverrides.userId, userId),
+          eq(aiUserOverrides.functionName, functionName)
+        )
+      );
+  }
+
+  /**
+   * Get all AI usage limits
+   */
+  async getAllAIUsageLimits(): Promise<AiUsageLimit[]> {
+    return await db
+      .select()
+      .from(aiUsageLimits)
+      .orderBy(aiUsageLimits.plan, aiUsageLimits.functionName);
+  }
+
+  /**
+   * Get all AI user overrides
+   */
+  async getAllAIUserOverrides(): Promise<AiUserOverride[]> {
+    return await db
+      .select()
+      .from(aiUserOverrides)
+      .orderBy(aiUserOverrides.userId, aiUserOverrides.functionName);
   }
 }
 

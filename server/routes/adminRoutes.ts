@@ -459,4 +459,172 @@ export function registerAdminRoutes(app: Express) {
       return res.status(500).json({ message: "Failed to fetch TTL configuration" });
     }
   });
+
+  // === AI FUNCTIONS USAGE STATISTICS ROUTES ===
+
+  // Get AI function usage statistics for admin
+  app.get('/api/admin-analytics/ai-functions/stats', adminAuth, async (req: any, res: Response) => {
+    try {
+      const stats = await storage.getAIUsageByFunction();
+      return res.json(stats);
+    } catch (error) {
+      console.error("Error fetching AI function stats:", error);
+      return res.status(500).json({ message: "Failed to fetch AI function statistics" });
+    }
+  });
+
+  // Get AI usage statistics by user for admin
+  app.get('/api/admin-analytics/ai-functions/users', adminAuth, async (req: any, res: Response) => {
+    try {
+      const stats = await storage.getAIUsageByUser();
+      return res.json(stats);
+    } catch (error) {
+      console.error("Error fetching AI user stats:", error);
+      return res.status(500).json({ message: "Failed to fetch AI user statistics" });
+    }
+  });
+
+  // Get global AI usage statistics for admin
+  app.get('/api/admin-analytics/ai-functions/global', adminAuth, async (req: any, res: Response) => {
+    try {
+      // Get current month stats
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const monthlyStats = await storage.getGlobalAIUsageSummary('month');
+      const allTimeStats = await storage.getGlobalAIUsageSummary('all');
+      
+      // Get user count from users table
+      const users = await storage.getAllUsers();
+      const aiUsers = new Set();
+      
+      // Count unique AI users
+      const aiUsageRecords = await storage.getAllAIUsage(10000, 0);
+      aiUsageRecords.forEach(record => aiUsers.add(record.userId));
+
+      return res.json({
+        monthlyApiCalls: monthlyStats.totalRequests,
+        monthlyCost: monthlyStats.totalCost,
+        monthlyUniqueUsers: aiUsers.size,
+        errorRate: monthlyStats.totalRequests > 0 
+          ? ((monthlyStats.totalRequests - monthlyStats.successfulRequests) / monthlyStats.totalRequests) * 100 
+          : 0,
+        allTimeApiCalls: allTimeStats.totalRequests,
+        allTimeCost: allTimeStats.totalCost,
+        totalUsers: users.length
+      });
+    } catch (error) {
+      console.error("Error fetching global AI stats:", error);
+      return res.status(500).json({ message: "Failed to fetch global AI statistics" });
+    }
+  });
+
+  // Get all AI usage limits
+  app.get('/api/admin-analytics/ai-functions/limits', adminAuth, async (req: any, res: Response) => {
+    try {
+      const limits = await storage.getAllAIUsageLimits();
+      return res.json(limits);
+    } catch (error) {
+      console.error("Error fetching AI usage limits:", error);
+      return res.status(500).json({ message: "Failed to fetch AI usage limits" });
+    }
+  });
+
+  // Set AI usage limit for a plan and function
+  app.post('/api/admin-analytics/ai-functions/limits', adminAuth, async (req: any, res: Response) => {
+    try {
+      const { plan, functionName, monthlyRequestLimit, monthlyCostLimit, dailyRequestLimit, dailyCostLimit, cooldownSeconds, description } = req.body;
+      
+      if (!plan || !functionName) {
+        return res.status(400).json({ message: "Plan and function name are required" });
+      }
+
+      const limit = await storage.setAIUsageLimit({
+        plan,
+        functionName,
+        monthlyRequestLimit: monthlyRequestLimit || 0,
+        monthlyCostLimit: monthlyCostLimit?.toString() || '0.00',
+        dailyRequestLimit: dailyRequestLimit || 0,
+        dailyCostLimit: dailyCostLimit?.toString() || '0.00',
+        maxTokensPerRequest: 0,
+        cooldownSeconds: cooldownSeconds || 0,
+        isActive: true,
+        resetDay: 1,
+        description: description || null,
+      });
+
+      return res.json({ success: true, limit });
+    } catch (error) {
+      console.error("Error setting AI usage limit:", error);
+      return res.status(500).json({ message: "Failed to set AI usage limit" });
+    }
+  });
+
+  // Get user-specific AI overrides
+  app.get('/api/admin-analytics/ai-functions/user-overrides', adminAuth, async (req: any, res: Response) => {
+    try {
+      const overrides = await storage.getAllAIUserOverrides();
+      
+      // Get user details for each override
+      const users = await storage.getAllUsers();
+      const userMap = new Map(users.map(u => [u.id, u]));
+      
+      const overridesWithUsers = overrides.map(override => ({
+        ...override,
+        userEmail: userMap.get(override.userId)?.email || 'Unknown',
+        userPlan: userMap.get(override.userId)?.plan || 'free'
+      }));
+
+      return res.json(overridesWithUsers);
+    } catch (error) {
+      console.error("Error fetching AI user overrides:", error);
+      return res.status(500).json({ message: "Failed to fetch AI user overrides" });
+    }
+  });
+
+  // Set user-specific AI override
+  app.post('/api/admin-analytics/ai-functions/user-overrides', adminAuth, async (req: any, res: Response) => {
+    try {
+      const { userId, functionName, monthlyRequestLimit, monthlyCostLimit, dailyRequestLimit, dailyCostLimit, cooldownSeconds, isBlocked, reason, expiresAt } = req.body;
+      
+      if (!userId || !functionName) {
+        return res.status(400).json({ message: "User ID and function name are required" });
+      }
+
+      const override = await storage.setAIUserOverride({
+        userId,
+        functionName,
+        monthlyRequestLimit: monthlyRequestLimit || null,
+        monthlyCostLimit: monthlyCostLimit?.toString() || null,
+        dailyRequestLimit: dailyRequestLimit || null,
+        dailyCostLimit: dailyCostLimit?.toString() || null,
+        maxTokensPerRequest: null,
+        cooldownSeconds: cooldownSeconds || null,
+        isBlocked: isBlocked || false,
+        reason: reason || null,
+        expiresAt: expiresAt ? new Date(expiresAt) : null,
+        createdBy: 'admin', // In a real app, this would be the admin user ID
+      });
+
+      return res.json({ success: true, override });
+    } catch (error) {
+      console.error("Error setting AI user override:", error);
+      return res.status(500).json({ message: "Failed to set AI user override" });
+    }
+  });
+
+  // Delete user-specific AI override
+  app.delete('/api/admin-analytics/ai-functions/user-overrides/:userId/:functionName', adminAuth, async (req: any, res: Response) => {
+    try {
+      const { userId, functionName } = req.params;
+      
+      await storage.deleteAIUserOverride(userId, functionName);
+      
+      return res.json({ success: true, message: "User override deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting AI user override:", error);
+      return res.status(500).json({ message: "Failed to delete AI user override" });
+    }
+  });
 }

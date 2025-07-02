@@ -229,6 +229,28 @@
       }
     },
     "calculators": {
+      "expense": {
+        "title": "Calculadora de Estimación de Gastos",
+        "description": "Análisis rápido \"¿Puedo permitirme esto?\" - ¡sin cuenta requerida!",
+        "modal_title": "Calculadora de Estimación de Gastos",
+        "modal_description": "Análisis rápido \"¿Puedo permitirme esto?\" - ¡sin cuenta requerida!",
+        "features": "Características:",
+        "feature1": "Análisis de asequibilidad",
+        "feature2": "Cálculo de cronograma de ahorro",
+        "feature3": "Recomendaciones de presupuesto mensual",
+        "open_button": "Abrir Calculadora"
+      },
+      "debt": {
+        "title": "Visualizador de Pago de Deudas",
+        "description": "¡Compara estrategias de bola de nieve vs avalancha para eliminar tu deuda más rápido!",
+        "modal_title": "Visualizador de Pago de Deudas",
+        "modal_description": "¡Compara estrategias de bola de nieve vs avalancha para eliminar tu deuda más rápido!",
+        "features": "Características:",
+        "feature1": "Comparación de Bola de Nieve vs Avalancha",
+        "feature2": "Cálculo de ahorro de intereses",
+        "feature3": "Visualización de cronograma de pago",
+        "open_button": "Abrir Calculadora"
+      },
       "categorization": {
         "title": "Calculadora de Precisión de Categorización",
         "transactions_label": "Transacciones por mes:",

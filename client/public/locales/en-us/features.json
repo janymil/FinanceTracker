@@ -229,6 +229,28 @@
       }
     },
     "calculators": {
+      "expense": {
+        "title": "Expense Estimation Calculator",
+        "description": "Quick \"Can I afford this?\" analysis - no account required!",
+        "modal_title": "Expense Estimation Calculator",
+        "modal_description": "Quick \"Can I afford this?\" analysis - no account required!",
+        "features": "Features:",
+        "feature1": "Affordability analysis",
+        "feature2": "Savings timeline calculation", 
+        "feature3": "Monthly budget recommendations",
+        "open_button": "Open Calculator"
+      },
+      "debt": {
+        "title": "Debt Payoff Visualizer",
+        "description": "Compare snowball vs avalanche strategies to crush your debt faster!",
+        "modal_title": "Debt Payoff Visualizer",
+        "modal_description": "Compare snowball vs avalanche strategies to crush your debt faster!",
+        "features": "Features:",
+        "feature1": "Snowball vs Avalanche comparison",
+        "feature2": "Interest savings calculation",
+        "feature3": "Payoff timeline visualization", 
+        "open_button": "Open Calculator"
+      },
       "categorization": {
         "title": "Categorization Accuracy Calculator",
         "transactions_label": "Transactions per month:",

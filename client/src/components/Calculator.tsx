@@ -4,10 +4,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Calculator as CalculatorIcon, TrendingUp, TrendingDown, DollarSign, Trash2, Plus, Target, Zap } from 'lucide-react';
-import { Calculator as CalculatorType } from '@/data/courseContent';
+// import { Calculator as CalculatorType } from '@/data/courseContent';
 
 interface CalculatorProps {
-  calculator?: CalculatorType;
+  calculator?: any; // CalculatorType;
 }
 
 interface ExpenseEstimationProps {
@@ -670,7 +670,7 @@ export function Calculator({ calculator }: CalculatorProps) {
       <CardContent className="space-y-4">
         {/* Input Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {calculator?.fields?.map((field) => (
+          {calculator?.fields?.map((field: any) => (
             <div key={field.id} className="space-y-2">
               <Label htmlFor={field.id}>
                 {field.label}

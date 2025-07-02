@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useCurrency } from '@/context/CurrencyContext';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Settings, Check, Lock } from 'lucide-react';
 
 const PRESET_CURRENCIES = [
