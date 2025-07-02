@@ -18,14 +18,75 @@ function hashObject(obj: any): string {
 }
 
 /**
- * Centralized AI Processor for Fly.io Integration
- * Simple interface: runAI(task, userId, payload)
- * Handles: GPT Execution, Retry/Fallback, OpenAI Key Handling
+ * AI usage tracking wrapper
  */
-export async function runAI(task: string, userId: string, payload: Record<string, any>) {
-  console.log(`[AI ${task}] Direct Fly.io call with local fallback`);
+async function trackAIUsage(
+  userId: string, 
+  functionName: string, 
+  userPlan: string,
+  fn: () => Promise<any>
+): Promise<any> {
+  const startTime = Date.now();
+  let result = null;
+  let status = 'success';
+  let errorMessage = null;
 
   try {
+    // Check usage limits before processing
+    const accessCheck = await storage.canUseAIFunction(userId, functionName, userPlan);
+    if (!accessCheck.allowed) {
+      throw new Error(accessCheck.reason || 'Usage limit exceeded');
+    }
+
+    // Execute the AI function
+    result = await fn();
+    
+    return result;
+  } catch (error: any) {
+    status = 'error';
+    errorMessage = error.message;
+    throw error;
+  } finally {
+    const executionTime = Date.now() - startTime;
+    
+    // Log usage data (basic tracking for now)
+    try {
+      await storage.recordAIUsage({
+        userId,
+        functionName,
+        model: 'gpt-4o', // Default model
+        cost: '0.001', // Default cost, will be updated with real data later
+        tokensUsed: 0,
+        promptTokens: 0,
+        completionTokens: 0,
+        executionTime,
+        language: 'en-us',
+        plan: userPlan,
+        status,
+        errorMessage,
+        cached: false,
+        requestSize: 0,
+        responseSize: result ? JSON.stringify(result).length : 0,
+        ipAddress: null,
+        userAgent: null
+      });
+    } catch (logError) {
+      console.error('Failed to log AI usage:', logError);
+    }
+  }
+}
+
+/**
+ * Centralized AI Processor for Fly.io Integration
+ * Simple interface: runAI(task, userId, payload, userPlan)
+ * Handles: GPT Execution, Retry/Fallback, OpenAI Key Handling, Usage Tracking
+ */
+export async function runAI(task: string, userId: string, payload: Record<string, any>, userPlan: string = 'free') {
+  // Wrap the AI execution with usage tracking
+  return await trackAIUsage(userId, task, userPlan, async () => {
+    console.log(`[AI ${task}] Direct Fly.io call with local fallback`);
+
+    try {
     console.log(`[AI ${task}] Calling Fly.io processor...`);
     
     // Create AbortController for timeout
@@ -62,59 +123,60 @@ export async function runAI(task: string, userId: string, payload: Record<string
 
     return result;
 
-  } catch (error: any) {
-    console.error(`[AI ${task}] Fly.io service failed:`, error.message || error);
-    
-    try {
-      let fallbackResult;
+    } catch (error: any) {
+      console.error(`[AI ${task}] Fly.io service failed:`, error.message || error);
       
-      switch (task) {
-        case 'contextual-tips':
-          fallbackResult = await generateContextualFinancialTips(userId, payload, payload.language || 'en-us');
-          break;
-        case 'financial-tips':
-          fallbackResult = await generateFinancialTips(userId, payload);
-          break;
-        case 'daily-recommendations':
-          fallbackResult = await generateDailyRecommendations(userId, payload, payload.language || 'en-us');
-          break;
-        case 'spending-insights':
-          fallbackResult = await generateSpendingInsights(userId, payload.transactions);
-          break;
-        case 'financial-health-score':
-          fallbackResult = await generateAIFinancialHealthScore(payload, payload.language || 'en-us');
-          break;
-        case 'trend-predictions':
-          fallbackResult = await generateTrendPredictions(userId, payload.transactions, payload.budgets);
-          break;
-        case 'expense-predictions':
-          fallbackResult = await generateExpensePredictions(userId, payload.transactions);
-          break;
-        case 'categorizeExpense':
-          const { categorizeExpense } = await import('../server/openai');
-          fallbackResult = await categorizeExpense(
-            payload.description, 
-            payload.amount, 
-            payload.language || 'en-us',
-            payload.userTransactions || [],
-            payload.userCategories || []
-          );
-          break;
-        case 'parseBankStatement':
-          fallbackResult = await parseBankStatement(payload.text, payload.language || 'en-us');
-          break;
-        default:
-          throw new Error(`No local fallback available for task: ${task}`);
+      try {
+        let fallbackResult;
+        
+        switch (task) {
+          case 'contextual-tips':
+            fallbackResult = await generateContextualFinancialTips(userId, payload, payload.language || 'en-us');
+            break;
+          case 'financial-tips':
+            fallbackResult = await generateFinancialTips(userId, payload as any);
+            break;
+          case 'daily-recommendations':
+            fallbackResult = await generateDailyRecommendations(userId, payload, payload.language || 'en-us');
+            break;
+          case 'spending-insights':
+            fallbackResult = await generateSpendingInsights(userId, payload.transactions);
+            break;
+          case 'financial-health-score':
+            fallbackResult = await generateAIFinancialHealthScore(payload as any, payload.language || 'en-us');
+            break;
+          case 'trend-predictions':
+            fallbackResult = await generateTrendPredictions(userId, payload.transactions, payload.budgets);
+            break;
+          case 'expense-predictions':
+            fallbackResult = await generateExpensePredictions(userId, payload.transactions);
+            break;
+          case 'categorizeExpense':
+            const { categorizeExpense } = await import('../server/openai');
+            fallbackResult = await categorizeExpense(
+              payload.description, 
+              payload.amount, 
+              payload.language || 'en-us',
+              payload.userTransactions || [],
+              payload.userCategories || []
+            );
+            break;
+          case 'parseBankStatement':
+            fallbackResult = await parseBankStatement(payload.text, payload.language || 'en-us');
+            break;
+          default:
+            throw new Error(`No local fallback available for task: ${task}`);
+        }
+        
+        console.log(`[AI ${task}] SUCCESS: Local fallback completed`);
+        return fallbackResult;
+      } catch (fallbackError: any) {
+        console.error(`[AI ${task}] Local fallback also failed:`, fallbackError.message);
+        return { 
+          error: 'AI service temporarily unavailable', 
+          message: 'Unable to process request at this time' 
+        };
       }
-      
-      console.log(`[AI ${task}] SUCCESS: Local fallback completed`);
-      return fallbackResult;
-    } catch (fallbackError: any) {
-      console.error(`[AI ${task}] Local fallback also failed:`, fallbackError.message);
-      return { 
-        error: 'AI service temporarily unavailable', 
-        message: 'Unable to process request at this time' 
-      };
     }
-  }
+  });
 }
