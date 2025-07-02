@@ -19,14 +19,24 @@ async function loadTranslations() {
       const response = await fetch(`/locales/${lang}/translation.json`);
       // Load course translation file
       const coursesResponse = await fetch(`/locales/${lang}/courses.json`);
+      // Load features translation file
+      const featuresResponse = await fetch(`/locales/${lang}/features.json`);
       
       if (response.ok) {
         const translations = await response.json();
         let coursesTranslations = {};
+        let featuresTranslations = {};
         
         // Load courses translations if available
         if (coursesResponse.ok) {
           coursesTranslations = await coursesResponse.json();
+        }
+        
+        // Load features translations if available
+        if (featuresResponse.ok) {
+          featuresTranslations = await featuresResponse.json();
+          // Merge features translations into main translations
+          translations.features = featuresTranslations.features;
         }
         
         // Store under primary language key with both translation namespaces

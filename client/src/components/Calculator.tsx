@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Calculator as CalculatorIcon, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import { Calculator as CalculatorIcon, TrendingUp, TrendingDown, DollarSign, Trash2, Plus, Target, Zap } from 'lucide-react';
 import { Calculator as CalculatorType } from '@/data/courseContent';
 
 interface CalculatorProps {
@@ -12,6 +12,18 @@ interface CalculatorProps {
 
 interface ExpenseEstimationProps {
   isStandalone?: boolean;
+}
+
+interface DebtPayoffVisualizerProps {
+  isStandalone?: boolean;
+}
+
+interface Debt {
+  id: string;
+  name: string;
+  balance: number;
+  minPayment: number;
+  interestRate: number;
 }
 
 export function ExpenseEstimationCalculator({ isStandalone = false }: ExpenseEstimationProps) {
