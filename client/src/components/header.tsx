@@ -526,11 +526,15 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
 {t("Profile & Account Configuration")}
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={`/${currentLang}/courses`}>
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  Financial Courses
-                </Link>
+              <DropdownMenuItem 
+                disabled 
+                className="cursor-not-allowed opacity-60"
+              >
+                <BookOpen className="h-4 w-4 mr-2" />
+                <div className="flex flex-col">
+                  <span>Financial Courses</span>
+                  <span className="text-xs text-gray-400">Soon available</span>
+                </div>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/help">
