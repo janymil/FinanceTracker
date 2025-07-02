@@ -978,7 +978,7 @@ async function addAICategorization(
               name: cat.name,
               type: cat.type
             }))
-          }, user.plan || 'free');
+          }, user?.plan || 'free');
           
           transaction.category = categorizationResult.category || 'Other';
           console.log(`Intelligent AI categorized "${transaction.description}" as "${transaction.category}"`);

@@ -54,7 +54,7 @@ async function processBatchedOperations() {
               categoryName: t.categoryId?.toString() || 'Uncategorized',
               type: t.type
             }))
-          });
+          }, user.plan || 'free');
           
           // Cache insights with transaction hash
           // Cache system removed
@@ -80,7 +80,7 @@ async function processBatchedOperations() {
             }))
           };
           
-          const tips = await runAI('financial-tips', userId, financialData);
+          const tips = await runAI('financial-tips', userId, financialData, user.plan || 'free');
           // Cache system removed
         }
         
