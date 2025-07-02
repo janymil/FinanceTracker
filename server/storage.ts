@@ -3172,6 +3172,80 @@ export class DatabaseStorage implements IStorage {
       .from(aiUserOverrides)
       .orderBy(aiUserOverrides.userId, aiUserOverrides.functionName);
   }
+
+  /**
+   * Check if user can make AI request based on limits
+   */
+  async canUseAIFunction(userId: string, functionName: string, plan: string): Promise<{
+    allowed: boolean;
+    reason?: string;
+  }> {
+    try {
+      // Check user override (blocking)
+      const override = await this.getAIUserOverride(userId, functionName);
+      if (override?.isBlocked) {
+        return {
+          allowed: false,
+          reason: override.reason || 'Function blocked for user'
+        };
+      }
+
+      // Get plan limits
+      const limits = await this.getAIUsageLimit(plan, functionName);
+      
+      // If no limits configured, allow unlimited
+      if (!limits.monthlyRequestLimit && !limits.dailyRequestLimit) {
+        return { allowed: true };
+      }
+
+      // Check daily limit
+      if (limits.dailyRequestLimit > 0) {
+        const dailyUsage = await this.getDailyAIUsage(userId, functionName);
+        if (dailyUsage.requests >= limits.dailyRequestLimit) {
+          return {
+            allowed: false,
+            reason: `Daily limit exceeded (${dailyUsage.requests}/${limits.dailyRequestLimit})`
+          };
+        }
+      }
+
+      // Check monthly limit
+      if (limits.monthlyRequestLimit > 0) {
+        const monthlyUsage = await this.getMonthlyAIUsage(userId, functionName);
+        if (monthlyUsage.requests >= limits.monthlyRequestLimit) {
+          return {
+            allowed: false,
+            reason: `Monthly limit exceeded (${monthlyUsage.requests}/${limits.monthlyRequestLimit})`
+          };
+        }
+      }
+
+      return { allowed: true };
+
+    } catch (error) {
+      console.error('Error checking AI function access:', error);
+      return { allowed: true }; // Allow on error
+    }
+  }
+
+  /**
+   * Calculate OpenAI cost based on model and tokens
+   */
+  calculateOpenAICost(model: string, promptTokens: number, completionTokens: number): number {
+    const pricing = {
+      'gpt-4o': { input: 0.005, output: 0.015 },
+      'gpt-4o-mini': { input: 0.00015, output: 0.0006 },
+      'gpt-4': { input: 0.03, output: 0.06 },
+      'gpt-3.5-turbo': { input: 0.0015, output: 0.002 }
+    } as const;
+
+    const modelPricing = pricing[model as keyof typeof pricing] || pricing['gpt-4o'];
+    
+    return ((promptTokens / 1000) * modelPricing.input) + 
+           ((completionTokens / 1000) * modelPricing.output);
+  }
+
+
 }
 
 export const storage = new DatabaseStorage();

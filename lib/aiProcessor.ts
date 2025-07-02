@@ -1,5 +1,6 @@
 // Centralized AI Processor with Fly.io Primary + Local Fallback
 import crypto from 'crypto';
+import { storage } from '../server/storage.js';
 import { 
   generateContextualFinancialTips,
   generateFinancialTips,
