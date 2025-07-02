@@ -950,6 +950,7 @@ async function addAICategorization(
     // Fetch user's existing categories AND transaction history for intelligent categorization
     const userCategories = await storage.getCategories(userId);
     const userTransactions = await storage.getUserTransactions(userId, 500); // Get recent 500 transactions for pattern analysis
+    const user = await storage.getUser(userId);
     
     console.log(`Intelligent AI categorization: Found ${userCategories.length} categories and ${userTransactions.length} historical transactions`);
     
@@ -977,7 +978,7 @@ async function addAICategorization(
               name: cat.name,
               type: cat.type
             }))
-          });
+          }, user.plan || 'free');
           
           transaction.category = categorizationResult.category || 'Other';
           console.log(`Intelligent AI categorized "${transaction.description}" as "${transaction.category}"`);
@@ -1024,7 +1025,7 @@ async function parseTransactionsWithAI(
     const result = await runAI('parseBankStatement', 'system', {
       text: text,
       language: language
-    });
+    }, 'free');
     
     if (result.transactions && Array.isArray(result.transactions)) {
       const parsedTransactions = result.transactions.map((tx: any) => ({
