@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocation } from 'wouter';
 import { AppLayout } from '@/components/AppLayout';
-import { ExpenseEstimationCalculator, DebtPayoffVisualizer } from '@/components/Calculator';
+import { ExpenseCalculatorModal, DebtCalculatorModal } from '@/components/CalculatorModals';
 
 import { 
   Brain, 

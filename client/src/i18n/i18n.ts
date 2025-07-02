@@ -35,8 +35,12 @@ async function loadTranslations() {
         // Load features translations if available
         if (featuresResponse.ok) {
           featuresTranslations = await featuresResponse.json();
+          console.log(`Loaded features translations for ${lang}:`, Object.keys(featuresTranslations).length, 'keys');
           // Merge features translations directly into main translations (flat structure)
           Object.assign(translations, featuresTranslations);
+          console.log(`Total translations after merging features for ${lang}:`, Object.keys(translations).length, 'keys');
+        } else {
+          console.error(`Failed to load features translations for ${lang}:`, featuresResponse.status);
         }
         
         // Store under primary language key with both translation namespaces
