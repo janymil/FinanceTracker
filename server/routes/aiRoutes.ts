@@ -169,7 +169,7 @@ export function registerAIRoutes(app: Express) {
       }
 
       // Generate new AI response
-      const tipResults = await runAI('financial-tips', userId, aiPayload);
+      const tipResults = await runAI('financial-tips', userId, aiPayload, user.plan || 'free');
 
       // Handle AI processor response format
       console.log('TIP ENDPOINT: AI processor response type:', typeof tipResults, 'isArray:', Array.isArray(tipResults));
@@ -253,7 +253,7 @@ export function registerAIRoutes(app: Express) {
       }
 
       // Generate new AI response
-      const insights = await runAI('spending-insights', userId, aiPayload);
+      const insights = await runAI('spending-insights', userId, aiPayload, user.plan || 'free');
 
       // Cache the result for 72 hours
       await cache.set(aiPayload, insights, false, 72);
@@ -313,7 +313,7 @@ export function registerAIRoutes(app: Express) {
       }
 
       // Generate new AI response
-      const aiScore = await runAI('financial-health-score', userId, aiPayload);
+      const aiScore = await runAI('financial-health-score', userId, aiPayload, user.plan || 'free');
 
       // Cache the result for 24 hours
       await cache.set(aiPayload, aiScore, false, 24);
@@ -382,7 +382,7 @@ export function registerAIRoutes(app: Express) {
       }
 
       // Generate new AI response
-      const predictions = await runAI('trend-predictions', userId, aiPayload);
+      const predictions = await runAI('trend-predictions', userId, aiPayload, user.plan || 'free');
 
       // Cache the result for 48 hours
       await cache.set(aiPayload, predictions, false, 48);
@@ -466,7 +466,7 @@ export function registerAIRoutes(app: Express) {
       }
 
       // Generate new AI response
-      let recommendations = await runAI('daily-recommendations', userId, aiPayload);
+      let recommendations = await runAI('daily-recommendations', userId, aiPayload, user.plan || 'free');
       
       console.log('Daily recommendations: Received response from Fly.io:', {
         hasRecommendations: Array.isArray(recommendations?.recommendations),
@@ -622,7 +622,7 @@ export function registerAIRoutes(app: Express) {
       }
 
       // Use unified AI processor for financial health score
-      const healthData = await runAI('financial-health-score', userId, aiPayload);
+      const healthData = await runAI('financial-health-score', userId, aiPayload, user.plan || 'free');
 
       // Transform AI analysis into frontend-expected format
       const response = transformAIResponseForMascot(healthData);
@@ -985,7 +985,7 @@ export function registerAIRoutes(app: Express) {
         summary: req.body.summary || { totalIncome: 0, totalExpenses: 0, netAmount: 0 },
         language: language
       };
-      const predictions = await runAI('expense-predictions', userId, aiPayload);
+      const predictions = await runAI('expense-predictions', userId, aiPayload, user.plan || 'free');
 
       // Cache the result for 48 hours using consistent input
       await cache.set(cacheInput, predictions, false, 48);
@@ -1144,7 +1144,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
       }
 
       // Generate new AI response
-      const result = await runAI('contextual-tips', userId, aiPayload);
+      const result = await runAI('contextual-tips', userId, aiPayload, user.plan || 'free');
       
       // Handle centralized processor response
       const tips = Array.isArray(result?.tips) ? result.tips.map((tip: any, index: number) => ({
