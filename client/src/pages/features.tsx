@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocation } from 'wouter';
 import { AppLayout } from '@/components/AppLayout';
-import { ExpenseEstimationCalculator } from '@/components/Calculator';
+import { ExpenseEstimationCalculator, DebtPayoffVisualizer } from '@/components/Calculator';
 
 import { 
   Brain, 
@@ -360,8 +360,9 @@ export default function FeaturesPage() {
           </p>
         </div>
         
-        <div className="max-w-4xl mx-auto mb-16">
+        <div className="grid gap-8 max-w-6xl mx-auto mb-16">
           <ExpenseEstimationCalculator isStandalone={true} />
+          <DebtPayoffVisualizer isStandalone={true} />
         </div>
       </div>
 

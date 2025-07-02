@@ -35,8 +35,8 @@ async function loadTranslations() {
         // Load features translations if available
         if (featuresResponse.ok) {
           featuresTranslations = await featuresResponse.json();
-          // Merge features translations into main translations
-          translations.features = featuresTranslations.features;
+          // Merge features translations directly into main translations (flat structure)
+          Object.assign(translations, featuresTranslations);
         }
         
         // Store under primary language key with both translation namespaces
