@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { requireAuth } from "@clerk/express";
 import { z } from "zod";
-import { openaiRequest } from "../openai";
+import { runAI } from "../../lib/aiProcessor";
 import { db } from "../db";
 import { categories } from "../../shared/schema";
 import { eq, and } from "drizzle-orm";
