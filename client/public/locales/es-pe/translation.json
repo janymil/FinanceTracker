@@ -3771,6 +3771,36 @@
       "minutes": "minutos",
       "per_week": "por semana"
     }
+  },
+
+  "categories": {
+    "voľná_práca": "Trabajo independiente",
+    "plat": "Salario",
+    "investície": "Inversiones",
+    "doprava": "Transporte",
+    "jedlo_&_reštaurácie": "Comida y Restaurantes",
+    "nakupovanie": "Compras",
+    "nákupy": "Compras",
+    "účty_&_služby": "Cuentas y Servicios",
+    "zdravotníctvo": "Salud",
+    "zábava": "Entretenimiento",
+    "bývanie": "Vivienda",
+    "jedlo": "Comida",
+    "freelancing": "Trabajo independiente",
+    "salary": "Salario",
+    "freelance": "Trabajo independiente",
+    "investments": "Inversiones",
+    "transportation": "Transporte",
+    "healthcare": "Salud",
+    "shopping": "Compras",
+    "housing": "Vivienda",
+    "entertainment": "Entretenimiento",
+    "food": "Comida",
+    "utilities": "Servicios públicos",
+    "education": "Educación",
+    "travel": "Viajes",
+    "business": "Negocio",
+    "other": "Otro"
   }
 
 }

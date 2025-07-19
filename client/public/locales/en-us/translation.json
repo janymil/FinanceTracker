@@ -3709,6 +3709,36 @@
       "minutes": "minutes",
       "per_week": "per week"
     }
+  },
+
+  "categories": {
+    "voľná_práca": "Freelance",
+    "plat": "Salary",
+    "investície": "Investments",
+    "doprava": "Transportation",
+    "jedlo_&_reštaurácie": "Food & Restaurants",
+    "nakupovanie": "Shopping",
+    "nákupy": "Shopping",
+    "účty_&_služby": "Bills & Services",
+    "zdravotníctvo": "Healthcare",
+    "zábava": "Entertainment",
+    "bývanie": "Housing",
+    "jedlo": "Food",
+    "freelancing": "Freelancing",
+    "salary": "Salary",
+    "freelance": "Freelance",
+    "investments": "Investments",
+    "transportation": "Transportation",
+    "healthcare": "Healthcare",
+    "shopping": "Shopping",
+    "housing": "Housing",
+    "entertainment": "Entertainment",
+    "food": "Food",
+    "utilities": "Utilities",
+    "education": "Education",
+    "travel": "Travel",
+    "business": "Business",
+    "other": "Other"
   }
 
 }

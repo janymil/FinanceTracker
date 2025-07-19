@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/clerk-react";
 import { useTranslation } from "react-i18next";
 import { useDateFormat } from "@/hooks/useDateFormat";
-import { translateCategoryName } from "../../../server/categoryTranslations";
+
 
 
 
@@ -426,7 +426,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                     <SelectContent>
                       {categories.map((category) => (
                         <SelectItem key={category.id} value={category.name}>
-                          {translateCategoryName(category.name, i18n.language)}
+                          {t(`categories.${category.name}`, category.name)}
                         </SelectItem>
                       ))}
                     </SelectContent>
