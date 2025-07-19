@@ -102,6 +102,7 @@ export default function AuthPage() {
                 <SignUp 
                   routing="virtual"
                   signInUrl="#sign-in"
+                  afterSignUpUrl={dashboardUrl}
                   initialValues={{
                     emailAddress: "",
                     firstName: "",
@@ -149,6 +150,7 @@ export default function AuthPage() {
                 <SignIn 
                   routing="virtual"
                   signUpUrl="#sign-up"
+                  afterSignInUrl={dashboardUrl}
                   appearance={{
                     elements: {
                       formButtonPrimary: "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 w-full",

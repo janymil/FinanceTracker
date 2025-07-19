@@ -127,8 +127,10 @@ root.render(
     <HelmetProvider>
       <ClerkProvider 
         publishableKey={clerkPubKey}
-        fallbackRedirectUrl={dashboardRedirectUrl}
-        forceRedirectUrl={dashboardRedirectUrl}
+        signInFallbackRedirectUrl={dashboardRedirectUrl}
+        signUpFallbackRedirectUrl={dashboardRedirectUrl}
+        afterSignInUrl={dashboardRedirectUrl}
+        afterSignUpUrl={dashboardRedirectUrl}
         localization={localization}
       >
         <QueryClientProvider client={queryClient}>

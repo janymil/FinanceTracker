@@ -121,10 +121,14 @@ function Router() {
                 ? browserLang 
                 : 'en';
             
+            console.log('Root route redirect:', { isSignedIn, targetLang });
+            
             // Redirect to appropriate page based on auth status
             if (isSignedIn) {
+              console.log('Redirecting signed-in user to dashboard');
               setLocation(`/${targetLang}/dashboard`);
             } else {
+              console.log('Redirecting unsigned user to landing');
               setLocation(`/${targetLang}`);
             }
           }, [setLocation, isSignedIn]);
