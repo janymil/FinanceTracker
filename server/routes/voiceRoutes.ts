@@ -162,7 +162,7 @@ Examples:
         });
         
         const fallbackStartTime = Date.now();
-        completion = await runAI(prompt, userId, "voice-extraction");
+        completion = await runAI("voice-extraction", userId, { prompt }, "free");
         const fallbackTime = Date.now() - fallbackStartTime;
         
         console.log('🔄 [VoiceAPI] Fallback processing completed:', {

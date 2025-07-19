@@ -75,20 +75,18 @@ export function VoiceTransactionDialog({
       const startTime = performance.now();
       
       try {
-        const response = await apiRequest('/api/voice/process', {
-          method: 'POST',
-          body: JSON.stringify(requestData),
-        });
+        const response = await apiRequest('POST', '/api/voice/process', requestData);
+        const data = await response.json();
         
         const endTime = performance.now();
         console.log('⚡ [VoiceDialog] API response received:', {
           processingTime: `${(endTime - startTime).toFixed(2)}ms`,
-          success: response.success,
-          hasData: !!response.data,
+          success: data.success,
+          hasData: !!data.data,
           timestamp: new Date().toISOString()
         });
         
-        return response;
+        return data;
       } catch (error) {
         const endTime = performance.now();
         console.error('💥 [VoiceDialog] API request failed:', {

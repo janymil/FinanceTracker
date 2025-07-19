@@ -197,6 +197,20 @@ export async function runAI(task: string, userId: string, payload: Record<string
           case 'parseBankStatement':
             fallbackResult = await parseBankStatement(payload.text, payload.language || 'en-us');
             break;
+          case 'voice-extraction':
+            // Direct OpenAI call for voice extraction
+            const { prompt } = payload;
+            const openai = new (await import('openai')).default({ 
+              apiKey: process.env.OPENAI_API_KEY 
+            });
+            const completion = await openai.chat.completions.create({
+              model: 'gpt-4o-mini',
+              messages: [{ role: 'user', content: prompt }],
+              temperature: 0.1,
+              max_tokens: 500
+            });
+            fallbackResult = completion.choices[0]?.message?.content || '';
+            break;
           default:
             throw new Error(`No local fallback available for task: ${task}`);
         }

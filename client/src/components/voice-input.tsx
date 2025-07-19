@@ -17,6 +17,7 @@ export function VoiceInput({ onTranscript, onError, className, language }: Voice
   const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState('');
   const recognitionRef = useRef<any>(null);
+  const transcriptRef = useRef<string>('');
 
   useEffect(() => {
     console.log('🔧 [VoiceInput] Initializing speech recognition...', {
@@ -45,6 +46,7 @@ export function VoiceInput({ onTranscript, onError, className, language }: Voice
       console.log('🎤 [VoiceInput] Recording started');
       setIsListening(true);
       setTranscript('');
+      transcriptRef.current = '';
     };
 
     recognition.onresult = (event: any) => {
@@ -59,9 +61,10 @@ export function VoiceInput({ onTranscript, onError, className, language }: Voice
       });
       
       if (event.results[current].isFinal) {
-        const finalTranscript = prev => prev + ' ' + transcriptText;
-        setTranscript(finalTranscript);
-        console.log('✅ [VoiceInput] Final transcript captured');
+        transcriptRef.current = transcriptRef.current + ' ' + transcriptText;
+        setTranscript(transcriptRef.current);
+        console.log('✅ [VoiceInput] Final transcript captured:', transcriptText);
+        console.log('📝 [VoiceInput] Full transcript so far:', transcriptRef.current);
       }
     };
 
@@ -89,14 +92,23 @@ export function VoiceInput({ onTranscript, onError, className, language }: Voice
     recognition.onend = () => {
       console.log('🔚 [VoiceInput] Recording ended');
       setIsListening(false);
-      if (transcript.trim()) {
+      const finalTranscript = transcriptRef.current.trim();
+      
+      console.log('🔍 [VoiceInput] Checking transcript:', {
+        refValue: transcriptRef.current,
+        stateValue: transcript,
+        finalValue: finalTranscript,
+        length: finalTranscript.length
+      });
+      
+      if (finalTranscript) {
         console.log('📤 [VoiceInput] Sending transcript to dialog:', {
-          transcript: transcript.trim(),
-          length: transcript.trim().length,
+          transcript: finalTranscript,
+          length: finalTranscript.length,
           timestamp: new Date().toISOString()
         });
         setIsProcessing(true);
-        onTranscript(transcript.trim());
+        onTranscript(finalTranscript);
         setTimeout(() => setIsProcessing(false), 1000);
       } else {
         console.warn('⚠️ [VoiceInput] No transcript captured');
@@ -110,7 +122,7 @@ export function VoiceInput({ onTranscript, onError, className, language }: Voice
         recognitionRef.current.abort();
       }
     };
-  }, [language, i18n.language, onTranscript, onError, t, transcript]);
+  }, [language, i18n.language, onTranscript, onError, t]);
 
   const toggleListening = () => {
     if (!recognitionRef.current) {
