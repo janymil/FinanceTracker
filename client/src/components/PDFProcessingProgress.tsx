@@ -52,6 +52,8 @@ export function PDFProcessingProgress({ sessionId, onComplete, onError }: PDFPro
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
+    console.log(`[PDF Progress] Attempting to connect to SSE for session: ${sessionId}`);
+    
     // Create SSE connection for progress updates
     const es = new EventSource(`/api/import/pdf-progress/${sessionId}`);
     setEventSource(es);
@@ -70,6 +72,16 @@ export function PDFProcessingProgress({ sessionId, onComplete, onError }: PDFPro
         }
       } catch (error) {
         console.error('Error parsing progress data:', error);
+        console.error('Raw event data:', event.data);
+        
+        // Check if the response is HTML (504 error page)
+        if (event.data && event.data.startsWith('<!DOCTYPE') || event.data.includes('upstream')) {
+          console.error('Received HTML response instead of JSON - likely a 504 Gateway Timeout');
+          setHasError(true);
+          onError?.('Server timeout error - please try again');
+          return;
+        }
+        
         setHasError(true);
         onError?.('Failed to parse progress data');
       }
@@ -77,8 +89,16 @@ export function PDFProcessingProgress({ sessionId, onComplete, onError }: PDFPro
 
     es.onerror = (error) => {
       console.error('SSE error:', error);
-      setHasError(true);
-      onError?.('Connection error during processing');
+      console.error('EventSource readyState:', es.readyState);
+      
+      // Provide more specific error messages based on the connection state
+      if (es.readyState === EventSource.CLOSED) {
+        setHasError(true);
+        onError?.('Connection closed unexpectedly - this may be due to authentication issues or server timeout');
+      } else {
+        setHasError(true);
+        onError?.('Connection error during processing - please check your internet connection and try again');
+      }
       es.close();
     };
 

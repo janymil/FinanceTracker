@@ -241,25 +241,47 @@ export function registerImportRoutes(app: Express) {
   app.get('/api/import/pdf-progress/:sessionId', isAuthenticated, (req, res) => {
     const { sessionId } = req.params;
     
-    // Set headers for SSE
-    res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Cache-Control'
-    });
+    console.log(`[PDF Progress] New SSE connection for session: ${sessionId}`);
+    
+    try {
+      // Set headers for SSE
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Cache-Control'
+      });
 
-    // Store connection for this session
-    progressConnections.set(sessionId, res);
+      // Store connection for this session
+      progressConnections.set(sessionId, res);
+      console.log(`[PDF Progress] Connection stored for session: ${sessionId}`);
 
-    // Send initial connection confirmation
-    res.write(`data: ${JSON.stringify({ stage: 'connected', percentage: 0, message: 'Connected to progress stream' })}\n\n`);
+      // Send initial connection confirmation
+      const initialMessage = JSON.stringify({ 
+        stage: 'connected', 
+        percentage: 0, 
+        message: 'Connected to progress stream' 
+      });
+      res.write(`data: ${initialMessage}\n\n`);
+      console.log(`[PDF Progress] Initial message sent for session: ${sessionId}`);
 
-    // Clean up on client disconnect
-    req.on('close', () => {
-      progressConnections.delete(sessionId);
-    });
+      // Clean up on client disconnect
+      req.on('close', () => {
+        console.log(`[PDF Progress] Client disconnected for session: ${sessionId}`);
+        progressConnections.delete(sessionId);
+      });
+      
+      // Handle errors
+      req.on('error', (error) => {
+        console.error(`[PDF Progress] Request error for session ${sessionId}:`, error);
+        progressConnections.delete(sessionId);
+      });
+      
+    } catch (error) {
+      console.error(`[PDF Progress] Error setting up SSE for session ${sessionId}:`, error);
+      res.status(500).json({ error: 'Failed to establish progress connection' });
+    }
   });
   // Get import logs for a user
   app.get('/api/import-logs', isAuthenticated, async (req: any, res) => {

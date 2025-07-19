@@ -33,6 +33,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/contact', handleContactForm);
 
   // System status endpoints
+  app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+  
   app.get('/api/encryption-status', (req, res) => {
     const status = DataEncryption.getEncryptionStatus();
     res.json(status);
