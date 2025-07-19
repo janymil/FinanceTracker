@@ -42,7 +42,7 @@ export function VoiceInput({ onTranscript, onError, className, language }: Voice
     recognition.interimResults = true;
     recognition.lang = language || getVoiceLanguage(i18n.language);
     recognition.maxAlternatives = 3; // Get multiple alternatives for better accuracy
-    recognition.grammars = null; // Use general language model
+    // Note: grammars property is deprecated and causes errors in modern browsers
 
     recognition.onstart = () => {
       console.log('🎤 [VoiceInput] Recording started');
