@@ -101,7 +101,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
     
     // Create AbortController for timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for bank statement processing
+    const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 minute timeout for bank statement processing
     
     const response = await fetch("http://31.97.103.28:8080/execute-gpt-task", {
       method: "POST",
