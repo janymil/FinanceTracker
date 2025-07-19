@@ -45,9 +45,7 @@ const isPredefinedCategory = (category: Category): boolean => {
 };
 
 const getLocalizedCategoryName = (category: Category, t: any): string => {
-  if (isPredefinedCategory(category)) {
-    return t(`categories.${category.name.toLowerCase().replace(/\s+/g, '_')}`);
-  }
+  // Use the category name directly - it's already translated by the API
   return category.name;
 };
 

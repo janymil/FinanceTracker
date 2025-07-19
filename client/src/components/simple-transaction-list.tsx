@@ -426,7 +426,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                     <SelectContent>
                       {categories.map((category) => (
                         <SelectItem key={category.id} value={category.name}>
-                          {t(`categories.${category.name}`, category.name)}
+                          {category.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
