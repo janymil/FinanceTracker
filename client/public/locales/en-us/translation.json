@@ -3711,6 +3711,35 @@
     }
   },
 
+  "voiceInput": {
+    "listening": "Listening... Speak now",
+    "notSupported": "Voice input is not supported in your browser",
+    "errors": {
+      "noSpeech": "No speech detected. Please try again.",
+      "audioCapture": "Failed to capture audio. Please check your microphone.",
+      "notAllowed": "Microphone access denied. Please allow microphone access.",
+      "network": "Network error. Please check your connection.",
+      "generic": "Voice input error. Please try again."
+    }
+  },
+
+  "voiceTransaction": {
+    "title": "Review Voice Transaction",
+    "description": "Review and confirm the transaction details extracted from your voice input",
+    "transcript": "What you said",
+    "processing": "Processing your voice input...",
+    "processingError": "Failed to process voice input. Please try again.",
+    "success": "Transaction Created",
+    "successDescription": "Your transaction has been created successfully",
+    "createError": "Failed to create transaction",
+    "confidence": "Confidence",
+    "ambiguities": "Please verify",
+    "type": "Transaction Type",
+    "descriptionPlaceholder": "Enter description",
+    "selectCategory": "Select a category",
+    "followUp": "Additional information needed"
+  },
+
   "categories": {
     "food": "Food",
     "transportation": "Transportation",

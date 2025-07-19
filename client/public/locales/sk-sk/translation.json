@@ -3888,6 +3888,35 @@
       "minutes": "minúty",
       "per_week": "za týždeň"
     }
+  },
+
+  "voiceInput": {
+    "listening": "Počúvam... Hovorte teraz",
+    "notSupported": "Hlasový vstup nie je podporovaný vo vašom prehliadači",
+    "errors": {
+      "noSpeech": "Nebola zistená žiadna reč. Skúste to znova.",
+      "audioCapture": "Nepodarilo sa zachytiť zvuk. Skontrolujte mikrofón.",
+      "notAllowed": "Prístup k mikrofónu bol zamietnutý. Povoľte prístup k mikrofónu.",
+      "network": "Chyba siete. Skontrolujte pripojenie.",
+      "generic": "Chyba hlasového vstupu. Skúste to znova."
+    }
+  },
+
+  "voiceTransaction": {
+    "title": "Skontrolovať hlasovú transakciu",
+    "description": "Skontrolujte a potvrďte podrobnosti transakcie extrahované z vášho hlasového vstupu",
+    "transcript": "Čo ste povedali",
+    "processing": "Spracúvam váš hlasový vstup...",
+    "processingError": "Nepodarilo sa spracovať hlasový vstup. Skúste to znova.",
+    "success": "Transakcia vytvorená",
+    "successDescription": "Vaša transakcia bola úspešne vytvorená",
+    "createError": "Nepodarilo sa vytvoriť transakciu",
+    "confidence": "Spoľahlivosť",
+    "ambiguities": "Prosím overte",
+    "type": "Typ transakcie",
+    "descriptionPlaceholder": "Zadajte popis",
+    "selectCategory": "Vyberte kategóriu",
+    "followUp": "Potrebné ďalšie informácie"
   }
 
 }

@@ -3773,6 +3773,35 @@
     }
   },
 
+  "voiceInput": {
+    "listening": "Escuchando... Habla ahora",
+    "notSupported": "La entrada de voz no es compatible con tu navegador",
+    "errors": {
+      "noSpeech": "No se detectó voz. Por favor, intenta de nuevo.",
+      "audioCapture": "Error al capturar audio. Verifica tu micrófono.",
+      "notAllowed": "Acceso al micrófono denegado. Por favor, permite el acceso.",
+      "network": "Error de red. Verifica tu conexión.",
+      "generic": "Error de entrada de voz. Por favor, intenta de nuevo."
+    }
+  },
+
+  "voiceTransaction": {
+    "title": "Revisar Transacción por Voz",
+    "description": "Revisa y confirma los detalles de la transacción extraídos de tu entrada de voz",
+    "transcript": "Lo que dijiste",
+    "processing": "Procesando tu entrada de voz...",
+    "processingError": "Error al procesar entrada de voz. Por favor, intenta de nuevo.",
+    "success": "Transacción Creada",
+    "successDescription": "Tu transacción ha sido creada exitosamente",
+    "createError": "Error al crear transacción",
+    "confidence": "Confianza",
+    "ambiguities": "Por favor verifica",
+    "type": "Tipo de Transacción",
+    "descriptionPlaceholder": "Ingresa descripción",
+    "selectCategory": "Selecciona una categoría",
+    "followUp": "Información adicional necesaria"
+  },
+
   "categories": {
     "food": "Comida",
     "transportation": "Transporte",

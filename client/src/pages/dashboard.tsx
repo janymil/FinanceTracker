@@ -72,6 +72,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "wouter";
+import { VoiceInput } from "@/components/voice-input";
+import { VoiceTransactionDialog } from "@/components/voice-transaction-dialog";
 
 interface Category {
   id: number;
@@ -142,6 +144,8 @@ export default function Dashboard() {
   // Combine month and year for API calls
   const selectedMonth = `${selectedYear}-${selectedMonthNum}`;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [voiceDialogOpen, setVoiceDialogOpen] = useState(false);
+  const [voiceTranscript, setVoiceTranscript] = useState("");
 
   // Defer expensive rendering to prevent Suspense errors
   const deferredSelectedMonth = useDeferredValue(selectedMonth);
@@ -402,14 +406,13 @@ export default function Dashboard() {
     createTransactionMutation.mutate(newTransaction);
   };
 
-  return (
-    <>
-      <SEO 
-        title="Dashboard - Financial Overview | FinanzerPro"
-        description="View your complete financial picture with real-time expense tracking, budget insights, and AI-powered recommendations. Manage transactions and monitor your financial health."
-        keywords="personal finance dashboard, expense tracking, budget overview, financial insights, money management, transaction history"
-        canonical="https://finanzerpro.com/dashboard"
-      />
+  return <>
+    <SEO 
+      title="Dashboard - Financial Overview | FinanzerPro"
+      description="View your complete financial picture with real-time expense tracking, budget insights, and AI-powered recommendations. Manage transactions and monitor your financial health."
+      keywords="personal finance dashboard, expense tracking, budget overview, financial insights, money management, transaction history"
+      canonical="https://finanzerpro.com/dashboard"
+    />
       <div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
@@ -453,30 +456,44 @@ export default function Dashboard() {
                   </Select>
                 </div>
               </div>
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button 
-                    className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
-                    onClick={() => {
-                      setNewTransaction({
-                        amount: "",
-                        description: "",
-                        date: new Date().toISOString().split('T')[0],
-                        type: "expense",
-                        categoryId: "",
-                        isRecurring: false,
-                        recurringFrequency: "monthly",
-                        recurringEndDate: "",
-                        paymentUrl: "",
-                        referenceNote: "",
-                      });
-                    }}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("Add Transaction")}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4 sm:mx-auto">
+              <div className="flex gap-2">
+                <VoiceInput 
+                  onTranscript={(transcript) => {
+                    setVoiceTranscript(transcript);
+                    setVoiceDialogOpen(true);
+                  }}
+                  onError={(error) => {
+                    toast({
+                      title: t("Error"),
+                      description: error,
+                      variant: "destructive",
+                    });
+                  }}
+                />
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
+                      onClick={() => {
+                        setNewTransaction({
+                          amount: "",
+                          description: "",
+                          date: new Date().toISOString().split('T')[0],
+                          type: "expense",
+                          categoryId: "",
+                          isRecurring: false,
+                          recurringFrequency: "monthly",
+                          recurringEndDate: "",
+                          paymentUrl: "",
+                          referenceNote: "",
+                        });
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      {t("Add Transaction")}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4 sm:mx-auto">
                   <DialogHeader>
                     <DialogTitle>{t("Add New Transaction")}</DialogTitle>
                     <DialogDescription>
@@ -811,9 +828,21 @@ export default function Dashboard() {
           </div>
         )}
 
-
+        {/* Voice Transaction Dialog */}
+        <VoiceTransactionDialog
+          isOpen={voiceDialogOpen}
+          onClose={() => setVoiceDialogOpen(false)}
+          transcript={voiceTranscript}
+          onSuccess={() => {
+            // Refresh data after successful transaction creation
+            if (deferredUser) {
+              queryClient.invalidateQueries({ queryKey: ['transactions'] });
+              queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
+            }
+          }}
+        />
+        
+        </div>
       </div>
-    </div>
-    </>
-  );
+  </>;
 }
