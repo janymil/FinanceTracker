@@ -41,6 +41,8 @@ export function VoiceInput({ onTranscript, onError, className, language }: Voice
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = language || getVoiceLanguage(i18n.language);
+    recognition.maxAlternatives = 3; // Get multiple alternatives for better accuracy
+    recognition.grammars = null; // Use general language model
 
     recognition.onstart = () => {
       console.log('🎤 [VoiceInput] Recording started');
@@ -51,19 +53,38 @@ export function VoiceInput({ onTranscript, onError, className, language }: Voice
 
     recognition.onresult = (event: any) => {
       const current = event.resultIndex;
-      const transcriptText = event.results[current][0].transcript;
-      const confidence = event.results[current][0].confidence;
+      
+      // Get the best alternative if multiple are available
+      let bestTranscript = event.results[current][0].transcript;
+      let bestConfidence = event.results[current][0].confidence;
+      
+      // Check other alternatives for better confidence
+      for (let i = 1; i < event.results[current].length; i++) {
+        const alternative = event.results[current][i];
+        if (alternative.confidence > bestConfidence) {
+          bestTranscript = alternative.transcript;
+          bestConfidence = alternative.confidence;
+        }
+      }
       
       console.log('🗣️ [VoiceInput] Speech result:', {
-        text: transcriptText,
-        confidence: confidence,
-        isFinal: event.results[current].isFinal
+        text: bestTranscript,
+        confidence: bestConfidence,
+        isFinal: event.results[current].isFinal,
+        alternatives: event.results[current].length
       });
       
       if (event.results[current].isFinal) {
-        transcriptRef.current = transcriptRef.current + ' ' + transcriptText;
+        // Clean up transcript - remove extra spaces and common recognition errors
+        const cleanedText = bestTranscript
+          .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+          .replace(/\bdollar\b/gi, 'dollars') // Normalize currency
+          .replace(/\bcent\b/gi, 'cents')
+          .trim();
+          
+        transcriptRef.current = transcriptRef.current + ' ' + cleanedText;
         setTranscript(transcriptRef.current);
-        console.log('✅ [VoiceInput] Final transcript captured:', transcriptText);
+        console.log('✅ [VoiceInput] Final transcript captured:', cleanedText);
         console.log('📝 [VoiceInput] Full transcript so far:', transcriptRef.current);
       }
     };

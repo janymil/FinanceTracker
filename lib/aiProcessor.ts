@@ -205,7 +205,17 @@ export async function runAI(task: string, userId: string, payload: Record<string
             });
             const completion = await openai.chat.completions.create({
               model: 'gpt-4o-mini',
-              messages: [{ role: 'user', content: prompt }],
+              messages: [
+                {
+                  role: 'system',
+                  content: 'You are a JSON extraction AI. Respond ONLY with valid JSON. No explanations, no markdown, no code blocks.'
+                },
+                {
+                  role: 'user', 
+                  content: prompt
+                }
+              ],
+              response_format: { type: "json_object" },
               temperature: 0.1,
               max_tokens: 500
             });

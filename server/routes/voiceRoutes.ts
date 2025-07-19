@@ -68,47 +68,47 @@ export function registerVoiceRoutes(app: Router) {
         totalCategories: allCategories.length
       });
 
-      // Build the extraction prompt
+      // Build the extraction prompt with stricter JSON formatting
       const currentDate = new Date().toISOString();
-      const prompt = `Extract financial transaction details from the following voice transcript.
+      const prompt = `CRITICAL: You must respond with ONLY valid JSON. No explanations, no markdown, no additional text.
 
-Voice Transcript: "${transcript}"
-User Language: ${language}
-Current Date: ${currentDate}
-User Timezone: ${timezone || 'UTC'}
+Extract financial transaction details from this voice transcript:
+"${transcript}"
 
-Available expense categories:
+Context:
+- User Language: ${language}
+- Current Date: ${currentDate}
+- User Timezone: ${timezone || 'UTC'}
+
+Available Categories:
 ${allCategories.map(cat => `- ${cat.name} (ID: ${cat.id})`).join('\n')}
 
-Instructions:
-1. Extract the transaction amount, vendor/description, category, and date
-2. Determine if this is income or expense
-3. Parse natural date references (e.g., "yesterday", "last week", "on Monday")
-4. Match to the most appropriate category from the list above
-5. If recurring is mentioned, extract frequency
+STRICT INSTRUCTIONS:
+1. Return ONLY valid JSON - no markdown code blocks, no explanations
+2. Extract amount, vendor, category, date, and type from the transcript
+3. Match to existing categories by ID when possible
+4. Parse natural dates like "yesterday", "last week"
+5. Determine if income or expense based on context
 
-Return ONLY a valid JSON object with this exact structure:
+JSON RESPONSE FORMAT (respond with exactly this structure):
 {
-  "amount": number | null,
-  "currency": "USD" | "EUR" | "PEN" | null,
-  "vendor": string | null,
-  "description": string | null,
-  "categoryId": number | null,
-  "categoryName": string | null,
-  "dateReference": string | null,
-  "parsedDate": "YYYY-MM-DD" | null,
-  "type": "income" | "expense" | null,
-  "isRecurring": boolean,
-  "recurringFrequency": "weekly" | "monthly" | "yearly" | null,
-  "confidence": number (0.0-1.0),
-  "ambiguities": string[],
-  "followUpQuestions": string[]
+  "amount": 52.00,
+  "currency": "USD",
+  "vendor": "Walmart",
+  "description": "groceries",
+  "categoryId": 15,
+  "categoryName": "Food & Groceries",
+  "dateReference": "today",
+  "parsedDate": "2025-07-19",
+  "type": "expense",
+  "isRecurring": false,
+  "recurringFrequency": null,
+  "confidence": 0.9,
+  "ambiguities": [],
+  "followUpQuestions": []
 }
 
-Examples:
-- "I spent fifty two dollars at Walmart for groceries" → {amount: 52, vendor: "Walmart", type: "expense", description: "groceries"}
-- "Got my salary of three thousand yesterday" → {amount: 3000, type: "income", dateReference: "yesterday", description: "salary"}
-- "Coffee this morning at Starbucks" → {vendor: "Starbucks", dateReference: "this morning", type: "expense", ambiguities: ["amount"]}`;
+CRITICAL: Respond with valid JSON only. No \`\`\`json blocks, no explanations, just the JSON object.`;
 
       // Use external AI processor service with fallback to local OpenAI
       let completion;
@@ -173,13 +173,22 @@ Examples:
       
       let extractedData;
       try {
-        // Parse the AI response
+        // Parse the AI response with cleanup
         console.log('🔍 [VoiceAPI] Parsing AI response:', {
           rawResponse: completion,
           responseLength: completion?.length
         });
         
-        extractedData = JSON.parse(completion);
+        // Clean up AI response - remove markdown code blocks if present
+        let cleanedResponse = completion;
+        if (typeof completion === 'string') {
+          cleanedResponse = completion
+            .replace(/```json\s*/g, '') // Remove ```json
+            .replace(/```\s*/g, '')     // Remove ```
+            .trim();
+        }
+        
+        extractedData = JSON.parse(cleanedResponse);
         
         console.log('✅ [VoiceAPI] AI response parsed successfully:', {
           hasAmount: !!extractedData.amount,
@@ -195,10 +204,26 @@ Examples:
           rawResponse: completion,
           responseType: typeof completion
         });
-        return res.status(500).json({ 
-          error: "Failed to parse transaction data",
-          rawResponse: completion 
-        });
+        
+        // Return a fallback response instead of failing completely
+        extractedData = {
+          amount: null,
+          currency: "USD",
+          vendor: null,
+          description: transcript,
+          categoryId: null,
+          categoryName: null,
+          dateReference: "today",
+          parsedDate: new Date().toISOString().split('T')[0],
+          type: "expense",
+          isRecurring: false,
+          recurringFrequency: null,
+          confidence: 0.3,
+          ambiguities: ["Failed to parse AI response - manual review needed"],
+          followUpQuestions: ["Please verify the transaction details"]
+        };
+        
+        console.log('🔄 [VoiceAPI] Using fallback extracted data');
       }
 
       // Validate and enhance the extracted data
