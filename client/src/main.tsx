@@ -46,17 +46,10 @@ function processClerkRedirect(url: string): string {
   const currentLang = savedLang && supportedLangs.includes(savedLang) ? savedLang : 
     (supportedLangs.includes(browserLang) ? browserLang : 'en');
   
-  // For root path or common auth redirects, redirect to dashboard with language
-  if (url === '/' || url === '/dashboard' || url === '') {
-    const dashboardUrl = `/${currentLang}/dashboard`;
-    console.log('Redirecting to language-aware dashboard:', dashboardUrl);
-    return dashboardUrl;
-  }
-  
-  // For other paths, add language prefix
-  const languageAwareUrl = `/${currentLang}${url.startsWith('/') ? url : '/' + url}`;
-  console.log('Adding language prefix:', languageAwareUrl);
-  return languageAwareUrl;
+  // Always redirect to dashboard after authentication
+  const dashboardUrl = `/${currentLang}/dashboard`;
+  console.log('Redirecting authenticated user to dashboard:', dashboardUrl);
+  return dashboardUrl;
 }
 
 if (!clerkPubKey) {
@@ -90,7 +83,7 @@ const getUserLanguage = (): string => {
 };
 
 const userLanguage = getUserLanguage();
-const dashboardRedirectUrl = `/${userLanguage}/dashboard`;
+const dashboardRedirectUrl = processClerkRedirect('/dashboard');
 
 // Custom Slovak localization with missing terms
 const customSlovak = {
@@ -134,8 +127,8 @@ root.render(
     <HelmetProvider>
       <ClerkProvider 
         publishableKey={clerkPubKey}
-        afterSignInUrl={dashboardRedirectUrl}
-        afterSignUpUrl={dashboardRedirectUrl}
+        fallbackRedirectUrl={dashboardRedirectUrl}
+        forceRedirectUrl={dashboardRedirectUrl}
         localization={localization}
       >
         <QueryClientProvider client={queryClient}>

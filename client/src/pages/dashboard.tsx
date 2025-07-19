@@ -414,7 +414,7 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 {t("Welcome back")}, {user.firstName || t("User")}!
@@ -423,38 +423,40 @@ export default function Dashboard() {
                 {t("Here's an overview of your financial situation for")} {formatMonth(selectedMonth)}
               </p>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-4 w-4 text-gray-500" />
-                <Select value={selectedMonthNum} onValueChange={setSelectedMonthNum}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder={t("Month")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generateMonthOptions().map(({ value, label }) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={selectedYear} onValueChange={setSelectedYear}>
-                  <SelectTrigger className="w-20">
-                    <SelectValue placeholder={t("Year")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generateYearOptions().map(({ value, label }) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <Select value={selectedMonthNum} onValueChange={setSelectedMonthNum}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue placeholder={t("Month")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {generateMonthOptions().map(({ value, label }) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={selectedYear} onValueChange={setSelectedYear}>
+                    <SelectTrigger className="w-20">
+                      <SelectValue placeholder={t("Year")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {generateYearOptions().map(({ value, label }) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button 
-                    className="bg-primary hover:bg-primary/90"
+                    className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
                     onClick={() => {
                       setNewTransaction({
                         amount: "",
@@ -474,7 +476,7 @@ export default function Dashboard() {
                     {t("Add Transaction")}
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4 sm:mx-auto">
                   <DialogHeader>
                     <DialogTitle>{t("Add New Transaction")}</DialogTitle>
                     <DialogDescription>
