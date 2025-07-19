@@ -1064,6 +1064,11 @@ Answer questions about features, subscription plans, how to use the app, trouble
       
       // First check user plan
       const user = await storage.getUser(userId);
+      
+      // Provide safe defaults for missing data
+      const safeTransactions = transactions || [];
+      const safeSummary = summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 };
+      const safeBudgets = budgets || [];
       console.log('🎯 Contextual tips - User check:', {
         userId: userId?.substring(0, 8) + '...',
         userPlan: user?.plan || 'free',
@@ -1086,8 +1091,8 @@ Answer questions about features, subscription plans, how to use the app, trouble
         } : 'none'
       });
 
-      if (!transactions || !summary) {
-        return res.status(400).json({ message: "Transactions and summary are required" });
+      if (!safeTransactions && !safeSummary) {
+        return res.status(400).json({ message: "Financial data is required" });
       }
 
       // Format the selected month for natural language
@@ -1103,19 +1108,19 @@ Answer questions about features, subscription plans, how to use the app, trouble
       // Prepare payload for centralized AI processor
       const aiPayload = {
         summary: {
-          totalIncome: summary.totalIncome || 0,
-          totalExpenses: summary.totalExpenses || 0,
-          netBalance: summary.netBalance || 0,
-          transactionCount: transactions.length || 0
+          totalIncome: safeSummary.totalIncome || 0,
+          totalExpenses: safeSummary.totalExpenses || 0,
+          netBalance: safeSummary.netBalance || 0,
+          transactionCount: safeTransactions.length || 0
         },
-        transactions: transactions.slice(0, 10).map((t: any) => ({
+        transactions: safeTransactions.slice(0, 10).map((t: any) => ({
           description: t.description || t.note || 'Transaction',
           amount: t.amount,
           categoryName: t.categoryName || t.category || 'Uncategorized',
           type: t.type || 'expense',
           date: t.date
         })),
-        budgets: budgets?.map((budget: any) => ({
+        budgets: safeBudgets?.map((budget: any) => ({
           category: budget.categoryName,
           budgetAmount: budget.amount,
           spent: budget.spent,
@@ -1170,7 +1175,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
       } catch (aiError: any) {
         console.error('🚨 AI processor failed for contextual tips:', aiError.message);
         // Return fallback tips based on available data
-        const fallbackTips = generateFallbackTips(summary, transactions, budgets);
+        const fallbackTips = generateFallbackTips(safeSummary, safeTransactions, safeBudgets);
         return res.json({ tips: fallbackTips });
       }
       
@@ -1186,7 +1191,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
       // Handle AI processor errors
       if (result?.error) {
         console.error('🚨 AI processor returned error for contextual tips:', result.error);
-        const fallbackTips = generateFallbackTips(summary, transactions, budgets);
+        const fallbackTips = generateFallbackTips(safeSummary, safeTransactions, safeBudgets);
         return res.json({ tips: fallbackTips });
       }
       
@@ -1198,7 +1203,7 @@ Answer questions about features, subscription plans, how to use the app, trouble
         category: ['spending', 'saving', 'budgeting', 'income'].includes(tip.category) ? tip.category : 'budgeting',
         priority: ['high', 'medium', 'low'].includes(tip.priority) ? tip.priority : 'medium',
         actionable: Boolean(tip.actionable)
-      })) : generateFallbackTips(summary, transactions, budgets);
+      })) : generateFallbackTips(safeSummary, safeTransactions, safeBudgets);
 
       // Cache the result for 72 hours
       await cache.set(aiPayload, { tips }, false, 72);
@@ -1210,7 +1215,17 @@ Answer questions about features, subscription plans, how to use the app, trouble
         stack: error.stack,
         name: error.name
       });
-      return res.status(500).json({ message: "Failed to generate contextual financial tips" });
+      
+      // Return fallback tips instead of 500 error
+      try {
+        const fallbackTips = generateFallbackTips(safeSummary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 }, safeTransactions || [], safeBudgets || []);
+        console.log('🔄 Contextual tips - Returning fallback tips due to error');
+        return res.json({ tips: fallbackTips });
+      } catch (fallbackError) {
+        console.error("Error generating fallback tips:", fallbackError);
+        // Return empty tips as last resort
+        return res.json({ tips: [] });
+      }
     }
   });
 
