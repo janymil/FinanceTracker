@@ -3,8 +3,8 @@ import { requireAuth } from "@clerk/express";
 import { z } from "zod";
 import { runAI } from "../../lib/aiProcessor";
 import { db } from "../db";
-import { categories } from "../../shared/schema";
-import { eq, and } from "drizzle-orm";
+import { categories, aiUsage, users } from "../../shared/schema";
+import { eq, and, sql, gte } from "drizzle-orm";
 
 const voiceProcessSchema = z.object({
   transcript: z.string().min(1),
@@ -18,11 +18,23 @@ export function registerVoiceRoutes(app: Router) {
 
   // Process voice transcript to extract transaction data
   router.post('/process', requireAuth(), async (req: Request, res: Response) => {
+    const startTime = Date.now();
+    
     try {
       const { transcript, language, timezone } = voiceProcessSchema.parse(req.body);
       const userId = req.auth?.userId;
       
+      console.log('🎯 [VoiceAPI] Processing voice input:', {
+        userId: userId?.substring(0, 8) + '...',
+        transcript: transcript,
+        language,
+        timezone,
+        transcriptLength: transcript.length,
+        timestamp: new Date().toISOString()
+      });
+      
       if (!userId) {
+        console.error('❌ [VoiceAPI] Unauthorized request');
         return res.status(401).json({ error: "Unauthorized" });
       }
 
@@ -49,6 +61,12 @@ export function registerVoiceRoutes(app: Router) {
         );
 
       const allCategories = [...systemCategories, ...userCategories];
+      
+      console.log('📂 [VoiceAPI] Categories loaded:', {
+        systemCategories: systemCategories.length,
+        userCategories: userCategories.length,
+        totalCategories: allCategories.length
+      });
 
       // Build the extraction prompt
       const currentDate = new Date().toISOString();
@@ -94,8 +112,19 @@ Examples:
 
       // Use external AI processor service with fallback to local OpenAI
       let completion;
+      let aiProcessingTime = 0;
+      const aiStartTime = Date.now();
+      
       try {
         const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'http://31.97.103.28:8080';
+        
+        console.log('🤖 [VoiceAPI] Calling external AI processor:', {
+          url: AI_PROCESSOR_URL,
+          model: 'gpt-4o-mini',
+          promptLength: prompt.length,
+          timeout: '30s'
+        });
+        
         const response = await fetch(`${AI_PROCESSOR_URL}/api/ai/voice-extract`, {
           method: 'POST',
           headers: {
@@ -111,22 +140,61 @@ Examples:
         });
 
         if (!response.ok) {
-          throw new Error(`AI processor responded with ${response.status}`);
+          throw new Error(`AI processor responded with ${response.status}: ${response.statusText}`);
         }
 
         const data = await response.json();
         completion = data.result || data.completion;
+        aiProcessingTime = Date.now() - aiStartTime;
+        
+        console.log('🎉 [VoiceAPI] External AI processing successful:', {
+          processingTime: `${aiProcessingTime}ms`,
+          responseSize: JSON.stringify(data).length,
+          hasResult: !!completion
+        });
+        
       } catch (aiProcessorError) {
-        console.warn('AI processor service unavailable, falling back to direct OpenAI:', aiProcessorError);
-        completion = await openaiRequest(prompt, userId, "voice-extraction");
+        aiProcessingTime = Date.now() - aiStartTime;
+        console.warn('⚠️ [VoiceAPI] External AI processor failed, using fallback:', {
+          error: aiProcessorError.message,
+          processingTime: `${aiProcessingTime}ms`,
+          fallbackMethod: 'local OpenAI'
+        });
+        
+        const fallbackStartTime = Date.now();
+        completion = await runAI(prompt, userId, "voice-extraction");
+        const fallbackTime = Date.now() - fallbackStartTime;
+        
+        console.log('🔄 [VoiceAPI] Fallback processing completed:', {
+          fallbackTime: `${fallbackTime}ms`,
+          totalTime: `${Date.now() - aiStartTime}ms`
+        });
       }
       
       let extractedData;
       try {
         // Parse the AI response
+        console.log('🔍 [VoiceAPI] Parsing AI response:', {
+          rawResponse: completion,
+          responseLength: completion?.length
+        });
+        
         extractedData = JSON.parse(completion);
+        
+        console.log('✅ [VoiceAPI] AI response parsed successfully:', {
+          hasAmount: !!extractedData.amount,
+          hasVendor: !!extractedData.vendor,
+          hasType: !!extractedData.type,
+          confidence: extractedData.confidence,
+          ambiguities: extractedData.ambiguities?.length || 0
+        });
+        
       } catch (error) {
-        console.error("Failed to parse AI response:", completion);
+        console.error('💥 [VoiceAPI] Failed to parse AI response:', {
+          error: error.message,
+          rawResponse: completion,
+          responseType: typeof completion
+        });
         return res.status(500).json({ 
           error: "Failed to parse transaction data",
           rawResponse: completion 
@@ -153,18 +221,128 @@ Examples:
         extractedData.confidence = calculateConfidence(extractedData);
       }
 
+      const totalTime = Date.now() - startTime;
+      
+      console.log('🚀 [VoiceAPI] Voice processing completed successfully:', {
+        totalProcessingTime: `${totalTime}ms`,
+        aiProcessingTime: `${aiProcessingTime}ms`,
+        finalConfidence: extractedData.confidence,
+        extractedFields: Object.keys(extractedData).filter(key => extractedData[key] !== null && extractedData[key] !== undefined),
+        userId: userId?.substring(0, 8) + '...',
+        timestamp: new Date().toISOString()
+      });
+
       res.json({
         success: true,
         data: extractedData,
-        transcript: transcript
+        transcript: transcript,
+        processingTime: totalTime
       });
 
     } catch (error) {
-      console.error("Voice processing error:", error);
+      const totalTime = Date.now() - startTime;
+      console.error('💥 [VoiceAPI] Voice processing failed:', {
+        error: error.message,
+        stack: error.stack,
+        totalTime: `${totalTime}ms`,
+        userId: userId?.substring(0, 8) + '...',
+        timestamp: new Date().toISOString()
+      });
+      
       res.status(500).json({ 
         error: "Failed to process voice input",
         details: error instanceof Error ? error.message : "Unknown error"
       });
+    }
+  });
+
+  // Get current month voice usage for free users
+  router.get('/usage', requireAuth(), async (req: Request, res: Response) => {
+    try {
+      const userId = req.auth?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Get user's plan
+      const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      
+      if (!user[0]) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Only track usage for free users
+      if (user[0].plan !== 'free') {
+        return res.json({
+          currentMonthUsage: 0,
+          maxUsage: -1, // Unlimited
+          remainingUsage: -1 // Unlimited
+        });
+      }
+
+      // Get current month usage
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const usage = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(aiUsage)
+        .where(
+          and(
+            eq(aiUsage.userId, userId),
+            eq(aiUsage.functionName, 'voice-input'),
+            gte(aiUsage.createdAt, startOfMonth)
+          )
+        );
+
+      const currentMonthUsage = usage[0]?.count || 0;
+      const maxUsage = 5; // Free users get 5 voice inputs per month
+      const remainingUsage = Math.max(0, maxUsage - currentMonthUsage);
+
+      res.json({
+        currentMonthUsage,
+        maxUsage,
+        remainingUsage
+      });
+
+    } catch (error) {
+      console.error("Voice usage check error:", error);
+      res.status(500).json({ error: "Failed to check voice usage" });
+    }
+  });
+
+  // Track voice input usage
+  router.post('/track-usage', requireAuth(), async (req: Request, res: Response) => {
+    try {
+      const userId = req.auth?.userId;
+      const { transcript, plan } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Only track usage for free users
+      if (plan === 'free') {
+        await db.insert(aiUsage).values({
+          userId,
+          functionName: 'voice-input',
+          tokensUsed: Math.ceil(transcript / 4), // Approximate tokens
+          cost: "0.000000", // Free tier
+          model: 'voice-recognition',
+          requestSize: transcript,
+          responseSize: 0,
+          plan: plan,
+          status: 'success'
+        });
+      }
+
+      res.json({ success: true });
+
+    } catch (error) {
+      console.error("Voice usage tracking error:", error);
+      res.status(500).json({ error: "Failed to track voice usage" });
     }
   });
 

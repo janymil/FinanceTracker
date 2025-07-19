@@ -61,28 +61,77 @@ export function VoiceTransactionDialog({
   // Process voice transcript
   const processVoice = useMutation({
     mutationFn: async (transcript: string) => {
-      const response = await apiRequest('/api/voice/process', {
-        method: 'POST',
-        body: JSON.stringify({
-          transcript,
-          language: i18n.language,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        }),
+      const requestData = {
+        transcript,
+        language: i18n.language,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      };
+      
+      console.log('🚀 [VoiceDialog] Starting voice processing:', {
+        ...requestData,
+        timestamp: new Date().toISOString()
       });
-      return response;
+      
+      const startTime = performance.now();
+      
+      try {
+        const response = await apiRequest('/api/voice/process', {
+          method: 'POST',
+          body: JSON.stringify(requestData),
+        });
+        
+        const endTime = performance.now();
+        console.log('⚡ [VoiceDialog] API response received:', {
+          processingTime: `${(endTime - startTime).toFixed(2)}ms`,
+          success: response.success,
+          hasData: !!response.data,
+          timestamp: new Date().toISOString()
+        });
+        
+        return response;
+      } catch (error) {
+        const endTime = performance.now();
+        console.error('💥 [VoiceDialog] API request failed:', {
+          processingTime: `${(endTime - startTime).toFixed(2)}ms`,
+          error: error.message,
+          timestamp: new Date().toISOString()
+        });
+        throw error;
+      }
     },
     onSuccess: (data) => {
+      console.log('✅ [VoiceDialog] Processing successful:', {
+        extractedData: data.data,
+        confidence: data.data?.confidence,
+        ambiguities: data.data?.ambiguities,
+        timestamp: new Date().toISOString()
+      });
+      
       if (data.success && data.data) {
         setExtractedData(data.data);
         setEditedData({ ...data.data });
         setError(null);
+        
+        console.log('📊 [VoiceDialog] Data extraction results:', {
+          amount: data.data.amount,
+          type: data.data.type,
+          vendor: data.data.vendor,
+          categoryId: data.data.categoryId,
+          confidence: data.data.confidence,
+          hasAmbiguities: data.data.ambiguities?.length > 0
+        });
       } else {
+        console.error('❌ [VoiceDialog] Invalid response format:', data);
         setError(t('voiceTransaction.processingError'));
       }
       setIsProcessing(false);
     },
     onError: (error) => {
-      console.error('Voice processing error:', error);
+      console.error('💥 [VoiceDialog] Processing error:', {
+        error: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString()
+      });
       setError(t('voiceTransaction.processingError'));
       setIsProcessing(false);
     },

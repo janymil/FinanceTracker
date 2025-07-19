@@ -19,19 +19,30 @@ export function VoiceInput({ onTranscript, onError, className, language }: Voice
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
+    console.log('🔧 [VoiceInput] Initializing speech recognition...', {
+      hasWebkitSpeechRecognition: 'webkitSpeechRecognition' in window,
+      hasSpeechRecognition: 'SpeechRecognition' in window,
+      userAgent: navigator.userAgent,
+      language: language || getVoiceLanguage(i18n.language)
+    });
+
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      console.error('❌ [VoiceInput] Speech Recognition not supported');
       onError?.(t('voiceInput.notSupported'));
       return;
     }
 
     const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
     const recognition = new SpeechRecognition();
+    
+    console.log('✅ [VoiceInput] Speech recognition initialized successfully');
 
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = language || getVoiceLanguage(i18n.language);
 
     recognition.onstart = () => {
+      console.log('🎤 [VoiceInput] Recording started');
       setIsListening(true);
       setTranscript('');
     };
@@ -39,14 +50,30 @@ export function VoiceInput({ onTranscript, onError, className, language }: Voice
     recognition.onresult = (event: any) => {
       const current = event.resultIndex;
       const transcriptText = event.results[current][0].transcript;
+      const confidence = event.results[current][0].confidence;
+      
+      console.log('🗣️ [VoiceInput] Speech result:', {
+        text: transcriptText,
+        confidence: confidence,
+        isFinal: event.results[current].isFinal
+      });
       
       if (event.results[current].isFinal) {
-        setTranscript(prev => prev + ' ' + transcriptText);
+        const finalTranscript = prev => prev + ' ' + transcriptText;
+        setTranscript(finalTranscript);
+        console.log('✅ [VoiceInput] Final transcript captured');
       }
     };
 
     recognition.onerror = (event: any) => {
-      console.error('Speech recognition error:', event.error);
+      console.error('❌ [VoiceInput] Speech recognition error:', {
+        error: event.error,
+        message: event.message || 'No message provided',
+        type: event.type,
+        target: event.target?.constructor?.name,
+        timestamp: new Date().toISOString()
+      });
+      console.error('❌ [VoiceInput] Full error event:', event);
       setIsListening(false);
       
       const errorMessages: Record<string, string> = {
@@ -60,11 +87,19 @@ export function VoiceInput({ onTranscript, onError, className, language }: Voice
     };
 
     recognition.onend = () => {
+      console.log('🔚 [VoiceInput] Recording ended');
       setIsListening(false);
       if (transcript.trim()) {
+        console.log('📤 [VoiceInput] Sending transcript to dialog:', {
+          transcript: transcript.trim(),
+          length: transcript.trim().length,
+          timestamp: new Date().toISOString()
+        });
         setIsProcessing(true);
         onTranscript(transcript.trim());
         setTimeout(() => setIsProcessing(false), 1000);
+      } else {
+        console.warn('⚠️ [VoiceInput] No transcript captured');
       }
     };
 
@@ -78,12 +113,22 @@ export function VoiceInput({ onTranscript, onError, className, language }: Voice
   }, [language, i18n.language, onTranscript, onError, t, transcript]);
 
   const toggleListening = () => {
-    if (!recognitionRef.current) return;
+    if (!recognitionRef.current) {
+      console.error('❌ [VoiceInput] Recognition not initialized');
+      return;
+    }
 
     if (isListening) {
+      console.log('🛑 [VoiceInput] Stopping recognition...');
       recognitionRef.current.stop();
     } else {
-      recognitionRef.current.start();
+      console.log('▶️ [VoiceInput] Starting recognition...');
+      try {
+        recognitionRef.current.start();
+      } catch (error) {
+        console.error('❌ [VoiceInput] Failed to start recognition:', error);
+        onError?.('Failed to start voice recognition');
+      }
     }
   };
 

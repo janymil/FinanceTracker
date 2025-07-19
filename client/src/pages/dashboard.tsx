@@ -72,7 +72,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "wouter";
-import { VoiceInput } from "@/components/voice-input";
+import { VoiceInputWithPlan } from "@/components/voice-input-with-plan";
 import { VoiceTransactionDialog } from "@/components/voice-transaction-dialog";
 
 interface Category {
@@ -457,7 +457,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <VoiceInput 
+                <VoiceInputWithPlan 
                   onTranscript={(transcript) => {
                     setVoiceTranscript(transcript);
                     setVoiceDialogOpen(true);
