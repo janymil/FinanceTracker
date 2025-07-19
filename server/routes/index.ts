@@ -22,6 +22,7 @@ import { registerClerkWebhookRoutes } from "./clerkWebhooks.js";
 import { registerPDFRoutes } from "./pdfRoutes.js";
 import demoRoutes from "../demoRoutes.js";
 import courseRoutes from "../courseRoutes.js";
+import { DataEncryption } from "../encryption.js";
 // Contextual financial tips routes moved to aiRoutes.ts
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -33,7 +34,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // System status endpoints
   app.get('/api/encryption-status', (req, res) => {
-    const { DataEncryption } = require('../encryption');
     const status = DataEncryption.getEncryptionStatus();
     res.json(status);
   });
