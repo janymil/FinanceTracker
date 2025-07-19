@@ -214,13 +214,8 @@ async function checkForNewAchievements(userId: string) {
       if (!earnedBadgeIds.has(badgeId)) {
         let shouldAward = false;
         
-        if (achievement.check.length === 1) {
-          // Stats-only check
-          shouldAward = achievement.check(stats);
-        } else {
-          // Stats + progress check
-          shouldAward = achievement.check(stats, progress || []);
-        }
+        // Always provide both parameters
+        shouldAward = achievement.check(stats, progress || []);
         
         if (shouldAward) {
           await storage.awardAchievement(userId, badgeId);

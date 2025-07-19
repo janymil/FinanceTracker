@@ -15,7 +15,7 @@ router.post('/generate-narration', async (req, res) => {
     if (!narrationText && demoType) {
       const language = normalizeLanguageCode(rawLanguage || 'en-us');
       const scripts = getDemoScripts();
-      const featureScript = scripts[demoType];
+      const featureScript = scripts[demoType as keyof typeof scripts];
       
       if (featureScript && featureScript[language]) {
         // Combine all script steps into one narration
@@ -60,7 +60,7 @@ router.get('/script/:featureId/:language', (req, res) => {
   const language = normalizeLanguageCode(rawLanguage);
 
   const scripts = getDemoScripts();
-  const featureScript = scripts[featureId];
+  const featureScript = scripts[featureId as keyof typeof scripts];
 
   if (!featureScript) {
     return res.status(404).json({ error: 'Feature script not found' });

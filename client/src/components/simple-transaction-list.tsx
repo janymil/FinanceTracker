@@ -37,6 +37,7 @@ interface Transaction {
   ocrDetectedDate?: string;
   isRecurring?: boolean;
   recurringFrequency?: string;
+  referenceNote?: string;
 }
 
 interface SimpleTransactionListProps {

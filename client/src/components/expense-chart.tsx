@@ -33,10 +33,11 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
     // Use summary data if provided (already translated by backend)
     data = summary.expensesByCategory;
     totalExpenses = summary.totalExpenses;
-  } else if (expenseData) {
+  } else if (expenseData && typeof expenseData === 'object') {
     // Use API data if no summary provided (already translated by backend)
-    data = expenseData.expensesByCategory || [];
-    totalExpenses = expenseData.totalExpenses || 0;
+    const typedExpenseData = expenseData as { expensesByCategory?: any[]; totalExpenses?: number };
+    data = typedExpenseData.expensesByCategory || [];
+    totalExpenses = typedExpenseData.totalExpenses || 0;
   }
 
   const chartData = data.map((item: any, index: number) => ({
@@ -99,7 +100,7 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
                 fill="#8884d8"
                 dataKey="amount"
               >
-                {chartData.map((entry, index) => (
+                {chartData.map((entry: any, index: number) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
@@ -113,7 +114,7 @@ export function ExpenseChart({ summary }: ExpenseChartProps) {
         </div>
         
         <div className="mt-4 space-y-2">
-          {chartData.map((item, index) => (
+          {chartData.map((item: any, index: number) => (
             <div key={index} className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
                 <div 

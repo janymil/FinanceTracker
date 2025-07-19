@@ -159,7 +159,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
               transactionCount: payload.transactions?.length || 0,
               language: payload.language || 'en-us'
             });
-            fallbackResult = await generateContextualFinancialTips(userId, payload, payload.language || 'en-us');
+            fallbackResult = await generateContextualFinancialTips(userId, payload as any, payload.language || 'en-us');
             console.log('[AI contextual-tips] Local fallback result:', {
               hasResult: !!fallbackResult,
               hasTips: !!fallbackResult?.tips,
@@ -170,7 +170,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
             fallbackResult = await generateFinancialTips(userId, payload as any);
             break;
           case 'daily-recommendations':
-            fallbackResult = await generateDailyRecommendations(userId, payload, payload.language || 'en-us');
+            fallbackResult = await generateDailyRecommendations(userId, payload as any, payload.language || 'en-us');
             break;
           case 'spending-insights':
             fallbackResult = await generateSpendingInsights(userId, payload.transactions);

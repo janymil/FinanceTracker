@@ -174,7 +174,7 @@ export default function Courses() {
       
       if (isCorrect) {
         correctAnswers++;
-        totalScore += exercise.points;
+        totalScore += exercise.points || 10;
       }
     });
 
@@ -586,7 +586,7 @@ export default function Courses() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="text-2xl flex items-center">
-                      {React.createElement(getIcon(module.icon), { className: "h-6 w-6" })}
+                      {React.createElement(getIcon(module.icon || 'BookOpen'), { className: "h-6 w-6" })}
                     </div>
                     <div>
                       <CardTitle className="text-lg">

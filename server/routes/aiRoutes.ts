@@ -824,10 +824,9 @@ export function registerAIRoutes(app: Express) {
         throw new Error("Failed to generate mascot image - no URL returned from DALL-E 3");
       }
 
-      // Download the image from DALL-E and store it permanently
+      // Download the image from DALL-E and store it permanently in Bunny CDN
       const fetch = (await import('node-fetch')).default;
-      const fs = await import('fs/promises');
-      const path = await import('path');
+      const { bunnyStorage } = await import('../bunnyStorage');
       
       const imageResponse = await fetch(tempImageUrl);
       if (!imageResponse.ok) {
@@ -840,21 +839,34 @@ export function registerAIRoutes(app: Express) {
       let permanentImageUrl: string;
       
       try {
-        // Create uploads directory if it doesn't exist
-        const uploadsDir = path.join(process.cwd(), 'uploads', 'mascots');
-        await fs.mkdir(uploadsDir, { recursive: true });
+        // Upload to Bunny CDN
+        const bunnyPath = `mascots/${userId}/${filename}`;
+        await bunnyStorage.uploadFile(bunnyPath, imageBuffer, 'image/png');
         
-        // Store image permanently in local file system
-        const filePath = path.join(uploadsDir, filename);
-        await fs.writeFile(filePath, imageBuffer);
-        
-        // Create permanent URL for the stored image
-        permanentImageUrl = `/uploads/mascots/${filename}`;
-        console.log(`Mascot image stored permanently at: ${permanentImageUrl}`);
+        // Get the CDN URL
+        const cdnBaseUrl = process.env.BUNNY_CDN_URL || `https://${process.env.BUNNY_STORAGE_ZONE}.b-cdn.net`;
+        permanentImageUrl = `${cdnBaseUrl}/${bunnyPath}`;
+        console.log(`Mascot image stored permanently on CDN at: ${permanentImageUrl}`);
       } catch (storageError) {
-        console.error("Failed to store image locally, using temporary URL:", storageError);
-        // Fallback to temporary URL if local storage fails
-        permanentImageUrl = tempImageUrl;
+        console.error("Failed to store image on CDN, falling back to local storage:", storageError);
+        
+        // Fallback to local storage
+        try {
+          const fs = await import('fs/promises');
+          const path = await import('path');
+          const uploadsDir = path.join(process.cwd(), 'uploads', 'mascots');
+          await fs.mkdir(uploadsDir, { recursive: true });
+          
+          const filePath = path.join(uploadsDir, filename);
+          await fs.writeFile(filePath, imageBuffer);
+          
+          permanentImageUrl = `/uploads/mascots/${filename}`;
+          console.log(`Mascot image stored locally at: ${permanentImageUrl}`);
+        } catch (localError) {
+          console.error("Failed to store image locally as well:", localError);
+          // Last resort - use temporary URL
+          permanentImageUrl = tempImageUrl;
+        }
       }
 
       // Check if user already has a mascot
@@ -862,11 +874,23 @@ export function registerAIRoutes(app: Express) {
       
       let mascot;
       if (existingMascot) {
-        // Delete old image if it exists and is stored locally
-        if (existingMascot.imageUrl && existingMascot.imageUrl.startsWith('/uploads/mascots/')) {
+        // Delete old image if it exists
+        if (existingMascot.imageUrl) {
           try {
-            const oldFilePath = path.join(process.cwd(), existingMascot.imageUrl);
-            await fs.unlink(oldFilePath);
+            // Check if it's a CDN URL or local file
+            if (existingMascot.imageUrl.includes('b-cdn.net') || existingMascot.imageUrl.includes('bunny')) {
+              // Delete from Bunny CDN
+              const cdnPath = existingMascot.imageUrl.split('.net/')[1];
+              if (cdnPath) {
+                await bunnyStorage.deleteFile(cdnPath);
+                console.log('Deleted previous mascot from CDN:', cdnPath);
+              }
+            } else if (existingMascot.imageUrl.startsWith('/uploads/mascots/')) {
+              // Delete local file (fallback for old mascots)
+              const oldFilePath = path.join(process.cwd(), existingMascot.imageUrl);
+              await fs.unlink(oldFilePath);
+              console.log('Deleted previous local mascot file');
+            }
           } catch (error) {
             console.warn("Failed to delete old mascot image:", error);
           }

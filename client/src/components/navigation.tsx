@@ -91,7 +91,7 @@ export default function Navigation() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2 h-auto p-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={clerkUser?.imageUrl || user?.profileImageUrl} alt={clerkUser?.firstName || user?.firstName || "User"} />
+                    <AvatarImage src={clerkUser?.imageUrl || user?.profileImageUrl || undefined} alt={clerkUser?.firstName || user?.firstName || "User"} />
                     <AvatarFallback className="bg-primary text-white">
                       J
                     </AvatarFallback>
@@ -111,7 +111,7 @@ export default function Navigation() {
                   <Settings className="h-4 w-4 mr-2" />
                   Account Settings
                 </DropdownMenuItem>
-                {!user?.isPremium && (
+                {user?.plan !== 'premium' && (
                   <DropdownMenuItem asChild>
                     <Link href="/subscribe">
                       <Crown className="h-4 w-4 mr-2" />

@@ -90,7 +90,8 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
 
   const autoCategorize = async () => {
     try {
-      const data = await apiRequest("POST", "/api/auto-categorize");
+      const response = await apiRequest("POST", "/api/auto-categorize");
+      const data = await response.json();
       setSuggestions(data.suggestions || []);
       toast({
         title: t("Auto-Categorization Complete"),
@@ -124,7 +125,8 @@ export default function AutoCategorization({ transactions = [] }: AutoCategoriza
 
   const aiCategorize = async ({ description, amount }: { description: string; amount: number }) => {
     try {
-      const data = await apiRequest("POST", "/api/ai/categorize", { description, amount });
+      const response = await apiRequest("POST", "/api/ai/categorize", { description, amount });
+      const data = await response.json();
       await queryClient.invalidateQueries({ queryKey: ["ai"] });
       return data;
     } catch (error: any) {

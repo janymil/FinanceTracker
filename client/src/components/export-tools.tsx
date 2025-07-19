@@ -227,11 +227,12 @@ export function ExportTools() {
           categoryBreakdown[category] = (categoryBreakdown[category] || 0) + parseFloat(t.amount);
         });
       
+      const typedSummary = summary as { totalIncome?: number; totalExpenses?: number; netAmount?: number; transactionCount?: number } | undefined;
       const monthlySummary: MonthlySummary = {
-        totalIncome: summary?.totalIncome || 0,
-        totalExpenses: summary?.totalExpenses || 0,
-        netAmount: summary?.netAmount || 0,
-        transactionCount: summary?.transactionCount || 0,
+        totalIncome: typedSummary?.totalIncome || 0,
+        totalExpenses: typedSummary?.totalExpenses || 0,
+        netAmount: typedSummary?.netAmount || 0,
+        transactionCount: typedSummary?.transactionCount || 0,
         categoryBreakdown,
         month: currentMonth,
         year: currentYear,

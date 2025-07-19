@@ -44,20 +44,20 @@ const languageDetector = {
     return 'en';
   },
   
-  cacheUserLanguage: function(lng) {
+  cacheUserLanguage: function(lng: string) {
     // Save to cookie for persistence
     this.setCookie('i18next', lng, 365);
   },
   
   // Helper methods for cookie handling
-  getCookie: function(name) {
+  getCookie: function(name: string) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
+    if (parts.length === 2) return parts.pop()?.split(';').shift();
     return null;
   },
   
-  setCookie: function(name, value, days) {
+  setCookie: function(name: string, value: string, days: number) {
     const expires = new Date();
     expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
     document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
@@ -74,7 +74,7 @@ export function detectLanguageAndRedirect() {
   const oldLangMatch = currentPath.match(/^\/([a-z]{2}-[a-z]{2})\//);
   if (oldLangMatch) {
     const oldLang = oldLangMatch[1];
-    const langMap = {
+    const langMap: Record<string, string> = {
       'en-us': 'en',
       'es-pe': 'es',
       'sk-sk': 'sk'

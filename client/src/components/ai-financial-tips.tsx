@@ -394,7 +394,7 @@ export default function AIFinancialTips({ summary }: AIFinancialTipsProps) {
                     };
 
                     return (
-                      <div key={index} className={`p-4 bg-gradient-to-r ${colorClasses[section.color] || colorClasses.blue} rounded-lg border`}>
+                      <div key={index} className={`p-4 bg-gradient-to-r ${colorClasses[section.color as keyof typeof colorClasses] || colorClasses.blue} rounded-lg border`}>
                         <div className="flex items-start gap-3">
                           <div className={`p-2 rounded-full ${
                             section.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900' :

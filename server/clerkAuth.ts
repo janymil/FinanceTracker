@@ -42,7 +42,7 @@ export const isAuthenticated = (req: any, res: Response, next: NextFunction) => 
   } catch (error) {
     console.error('Authentication error:', error);
     // If this is a user deletion scenario, return 401 instead of 500
-    if (error.message?.includes('User not found') || error.message?.includes('deleted')) {
+    if ((error as Error).message?.includes('User not found') || (error as Error).message?.includes('deleted')) {
       return res.status(401).json({ message: 'User account no longer exists' });
     }
     res.status(401).json({ message: 'Authentication failed' });

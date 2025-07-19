@@ -27,6 +27,7 @@ export interface Exercise {
     correct: string;
     incorrect: string;
   };
+  points?: number;
 }
 
 export interface Level {
@@ -52,6 +53,7 @@ export interface Course {
   unlockLevel: number;
   totalLevels: number;
   levels: Level[];
+  icon?: string;
 }
 
 // Type aliases for compatibility with Courses.tsx

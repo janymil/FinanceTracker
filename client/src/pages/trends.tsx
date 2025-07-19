@@ -1,4 +1,5 @@
 import { useClerkUserReady } from "@/hooks/useClerkUserReady";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ import { translateCategoryName } from "../../../server/categoryTranslations";
 
 export default function Trends() {
   const { isReady, user } = useClerkUserReady();
+  const { user: authUser } = useAuth();
   const { currency } = useCurrency();
   const { t, i18n } = useTranslation();
   const displayCurrency = currency || '$';
@@ -195,7 +197,7 @@ export default function Trends() {
   console.log("Trends Debug:", {
     isReady,
     userId: user?.id,
-    userPlan: user?.plan,
+    userPlan: authUser?.plan,
     loading,
     transactionsLength: transactions?.length || 0,
     categoriesLength: categories?.length || 0,
@@ -310,8 +312,8 @@ export default function Trends() {
     });
 
     return Array.from(categoryTrends.entries()).map(([categoryName, monthData]) => {
-      const amounts = Array.from(monthData.values());
-      const totalAmount = amounts.reduce((sum, amount) => sum + amount, 0);
+      const amounts = Array.from(monthData.values()) as number[];
+      const totalAmount = amounts.reduce((sum: number, amount: number) => sum + amount, 0);
       const avgAmount = totalAmount / amounts.length;
       const trend = amounts.length > 1 ? 
         (amounts[amounts.length - 1] > amounts[amounts.length - 2] ? 'increasing' : 'decreasing') : 'stable';
@@ -321,12 +323,15 @@ export default function Trends() {
         totalAmount,
         avgAmount,
         trend,
-        monthlyData: Array.from(monthData.entries()).map(([month, amount]) => ({
-          month,
-          amount
-        }))
+        monthlyData: Array.from(monthData.entries()).map((entry: any) => {
+          const [month, amount] = entry;
+          return {
+            month,
+            amount
+          };
+        })
       };
-    }).sort((a, b) => b.totalAmount - a.totalAmount);
+    }).sort((a: any, b: any) => b.totalAmount - a.totalAmount);
   }, [transactions, categories]);
 
   const formatCurrency = (value: number) => {
@@ -679,11 +684,11 @@ export default function Trends() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>{t('trends.categories.total_spent')}</span>
-                        <span className="font-medium">{formatCurrency(categoryTrend.totalAmount)}</span>
+                        <span className="font-medium">{formatCurrency(categoryTrend.totalAmount as number)}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span>{t('trends.categories.monthly_average')}</span>
-                        <span className="font-medium">{formatCurrency(categoryTrend.avgAmount)}</span>
+                        <span className="font-medium">{formatCurrency(categoryTrend.avgAmount as number)}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -875,7 +880,7 @@ export default function Trends() {
                         <div>
                           <h4 className="font-medium mb-3">{t('trends.forecasts.key_insights')}</h4>
                           <div className="space-y-2">
-                            {aiPredictions.financialForecast.keyInsights.map((insight, index) => (
+                            {aiPredictions.financialForecast.keyInsights.map((insight: any, index: number) => (
                               <div key={index} className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                 <p className="text-sm">{insight}</p>
                               </div>
@@ -889,7 +894,7 @@ export default function Trends() {
                         <div>
                           <h4 className="font-medium mb-3">{t('trends.forecasts.ai_recommendations')}</h4>
                           <div className="space-y-2">
-                            {aiPredictions.financialForecast.recommendations.map((rec, index) => (
+                            {aiPredictions.financialForecast.recommendations.map((rec: any, index: number) => (
                               <div key={index} className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border-l-4 border-green-600">
                                 <p className="text-sm">{rec}</p>
                               </div>
@@ -903,7 +908,7 @@ export default function Trends() {
                         <div>
                           <h4 className="font-medium mb-3">{t('trends.forecasts.risk_factors')}</h4>
                           <div className="space-y-2">
-                            {aiPredictions.financialForecast.riskFactors.map((risk, index) => (
+                            {aiPredictions.financialForecast.riskFactors.map((risk: any, index: number) => (
                               <div key={index} className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border-l-4 border-red-600">
                                 <p className="text-sm">{risk}</p>
                               </div>
@@ -926,7 +931,7 @@ export default function Trends() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {aiPredictions.categoryPredictions.slice(0, 6).map((prediction, index) => (
+                        {aiPredictions.categoryPredictions.slice(0, 6).map((prediction: any, index: number) => (
                           <div key={index} className="p-4 border rounded-lg">
                             <div className="flex items-center justify-between mb-2">
                               <h5 className="font-medium">{translateCategoryName(prediction.category, i18n.language)}</h5>

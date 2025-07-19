@@ -29,6 +29,7 @@ interface Transaction {
   ocrDetectedAmount?: string;
   ocrDetectedDate?: string;
   isRecurring?: boolean;
+  referenceNote?: string;
 }
 
 interface TransactionListProps {

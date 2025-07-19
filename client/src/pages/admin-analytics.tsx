@@ -276,7 +276,7 @@ export default function AdminAnalytics() {
 
   // AI Functions Management Functions
   const openEditLimitDialog = (plan: string, functionName: string) => {
-    const existingLimit = aiUsageLimits.find(l => l.plan === plan && l.functionName === functionName);
+    const existingLimit = aiUsageLimits.find((l: any) => l.plan === plan && l.functionName === functionName);
     setEditingLimit(existingLimit || {
       plan,
       functionName,
@@ -1835,9 +1835,9 @@ export default function AdminAnalytics() {
                             </td>
                           </tr>
                         ) : (
-                          aiFunctionStats.map((func) => {
+                          aiFunctionStats.map((func: any) => {
                             // Map function names to display info
-                            const functionInfo = {
+                            const functionInfo: Record<string, any> = {
                               'categorizeExpense': { title: 'Expense Categorization', model: 'gpt-4o-mini' },
                               'generateFinancialTips': { title: 'Financial Tips', model: 'gpt-4o' },
                               'generateContextualFinancialTips': { title: 'Contextual Tips', model: 'gpt-4o' },
@@ -1848,7 +1848,7 @@ export default function AdminAnalytics() {
                               'generateExpensePredictions': { title: 'Expense Predictions', model: 'gpt-4o' },
                               'parseBankStatement': { title: 'Bank Statement Parser', model: 'gpt-4o' },
                               'generateFinancialMascot': { title: 'DALL-E Mascot', model: 'dall-e-3' },
-                            }[func.functionName] || { title: func.functionName, model: 'unknown' };
+                            }[func.functionName as keyof typeof functionInfo] || { title: func.functionName, model: 'unknown' };
                             
                             return (
                               <tr key={func.functionName} className="hover:bg-gray-50">
@@ -2050,7 +2050,7 @@ export default function AdminAnalytics() {
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        {aiUserOverrides.map((override) => (
+                        {aiUserOverrides.map((override: any) => (
                           <div key={`${override.userId}-${override.functionName}`} className="flex items-center justify-between p-3 bg-white rounded border">
                             <div>
                               <div className="font-medium text-sm">{override.userEmail}</div>
@@ -2130,9 +2130,9 @@ export default function AdminAnalytics() {
                 ) : (
                   <div className="space-y-4">
                     {aiUserStats
-                      .sort((a, b) => b.totalCost - a.totalCost)
+                      .sort((a: any, b: any) => b.totalCost - a.totalCost)
                       .slice(0, 10)
-                      .map((user) => (
+                      .map((user: any) => (
                         <div key={user.userId} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
                           <div className="flex items-center gap-4">
                             <div>

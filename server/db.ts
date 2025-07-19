@@ -26,11 +26,12 @@ if (isProduction) {
   // Production: Use Neon with WebSocket for serverless
   neonConfig.webSocketConstructor = ws;
   
-  pool = new NeonPool({ 
+  const neonPool = new NeonPool({ 
     connectionString: databaseUrl,
     ssl: { rejectUnauthorized: false }
   });
-  db = neonDrizzle({ client: pool, schema });
+  pool = neonPool;
+  db = neonDrizzle(neonPool, { schema });
   
   console.log('✅ Connected to Neon production database');
 } else {
