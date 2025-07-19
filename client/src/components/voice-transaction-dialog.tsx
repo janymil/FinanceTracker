@@ -11,6 +11,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrency } from '@/context/CurrencyContext';
+import { getDynamicIcon } from '@/lib/iconUtils';
 
 interface VoiceTransactionData {
   amount?: number | null;
@@ -199,25 +200,7 @@ export function VoiceTransactionDialog({
     return category.name;
   };
 
-  const getCategoryIcon = (icon: string): string => {
-    const iconMap: Record<string, string> = {
-      'utensils': '🍽️',
-      'film': '🎬',
-      'home': '🏠',
-      'car': '🚗',
-      'heart': '❤️',
-      'shopping-bag': '🛍️',
-      'dollar-sign': '💰',
-      'briefcase': '💼',
-      'graduation-cap': '🎓',
-      'plane': '✈️',
-      'gamepad-2': '🎮',
-      'shirt': '👕',
-      'zap': '⚡',
-      'gift': '🎁'
-    };
-    return iconMap[icon] || '💰';
-  };
+
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -332,8 +315,8 @@ export function VoiceTransactionDialog({
                       .map((category: any) => (
                         <SelectItem key={category.id} value={category.id.toString()}>
                           <div className="flex items-center">
-                            <span className="mr-2 text-lg">
-                              {getCategoryIcon(category.icon)}
+                            <span className="mr-2">
+                              {getDynamicIcon(category.icon, "h-4 w-4")}
                             </span>
                             {getLocalizedCategoryName(category)}
                           </div>
