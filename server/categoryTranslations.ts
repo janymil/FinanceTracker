@@ -380,6 +380,39 @@ export function getUserLanguage(req: any): string {
 
 // Helper function to translate category name if it's predefined
 export function translateCategoryName(categoryName: string, language: string): string {
+  // Handle translation keys like "categories.transportation"
+  if (categoryName.startsWith('categories.')) {
+    const keyName = categoryName.replace('categories.', '');
+    
+    // Map common translation keys to category names
+    const keyMappings: Record<string, string> = {
+      'transportation': 'Transportation',
+      'healthcare': 'Healthcare', 
+      'shopping': 'Shopping',
+      'housing': 'Housing',
+      'entertainment': 'Entertainment',
+      'food': 'Food',
+      'utilities': 'Utilities',
+      'education': 'Education',
+      'travel': 'Travel',
+      'business': 'Business',
+      'other': 'Other',
+      'salary': 'Salary',
+      'freelance': 'Freelance',
+      'investments': 'Investments'
+    };
+    
+    const mappedName = keyMappings[keyName] || keyName;
+    const translation = categoryTranslations[mappedName as keyof typeof categoryTranslations];
+    
+    if (translation && translation[language as keyof typeof translation]) {
+      return translation[language as keyof typeof translation];
+    }
+    
+    // Return mapped name if no translation found
+    return mappedName;
+  }
+  
   // Check if this is a predefined category
   const translation = categoryTranslations[categoryName as keyof typeof categoryTranslations];
   
