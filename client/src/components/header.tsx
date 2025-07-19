@@ -216,8 +216,8 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
             <Menu className="h-5 w-5" />
           </Button>
 
-          {/* Redeem Code button */}
-          <Link href="/redeem">
+          {/* Redeem Code button - hidden on mobile */}
+          <Link href="/redeem" className="hidden md:block">
             <Button 
               size="sm" 
               variant="outline"
@@ -228,12 +228,12 @@ export default function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
             </Button>
           </Link>
 
-          {/* Quick add transaction button */}
+          {/* Quick add transaction button - hidden on mobile */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button 
                 size="sm" 
-                className="bg-primary hover:bg-primary/90"
+                className="bg-primary hover:bg-primary/90 hidden md:inline-flex"
                 onClick={() => {
                   setNewTransaction({
                     amount: "",
