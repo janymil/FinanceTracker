@@ -2,7 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { storage } from "../storage.js";
 import { adminAuth, adminLogin, adminLogout } from "../adminAuth.js";
 import { db } from "../db.js";
-import { blockedCountries } from "../../shared/schema.js";
+import { blockedCountries } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
 export function registerAdminRoutes(app: Express) {

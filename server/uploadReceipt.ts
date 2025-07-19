@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { ImageAnnotatorClient } from '@google-cloud/vision';
 import { getUserId } from './clerkAuth';
 import { db } from './db';
-import { users } from '../shared/schema';
+import { users } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import fetch from 'node-fetch';
 import { openai } from './openaiClient';
