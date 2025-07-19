@@ -2,7 +2,7 @@ import OpenAI from "openai";
 import { UnifiedAICache } from "../lib/unifiedAICache";
 import { getLanguageLabel, normalizeLanguageCode } from "../lib/languageUtils";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+// Using gpt-4o-mini for cost optimization while maintaining quality for financial analysis
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export interface ExpenseCategorizationResult {
@@ -329,7 +329,7 @@ export async function categorizeExpense(
       .join('\n');
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
@@ -529,7 +529,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
       
       // Fallback to direct OpenAI call
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
@@ -654,7 +654,7 @@ export async function generateSpendingInsights(
     }
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
@@ -781,7 +781,7 @@ export async function generateAIFinancialHealthScore(financialData: {
     // Cache system removed - direct processing only
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
@@ -1030,7 +1030,7 @@ Analysis Requirements:
 - Analyze budget adherence and variance predictions`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
@@ -1261,7 +1261,7 @@ ANALYSIS GUIDELINES:
 - Ensure all numeric values are provided (no null/undefined)`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
@@ -1450,7 +1450,7 @@ Focus on:
 Only provide recommendations and insights based on the actual financial data provided. Do not include generic advice.`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
@@ -1775,7 +1775,7 @@ Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
 }`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
@@ -2086,7 +2086,7 @@ CRITICAL QUALITY STANDARDS:
 Respond ONLY with valid JSON. No explanations or additional text.`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",

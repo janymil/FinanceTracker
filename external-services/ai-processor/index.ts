@@ -52,7 +52,7 @@ app.use(express.json({ limit: '10mb' }));
 
 
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+// External AI processor using cost-effective models while maintaining quality for financial analysis
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // DeepSeek API client - mimics OpenAI interface
@@ -1259,7 +1259,7 @@ Analysis Requirements:
 - Analyze budget adherence and variance predictions`;
 
     const response = await getAIClient(true).chat.completions.create({
-      model: "deepseek-chat", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "deepseek-chat", // Using cost-effective DeepSeek model for financial forecasting
       messages: [
         {
           role: "system",
@@ -1651,7 +1651,7 @@ Focus on:
 Only provide recommendations and insights based on the actual financial data provided. Do not include generic advice.`;
 
     const response = await getAIClient(true).chat.completions.create({
-      model: "deepseek-chat", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "deepseek-chat", // Using cost-effective DeepSeek model for daily recommendations
       messages: [
         {
           role: "system",
