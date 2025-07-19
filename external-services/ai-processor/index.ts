@@ -575,8 +575,8 @@ ${transactions.slice(0, 8).map(t => `- ${t.date}: ${t.description} - $${t.amount
 
 CONTEXTUAL ANALYSIS REQUIREMENTS:
 1. Address specific scenarios identified above with targeted, data-driven advice
-2. For budget overruns: Analyze transaction patterns and suggest specific reduction strategies
-3. For goal progress: Calculate required monthly contributions and suggest optimization
+2. For budget overruns: ONLY if budgets exist - Analyze transaction patterns and suggest specific reduction strategies
+3. For goal progress: ONLY if goals exist - Calculate required monthly contributions and suggest optimization
 4. For savings rate issues: Provide concrete steps with dollar targets based on their income
 5. For spending patterns: Identify specific categories and transaction behaviors to modify
 6. For income irregularities: Recommend buffer strategies based on their variability patterns
@@ -584,6 +584,8 @@ CONTEXTUAL ANALYSIS REQUIREMENTS:
 8. Use their actual transaction data, amounts, and patterns in all recommendations
 9. Provide specific dollar amounts, percentages, and realistic timeframes
 10. Make every tip immediately actionable with clear, measurable next steps
+
+CRITICAL: If no budgets are set, DO NOT mention budget overruns, budget comparisons, or budget-related advice. If no goals are set, DO NOT mention goal progress or goal-related recommendations. Focus only on spending patterns, categorization, and general financial health based on actual transaction data.
 
 Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
 {

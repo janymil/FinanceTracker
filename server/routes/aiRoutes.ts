@@ -1079,6 +1079,17 @@ Answer questions about features, subscription plans, how to use the app, trouble
         summary: !!safeSummary, 
         budgets: safeBudgets.length 
       });
+      
+      console.log('🎯 [CONTEXTUAL-TIPS] Budget Analysis:', {
+        budgetCount: safeBudgets.length,
+        budgets: safeBudgets.map(b => ({
+          category: b.categoryName,
+          amount: b.amount,
+          spent: b.spent,
+          remaining: b.remaining
+        })),
+        hasBudgets: safeBudgets.length > 0
+      });
       console.log('🎯 Contextual tips - User check:', {
         userId: userId?.substring(0, 8) + '...',
         userPlan: user?.plan || 'free',

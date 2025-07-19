@@ -1638,20 +1638,22 @@ export async function generateContextualFinancialTips(
       scenarios.push(`🟩 Well organized: All ${transactions.length} transactions are properly categorized, enabling detailed spending analysis.`);
     }
     
-    // Check for budget overruns with detailed analysis
-    budgets.forEach(budget => {
-      if (budget.remaining < 0) {
-        const overrunPercent = Math.abs((budget.remaining / budget.budgetAmount) * 100);
-        const categoryTransactions = expenseTransactions.filter(t => t.categoryName === budget.categoryName);
-        const avgTransactionInCategory = categoryTransactions.length > 0 ? 
-          categoryTransactions.reduce((sum, t) => sum + t.amount, 0) / categoryTransactions.length : 0;
-        
-        scenarios.push(`🟥 Budget overrun: You've exceeded your ${budget.categoryName} budget by ${overrunPercent.toFixed(0)}% this month. Average transaction: $${avgTransactionInCategory.toFixed(2)}, Total transactions: ${categoryTransactions.length}`);
-      } else if (budget.remaining < budget.budgetAmount * 0.1) {
-        // Budget almost exhausted
-        scenarios.push(`🟨 Budget warning: Only $${budget.remaining.toFixed(2)} remaining in your ${budget.categoryName} budget (${((budget.remaining/budget.budgetAmount)*100).toFixed(0)}% left).`);
-      }
-    });
+    // Check for budget overruns with detailed analysis ONLY if budgets exist
+    if (budgets && Array.isArray(budgets) && budgets.length > 0) {
+      budgets.forEach(budget => {
+        if (budget.remaining < 0) {
+          const overrunPercent = Math.abs((budget.remaining / budget.budgetAmount) * 100);
+          const categoryTransactions = expenseTransactions.filter(t => t.categoryName === budget.categoryName);
+          const avgTransactionInCategory = categoryTransactions.length > 0 ? 
+            categoryTransactions.reduce((sum, t) => sum + t.amount, 0) / categoryTransactions.length : 0;
+          
+          scenarios.push(`🟥 Budget overrun: You've exceeded your ${budget.categoryName} budget by ${overrunPercent.toFixed(0)}% this month. Average transaction: $${avgTransactionInCategory.toFixed(2)}, Total transactions: ${categoryTransactions.length}`);
+        } else if (budget.remaining < budget.budgetAmount * 0.1) {
+          // Budget almost exhausted
+          scenarios.push(`🟨 Budget warning: Only $${budget.remaining.toFixed(2)} remaining in your ${budget.categoryName} budget (${((budget.remaining/budget.budgetAmount)*100).toFixed(0)}% left).`);
+        }
+      });
+    }
     
     // Check savings rate scenarios with goal analysis
     if (savingsRate < 5 && summary.totalIncome > 0) {
@@ -1660,18 +1662,20 @@ export async function generateContextualFinancialTips(
       scenarios.push(`🟩 Excellent savings: Great job! You're saving ${savingsRate.toFixed(1)}% of your income this month.`);
     }
     
-    // Analyze goals progress
-    goals.forEach(goal => {
-      const progressPercent = (goal.currentAmount / goal.targetAmount) * 100;
-      const daysToTarget = Math.ceil((new Date(goal.targetDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-      const monthlyNeeded = daysToTarget > 0 ? (goal.targetAmount - goal.currentAmount) / (daysToTarget / 30) : 0;
-      
-      if (progressPercent >= 90) {
-        scenarios.push(`🟩 Goal achievement: You're ${progressPercent.toFixed(0)}% towards your ${goal.name} goal! Only $${(goal.targetAmount - goal.currentAmount).toFixed(2)} remaining.`);
-      } else if (monthlyNeeded > netBalance) {
-        scenarios.push(`🟨 Goal at risk: Your ${goal.name} goal needs $${monthlyNeeded.toFixed(2)}/month, but current monthly surplus is $${netBalance.toFixed(2)}.`);
-      }
-    });
+    // Analyze goals progress ONLY if goals exist
+    if (goals && Array.isArray(goals) && goals.length > 0) {
+      goals.forEach(goal => {
+        const progressPercent = (goal.currentAmount / goal.targetAmount) * 100;
+        const daysToTarget = Math.ceil((new Date(goal.targetDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+        const monthlyNeeded = daysToTarget > 0 ? (goal.targetAmount - goal.currentAmount) / (daysToTarget / 30) : 0;
+        
+        if (progressPercent >= 90) {
+          scenarios.push(`🟩 Goal achievement: You're ${progressPercent.toFixed(0)}% towards your ${goal.name} goal! Only $${(goal.targetAmount - goal.currentAmount).toFixed(2)} remaining.`);
+        } else if (monthlyNeeded > netBalance) {
+          scenarios.push(`🟨 Goal at risk: Your ${goal.name} goal needs $${monthlyNeeded.toFixed(2)}/month, but current monthly surplus is $${netBalance.toFixed(2)}.`);
+        }
+      });
+    }
     
     // Check for irregular income patterns
     if (incomeTransactions.length > 0) {
@@ -1744,8 +1748,8 @@ ${transactions.slice(0, 8).map(t => `- ${t.date}: ${t.description} - $${t.amount
 
 CONTEXTUAL ANALYSIS REQUIREMENTS:
 1. Address specific scenarios identified above with targeted, data-driven advice
-2. For budget overruns: Analyze transaction patterns and suggest specific reduction strategies
-3. For goal progress: Calculate required monthly contributions and suggest optimization
+2. For budget overruns: ONLY if budgets exist - Analyze transaction patterns and suggest specific reduction strategies
+3. For goal progress: ONLY if goals exist - Calculate required monthly contributions and suggest optimization
 4. For savings rate issues: Provide concrete steps with dollar targets based on their income
 5. For spending patterns: Identify specific categories and transaction behaviors to modify
 6. For income irregularities: Recommend buffer strategies based on their variability patterns
@@ -1753,6 +1757,8 @@ CONTEXTUAL ANALYSIS REQUIREMENTS:
 8. Use their actual transaction data, amounts, and patterns in all recommendations
 9. Provide specific dollar amounts, percentages, and realistic timeframes
 10. Make every tip immediately actionable with clear, measurable next steps
+
+CRITICAL: If no budgets are set, DO NOT mention budget overruns, budget comparisons, or budget-related advice. If no goals are set, DO NOT mention goal progress or goal-related recommendations. Focus only on spending patterns, categorization, and general financial health based on actual transaction data.
 
 Return 2-4 contextual tips in JSON format, prioritizing scenario-based insights:
 {
