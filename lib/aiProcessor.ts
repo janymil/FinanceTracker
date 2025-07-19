@@ -89,6 +89,16 @@ export async function runAI(task: string, userId: string, payload: Record<string
     try {
     console.log(`[AI ${task}] Calling Fly.io processor...`);
     
+    // Log contextual tips specific data
+    if (task === 'contextual-tips') {
+      console.log('[AI contextual-tips] Request payload:', {
+        hasSummary: !!payload.summary,
+        hasTransactions: !!payload.transactions,
+        transactionCount: payload.transactions?.length || 0,
+        language: payload.language
+      });
+    }
+    
     // Create AbortController for timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for bank statement processing
@@ -115,6 +125,17 @@ export async function runAI(task: string, userId: string, payload: Record<string
 
     const result = await response.json();
     
+    // Log contextual tips response
+    if (task === 'contextual-tips') {
+      console.log('[AI contextual-tips] Fly.io response:', {
+        hasResult: !!result,
+        hasError: !!result?.error,
+        hasTips: !!result?.tips,
+        tipsCount: result?.tips?.length || 0,
+        resultKeys: result ? Object.keys(result) : []
+      });
+    }
+    
     // Check if result is empty or error
     if (result?.error || !result || (Array.isArray(result) && result.length === 0)) {
 
@@ -127,11 +148,23 @@ export async function runAI(task: string, userId: string, payload: Record<string
       console.error(`[AI ${task}] Fly.io service failed:`, error.message || error);
       
       try {
+        console.log(`[AI ${task}] Attempting local fallback...`);
         let fallbackResult;
         
         switch (task) {
           case 'contextual-tips':
+            console.log('[AI contextual-tips] Running local fallback with payload:', {
+              hasSummary: !!payload.summary,
+              hasTransactions: !!payload.transactions,
+              transactionCount: payload.transactions?.length || 0,
+              language: payload.language || 'en-us'
+            });
             fallbackResult = await generateContextualFinancialTips(userId, payload, payload.language || 'en-us');
+            console.log('[AI contextual-tips] Local fallback result:', {
+              hasResult: !!fallbackResult,
+              hasTips: !!fallbackResult?.tips,
+              tipsCount: fallbackResult?.tips?.length || 0
+            });
             break;
           case 'financial-tips':
             fallbackResult = await generateFinancialTips(userId, payload as any);

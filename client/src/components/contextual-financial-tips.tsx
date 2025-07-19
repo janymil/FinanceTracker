@@ -129,14 +129,22 @@ export default function ContextualFinancialTips({ summary, transactions, budgets
         
         const fetchedTips = res.data.tips || [];
         console.log('Contextual tips: API response received', {
+          status: res.status,
+          hasData: !!res.data,
+          hasTips: !!res.data?.tips,
           tipsCount: fetchedTips.length,
-          firstTip: fetchedTips[0]?.title || 'none'
+          firstTip: fetchedTips[0]?.title || 'none',
+          fullResponse: res.data
         });
         
         setTips(fetchedTips);
         
-      } catch (error) {
-        console.error('Failed to fetch AI tips:', error);
+      } catch (error: any) {
+        console.error('Failed to fetch AI tips:', {
+          error: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
         setTips([]);
       } finally {
         setLoading(false);

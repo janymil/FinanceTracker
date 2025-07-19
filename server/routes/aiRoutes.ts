@@ -1061,6 +1061,14 @@ Answer questions about features, subscription plans, how to use the app, trouble
       }
 
       const { transactions, summary, budgets, goals, selectedMonth } = req.body;
+      
+      // First check user plan
+      const user = await storage.getUser(userId);
+      console.log('🎯 Contextual tips - User check:', {
+        userId: userId?.substring(0, 8) + '...',
+        userPlan: user?.plan || 'free',
+        hasUser: !!user
+      });
 
       console.log('🔥 Contextual tips API request received:', {
         userId: userId?.substring(0, 8) + '...',
@@ -1143,8 +1151,44 @@ Answer questions about features, subscription plans, how to use the app, trouble
         return res.json({ tips });
       }
 
+      // Add user plan check for contextual tips
+      if (!user || user?.plan === 'free') {
+        console.log('🚫 Contextual tips - Free plan, returning empty tips');
+        return res.json({ tips: [] });
+      }
+      
       // Generate new AI response
-      const result = await runAI('contextual-tips', userId, aiPayload, user.plan || 'free');
+      console.log('🤖 Contextual tips - Calling AI processor with payload:', {
+        payloadKeys: Object.keys(aiPayload),
+        language: aiPayload.language,
+        transactionCount: aiPayload.transactions?.length || 0
+      });
+      
+      let result;
+      try {
+        result = await runAI('contextual-tips', userId, aiPayload, user?.plan || 'free');
+      } catch (aiError: any) {
+        console.error('🚨 AI processor failed for contextual tips:', aiError.message);
+        // Return fallback tips based on available data
+        const fallbackTips = generateFallbackTips(summary, transactions, budgets);
+        return res.json({ tips: fallbackTips });
+      }
+      
+      console.log('📥 Contextual tips - AI processor response:', {
+        hasResult: !!result,
+        resultType: typeof result,
+        hasError: !!result?.error,
+        hasTips: !!result?.tips,
+        tipsCount: result?.tips?.length || 0,
+        firstTip: result?.tips?.[0]?.title || 'none'
+      });
+      
+      // Handle AI processor errors
+      if (result?.error) {
+        console.error('🚨 AI processor returned error for contextual tips:', result.error);
+        const fallbackTips = generateFallbackTips(summary, transactions, budgets);
+        return res.json({ tips: fallbackTips });
+      }
       
       // Handle centralized processor response
       const tips = Array.isArray(result?.tips) ? result.tips.map((tip: any, index: number) => ({
@@ -1154,15 +1198,84 @@ Answer questions about features, subscription plans, how to use the app, trouble
         category: ['spending', 'saving', 'budgeting', 'income'].includes(tip.category) ? tip.category : 'budgeting',
         priority: ['high', 'medium', 'low'].includes(tip.priority) ? tip.priority : 'medium',
         actionable: Boolean(tip.actionable)
-      })) : [];
+      })) : generateFallbackTips(summary, transactions, budgets);
 
       // Cache the result for 72 hours
       await cache.set(aiPayload, { tips }, false, 72);
 
       return res.json({ tips });
-    } catch (error) {
-      console.error("Error generating contextual financial tips:", error);
+    } catch (error: any) {
+      console.error("Error generating contextual financial tips:", {
+        error: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       return res.status(500).json({ message: "Failed to generate contextual financial tips" });
     }
   });
+
+  // Helper function to generate fallback tips when AI processor fails
+  function generateFallbackTips(summary: any, transactions: any[], budgets: any[]) {
+    const tips = [];
+    const netBalance = (summary?.totalIncome || 0) - (summary?.totalExpenses || 0);
+    
+    // Basic budgeting tip
+    if (summary?.totalExpenses > 0 && budgets?.length === 0) {
+      tips.push({
+        id: 'fallback_budget',
+        title: 'Create Your First Budget',
+        description: 'Set spending limits for your expense categories to better control your finances.',
+        category: 'budgeting',
+        priority: 'high',
+        actionable: true
+      });
+    }
+    
+    // Savings tip based on net balance
+    if (netBalance > 0) {
+      tips.push({
+        id: 'fallback_savings',
+        title: 'Great Job on Positive Cash Flow!',
+        description: 'You have a positive balance this month. Consider setting aside some money for savings or emergency fund.',
+        category: 'saving',
+        priority: 'medium',
+        actionable: true
+      });
+    } else if (netBalance < 0) {
+      tips.push({
+        id: 'fallback_spending',
+        title: 'Review Your Spending',
+        description: 'Your expenses exceed your income this month. Look for areas where you can reduce costs.',
+        category: 'spending',
+        priority: 'high',
+        actionable: true
+      });
+    }
+    
+    // Transaction tracking tip
+    if (!transactions || transactions.length === 0) {
+      tips.push({
+        id: 'fallback_tracking',
+        title: 'Start Tracking Your Expenses',
+        description: 'Begin by recording your daily expenses to get a clear picture of your spending habits.',
+        category: 'budgeting',
+        priority: 'high',
+        actionable: true
+      });
+    }
+    
+    // Default tip if no other conditions met
+    if (tips.length === 0) {
+      tips.push({
+        id: 'fallback_general',
+        title: 'Keep Track of Your Finances',
+        description: 'Regular monitoring of your income and expenses helps maintain financial health.',
+        category: 'budgeting',
+        priority: 'medium',
+        actionable: true
+      });
+    }
+    
+    return tips;
+  }
 }
