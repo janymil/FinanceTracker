@@ -1055,20 +1055,30 @@ Answer questions about features, subscription plans, how to use the app, trouble
   // Contextual Financial Tips endpoint (moved from contextualFinancialTipsRoutes.ts)
   app.post('/api/ai/contextual-financial-tips', isAuthenticated, async (req: any, res) => {
     try {
+      console.log('🎯 [CONTEXTUAL-TIPS] Starting request processing...');
       const userId = getUserId(req);
       if (!userId) {
+        console.error('🚨 [CONTEXTUAL-TIPS] No userId found');
         return res.status(401).json({ message: "Authentication required" });
       }
+      console.log('✅ [CONTEXTUAL-TIPS] User authenticated:', userId.substring(0, 8) + '...');
 
       const { transactions, summary, budgets, goals, selectedMonth } = req.body;
       
       // First check user plan
+      console.log('📊 [CONTEXTUAL-TIPS] Getting user data...');
       const user = await storage.getUser(userId);
+      console.log('👤 [CONTEXTUAL-TIPS] User data:', { userId: userId.substring(0, 8) + '...', plan: user?.plan, hasUser: !!user });
       
       // Provide safe defaults for missing data
       const safeTransactions = transactions || [];
       const safeSummary = summary || { totalIncome: 0, totalExpenses: 0, netBalance: 0 };
       const safeBudgets = budgets || [];
+      console.log('💾 [CONTEXTUAL-TIPS] Data prepared:', { 
+        transactions: safeTransactions.length, 
+        summary: !!safeSummary, 
+        budgets: safeBudgets.length 
+      });
       console.log('🎯 Contextual tips - User check:', {
         userId: userId?.substring(0, 8) + '...',
         userPlan: user?.plan || 'free',
@@ -1171,11 +1181,15 @@ Answer questions about features, subscription plans, how to use the app, trouble
       
       let result;
       try {
+        console.log('🤖 [CONTEXTUAL-TIPS] Calling runAI...');
         result = await runAI('contextual-tips', userId, aiPayload, user?.plan || 'free');
+        console.log('✅ [CONTEXTUAL-TIPS] runAI completed successfully');
       } catch (aiError: any) {
-        console.error('🚨 AI processor failed for contextual tips:', aiError.message);
+        console.error('🚨 [CONTEXTUAL-TIPS] AI processor failed:', aiError.message);
+        console.error('🚨 [CONTEXTUAL-TIPS] Full error:', aiError);
         // Return fallback tips based on available data
         const fallbackTips = generateFallbackTips(safeSummary, safeTransactions, safeBudgets);
+        console.log('🔄 [CONTEXTUAL-TIPS] Returning fallback tips:', fallbackTips.length);
         return res.json({ tips: fallbackTips });
       }
       
