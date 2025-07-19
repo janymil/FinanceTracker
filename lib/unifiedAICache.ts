@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { storage } from '../server/storage';
 import { db } from '../server/db';
-import { aiCache } from '@shared/schema';
+import { aiCache } from '../shared/schema.ts';
 import { eq, and, lt, isNotNull } from 'drizzle-orm';
 
 // Default TTL configurations for different AI functions (in hours)

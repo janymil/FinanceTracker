@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { db } from '../db.js';
-import { blockedCountries } from '@shared/schema';
+import { blockedCountries } from '../../shared/schema.ts';
 import { eq } from 'drizzle-orm';
 
 interface GeoJSResponse {
