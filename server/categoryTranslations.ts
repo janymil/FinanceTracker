@@ -427,7 +427,7 @@ export function translateCategoryName(categoryName: string, language: string): s
 // Helper function to translate an array of categories
 export function translateCategories(categories: any[], language: string): any[] {
   return categories.map(category => {
-    // Only translate predefined categories (those with userId: null)
+    // Translate predefined categories (those with userId: null)
     if (category.userId === null) {
       return {
         ...category,
@@ -435,7 +435,15 @@ export function translateCategories(categories: any[], language: string): any[] 
       };
     }
     
-    // Keep custom categories unchanged
+    // Also translate user categories that contain translation keys (like "categories.jedlo")
+    if (category.name && category.name.startsWith('categories.')) {
+      return {
+        ...category,
+        name: translateCategoryName(category.name, language)
+      };
+    }
+    
+    // Keep other custom categories unchanged
     return category;
   });
 }
