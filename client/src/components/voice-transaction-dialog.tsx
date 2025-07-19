@@ -11,6 +11,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrency } from '@/context/CurrencyContext';
+import { getIconComponent } from '@/lib/utils';
 
 interface VoiceTransactionData {
   amount?: number | null;
@@ -311,8 +312,12 @@ export function VoiceTransactionDialog({
                       .filter((cat: any) => cat.type === editedData.type)
                       .map((category: any) => (
                         <SelectItem key={category.id} value={category.id.toString()}>
-                          <span className="mr-2">{category.icon}</span>
-                          {getLocalizedCategoryName(category)}
+                          <div className="flex items-center">
+                            <span className="mr-2 text-lg">
+                              {getIconComponent(category.icon)}
+                            </span>
+                            {getLocalizedCategoryName(category)}
+                          </div>
                         </SelectItem>
                       ))}
                   </SelectContent>
