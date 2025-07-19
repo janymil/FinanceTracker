@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/clerk-react";
 import { useTranslation } from "react-i18next";
 import { useDateFormat } from "@/hooks/useDateFormat";
+import { translateCategoryName } from "../../../server/categoryTranslations";
 
 
 
@@ -52,7 +53,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
   const { user } = useUser();
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { formatDate } = useDateFormat();
 
   // Fetch categories for edit form
@@ -294,7 +295,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                         className="cursor-pointer"
                       >
                         <Edit className="h-4 w-4 mr-2" />
-                        Edit
+                        {t('Edit')}
                       </DropdownMenuItem>
                       <DropdownMenuItem 
                         onClick={() => handleDelete(transaction.id)}
@@ -302,7 +303,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                         className="cursor-pointer text-destructive focus:text-destructive"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        {isDeleting === transaction.id ? "Deleting..." : "Delete"}
+                        {isDeleting === transaction.id ? t('Deleting...') : t('Delete')}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -348,11 +349,12 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
           <Dialog open={!!editingTransaction} onOpenChange={(open) => !open && setEditingTransaction(null)}>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>Edit Transaction</DialogTitle>
+                <DialogTitle>{editingTransaction?.type === 'expense' ? t('Edit Expense') : t('Edit Income')}</DialogTitle>
+                <p className="text-sm text-muted-foreground">{t('Update the expense details')}</p>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="amount">Amount</Label>
+                  <Label htmlFor="amount">{t('Amount')}</Label>
                   <Input
                     id="amount"
                     type="number"
@@ -366,7 +368,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">{t('Description')}</Label>
                   <Input
                     id="description"
                     value={editingTransaction.description}
@@ -378,7 +380,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="date">Date</Label>
+                  <Label htmlFor="date">{t('Date')}</Label>
                   <Input
                     id="date"
                     type="date"
@@ -391,7 +393,7 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="type">Type</Label>
+                  <Label htmlFor="type">{t('Type')}</Label>
                   <Select 
                     value={editingTransaction.type} 
                     onValueChange={(value: 'income' | 'expense') => setEditingTransaction({
@@ -403,14 +405,14 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="expense">Expense</SelectItem>
-                      <SelectItem value="income">Income</SelectItem>
+                      <SelectItem value="expense">{t('Expense')}</SelectItem>
+                      <SelectItem value="income">{t('Income')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
+                  <Label htmlFor="category">{t('Category')}</Label>
                   <Select 
                     value={editingTransaction.categoryName || ''} 
                     onValueChange={(value) => setEditingTransaction({
@@ -419,12 +421,12 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                     })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder={t('Select category')} />
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map((category) => (
                         <SelectItem key={category.id} value={category.name}>
-                          {category.name}
+                          {translateCategoryName(category.name, i18n.language)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -437,10 +439,10 @@ export default function SimpleTransactionList({ transactions, isLoading }: Simpl
                   variant="outline" 
                   onClick={() => setEditingTransaction(null)}
                 >
-                  Cancel
+                  {t('Cancel')}
                 </Button>
                 <Button onClick={() => handleEdit(editingTransaction)}>
-                  Save Changes
+                  {t('Save Changes')}
                 </Button>
               </div>
             </DialogContent>
