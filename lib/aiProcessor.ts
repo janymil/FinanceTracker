@@ -93,7 +93,7 @@ export async function runAI(task: string, userId: string, payload: Record<string
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for bank statement processing
     
-    const response = await fetch("https://finanzerpro.fly.dev/execute-gpt-task", {
+    const response = await fetch("http://31.97.103.28:8080/execute-gpt-task", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

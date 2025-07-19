@@ -302,6 +302,90 @@
         "description": "Análisis completo de IA en eslovaco con contexto empresarial europeo"
       }
     },
+    "core_features": {
+      "title": "Características Financieras Principales",
+      "subtitle": "Herramientas esenciales para gestión financiera completa más allá de la automatización de IA",
+      "budgets": {
+        "title": "Gestión Inteligente de Presupuestos",
+        "description": "Crea, rastrea y gestiona tus presupuestos con insights inteligentes y categorización automática",
+        "features": {
+          "categories": "Categorías de presupuesto ilimitadas",
+          "tracking": "Seguimiento de gastos en tiempo real",
+          "comparison": "Comparación presupuesto vs real",
+          "alerts": "Alertas y notificaciones de sobregasto"
+        }
+      },
+      "goals": {
+        "title": "Seguimiento de Metas Financieras",
+        "description": "Establece y alcanza tus metas financieras con características colaborativas y seguimiento inteligente del progreso",
+        "features": {
+          "types": "Múltiples tipos de metas (ahorros, pago de deudas, inversión)",
+          "sharing": "Compartir metas colaborativas con socios",
+          "visualization": "Visualización del progreso e hitos",
+          "predictions": "Predicciones de logro de metas"
+        }
+      },
+      "receipts": {
+        "title": "Procesamiento de Recibos",
+        "description": "Sube y procesa recibos con tecnología OCR avanzada para seguimiento automático de gastos",
+        "features": {
+          "extraction": "Extracción de texto OCR de recibos",
+          "categorization": "Categorización automática de gastos",
+          "storage": "Almacenamiento y organización de recibos",
+          "reports": "Reportes de gastos listos para impuestos"
+        }
+      },
+      "recurring": {
+        "title": "Transacciones Recurrentes",
+        "description": "Automatiza tus ingresos y gastos regulares con gestión inteligente de transacciones recurrentes",
+        "features": {
+          "frequency": "Recurrencia semanal, mensual y anual",
+          "automation": "Creación automática de transacciones",
+          "flexibility": "Fechas de finalización y modificaciones flexibles",
+          "reminders": "Notificaciones de recordatorio de facturas"
+        }
+      },
+      "currency": {
+        "title": "Opciones de Visualización de Moneda",
+        "description": "Elige tu moneda preferida para mostrar datos financieros y reportes",
+        "features": {
+          "support": "Soporte para 15 monedas globales principales",
+          "interface": "Interfaz simple de selección de moneda",
+          "consistency": "Visualización consistente de moneda en toda la app",
+          "preference": "Preferencia de moneda guardada por usuario"
+        }
+      },
+      "export": {
+        "title": "Exportación e Importación de Datos",
+        "description": "Importa desde estados bancarios y exporta tus datos financieros en múltiples formatos",
+        "features": {
+          "formats": "Formatos de exportación CSV, Excel y PDF",
+          "import": "Importación de PDF de estados bancarios",
+          "ranges": "Exportaciones de rangos de fechas personalizados",
+          "tax_reports": "Reportes financieros listos para impuestos"
+        }
+      },
+      "collaboration": {
+        "title": "Finanzas Colaborativas",
+        "description": "Comparte metas financieras y presupuestos con socios para mejor gestión financiera del hogar",
+        "features": {
+          "shared_goals": "Metas financieras compartidas con socios",
+          "planning": "Planificación colaborativa de presupuestos",
+          "updates": "Actualizaciones de progreso en tiempo real",
+          "notifications": "Sistema de notificaciones para socios"
+        }
+      },
+      "security": {
+        "title": "Seguridad de Grado Bancario",
+        "description": "Tus datos financieros están protegidos con medidas de seguridad y privacidad de nivel empresarial",
+        "features": {
+          "encryption": "Cifrado AES-256 para datos sensibles",
+          "privacy": "Procesamiento OCR local para privacidad",
+          "authentication": "Autenticación segura de usuarios",
+          "audits": "Auditorías de seguridad regulares"
+        }
+      }
+    },
     "cta": {
       "title": "¿Listo para Transformar tu Gestión Financiera?",
       "subtitle": "Únete a miles de emprendedores que han revolucionado sus finanzas empresariales con insights potenciados por IA",

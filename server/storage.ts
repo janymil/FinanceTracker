@@ -2397,14 +2397,6 @@ export class DatabaseStorage implements IStorage {
     return results;
   }
 
-  async getUserByStripeCustomerId(stripeCustomerId: string): Promise<User | null> {
-    const results = await db
-      .select()
-      .from(users)
-      .where(eq(users.stripeCustomerId, stripeCustomerId))
-      .limit(1);
-    return results[0] || null;
-  }
 
   // Admin method to get comprehensive user payment information
   async getAdminUserPaymentDetails(): Promise<Array<User & { 

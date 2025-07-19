@@ -302,6 +302,90 @@
         "description": "Kompletná AI analýza v slovenčine s kontextom európskeho podnikania"
       }
     },
+    "core_features": {
+      "title": "Core Financial Features",
+      "subtitle": "Essential tools for complete financial management beyond AI automation",
+      "budgets": {
+        "title": "Smart Budget Management",
+        "description": "Create, track, and manage your budgets with intelligent insights and automatic categorization",
+        "features": {
+          "categories": "Unlimited budget categories",
+          "tracking": "Real-time spending tracking",
+          "comparison": "Budget vs actual comparison",
+          "alerts": "Overspending alerts and notifications"
+        }
+      },
+      "goals": {
+        "title": "Financial Goals Tracking",
+        "description": "Set and achieve your financial goals with collaborative features and smart progress tracking",
+        "features": {
+          "types": "Multiple goal types (savings, debt payoff, investment)",
+          "sharing": "Collaborative goal sharing with partners",
+          "visualization": "Progress visualization and milestones",
+          "predictions": "Goal achievement predictions"
+        }
+      },
+      "receipts": {
+        "title": "Receipt Processing",
+        "description": "Upload and process receipts with advanced OCR technology for automatic expense tracking",
+        "features": {
+          "extraction": "OCR text extraction from receipts",
+          "categorization": "Automatic expense categorization",
+          "storage": "Receipt storage and organization",
+          "reports": "Tax-ready expense reports"
+        }
+      },
+      "recurring": {
+        "title": "Recurring Transactions",
+        "description": "Automate your regular income and expenses with smart recurring transaction management",
+        "features": {
+          "frequency": "Weekly, monthly, and yearly recurrence",
+          "automation": "Automatic transaction creation",
+          "flexibility": "Flexible end dates and modifications",
+          "reminders": "Bill reminder notifications"
+        }
+      },
+      "currency": {
+        "title": "Currency Display Options",
+        "description": "Choose your preferred currency for displaying financial data and reports",
+        "features": {
+          "support": "Support for 15 major global currencies",
+          "interface": "Simple currency selection interface",
+          "consistency": "Consistent currency display across app",
+          "preference": "Currency preference saved per user"
+        }
+      },
+      "export": {
+        "title": "Data Export & Import",
+        "description": "Import from bank statements and export your financial data in multiple formats",
+        "features": {
+          "formats": "CSV, Excel, and PDF export formats",
+          "import": "Bank statement PDF import",
+          "ranges": "Custom date range exports",
+          "tax_reports": "Tax-ready financial reports"
+        }
+      },
+      "collaboration": {
+        "title": "Collaborative Finance",
+        "description": "Share financial goals and budgets with partners for better household financial management",
+        "features": {
+          "shared_goals": "Shared financial goals with partners",
+          "planning": "Collaborative budget planning",
+          "updates": "Real-time progress updates",
+          "notifications": "Partner notification system"
+        }
+      },
+      "security": {
+        "title": "Bank-Grade Security",
+        "description": "Your financial data is protected with enterprise-level security and privacy measures",
+        "features": {
+          "encryption": "AES-256 encryption for sensitive data",
+          "privacy": "Local OCR processing for privacy",
+          "authentication": "Secure user authentication",
+          "audits": "Regular security audits"
+        }
+      }
+    },
     "cta": {
       "title": "Ready to Transform Your Financial Management?",
       "subtitle": "Join thousands of entrepreneurs who have revolutionized their business finances with AI-powered insights",

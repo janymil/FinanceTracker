@@ -28,69 +28,46 @@ import {
   Shield,
   Zap,
   FileText,
-  Calculator as CalculatorIcon
+  Calculator as CalculatorIcon,
+  Receipt,
+  Users,
+  PieChart,
+  Wallet,
+  CreditCard,
+  Upload,
+  Download,
+  Lock,
+  Smartphone,
+  RefreshCw,
+  BookOpen,
+  Bell
 } from 'lucide-react';
 
-// Helper function to get current language for video files
-function getCurrentLanguageForAPI(): string {
-  if (typeof window !== 'undefined' && (window as any).i18next) {
-    const lang = (window as any).i18next.language;
-    return lang.startsWith('es') ? 'es-pe' : lang.startsWith('sk') ? 'sk-sk' : 'en-us';
-  }
-  return 'en-us';
-}
-
-// Static video card component
-function DemoVideoCard({ title, description, demoType }: { 
+// Feature showcase component
+function FeatureShowcaseCard({ title, description, icon: Icon, features }: { 
   title: string; 
   description: string; 
-  demoType: 'categorization' | 'tips' | 'health' 
+  icon: any;
+  features: string[];
 }) {
-  const { t } = useTranslation();
-  const language = getCurrentLanguageForAPI();
-  // Always use en-us for now since that's the only video we have
-  const videoPath = `/demo-videos/categorization-demo-en-us.mp4`;
-
-  const handleWatchDemo = () => {
-    const videoElement = document.querySelector(`#video-${demoType}`) as HTMLVideoElement;
-    if (videoElement) {
-      videoElement.load(); // Reload the video source
-      videoElement.currentTime = 0; // Reset to beginning
-      videoElement.play().catch(error => {
-        console.error('Error playing video:', error);
-        // If autoplay fails, just show the video controls
-        videoElement.setAttribute('controls', 'true');
-      });
-      // Scroll to video if not visible
-      videoElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  };
-
   return (
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
+          <Icon className="h-5 w-5 text-primary" />
           {title}
         </CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg flex items-center justify-center mb-4">
-          <video 
-            id={`video-${demoType}`}
-            controls 
-            preload="metadata"
-            className="w-full h-full rounded-lg"
-          >
-            <source src={videoPath} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+        <div className="space-y-2">
+          {features.map((feature, index) => (
+            <div key={index} className="flex items-center gap-2 text-sm">
+              <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
+              <span>{feature}</span>
+            </div>
+          ))}
         </div>
-        <Button onClick={handleWatchDemo} className="w-full" size="sm">
-          <Sparkles className="mr-2 h-4 w-4" />
-          {t('features.cta.watch_demo', 'Watch Demo')}
-        </Button>
       </CardContent>
     </Card>
   );
@@ -129,7 +106,7 @@ export default function FeaturesPage() {
   const aiFeatures = [
     {
       id: 'categorization',
-      icon: Target,
+      icon: Brain,
       title: t('features.categorization.title', 'Intelligent Expense Categorization'),
       badge: t('features.categorization.badge', 'Standard+'),
       description: t('features.categorization.description', 'AI-powered automatic categorization of all your transactions with continuous learning and improvement'),
@@ -140,40 +117,88 @@ export default function FeaturesPage() {
       ]
     },
     {
+      id: 'contextual',
+      icon: Target,
+      title: t('features.contextual.title', 'Contextual Financial Tips'),
+      badge: t('features.contextual.badge', 'Standard+'),
+      description: t('features.contextual.description', 'Receive personalized financial advice based on your specific transaction patterns and spending behavior'),
+      benefits: [
+        { title: t('features.contextual.benefits.realtime.title', 'Real-time Analysis'), desc: t('features.contextual.benefits.realtime.desc', 'Instant insights based on your current financial activity') },
+        { title: t('features.contextual.benefits.budget.title', 'Budget Awareness'), desc: t('features.contextual.benefits.budget.desc', 'Advice that considers your current budget and spending limits') },
+        { title: t('features.contextual.benefits.goal.title', 'Goal-Oriented'), desc: t('features.contextual.benefits.goal.desc', 'Tips aligned with your specific financial goals and targets') }
+      ]
+    },
+    {
       id: 'tips',
       icon: Lightbulb,
       title: t('features.tips.title', 'AI Financial Tips'),
-      badge: t('features.tips.badge', 'Standard+'),
-      description: t('features.tips.description', 'Receive personalized financial advice based on your spending patterns and goals'),
+      badge: t('features.tips.badge', 'Premium'),
+      description: t('features.tips.description', 'Daily personalized recommendations to optimize your financial health and achieve your money goals faster'),
       benefits: [
-        { title: t('features.tips.benefits.patterns.title', 'Pattern Analysis'), desc: t('features.tips.benefits.patterns.desc', 'Identifies spending patterns and suggests improvements') },
-        { title: t('features.tips.benefits.strategies.title', 'Smart Strategies'), desc: t('features.tips.benefits.strategies.desc', 'Provides actionable strategies to optimize your finances') },
-        { title: t('features.tips.benefits.optimization.title', 'Budget Optimization'), desc: t('features.tips.benefits.optimization.desc', 'Suggests ways to reduce expenses and increase savings') },
-        { title: t('features.tips.benefits.analysis.title', 'Goal Analysis'), desc: t('features.tips.benefits.analysis.desc', 'Analyzes progress toward your financial goals') }
+        { title: t('features.tips.benefits.patterns.title', 'Spending Patterns'), desc: t('features.tips.benefits.patterns.desc', 'Deep analysis of your spending behaviors and trends') },
+        { title: t('features.tips.benefits.strategies.title', 'Saving Strategies'), desc: t('features.tips.benefits.strategies.desc', 'Personalized recommendations to optimize your cash flow') },
+        { title: t('features.tips.benefits.optimization.title', 'Budget Optimization'), desc: t('features.tips.benefits.optimization.desc', 'Smart adjustments to maximize your budget efficiency') },
+        { title: t('features.tips.benefits.analysis.title', 'Advanced Analysis'), desc: t('features.tips.benefits.analysis.desc', 'Professional-grade financial insights and forecasting') }
       ]
     },
     {
       id: 'insights',
       icon: BarChart3,
-      title: t('features.insights.title', 'Smart Financial Insights'),
-      badge: t('features.insights.badge', 'Premium'),
-      description: t('features.insights.description', 'Deep analytical insights into your financial behavior with predictive recommendations'),
+      title: t('features.insights.title', 'Intelligent Spending Insights'),
+      badge: t('features.insights.badge', 'Standard+'),
+      description: t('features.insights.description', 'Advanced analysis of your expense transactions to identify patterns, anomalies, and optimization opportunities'),
       benefits: [
-        { title: t('features.insights.benefits.anomaly.title', 'Anomaly Detection'), desc: t('features.insights.benefits.anomaly.desc', 'Automatically detects unusual spending patterns and alerts you') },
-        { title: t('features.insights.benefits.trend.title', 'Trend Analysis'), desc: t('features.insights.benefits.trend.desc', 'Identifies long-term trends in your spending and income') },
-        { title: t('features.insights.benefits.optimization.title', 'Smart Optimization'), desc: t('features.insights.benefits.optimization.desc', 'Suggests specific actions to improve your financial health') }
+        { title: t('features.insights.benefits.anomaly.title', 'Anomaly Detection'), desc: t('features.insights.benefits.anomaly.desc', 'Automatically identifies unusual spending patterns') },
+        { title: t('features.insights.benefits.trend.title', 'Trend Analysis'), desc: t('features.insights.benefits.trend.desc', 'Spots emerging trends in your business expenses') },
+        { title: t('features.insights.benefits.optimization.title', 'Optimization Tips'), desc: t('features.insights.benefits.optimization.desc', 'Actionable recommendations to reduce costs') }
       ]
     },
     {
       id: 'health',
       icon: Heart,
-      title: t('features.health.title', 'Financial Health Analysis'),
+      title: t('features.health.title', 'Financial Health Score'),
       badge: t('features.health.badge', 'Premium'),
-      description: t('features.health.description', 'Comprehensive financial health scoring with personalized improvement recommendations'),
+      description: t('features.health.description', 'Comprehensive AI-powered financial health analysis with personalized scoring and improvement recommendations'),
       benefits: [
-        { title: t('features.health.benefits.scoring.title', 'Health Scoring'), desc: t('features.health.benefits.scoring.desc', 'Real-time financial health score based on multiple factors') },
-        { title: t('features.health.benefits.analysis.title', 'Deep Analysis'), desc: t('features.health.benefits.analysis.desc', 'Detailed analysis of your financial habits and patterns') },
-        { title: t('features.health.benefits.plan.title', 'Improvement Plan'), desc: t('features.health.benefits.plan.desc', 'Personalized action plan to improve your financial health') }
+        { title: t('features.health.benefits.scoring.title', 'Real-time Scoring'), desc: t('features.health.benefits.scoring.desc', 'Live financial health score from 0-100') },
+        { title: t('features.health.benefits.analysis.title', 'Factor Analysis'), desc: t('features.health.benefits.analysis.desc', 'Detailed breakdown of what affects your score') },
+        { title: t('features.health.benefits.plan.title', 'Improvement Plan'), desc: t('features.health.benefits.plan.desc', 'Personalized action plan to boost your financial health') }
+      ]
+    },
+    {
+      id: 'trends',
+      icon: TrendingUp,
+      title: t('features.trends.title', 'Trend Predictions'),
+      badge: t('features.trends.badge', 'Premium'),
+      description: t('features.trends.description', 'AI-powered forecasting of your financial trends with predictive analytics and future spending patterns'),
+      benefits: [
+        { title: t('features.trends.benefits.growth.title', 'Growth Forecasting'), desc: t('features.trends.benefits.growth.desc', 'Predict future income and expense trends') },
+        { title: t('features.trends.benefits.category.title', 'Category Analysis'), desc: t('features.trends.benefits.category.desc', 'Detailed predictions by spending category') },
+        { title: t('features.trends.benefits.adaptation.title', 'Adaptive Learning'), desc: t('features.trends.benefits.adaptation.desc', 'Improves accuracy with your spending patterns') }
+      ]
+    },
+    {
+      id: 'predictions',
+      icon: Calendar,
+      title: t('features.predictions.title', 'Expense Predictions'),
+      badge: t('features.predictions.badge', 'Premium'),
+      description: t('features.predictions.description', 'Advanced AI algorithms predict your future expenses to help you plan and budget more effectively'),
+      benefits: [
+        { title: t('features.predictions.benefits.forecasting.title', 'Smart Forecasting'), desc: t('features.predictions.benefits.forecasting.desc', 'Predict expenses up to 12 months ahead') },
+        { title: t('features.predictions.benefits.seasonal.title', 'Seasonal Patterns'), desc: t('features.predictions.benefits.seasonal.desc', 'Recognizes seasonal spending variations') },
+        { title: t('features.predictions.benefits.planning.title', 'Planning Support'), desc: t('features.predictions.benefits.planning.desc', 'Better budget planning with future insights') }
+      ]
+    },
+    {
+      id: 'recommendations',
+      icon: Sparkles,
+      title: t('features.recommendations.title', 'Daily Recommendations'),
+      badge: t('features.recommendations.badge', 'Premium'),
+      description: t('features.recommendations.description', 'Personalized daily financial recommendations powered by AI to optimize your spending and savings'),
+      benefits: [
+        { title: t('features.recommendations.benefits.daily.title', 'Daily Updates'), desc: t('features.recommendations.benefits.daily.desc', 'Fresh recommendations delivered every day') },
+        { title: t('features.recommendations.benefits.action.title', 'Actionable Advice'), desc: t('features.recommendations.benefits.action.desc', 'Practical steps you can take immediately') },
+        { title: t('features.recommendations.benefits.priority.title', 'Priority-based'), desc: t('features.recommendations.benefits.priority.desc', 'Focus on what matters most for your finances') }
       ]
     },
     {
@@ -181,59 +206,11 @@ export default function FeaturesPage() {
       icon: FileText,
       title: t('features.statements.title', 'Bank Statement Processing'),
       badge: t('features.statements.badge', 'Standard+'),
-      description: t('features.statements.description', 'AI-powered extraction and categorization of transactions from bank statements'),
+      description: t('features.statements.description', 'Upload PDF bank statements and let AI extract and categorize all transactions automatically'),
       benefits: [
-        { title: t('features.statements.benefits.processing.title', 'Smart Processing'), desc: t('features.statements.benefits.processing.desc', 'Automatically extracts transactions from PDF statements') },
-        { title: t('features.statements.benefits.ocr.title', 'Advanced OCR'), desc: t('features.statements.benefits.ocr.desc', 'High-accuracy text recognition for all statement formats') },
-        { title: t('features.statements.benefits.categorization.title', 'Auto Categorization'), desc: t('features.statements.benefits.categorization.desc', 'Automatically categorizes all extracted transactions') }
-      ]
-    },
-    {
-      id: 'predictions',
-      icon: TrendingUp,
-      title: t('features.predictions.title', 'Predictive Analytics'),
-      badge: t('features.predictions.badge', 'Premium'),
-      description: t('features.predictions.description', 'Advanced machine learning predictions for future spending and income patterns'),
-      benefits: [
-        { title: t('features.predictions.benefits.forecasting.title', 'Expense Forecasting'), desc: t('features.predictions.benefits.forecasting.desc', 'Predicts future expenses based on historical patterns') },
-        { title: t('features.predictions.benefits.seasonal.title', 'Seasonal Analysis'), desc: t('features.predictions.benefits.seasonal.desc', 'Identifies seasonal spending patterns and trends') },
-        { title: t('features.predictions.benefits.planning.title', 'Financial Planning'), desc: t('features.predictions.benefits.planning.desc', 'Helps plan budgets and savings goals with accurate predictions') }
-      ]
-    },
-    {
-      id: 'trends',
-      icon: BarChart3,
-      title: t('features.trends.title', 'Trend Analysis'),
-      badge: t('features.trends.badge', 'Standard+'),
-      description: t('features.trends.description', 'Identify long-term spending trends and patterns to make informed financial decisions'),
-      benefits: [
-        { title: t('features.trends.benefits.category.title', 'Category Trends'), desc: t('features.trends.benefits.category.desc', 'Track spending trends across different expense categories') },
-        { title: t('features.trends.benefits.growth.title', 'Growth Analysis'), desc: t('features.trends.benefits.growth.desc', 'Monitor income and expense growth patterns over time') },
-        { title: t('features.trends.benefits.adaptation.title', 'Adaptive Insights'), desc: t('features.trends.benefits.adaptation.desc', 'Get insights that adapt to your changing financial situation') }
-      ]
-    },
-    {
-      id: 'recommendations',
-      icon: Calendar,
-      title: t('features.recommendations.title', 'Smart Recommendations'),
-      badge: t('features.recommendations.badge', 'Premium'),
-      description: t('features.recommendations.description', 'Personalized daily recommendations to optimize your financial decisions'),
-      benefits: [
-        { title: t('features.recommendations.benefits.daily.title', 'Daily Insights'), desc: t('features.recommendations.benefits.daily.desc', 'Receive daily personalized financial recommendations') },
-        { title: t('features.recommendations.benefits.action.title', 'Actionable Tips'), desc: t('features.recommendations.benefits.action.desc', 'Get specific actions you can take to improve your finances') },
-        { title: t('features.recommendations.benefits.priority.title', 'Priority Guidance'), desc: t('features.recommendations.benefits.priority.desc', 'Focus on the most impactful financial improvements first') }
-      ]
-    },
-    {
-      id: 'contextual',
-      icon: Brain,
-      title: t('features.contextual.title', 'Contextual Financial Tips'),
-      badge: t('features.contextual.badge', 'Premium'),
-      description: t('features.contextual.description', 'Receive personalized financial advice based on your specific transaction patterns and spending behavior'),
-      benefits: [
-        { title: t('features.contextual.benefits.realtime.title', 'Real-time Analysis'), desc: t('features.contextual.benefits.realtime.desc', 'Instant insights based on your current financial activity') },
-        { title: t('features.contextual.benefits.goal.title', 'Goal-Oriented'), desc: t('features.contextual.benefits.goal.desc', 'Tips aligned with your specific financial goals and targets') },
-        { title: t('features.contextual.benefits.budget.title', 'Budget Awareness'), desc: t('features.contextual.benefits.budget.desc', 'Advice that considers your current budget and spending limits') }
+        { title: t('features.statements.benefits.ocr.title', 'OCR Technology'), desc: t('features.statements.benefits.ocr.desc', 'Advanced text recognition from PDF statements') },
+        { title: t('features.statements.benefits.processing.title', 'Bulk Processing'), desc: t('features.statements.benefits.processing.desc', 'Process hundreds of transactions at once') },
+        { title: t('features.statements.benefits.categorization.title', 'Auto-categorization'), desc: t('features.statements.benefits.categorization.desc', 'AI categorizes all extracted transactions') }
       ]
     }
   ];
@@ -304,33 +281,104 @@ export default function FeaturesPage() {
         </div>
       </div>
 
-      {/* Interactive Video Demos */}
+      {/* Core Features Section */}
       <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <div className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('features.video_demos.title', 'AI Feature Demonstrations')}</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('features.core_features.title')}</h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              {t('features.video_demos.subtitle', 'Experience our AI features with interactive voice-guided demonstrations in your language.')}
+              {t('features.core_features.subtitle')}
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <DemoVideoCard
-              title={t('features.video_demos.categorization.title', 'Smart Categorization')}
-              description={t('features.video_demos.categorization.description', 'Watch how our AI intelligently categorizes your transactions based on merchant patterns and spending behavior.')}
-              demoType="categorization"
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <FeatureShowcaseCard
+              title={t('features.core_features.budgets.title')}
+              description={t('features.core_features.budgets.description')}
+              icon={PieChart}
+              features={[
+                t('features.core_features.budgets.features.categories'),
+                t('features.core_features.budgets.features.tracking'),
+                t('features.core_features.budgets.features.comparison'),
+                t('features.core_features.budgets.features.alerts')
+              ]}
             />
-            
-            <DemoVideoCard
-              title={t('features.video_demos.tips.title', 'Financial Insights')}
-              description={t('features.video_demos.tips.description', 'Discover how AI analyzes your spending patterns to provide personalized financial recommendations.')}
-              demoType="tips"
+            <FeatureShowcaseCard
+              title={t('features.core_features.goals.title')}
+              description={t('features.core_features.goals.description')}
+              icon={Target}
+              features={[
+                t('features.core_features.goals.features.types'),
+                t('features.core_features.goals.features.sharing'),
+                t('features.core_features.goals.features.visualization'),
+                t('features.core_features.goals.features.predictions')
+              ]}
             />
-            
-            <DemoVideoCard
-              title={t('features.video_demos.health.title', 'Health Analysis')}
-              description={t('features.video_demos.health.description', 'See how AI evaluates your financial health and provides actionable improvement strategies.')}
-              demoType="health"
+            <FeatureShowcaseCard
+              title={t('features.core_features.receipts.title')}
+              description={t('features.core_features.receipts.description')}
+              icon={Receipt}
+              features={[
+                t('features.core_features.receipts.features.extraction'),
+                t('features.core_features.receipts.features.categorization'),
+                t('features.core_features.receipts.features.storage'),
+                t('features.core_features.receipts.features.reports')
+              ]}
+            />
+            <FeatureShowcaseCard
+              title={t('features.core_features.recurring.title')}
+              description={t('features.core_features.recurring.description')}
+              icon={RefreshCw}
+              features={[
+                t('features.core_features.recurring.features.frequency'),
+                t('features.core_features.recurring.features.automation'),
+                t('features.core_features.recurring.features.flexibility'),
+                t('features.core_features.recurring.features.reminders')
+              ]}
+            />
+            <FeatureShowcaseCard
+              title={t('features.core_features.currency.title')}
+              description={t('features.core_features.currency.description')}
+              icon={Globe}
+              features={[
+                t('features.core_features.currency.features.support'),
+                t('features.core_features.currency.features.interface'),
+                t('features.core_features.currency.features.consistency'),
+                t('features.core_features.currency.features.preference')
+              ]}
+            />
+            <FeatureShowcaseCard
+              title={t('features.core_features.export.title')}
+              description={t('features.core_features.export.description')}
+              icon={Download}
+              features={[
+                t('features.core_features.export.features.formats'),
+                t('features.core_features.export.features.import'),
+                t('features.core_features.export.features.ranges'),
+                t('features.core_features.export.features.tax_reports')
+              ]}
+            />
+            <FeatureShowcaseCard
+              title={t('features.core_features.collaboration.title')}
+              description={t('features.core_features.collaboration.description')}
+              icon={Users}
+              features={[
+                t('features.core_features.collaboration.features.shared_goals'),
+                t('features.core_features.collaboration.features.planning'),
+                t('features.core_features.collaboration.features.updates'),
+                t('features.core_features.collaboration.features.notifications')
+              ]}
+            />
+            <FeatureShowcaseCard
+              title={t('features.core_features.security.title')}
+              description={t('features.core_features.security.description')}
+              icon={Shield}
+              features={[
+                t('features.core_features.security.features.encryption'),
+                t('features.core_features.security.features.privacy'),
+                t('features.core_features.security.features.authentication'),
+                t('features.core_features.security.features.audits')
+              ]}
             />
           </div>
         </div>
@@ -697,26 +745,8 @@ export default function FeaturesPage() {
                 <Zap className="mr-2 h-4 w-4" />
                 {t('features.cta.start_free', 'Start with Free Account')}
               </Button>
-              <Button size="lg" variant="outline" onClick={() => setLocation('/contact')}>
-                <Clock className="mr-2 h-4 w-4" />
-                {t('features.cta.watch_demo', 'Watch Demo')}
-              </Button>
             </div>
             
-            <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
-              <div className="flex items-center">
-                <Shield className="mr-1 h-4 w-4 text-green-600" />
-                {t('features.cta.guarantee', '30-day money-back guarantee')}
-              </div>
-              <div className="flex items-center">
-                <DollarSign className="mr-1 h-4 w-4 text-green-600" />
-                {t('features.cta.no_card', 'No credit card required')}
-              </div>
-              <div className="flex items-center">
-                <Clock className="mr-1 h-4 w-4 text-green-600" />
-                {t('features.cta.cancel_anytime', 'Cancel anytime')}
-              </div>
-            </div>
           </CardContent>
         </Card>
         </div>

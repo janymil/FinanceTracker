@@ -503,7 +503,7 @@ Generate 4 independent box analyses with exact mathematical calculations.`;
     // Call the Fly.io AI processor service with fallback to direct OpenAI
     let result;
     try {
-      const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'https://finanzerpro.fly.dev';
+      const AI_PROCESSOR_URL = process.env.AI_PROCESSOR_URL || 'http://31.97.103.28:8080';
       
       const aiResponse = await fetch(`${AI_PROCESSOR_URL}/execute-gpt-task`, {
         method: 'POST',
