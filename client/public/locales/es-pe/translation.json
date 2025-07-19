@@ -3789,18 +3789,7 @@
     "freelancing": "Trabajo independiente",
     "salary": "Salario",
     "freelance": "Trabajo independiente",
-    "investments": "Inversiones",
-    "transportation": "Transporte",
-    "healthcare": "Salud",
-    "shopping": "Compras",
-    "housing": "Vivienda",
-    "entertainment": "Entretenimiento",
-    "food": "Comida",
-    "utilities": "Servicios públicos",
-    "education": "Educación",
-    "travel": "Viajes",
-    "business": "Negocio",
-    "other": "Otro"
+    "investments": "Inversiones"
   }
 
 }

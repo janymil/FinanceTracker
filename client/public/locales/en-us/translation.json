@@ -3727,18 +3727,7 @@
     "freelancing": "Freelancing",
     "salary": "Salary",
     "freelance": "Freelance",
-    "investments": "Investments",
-    "transportation": "Transportation",
-    "healthcare": "Healthcare",
-    "shopping": "Shopping",
-    "housing": "Housing",
-    "entertainment": "Entertainment",
-    "food": "Food",
-    "utilities": "Utilities",
-    "education": "Education",
-    "travel": "Travel",
-    "business": "Business",
-    "other": "Other"
+    "investments": "Investments"
   }
 
 }
