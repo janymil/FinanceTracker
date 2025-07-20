@@ -5,122 +5,134 @@ import { storage } from "../storage";
 import { db } from "../db";
 import { categories } from "../../shared/schema";
 import { eq, and } from "drizzle-orm";
-import { runMistralAnalysis } from "../mistralClient";
-import { generateContextualFinancialTips } from "../openai";
+import OpenAI from "openai";
+
+const openai = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY 
+});
 
 const conversationSchema = z.object({
   transcript: z.string().min(1),
   sessionId: z.string().min(1),
   userLanguage: z.string().optional(),
   userCurrency: z.string().optional(),
-  currentData: z.object({
-    amount: z.number().nullable(),
-    description: z.string().nullable(),
-    type: z.enum(['income', 'expense']).nullable(),
-    categoryId: z.number().nullable(),
-    categoryName: z.string().nullable(),
-    date: z.string().nullable().optional(),
-    note: z.string().nullable().optional()
-  }).optional()
+  conversationHistory: z.array(z.string()).optional()
 });
 
-// Generate natural conversation response using OpenAI (transaction-limited)
-async function generateNaturalResponse(currentData: any, missing: string[], userLanguage: string, userCurrency: string): Promise<string> {
+const completeTransactionSchema = z.object({
+  transactionData: z.object({
+    amount: z.number(),
+    description: z.string(),
+    type: z.enum(['income', 'expense']),
+    categoryId: z.number().nullable(),
+    categoryName: z.string().nullable(),
+    date: z.string().optional(),
+    note: z.string().optional()
+  }),
+  sessionId: z.string().min(1),
+  userLanguage: z.string().optional()
+});
+
+// Ultra-efficient OpenAI conversation management
+async function manageCompleteConversation(
+  transcript: string, 
+  conversationHistory: string[], 
+  userLanguage: string, 
+  userCurrency: string
+): Promise<{
+  response: string;
+  isComplete: boolean;
+  transactionData?: any;
+}> {
   try {
-    console.log('🗣️ [Natural Response] Generating with OpenAI:', { currentData, missing, userLanguage });
+    console.log('🧠 [OpenAI Complete] Managing conversation:', { transcript, userLanguage, userCurrency });
     
-    // Create context-aware prompt for OpenAI
-    const dataContext = Object.entries(currentData)
-      .filter(([_, value]) => value !== null && value !== undefined)
-      .map(([key, value]) => `${key}: ${value}`)
-      .join(', ');
+    // Build conversation context
+    const fullConversation = [...conversationHistory, `User: ${transcript}`].join('\n');
     
-    const missingFields = missing.join(', ');
-    
-    const prompt = `You are a transaction data collection assistant. Generate a natural, conversational response to collect missing transaction information.
+    const systemPrompt = `You are an intelligent transaction data collection assistant. Your goal is to collect ALL required transaction data through natural conversation, then provide a complete transaction object.
 
-STRICT RULES:
-1. ONLY discuss financial transactions (expenses, income, purchases)
-2. DO NOT answer questions about other topics
-3. Keep responses SHORT (max 15 words)
-4. Be conversational and friendly
-5. Use the user's currency: ${userCurrency}
+CRITICAL RULES:
+1. Conduct natural conversation in ${userLanguage === 'sk-sk' ? 'Slovak' : userLanguage === 'es-pe' ? 'Spanish' : 'English'}
+2. Use user's currency: ${userCurrency}
+3. Collect: amount, description, type (expense/income), date, note (optional)
+4. When ALL data collected, set "complete": true and provide transaction object
+5. Be conversational and natural - don't ask rigid questions
+6. Extract data intelligently from natural speech
 
-Current transaction data: ${dataContext || 'none collected yet'}
-Missing information: ${missingFields}
-User language: ${userLanguage}
-
-Generate a natural question to collect the next piece of missing information. If user language is Slovak (sk-sk), respond in Slovak. If Spanish (es-pe), respond in Spanish.
-
-Examples:
-- Missing amount: "How much did you spend?" or "Koľko to stálo?" (Slovak)
-- Missing description: "What did you buy?" or "Čo ste si kúpili?" (Slovak)
-- Missing type: "Was this an expense or income?" or "Bol to výdavok alebo príjem?" (Slovak)
-- Missing date: "When did this happen?" or "Kedy sa to stalo?" (Slovak)
-
-Response:`;
-
-    // Use basic OpenAI completion (not the full financial tips system)
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system', 
-            content: 'You are a transaction data collection assistant. Generate SHORT, natural conversation responses ONLY about financial transactions. Respond in the user\'s language.'
-          },
-          { role: 'user', content: prompt }
-        ],
-        max_tokens: 50,
-        temperature: 0.7
-      })
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      const naturalResponse = result.choices[0]?.message?.content?.trim();
-      console.log('✅ [Natural Response] Generated:', naturalResponse);
-      return naturalResponse || getFallbackQuestion(missing[0], currentData, userCurrency, userLanguage);
-    }
-  } catch (error) {
-    console.error('❌ [Natural Response] OpenAI error:', error);
+RESPONSE FORMAT (JSON):
+{
+  "response": "Your natural conversational response in user's language",
+  "complete": false,
+  "transactionData": {
+    "amount": number or null,
+    "description": "clean description" or null,
+    "type": "expense" or "income" or null,
+    "date": "YYYY-MM-DD" or null,
+    "note": "user note" or null,
+    "categoryName": "intelligent category guess" or null
   }
-
-  // Fallback to predefined questions
-  return getFallbackQuestion(missing[0], currentData, userCurrency, userLanguage);
 }
 
-// Fallback: Simple English-only questions if OpenAI fails
-function getFallbackQuestion(nextField: string, data: any, userCurrency: string, userLanguage: string): string {
-  // Simple fallback - OpenAI should handle multilingual questions
-  switch (nextField) {
-    case 'amount':
-      return 'How much was it?';
-    case 'description':
-      return 'What was this for?';
-    case 'type':
-      return 'Was this an expense or income?';
-    case 'date':
-      return 'When did this happen?';
-    case 'note':
-      return 'Any notes?';
-    default:
-      return 'Tell me more about your transaction.';
+When complete=true, ensure ALL required fields (amount, description, type) are filled.
+
+Examples:
+- "Kúpil som pivo za 5 eur" → extract amount: 5, description: "pivo", type: "expense"
+- "Got salary 2000" → amount: 2000, description: "salary", type: "income"
+- "yesterday" → date: previous day
+- "today" → date: current day
+
+Current conversation:
+${fullConversation}
+
+Provide JSON response:`;
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: 'Process this conversation and respond appropriately.' }
+      ],
+      temperature: 0.3,
+      max_tokens: 300,
+      response_format: { type: "json_object" }
+    });
+
+    const response = completion.choices[0].message.content?.trim();
+    
+    if (response) {
+      const parsed = JSON.parse(response);
+      console.log('✅ [OpenAI Complete] Parsed response:', parsed);
+      return {
+        response: parsed.response,
+        isComplete: parsed.complete || false,
+        transactionData: parsed.transactionData
+      };
+    }
+
+    throw new Error('No response from OpenAI');
+
+  } catch (error) {
+    console.error('❌ [OpenAI Complete] Error:', error);
+    
+    // Fallback response
+    return {
+      response: userLanguage === 'sk-sk' ? 'Povedzte mi o vašej transakcii.' : 
+                userLanguage === 'es-pe' ? 'Cuéntame sobre tu transacción.' : 
+                'Tell me about your transaction.',
+      isComplete: false,
+      transactionData: null
+    };
   }
 }
 
 export function registerVoiceConversationRoutes(app: Router) {
   const router = Router();
 
-  // Process voice conversation with AI categorization
+  // Ultra-efficient voice conversation with pure OpenAI
   router.post('/conversation', requireAuth(), async (req: Request, res: Response) => {
     try {
-      const { transcript, sessionId, currentData, userLanguage, userCurrency } = conversationSchema.parse(req.body);
+      const { transcript, sessionId, userLanguage, userCurrency, conversationHistory = [] } = conversationSchema.parse(req.body);
       const userId = (req as any).auth?.userId;
 
       if (!userId) {
@@ -129,113 +141,78 @@ export function registerVoiceConversationRoutes(app: Router) {
 
       // CRITICAL: Don't process empty transcripts
       if (!transcript || transcript.trim() === '') {
-        console.log('❌ [VoiceConversation] Rejecting empty transcript:', {
-          transcript,
-          sessionId,
-          hasCurrentData: !!currentData
-        });
+        console.log('❌ [VoiceConversation] Rejecting empty transcript');
         return res.status(400).json({ 
           success: false, 
           error: "Empty transcript not allowed" 
         });
       }
 
-      console.log('🎯 [VoiceConversation] Processing:', {
+      console.log('🗣️ [VoiceConversation] Processing:', {
         userId: userId.substring(0, 8) + '...',
         transcript,
         sessionId,
-        receivedCurrentData: currentData
+        historyLength: conversationHistory.length
       });
 
-      // Get user for currency info
+      // Get user data for language and currency fallbacks
       const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ success: false, error: "User not found" });
-      }
+      const finalLanguage = userLanguage || (user as any)?.language || 'en-us';
+      const finalCurrency = userCurrency || (user as any)?.currency || '$';
 
-      // Start with existing data from frontend
-      const existing = {
-        amount: null,
-        description: null,
-        type: null,
-        date: null,
-        note: undefined,
-        categoryId: null,
-        categoryName: null,
-        ...(currentData || {})
-      };
-      
-      console.log('📤 [VoiceConversation] Existing data from frontend:', existing);
-
-      // Get proper user language and currency
-      const finalUserLanguage = userLanguage || user.language || 'en-us';
-      const finalUserCurrency = userCurrency || user.currency || '$';
-      
-      // Always use Mistral AI for data extraction from conversation
-      const newData = await aiExtractData(transcript, finalUserCurrency, finalUserLanguage, existing);
-      console.log('📝 [VoiceConversation] Extracted:', newData);
-
-      // Merge new data with existing (preserve existing data, only add new non-null values)
-      const updated = {
-        amount: newData.amount !== null ? newData.amount : existing.amount,
-        description: newData.description !== null ? newData.description : existing.description,
-        type: newData.type !== null ? newData.type : existing.type,
-        date: (newData as any).date !== null && (newData as any).date !== undefined ? (newData as any).date : (existing as any).date,
-        note: (newData as any).note !== undefined ? (newData as any).note : (existing as any).note,
-        categoryId: newData.categoryId !== null ? newData.categoryId : existing.categoryId,
-        categoryName: newData.categoryName !== null ? newData.categoryName : existing.categoryName
-      };
-      
-      console.log('🔄 [VoiceConversation] Data merge:', {
-        existing,
-        newData,
-        updated
+      console.log('🌍 [VoiceConversation] Using settings:', {
+        language: finalLanguage,
+        currency: finalCurrency
       });
 
-      // Remove Mistral from conversation flow - only use for final categorization
+      // Let OpenAI manage the complete conversation
+      const result = await manageCompleteConversation(
+        transcript,
+        conversationHistory,
+        finalLanguage,
+        finalCurrency
+      );
 
-      console.log('🔄 [VoiceConversation] Final updated data:', updated);
+      console.log('🤖 [VoiceConversation] OpenAI result:', result);
 
-      // Check what's still missing (including date and note)
-      const missing = [];
-      if (!updated.amount) missing.push('amount');
-      if (!updated.description) missing.push('description'); 
-      if (!updated.type) missing.push('type');
-      if (!updated.date) missing.push('date');
-      if (updated.note === undefined) missing.push('note');
-
-      const isComplete = missing.length === 0;
-      const nextField = missing[0] || null;
-
-      // Generate natural conversation response using OpenAI TTS (transaction-limited)
-      let nextQuestion = null;
-      if (!isComplete) {
-        nextQuestion = await generateNaturalResponse(updated, missing, finalUserLanguage, finalUserCurrency);
-      }
+      // Update conversation history
+      const updatedHistory = [
+        ...conversationHistory,
+        `User: ${transcript}`,
+        `Assistant: ${result.response}`
+      ];
 
       return res.json({
         success: true,
-        data: updated,
-        nextField,
-        missing,
-        isComplete,
-        nextQuestion,
-        sessionId
+        response: result.response,
+        isComplete: result.isComplete,
+        transactionData: result.transactionData,
+        conversationHistory: updatedHistory
       });
 
     } catch (error) {
       console.error('💥 [VoiceConversation] Error:', error);
-      return res.status(500).json({ 
-        success: false,
-        error: "Failed to process voice input"
+      
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Invalid request parameters",
+          details: error.errors
+        });
+      }
+
+      res.status(500).json({ 
+        success: false, 
+        error: "Failed to process voice conversation",
+        details: error instanceof Error ? error.message : "Unknown error"
       });
     }
   });
 
-  // Complete and save transaction
+  // Complete and save transaction with OpenAI categorization
   router.post('/complete', requireAuth(), async (req: Request, res: Response) => {
     try {
-      const { transactionData, sessionId, userLanguage } = req.body;
+      const { transactionData, sessionId, userLanguage } = completeTransactionSchema.parse(req.body);
       const userId = (req as any).auth?.userId;
 
       if (!userId) {
@@ -248,34 +225,52 @@ export function registerVoiceConversationRoutes(app: Router) {
         data: transactionData
       });
 
-      // Use Mistral AI ONLY for categorization if missing
-      let finalType = transactionData.type;
+      // Use OpenAI for intelligent categorization if missing
       let finalCategoryId = transactionData.categoryId;
       let finalCategoryName = transactionData.categoryName;
 
       if (transactionData.description && !finalCategoryId) {
-        console.log('🤖 [VoiceConversation] Using Mistral for AI categorization...');
+        console.log('🤖 [VoiceConversation] Using OpenAI for categorization...');
         try {
-          const analysis = await runMistralAnalysis(
-            transactionData.description,
-            userId,
-            userLanguage
+          // Get available categories
+          const availableCategories = await db.select().from(categories).where(
+            and(
+              eq(categories.userId, userId),
+              eq(categories.type, transactionData.type)
+            )
           );
-          
-          if (analysis) {
-            finalCategoryId = analysis.categoryId || finalCategoryId;
-            finalCategoryName = analysis.categoryName || finalCategoryName;
-            console.log('✅ [VoiceConversation] Mistral categorization applied:', analysis);
+
+          if (availableCategories.length > 0) {
+            const categoryPrompt = `Categorize this transaction intelligently:
+
+Description: "${transactionData.description}"
+Type: ${transactionData.type}
+Available categories: ${availableCategories.map(c => `${c.id}: ${c.name}`).join(', ')}
+
+Return only the category ID number that best matches this transaction. If no good match exists, return 'null'.`;
+
+            const categoryCompletion = await openai.chat.completions.create({
+              model: 'gpt-4o-mini',
+              messages: [
+                { role: 'system', content: 'You are a transaction categorization specialist. Return only the category ID number or null.' },
+                { role: 'user', content: categoryPrompt }
+              ],
+              temperature: 0.1,
+              max_tokens: 10
+            });
+
+            const categoryResponse = categoryCompletion.choices[0].message.content?.trim();
+            const categoryId = categoryResponse && categoryResponse !== 'null' ? parseInt(categoryResponse) : null;
+            
+            if (categoryId && availableCategories.find(c => c.id === categoryId)) {
+              finalCategoryId = categoryId;
+              finalCategoryName = availableCategories.find(c => c.id === categoryId)?.name || null;
+              console.log('✅ [OpenAI Categorization] Found category:', { categoryId, categoryName: finalCategoryName });
+            }
           }
         } catch (error) {
-          console.log('⚠️ [VoiceConversation] Mistral categorization failed, using defaults');
+          console.log('⚠️ [VoiceConversation] OpenAI categorization failed, using defaults');
         }
-      }
-
-      // Default to expense if still no type determined
-      if (!finalType) {
-        finalType = 'expense';
-        console.log('📝 [VoiceConversation] Defaulting to expense type');
       }
 
       // Create transaction record
@@ -283,8 +278,8 @@ export function registerVoiceConversationRoutes(app: Router) {
         userId: userId,
         amount: transactionData.amount,
         description: transactionData.description,
-        type: finalType,
-        date: transactionData.date || new Date().toISOString().split('T')[0],
+        type: transactionData.type,
+        date: new Date(transactionData.date || new Date().toISOString().split('T')[0]),
         referenceNote: transactionData.note || '',
         categoryId: finalCategoryId || null,
         isRecurring: false
@@ -308,63 +303,7 @@ export function registerVoiceConversationRoutes(app: Router) {
   app.use('/api/voice', router);
 }
 
-// REMOVED: smartExtractData function - not needed anymore
-// All extraction is done by aiExtractData using Mistral
-
-// AI-powered conversational data extraction using external AI processor
-async function aiExtractData(transcript: string, userCurrency: string, userLanguage: string = 'en-us', existingData: any = {}) {
-  try {
-    console.log('🤖 [AI Extraction] Calling external AI processor for intelligent extraction');
-    
-    // Call external AI processor with the new extractConversationalTransactionData function
-    const response = await fetch('https://finanzerpro-ai-processor.fly.dev/execute-gpt-task', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        task: 'voice-extraction',
-        userId: 'voice-system',
-        payload: {
-          transcript,
-          existingData,
-          userCurrency,
-          language: userLanguage
-        }
-      })
-    });
-
-    if (response.ok) {
-      const aiResult = await response.json();
-      console.log('✅ [AI Extraction] External processor result:', aiResult);
-      
-      return {
-        amount: aiResult.amount || null,
-        description: aiResult.description || null,
-        type: aiResult.type || null,
-        date: aiResult.date || null,
-        note: aiResult.note || null,
-        categoryId: null,
-        categoryName: null
-      };
-    } else {
-      console.warn('⚠️ [AI Extraction] External processor failed, using fallback');
-    }
-  } catch (error) {
-    console.error('❌ [AI Extraction] External processor error:', error);
-  }
-
-  // Fallback: return minimal data if external AI fails
-  return {
-    amount: null,
-    description: transcript.trim(),
-    type: null,
-    date: null,
-    note: null,
-    categoryId: null,
-    categoryName: null
-  };
-}
+// REMOVED: All external AI processor calls - pure OpenAI solution implemented
 
 // REMOVED: basicExtraction and parseWordNumber functions
 // These contained hardcoded Slovak/Spanish words which is terrible coding practice

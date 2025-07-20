@@ -28,16 +28,8 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
   const [state, setState] = useState<ConversationState>('starting');
   const [currentMessage, setCurrentMessage] = useState('');
   const [sessionId] = useState(`session_${Date.now()}`);
-  
-  const [transactionData, setTransactionData] = useState<TransactionData>({
-    amount: null,
-    description: null,
-    type: null,
-    categoryId: null,
-    categoryName: null,
-    date: undefined,
-    note: undefined
-  });
+  const [conversationHistory, setConversationHistory] = useState<string[]>([]);
+  const [transactionData, setTransactionData] = useState<TransactionData | null>(null);
 
   const recognitionRef = useRef<any>(null);
   const conversationLockRef = useRef<boolean>(false);
@@ -242,7 +234,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     });
   }, [userLanguage]); // Only include userLanguage dependency to avoid circular reference
 
-  // Process voice input with AI
+  // Process voice input with ultra-efficient OpenAI
   const processVoiceInput = useCallback(async (transcript: string) => {
     // CRITICAL: Don't process empty or null transcripts
     if (!transcript || transcript.trim() === '' || conversationLockRef.current) {
@@ -257,12 +249,12 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
     try {
       console.log('📡 Processing voice input:', transcript);
-      console.log('📤 Sending to backend:', { transcript, sessionId, currentData: transactionData });
+      console.log('📤 Sending to backend:', { transcript, sessionId, conversationHistory });
       
       const response = await apiRequest('POST', '/api/voice/conversation', {
         transcript,
         sessionId,
-        currentData: transactionData,
+        conversationHistory,
         userLanguage: userLanguage,
         userCurrency: userCurrency
       });
@@ -271,34 +263,33 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       console.log('✅ Voice result:', result);
 
       if (result.success) {
-        const updatedData = result.data;
-        console.log('📥 Updating frontend state with:', updatedData);
-        console.log('🔄 Previous state was:', transactionData);
-        setTransactionData(updatedData);
-        console.log('✅ State should now be:', updatedData);
-
-        if (result.isComplete) {
+        // Update conversation history
+        setConversationHistory(result.conversationHistory || []);
+        
+        if (result.isComplete && result.transactionData) {
           // Transaction complete - save it
           console.log('🎯 Transaction complete - saving...');
+          setTransactionData(result.transactionData);
           setState('complete');
           conversationLockRef.current = true; // Lock conversation before saving
-          await saveTransaction(updatedData);
-        } else if (result.nextQuestion) {
-          // Ask next question
-          console.log('❓ Asking next question:', result.nextQuestion);
-          setCurrentMessage(result.nextQuestion);
+          await saveTransaction(result.transactionData);
+        } else if (result.response) {
+          // Continue conversation
+          console.log('❓ AI response:', result.response);
+          setCurrentMessage(result.response);
           conversationLockRef.current = false;
           setState('speaking');
-          speak(result.nextQuestion, () => {
+          speak(result.response, () => {
             // Only start listening if conversation is not locked
             if (!conversationLockRef.current) {
               startListening();
             }
           });
         } else {
-          // Fallback - determine next question
+          // Fallback
           conversationLockRef.current = false;
-          askNextQuestion(updatedData);
+          setState('error');
+          setCurrentMessage('Sorry, something went wrong. Please try speaking again.');
         }
       } else {
         throw new Error('Failed to process voice input');
@@ -311,7 +302,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       // Don't automatically restart - wait for user action
       conversationLockRef.current = false;
     }
-  }, [transactionData, sessionId, userLanguage, userCurrency]);
+  }, [conversationHistory, sessionId, userLanguage, userCurrency]);
 
   // Determine and ask next question with user's currency
   const askNextQuestion = useCallback((data: TransactionData) => {
@@ -345,7 +336,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
 
 
-  // Save transaction
+  // Save transaction with OpenAI categorization
   const saveTransaction = useCallback(async (data: TransactionData) => {
     if (!data.amount || !data.description) {
       console.error('❌ Missing required data:', data);
@@ -362,7 +353,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
       const response = await apiRequest('POST', '/api/voice/complete', {
         transactionData: data,
         sessionId: sessionId,
-        userLanguage: userLanguage // Pass user language for Mistral categorization
+        userLanguage: userLanguage // Pass user language for OpenAI categorization
       });
 
       const result = await response.json();
