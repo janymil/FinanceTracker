@@ -38,7 +38,7 @@ export function registerVoiceRoutes(app: Router) {
       const userId = req.auth?.userId;
       
       console.log('🎯 [VoiceAPI] Processing voice input:', {
-        userId: userId?.substring(0, 8) + '...',
+        userId: (userId || 'unknown').substring(0, 8) + '...',
         transcript: transcript,
         language,
         timezone,
@@ -326,7 +326,7 @@ CRITICAL: Better to return categoryId: null than wrong category. User can select
         aiProcessingTime: `${aiProcessingTime}ms`,
         finalConfidence: extractedData.confidence,
         extractedFields: Object.keys(extractedData).filter(key => extractedData[key] !== null && extractedData[key] !== undefined),
-        userId: userId?.substring(0, 8) + '...',
+        userId: (userId || 'unknown').substring(0, 8) + '...',
         timestamp: new Date().toISOString()
       });
 
@@ -343,7 +343,7 @@ CRITICAL: Better to return categoryId: null than wrong category. User can select
         error: error.message,
         stack: error.stack,
         totalTime: `${totalTime}ms`,
-        userId: userId?.substring(0, 8) + '...',
+        userId: (userId || 'unknown').substring(0, 8) + '...',
         timestamp: new Date().toISOString()
       });
       
