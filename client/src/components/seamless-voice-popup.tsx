@@ -130,30 +130,15 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
     }
   }, []);
 
-  // SINGLE validation function - ensures consistency everywhere
-  const validateRequiredFields = (data: any): string[] => {
+  // SIMPLE validation - check what's actually missing
+  const getMissingFields = (data: any): string[] => {
     const missing = [];
     
-    console.log('🔍 [VALIDATION] Checking fields:', {
-      amount: data.amount,
-      description: data.description,
-      type: data.type
-    });
+    // Check each required field
+    if (!data.amount || data.amount <= 0) missing.push('amount');
+    if (!data.description || data.description.trim().length === 0) missing.push('description');
+    if (!data.type || (data.type !== 'income' && data.type !== 'expense')) missing.push('type');
     
-    if (!data.amount || data.amount <= 0) {
-      missing.push('amount');
-      console.log('❌ [VALIDATION] Missing amount');
-    }
-    if (!data.description || !data.description.trim()) {
-      missing.push('description');
-      console.log('❌ [VALIDATION] Missing description');
-    }
-    if (!data.type || (data.type !== 'income' && data.type !== 'expense')) {
-      missing.push('type');
-      console.log('❌ [VALIDATION] Missing type');
-    }
-    
-    console.log('🔍 [VALIDATION] Result:', missing);
     return missing;
   };
 
@@ -177,69 +162,38 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       // Voice API returns data in result.data structure
       const voiceData = result.data || result;
       
-      const newExtractedData = { 
+      // Merge API data with existing data - preserving previous inputs
+      const updatedData = { 
         ...extractedData, 
-        // Extract from voice API response structure - NO DEFAULT FALLBACKS FOR REQUIRED FIELDS
         amount: voiceData.amount || extractedData.amount,
         vendor: voiceData.vendor || extractedData.vendor, 
         category: voiceData.categoryName || voiceData.category || extractedData.category,
         description: voiceData.description || extractedData.description,
-        type: voiceData.type || extractedData.type, // NO DEFAULT TO 'expense' - must be explicit
+        type: voiceData.type || extractedData.type,
         date: voiceData.parsedDate || voiceData.date || extractedData.date,
         categoryId: voiceData.categoryId || extractedData.categoryId
       };
       
-      console.log('📝 [SeamlessPopup] NEW extractedData:', newExtractedData);
-      setExtractedData(newExtractedData);
-      
+      setExtractedData(updatedData);
       if (result.sessionId) setSessionId(result.sessionId);
 
-      // Step 2: Check REQUIRED fields based on transaction schema
-      // REQUIRED: amount, description, type, date (userId handled automatically)
-      // OPTIONAL: categoryId, vendor, recurring fields
+      // Check what's missing for complete transaction
+      const missingFields = getMissingFields(updatedData);
       
-      const hasAmount = newExtractedData.amount && newExtractedData.amount > 0;
-      const hasDescription = newExtractedData.description && newExtractedData.description.trim();
-      const hasType = newExtractedData.type && (newExtractedData.type === 'income' || newExtractedData.type === 'expense');
-      const hasDate = newExtractedData.date || newExtractedData.parsedDate || true; // Can default to today
-      
-      console.log('🔍 [SeamlessPopup] Required field validation:', {
-        amount: newExtractedData.amount,
-        hasAmount,
-        description: newExtractedData.description,
-        hasDescription,
-        type: newExtractedData.type,
-        hasType,
-        date: newExtractedData.date || 'will default to today',
-        hasDate,
-        // Optional fields:
-        vendor: newExtractedData.vendor,
-        category: newExtractedData.category
-      });
-      
-      // Use the single validation function
-      const missingFields = validateRequiredFields(newExtractedData);
-      
-      console.log('🔍 [SeamlessPopup] CRITICAL DEBUG - Missing fields:', missingFields);
-      console.log('🔍 [SeamlessPopup] CRITICAL DEBUG - All field values:', {
-        amount: newExtractedData.amount,
-        description: newExtractedData.description,
-        type: newExtractedData.type,
-        vendor: newExtractedData.vendor,
-        category: newExtractedData.category
-      });
-      console.log('🔍 [SeamlessPopup] CRITICAL DEBUG - Validation result:', {
-        missingFieldsCount: missingFields.length,
-        shouldSaveTransaction: missingFields.length === 0,
-        shouldAskQuestions: missingFields.length > 0
+      console.log('🔍 [SeamlessPopup] Data check:', {
+        amount: updatedData.amount,
+        description: updatedData.description,
+        type: updatedData.type,
+        missingFields: missingFields
       });
 
       if (missingFields.length === 0) {
-        console.log('✅ [SeamlessPopup] CRITICAL DEBUG - All required fields present, saving transaction');
+        console.log('✅ [SeamlessPopup] Transaction complete - saving');
       } else {
-        console.log('❓ [SeamlessPopup] CRITICAL DEBUG - Missing fields found, asking questions:', missingFields);
+        console.log('❓ [SeamlessPopup] Missing fields - asking questions:', missingFields);
       }
 
+      // Decision: Save transaction or ask questions
       if (missingFields.length === 0) {
         // Transaction complete - save it
         console.log('✅ [SeamlessPopup] Transaction complete, saving...');
