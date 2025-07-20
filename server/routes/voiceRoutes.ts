@@ -214,5 +214,113 @@ Respond ONLY with JSON: {"categoryId": number|null, "categoryName": "string"|nul
     }
   });
 
+  // Conversation endpoint for voice conversation component
+  router.post('/conversation', requireAuth(), async (req: Request, res: Response) => {
+    try {
+      const { transcript, sessionId, currentData, userLanguage, userCurrency } = req.body;
+      const userId = req.auth?.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      console.log('🗣️ [VoiceConversation] Processing:', {
+        userId: userId.substring(0, 8) + '...',
+        transcript,
+        currentData
+      });
+
+      // Simple parsing approach for better accuracy
+      const newAmount = extractAmountFromText(transcript, userCurrency);
+      const newDescription = extractDescriptionFromText(transcript);
+      const newType = extractTransactionType(transcript);
+
+      // Merge with existing data (preserve what's already there)
+      const updatedData = {
+        amount: newAmount || currentData.amount,
+        description: newDescription || currentData.description,
+        type: newType || currentData.type,
+        categoryId: currentData.categoryId,
+        categoryName: currentData.categoryName,
+        date: currentData.date || new Date().toISOString().split('T')[0],
+        note: currentData.note
+      };
+
+      // Check if complete
+      const isComplete = updatedData.amount !== null && updatedData.description !== null;
+
+      // Generate next question
+      let nextQuestion = null;
+      if (!isComplete) {
+        if (!updatedData.amount) {
+          nextQuestion = "How much was it?";
+        } else if (!updatedData.description) {
+          nextQuestion = `What was this ${userCurrency}${updatedData.amount} for?`;
+        }
+      }
+
+      console.log('✅ [VoiceConversation] Result:', {
+        updatedData,
+        isComplete,
+        nextQuestion
+      });
+
+      res.json({
+        success: true,
+        data: updatedData,
+        isComplete,
+        nextQuestion
+      });
+
+    } catch (error) {
+      console.error('💥 [VoiceConversation] Error:', error);
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Processing failed"
+      });
+    }
+  });
+
+  // Complete endpoint to save transaction
+  router.post('/complete', requireAuth(), async (req: Request, res: Response) => {
+    try {
+      const { transactionData, sessionId, userLanguage } = req.body;
+      const userId = req.auth?.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      console.log('💾 [VoiceComplete] Saving:', transactionData);
+
+      // Save transaction to database
+      const insertResult = await db.insert(transactions).values({
+        userId,
+        amount: transactionData.amount,
+        description: transactionData.description,
+        type: transactionData.type || 'expense',
+        categoryId: transactionData.categoryId || null,
+        date: transactionData.date || new Date().toISOString().split('T')[0],
+        notes: transactionData.note || null,
+        isRecurring: false,
+        paymentUrl: null
+      }).returning();
+
+      console.log('✅ [VoiceComplete] Saved transaction:', insertResult[0].id);
+
+      res.json({
+        success: true,
+        transaction: insertResult[0]
+      });
+
+    } catch (error) {
+      console.error('💥 [VoiceComplete] Error:', error);
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Save failed"
+      });
+    }
+  });
+
   app.use('/api/voice', router);
 }

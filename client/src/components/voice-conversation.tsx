@@ -62,11 +62,22 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     userData: user 
   });
   
-  // Language mapping for speech recognition
+  // Improved language mapping for speech recognition
   const getRecognitionLanguage = (lang: string) => {
-    if (lang.startsWith('es')) return 'es-ES';
-    if (lang.startsWith('sk')) return 'sk-SK';
-    return 'en-US';
+    console.log('🌍 Mapping language for STT:', lang);
+    
+    // More precise language mapping
+    if (lang === 'es-pe' || lang.startsWith('es')) {
+      console.log('🌍 Using Spanish STT');
+      return 'es-ES'; // Spanish recognition
+    }
+    if (lang === 'sk-sk' || lang.startsWith('sk')) {
+      console.log('🌍 Using Slovak STT');
+      return 'sk-SK'; // Slovak recognition
+    }
+    
+    console.log('🌍 Using English STT (default)');
+    return 'en-US'; // Default to English
   };
 
   // Initialize and start conversation when user data is available
@@ -100,14 +111,38 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     const recognition = new (window as any).webkitSpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
+    recognition.maxAlternatives = 3; // Get multiple alternatives for better accuracy
     recognition.lang = getRecognitionLanguage(userLanguage);
     
-    console.log('🎤 STT Language set to:', recognition.lang);
+    console.log('🎤 STT configured:', {
+      language: recognition.lang,
+      userLanguage,
+      continuous: recognition.continuous,
+      interimResults: recognition.interimResults,
+      maxAlternatives: recognition.maxAlternatives
+    });
 
     recognition.onresult = (event: any) => {
       try {
-        const transcript = event.results[0][0].transcript.trim();
-        console.log('🎤 Voice heard:', transcript);
+        // Get best transcript from alternatives
+        const result = event.results[0];
+        const alternatives = [];
+        for (let i = 0; i < result.length && i < 3; i++) {
+          alternatives.push({
+            transcript: result[i].transcript.trim(),
+            confidence: result[i].confidence
+          });
+        }
+        
+        // Use the most confident result
+        const bestResult = alternatives.sort((a, b) => b.confidence - a.confidence)[0];
+        const transcript = bestResult.transcript;
+        
+        console.log('🎤 Voice recognition results:', {
+          alternatives,
+          bestTranscript: transcript,
+          confidence: bestResult.confidence
+        });
         
         if (transcript && !conversationLockRef.current) {
           console.log('🎤 Processing transcript:', transcript);
@@ -120,7 +155,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
           setState('processing');
           handleVoiceInput(transcript);
         } else {
-          console.log('🎤 Transcript ignored - conversation locked');
+          console.log('🎤 Transcript ignored - conversation locked or empty');
         }
       } catch (error) {
         console.error('🎤 Error in onresult:', error);
@@ -279,8 +314,16 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
       if (result.success) {
         const updatedData = result.data;
-        console.log('📥 Updating frontend state with:', updatedData);
-        setTransactionData(updatedData);
+        console.log('📥 Backend response:', result);
+        console.log('📥 Current frontend state:', transactionData);
+        console.log('📥 Updated data from backend:', updatedData);
+        console.log('📥 Updating frontend state...');
+        
+        setTransactionData(prev => {
+          console.log('📥 Previous state:', prev);
+          console.log('📥 New state:', updatedData);
+          return updatedData;
+        });
 
         if (result.isComplete) {
           // Transaction complete - save it
@@ -490,7 +533,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
             <div className="flex justify-between items-center">
               <span className="font-medium">Amount:</span>
               <span className={transactionData.amount ? 'text-green-600 font-medium' : 'text-gray-400'}>
-                {transactionData.amount ? `$${transactionData.amount}` : 'Waiting...'}
+                {transactionData.amount ? `${userCurrency}${transactionData.amount}` : 'Waiting...'}
               </span>
             </div>
             <div className="flex justify-between items-center">
