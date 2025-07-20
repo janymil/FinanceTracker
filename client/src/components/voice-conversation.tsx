@@ -37,6 +37,14 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     note: undefined
   });
 
+  // Use useRef to store the current transaction data to avoid stale closures
+  const transactionDataRef = useRef<TransactionData>(transactionData);
+  
+  // Keep ref in sync with state
+  useEffect(() => {
+    transactionDataRef.current = transactionData;
+  }, [transactionData]);
+
   const recognitionRef = useRef<any>(null);
   const conversationLockRef = useRef<boolean>(false);
   const { toast } = useToast();
@@ -122,12 +130,15 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
 
     try {
       console.log('📡 Processing voice input:', transcript);
-      console.log('📤 Sending to backend:', { transcript, sessionId, currentData: transactionData });
+      
+      // Get current data from ref to avoid stale closure
+      const currentData = transactionDataRef.current;
+      console.log('📤 Sending to backend:', { transcript, sessionId, currentData });
       
       const response = await apiRequest('POST', '/api/voice/conversation', {
         transcript,
         sessionId,
-        currentData: transactionData
+        currentData
       });
 
       const result = await response.json();
@@ -167,7 +178,7 @@ export function VoiceConversation({ onClose, onComplete }: VoiceConversationProp
     } finally {
       conversationLockRef.current = false;
     }
-  }, [transactionData, sessionId]);
+  }, [sessionId]);
 
   // Determine and ask next question
   const askNextQuestion = useCallback((data: TransactionData) => {
