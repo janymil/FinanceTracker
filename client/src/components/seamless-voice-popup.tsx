@@ -134,10 +134,26 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
   const validateRequiredFields = (data: any): string[] => {
     const missing = [];
     
-    if (!data.amount || data.amount <= 0) missing.push('amount');
-    if (!data.description || !data.description.trim()) missing.push('description'); 
-    if (!data.type || (data.type !== 'income' && data.type !== 'expense')) missing.push('type');
+    console.log('🔍 [VALIDATION] Checking fields:', {
+      amount: data.amount,
+      description: data.description,
+      type: data.type
+    });
     
+    if (!data.amount || data.amount <= 0) {
+      missing.push('amount');
+      console.log('❌ [VALIDATION] Missing amount');
+    }
+    if (!data.description || !data.description.trim()) {
+      missing.push('description');
+      console.log('❌ [VALIDATION] Missing description');
+    }
+    if (!data.type || (data.type !== 'income' && data.type !== 'expense')) {
+      missing.push('type');
+      console.log('❌ [VALIDATION] Missing type');
+    }
+    
+    console.log('🔍 [VALIDATION] Result:', missing);
     return missing;
   };
 
@@ -204,12 +220,25 @@ export function SeamlessVoicePopup({ isOpen, onClose, onComplete }: SeamlessVoic
       // Use the single validation function
       const missingFields = validateRequiredFields(newExtractedData);
       
-      console.log('🔍 [SeamlessPopup] Missing fields:', missingFields);
-      console.log('🎯 [SeamlessPopup] Field values:', {
+      console.log('🔍 [SeamlessPopup] CRITICAL DEBUG - Missing fields:', missingFields);
+      console.log('🔍 [SeamlessPopup] CRITICAL DEBUG - All field values:', {
         amount: newExtractedData.amount,
+        description: newExtractedData.description,
+        type: newExtractedData.type,
         vendor: newExtractedData.vendor,
         category: newExtractedData.category
       });
+      console.log('🔍 [SeamlessPopup] CRITICAL DEBUG - Validation result:', {
+        missingFieldsCount: missingFields.length,
+        shouldSaveTransaction: missingFields.length === 0,
+        shouldAskQuestions: missingFields.length > 0
+      });
+
+      if (missingFields.length === 0) {
+        console.log('✅ [SeamlessPopup] CRITICAL DEBUG - All required fields present, saving transaction');
+      } else {
+        console.log('❓ [SeamlessPopup] CRITICAL DEBUG - Missing fields found, asking questions:', missingFields);
+      }
 
       if (missingFields.length === 0) {
         // Transaction complete - save it
