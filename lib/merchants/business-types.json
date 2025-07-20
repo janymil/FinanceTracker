@@ -1,0 +1,85 @@
+{
+  "business_type_mappings": {
+    "coffee_shop": {
+      "category_keywords": ["food", "dining", "beverages", "coffee"],
+      "typical_categories": ["Food & Dining", "Jedlo", "Comida"],
+      "confidence": 0.9
+    },
+    "grocery_store": {
+      "category_keywords": ["food", "groceries", "shopping"],
+      "typical_categories": ["Groceries", "Potraviny", "Supermercado"],
+      "confidence": 0.95
+    },
+    "gas_station": {
+      "category_keywords": ["transportation", "fuel", "gas"],
+      "typical_categories": ["Transportation", "Doprava", "Transporte"],
+      "confidence": 0.95
+    },
+    "restaurant": {
+      "category_keywords": ["food", "dining", "meals"],
+      "typical_categories": ["Food & Dining", "Jedlo", "Comida"],
+      "confidence": 0.9
+    },
+    "fast_food": {
+      "category_keywords": ["food", "dining", "quick_service"],
+      "typical_categories": ["Food & Dining", "Jedlo", "Comida"],
+      "confidence": 0.9
+    },
+    "pharmacy": {
+      "category_keywords": ["health", "medical", "medicine"],
+      "typical_categories": ["Health & Medical", "Zdravie", "Salud"],
+      "confidence": 0.95
+    },
+    "financial_institution": {
+      "category_keywords": ["banking", "financial", "money"],
+      "typical_categories": ["Banking", "Bankovnictvo", "Bancario"],
+      "confidence": 0.95
+    },
+    "entertainment_streaming": {
+      "category_keywords": ["entertainment", "media", "subscriptions"],
+      "typical_categories": ["Entertainment", "Zabava", "Entretenimiento"],
+      "confidence": 0.9
+    },
+    "retail": {
+      "category_keywords": ["shopping", "clothing", "merchandise"],
+      "typical_categories": ["Shopping", "Nakupovanie", "Compras"],
+      "confidence": 0.8
+    },
+    "telecom": {
+      "category_keywords": ["communication", "phone", "internet"],
+      "typical_categories": ["Utilities", "Komunikacia", "Comunicaciones"],
+      "confidence": 0.9
+    },
+    "transportation_service": {
+      "category_keywords": ["transportation", "travel", "rideshare"],
+      "typical_categories": ["Transportation", "Doprava", "Transporte"],
+      "confidence": 0.9
+    },
+    "home_improvement": {
+      "category_keywords": ["home", "tools", "hardware", "maintenance"],
+      "typical_categories": ["Home & Garden", "Dom", "Hogar"],
+      "confidence": 0.85
+    },
+    "delivery": {
+      "category_keywords": ["food", "delivery", "service"],
+      "typical_categories": ["Food & Dining", "Jedlo", "Comida"],
+      "confidence": 0.8
+    }
+  },
+  "fallback_analysis": {
+    "context_keywords": {
+      "food_related": ["ate", "food", "meal", "lunch", "dinner", "breakfast", "coffee", "drink"],
+      "transport_related": ["gas", "fuel", "uber", "taxi", "bus", "train", "parking"],
+      "shopping_related": ["bought", "purchased", "shopping", "store", "mall"],
+      "health_related": ["doctor", "medicine", "hospital", "pharmacy", "health"],
+      "entertainment_related": ["movie", "game", "subscription", "streaming", "music"]
+    },
+    "amount_patterns": {
+      "coffee_range": [1, 15],
+      "gas_range": [20, 100],
+      "grocery_range": [10, 200],
+      "restaurant_range": [8, 80],
+      "entertainment_range": [5, 50]
+    }
+  }
+}

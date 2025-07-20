@@ -139,10 +139,8 @@ export function VoiceTransactionDialog({
   // Create transaction
   const createTransaction = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest('/api/transactions', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      const response = await apiRequest('POST', '/api/transactions', data);
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -181,6 +179,15 @@ export function VoiceTransactionDialog({
       categoryId: editedData.categoryId?.toString() || '',
       isRecurring: editedData.isRecurring || false,
       recurringFrequency: editedData.recurringFrequency || 'monthly',
+      // Add learning data for backend
+      voiceLearningData: {
+        transcript: transcript,
+        merchantName: editedData.vendor || '',
+        originalCategoryId: extractedData?.categoryId,
+        correctedCategoryId: editedData.categoryId,
+        language: i18n.language,
+        confidence: extractedData?.confidence || 0.5
+      }
     };
 
     createTransaction.mutate(transactionData);

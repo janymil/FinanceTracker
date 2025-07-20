@@ -1,0 +1,121 @@
+{
+  "grocery_stores": {
+    "business_type": "grocery_store",
+    "category_keywords": ["food", "groceries", "shopping"],
+    "merchants": [
+      "walmart",
+      "target", 
+      "kroger",
+      "safeway",
+      "publix",
+      "harris teeter",
+      "wegmans",
+      "whole foods",
+      "trader joes",
+      "costco",
+      "sams club",
+      "food lion",
+      "giant",
+      "stop & shop"
+    ]
+  },
+  "gas_stations": {
+    "business_type": "gas_station",
+    "category_keywords": ["transportation", "fuel", "gas"],
+    "merchants": [
+      "shell",
+      "exxon",
+      "chevron", 
+      "bp",
+      "marathon",
+      "speedway",
+      "wawa",
+      "7-eleven",
+      "circle k",
+      "mobil",
+      "sunoco",
+      "phillips 66"
+    ]
+  },
+  "fast_food": {
+    "business_type": "fast_food",
+    "category_keywords": ["food", "dining", "restaurants"],
+    "merchants": [
+      "mcdonalds",
+      "burger king",
+      "wendys",
+      "taco bell",
+      "kfc",
+      "pizza hut",
+      "dominos",
+      "subway",
+      "chipotle",
+      "panera bread",
+      "chick-fil-a",
+      "in-n-out",
+      "five guys"
+    ]
+  },
+  "coffee_shops": {
+    "business_type": "coffee_shop", 
+    "category_keywords": ["food", "coffee", "dining", "beverages"],
+    "merchants": [
+      "starbucks",
+      "dunkin donuts",
+      "tim hortons",
+      "caribou coffee",
+      "peets coffee",
+      "dutch bros",
+      "blue bottle coffee"
+    ]
+  },
+  "department_stores": {
+    "business_type": "retail",
+    "category_keywords": ["shopping", "clothing", "household"],
+    "merchants": [
+      "macys",
+      "nordstrom",
+      "kohls",
+      "jcpenney",
+      "sears",
+      "dillards",
+      "bloomingdales"
+    ]
+  },
+  "pharmacies": {
+    "business_type": "pharmacy",
+    "category_keywords": ["health", "medical", "pharmacy"],
+    "merchants": [
+      "cvs",
+      "walgreens",
+      "rite aid",
+      "walmart pharmacy",
+      "kroger pharmacy"
+    ]
+  },
+  "banks": {
+    "business_type": "financial_institution",
+    "category_keywords": ["banking", "financial", "atm"],
+    "merchants": [
+      "bank of america",
+      "chase",
+      "wells fargo",
+      "citibank",
+      "us bank",
+      "pnc bank",
+      "capital one",
+      "td bank",
+      "regions bank"
+    ]
+  },
+  "home_improvement": {
+    "business_type": "home_improvement",
+    "category_keywords": ["home", "tools", "hardware"],
+    "merchants": [
+      "home depot",
+      "lowes",
+      "menards",
+      "ace hardware"
+    ]
+  }
+}

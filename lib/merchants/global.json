@@ -1,0 +1,108 @@
+{
+  "coffee_shops": {
+    "business_type": "coffee_shop",
+    "category_keywords": ["food", "coffee", "dining", "beverages"],
+    "merchants": [
+      "starbucks",
+      "costa coffee",
+      "dunkin donuts",
+      "tim hortons",
+      "caribou coffee",
+      "peet's coffee",
+      "costa",
+      "dunkin"
+    ]
+  },
+  "fast_food": {
+    "business_type": "fast_food",
+    "category_keywords": ["food", "dining", "restaurants"],
+    "merchants": [
+      "mcdonalds",
+      "burger king",
+      "kfc",
+      "pizza hut",
+      "dominos",
+      "subway",
+      "taco bell",
+      "wendys"
+    ]
+  },
+  "grocery_stores": {
+    "business_type": "grocery_store", 
+    "category_keywords": ["food", "groceries", "shopping"],
+    "merchants": [
+      "walmart",
+      "target",
+      "costco",
+      "kroger",
+      "safeway",
+      "whole foods",
+      "trader joes",
+      "aldi",
+      "lidl"
+    ]
+  },
+  "gas_stations": {
+    "business_type": "gas_station",
+    "category_keywords": ["transportation", "fuel", "gas"],
+    "merchants": [
+      "shell",
+      "bp",
+      "exxon",
+      "chevron",
+      "texaco",
+      "mobil",
+      "marathon",
+      "sunoco"
+    ]
+  },
+  "banks": {
+    "business_type": "financial_institution",
+    "category_keywords": ["banking", "financial", "atm"],
+    "merchants": [
+      "bank of america",
+      "chase",
+      "wells fargo",
+      "citibank",
+      "hsbc",
+      "santander",
+      "barclays"
+    ]
+  },
+  "pharmacies": {
+    "business_type": "pharmacy",
+    "category_keywords": ["health", "medical", "pharmacy"],
+    "merchants": [
+      "cvs",
+      "walgreens",
+      "rite aid",
+      "boots",
+      "superdrug"
+    ]
+  },
+  "streaming_services": {
+    "business_type": "entertainment_streaming",
+    "category_keywords": ["entertainment", "subscriptions", "media"],
+    "merchants": [
+      "netflix",
+      "spotify",
+      "amazon prime",
+      "disney plus",
+      "hulu",
+      "apple music",
+      "youtube premium",
+      "hbo max"
+    ]
+  },
+  "ride_sharing": {
+    "business_type": "transportation_service",
+    "category_keywords": ["transportation", "travel"],
+    "merchants": [
+      "uber",
+      "lyft",
+      "bolt",
+      "grab",
+      "didi"
+    ]
+  }
+}

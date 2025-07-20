@@ -70,6 +70,40 @@ export function registerTransactionRoutes(app: Express) {
         try {
           const user = await storage.getUser(userId);
 
+          // Process voice learning data if present
+          if (req.body.voiceLearningData) {
+            try {
+              const { recordMerchantLearning } = await import('../../lib/merchantLearning');
+              const { getCountryFromLanguage } = await import('../../lib/merchantLookup');
+              
+              const learningData = req.body.voiceLearningData;
+              const countryCode = getCountryFromLanguage(learningData.language);
+              
+              // Determine correction type
+              let correctionType = 'manual_selection';
+              if (learningData.originalCategoryId && learningData.correctedCategoryId !== learningData.originalCategoryId) {
+                correctionType = 'category_change';
+              }
+              
+              await recordMerchantLearning({
+                userId,
+                merchantName: learningData.merchantName,
+                transcript: learningData.transcript,
+                originalCategoryId: learningData.originalCategoryId,
+                correctedCategoryId: parseInt(learningData.correctedCategoryId),
+                countryCode,
+                language: learningData.language,
+                confidence: learningData.confidence,
+                correctionType: correctionType as any,
+                transactionId: transaction.id
+              });
+              
+              console.log('📚 Voice learning recorded for transaction:', transaction.id);
+            } catch (error) {
+              console.error('Voice learning error:', error);
+            }
+          }
+
           // Auto-categorization for premium users (immediate processing)
           if (user?.plan === 'premium' && !transaction.categoryId && transaction.type === 'expense') {
             try {

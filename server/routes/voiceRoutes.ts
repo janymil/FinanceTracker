@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { requireAuth } from "@clerk/express";
 import { z } from "zod";
 import { runAI } from "../../lib/aiProcessor";
+import { getMerchantContextForAI, getCountryFromLanguage } from "../../lib/merchantLookup";
 import { db } from "../db";
 import { categories, aiUsage, users } from "../../shared/schema";
 import { eq, and, sql, gte } from "drizzle-orm";
@@ -65,11 +66,19 @@ export function registerVoiceRoutes(app: Router) {
       console.log('📂 [VoiceAPI] Categories loaded:', {
         systemCategories: systemCategories.length,
         userCategories: userCategories.length,
-        totalCategories: allCategories.length
+        totalCategories: allCategories.length,
+        allCategoriesList: allCategories.map(cat => `${cat.name} (ID: ${cat.id})`)
       });
 
-      // Build the extraction prompt with stricter JSON formatting
+      // Build the extraction prompt with smart merchant lookup and learning
       const currentDate = new Date().toISOString();
+      const countryCode = getCountryFromLanguage(language);
+      const merchantContext = await getMerchantContextForAI(transcript, countryCode, 15);
+      
+      // Get learned patterns for this user/merchant
+      const { lookupMerchant } = await import('../../lib/merchantLookup');
+      const learnedMatch = await lookupMerchant(transcript, countryCode, userId);
+      
       const prompt = `CRITICAL: You must respond with ONLY valid JSON. No explanations, no markdown, no additional text.
 
 Extract financial transaction details from this voice transcript:
@@ -79,22 +88,43 @@ Context:
 - User Language: ${language}
 - Current Date: ${currentDate}
 - User Timezone: ${timezone || 'UTC'}
+- Country: ${countryCode.toUpperCase()}
 
 Available Categories:
 ${allCategories.map(cat => `- ${cat.name} (ID: ${cat.id})`).join('\n')}
 
+${merchantContext}
+
+${learnedMatch ? `
+LEARNED PATTERN FOR THIS USER:
+- This merchant "${learnedMatch.matched_merchant}" was previously categorized by this user
+- Business Type: ${learnedMatch.business_type}
+- Confidence: ${learnedMatch.confidence}
+- Source: ${learnedMatch.source}
+- PRIORITIZE this learned pattern if merchant matches
+` : ''}
+
+SMART CATEGORIZATION RULES:
+1. Extract merchant name from transcript
+2. Check if merchant matches known businesses from examples above
+3. Match business type to user's available categories by purpose/keywords
+4. If NO confident match exists, set categoryId: null
+5. NEVER force into wrong category - better to leave null for manual selection
+
 STRICT INSTRUCTIONS:
 1. Return ONLY valid JSON - no markdown code blocks, no explanations
-2. Extract amount, vendor, category, date, and type from the transcript
-3. Match to existing categories by ID when possible
-4. Parse natural dates like "yesterday", "last week"
-5. Determine if income or expense based on context
+2. Extract: amount, vendor, category, date, type from transcript
+3. Use merchant recognition examples to identify business type
+4. Match business type to most relevant user category
+5. If uncertain about category (confidence < 0.7), set categoryId: null
+6. Parse natural dates like "yesterday", "last week" 
+7. Determine income vs expense from context
 
-JSON RESPONSE FORMAT (respond with exactly this structure):
+JSON RESPONSE FORMAT:
 {
   "amount": 52.00,
   "currency": "USD",
-  "vendor": "Walmart",
+  "vendor": "Walmart", 
   "description": "groceries",
   "categoryId": 15,
   "categoryName": "Food & Groceries",
@@ -108,7 +138,12 @@ JSON RESPONSE FORMAT (respond with exactly this structure):
   "followUpQuestions": []
 }
 
-CRITICAL: Respond with valid JSON only. No \`\`\`json blocks, no explanations, just the JSON object.`;
+EXAMPLES FOR ${countryCode.toUpperCase()}:
+- "I bought coffee at Starbucks" + available "Jedlo (ID: 5)" → categoryId: 5, categoryName: "Jedlo"
+- "Filled gas at Slovnaft" + available "Doprava (ID: 8)" → categoryId: 8, categoryName: "Doprava"
+- "Shopping at unknown store" → categoryId: null, categoryName: null (let user choose)
+
+CRITICAL: Better to return categoryId: null than wrong category. User can select manually.`;
 
       // Use external AI processor service with fallback to local OpenAI
       let completion;
@@ -244,6 +279,18 @@ CRITICAL: Respond with valid JSON only. No \`\`\`json blocks, no explanations, j
 
       if (!extractedData.confidence) {
         extractedData.confidence = calculateConfidence(extractedData);
+      }
+
+      // Category validation - if confidence is low, clear category to let user choose
+      if (extractedData.categoryId && extractedData.confidence < 0.7) {
+        console.log('⚠️ [VoiceAPI] Low confidence category match, clearing category for user selection:', {
+          originalCategory: extractedData.categoryName,
+          confidence: extractedData.confidence
+        });
+        extractedData.categoryId = null;
+        extractedData.categoryName = null;
+        extractedData.ambiguities = extractedData.ambiguities || [];
+        extractedData.ambiguities.push('Category match uncertain - please select manually');
       }
 
       const totalTime = Date.now() - startTime;

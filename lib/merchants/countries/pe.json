@@ -1,0 +1,109 @@
+{
+  "grocery_stores": {
+    "business_type": "grocery_store",
+    "category_keywords": ["comida", "supermercado", "compras"],
+    "merchants": [
+      "plaza vea",
+      "wong",
+      "metro",
+      "tottus",
+      "vivanda",
+      "mass",
+      "makro"
+    ]
+  },
+  "gas_stations": {
+    "business_type": "gas_station",
+    "category_keywords": ["transporte", "combustible", "gasolina"],
+    "merchants": [
+      "primax",
+      "petroperu",
+      "repsol",
+      "shell",
+      "mobil",
+      "pecsa"
+    ]
+  },
+  "restaurants": {
+    "business_type": "restaurant",
+    "category_keywords": ["comida", "restaurante", "alimentacion"],
+    "merchants": [
+      "mcdonalds",
+      "kfc",
+      "burger king",
+      "pizza hut",
+      "papa johns",
+      "chilis",
+      "norky's",
+      "pollo a la brasa",
+      "bembos",
+      "china wok"
+    ]
+  },
+  "coffee_shops": {
+    "business_type": "coffee_shop",
+    "category_keywords": ["comida", "cafe", "alimentacion"],
+    "merchants": [
+      "starbucks",
+      "juan valdez",
+      "cafe cafe",
+      "dolce capriccio"
+    ]
+  },
+  "banks": {
+    "business_type": "financial_institution",
+    "category_keywords": ["bancario", "financiero"],
+    "merchants": [
+      "bcp",
+      "banco de credito",
+      "bbva",
+      "interbank",
+      "scotiabank",
+      "banco de la nacion",
+      "banbif"
+    ]
+  },
+  "pharmacies": {
+    "business_type": "pharmacy",
+    "category_keywords": ["salud", "farmacia", "medicinas"],
+    "merchants": [
+      "inkafarma",
+      "mifarma",
+      "boticas arcangel",
+      "boticas fasa",
+      "farmacia universal"
+    ]
+  },
+  "telecommunications": {
+    "business_type": "telecom",
+    "category_keywords": ["comunicaciones", "telefono", "internet"],
+    "merchants": [
+      "movistar",
+      "claro",
+      "entel",
+      "bitel"
+    ]
+  },
+  "retail_stores": {
+    "business_type": "retail",
+    "category_keywords": ["compras", "ropa", "tiendas"],
+    "merchants": [
+      "saga falabella",
+      "ripley",
+      "oechsle",
+      "h&m",
+      "zara",
+      "paris"
+    ]
+  },
+  "delivery_services": {
+    "business_type": "delivery",
+    "category_keywords": ["comida", "delivery", "transporte"],
+    "merchants": [
+      "rappi",
+      "uber eats",
+      "glovo",
+      "pedidos ya"
+    ]
+  }
+}

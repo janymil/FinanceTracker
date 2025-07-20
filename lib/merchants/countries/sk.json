@@ -1,0 +1,100 @@
+{
+  "grocery_stores": {
+    "business_type": "grocery_store",
+    "category_keywords": ["jedlo", "potraviny", "nakupovanie"],
+    "merchants": [
+      "tesco",
+      "kaufland", 
+      "billa",
+      "lidl",
+      "coop jednota",
+      "fresh",
+      "koruna",
+      "hypernova"
+    ]
+  },
+  "gas_stations": {
+    "business_type": "gas_station", 
+    "category_keywords": ["doprava", "palivo", "benzin"],
+    "merchants": [
+      "slovnaft",
+      "shell",
+      "omv",
+      "mol",
+      "lukoil",
+      "eni"
+    ]
+  },
+  "pharmacies": {
+    "business_type": "pharmacy",
+    "category_keywords": ["zdravie", "liekaren"],
+    "merchants": [
+      "dr.max",
+      "benu",
+      "pharmacy",
+      "lekaren",
+      "farmacia"
+    ]
+  },
+  "banks": {
+    "business_type": "financial_institution",
+    "category_keywords": ["bankovnictvo", "financie"],
+    "merchants": [
+      "vub banka",
+      "slovenska sporitelna",
+      "csob",
+      "tatrabanka",
+      "prima banka",
+      "postova banka",
+      "unicredit bank"
+    ]
+  },
+  "restaurants": {
+    "business_type": "restaurant",
+    "category_keywords": ["jedlo", "restauracia", "stravovanie"],
+    "merchants": [
+      "mcdonalds",
+      "kfc",
+      "pizza hut",
+      "burger king",
+      "subway",
+      "telepizza",
+      "papa johns"
+    ]
+  },
+  "coffee_shops": {
+    "business_type": "coffee_shop",
+    "category_keywords": ["jedlo", "kava", "stravovanie"],
+    "merchants": [
+      "starbucks",
+      "costa coffee",
+      "coffee island",
+      "urban space",
+      "coffee&co"
+    ]
+  },
+  "telecommunications": {
+    "business_type": "telecom",
+    "category_keywords": ["komunikacia", "telefon", "internet"],
+    "merchants": [
+      "orange",
+      "telekom",
+      "o2",
+      "4ka",
+      "swan"
+    ]
+  },
+  "retail_stores": {
+    "business_type": "retail",
+    "category_keywords": ["nakupovanie", "oblecenie", "elektronika"],
+    "merchants": [
+      "ikea",
+      "h&m",
+      "zara",
+      "reserved",
+      "datart",
+      "alza",
+      "electroworld"
+    ]
+  }
+}

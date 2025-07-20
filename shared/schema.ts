@@ -243,6 +243,39 @@ export const goalContributions = pgTable("goal_contributions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Merchant learning from user corrections
+export const merchantLearning = pgTable("merchant_learning", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  merchantName: varchar("merchant_name", { length: 255 }).notNull(),
+  transcript: text("transcript"), // Original voice transcript
+  originalCategoryId: integer("original_category_id").references(() => categories.id),
+  correctedCategoryId: integer("corrected_category_id").references(() => categories.id),
+  businessType: varchar("business_type", { length: 100 }), // Detected business type
+  countryCode: varchar("country_code", { length: 10 }).notNull(),
+  language: varchar("language", { length: 10 }).notNull(),
+  confidence: decimal("confidence", { precision: 3, scale: 2 }), // AI confidence score
+  correctionType: varchar("correction_type", { length: 50 }).notNull(), // 'manual_selection', 'category_change', 'merchant_correction'
+  learnedAt: timestamp("learned_at").defaultNow(),
+  transactionId: integer("transaction_id").references(() => transactions.id), // Link to actual transaction
+});
+
+// Global merchant patterns learned from user behavior
+export const merchantPatterns = pgTable("merchant_patterns", {
+  id: serial("id").primaryKey(),
+  merchantName: varchar("merchant_name", { length: 255 }).notNull(),
+  businessType: varchar("business_type", { length: 100 }).notNull(),
+  categoryId: integer("category_id").references(() => categories.id),
+  categoryName: varchar("category_name", { length: 100 }).notNull(),
+  countryCode: varchar("country_code", { length: 10 }).notNull(),
+  language: varchar("language", { length: 10 }).notNull(),
+  userCount: integer("user_count").default(1).notNull(), // How many users confirmed this pattern
+  confidence: decimal("confidence", { precision: 3, scale: 2 }).notNull(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  isUserGenerated: boolean("is_user_generated").default(true), // vs system/file generated
+  source: varchar("source", { length: 50 }).default("user_feedback"), // 'user_feedback', 'file_import', 'ai_analysis'
+});
+
 // Chat messages for collaborative goals
 export const goalMessages = pgTable("goal_messages", {
   id: serial("id").primaryKey(),
